@@ -26,11 +26,7 @@ stream = File.stream!("input.txt")
 ###
 
 accum = Enum.reduce_while(stream, {%{0 => true}, 0}, fn(i, {seen, _}) ->
-          if seen[i] do
-            {:halt, {seen, i}}
-          else
-            {:cont, {Map.put(seen, i, true), 0}}
-          end
+          if seen[i], do: {:halt, {seen, i}}, else: {:cont, {Map.put(seen, i, true), 0}}
         end)
 {_, first} = accum
 IO.inspect(first)
