@@ -25,12 +25,12 @@ stream = File.stream!("input.txt")
 # keep a map of accumulated "seen" values
 ###
 
-accum = Enum.reduce_while(stream, {%{0 => true}, 0, false}, fn(i, {seen, value, found}) ->
-          case {seen[i], found} do
-            {_, true}     -> {:halt, {seen, value, found}}
-            {true, false} -> {:cont, {seen, i, true}}
-            {_, _}        -> {:cont, {Map.put(seen, i, true), value, false}}
+accum = Enum.reduce_while(stream, {%{0 => true}, 0}, fn(i, {seen, _}) ->
+          if seen[i] do
+            {:halt, {seen, i}}
+          else
+            {:cont, {Map.put(seen, i, true), 0}}
           end
         end)
-{_, first, _} = accum
+{_, first} = accum
 IO.inspect(first)
