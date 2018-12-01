@@ -18,5 +18,5 @@ stream = File.stream!("input.txt")
 # reduce the stream to an accumulated sum
 ###
 
-freqsum = Enum.reduce(stream, fn(i, sum) -> i + sum end)
+freqsum = Enum.sum(stream)
 IO.inspect(freqsum)
