@@ -1,9 +1,9 @@
 # Day 2: Inventory Management System
 #
-# Part 1: count how many letters appear twice, and how many appear thrice
+# Part 1: count how many box IDs w/ letters appearing twice, and thrice
 #         checksum = twice-count * thrice-count
 #
-# Correct answer: ?
+# Correct answer: 6696
 
 ###
 # functions needed for main stream
@@ -25,19 +25,25 @@ tupler = fn (countmap) -> { detector.(countmap, 2), detector.(countmap, 3) } end
 # produce a stream of tuples w/binary values {has-letter-twice, has-letter-thrice}
 ###
 
-stream = File.stream!("test/example1.txt")
+stream = File.stream!("input.txt")
 |> Stream.map(&String.trim/1)
 |> Stream.map(&String.graphemes/1)
 |> Stream.map(counter)
 |> Stream.map(tupler)
 
-# test/example1.txt produces:
-#   {false, false}
-#   {true, true}
-#   {true, false}
-#   {false, true}
-#   {true, false}
-#   {true, false}
-#   {false, true}
+###
+# reduce the stream of binary has-2/has-3 tuples
+# to a single tuple with counts of ID-with-letter-twice, ID-with-letter-thrice
+# and calculate the checksum
+###
 
-Enum.map(stream, fn x -> IO.inspect(x) end)
+{has2, has3} = Enum.reduce(stream, {0, 0}, fn (tuple, {acc2, acc3}) ->
+                 case tuple do
+                   {true, true} -> {acc2 + 1, acc3 + 1}
+                   {true, false} -> {acc2 + 1, acc3}
+                   {false, true} -> {acc2, acc3 + 1}
+                   {_, _} -> {acc2, acc3}
+                 end
+               end)
+checksum = has2 * has3
+IO.inspect(checksum)
