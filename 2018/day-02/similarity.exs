@@ -27,6 +27,26 @@ pair_comparator = fn (pairs) ->
 # (return nil if they differ in more or less than one position)
 str_comparator = fn (a, b) -> pair_comparator.(Enum.zip(String.graphemes(a), String.graphemes(b))) end
 
-IO.inspect(str_comparator.("abcde", "abxdy"))
-IO.inspect(str_comparator.("abcde", "abxde"))
-IO.inspect(str_comparator.("abcde", "abcde"))
+###
+# read box IDs from input file (one per line)
+###
+
+stream = File.stream!("test/example2.txt")
+|> Stream.map(&String.trim/1)
+
+###
+# find two box IDs that differ in only one letter (same position)
+# keep a list of accumulated "seen" box IDs
+###
+
+accum = Enum.reduce_while(stream, {[], {}}, fn (next_s, {seen, _}) ->
+          compares = Enum.map(seen, fn (seen_s) -> str_comparator.(seen_s, next_s) end)
+          i = Enum.find_index(compares, fn (compare) -> compare != nil end)
+          if i != nil do
+            {:halt, {[next_s | seen], {Enum.at(seen, i), next_s}}}
+          else
+            {:cont, {[next_s | seen], {}}}
+          end
+        end)
+{_, ids} = accum
+IO.inspect(ids)
