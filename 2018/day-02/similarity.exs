@@ -3,7 +3,7 @@
 # Part 2: Find two box IDs that differ in only one letter (same position)
 #         What letters are common between the two correct box IDs?
 #
-# Correct answer: _
+# Correct answer: "bvnfawcnyoeyudzrpgslimtkj"
 
 # NOTE my solution assumes all box IDs will be the same length
 
@@ -27,11 +27,19 @@ pair_comparator = fn (pairs) ->
 # (return nil if they differ in more or less than one position)
 str_comparator = fn (a, b) -> pair_comparator.(Enum.zip(String.graphemes(a), String.graphemes(b))) end
 
+# return string with common characters between input strings
+str_commonor = fn (a, b) ->
+  Enum.zip(String.graphemes(a), String.graphemes(b))
+  |> Enum.reduce([], fn ({l, r}, acc) -> if l == r, do: [l | acc], else: acc end)
+  |> Enum.reverse
+  |> List.to_string
+end
+
 ###
 # read box IDs from input file (one per line)
 ###
 
-stream = File.stream!("test/example2.txt")
+stream = File.stream!("input.txt")
 |> Stream.map(&String.trim/1)
 
 ###
@@ -48,5 +56,11 @@ accum = Enum.reduce_while(stream, {[], {}}, fn (next_s, {seen, _}) ->
             {:cont, {[next_s | seen], {}}}
           end
         end)
-{_, ids} = accum
-IO.inspect(ids)
+{_, {id1, id2}} = accum
+
+###
+# display the letters in common between the two box IDs
+###
+
+common = str_commonor.(id1, id2)
+IO.inspect(common)
