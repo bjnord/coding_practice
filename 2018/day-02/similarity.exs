@@ -32,7 +32,7 @@ str_commonor = fn (a, b) ->
   Enum.zip(String.graphemes(a), String.graphemes(b))
   |> Enum.reduce([], fn ({l, r}, acc) -> if l == r, do: [l | acc], else: acc end)
   |> Enum.reverse
-  |> List.to_string
+  |> List.to_string  # or Enum.join("")
 end
 
 ###
