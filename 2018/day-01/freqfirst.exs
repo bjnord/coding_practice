@@ -7,7 +7,7 @@
 ###
 # read frequency changes from input file (one per line)
 # treat them as a repeating list (with "cycle")
-# and map them to accumulated frequencies
+# and map them to accumulated frequencies (with "scan")
 #
 # i.e. input:  +1 +2 -1 +3
 #      stream:  1  3  2  5  6  8  7 10 ...
