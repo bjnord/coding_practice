@@ -5,11 +5,11 @@ defmodule Squares do
   end
 
   # return list of all fabric squares used by claim map
-  def squares_used_by(claims) do
-    x = String.to_integer(claims["xs"])
-    y = String.to_integer(claims["ys"])
-    x_end = x + String.to_integer(claims["ws"]) - 1
-    y_end = y + String.to_integer(claims["hs"]) - 1
+  def squares_used_by(claim) do
+    x = String.to_integer(claim["xs"])
+    y = String.to_integer(claim["ys"])
+    x_end = x + String.to_integer(claim["ws"]) - 1
+    y_end = y + String.to_integer(claim["hs"]) - 1
     Enum.map(x..x_end, fn (i) -> Enum.map(y..y_end, fn (j) -> {i, j} end) end)
     |> List.flatten
   end
