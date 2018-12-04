@@ -66,6 +66,6 @@ defmodule Day4Test do
       {10, 5, 25}, {10, 30, 55},
       {99, 40, 50}
     ]
-    assert minutes_asleep(times) == %{10 => 45, 99 => 10}
+    assert total_minutes_asleep(times) == %{10 => 45, 99 => 10}
   end
 end

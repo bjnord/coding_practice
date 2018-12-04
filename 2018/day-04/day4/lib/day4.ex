@@ -17,13 +17,24 @@ defmodule Day4 do
   """
   def part1(argv) do
     times = argv
-    |> input_file
-    |> File.stream!
-    |> sort_lines
-    |> sleepy_times
-    times
-    |> minutes_asleep
-    |> IO.inspect
+            |> input_file
+            |> File.stream!
+            |> sort_lines
+            |> sleepy_times
+    minute_sum_map = times
+                     |> total_minutes_asleep
+    sleepiest_guard_id = minute_sum_map
+                         |> IO.inspect
+                         # FIXME extract this to private "max" function
+                         |> Enum.reduce({-1, 0}, fn ({guard_id, minutes}, {max_guard_id, max_minutes}) ->
+                              if minutes > max_minutes do
+                                {guard_id, minutes}
+                              else
+                                {max_guard_id, max_minutes}
+                              end
+                            end)
+                         |> Kernel.elem(0)
+                         |> IO.inspect
   end
 
   @doc """
@@ -157,7 +168,7 @@ defmodule Day4 do
   - map (keyed by guard_id) of total minutes asleep for each guard
 
   """
-  def minutes_asleep(times) do
+  def total_minutes_asleep(times) do
     Enum.reduce(times, %{}, fn ({guard_id, sleep_min, wake_min}, acc) ->
       min = wake_min - sleep_min
       Map.update(acc, guard_id, min, &(&1 + min))
