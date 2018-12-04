@@ -21,4 +21,12 @@ defmodule Day4Test do
       "[1518-11-02 00:50] wakes up",
       ]
   end
+
+  test "gets minute of input line (leading 0)" do
+    assert Day4.minute_of("[1518-11-01 00:05] falls asleep") == 5
+  end
+
+  test "gets minute of input line (no leading 0)" do
+    assert Day4.minute_of("[1518-11-01 23:58] Guard #99 begins shift") == 58
+  end
 end

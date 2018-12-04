@@ -58,4 +58,23 @@ defmodule Day4 do
   def sort_lines(lines) do
     Enum.sort(lines)
   end
+
+  @doc """
+  Extract minute from timestamp of the form:
+
+  `[1518-11-01 23:58] …`
+
+  ## Parameters
+
+  - line: Input line (string)
+
+  ## Returns
+
+  - Minute (integer)
+
+  """
+  def minute_of(line) do
+    String.slice(line, 15..16)
+    |> String.to_integer
+  end
 end
