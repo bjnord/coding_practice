@@ -16,11 +16,13 @@ defmodule Day4 do
   - argv: Command-line arguments (should be name of input file)
   """
   def part1(argv) do
-    argv
+    times = argv
     |> input_file
     |> File.stream!
     |> sort_lines
     |> sleepy_times
+    times
+    |> minutes_asleep
     |> IO.inspect
   end
 
@@ -141,5 +143,24 @@ defmodule Day4 do
   def parse_line(line) do
     r = Regex.named_captures(~r/\[\d{4}-[^:]*:(?<minute>\d{2})\]\s+(?<type>\S+)\s+(?<remainder>.*)/, line)
     {String.to_integer(r["minute"]), r["type"], r["remainder"]}
+  end
+
+  @doc """
+  Parse sleep-time tuples to summarize minutes asleep for each guard.
+
+  ## Parameters
+
+  - times: List of tuples of the form {guard_id, sleep_minute, wake_minute} (integers)
+
+  ## Returns
+
+  - map (keyed by guard_id) of total minutes asleep for each guard
+
+  """
+  def minutes_asleep(times) do
+    Enum.reduce(times, %{}, fn ({guard_id, sleep_min, wake_min}, acc) ->
+      min = wake_min - sleep_min
+      Map.update(acc, guard_id, min, &(&1 + min))
+    end)
   end
 end
