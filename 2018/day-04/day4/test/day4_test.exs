@@ -61,7 +61,7 @@ defmodule Day4Test do
     assert parse_line("[1518-11-02 00:50] wakes up") == {50, "wakes", "up"}
   end
 
-  test "summarizes sleep-time tuples by guard" do
+  test "summarizes total minutes asleep by guard from sleep-time tuples" do
     times = [
       {10, 5, 25}, {10, 30, 55},
       {99, 40, 50},
