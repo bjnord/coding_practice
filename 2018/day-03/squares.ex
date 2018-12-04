@@ -18,4 +18,9 @@ defmodule Squares do
   def count(counts, squares) do
     Enum.reduce(squares, counts, fn (sq, acc) -> Map.update(acc, sq, 1, &(&1 + 1)) end)
   end
+
+  # return highest count used
+  def highest_count(counts, squares) do
+    Enum.reduce(squares, 0, fn (sq, acc) -> if counts[sq] > acc, do: counts[sq], else: acc end)
+  end
 end
