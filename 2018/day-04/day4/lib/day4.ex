@@ -20,6 +20,7 @@ defmodule Day4 do
     |> input_file
     |> File.stream!
     |> sort_lines
+    |> sleepy_times
     |> IO.inspect
   end
 
@@ -76,5 +77,69 @@ defmodule Day4 do
   def minute_of(line) do
     String.slice(line, 15..16)
     |> String.to_integer
+  end
+
+  @doc """
+  Parse chronological lines in the following form to sleep/wake times:
+
+  ```
+  [1518-11-01 23:58] Guard #99 begins shift
+  [1518-11-01 00:05] falls asleep
+  [1518-11-01 00:25] wakes up
+  ```
+
+  ## Parameters
+
+  - chron_lines: List of chronologically-sorted input lines (strings)
+
+  ## Returns
+
+  - List of tuples of the form {guard_id, sleep_minute, wake_minute} (integers)
+
+  """
+  def sleepy_times(chron_lines) do
+    Enum.map(chron_lines, &parse_line/1)
+    |> Enum.reduce({-1, -1, []}, fn ({min, type, rem}, {guard_id, sleep_min, result}) ->
+         case {min, type, rem} do
+           {_, "Guard", _} ->
+             # FIXME replace with first-capture
+             r = Regex.named_captures(~r/#(?<guard>\d+)/, rem)
+             {String.to_integer(r["guard"]), sleep_min, result}
+           {_, "falls", "asleep"} ->
+             {guard_id, min, result}
+           {_, "wakes", "up"} ->
+             {guard_id, sleep_min, [{guard_id, sleep_min, min} | result]}
+         end
+       end)
+    |> Kernel.elem(2)
+    |> Enum.reverse
+  end
+
+  @doc """
+  Parse line in the following form to get required tokens:
+
+  `[1518-11-01 23:58] Guard #99 begins shift`
+
+  ## Parameters
+
+  - line: Input line (string)
+
+  ## Returns
+
+  - List of tuples of the form {minute, type, remainder}
+
+  ## Examples
+
+  ```
+  Day4.parse_line "[1518-11-01 23:58] Guard #99 begins shift"
+  #=> {58, "Guard", "#99 begins shift"}
+
+  Day4.parse_line "[1518-11-02 00:40] falls asleep"
+  #=> {40, "falls", "asleep"}
+  ```
+  """
+  def parse_line(line) do
+    r = Regex.named_captures(~r/\[\d{4}-[^:]*:(?<minute>\d{2})\]\s+(?<type>\S+)\s+(?<remainder>.*)/, line)
+    {String.to_integer(r["minute"]), r["type"], r["remainder"]}
   end
 end
