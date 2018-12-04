@@ -18,6 +18,8 @@ defmodule Day4 do
   def part1(argv) do
     argv
     |> input_file
+    |> File.stream!
+    |> sort_lines
     |> IO.inspect
   end
 
@@ -37,5 +39,23 @@ defmodule Day4 do
       [filename] -> filename
       _          -> abort('Usage: day4 filename', 64)
     end
+  end
+
+  @doc """
+  Chronologically sort input lines of the form:
+
+  `[1518-11-01 23:58] Guard #99 begins shift`
+
+  ## Parameters
+
+  - lines: List of input lines (strings)
+
+  ## Returns
+
+  - List of chronologically-sorted input lines (strings)
+
+  """
+  def sort_lines(lines) do
+    Enum.sort(lines)
   end
 end
