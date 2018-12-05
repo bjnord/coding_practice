@@ -35,4 +35,24 @@ defmodule AlchemyTest do
   test "scans string for reactant (off end of string)" do
     assert reactant_at("Aa", 2) == false
   end
+
+  test "removes pair from string (middle)" do
+    assert remove_pair("aBcDeEfGh", 4) == "aBcDfGh"
+  end
+
+  test "removes pair from string (beginning)" do
+    assert remove_pair("AaBbCcDdEe", 0) == "BbCcDdEe"
+  end
+
+  test "removes pair from string (pos 1)" do
+    assert remove_pair("aBbCcDdEe", 1) == "aCcDdEe"
+  end
+
+  test "removes pair from string (pos 2)" do
+    assert remove_pair("AaBbCcDdEe", 2) == "AaCcDdEe"
+  end
+
+  test "removes pair from string (end)" do
+    assert remove_pair("AaBbCcDdEe", 8) == "AaBbCcDd"
+  end
 end
