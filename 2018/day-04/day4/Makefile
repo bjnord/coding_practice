@@ -1,2 +1,2 @@
 all:
-	mix test && mix run -e 'Day4.part1(["input/example1.txt"])'
+	mix test && mix run -e 'Day4.part1(["input/input.txt"])'

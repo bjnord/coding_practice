@@ -14,6 +14,10 @@ defmodule Day4 do
   ## Parameters
 
   - argv: Command-line arguments (should be name of input file)
+
+  ## Correct Answer
+
+  - Part 1 checksum is: 95199
   """
   def part1(argv) do
     times = argv
@@ -24,7 +28,6 @@ defmodule Day4 do
     minute_sum_map = times
                      |> total_minutes_asleep
     sleepiest_guard_id = minute_sum_map
-                         |> IO.inspect
                          # FIXME extract this to private "max" function
                          |> Enum.reduce({-1, 0}, fn ({guard_id, minutes}, {max_guard_id, max_minutes}) ->
                               if minutes > max_minutes do
@@ -34,10 +37,19 @@ defmodule Day4 do
                               end
                             end)
                          |> Kernel.elem(0)
-                         |> IO.inspect
     minute_map = times
                  |> sleep_minute_breakdown
-                 |> IO.inspect
+                 |> Map.get(sleepiest_guard_id)
+                 # FIXME extract this to private "max" function
+                 |> Enum.reduce({-1, 0}, fn ({minute, count}, {max_minute, max_count}) ->
+                      if count > max_count do
+                        {minute, count}
+                      else
+                        {max_minute, max_count}
+                      end
+                    end)
+                 |> Kernel.elem(0)
+    IO.inspect(sleepiest_guard_id * minute_map, label: "Part 1 checksum is")
   end
 
   @doc """
