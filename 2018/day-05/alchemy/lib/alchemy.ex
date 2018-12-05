@@ -122,25 +122,4 @@ defmodule Alchemy do
   def reactant?(a, b) do
     (a != b) && (String.upcase(a) == String.upcase(b))
   end
-
-  @doc """
-  Remove unit pair from string at the given position.
-
-  ## Parameters
-
-  - str: String from which to remove
-  - pos: Position at which to remove
-
-  ## Returns
-
-  String with unit pair removed
-
-  """
-  def remove_pair(str, pos) do
-    if pos == 0 do
-      String.slice(str, pos+2..-1)
-    else
-      String.slice(str, 0..pos-1) <> String.slice(str, pos+2..-1)
-    end
-  end
 end
