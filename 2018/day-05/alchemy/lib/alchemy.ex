@@ -45,7 +45,7 @@ defmodule Alchemy do
         case tail2 do
           [] ->
              # called w/only two letters:
-             if reactant_at([first, second], 0) do
+             if reactant?(first, second) do
                # toss them if reactant
                []
              else
@@ -62,7 +62,7 @@ defmodule Alchemy do
                _  ->
                  # two or more letters remain:
                  [second | new_tail2] = new_tail
-                 if reactant_at([first, second], 0) do
+                 if reactant?(first, second) do
                    # toss first two letters if reactant
                    new_tail2
                  else
@@ -107,31 +107,19 @@ defmodule Alchemy do
   end
 
   @doc """
-  Does string have reacting unit pair at the given position?
+  Are these two letters a reacting unit pair?
 
   ## Parameters
 
-  - letters: List of letters to scan
-  - pos: Position at which to scan
+  - a: First letter
+  - b: Second letter
 
   ## Returns
 
-  `true` if position has a reacting unit pair, otherwise `false`
+  `true` if letters are a reacting unit pair, otherwise `false`
 
   """
-  def reactant_at(letters, pos) do
-    pair = Enum.slice(letters, pos, 2)
-    if length(pair) == 2 do
-      is_reactant(pair)
-    else
-      false
-    end
-  end
-
-  # Is this a reacting unit pair?
-  # (argument must be list of exactly two letters)
-  defp is_reactant(letters) do
-    {a, b} = List.to_tuple(letters)
+  def reactant?(a, b) do
     (a != b) && (String.upcase(a) == String.upcase(b))
   end
 

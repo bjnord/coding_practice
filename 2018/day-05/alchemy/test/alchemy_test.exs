@@ -4,36 +4,18 @@ defmodule AlchemyTest do
 
   import Alchemy
 
-  test "scans string for reactant (found #1)" do
-    assert reactant_at(["A", "a"], 0) == true
+  test "test letter pair for reactance (reactant)" do
+    assert reactant?("A", "a") == true
+    assert reactant?("z", "Z") == true
   end
 
-  test "scans string for reactant (found #2)" do
-    assert reactant_at(["z", "Z"], 0) == true
+  test "test letter pair for reactance (nonreactant)" do
+    assert reactant?("a", "a") == false
+    assert reactant?("Z", "Z") == false
   end
 
-  test "scans string for reactant (different letters)" do
-    assert reactant_at(["b", "N"], 0) == false
-  end
-
-  test "scans string for reactant (same polarity #1)" do
-    assert reactant_at(["a", "a"], 0) == false
-  end
-
-  test "scans string for reactant (same polarity #2)" do
-    assert reactant_at(["Z", "Z"], 0) == false
-  end
-
-  test "scans string for reactant (found in middle)" do
-    assert reactant_at(["a", "B", "c", "D", "e", "E", "f", "G", "h"], 4) == true
-  end
-
-  test "scans string for reactant (straddling end of string)" do
-    assert reactant_at(["A", "a"], 1) == false
-  end
-
-  test "scans string for reactant (off end of string)" do
-    assert reactant_at(["A", "a"], 2) == false
+  test "test letter pair for reactance (different letters)" do
+    assert reactant?("b", "N") == false
   end
 
   test "removes pair from string (middle)" do
