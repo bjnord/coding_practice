@@ -55,15 +55,33 @@ defmodule Alchemy do
   end
 
   @doc """
-  Hello world.
+  Does string have reacting unit pair at the given position?
 
-  ## Examples
+  ## Parameters
 
-      iex> Alchemy.hello
-      :world
+  - str: String to scan
+  - pos: Position at which to scan
+
+  ## Returns
+  
+  `true` if position has a reacting unit pair, otherwise `false`
 
   """
-  def hello do
-    :world
+  def reactant_at(str, pos) do
+    letters = str
+              |> String.slice(pos..pos+1)
+              |> String.graphemes()
+    if length(letters) == 2 do
+      is_reactant(letters)
+    else
+      false
+    end
+  end
+
+  # Is this a reacting unit pair?
+  # (argument must be list of exactly two)
+  defp is_reactant(letters) do
+    {a, b} = List.to_tuple(letters)
+    (a != b) && (String.upcase(a) == String.upcase(b))
   end
 end
