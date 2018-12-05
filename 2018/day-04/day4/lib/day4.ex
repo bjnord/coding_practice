@@ -37,6 +37,34 @@ defmodule Day4 do
     IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 1 checksum is")
   end
 
+  @doc """
+  Process input file and display part 2 solution.
+
+  ## Parameters
+
+  - argv: Command-line arguments (should be name of input file)
+
+  ## Correct Answer
+
+  - Part 2 checksum is: 7887
+  """
+  def part2(argv) do
+    times = argv
+            |> input_file
+            |> File.stream!
+            |> sort_lines
+            |> sleepy_times
+    {sleepiest_guard_id, sleepiest_minute} = times
+                                             |> sleep_minute_breakdown
+                                             |> Enum.reduce(%{}, fn ({guard_id, breakdown}, acc) ->
+                                                  {min, count} = max_k_v(breakdown)
+                                                  Map.put(acc, {guard_id, min}, count)
+                                                end)
+                                             |> max_k_v
+                                             |> Kernel.elem(0)
+    IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 2 checksum is")
+  end
+
   # Return {k, v} entry in map with the highest value.
   defp max_k_v(map) do
     Enum.reduce(map, {nil, 0}, fn ({k, v}, {max_k, max_v}) ->
