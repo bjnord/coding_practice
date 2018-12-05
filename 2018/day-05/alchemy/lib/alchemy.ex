@@ -17,9 +17,33 @@ defmodule Alchemy do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 10804
   """
   def part1(argv) do
+    argv
+    |> input_file
+    |> File.read!
+    |> String.trim
+    |> remove_reactants(0)
+    |> String.length
+    |> IO.inspect(label: "Part 1 remainder length is")
+  end
+
+  defp remove_reactants(str, pos) do
+    len = String.length(str)
+    eos = pos >= len
+    has_r = reactant_at(str, pos)
+    #IO.inspect({eos, has_r, pos, len, str})
+    progress = rem(len, 100)
+    if (progress == 0) || (progress == 1) do
+      IO.inspect(len, label: "String length")
+    end
+    case {eos, has_r, pos} do
+      {true, _, _}      -> str
+      {false, true, 0}  -> remove_reactants(remove_pair(str, pos), 0)
+      {false, true, _}  -> remove_reactants(remove_pair(str, pos), pos-1)
+      {false, false, _} -> remove_reactants(str, pos+1)
+    end
   end
 
   @doc """
