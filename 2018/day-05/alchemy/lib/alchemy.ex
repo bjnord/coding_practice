@@ -32,7 +32,7 @@ defmodule Alchemy do
   defp remove_reactants(str, pos) do
     len = String.length(str)
     eos = pos >= len
-    has_r = reactant_at(str, pos)
+    has_r = reactant_at(String.graphemes(str), pos)
     #IO.inspect({eos, has_r, pos, len, str})
     progress = rem(len, 100)
     if (progress == 0) || (progress == 1) do
@@ -83,7 +83,7 @@ defmodule Alchemy do
 
   ## Parameters
 
-  - str: String to scan
+  - letters: List of letters to scan
   - pos: Position at which to scan
 
   ## Returns
@@ -91,19 +91,17 @@ defmodule Alchemy do
   `true` if position has a reacting unit pair, otherwise `false`
 
   """
-  def reactant_at(str, pos) do
-    letters = str
-              |> String.slice(pos..pos+1)
-              |> String.graphemes()
-    if length(letters) == 2 do
-      is_reactant(letters)
+  def reactant_at(letters, pos) do
+    pair = Enum.slice(letters, pos, 2)
+    if length(pair) == 2 do
+      is_reactant(pair)
     else
       false
     end
   end
 
   # Is this a reacting unit pair?
-  # (argument must be list of exactly two)
+  # (argument must be list of exactly two letters)
   defp is_reactant(letters) do
     {a, b} = List.to_tuple(letters)
     (a != b) && (String.upcase(a) == String.upcase(b))
