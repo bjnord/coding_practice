@@ -28,28 +28,25 @@ defmodule Day4 do
     minute_sum_map = times
                      |> total_minutes_asleep
     sleepiest_guard_id = minute_sum_map
-                         # FIXME extract this to private "max" function
-                         |> Enum.reduce({-1, 0}, fn ({guard_id, minutes}, {max_guard_id, max_minutes}) ->
-                              if minutes > max_minutes do
-                                {guard_id, minutes}
-                              else
-                                {max_guard_id, max_minutes}
-                              end
-                            end)
+                         |> max_k_v
                          |> Kernel.elem(0)
     minute_map = times
                  |> sleep_minute_breakdown
                  |> Map.get(sleepiest_guard_id)
-                 # FIXME extract this to private "max" function
-                 |> Enum.reduce({-1, 0}, fn ({minute, count}, {max_minute, max_count}) ->
-                      if count > max_count do
-                        {minute, count}
-                      else
-                        {max_minute, max_count}
-                      end
-                    end)
+                 |> max_k_v
                  |> Kernel.elem(0)
     IO.inspect(sleepiest_guard_id * minute_map, label: "Part 1 checksum is")
+  end
+
+  # Return {k, v} entry in map with the highest value.
+  defp max_k_v(map) do
+    Enum.reduce(map, {nil, 0}, fn ({k, v}, {max_k, max_v}) ->
+      if v > max_v do
+        {k, v}
+      else
+        {max_k, max_v}
+      end
+    end)
   end
 
   @doc """
