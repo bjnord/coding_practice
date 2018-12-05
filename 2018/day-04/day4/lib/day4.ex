@@ -25,17 +25,16 @@ defmodule Day4 do
             |> File.stream!
             |> sort_lines
             |> sleepy_times
-    minute_sum_map = times
-                     |> total_minutes_asleep
-    sleepiest_guard_id = minute_sum_map
+    sleepiest_guard_id = times
+                         |> total_minutes_asleep
                          |> max_k_v
                          |> Kernel.elem(0)
-    minute_map = times
-                 |> sleep_minute_breakdown
-                 |> Map.get(sleepiest_guard_id)
-                 |> max_k_v
-                 |> Kernel.elem(0)
-    IO.inspect(sleepiest_guard_id * minute_map, label: "Part 1 checksum is")
+    sleepiest_minute = times
+                       |> sleep_minute_breakdown
+                       |> Map.get(sleepiest_guard_id)
+                       |> max_k_v
+                       |> Kernel.elem(0)
+    IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 1 checksum is")
   end
 
   # Return {k, v} entry in map with the highest value.
