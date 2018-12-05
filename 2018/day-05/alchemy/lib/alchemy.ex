@@ -24,25 +24,53 @@ defmodule Alchemy do
     |> input_file
     |> File.read!
     |> String.trim
-    |> remove_reactants(0)
-    |> String.length
+    |> String.graphemes
+    |> remove_reactants
+    |> length
     |> IO.inspect(label: "Part 1 remainder length is")
   end
 
-  defp remove_reactants(str, pos) do
-    len = String.length(str)
-    eos = pos >= len
-    has_r = reactant_at(String.graphemes(str), pos)
-    #IO.inspect({eos, has_r, pos, len, str})
-    progress = rem(len, 100)
-    if (progress == 0) || (progress == 1) do
-      IO.inspect(len, label: "String length")
-    end
-    case {eos, has_r, pos} do
-      {true, _, _}      -> str
-      {false, true, 0}  -> remove_reactants(remove_pair(str, pos), 0)
-      {false, true, _}  -> remove_reactants(remove_pair(str, pos), pos-1)
-      {false, false, _} -> remove_reactants(str, pos+1)
+  # Tail-recursive function to remove all reactants
+  #   (this is more deeply-nested than I'd like, but I want to avoid
+  #   e.g. computing the full length of the list on every call;
+  #   splitting the head from a list is always cheap)
+  defp remove_reactants(letters) do
+    [first | tail] = letters
+    case tail do
+      [] ->
+        # called w/only one letter; return it to parent
+        [first]
+      _  ->
+        [second | tail2] = tail
+        case tail2 do
+          [] ->
+             # called w/only two letters:
+             if reactant_at([first, second], 0) do
+               # toss them if reactant
+               []
+             else
+               # return them to parent if not
+               [first, second]
+             end
+          _  ->
+             # called w/three or more letters: tail recursion
+             new_tail = remove_reactants(tail)
+             case new_tail do
+               [] ->
+                 # only one letter remains; return it to parent
+                 [first]
+               _  ->
+                 # two or more letters remain:
+                 [second | new_tail2] = new_tail
+                 if reactant_at([first, second], 0) do
+                   # toss first two letters if reactant
+                   new_tail2
+                 else
+                   # return all to parent if not
+                   [first | new_tail]
+                 end
+             end
+        end
     end
   end
 
