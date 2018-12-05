@@ -68,4 +68,16 @@ defmodule Day4Test do
     ]
     assert total_minutes_asleep(times) == %{10 => 45, 99 => 10}
   end
+
+  test "creates minute breakdown by guard from sleep-time tuples" do
+    times = [
+      {10, 22, 25}, {10, 30, 32},
+      {99, 40, 43},
+      {10, 24, 27},
+    ]
+    assert sleep_minute_breakdown(times) == %{
+      10 => %{22 => 1, 23 => 1, 24 => 2, 25 => 1, 26 => 1, 30 => 1, 31 => 1},
+      99 => %{40 => 1, 41 => 1, 42 => 1},
+    }
+  end
 end

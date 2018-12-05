@@ -35,6 +35,9 @@ defmodule Day4 do
                             end)
                          |> Kernel.elem(0)
                          |> IO.inspect
+    minute_map = times
+                 |> sleep_minute_breakdown
+                 |> IO.inspect
   end
 
   @doc """
@@ -173,5 +176,35 @@ defmodule Day4 do
       min = wake_min - sleep_min
       Map.update(acc, guard_id, min, &(&1 + min))
     end)
+  end
+
+  @doc """
+  Parse sleep-time tuples to create minute breakdown for each guard.
+
+  ## Parameters
+
+  - times: List of tuples of the form {guard_id, sleep_minute, wake_minute} (integers)
+
+  ## Returns
+
+  - two-level map (keyed by guard_id, minute) with minute breakdown for each guard
+
+  """
+  def sleep_minute_breakdown(times) do
+    Enum.reduce(times, %{}, fn ({guard_id, sleep_min, wake_min}, acc) ->
+      mm = minute_map(sleep_min, wake_min)
+      if acc[guard_id] do
+        new_mm = Map.merge(acc[guard_id], mm, fn (_key, old, new) -> old + new end)
+        Map.replace!(acc, guard_id, new_mm)
+      else
+        Map.put(acc, guard_id, mm)
+      end
+    end)
+  end
+
+  # produce the 2nd-level minute breakdown map
+  # e.g. (sleep_min=2, wake_min=5) => %{2 => 1, 3 => 1, 4 => 1}
+  defp minute_map(sleep_min, wake_min) do
+    Enum.reduce(sleep_min..(wake_min-1), %{}, fn (min, acc) -> Map.put(acc, min, 1) end)
   end
 end
