@@ -192,16 +192,15 @@ defmodule Chronal do
     {min_x, min_y, max_x, max_y}
   end
 
-  # the canvas is infinite, but we compute a reasonably large margin
+  # the canvas is infinite, but we compute a sufficiently large margin
   # around the bounding box of the input points
   defp canvas_dimensions(points) do
     {min_x, min_y, max_x, max_y} = bounds(points)
-    m = 10
     {
-      min_x - ((max_x - min_x) * m),
-      min_y - ((max_y - min_y) * m),
-      max_x + ((max_x - min_x) * m),
-      max_y + ((max_y - min_y) * m)
+      min_x - (max_x - min_x + 2),
+      min_y - (max_y - min_y + 2),
+      max_x + (max_x - min_x + 2),
+      max_y + (max_y - min_y + 2)
     }
   end
 end
