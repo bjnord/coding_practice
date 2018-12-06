@@ -16,6 +16,29 @@ defmodule ChronalTest do
     assert manhattan({-1, 5}, {2, 3}) == 5
   end
 
+  # aaaaa.cccc
+  # aAaaa.cccc
+  # aaaddecccc
+  # aadddeccCc
+  # ..dDdeeccc
+  # bb.deEeecc
+  # bBb.eeee..
+  # bbb.eeefff
+  # bbb.eeffff
+  # bbb.ffffFf
+
+  test "finds closest points" do
+    points = [{1, 1}, {1, 6}, {8, 3}, {3, 4}, {5, 5}, {8, 9}]
+    assert closest_points({4, 1}, points) == [{1, 1}]
+    assert closest_points({4, 2}, points) == [{3, 4}]
+    assert closest_points({5, 2}, points) == [{5, 5}]
+    assert closest_points({1, 6}, points) == [{1, 6}]
+    assert closest_points({3, 6}, points) == [{1, 6}, {3, 4}]
+    assert closest_points({8, 5}, points) == [{8, 3}]
+    assert closest_points({8, 6}, points) == [{8, 3}, {8, 9}]
+    assert closest_points({8, 7}, points) == [{8, 9}]
+  end
+
   test "computes bounding box (minimal rectangle)" do
     points = [{1, 2}, {5, 2}, {5, 7}, {1, 7}]
     assert bounds(points) == {1, 2, 5, 7}

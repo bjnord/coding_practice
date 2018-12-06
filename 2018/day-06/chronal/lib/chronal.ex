@@ -102,6 +102,28 @@ defmodule Chronal do
   end
 
   @doc """
+  Find the closest point(s) to the given coordinates.
+
+  ## Parameters
+
+  - {xc, yc}: coordinates to measure from (integers)
+  - points: list of points ({x, y} integer tuples)
+
+  ## Returns
+
+  List of points ({x, y} integer tuples) that are closest to provided coordinates.
+  (Returned points will be in the same order as they were in the input list.)
+
+  """
+  def closest_points({xc, yc}, points) do
+    shortest = points
+               |> Enum.map(fn (p) -> manhattan(p, {xc, yc}) end)
+               |> Enum.min
+    points
+    |> Enum.filter(fn (p) -> manhattan(p, {xc, yc}) == shortest end)
+  end
+
+  @doc """
   Compute the bounding box of a set of points.
 
   ## Parameters
