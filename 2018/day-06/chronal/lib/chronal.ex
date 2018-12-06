@@ -59,15 +59,23 @@ defmodule Chronal do
   end
 
   @doc """
-  Hello world.
+  Compute the Manhattan distance between two points.
 
-  ## Examples
+  "Take the sum of the absolute values of the differences of the coordinates.
+  For example, if x=(a,b) and y=(c,d), the Manhattan distance between x and y is |a−c|+|b−d|."
+  <https://math.stackexchange.com/a/139604>
 
-      iex> Chronal.hello
-      :world
+  ## Parameters
+
+  - {x1, y1}: coordinates of first point (integers)
+  - {x2, y2}: coordinates of second point (integers)
+
+  ## Returns
+
+  Manhattan distance between the two points (integer)
 
   """
-  def hello do
-    :world
+  def manhattan({x1, y1}, {x2, y2}) do
+    Kernel.abs(x1 - x2) + Kernel.abs(y1 - y2)
   end
 end
