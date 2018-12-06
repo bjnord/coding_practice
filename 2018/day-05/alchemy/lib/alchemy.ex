@@ -83,9 +83,34 @@ defmodule Alchemy do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 6650
   """
   def part2(argv) do
+    input = argv
+    |> input_file
+    |> File.read!
+    |> String.trim
+    Enum.map(?a..?z, fn (rm_cp) ->
+      len = remove_unit_type(input, <<rm_cp::utf8>>)
+      |> String.graphemes
+      |> remove_reactants
+      |> length
+      {rm_cp, len}
+    end)
+    |> Enum.reduce({nil, 999_999_999}, fn ({cp, count}, {min_cp, min_count}) ->
+      if count < min_count do
+        {cp, count}
+      else
+        {min_cp, min_count}
+      end
+    end)
+    |> Kernel.elem(1)
+    |> IO.inspect(label: "Part 2 shortest polymer is")
+  end
+
+  # Remove all occurrences of letter (case-insensitive) from string
+  defp remove_unit_type(str, letter) do
+    Regex.replace(~r/#{letter}/i, str, "")
   end
 
   @doc """
