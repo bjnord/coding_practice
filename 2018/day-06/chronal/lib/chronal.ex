@@ -20,8 +20,14 @@ defmodule Chronal do
   - Part 1 answer is: ...
   """
   def part1(argv) do
-    argv
-    |> input_file
+    points = argv
+             |> input_file
+             |> File.stream!
+             |> Enum.map(&Chronal.input_point/1)
+    bounds = bounds(points)
+             |> IO.inspect(label: "bounds")
+    canvas = canvas(bounds)
+             |> IO.inspect(label: "canvas")
   end
 
   @doc """
@@ -56,6 +62,22 @@ defmodule Chronal do
       [filename] -> filename
       _          -> abort('Usage: chronal filename', 64)
     end
+  end
+
+  @doc """
+  Parse input point from string.
+
+  ## Parameters
+
+  - string of the form "23, 45\n"
+
+  ## Returns
+
+  Point coordinates as {x, y} tuple
+  """
+  def input_point(str) do
+    r = Regex.named_captures(~r/(?<x>\d+),\s+(?<y>\d+)/, str)
+    {String.to_integer(r["x"]), String.to_integer(r["y"])}
   end
 
   @doc """
@@ -97,5 +119,17 @@ defmodule Chronal do
     max_x = Enum.max_by(points, fn { x, _y} -> x end) |> Kernel.elem(0)
     max_y = Enum.max_by(points, fn {_x,  y} -> y end) |> Kernel.elem(1)
     {min_x, min_y, max_x, max_y}
+  end
+
+  # the canvas is infinite, but we compute a reasonably large margin
+  # around the bounding box of the input points
+  defp canvas({min_x, min_y, max_x, max_y}) do
+    m = 10
+    {
+      min_x - ((max_x - min_x) * m),
+      min_y - ((max_y - min_y) * m),
+      max_x + ((max_x - min_x) * m),
+      max_y + ((max_y - min_y) * m)
+    }
   end
 end

@@ -4,6 +4,10 @@ defmodule ChronalTest do
 
   import Chronal
 
+  test "parses input point" do
+    assert input_point("3, 4\n") == {3, 4}
+  end
+
   test "computes Manhattan distance" do
     assert manhattan({2, 3}, {5, 6}) == 6
     # "Distance of {1, 6}, {3, 5}, {2, 3} from {-1, 5} are 3, 4, 5 respectively."
