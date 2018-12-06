@@ -39,6 +39,12 @@ defmodule ChronalTest do
     assert closest_points({8, 7}, points) == [{8, 9}]
   end
 
+  test "finds points with finite areas" do
+    points = [{1, 1}, {1, 6}, {8, 3}, {3, 4}, {5, 5}, {8, 9}]
+    canvas = {-200, -200, 200, 200}
+    assert finite_area_points(points, canvas) == [{3, 4}, {5, 5}]
+  end
+
   test "computes bounding box (minimal rectangle)" do
     points = [{1, 2}, {5, 2}, {5, 7}, {1, 7}]
     assert bounds(points) == {1, 2, 5, 7}

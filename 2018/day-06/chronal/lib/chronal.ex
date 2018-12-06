@@ -24,10 +24,14 @@ defmodule Chronal do
              |> input_file
              |> File.stream!
              |> Enum.map(&Chronal.input_point/1)
+    # FIXME RF to canvas(points) which calls bounds()
+    #       rename as canvas_dimensions()
     bounds = bounds(points)
              |> IO.inspect(label: "bounds")
     canvas = canvas(bounds)
              |> IO.inspect(label: "canvas")
+    finite_area_points(points, canvas)
+    |> IO.inspect(label: "finite-area points")
   end
 
   @doc """
@@ -121,6 +125,55 @@ defmodule Chronal do
                |> Enum.min
     points
     |> Enum.filter(fn (p) -> manhattan(p, {xc, yc}) == shortest end)
+  end
+
+  @doc """
+  Find the point(s) with finite areas within the canvas.
+
+  ## Parameters
+
+  - points: list of points ({x, y} integer tuples)
+  - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
+
+  ## Returns
+
+  List of points ({x, y} integer tuples) that have finite areas.
+  (Returned points will be in the same order as they were in the input list.)
+
+  """
+  def finite_area_points(points, {min_x, min_y, max_x, max_y}) do
+    # measure from canvas edges; any edge location that has a single closest
+    # point means that point will have an infinite area
+    infinite = MapSet.new()
+    infinite = Enum.reduce(min_x..max_x, infinite, fn (x, acc) ->
+      closest_points({x, min_y}, points)
+      |> pass_single_elem
+      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
+    end)
+    infinite = Enum.reduce(min_x..max_x, infinite, fn (x, acc) ->
+      closest_points({x, max_y}, points)
+      |> pass_single_elem
+      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
+    end)
+    infinite = Enum.reduce(min_y..max_y, infinite, fn (y, acc) ->
+      closest_points({min_x, y}, points)
+      |> pass_single_elem
+      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
+    end)
+    infinite = Enum.reduce(min_y..max_y, infinite, fn (y, acc) ->
+      closest_points({max_x, y}, points)
+      |> pass_single_elem
+      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
+    end)
+    # now the list of finite points is simply all the non-infinite ones
+    points
+    |> Enum.reject(fn (p) -> MapSet.member?(infinite, p) end)
+  end
+
+  # if list has more than one element, empty it
+  defp pass_single_elem(list) do
+    [_head | tail] = list
+    if tail == [], do: list, else: []
   end
 
   @doc """
