@@ -27,12 +27,12 @@ defmodule Day4 do
             |> sleepy_times
     sleepiest_guard_id = times
                          |> total_minutes_asleep
-                         |> max_k_v
+                         |> Enum.max_by(fn ({_k, v}) -> v end)
                          |> Kernel.elem(0)
     sleepiest_minute = times
                        |> sleep_minute_breakdown
                        |> Map.get(sleepiest_guard_id)
-                       |> max_k_v
+                       |> Enum.max_by(fn ({_k, v}) -> v end)
                        |> Kernel.elem(0)
     IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 1 checksum is")
   end
@@ -57,23 +57,12 @@ defmodule Day4 do
     {sleepiest_guard_id, sleepiest_minute} = times
                                              |> sleep_minute_breakdown
                                              |> Enum.reduce(%{}, fn ({guard_id, breakdown}, acc) ->
-                                                  {min, count} = max_k_v(breakdown)
+                                                  {min, count} = Enum.max_by(breakdown, fn ({_k, v}) -> v end)
                                                   Map.put(acc, {guard_id, min}, count)
                                                 end)
-                                             |> max_k_v
+                                             |> Enum.max_by(fn ({_k, v}) -> v end)
                                              |> Kernel.elem(0)
     IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 2 checksum is")
-  end
-
-  # Return {k, v} entry in map with the highest value.
-  defp max_k_v(map) do
-    Enum.reduce(map, {nil, 0}, fn ({k, v}, {max_k, max_v}) ->
-      if v > max_v do
-        {k, v}
-      else
-        {max_k, max_v}
-      end
-    end)
   end
 
   @doc """

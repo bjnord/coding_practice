@@ -21,6 +21,7 @@ defmodule Squares do
 
   # return highest count used
   def highest_count(counts, squares) do
+    # FIXME replace with Enum.max_by [once this day is converted to mix project w/tests]
     Enum.reduce(squares, 0, fn (sq, acc) -> if counts[sq] > acc, do: counts[sq], else: acc end)
   end
 end
