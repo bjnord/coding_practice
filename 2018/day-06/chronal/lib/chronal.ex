@@ -24,12 +24,8 @@ defmodule Chronal do
              |> input_file
              |> File.stream!
              |> Enum.map(&Chronal.input_point/1)
-    # FIXME RF to canvas(points) which calls bounds()
-    #       rename as canvas_dimensions()
-    bounds = bounds(points)
-             |> IO.inspect(label: "bounds")
-    canvas = canvas(bounds)
-             |> IO.inspect(label: "canvas")
+    canvas = canvas_dimensions(points)
+             |> IO.inspect(label: "canvas dimensions")
     finite_area_points(points, canvas)
     |> IO.inspect(label: "finite-area points")
   end
@@ -198,7 +194,8 @@ defmodule Chronal do
 
   # the canvas is infinite, but we compute a reasonably large margin
   # around the bounding box of the input points
-  defp canvas({min_x, min_y, max_x, max_y}) do
+  defp canvas_dimensions(points) do
+    {min_x, min_y, max_x, max_y} = bounds(points)
     m = 10
     {
       min_x - ((max_x - min_x) * m),
