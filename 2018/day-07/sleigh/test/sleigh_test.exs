@@ -10,10 +10,16 @@ defmodule SleighTest do
   end
 
   test "creates map of requirements" do
-    reqs = [{"C", "A"}, {"C", "F"}, {"A", "B"}, {"A", "D"}, {"B", "E"}, {"D", "E"}, {"F", "E"}]
+    reqs = [{"C", "A"}, {"C", "F"}, {"A", "B"}, {"A", "D"}, {"H", "G"}, {"B", "E"}, {"D", "E"}, {"F", "E"}, {"I", "G"}]
     assert requirements_map(reqs) == {
-      %{"E" => ["F", "D", "B"], "B" => ["A"], "D" => ["A"], "A" => ["C"], "F" => ["C"]},
-      Enum.into(["A", "B", "C", "D", "E", "F"], MapSet.new())
+      %{"E" => ["F", "D", "B"], "B" => ["A"], "D" => ["A"], "A" => ["C"], "F" => ["C"], "G" => ["I", "H"]},
+      Enum.into(["A", "B", "C", "D", "E", "F", "G", "H", "I"], MapSet.new())
     }
+  end
+
+  test "creates sorted list of steps with no dependencies" do
+    reqmap = %{"E" => ["F", "D", "B"], "B" => ["A"], "D" => ["A"], "A" => ["C"], "F" => ["C"], "G" => ["I", "H"]}
+    steps = ["I", "B", "G", "E", "F", "D", "C", "H", "A"]
+    assert no_dependencies(steps, reqmap) == ["C", "H", "I"]
   end
 end

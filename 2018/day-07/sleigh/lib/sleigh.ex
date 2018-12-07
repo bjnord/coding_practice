@@ -57,6 +57,24 @@ defmodule Sleigh do
   end
 
   @doc """
+  Create sorted list of steps with no dependencies.
+
+  ## Parameters
+
+  - steps: All steps (list of strings)
+  - reqmap: Requirements (Map)
+
+  ## Returns
+
+  List of steps with no dependencies, sorted alphabetically (strings)
+  """
+  def no_dependencies(steps, reqmap) do
+    steps
+    |> Enum.reject(fn (step) -> Map.has_key?(reqmap, step) end)
+    |> Enum.sort
+  end
+
+  @doc """
   Process input file and display part 2 solution.
 
   ## Parameters
