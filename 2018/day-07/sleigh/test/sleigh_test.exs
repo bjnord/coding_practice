@@ -28,8 +28,8 @@ defmodule SleighTest do
     reqmap = %{"E" => ["F", "D", "B"], "B" => ["A"], "D" => ["A"], "A" => ["C"], "F" => ["C"], "G" => ["I", "H"]}
     depmap = %{"C" => ["F", "A"], "A" => ["D", "B"], "B" => ["E"], "D" => ["E"], "F" => ["E"], "H" => ["G"], "I" => ["G"]}
     done_steps = ["C", "A", "B"]
-    assert freed_by("C", [], reqmap, depmap) |> Enum.sort == ["A", "F"]
-    assert freed_by("A", ["C"], reqmap, depmap) |> Enum.sort == ["B", "D"]
-    assert freed_by("B", ["A", "C"], reqmap, depmap) == []
+    assert freed_by("C", MapSet.new(), reqmap, depmap) |> Enum.sort == ["A", "F"]
+    assert freed_by("A", ["C"] |> Enum.into(MapSet.new()), reqmap, depmap) |> Enum.sort == ["B", "D"]
+    assert freed_by("B", ["A", "C"] |> Enum.into(MapSet.new()), reqmap, depmap) == []
   end
 end

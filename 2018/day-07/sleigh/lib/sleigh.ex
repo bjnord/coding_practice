@@ -17,7 +17,7 @@ defmodule Sleigh do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: "EPWCFXKISTZVJHDGNABLQYMORU"
   """
   def part1(argv) do
     reqs = argv
@@ -27,21 +27,26 @@ defmodule Sleigh do
     {steps, reqmap, depmap} = reqs
                               |> requirements_maps
     no_dependencies(steps, reqmap)
-    |> execute_steps([], reqmap, depmap)
+    |> execute_steps({[], MapSet.new()}, reqmap, depmap)
+    |> Kernel.elem(0)
     |> Enum.reverse
     |> List.to_string
     |> IO.inspect(label: "Part 1 step order is")
   end
 
-  defp execute_steps([step | remaining_steps], acc_steps, reqmap, depmap) do
+  # we need to keep done steps as both
+  # - list, so we know the order of step execution
+  # - set, for efficiency in checking if a step is already done
+  defp execute_steps([step | remaining_steps], {done_list, done_set}, reqmap, depmap) do
     remaining_steps =
-      freed_by(step, acc_steps, reqmap, depmap) ++ remaining_steps
+      freed_by(step, done_set, reqmap, depmap) ++ remaining_steps
       |> Enum.sort
-    execute_steps(remaining_steps, [step | acc_steps], reqmap, depmap)
+    acc = {[step | done_list], MapSet.put(done_set, step)}
+    execute_steps(remaining_steps, acc, reqmap, depmap)
   end
 
-  defp execute_steps([], acc_steps, _reqmap, _depmap) do
-    acc_steps
+  defp execute_steps([], acc, _reqmap, _depmap) do
+    acc
   end
 
   @doc """
@@ -50,7 +55,7 @@ defmodule Sleigh do
   ## Parameters
 
   - step: The step being executed (string)
-  - done_steps: The steps already executed (list of strings)
+  - done_set: The steps already executed (mapset of strings)
   - reqmap: The step requirements (map)
   - depmap: The step dependencies (map)
 
@@ -58,8 +63,7 @@ defmodule Sleigh do
 
   Steps newly freed of dependencies (list of strings)
   """
-  # OPTIMIZE done_steps should be MapSet
-  def freed_by(step, done_steps, reqmap, depmap) do
+  def freed_by(step, done_set, reqmap, depmap) do
     case depmap[step] do
       nil ->
         []
@@ -68,7 +72,7 @@ defmodule Sleigh do
         |> Enum.reduce([], fn (dstep, acc) ->
           left = reqmap[dstep]
                  |> Enum.reject(fn (rstep) ->
-                   (step == rstep) || Enum.member?(done_steps, rstep)
+                   (step == rstep) || MapSet.member?(done_set, rstep)
                  end)
           case left do
           [] -> [dstep | acc]
