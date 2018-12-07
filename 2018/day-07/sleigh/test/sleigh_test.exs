@@ -12,9 +12,9 @@ defmodule SleighTest do
   test "creates map of requirements" do
     reqs = [{"C", "A"}, {"C", "F"}, {"A", "B"}, {"A", "D"}, {"H", "G"}, {"B", "E"}, {"D", "E"}, {"F", "E"}, {"I", "G"}]
     assert requirements_maps(reqs) == {
+      Enum.into(["A", "B", "C", "D", "E", "F", "G", "H", "I"], MapSet.new()),
       %{"E" => ["F", "D", "B"], "B" => ["A"], "D" => ["A"], "A" => ["C"], "F" => ["C"], "G" => ["I", "H"]},
       %{"C" => ["F", "A"], "A" => ["D", "B"], "B" => ["E"], "D" => ["E"], "F" => ["E"], "H" => ["G"], "I" => ["G"]},
-      Enum.into(["A", "B", "C", "D", "E", "F", "G", "H", "I"], MapSet.new())
     }
   end
 

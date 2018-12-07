@@ -24,7 +24,7 @@ defmodule Sleigh do
            |> input_file
            |> File.stream!
            |> Enum.map(&Sleigh.parse_requirement/1)
-    {reqmap, depmap, steps} = reqs
+    {steps, reqmap, depmap} = reqs
                               |> requirements_maps
     no_dependencies(steps, reqmap)
     |> execute_steps([], reqmap, depmap)
@@ -88,26 +88,26 @@ defmodule Sleigh do
   ## Returns
 
   Tuple:
-  - 0: Map of requirements
+  - 0: MapSet of all steps seen
+  - 1: Map of requirements
     -- key: step which depends on another step (string)
     -- value: list of dependent steps (strings)
-  - 1: Map of dependencies
+  - 2: Map of dependencies
     -- key: dependent step (string)
     -- value: list of steps which depend on it (strings)
-  - 2: MapSet of all steps seen
   """
   def requirements_maps(reqs) do
+    seen = Enum.reduce(reqs, MapSet.new(), fn ({finish, before}, acc) ->
+      MapSet.put(acc, finish)
+      |> MapSet.put(before)
+    end)
     reqmap = Enum.reduce(reqs, %{}, fn ({finish, before}, acc) ->
       Map.update(acc, before, [finish], &([finish | &1]))
     end)
     depmap = Enum.reduce(reqs, %{}, fn ({finish, before}, acc) ->
       Map.update(acc, finish, [before], &([before | &1]))
     end)
-    seen = Enum.reduce(reqs, MapSet.new(), fn ({finish, before}, acc) ->
-      MapSet.put(acc, finish)
-      |> MapSet.put(before)
-    end)
-    {reqmap, depmap, seen}
+    {seen, reqmap, depmap}
   end
 
   @doc """
