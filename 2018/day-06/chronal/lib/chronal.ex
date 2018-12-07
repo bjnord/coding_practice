@@ -40,11 +40,27 @@ defmodule Chronal do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 46554
   """
   def part2(argv) do
-    argv
-    |> input_file
+    points = argv
+             |> input_file
+             |> File.stream!
+             |> Enum.map(&Chronal.input_point/1)
+    {min_x, min_y, max_x, max_y} = canvas_dimensions(points)
+    # FIXME should come from argv as option!
+    within = if max_x > 100, do: 10000, else: 32
+    Enum.reduce(min_x..max_x, [], fn (x, acc) ->
+      Enum.reduce(min_y..max_y, acc, fn (y, accy) ->
+        if total_distance({x, y}, points) < within do
+          [{x, y} | accy]
+        else
+          accy
+        end
+      end)
+    end)
+    |> length
+    |> IO.inspect(label: "Part 2 region size is")
   end
 
   @doc """
@@ -122,6 +138,25 @@ defmodule Chronal do
                |> Enum.min
     points
     |> Enum.filter(fn (p) -> manhattan(p, {xc, yc}) == shortest end)
+  end
+
+  @doc """
+  Find the total distance to all points from the given coordinates.
+
+  ## Parameters
+
+  - {xc, yc}: coordinates to measure from (integers)
+  - points: list of points ({x, y} integer tuples)
+
+  ## Returns
+
+  Total distance to all points from the given coordinates (integer)
+
+  """
+  def total_distance({xc, yc}, points) do
+    points
+    |> Enum.map(fn (p) -> manhattan(p, {xc, yc}) end)
+    |> Enum.sum
   end
 
   @doc """
