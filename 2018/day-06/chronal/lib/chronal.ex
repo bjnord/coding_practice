@@ -17,7 +17,7 @@ defmodule Chronal do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 5626
   """
   def part1(argv) do
     points = argv
@@ -25,9 +25,10 @@ defmodule Chronal do
              |> File.stream!
              |> Enum.map(&Chronal.input_point/1)
     canvas = canvas_dimensions(points)
-             |> IO.inspect(label: "canvas dimensions")
     finite_area_points(points, canvas)
-    |> IO.inspect(label: "finite-area points")
+    |> Enum.map(fn (p) -> point_area(p, points, canvas) end)
+    |> Enum.max
+    |> IO.inspect(label: "Part 1 largest area is")
   end
 
   @doc """
@@ -170,6 +171,37 @@ defmodule Chronal do
   defp pass_single_elem(list) do
     [_head | tail] = list
     if tail == [], do: list, else: []
+  end
+
+  @doc """
+  Find the area of a point within the canvas.
+
+  ## Parameters
+
+  - {x0, y0}: point to measure from (integers)
+  - points: list of points ({x, y} integer tuples)
+  - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
+
+  ## Returns
+
+  Area closest to the given point.
+
+  """
+  # TODO OPTIMIZE this is far too slow when O(n^2) gets large
+  #
+  #      perhaps start with {x0, y0} and spiral out? once a given
+  #      square adds no further matching points, you're done
+  def point_area({x0, y0}, points, {min_x, min_y, max_x, max_y}) do
+    Enum.reduce(min_x..max_x, [], fn (x, acc) ->
+      Enum.reduce(min_y..max_y, acc, fn (y, accy) ->
+        if closest_points({x, y}, points) == [{x0, y0}] do
+          [{x, y} | accy]
+        else
+          accy
+        end
+      end)
+    end)
+    |> length
   end
 
   @doc """
