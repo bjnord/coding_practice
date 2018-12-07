@@ -20,10 +20,40 @@ defmodule Sleigh do
   - Part 1 answer is: ...
   """
   def part1(argv) do
-    _reqs = argv
-            |> input_file
-            |> File.stream!
-            |> Enum.map(&Sleigh.parse_requirement/1)
+    reqs = argv
+           |> input_file
+           |> File.stream!
+           |> Enum.map(&Sleigh.parse_requirement/1)
+    {reqmap, seen} = reqs
+                     |> requirements_map
+    IO.inspect(reqmap, label: "requirements")
+    IO.inspect(seen, label: "seen")
+  end
+
+  @doc """
+  Map requirements list to data structures.
+
+  ## Parameters
+
+  - reqs: Requirements as {finish, before} tuples
+
+  ## Returns
+
+  Tuple:
+  - 0: Map of requirements
+    -- key: step which depends on another step (string)
+    -- value: list of dependent steps (strings)
+  - 1: MapSet of all steps seen
+  """
+  def requirements_map(reqs) do
+    map = Enum.reduce(reqs, %{}, fn ({finish, before}, acc) ->
+      Map.update(acc, before, [finish], &([finish | &1]))
+    end)
+    seen = Enum.reduce(reqs, MapSet.new(), fn ({finish, before}, acc) ->
+      MapSet.put(acc, finish)
+      |> MapSet.put(before)
+    end)
+    {map, seen}
   end
 
   @doc """
