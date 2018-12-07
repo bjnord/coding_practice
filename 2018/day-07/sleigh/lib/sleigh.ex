@@ -24,11 +24,58 @@ defmodule Sleigh do
            |> input_file
            |> File.stream!
            |> Enum.map(&Sleigh.parse_requirement/1)
-    {reqmap, depmap, seen} = reqs
-                             |> requirements_maps
-    IO.inspect(reqmap, label: "requirements")
-    IO.inspect(depmap, label: "dependencies")
-    IO.inspect(seen, label: "seen")
+    {reqmap, depmap, steps} = reqs
+                              |> requirements_maps
+    no_dependencies(steps, reqmap)
+    |> execute_steps([], reqmap, depmap)
+    |> Enum.reverse
+    |> List.to_string
+    |> IO.inspect(label: "Part 1 step order is")
+  end
+
+  defp execute_steps([step | remaining_steps], acc_steps, reqmap, depmap) do
+    remaining_steps =
+      freed_by(step, acc_steps, reqmap, depmap) ++ remaining_steps
+      |> Enum.sort
+    execute_steps(remaining_steps, [step | acc_steps], reqmap, depmap)
+  end
+
+  defp execute_steps([], acc_steps, _reqmap, _depmap) do
+    acc_steps
+  end
+
+  @doc """
+  Return list of steps freed of dependencies by an executed step.
+
+  ## Parameters
+
+  - step: The step being executed (string)
+  - done_steps: The steps already executed (list of strings)
+  - reqmap: The step requirements (map)
+  - depmap: The step dependencies (map)
+
+  ## Returns
+
+  Steps newly freed of dependencies (list of strings)
+  """
+  # OPTIMIZE done_steps should be MapSet
+  def freed_by(step, done_steps, reqmap, depmap) do
+    case depmap[step] do
+      nil ->
+        []
+      _ ->
+        depmap[step]
+        |> Enum.reduce([], fn (dstep, acc) ->
+          left = reqmap[dstep]
+                 |> Enum.reject(fn (rstep) ->
+                   (step == rstep) || Enum.member?(done_steps, rstep)
+                 end)
+          case left do
+          [] -> [dstep | acc]
+          _  -> acc
+          end
+        end)
+    end
   end
 
   @doc """
