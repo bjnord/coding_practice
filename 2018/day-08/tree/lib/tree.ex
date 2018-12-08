@@ -47,9 +47,9 @@ defmodule Tree do
     |> Enum.map(&String.to_integer/1)
   end
 
-  defp meta_sum({children, metas}) do
-    child_sum = children
-                |> Enum.reduce(0, fn (child, acc) -> acc + meta_sum(child) end)
+  defp meta_sum({childmap, metas}) do
+    child_sum = childmap
+                |> Enum.reduce(0, fn ({_k, child}, acc) -> acc + meta_sum(child) end)
     child_sum + Enum.sum(metas)
   end
 
@@ -104,7 +104,7 @@ defmodule Tree do
 
   ## Returns
 
-  Node structure in the form {[<children>], [<metas>]}
+  Node structure in the form {%{<children>}, [<metas>]}
   """
   def build_tree(input) do
     {children, metas, remainder} = build_node(input)
@@ -114,25 +114,33 @@ defmodule Tree do
     {children, metas}
   end
 
+  # NB returns a child, with its children as **map**
   defp build_node([n_children | [n_meta | input]]) do
     #IO.inspect(input, label: "build_node: initial input")
     {children, input} = build_children(n_children, input)
                         #|> IO.inspect(label: "> built children(#{n_children}) + remaining input")
     {metas, input} = Enum.split(input, n_meta)
                      #|> IO.inspect(label: "> extracted metas(#{n_meta}) + remaining input")
-    {Enum.reverse(children), metas, input}
+    childmap = Enum.reverse(children)
+               |> Enum.reduce({%{}, 1}, fn (child, {map, i}) ->
+                 {Map.put(map, i, child), i+1}
+               end)
+               |> Kernel.elem(0)
+    {childmap, metas, input}
   end
 
+  # NB returns children as **list**
   defp build_children(0, input) do
     {[], input}
   end
 
+  # NB returns children as **list**
   defp build_children(n_children, input) do
     1..n_children
     |> Enum.reduce({[], input}, fn (_child_n, {children, remainder}) ->
-      {child, metas, remainder} = build_node(remainder)
-                                  #|> IO.inspect(label: "build_tree result")
-      {[{child, metas} | children], remainder}
+      {childmap, metas, remainder} = build_node(remainder)
+                                     #|> IO.inspect(label: "build_tree result")
+      {[{childmap, metas} | children], remainder}
     end)
   end
 end
