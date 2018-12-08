@@ -1,10 +1,3 @@
-# Day 2: Inventory Management System
-#
-# Part 1: count how many box IDs w/ letters appearing twice, and thrice
-#         checksum = twice-count * thrice-count
-#
-# Correct answer: 6696
-
 ###
 # functions needed for main stream
 ###
@@ -25,7 +18,7 @@ tupler = fn (countmap) -> { detector.(countmap, 2), detector.(countmap, 3) } end
 # produce a stream of tuples w/binary values {has-letter-twice, has-letter-thrice}
 ###
 
-stream = File.stream!("input.txt")
+stream = File.stream!("input/input.txt")
 |> Stream.map(&String.trim/1)
 |> Stream.map(&String.graphemes/1)
 |> Stream.map(counter)
@@ -45,5 +38,6 @@ stream = File.stream!("input.txt")
                    {_, _} -> {acc2, acc3}
                  end
                end)
-checksum = has2 * has3
-IO.inspect(checksum)
+
+# Part 1 answer is: 6696
+IO.inspect(has2 * has3, label: "Part 1 checksum is")

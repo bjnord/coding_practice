@@ -1,11 +1,4 @@
-# Day 2: Inventory Management System
-#
-# Part 2: Find two box IDs that differ in only one letter (same position)
-#         What letters are common between the two correct box IDs?
-#
-# Correct answer: "bvnfawcnyoeyudzrpgslimtkj"
-
-# NOTE my solution assumes all box IDs will be the same length
+# NOTE solution assumes all box IDs will be the same length
 
 ###
 # functions needed for main stream
@@ -39,7 +32,7 @@ end
 # read box IDs from input file (one per line)
 ###
 
-stream = File.stream!("input.txt")
+stream = File.stream!("input/input.txt")
 |> Stream.map(&String.trim/1)
 
 ###
@@ -62,5 +55,6 @@ accum = Enum.reduce_while(stream, {[], {}}, fn (next_s, {seen, _}) ->
 # display the letters in common between the two box IDs
 ###
 
-common = str_commonor.(id1, id2)
-IO.inspect(common)
+# Part 2 answer is: "bvnfawcnyoeyudzrpgslimtkj"
+str_commonor.(id1, id2)
+|> IO.inspect(label: "Part 2 letters in common are")
