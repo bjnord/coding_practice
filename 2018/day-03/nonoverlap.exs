@@ -19,7 +19,7 @@ used = Enum.reduce(stream, %{}, fn (squares, acc) -> Squares.count(acc, squares)
 ###
 
 restream = File.stream!(file)
-         |> Stream.map(&Squares.parse/1)
+           |> Stream.map(&Squares.parse/1)
 
 ###
 # compare each claim to the full list of fabric squares used
@@ -27,10 +27,10 @@ restream = File.stream!(file)
 
 # Part 2 answer is: "1254"
 Enum.reduce_while(restream, nil, fn (claim, _) ->
-  if Squares.highest_count(used, Squares.squares_used_by(claim)) == 1 do
-    {:halt, claim["claim"]}
-  else
-    {:cont, nil}
+  count = Squares.highest_count(used, Squares.squares_used_by(claim))
+  case count do
+    1 -> {:halt, claim["claim"]}
+    _ -> {:cont, nil}
   end
 end)
 |> IO.inspect(label: "Part 2 nonoverlapping claim ID is")
