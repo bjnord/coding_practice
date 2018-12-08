@@ -20,8 +20,7 @@ stream = File.stream!("input/input.txt")
 ###
 
 # Part 2 answer is: 312
-Enum.reduce_while(stream, {%{0 => true}, 0}, fn(i, {seen, _}) ->
- if seen[i], do: {:halt, {seen, i}}, else: {:cont, {Map.put(seen, i, true), 0}}
+Enum.reduce_while(stream, %{0 => true}, fn(i, seen) ->
+ if seen[i], do: {:halt, i}, else: {:cont, Map.put(seen, i, true)}
 end)
-|> elem(1)
 |> IO.inspect(label: "Part 2 frequency repeat is")
