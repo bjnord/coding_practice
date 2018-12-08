@@ -62,13 +62,33 @@ defmodule Tree do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 25737
   """
   def part2(argv) do
     argv
     |> input_file
     |> File.read!
     |> parse_integers
+    |> build_tree
+    |> meta_sum_p2
+    |> IO.inspect(label: "Part 2 metadata sum is")
+  end
+
+  defp meta_sum_p2({childmap, metas}) do
+    if map_size(childmap) == 0 do
+      # If a node has no child nodes, its value is the sum of its metadata
+      # entries.
+      Enum.sum(metas)
+    else
+      # If a node does have child nodes, the metadata entries become indexes
+      # which refer to those child nodes.
+      metas
+      |> Enum.reduce(0, fn (meta, acc) ->
+        # If a referenced child node does not exist, that reference is
+        # skipped. A metadata entry of 0 does not refer to any child node.
+        if childmap[meta], do: meta_sum_p2(childmap[meta]) + acc, else: acc
+      end)
+    end
   end
 
   @doc """
