@@ -24,8 +24,8 @@ defmodule Tree do
     |> input_file
     |> File.read!
     |> parse_integers
-    |> IO.inspect(label: "input")
-    |> reduce_to_nodes
+    |> build_tree
+    |> IO.inspect(label: "tree")
   end
 
   @doc """
@@ -83,7 +83,7 @@ defmodule Tree do
   end
 
   @doc """
-  Reduce input list to map of nodes. The input takes the form:
+  Reduce input list to node tree structure. The input takes the form:
 
   ```
   n_children n_meta [child_1] [child_2] ... [child_n] meta_1 meta_2 ... meta_n
@@ -97,9 +97,35 @@ defmodule Tree do
 
   ## Returns
 
-  Map of nodes in the form {[<children>], [<metas>]}
+  Node structure in the form {[<children>], [<metas>]}
   """
-  def reduce_to_nodes(_input) do
-    {[], []}
+  def build_tree(input) do
+    {children, metas, remainder} = build_node(input)
+    if remainder != [] do
+      raise "non-empty remainder: implementation or input error?"
+    end
+    {children, metas}
+  end
+
+  defp build_node([n_children | [n_meta | input]]) do
+    #IO.inspect(input, label: "build_node: initial input")
+    {children, input} = build_children(n_children, input)
+                        #|> IO.inspect(label: "> built children(#{n_children}) + remaining input")
+    {metas, input} = Enum.split(input, n_meta)
+                     #|> IO.inspect(label: "> extracted metas(#{n_meta}) + remaining input")
+    {Enum.reverse(children), metas, input}
+  end
+
+  defp build_children(0, input) do
+    {[], input}
+  end
+
+  defp build_children(n_children, input) do
+    1..n_children
+    |> Enum.reduce({[], input}, fn (_child_n, {children, remainder}) ->
+      {child, metas, remainder} = build_node(remainder)
+                                  #|> IO.inspect(label: "build_tree result")
+      {[{child, metas} | children], remainder}
+    end)
   end
 end
