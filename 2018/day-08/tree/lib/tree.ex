@@ -136,11 +136,8 @@ defmodule Tree do
 
   # NB returns a child, with its children as **map**
   defp build_node([n_children | [n_meta | input]]) do
-    #IO.inspect(input, label: "build_node: initial input")
     {children, input} = build_children(n_children, input)
-                        #|> IO.inspect(label: "> built children(#{n_children}) + remaining input")
     {metas, input} = Enum.split(input, n_meta)
-                     #|> IO.inspect(label: "> extracted metas(#{n_meta}) + remaining input")
     childmap = Enum.reverse(children)
                |> Enum.reduce({%{}, 1}, fn (child, {map, i}) ->
                  {Map.put(map, i, child), i+1}
@@ -159,7 +156,6 @@ defmodule Tree do
     1..n_children
     |> Enum.reduce({[], input}, fn (_child_n, {children, remainder}) ->
       {childmap, metas, remainder} = build_node(remainder)
-                                     #|> IO.inspect(label: "build_tree result")
       {[{childmap, metas} | children], remainder}
     end)
   end
