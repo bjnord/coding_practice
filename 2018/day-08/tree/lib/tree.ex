@@ -17,7 +17,7 @@ defmodule Tree do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 41760
   """
   def part1(argv) do
     argv
@@ -25,7 +25,8 @@ defmodule Tree do
     |> File.read!
     |> parse_integers
     |> build_tree
-    |> IO.inspect(label: "tree")
+    |> meta_sum
+    |> IO.inspect(label: "Part 1 metadata sum is")
   end
 
   @doc """
@@ -44,6 +45,12 @@ defmodule Tree do
     |> String.trim
     |> String.split(" ")
     |> Enum.map(&String.to_integer/1)
+  end
+
+  defp meta_sum({children, metas}) do
+    child_sum = children
+                |> Enum.reduce(0, fn (child, acc) -> acc + meta_sum(child) end)
+    child_sum + Enum.sum(metas)
   end
 
   @doc """
