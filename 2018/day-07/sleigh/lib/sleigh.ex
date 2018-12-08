@@ -28,7 +28,7 @@ defmodule Sleigh do
                               |> requirements_maps
     no_dependencies(steps, reqmap)
     |> execute_steps({[], MapSet.new()}, reqmap, depmap)
-    |> Kernel.elem(0)
+    |> elem(0)
     |> Enum.reverse
     |> List.to_string
     |> IO.inspect(label: "Part 1 step order is")
@@ -161,7 +161,7 @@ defmodule Sleigh do
       end
     no_dependencies(steps, reqmap)
     |> assign_steps({0, MapSet.new(), ElfTasks.new(n_elves)}, dur_calc, reqmap, depmap)
-    |> Kernel.elem(0)
+    |> elem(0)
     |> IO.inspect(label: "Part 2 total duration is")
   end
 

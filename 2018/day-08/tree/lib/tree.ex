@@ -142,7 +142,7 @@ defmodule Tree do
                |> Enum.reduce({%{}, 1}, fn (child, {map, i}) ->
                  {Map.put(map, i, child), i+1}
                end)
-               |> Kernel.elem(0)
+               |> elem(0)
     {childmap, metas, input}
   end
 

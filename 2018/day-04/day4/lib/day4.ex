@@ -28,12 +28,12 @@ defmodule Day4 do
     sleepiest_guard_id = times
                          |> total_minutes_asleep
                          |> Enum.max_by(fn ({_k, v}) -> v end)
-                         |> Kernel.elem(0)
+                         |> elem(0)
     sleepiest_minute = times
                        |> sleep_minute_breakdown
                        |> Map.get(sleepiest_guard_id)
                        |> Enum.max_by(fn ({_k, v}) -> v end)
-                       |> Kernel.elem(0)
+                       |> elem(0)
     IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 1 checksum is")
   end
 
@@ -61,7 +61,7 @@ defmodule Day4 do
                                                   Map.put(acc, {guard_id, min}, count)
                                                 end)
                                              |> Enum.max_by(fn ({_k, v}) -> v end)
-                                             |> Kernel.elem(0)
+                                             |> elem(0)
     IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 2 checksum is")
   end
 
@@ -152,7 +152,7 @@ defmodule Day4 do
              {guard_id, sleep_min, [{guard_id, sleep_min, min} | result]}
          end
        end)
-    |> Kernel.elem(2)
+    |> elem(2)
     |> Enum.reverse
   end
 

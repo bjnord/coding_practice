@@ -115,7 +115,7 @@ defmodule Chronal do
 
   """
   def manhattan({x1, y1}, {x2, y2}) do
-    Kernel.abs(x1 - x2) + Kernel.abs(y1 - y2)
+    abs(x1 - x2) + abs(y1 - y2)
   end
 
   @doc """
@@ -252,10 +252,10 @@ defmodule Chronal do
 
   """
   def bounds(points) do
-    min_x = Enum.min_by(points, fn { x, _y} -> x end) |> Kernel.elem(0)
-    min_y = Enum.min_by(points, fn {_x,  y} -> y end) |> Kernel.elem(1)
-    max_x = Enum.max_by(points, fn { x, _y} -> x end) |> Kernel.elem(0)
-    max_y = Enum.max_by(points, fn {_x,  y} -> y end) |> Kernel.elem(1)
+    min_x = Enum.min_by(points, fn { x, _y} -> x end) |> elem(0)
+    min_y = Enum.min_by(points, fn {_x,  y} -> y end) |> elem(1)
+    max_x = Enum.max_by(points, fn { x, _y} -> x end) |> elem(0)
+    max_y = Enum.max_by(points, fn {_x,  y} -> y end) |> elem(1)
     {min_x, min_y, max_x, max_y}
   end
 

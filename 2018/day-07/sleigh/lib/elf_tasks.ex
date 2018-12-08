@@ -50,7 +50,7 @@ defmodule ElfTasks do
   defp free_elf_id(elf_tasks) do
     elf_tasks
     |> Enum.find({nil, nil}, fn ({_k, v}) -> v == nil end)
-    |> Kernel.elem(0)
+    |> elem(0)
   end
 
   @doc """

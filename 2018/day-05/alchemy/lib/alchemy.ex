@@ -98,7 +98,7 @@ defmodule Alchemy do
       {rm_cp, len}
     end)
     |> Enum.min_by(fn ({_cp, count}) -> count end)
-    |> Kernel.elem(1)
+    |> elem(1)
     |> IO.inspect(label: "Part 2 shortest polymer is")
   end
 
