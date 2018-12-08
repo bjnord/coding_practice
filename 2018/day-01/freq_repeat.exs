@@ -1,9 +1,3 @@
-# Day 1: Chronal Calibration
-#
-# Part 2: (Given a repeating set of frequency changes:) What is the first frequency your device reaches twice?
-#
-# Correct answer: 312
-
 ###
 # read frequency changes from input file (one per line)
 # treat them as a repeating list (with "cycle")
@@ -14,7 +8,7 @@
 ###
 
 # "Streams are composable, lazy enumerables"
-stream = File.stream!("input.txt")
+stream = File.stream!("input/input.txt")
 |> Stream.map(&String.trim/1)
 |> Stream.map(&String.to_integer/1)
 |> Stream.cycle
@@ -25,8 +19,9 @@ stream = File.stream!("input.txt")
 # keep a map of accumulated "seen" values
 ###
 
-accum = Enum.reduce_while(stream, {%{0 => true}, 0}, fn(i, {seen, _}) ->
-          if seen[i], do: {:halt, {seen, i}}, else: {:cont, {Map.put(seen, i, true), 0}}
-        end)
-{_, first} = accum
-IO.inspect(first)
+# Part 2 answer is: 312
+Enum.reduce_while(stream, {%{0 => true}, 0}, fn(i, {seen, _}) ->
+ if seen[i], do: {:halt, {seen, i}}, else: {:cont, {Map.put(seen, i, true), 0}}
+end)
+|> elem(1)
+|> IO.inspect(label: "Part 2 frequency repeat is")
