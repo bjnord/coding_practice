@@ -9,10 +9,9 @@
 pair_comparator = fn (pairs) ->
                     diff = Enum.map(pairs, fn ({a, b}) -> if a == b, do: 0, else: 1 end)
                            |> Enum.sum
-                    if diff == 1 do
-                      Enum.find_index(pairs, fn ({a, b}) -> a != b end)
-                    else
-                      nil
+                    case diff do
+                      1 -> Enum.find_index(pairs, fn ({a, b}) -> a != b end)
+                      _ -> nil
                     end
                   end
 
@@ -40,16 +39,14 @@ stream = File.stream!("input/input.txt")
 # keep a list of accumulated "seen" box IDs
 ###
 
-accum = Enum.reduce_while(stream, {[], {}}, fn (next_s, {seen, _}) ->
-          compares = Enum.map(seen, fn (seen_s) -> str_comparator.(seen_s, next_s) end)
-          i = Enum.find_index(compares, fn (compare) -> compare != nil end)
-          if i != nil do
-            {:halt, {[next_s | seen], {Enum.at(seen, i), next_s}}}
-          else
-            {:cont, {[next_s | seen], {}}}
-          end
-        end)
-{_, {id1, id2}} = accum
+{id1, id2} = Enum.reduce_while(stream, [], fn (this_s, seen) ->
+               compares = Enum.map(seen, fn (seen_s) -> str_comparator.(seen_s, this_s) end)
+               i = Enum.find_index(compares, fn (compare) -> compare != nil end)
+               case i do
+                 nil -> {:cont, [this_s | seen]}
+                 i   -> {:halt, {Enum.at(seen, i), this_s}}
+               end
+             end)
 
 ###
 # display the letters in common between the two box IDs
