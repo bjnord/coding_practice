@@ -32,6 +32,38 @@ defmodule Circle do
   end
 
   @doc """
+  Extract list of marbles in circle.
+  (Only used for testing, to assert circle state.)
+
+  ## Parameters
+
+  - circle: Current circle
+
+  ## Returns
+
+  List of marbles in circle (head will be current marble)
+  """
+  def to_list({front, back, _latest}) do
+    front ++ Enum.reverse(back)
+  end
+
+  @doc """
+  Return latest marble insertion.
+  (Only used for testing, to assert circle state.)
+
+  ## Parameters
+
+  - circle: Current circle
+
+  ## Returns
+
+  Number of latest marble insertion. (Note this may not be in the circle, if 23 marble.)
+  """
+  def latest({_front, _back, latest}) do
+    latest
+  end
+
+  @doc """
   Insert next marble into circle.
   (See `README.md` for design details.)
 
