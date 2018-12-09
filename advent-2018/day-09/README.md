@@ -17,29 +17,29 @@ For example, suppose there are 9 players. After the marble with value 0 is place
 ```
 [-] (0)
 [1]  0 (1)
-[2]  0 (2) 1 
+[2]  0 (2) 1
 [3]  0  2  1 (3)
-[4]  0 (4) 2  1  3 
-[5]  0  4  2 (5) 1  3 
-[6]  0  4  2  5  1 (6) 3 
+[4]  0 (4) 2  1  3
+[5]  0  4  2 (5) 1  3
+[6]  0  4  2  5  1 (6) 3
 [7]  0  4  2  5  1  6  3 (7)
-[8]  0 (8) 4  2  5  1  6  3  7 
-[9]  0  8  4 (9) 2  5  1  6  3  7 
-[1]  0  8  4  9  2(10) 5  1  6  3  7 
-[2]  0  8  4  9  2 10  5(11) 1  6  3  7 
-[3]  0  8  4  9  2 10  5 11  1(12) 6  3  7 
-[4]  0  8  4  9  2 10  5 11  1 12  6(13) 3  7 
-[5]  0  8  4  9  2 10  5 11  1 12  6 13  3(14) 7 
+[8]  0 (8) 4  2  5  1  6  3  7
+[9]  0  8  4 (9) 2  5  1  6  3  7
+[1]  0  8  4  9  2(10) 5  1  6  3  7
+[2]  0  8  4  9  2 10  5(11) 1  6  3  7
+[3]  0  8  4  9  2 10  5 11  1(12) 6  3  7
+[4]  0  8  4  9  2 10  5 11  1 12  6(13) 3  7
+[5]  0  8  4  9  2 10  5 11  1 12  6 13  3(14) 7
 [6]  0  8  4  9  2 10  5 11  1 12  6 13  3 14  7(15)
-[7]  0(16) 8  4  9  2 10  5 11  1 12  6 13  3 14  7 15 
-[8]  0 16  8(17) 4  9  2 10  5 11  1 12  6 13  3 14  7 15 
-[9]  0 16  8 17  4(18) 9  2 10  5 11  1 12  6 13  3 14  7 15 
-[1]  0 16  8 17  4 18  9(19) 2 10  5 11  1 12  6 13  3 14  7 15 
-[2]  0 16  8 17  4 18  9 19  2(20)10  5 11  1 12  6 13  3 14  7 15 
-[3]  0 16  8 17  4 18  9 19  2 20 10(21) 5 11  1 12  6 13  3 14  7 15 
-[4]  0 16  8 17  4 18  9 19  2 20 10 21  5(22)11  1 12  6 13  3 14  7 15 
-[5]  0 16  8 17  4 18(19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15 
-[6]  0 16  8 17  4 18 19  2(24)20 10 21  5 22 11  1 12  6 13  3 14  7 15 
+[7]  0(16) 8  4  9  2 10  5 11  1 12  6 13  3 14  7 15
+[8]  0 16  8(17) 4  9  2 10  5 11  1 12  6 13  3 14  7 15
+[9]  0 16  8 17  4(18) 9  2 10  5 11  1 12  6 13  3 14  7 15
+[1]  0 16  8 17  4 18  9(19) 2 10  5 11  1 12  6 13  3 14  7 15
+[2]  0 16  8 17  4 18  9 19  2(20)10  5 11  1 12  6 13  3 14  7 15
+[3]  0 16  8 17  4 18  9 19  2 20 10(21) 5 11  1 12  6 13  3 14  7 15
+[4]  0 16  8 17  4 18  9 19  2 20 10 21  5(22)11  1 12  6 13  3 14  7 15
+[5]  0 16  8 17  4 18(19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15
+[6]  0 16  8 17  4 18 19  2(24)20 10 21  5 22 11  1 12  6 13  3 14  7 15
 [7]  0 16  8 17  4 18 19  2 24 20(25)10 21  5 22 11  1 12  6 13  3 14  7 15
 ```
 
@@ -54,3 +54,58 @@ Here are a few more examples:
 - 30 players; last marble is worth 5807 points: high score is **37305**
 
 **What is the winning Elf's score?**
+
+## Part 1 Design
+
+I'm keeping the state of the circle in two Elixir lists, "front" and "back".
+
+- The front list always has the **current marble** as the head; this makes computing the next marble number fast.
+- I've reformatted the problem example table, below, by rotating each line clockwise so the current marble is at the top (shown as `(n)`).
+- The division between the front and back lists is shown as a pipe (`|`). Note that the head of the front list is to the **left** (so the current marble is the head), but the head of the back list is to the **right** (the back list is sorted in reverse).
+- So logically the complete list at any point is `[<front>] ++ [<reverse-of-back>]`.
+
+So the algorithm for inserting a non-23 marble becomes:
+
+1. (Special case:) If the circle contains only the initial marble 0, insert marble 1 into the head of the front list.
+1. If the front list only has 1 marble, we have to move all the back marbles to the front. (This is the expensive step, shown as `$` below, because we have to reverse the back. But as time goes on it happens less and less frequently.)
+1. Now the front list will have at least 2 marbles.
+    1. Remove two marbles from the head of the front list, and insert them into the head of the back list. (Do this one at a time; maintain the backward sorting of the back list.)
+    1. Insert the new marble into the head of the front list. (It thus becomes the current marble.)
+
+And the algorithm for inserting a 23 marble is:
+
+1. [TBP]
+
+```
+[-] (0)|
+[1] (1) 0|
+[2] (2)|1  0
+[$] (2) 1  0|
+[3] (3) 0| 2  1
+[4] (4)|2  1  3  0
+[$] (4) 2  1  3  0|
+[5] (5) 1  3  0| 4  2
+[6] (6) 3  0| 4  2  5  1
+[7] (7) 0| 4  2  5  1  6  3
+[8] (8)|4  2  5  1  6  3  7  0
+[$] (8) 4  2  5  1  6  3  7  0|
+[9] (9) 2  5  1  6  3  7  0| 8  4
+[1] (10) 5  1  6  3  7  0| 8  4  9  2
+[2] (11) 1  6  3  7  0| 8  4  9  2 10  5
+[3] (12) 6  3  7  0| 8  4  9  2 10  5 11  1
+[4] (13) 3  7  0| 8  4  9  2 10  5 11  1 12  6
+[5] (14) 7  0| 8  4  9  2 10  5 11  1 12  6 13  3
+[6] (15) 0| 8  4  9  2 10  5 11  1 12  6 13  3 14  7
+[7] (16)|8  4  9  2 10  5 11  1 12  6 13  3 14  7 15  0
+[$] (16) 8  4  9  2 10  5 11  1 12  6 13  3 14  7 15  0|
+[8] (17) 4  9  2 10  5 11  1 12  6 13  3 14  7 15  0|16  8
+[9] (18) 9  2 10  5 11  1 12  6 13  3 14  7 15  0|16  8 17  4
+[1] (19) 2 10  5 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9
+[2] (20)10  5 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2
+[3] (21) 5 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2 20 10
+[4] (22)11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2 20 10 21  5
+...
+[5] (19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15  0 16  8 17  4 18
+[6] (24)20 10 21  5 22 11  1 12  6 13  3 14  7 15  0 16  8 17  4 18 19  2
+[7] (25)10 21  5 22 11  1 12  6 13  3 14  7 15 0 16  8 17  4 18 19  2 24 20
+```
