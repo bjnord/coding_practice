@@ -48,7 +48,20 @@ defmodule Circle do
     {{[1, 0], [], 1}, 0}
   end
 
-  # if this is a 23-marble:
+  # if this is a 23-marble, but we don't have 7+ marbles in back:
+  # 1. move all N back marbles to front (however many there are)
+  # 2. move (6-N) marbles from the *bottom* of front to the *top* of front
+  # 3. remove another marble from the *bottom* of front (the 7th)
+  # 4. score is marble we would have inserted + 7th marble we removed
+  def insert({front, back, latest}) when (rem(latest+1, 23) == 0) and (length(back) < 7) do
+    {bottom_n, front_r} = Enum.reverse(front)
+                          |> Enum.split(7 - length(back))
+    {[remove], keep} = Enum.reverse(back ++ bottom_n)
+                       |> Enum.split(1)
+    {{keep ++ Enum.reverse(front_r), [], latest+1}, (latest+1) + remove}
+  end
+
+  # if this is a 23-marble (and we do have 7+ marbles in back):
   # 1. move top 6 back marbles to front
   # 2. remove another top back marble (the 7th)
   # 3. score is marble we would have inserted + 7th marble we removed

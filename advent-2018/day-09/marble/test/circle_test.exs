@@ -52,6 +52,17 @@ defmodule CircleTest do
     assert circle == {[19, 2, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0], [18, 4, 17, 8, 16], 23}
   end
 
+  # this covers the case when the back list doesn't have 7+ marbles for a
+  # 23-marble insert -- note that back will never have fewer than 2, so
+  # this tests the edge case
+  test "inserts a marble (23) [contrived state]" do
+    circle = {[22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0, 16, 8, 17, 4, 18, 9, 19, 2, 20, 10], [5, 21], 22}
+    {circle, score} = insert(circle)
+    assert score == 23 + 9
+    # [5] (19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18
+    assert circle == {[19, 2, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0, 16, 8, 17, 4, 18], [], 23}
+  end
+
   test "inserts a marble (24)" do
     circle = new(23)
     # [5] (19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18

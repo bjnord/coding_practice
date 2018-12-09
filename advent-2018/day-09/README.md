@@ -63,23 +63,29 @@ I'm keeping the state of the circle in two Elixir lists, "front" and "back", plu
 - I've reformatted the problem example table, below, by rotating each line clockwise so the current marble is at the top (shown as `(n)`).
 - The division between the front and back lists is shown as a pipe (`|`). Note that the head of the front list is to the **left** (so the current marble is the head), but the head of the back list is to the **right** (the back list is sorted in reverse).
 - So logically the complete list at any point is `[<front>] ++ [<reverse-of-back>]`.
+- Care is needed during implementation, when moving groups of marbles between the front and back lists, to maintain the proper order.
 
 So the algorithm for inserting a non-23 marble becomes:
 
 1. (Special case:) If the circle contains only the initial marble 0, insert marble 1 into the head of the front list.
 1. If the front list only has 1 marble, we have to move all the back marbles to the front. (This is an expensive step, shown as `$` below, because we have to reverse the back. But as time goes on it happens less and less frequently.)
 1. Now the front list will have at least 2 marbles.
-    1. Remove two marbles from the head of the front list, and insert them into the head of the back list. (Do this one at a time; maintain the backward sorting of the back list.)
+    1. Remove 2 marbles from the head of the front list, and insert them into the head of the back list.
     1. Insert the new marble into the head of the front list. (It thus becomes the current marble.)
 
 (In Elixir, each of those three steps is a one-liner function!)
 
-And the algorithm for inserting a 23 marble is:
+The algorithm for inserting a 23 marble is more complicated:
 
 1. If the back list has at least 7 marbles, insertion will be fast.
-    1. Remove the top 6 marbles from the head of the back list, one at a time, and insert each one into the head of the front list. Thus the 6th becomes the current marble.
+    1. Remove 6 marbles from the head of the back list, and insert them into the head of the front list. (Thus the 6th becomes the current marble.)
     1. Remove the next marble (the 7th) from the head of the back list, so that it's removed from the circle.
-1. Otherwise... \[TBP\]
+1. Otherwise this will be the slowest kind of insertion we do:
+    1. Move all N back marbles to the head of the front list (however many there are).
+    1. Move (6-N) marbles from the *tail* of the front list to the *head* of the front list. (This is an even more expensive step; we must reverse the front list twice to accomplish it.)
+    1. Remove another marble from the *tail* of the front list (the 7th).
+
+(Note that this describes the logical 23 marble algorithm. In the implementation, we actually do the 6 marbles and the 7th marble all at once, for efficiency.)
 
 ```
 [-] (0)|
