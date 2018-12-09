@@ -20,9 +20,13 @@ defmodule Marble do
   - Part 1 answer is: ...
   """
   def part1(argv) do
-    argv
-    |> input_file
-    |> IO.inspect(label: "Part 1 foo is")
+    {:ok, [n_players, last_points], _, _, _, _} =
+      argv
+      |> input_file
+      |> File.read!
+      |> String.trim
+      |> InputParser.input_line
+    IO.inspect(0, label: "Part 1 winning score is")
   end
 
   @doc """
