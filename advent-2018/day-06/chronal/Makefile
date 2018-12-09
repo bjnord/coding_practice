@@ -1,4 +1,4 @@
-all:
+run:
 	mix test && mix run -e 'Chronal.part1(["input/input.txt"])' && mix run -e 'Chronal.part2(["input/input.txt"])'
 
 example:
