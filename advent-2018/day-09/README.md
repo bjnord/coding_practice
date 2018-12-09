@@ -59,7 +59,7 @@ Here are a few more examples:
 
 ## Part 1 Design
 
-\[Elixir is _perfect_ for this puzzle. I'm rather proud that I came up with the design and implementation, in the Elixir idiom, without help from anyone else's solutions. Thanks [Dave Thomas](https://pragprog.com/book/elixir/programming-elixir) and [José Valim](https://www.twitch.tv/josevalim/videos) for being my teachers. Lots of practice (with tests and refactoring) is the way to really _learn_ a language.\]
+\[**NOTE**: This design is _far too slow_ for Part 2 (see below). Need to find a better data structure (like a doubly-linked list).\]
 
 I'm keeping the state of the circle in two Elixir lists, "front" and "back", plus the latest marble number inserted.
 
@@ -123,3 +123,13 @@ The algorithm for inserting a 23 marble is more complicated:
 [6] (24)20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18 19  2
 [7] (25)10 21  5 22 11  1 12  6 13  3 14  7 15 0|16  8 17  4 18 19  2 24 20
 ```
+
+# Part 2
+
+Amused by the speed of your answer, the Elves are curious:
+
+**What would the new winning Elf's score be if the number of the last marble were 100 times larger?**
+
+## Part 2 Design
+
+Sadly, my Part 1 design is woefully inadequate at x100. Those `Enum.reverse/1` calls take their toll.

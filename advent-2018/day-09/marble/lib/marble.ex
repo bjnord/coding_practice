@@ -20,12 +20,22 @@ defmodule Marble do
   - Part 1 answer is: 409832
   """
   def part1(argv) do
+    input_params(argv)
+    |> play_game
+    |> IO.inspect(label: "Part 1 winning score is")
+  end
+
+  defp input_params(argv) do
     {:ok, [n_players, last_marble], _, _, _, _} =
       argv
       |> input_file
       |> File.read!
       |> String.trim
       |> InputParser.input_line
+    {n_players, last_marble}
+  end
+
+  defp play_game({n_players, last_marble}) do
     1..10_000_000
     |> Enum.reduce_while({Circle.new(), %{}, 1}, fn (move, {circle, scores, player}) ->
       {circle, score} = Circle.insert(circle)
@@ -37,7 +47,6 @@ defmodule Marble do
     end)
     |> Enum.max_by(fn ({_p, score}) -> score end)
     |> elem(1)
-    |> IO.inspect(label: "Part 1 winning score is")
   end
 
   @doc """
@@ -45,16 +54,15 @@ defmodule Marble do
 
   ## Parameters
 
-  - argv: Command-line arguments (should be name of input file)
-
+  - argv: Command-line arguments (should be name of input file) 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 3469562780
   """
   def part2(argv) do
-    argv
-    |> input_file
-    |> IO.inspect(label: "Part 2 foo is")
+    {n_players, last_marble} = input_params(argv)
+    play_game({n_players, last_marble * 100})
+    |> IO.inspect(label: "Part 2 winning score is")
   end
 
   @doc """
