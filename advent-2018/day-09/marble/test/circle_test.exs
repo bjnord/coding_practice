@@ -72,4 +72,21 @@ defmodule CircleTest do
     # [6] (24)20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18 19  2
     assert circle == {[24, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0], [2, 19, 18, 4, 17, 8, 16], 24}
   end
+
+  # this double-checks what happens after our non 7+ marbles insertion
+  test "inserts a marble (24) [contrived state]" do
+    circle = {[19, 2, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0, 16, 8, 17, 4, 18], [], 23}
+    {circle, score} = insert(circle)
+    assert score == 0
+    # [6] (24)20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18 19  2
+    assert circle == {[24, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0, 16, 8, 17, 4, 18], [2, 19], 24}
+  end
+
+  test "inserts a marble (46)" do
+    circle = new(45)
+    assert circle == {[45, 2, 24, 20, 25, 10, 26, 21, 27, 5, 28, 22, 29, 11, 30, 1, 31, 12, 32, 6, 33, 13, 34, 3, 35, 14, 36, 7, 37, 15, 38, 0], [19, 44, 18, 43, 4, 42, 17, 41, 8, 40, 16, 39], 45}
+    {circle, score} = insert(circle)
+    assert score == 63
+    assert circle == {[42, 4, 43, 18, 44, 19, 45, 2, 24, 20, 25, 10, 26, 21, 27, 5, 28, 22, 29, 11, 30, 1, 31, 12, 32, 6, 33, 13, 34, 3, 35, 14, 36, 7, 37, 15, 38, 0], [41, 8, 40, 16, 39], 46}
+  end
 end

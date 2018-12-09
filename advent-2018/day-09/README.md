@@ -53,9 +53,13 @@ Here are a few more examples:
 - 21 players; last marble is worth 6111 points: high score is **54718**
 - 30 players; last marble is worth 5807 points: high score is **37305**
 
+\[**NOTE**: The above is very confusing wording. When it says "last marble is worth X points" what it really means is "the last marble is the one numbered X" _i.e._ "there are X marbles in the game" (plus the 0 marble). X isn't a point value (_i.e._ the score you get from adding a 23 marble to the circle).\]
+
 **What is the winning Elf's score?**
 
 ## Part 1 Design
+
+\[Elixir is _perfect_ for this puzzle. I'm rather proud that I came up with the design and implementation, in the Elixir idiom, without help from anyone else's solutions. Thanks [Dave Thomas](https://pragprog.com/book/elixir/programming-elixir) and [José Valim](https://www.twitch.tv/josevalim/videos) for being my teachers. Lots of practice (with tests and refactoring) is the way to really _learn_ a language.\]
 
 I'm keeping the state of the circle in two Elixir lists, "front" and "back", plus the latest marble number inserted.
 

@@ -17,16 +17,27 @@ defmodule Marble do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 409832
   """
   def part1(argv) do
-    {:ok, [n_players, last_points], _, _, _, _} =
+    {:ok, [n_players, last_marble], _, _, _, _} =
       argv
       |> input_file
       |> File.read!
       |> String.trim
       |> InputParser.input_line
-    IO.inspect(0, label: "Part 1 winning score is")
+    1..10_000_000
+    |> Enum.reduce_while({Circle.new(), %{}, 1}, fn (move, {circle, scores, player}) ->
+      {circle, score} = Circle.insert(circle)
+      scores = Map.update(scores, player, score, &(&1 + score))
+      case move do
+        ^last_marble -> {:halt, scores}
+        _            -> {:cont, {circle, scores, rem(player, n_players) + 1}}
+      end
+    end)
+    |> Enum.max_by(fn ({_p, score}) -> score end)
+    |> elem(1)
+    |> IO.inspect(label: "Part 1 winning score is")
   end
 
   @doc """
