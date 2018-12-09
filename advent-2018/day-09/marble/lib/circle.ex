@@ -35,6 +35,11 @@ defmodule Circle do
   Insert next marble into circle.
   (See `README.md` for design details.)
 
+  FIXME The various insert() functions below assume that the marble
+        being inserted will always be current+1 -- that's only true
+        through the 23rd marble. We need to refactor to include the
+        marble count as part of the circle state.
+
   ## Parameters
 
   - circle: Current circle
