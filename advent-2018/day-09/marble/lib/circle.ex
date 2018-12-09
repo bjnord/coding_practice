@@ -11,7 +11,7 @@ defmodule Circle do
   New circle
   """
   def new do
-    {[0], []}
+    {[0], [], 0}
   end
 
   @doc """
@@ -35,11 +35,6 @@ defmodule Circle do
   Insert next marble into circle.
   (See `README.md` for design details.)
 
-  FIXME The various insert() functions below assume that the marble
-        being inserted will always be current+1 -- that's only true
-        through the 23rd marble. We need to refactor to include the
-        marble count as part of the circle state.
-
   ## Parameters
 
   - circle: Current circle
@@ -49,31 +44,31 @@ defmodule Circle do
   `{new_circle, score}`: Updated circle plus score from insertion
   """
   # special case: add marble 1 to initial circle
-  def insert({[0], []}) do
-    {{[1, 0], []}, 0}
+  def insert({[0], [], 0}) do
+    {{[1, 0], [], 1}, 0}
   end
 
   # if this is a 23-marble:
-  # 1. move top 6 marbles from back to front
-  # 2. remove next top marble (7th) from back
+  # 1. move top 6 back marbles to front
+  # 2. remove another top back marble (the 7th)
   # 3. score is marble we would have inserted + 7th marble we removed
-  def insert({[current | front], back}) when rem(current, 23) == 22 do
+  def insert({front, back, latest}) when rem(latest+1, 23) == 0 do
     {top_7, new_back} = Enum.split(back, 7)
     {[remove], keep} = Enum.reverse(top_7) |> Enum.split(1)
-    {{keep ++ [current | front], new_back}, (current+1) + remove}
+    {{keep ++ front, new_back, latest+1}, (latest+1) + remove}
   end
 
-  # if we have 2 marbles in front:
-  # 1. move top 2 marbles from front to back
-  # 2. add new marble to front
-  def insert({[current, between | front], back}) do
-    {{[current+1 | front], [between, current | back]}, 0}
+  # if we have 2+ marbles in front:
+  # 1. move top 2 front marbles to back
+  # 2. insert new marble to top of front
+  def insert({[current, between | front], back, latest}) do
+    {{[latest+1 | front], [between, current | back], latest+1}, 0}
   end
 
-  # otherwise we only have 1 marble in front:
+  # otherwise we have 1 marble in front:
   # 1. move all back marbles to front
-  # 2. call self recursively
-  def insert({[current], back}) do
-    insert({[current | Enum.reverse(back)], []})
+  # 2. call self recursively, now that front has 2+ marbles
+  def insert({[current], back, latest}) do
+    insert({[current | Enum.reverse(back)], [], latest})
   end
 end

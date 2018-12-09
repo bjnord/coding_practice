@@ -57,9 +57,9 @@ Here are a few more examples:
 
 ## Part 1 Design
 
-I'm keeping the state of the circle in two Elixir lists, "front" and "back".
+I'm keeping the state of the circle in two Elixir lists, "front" and "back", plus the latest marble number inserted.
 
-- The front list always has the **current marble** as the head; this makes computing the next marble number fast.
+- The front list always has the **current marble** as the head.
 - I've reformatted the problem example table, below, by rotating each line clockwise so the current marble is at the top (shown as `(n)`).
 - The division between the front and back lists is shown as a pipe (`|`). Note that the head of the front list is to the **left** (so the current marble is the head), but the head of the back list is to the **right** (the back list is sorted in reverse).
 - So logically the complete list at any point is `[<front>] ++ [<reverse-of-back>]`.
@@ -67,7 +67,7 @@ I'm keeping the state of the circle in two Elixir lists, "front" and "back".
 So the algorithm for inserting a non-23 marble becomes:
 
 1. (Special case:) If the circle contains only the initial marble 0, insert marble 1 into the head of the front list.
-1. If the front list only has 1 marble, we have to move all the back marbles to the front. (This is the expensive step, shown as `$` below, because we have to reverse the back. But as time goes on it happens less and less frequently.)
+1. If the front list only has 1 marble, we have to move all the back marbles to the front. (This is an expensive step, shown as `$` below, because we have to reverse the back. But as time goes on it happens less and less frequently.)
 1. Now the front list will have at least 2 marbles.
     1. Remove two marbles from the head of the front list, and insert them into the head of the back list. (Do this one at a time; maintain the backward sorting of the back list.)
     1. Insert the new marble into the head of the front list. (It thus becomes the current marble.)
