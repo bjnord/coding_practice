@@ -105,7 +105,7 @@ defmodule Tree do
   def input_file(argv) do
     case argv do
       [filename] -> filename
-      _          -> abort('Usage: sleigh filename', 64)
+      _          -> abort('Usage: tree filename', 64)
     end
   end
 
