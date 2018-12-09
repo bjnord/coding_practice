@@ -72,9 +72,14 @@ So the algorithm for inserting a non-23 marble becomes:
     1. Remove two marbles from the head of the front list, and insert them into the head of the back list. (Do this one at a time; maintain the backward sorting of the back list.)
     1. Insert the new marble into the head of the front list. (It thus becomes the current marble.)
 
+(In Elixir, each of those three steps is a one-liner function!)
+
 And the algorithm for inserting a 23 marble is:
 
-1. [TBP]
+1. If the back list has at least 7 marbles, insertion will be fast.
+    1. Remove the top 6 marbles from the head of the back list, one at a time, and insert each one into the head of the front list. Thus the 6th becomes the current marble.
+    1. Remove the next marble (the 7th) from the head of the back list, so that it's removed from the circle.
+1. Otherwise... \[TBP\]
 
 ```
 [-] (0)|
@@ -104,8 +109,7 @@ And the algorithm for inserting a 23 marble is:
 [2] (20)10  5 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2
 [3] (21) 5 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2 20 10
 [4] (22)11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2 20 10 21  5
-...
-[5] (19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15  0 16  8 17  4 18
-[6] (24)20 10 21  5 22 11  1 12  6 13  3 14  7 15  0 16  8 17  4 18 19  2
-[7] (25)10 21  5 22 11  1 12  6 13  3 14  7 15 0 16  8 17  4 18 19  2 24 20
+[5] (19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18       <- after inserting (23)
+[6] (24)20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18 19  2
+[7] (25)10 21  5 22 11  1 12  6 13  3 14  7 15 0|16  8 17  4 18 19  2 24 20
 ```

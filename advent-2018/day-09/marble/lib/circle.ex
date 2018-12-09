@@ -48,6 +48,16 @@ defmodule Circle do
     {{[1, 0], []}, 0}
   end
 
+  # if this is a 23-marble:
+  # 1. move top 6 marbles from back to front
+  # 2. remove next top marble (7th) from back
+  # 3. score is marble we would have inserted + 7th marble we removed
+  def insert({[current | front], back}) when rem(current, 23) == 22 do
+    {top_7, new_back} = Enum.split(back, 7)
+    {[remove], keep} = Enum.reverse(top_7) |> Enum.split(1)
+    {{keep ++ [current | front], new_back}, (current+1) + remove}
+  end
+
   # if we have 2 marbles in front:
   # 1. move top 2 marbles from front to back
   # 2. add new marble to front

@@ -44,7 +44,11 @@ defmodule CircleTest do
 
   test "inserts a marble (23)" do
     circle = new(22)
-    {_circle, score} = insert(circle)
+    # [4] (22)11  1 12  6 13  3 14  7 15  0|16  8 17  4 18  9 19  2 20 10 21  5
+    assert circle == {[22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0], [5, 21, 10, 20, 2, 19, 9, 18, 4, 17, 8, 16]}
+    {circle, score} = insert(circle)
     assert score == 23 + 9
+    # [5] (19) 2 20 10 21  5 22 11  1 12  6 13  3 14  7 15  0|16  8 17  4 18
+    assert circle == {[19, 2, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0], [18, 4, 17, 8, 16]}
   end
 end
