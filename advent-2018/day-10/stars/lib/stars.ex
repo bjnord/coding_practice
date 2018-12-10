@@ -22,27 +22,24 @@ defmodule Stars do
   def part1(argv) do
     stars = parse_stars(argv)
     # FIXME should come from argv as option!
-    {grid_dim, iter_secs} = if (List.first(stars) |> elem(0) |> abs()) < 100 do
-      {{-6, -4, 15, 11}, 10}
+    iter_secs = if (List.first(stars) |> elem(0) |> abs()) < 100 do
+      10
     else
-      {{-320, -240, 319, 239}, 50_000}
+      50_000
     end
-    {second, stars} = iteration_with_min_y_distance(stars, grid_dim, iter_secs)
+    {_second, stars} = iteration_with_min_y_distance(stars, iter_secs)
     if stars == [] do
       raise "no iteration found with all stars"
     end
-    dump_grid(second, stars, grid_dim)
+    IO.puts("Part 1 message is:")
+    dump_grid(stars)
   end
 
-  defp dump_grid(sec, stars, grid_dim) do
+  defp dump_grid(stars) do
     IO.puts("")
-    case sec do
-      0 -> IO.puts("Initially:")
-      1 -> IO.puts("After 1 second:")
-      _ -> IO.puts("After #{sec} seconds:")
-    end
-    render_to_grid(stars, grid_dim)
+    render_to_grid(stars)
     |> Enum.map(fn (line) -> IO.puts(line) end)
+    IO.puts("")
   end
 
   @doc """
@@ -106,7 +103,7 @@ defmodule Stars do
   end
 
   @doc """
-  Calculate dimensions of grid needed to display stars, including a 1-square border.
+  Calculate dimensions of grid needed to display stars, including some border padding.
 
   ## Parameters
 
@@ -118,9 +115,9 @@ defmodule Stars do
 
   """
   def grid_dimensions(stars) do
-    b = 1  # border
+    {xb, yb} = {2, 1}  # border
     Enum.reduce(stars, {0, 0, 0, 0}, fn ({x, y, _vel_x, _vel_y}, {min_x, min_y, max_x, max_y}) ->
-      { min(x-b, min_x), min(y-b, min_y), max(x+b, max_x), max(y+b, max_y) }
+      { min(x-xb, min_x), min(y-yb, min_y), max(x+xb, max_x), max(y+yb, max_y) }
     end)
   end
 
@@ -130,17 +127,17 @@ defmodule Stars do
   ## Parameters
 
   - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
-  - grid_dim: Grid dimensions as {min_x, min_y, max_x, max_y}
 
   ## Returns
 
   List of min_y..max_y grid lines (strings)
 
   """
-  def render_to_grid(stars, {min_x, min_y, max_x, max_y}) do
+  def render_to_grid(stars) do
     star_set = Enum.reduce(stars, MapSet.new(), fn ({pos_x, pos_y, _vel_x, _vel_y}, set) ->
       MapSet.put(set, {pos_x, pos_y})
     end)
+    {min_x, min_y, max_x, max_y} = grid_dimensions(stars)
     Enum.reduce(max_y..min_y, [], fn (y, lines) ->
       line = Enum.reduce(max_x..min_x, [], fn (x, chars) ->
         char = if MapSet.member?(star_set, {x, y}), do: ?#, else: ?.
@@ -156,7 +153,6 @@ defmodule Stars do
   ## Parameters
 
   - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
-  - grid_dim: Grid dimensions as {min_x, min_y, max_x, max_y}
   - max_seconds: Number of iterations to try
 
   ## Returns
@@ -164,9 +160,9 @@ defmodule Stars do
   {second, stars}
 
   """
-  def iteration_with_min_y_distance(stars, {_min_x, min_y, _max_x, max_y}, max_seconds) do
+  def iteration_with_min_y_distance(stars, max_seconds) do
     {_, second, stars, _} = 0..max_seconds
-    |> Enum.reduce({max_y-min_y+1, -1, [], stars}, fn (sec, {min_y_dist, min_sec, min_stars, stars}) ->
+    |> Enum.reduce({1_000_000, nil, [], stars}, fn (sec, {min_y_dist, min_sec, min_stars, stars}) ->
       new_dist = y_dist_of(stars)
       if new_dist < min_y_dist do
         {new_dist, sec, stars, move_stars(stars)}
