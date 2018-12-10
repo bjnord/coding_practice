@@ -106,32 +106,6 @@ defmodule Stars do
   end
 
   @doc """
-  Are all stars visible within grid dimensions?
-
-  ## Parameters
-
-  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
-  - grid_dim: Grid dimensions as {min_x, min_y, max_x, max_y}
-
-  ## Returns
-
-  Updated list of stars
-
-  """
-  def stars_visible?(stars, grid_dim) do
-    Enum.reduce_while(stars, true, fn (star, _visible) ->
-      case star_visible?(star, grid_dim) do
-        true  -> {:cont, true}
-        false -> {:halt, false}
-      end
-    end)
-  end
-
-  defp star_visible?({x, y, _vel_x, _vel_y}, {min_x, min_y, max_x, max_y}) do
-    (x >= min_x) && (y >= min_y) && (x <= max_x) && (y <= max_y)
-  end
-
-  @doc """
   Render stars to grid.
 
   ## Parameters
@@ -158,7 +132,7 @@ defmodule Stars do
   end
 
   @doc """
-  Find iteration with visible stars whose y values are most tightly clustered.
+  Find iteration whose star y values are most tightly clustered.
 
   ## Parameters
 
@@ -171,19 +145,14 @@ defmodule Stars do
   {second, stars}
 
   """
-  def iteration_with_min_y_distance(stars, {min_x, min_y, max_x, max_y}, max_seconds) do
+  def iteration_with_min_y_distance(stars, {_min_x, min_y, _max_x, max_y}, max_seconds) do
     {_, second, stars, _} = 0..max_seconds
     |> Enum.reduce({max_y-min_y+1, -1, [], stars}, fn (sec, {min_y_dist, min_sec, min_stars, stars}) ->
-      case stars_visible?(stars, {min_x, min_y, max_x, max_y}) do
-        true ->
-          new_dist = y_dist_of(stars)
-          if new_dist < min_y_dist do
-            {new_dist, sec, stars, move_stars(stars)}
-          else
-            {min_y_dist, min_sec, min_stars, move_stars(stars)}
-          end
-        false ->
-          {min_y_dist, min_sec, min_stars, move_stars(stars)}
+      new_dist = y_dist_of(stars)
+      if new_dist < min_y_dist do
+        {new_dist, sec, stars, move_stars(stars)}
+      else
+        {min_y_dist, min_sec, min_stars, move_stars(stars)}
       end
     end)
     {second, stars}
