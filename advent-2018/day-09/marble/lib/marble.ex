@@ -54,7 +54,7 @@ defmodule Marble do
 
   ## Parameters
 
-  - argv: Command-line arguments (should be name of input file) 
+  - argv: Command-line arguments (should be name of input file)
 
   ## Correct Answer
 
