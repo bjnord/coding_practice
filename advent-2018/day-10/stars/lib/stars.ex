@@ -67,15 +67,30 @@ defmodule Stars do
   end
 
   @doc """
-  Hello world.
+  Render stars to grid.
 
-  ## Examples
+  ## Parameters
 
-      iex> Stars.hello
-      :world
+  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - grid_dim: Grid dimension as {min_x, min_y, max_x, max_y}
+
+  ## Returns
+
+  List of min_y..max_y grid lines (strings)
 
   """
-  def hello do
-    :world
+  def render_to_grid(stars, {min_x, min_y, max_x, max_y}) do
+    star_set = Enum.reduce(stars, MapSet.new(), fn ({pos_x, pos_y, _vel_x, _vel_y}, set) ->
+      MapSet.put(set, {pos_x, pos_y})
+    end)
+    Enum.reduce(min_y..max_y, [], fn (y, lines) ->
+      line = Enum.reduce(min_x..max_x, [], fn (x, chars) ->
+        char = if MapSet.member?(star_set, {x, y}), do: ?#, else: ?.
+        [char | chars]
+      end)
+      |> Enum.reverse
+      [line | lines]
+    end)
+    |> Enum.reverse
   end
 end
