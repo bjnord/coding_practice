@@ -108,7 +108,7 @@ defmodule Stars do
   end
 
   @doc """
-  Are any stars visible within grid dimensions?
+  Are all stars visible within grid dimensions?
 
   ## Parameters
 
@@ -120,17 +120,17 @@ defmodule Stars do
   Updated list of stars
 
   """
-  def stars_visible?(stars, {min_x, min_y, max_x, max_y}) do
-    Enum.reduce_while(stars, false, fn ({x, y, _vel_x, _vel_y}, _visible) ->
-      # FIXME seems clunky; is there a better way in Elixir?
-      case {x < min_x, y < min_y, x > max_x, y > max_y} do
-        {true, _, _, _} -> {:cont, false}
-        {_, true, _, _} -> {:cont, false}
-        {_, _, true, _} -> {:cont, false}
-        {_, _, _, true} -> {:cont, false}
-        _               -> {:halt, true}
+  def stars_visible?(stars, grid_dim) do
+    Enum.reduce_while(stars, true, fn (star, _visible) ->
+      case star_visible?(star, grid_dim) do
+        true  -> {:cont, true}
+        false -> {:halt, false}
       end
     end)
+  end
+
+  defp star_visible?({x, y, _vel_x, _vel_y}, {min_x, min_y, max_x, max_y}) do
+    (x >= min_x) && (y >= min_y) && (x <= max_x) && (y <= max_y)
   end
 
   @doc """
