@@ -5,6 +5,19 @@ defmodule StarsTest do
 
   import Stars
 
+  test "moves stars" do
+    stars = [
+      {9, 1, 0, 2},
+      {7, 0, -3, 0},
+      {3, -2, -1, 1},
+    ]
+    assert move_stars(stars) == [
+      {9, 3, 0, 2},
+      {4, 0, -3, 0},
+      {2, -1, -1, 1},
+    ]
+  end
+
   test "renders to grid (small example)" do
     stars = [
       {0, -1, 0, 0},

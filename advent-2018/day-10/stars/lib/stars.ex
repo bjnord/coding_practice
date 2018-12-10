@@ -67,6 +67,24 @@ defmodule Stars do
   end
 
   @doc """
+  Move stars based on velocity.
+
+  ## Parameters
+
+  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+
+  ## Returns
+
+  Updated list of stars
+
+  """
+  def move_stars(stars) do
+    Enum.map(stars, fn ({pos_x, pos_y, vel_x, vel_y}) ->
+      {pos_x + vel_x, pos_y + vel_y, vel_x, vel_y}
+    end)
+  end
+
+  @doc """
   Render stars to grid.
 
   ## Parameters
