@@ -55,6 +55,7 @@ defmodule Marble do
   ## Parameters
 
   - argv: Command-line arguments (should be name of input file) 
+
   ## Correct Answer
 
   - Part 2 answer is: 3469562780
@@ -81,18 +82,5 @@ defmodule Marble do
       [filename] -> filename
       _          -> abort('Usage: marble filename', 64)
     end
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Marble.hello
-      :world
-
-  """
-  def hello do
-    :world
   end
 end
