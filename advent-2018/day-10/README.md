@@ -155,3 +155,13 @@ After 4 seconds:
 After 3 seconds, the message appeared briefly: **HI**. Of course, your message will be much longer and will take many more seconds to appear.
 
 **What message will eventually appear in the sky?**
+
+### Part 1 Design
+
+I could have solved this a lot faster if I'd realized a key insight at the start: The iteration (seconds) with the words is the one whose star Y values are most tightly clustered (_i.e._ `min_y..max_y` is the smallest range). You can see the commits for my attempts to only show iterations with visible stars, etc.
+
+## Part 2
+
+Good thing you didn't have to wait, because that would have taken a long time - much longer than the **3** seconds in the example above.
+
+Impressed by your sub-hour communication capabilities, the Elves are curious: **Exactly how many seconds would they have needed to wait for that message to appear?**
