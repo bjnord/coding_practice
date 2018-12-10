@@ -1,5 +1,5 @@
 run:
-	mix test && mix run -e 'Stars.part1(["input/input.txt"])' && mix run -e 'Stars.part2(["input/input.txt"])'
+	mix test && mix run -e 'Stars.part12(["input/input.txt"])'
 
 example:
-	mix test && mix run -e 'Stars.part1(["input/example1.txt"])' && mix run -e 'Stars.part2(["input/example1.txt"])'
+	mix test && mix run -e 'Stars.part12(["input/example1.txt"])'

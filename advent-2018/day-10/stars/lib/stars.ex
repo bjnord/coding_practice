@@ -9,7 +9,7 @@ defmodule Stars do
   end
 
   @doc """
-  Process input file and display part 1 solution.
+  Process input file and display part 1 and 2 solutions.
 
   ## Parameters
 
@@ -17,9 +17,10 @@ defmodule Stars do
 
   ## Correct Answer
 
-  - Part 1 answer is: "GFNKCGGH"
+  - Part 1 message is: "GFNKCGGH"
+  - Part 2 second is: 10274
   """
-  def part1(argv) do
+  def part12(argv) do
     stars = parse_stars(argv)
     # FIXME should come from argv as option!
     iter_secs = if (List.first(stars) |> elem(0) |> abs()) < 100 do
@@ -27,12 +28,13 @@ defmodule Stars do
     else
       50_000
     end
-    {_second, stars} = iteration_with_min_y_distance(stars, iter_secs)
+    {second, stars} = iteration_with_min_y_distance(stars, iter_secs)
     if stars == [] do
       raise "no iteration found with all stars"
     end
     IO.puts("Part 1 message is:")
     dump_grid(stars)
+    IO.inspect(second, label: "Part 2 second is")
   end
 
   defp dump_grid(stars) do
@@ -40,22 +42,6 @@ defmodule Stars do
     render_to_grid(stars)
     |> Enum.map(fn (line) -> IO.puts(line) end)
     IO.puts("")
-  end
-
-  @doc """
-  Process input file and display part 2 solution.
-
-  ## Parameters
-
-  - argv: Command-line arguments (should be name of input file)
-
-  ## Correct Answer
-
-  - Part 2 answer is: 10274
-  """
-  def part2(argv) do
-    parse_stars(argv)
-    |> IO.inspect(label: "Part 2 foo is")
   end
 
   @doc """
