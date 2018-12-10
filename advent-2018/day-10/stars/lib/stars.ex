@@ -83,14 +83,12 @@ defmodule Stars do
     star_set = Enum.reduce(stars, MapSet.new(), fn ({pos_x, pos_y, _vel_x, _vel_y}, set) ->
       MapSet.put(set, {pos_x, pos_y})
     end)
-    Enum.reduce(min_y..max_y, [], fn (y, lines) ->
-      line = Enum.reduce(min_x..max_x, [], fn (x, chars) ->
+    Enum.reduce(max_y..min_y, [], fn (y, lines) ->
+      line = Enum.reduce(max_x..min_x, [], fn (x, chars) ->
         char = if MapSet.member?(star_set, {x, y}), do: ?#, else: ?.
         [char | chars]
       end)
-      |> Enum.reverse
       [line | lines]
     end)
-    |> Enum.reverse
   end
 end
