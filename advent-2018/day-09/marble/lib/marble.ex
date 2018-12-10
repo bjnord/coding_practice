@@ -37,7 +37,7 @@ defmodule Marble do
 
   defp play_game({n_players, last_marble}) do
     1..10_000_000
-    |> Enum.reduce_while({Circle.new(), %{}, 1}, fn (move, {circle, scores, player}) ->
+    |> Enum.reduce_while({Circle.new(last_marble+1), %{}, 1}, fn (move, {circle, scores, player}) ->
       {circle, score} = Circle.insert(circle)
       scores = Map.update(scores, player, score, &(&1 + score))
       case move do

@@ -1,3 +1,4 @@
 %{
+  "deque": {:hex, :deque, "1.2.0", "30404b86264be3eeb4e8331d88ef67d0fdc77e006b2fa7872be03923a47245b7", [:mix], [], "hexpm"},
   "nimble_parsec": {:hex, :nimble_parsec, "0.4.0", "ee261bb53214943679422be70f1658fff573c5d0b0a1ecd0f18738944f818efe", [:mix], [], "hexpm"},
 }
