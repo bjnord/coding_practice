@@ -54,7 +54,7 @@ defmodule Stars do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 10274
   """
   def part2(argv) do
     parse_stars(argv)
