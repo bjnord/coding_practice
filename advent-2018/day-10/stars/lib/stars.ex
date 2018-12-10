@@ -75,7 +75,7 @@ defmodule Stars do
 
   ## Parameters
 
-  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - stars: List of stars as {x, y, vel_x, vel_y}
 
   ## Returns
 
@@ -83,8 +83,8 @@ defmodule Stars do
 
   """
   def move_stars(stars) do
-    Enum.map(stars, fn ({pos_x, pos_y, vel_x, vel_y}) ->
-      {pos_x + vel_x, pos_y + vel_y, vel_x, vel_y}
+    Enum.map(stars, fn ({x, y, vel_x, vel_y}) ->
+      {x + vel_x, y + vel_y, vel_x, vel_y}
     end)
   end
 
@@ -93,7 +93,7 @@ defmodule Stars do
 
   ## Parameters
 
-  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - stars: List of stars as {x, y, vel_x, vel_y}
 
   ## Returns
 
@@ -112,7 +112,7 @@ defmodule Stars do
 
   ## Parameters
 
-  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - stars: List of stars as {x, y, vel_x, vel_y}
 
   ## Returns
 
@@ -120,8 +120,8 @@ defmodule Stars do
 
   """
   def render_to_grid(stars) do
-    star_set = Enum.reduce(stars, MapSet.new(), fn ({pos_x, pos_y, _vel_x, _vel_y}, set) ->
-      MapSet.put(set, {pos_x, pos_y})
+    star_set = Enum.reduce(stars, MapSet.new(), fn ({x, y, _vel_x, _vel_y}, set) ->
+      MapSet.put(set, {x, y})
     end)
     {min_x, min_y, max_x, max_y} = grid_dimensions(stars)
     Enum.reduce(max_y..min_y, [], fn (y, lines) ->
@@ -138,7 +138,7 @@ defmodule Stars do
 
   ## Parameters
 
-  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - stars: List of stars as {x, y, vel_x, vel_y}
   - max_seconds: Number of iterations to try
 
   ## Returns
