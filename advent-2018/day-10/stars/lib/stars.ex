@@ -17,23 +17,21 @@ defmodule Stars do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: "GFNKCGGH"
   """
   def part1(argv) do
     stars = parse_stars(argv)
     # FIXME should come from argv as option!
-    grid_dim = if (List.first(stars) |> elem(0) |> abs()) < 100 do
-      {-6, -4, 15, 11}
+    {grid_dim, iter_secs} = if (List.first(stars) |> elem(0) |> abs()) < 100 do
+      {{-6, -4, 15, 11}, 10}
     else
-      {-80, -22, 80, 23}
+      {{-320, -240, 319, 239}, 50_000}
     end
-    1..100_000
-    |> Enum.reduce_while(stars, fn (sec, stars) ->
-      if stars_visible?(stars, grid_dim) do
-        dump_grid(sec, stars, grid_dim)
-      end
-      {:cont, move_stars(stars)}
-    end)
+    {second, stars} = iteration_with_min_y_distance(stars, grid_dim, iter_secs)
+    if stars == [] do
+      raise "no iteration found with all stars"
+    end
+    dump_grid(second, stars, grid_dim)
   end
 
   defp dump_grid(sec, stars, grid_dim) do
@@ -157,5 +155,44 @@ defmodule Stars do
       end)
       [line | lines]
     end)
+  end
+
+  @doc """
+  Find iteration with visible stars whose y values are most tightly clustered.
+
+  ## Parameters
+
+  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - grid_dim: Grid dimensions as {min_x, min_y, max_x, max_y}
+  - max_seconds: Number of iterations to try
+
+  ## Returns
+
+  {second, stars}
+
+  """
+  def iteration_with_min_y_distance(stars, {min_x, min_y, max_x, max_y}, max_seconds) do
+    {_, second, stars, _} = 0..max_seconds
+    |> Enum.reduce({max_y-min_y+1, -1, [], stars}, fn (sec, {min_y_dist, min_sec, min_stars, stars}) ->
+      case stars_visible?(stars, {min_x, min_y, max_x, max_y}) do
+        true ->
+          new_dist = y_dist_of(stars)
+          if new_dist < min_y_dist do
+            {new_dist, sec, stars, move_stars(stars)}
+          else
+            {min_y_dist, min_sec, min_stars, move_stars(stars)}
+          end
+        false ->
+          {min_y_dist, min_sec, min_stars, move_stars(stars)}
+      end
+    end)
+    {second, stars}
+  end
+
+  defp y_dist_of(stars) do
+    {min, max} = Enum.reduce(stars, {0, 0}, fn ({_x, y, _vel_x, _vel_y}, {min_y, max_y}) ->
+      {min(y, min_y), max(y, max_y)}
+    end)
+    max - min
   end
 end
