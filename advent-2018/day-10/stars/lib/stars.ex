@@ -20,8 +20,31 @@ defmodule Stars do
   - Part 1 answer is: ...
   """
   def part1(argv) do
-    parse_stars(argv)
-    |> IO.inspect(label: "Part 1 foo is")
+    stars = parse_stars(argv)
+    # FIXME should come from argv as option!
+    grid_dim = if (List.first(stars) |> elem(0) |> abs()) < 100 do
+      {-6, -4, 15, 11}
+    else
+      {-80, -22, 80, 23}
+    end
+    1..100_000
+    |> Enum.reduce_while(stars, fn (sec, stars) ->
+      if stars_visible?(stars, grid_dim) do
+        dump_grid(sec, stars, grid_dim)
+      end
+      {:cont, move_stars(stars)}
+    end)
+  end
+
+  defp dump_grid(sec, stars, grid_dim) do
+    IO.puts("")
+    case sec do
+      0 -> IO.puts("Initially:")
+      1 -> IO.puts("After 1 second:")
+      _ -> IO.puts("After #{sec} seconds:")
+    end
+    render_to_grid(stars, grid_dim)
+    |> Enum.map(fn (line) -> IO.puts(line) end)
   end
 
   @doc """
@@ -85,12 +108,38 @@ defmodule Stars do
   end
 
   @doc """
+  Are any stars visible within grid dimensions?
+
+  ## Parameters
+
+  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+  - grid_dim: Grid dimensions as {min_x, min_y, max_x, max_y}
+
+  ## Returns
+
+  Updated list of stars
+
+  """
+  def stars_visible?(stars, {min_x, min_y, max_x, max_y}) do
+    Enum.reduce_while(stars, false, fn ({x, y, _vel_x, _vel_y}, _visible) ->
+      # FIXME seems clunky; is there a better way in Elixir?
+      case {x < min_x, y < min_y, x > max_x, y > max_y} do
+        {true, _, _, _} -> {:cont, false}
+        {_, true, _, _} -> {:cont, false}
+        {_, _, true, _} -> {:cont, false}
+        {_, _, _, true} -> {:cont, false}
+        _               -> {:halt, true}
+      end
+    end)
+  end
+
+  @doc """
   Render stars to grid.
 
   ## Parameters
 
   - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
-  - grid_dim: Grid dimension as {min_x, min_y, max_x, max_y}
+  - grid_dim: Grid dimensions as {min_x, min_y, max_x, max_y}
 
   ## Returns
 

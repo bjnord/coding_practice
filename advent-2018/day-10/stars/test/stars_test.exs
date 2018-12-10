@@ -18,6 +18,16 @@ defmodule StarsTest do
     ]
   end
 
+  test "detects visibility" do
+    stars = [
+      {9, 1, 0, 2},
+      {7, 0, -3, 0},
+      {3, -2, -1, 1},
+    ]
+    assert stars_visible?(stars, {-1, -1, 1, 1}) == false
+    assert stars_visible?(stars, {-1, -2, 3, 1}) == true
+  end
+
   test "renders to grid (small example)" do
     stars = [
       {0, -1, 0, 0},
