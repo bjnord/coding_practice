@@ -31,46 +31,26 @@ defmodule Alchemy do
   end
 
   # Tail-recursive function to remove all reactants
-  #   (this is more deeply-nested than I'd like, but I want to avoid
-  #   e.g. computing the full length of the list on every call;
-  #   splitting the head from a list is always cheap)
-  defp remove_reactants(letters) do
-    [first | tail] = letters
-    case tail do
+  defp remove_reactants(letters) when length(letters) < 2 do
+    letters
+  end
+  defp remove_reactants([first, second]) do
+    if reactant?(first, second), do: [], else: [first, second]
+  end
+  defp remove_reactants([first | tail]) do  # 3 or more
+    # tail recursion
+    new_tail = remove_reactants(tail)
+    # at this point, we only need to check reactance of the
+    # new top two letters, if there are two (recursion took
+    # care of everything else)
+    case new_tail do
       [] ->
-        # called w/only one letter; return it to parent
+        # only one letter remains:
         [first]
       _  ->
-        [second | tail2] = tail
-        case tail2 do
-          [] ->
-             # called w/only two letters:
-             if reactant?(first, second) do
-               # toss them if reactant
-               []
-             else
-               # return them to parent if not
-               [first, second]
-             end
-          _  ->
-             # called w/three or more letters: tail recursion
-             new_tail = remove_reactants(tail)
-             case new_tail do
-               [] ->
-                 # only one letter remains; return it to parent
-                 [first]
-               _  ->
-                 # two or more letters remain:
-                 [second | new_tail2] = new_tail
-                 if reactant?(first, second) do
-                   # toss first two letters if reactant
-                   new_tail2
-                 else
-                   # return all to parent if not
-                   [first | new_tail]
-                 end
-             end
-        end
+        # two or more letters remain:
+        [second | new_tail] = new_tail
+        remove_reactants([first, second]) ++ new_tail
     end
   end
 
