@@ -106,6 +106,25 @@ defmodule Stars do
   end
 
   @doc """
+  Calculate dimensions of grid needed to display stars, including a 1-square border.
+
+  ## Parameters
+
+  - stars: List of stars as {pos_x, pos_y, vel_x, vel_y}
+
+  ## Returns
+
+  Grid dimensions as {min_x, min_y, max_x, max_y}
+
+  """
+  def grid_dimensions(stars) do
+    b = 1  # border
+    Enum.reduce(stars, {0, 0, 0, 0}, fn ({x, y, _vel_x, _vel_y}, {min_x, min_y, max_x, max_y}) ->
+      { min(x-b, min_x), min(y-b, min_y), max(x+b, max_x), max(y+b, max_y) }
+    end)
+  end
+
+  @doc """
   Render stars to grid.
 
   ## Parameters
