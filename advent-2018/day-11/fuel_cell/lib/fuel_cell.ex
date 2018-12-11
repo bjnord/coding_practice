@@ -28,13 +28,15 @@ defmodule FuelCell do
     |> File.read!
     |> String.trim
     |> String.to_integer
-    |> largest_power_square(3..3)
+    |> square_powers(3..3)
+    |> Enum.max_by(&elem(&1, 1))
+    |> elem(0)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 largest power 3x3 square is")
   end
 
   @doc """
-  Find NxN square with the largest total power.
+  Compute total power of ZxZ squares.
 
   ## Parameters
 
@@ -43,26 +45,42 @@ defmodule FuelCell do
 
   ## Returns
 
-  Coordinates of top-left corner of 3x3 square as {x, y} (integers 1..@grid_size)
+  Map of power values:
+
+  - key: coordinates + size of top-left corner of square as {x, y, z} (integers 1..@grid_size)
+  - value: total power of square (integer)
   """
-  def largest_power_square(grid_serial, z_range) do
-    Enum.reduce(1..@grid_size, %{}, fn (x, acc) ->
-      Enum.reduce(1..@grid_size, acc, fn (y, acc) ->
-        power = power_level({x, y}, grid_serial)
-        Enum.reduce(contributes_to_cells({x, y}, z_range), {acc, power}, fn ({x0, y0, z0}, {acc, power}) ->
-          {Map.update(acc, {x0, y0, z0}, power, &(&1 + power)), power}
-        end)
-        |> elem(0)
-      end)
+  def square_powers(grid_serial, min_z..max_z) do
+    # FIXME make this recursive starting from max_z
+    Enum.reduce(1..max_z, %{}, fn (z, acc) ->
+      square_powers_for_z(grid_serial, z, acc)
     end)
-    |> Enum.max_by(&elem(&1, 1))
-    |> elem(0)
+    |> Enum.filter(fn ({{_x, _y, z}, _power}) -> Enum.member?(min_z..max_z, z) end)  # only 3x3 squares
   end
 
-  defp contributes_to_cells({x, y}, z_min.._z_max) do
-    k = z_min-1
-    Enum.flat_map(max(1, x-k)..x, fn (i) ->
-      Enum.map(max(1, y-k)..y, fn (j) -> {i, j, k} end)
+  defp square_powers_for_z(grid_serial, 1, acc) do
+    Enum.reduce(1..@grid_size, acc, fn (x, acc) ->
+      Enum.reduce(1..@grid_size, acc, fn (y, acc) ->
+        # total power of 1x1 squares is just the square's own power
+        Map.put(acc, {x, y, 1}, power_level({x, y}, grid_serial))
+      end)
+    end)
+  end
+
+  defp square_powers_for_z(_grid_serial, z, acc) do
+    Enum.reduce(1..@grid_size-(z-1), acc, fn (x, acc) ->
+      Enum.reduce(1..@grid_size-(z-1), acc, fn (y, acc) ->
+        # total power of ZxZ squares is
+        # - total power of (Z-1)x(Z-1) square at this location
+        square_power = acc[{x, y, z-1}]
+        # - plus total power of Zx1 edge below that square
+        #   (we use the 1x1 square in acc, rather than re-calculating)
+        x_edge = Enum.map(x..x+(z-1), fn (xi) -> acc[{xi, y+(z-1), 1}] end)
+        # - plus total power of 1x(Z-1) edge to the right of that square
+        #   (note that it's Z-1, so we don't double-count the corner)
+        y_edge = Enum.map(y..y+(z-2), fn (yj) -> acc[{x+(z-1), yj, 1}] end)
+        Map.put(acc, {x, y, z}, square_power + Enum.sum(x_edge) + Enum.sum(y_edge))
+      end)
     end)
   end
 
