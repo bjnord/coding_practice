@@ -51,15 +51,14 @@ defmodule FuelCell do
   - value: total power of square (integer)
   """
   def square_powers(grid_serial, min_z..max_z) do
-    # FIXME make this recursive starting from max_z
-    Enum.reduce(1..max_z, %{}, fn (z, acc) ->
-      square_powers_for_z(grid_serial, z, acc)
-    end)
-    |> Enum.filter(fn ({{_x, _y, z}, _power}) -> Enum.member?(min_z..max_z, z) end)  # only 3x3 squares
+    # must compute 1..max_z (since algorithm is recursive)
+    square_powers_for_z(grid_serial, max_z)
+    # ...but only return squares of interest (filter by range caller provided)
+    |> Enum.filter(fn ({{_x, _y, z}, _power}) -> Enum.member?(min_z..max_z, z) end)
   end
 
-  defp square_powers_for_z(grid_serial, 1, acc) do
-    Enum.reduce(1..@grid_size, acc, fn (x, acc) ->
+  defp square_powers_for_z(grid_serial, 1) do
+    Enum.reduce(1..@grid_size, %{}, fn (x, acc) ->
       Enum.reduce(1..@grid_size, acc, fn (y, acc) ->
         # total power of 1x1 squares is just the square's own power
         Map.put(acc, {x, y, 1}, power_level({x, y}, grid_serial))
@@ -67,18 +66,18 @@ defmodule FuelCell do
     end)
   end
 
-  defp square_powers_for_z(_grid_serial, z, acc) do
-    Enum.reduce(1..@grid_size-(z-1), acc, fn (x, acc) ->
+  defp square_powers_for_z(grid_serial, z) do
+    smaller_acc = square_powers_for_z(grid_serial, z-1)
+    Enum.reduce(1..@grid_size-(z-1), %{}, fn (x, acc) ->
       Enum.reduce(1..@grid_size-(z-1), acc, fn (y, acc) ->
         # total power of ZxZ squares is
         # - total power of (Z-1)x(Z-1) square at this location
-        square_power = acc[{x, y, z-1}]
+        square_power = smaller_acc[{x, y, z-1}]
         # - plus total power of Zx1 edge below that square
-        #   (we use the 1x1 square in acc, rather than re-calculating)
-        x_edge = Enum.map(x..x+(z-1), fn (xi) -> acc[{xi, y+(z-1), 1}] end)
+        x_edge = Enum.map(x..x+(z-1), fn (xi) -> power_level({xi, y+(z-1)}, grid_serial) end)
         # - plus total power of 1x(Z-1) edge to the right of that square
         #   (note that it's Z-1, so we don't double-count the corner)
-        y_edge = Enum.map(y..y+(z-2), fn (yj) -> acc[{x+(z-1), yj, 1}] end)
+        y_edge = Enum.map(y..y+(z-2), fn (yj) -> power_level({x+(z-1), yj}, grid_serial) end)
         Map.put(acc, {x, y, z}, square_power + Enum.sum(x_edge) + Enum.sum(y_edge))
       end)
     end)
