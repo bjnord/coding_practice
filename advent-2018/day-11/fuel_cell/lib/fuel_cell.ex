@@ -3,6 +3,9 @@ defmodule FuelCell do
   Documentation for FuelCell.
   """
 
+  # 300x300 grid
+  @grid_size 300
+
   defp abort(message, excode) do
     IO.puts(:stderr, message)
     System.halt(excode)
@@ -17,13 +20,48 @@ defmodule FuelCell do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: "21,93"
   """
   def part1(argv) do
-    argv
+    {x, y} = argv
     |> input_file
     |> File.read!
-    |> IO.inspect(label: "Part 1 foo is")
+    |> String.trim
+    |> String.to_integer
+    |> largest_power_square
+    # coordinates submitted to the puzzle web site must not have spaces!
+    IO.inspect("#{x},#{y}", label: "Part 1 largest power 3x3 square is")
+  end
+
+  @doc """
+  Find 3x3 square with the largest total power.
+
+  ## Parameters
+
+  - grid_serial: Grid serial number (integer)
+
+  ## Returns
+
+  Coordinates of top-left corner of 3x3 square as {x, y} (integers 1..@grid_size)
+  """
+  def largest_power_square(grid_serial) do
+    Enum.reduce(1..@grid_size, %{}, fn (x, acc) ->
+      Enum.reduce(1..@grid_size, acc, fn (y, acc) ->
+        power = power_level({x, y}, grid_serial)
+        Enum.reduce(contributes_to_cells({x, y}), {acc, power}, fn ({x0, y0}, {acc, power}) ->
+          {Map.update(acc, {x0, y0}, power, &(&1 + power)), power}
+        end)
+        |> elem(0)
+      end)
+    end)
+    |> Enum.max_by(&elem(&1, 1))
+    |> elem(0)
+  end
+
+  defp contributes_to_cells({x, y}) do
+    Enum.flat_map(max(1, x-2)..min(@grid_size, x), fn (i) ->
+      Enum.map(max(1, y-2)..min(@grid_size, y), fn (j) -> {i, j} end)
+    end)
   end
 
   @doc """
@@ -77,7 +115,7 @@ defmodule FuelCell do
 
   ## Parameters
 
-  - {x, y}: Fuel cell coordinates (integers 1..300)
+  - {x, y}: Fuel cell coordinates (integers 1..@grid_size)
   - grid_serial: Grid serial number (integer)
 
   ## Returns
