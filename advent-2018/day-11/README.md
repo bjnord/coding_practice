@@ -62,7 +62,7 @@ For grid serial number 42, the largest 3x3 square's top-left is **21,61** (with 
 
 **What is the X,Y coordinate of the top-left fuel cell of the 3x3 square with the largest total power?**
 
-# Part 2
+## Part 2
 
 You discover a dial on the side of the device; it seems to let you select a square of **any size**, not just 3x3. Sizes from 1x1 to 300x300 are supported.
 
@@ -74,3 +74,7 @@ For example:
 - For grid serial number 42, the largest total square (with a total power of 119) is 12x12 and has a top-left corner of 232,251, so its identifier is **232,251,12**.
 
 **What is the X,Y,size identifier of the square with the largest total power?**
+
+### Part 2 Design
+
+My part 2 implementation is really slow for the full 300x300 grid. There is probably a key insight I'm missing, that would reduce how many calculations are necessary?
