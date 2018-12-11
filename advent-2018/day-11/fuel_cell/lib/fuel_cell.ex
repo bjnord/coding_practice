@@ -23,33 +23,34 @@ defmodule FuelCell do
   - Part 1 answer is: "21,93"
   """
   def part1(argv) do
-    {x, y} = argv
+    {x, y, _z} = argv
     |> input_file
     |> File.read!
     |> String.trim
     |> String.to_integer
-    |> largest_power_square
+    |> largest_power_square(3..3)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 largest power 3x3 square is")
   end
 
   @doc """
-  Find 3x3 square with the largest total power.
+  Find NxN square with the largest total power.
 
   ## Parameters
 
   - grid_serial: Grid serial number (integer)
+  - z_range: Range of square sizes (integer range)
 
   ## Returns
 
   Coordinates of top-left corner of 3x3 square as {x, y} (integers 1..@grid_size)
   """
-  def largest_power_square(grid_serial) do
+  def largest_power_square(grid_serial, z_range) do
     Enum.reduce(1..@grid_size, %{}, fn (x, acc) ->
       Enum.reduce(1..@grid_size, acc, fn (y, acc) ->
         power = power_level({x, y}, grid_serial)
-        Enum.reduce(contributes_to_cells({x, y}), {acc, power}, fn ({x0, y0}, {acc, power}) ->
-          {Map.update(acc, {x0, y0}, power, &(&1 + power)), power}
+        Enum.reduce(contributes_to_cells({x, y}, z_range), {acc, power}, fn ({x0, y0, z0}, {acc, power}) ->
+          {Map.update(acc, {x0, y0, z0}, power, &(&1 + power)), power}
         end)
         |> elem(0)
       end)
@@ -58,9 +59,10 @@ defmodule FuelCell do
     |> elem(0)
   end
 
-  defp contributes_to_cells({x, y}) do
-    Enum.flat_map(max(1, x-2)..x, fn (i) ->
-      Enum.map(max(1, y-2)..y, fn (j) -> {i, j} end)
+  defp contributes_to_cells({x, y}, z_min.._z_max) do
+    k = z_min-1
+    Enum.flat_map(max(1, x-k)..x, fn (i) ->
+      Enum.map(max(1, y-k)..y, fn (j) -> {i, j, k} end)
     end)
   end
 
