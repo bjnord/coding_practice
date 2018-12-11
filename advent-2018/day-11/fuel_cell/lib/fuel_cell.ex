@@ -59,8 +59,8 @@ defmodule FuelCell do
   end
 
   defp contributes_to_cells({x, y}) do
-    Enum.flat_map(max(1, x-2)..min(@grid_size, x), fn (i) ->
-      Enum.map(max(1, y-2)..min(@grid_size, y), fn (j) -> {i, j} end)
+    Enum.flat_map(max(1, x-2)..x, fn (i) ->
+      Enum.map(max(1, y-2)..y, fn (j) -> {i, j} end)
     end)
   end
 
