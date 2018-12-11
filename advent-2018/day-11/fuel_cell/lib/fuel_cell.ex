@@ -28,15 +28,13 @@ defmodule FuelCell do
     |> File.read!
     |> String.trim
     |> String.to_integer
-    |> square_powers(3..3)
-    |> Enum.max_by(&elem(&1, 1))
-    |> elem(0)
+    |> largest_power_square(3..3)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 largest power 3x3 square is")
   end
 
   @doc """
-  Compute total power of ZxZ squares.
+  Find square with the largest total power.
 
   ## Parameters
 
@@ -45,34 +43,49 @@ defmodule FuelCell do
 
   ## Returns
 
-  Map of power values:
-
-  - key: coordinates + size of top-left corner of square as {x, y, z} (integers 1..@grid_size)
-  - value: total power of square (integer)
+  Coordinates + size of top-left corner of square as {x, y, z} (integers 1..@grid_size)
   """
-  def square_powers(grid_serial, min_z..max_z) do
-    # must compute 1..max_z (since algorithm is recursive)
-    square_powers_for_z(grid_serial, max_z)
-    # ...but only return squares of interest (filter by range caller provided)
-    |> Enum.filter(fn ({{_x, _y, z}, _power}) -> Enum.member?(min_z..max_z, z) end)
+  def largest_power_square(grid_serial, min_z..max_z) do
+    largest_power_square_for_z(grid_serial, max_z, min_z..max_z)
+    |> elem(1)  # from {squares, {largest_square_id, largest_power}}
+    |> elem(0)  # from {square_id, power}
+    #|> IO.inspect(label: "end")
   end
 
-  defp square_powers_for_z(grid_serial, 1) do
-    Enum.reduce(1..@grid_size, %{}, fn (x, acc) ->
+  defp largest_power_square_for_z(grid_serial, 1, z_filter) do
+    #IO.write("<z=#{1}>")
+    squares = Enum.reduce(1..@grid_size, %{}, fn (x, acc) ->
       Enum.reduce(1..@grid_size, acc, fn (y, acc) ->
         # total power of 1x1 squares is just the square's own power
         Map.put(acc, {x, y, 1}, power_level({x, y}, grid_serial))
       end)
     end)
+    ##-BEGIN-DRY-#####
+    # only consider squares of interest when computing max value
+    # FIXME DRY use function with same code as z>1 method
+    filtered = Enum.filter(squares, fn ({{_x, _y, z}, _power}) ->
+                 Enum.member?(z_filter, z)
+               end)
+    new_largest = case filtered do
+      [] ->
+        {nil, -1_000_000}
+        #|> IO.inspect(label: "empty z=1 largest")
+      _ ->
+        Enum.max_by(filtered, &elem(&1, 1))
+        #|> IO.inspect(label: "max z=1 largest")
+    end
+    ##-END-DRY-#######
+    {squares, new_largest}
   end
 
-  defp square_powers_for_z(grid_serial, z) do
-    smaller_acc = square_powers_for_z(grid_serial, z-1)
-    Enum.reduce(1..@grid_size-(z-1), %{}, fn (x, acc) ->
+  defp largest_power_square_for_z(grid_serial, z, z_filter) do
+    {smaller_squares, largest} = largest_power_square_for_z(grid_serial, z-1, z_filter)
+    #IO.write("<z=#{z}>")
+    squares = Enum.reduce(1..@grid_size-(z-1), %{}, fn (x, acc) ->
       Enum.reduce(1..@grid_size-(z-1), acc, fn (y, acc) ->
         # total power of ZxZ squares is
         # - total power of (Z-1)x(Z-1) square at this location
-        square_power = smaller_acc[{x, y, z-1}]
+        square_power = smaller_squares[{x, y, z-1}]
         # - plus total power of Zx1 edge below that square
         x_edge = Enum.map(x..x+(z-1), fn (xi) -> power_level({xi, y+(z-1)}, grid_serial) end)
         # - plus total power of 1x(Z-1) edge to the right of that square
@@ -81,6 +94,31 @@ defmodule FuelCell do
         Map.put(acc, {x, y, z}, square_power + Enum.sum(x_edge) + Enum.sum(y_edge))
       end)
     end)
+    ##-BEGIN-DRY-#####
+    # only consider squares of interest when computing max value
+    # FIXME DRY extract to function that works for z=1 and z>1
+    #       ...and this could be a lot more efficient; "squares"
+    #       all have the same z!
+    filtered = Enum.filter(squares, fn ({{_x, _y, z}, _power}) ->
+                 Enum.member?(z_filter, z)
+               end)
+    new_largest = case filtered do
+      [] ->
+        largest
+        #|> IO.inspect(label: "prev z=#{z} largest (empty filter)")
+      _ ->
+        this_largest = Enum.max_by(filtered, &elem(&1, 1))
+                       #|> IO.inspect(label: "max z=#{z} largest")
+        if elem(this_largest, 1) > elem(largest, 1) do
+          this_largest
+          #|> IO.inspect(label: "..and take max z=#{z} largest")
+        else
+          largest
+          #|> IO.inspect(label: "..but keep prev z=#{z} largest")
+        end
+    end
+    ##-END-DRY-#######
+    {squares, new_largest}
   end
 
   @doc """
@@ -92,13 +130,17 @@ defmodule FuelCell do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: "231,108,14"
   """
   def part2(argv) do
-    argv
+    {x, y, z} = argv
     |> input_file
     |> File.read!
-    |> IO.inspect(label: "Part 2 foo is")
+    |> String.trim
+    |> String.to_integer
+    |> largest_power_square(1..@grid_size)
+    # coordinates submitted to the puzzle web site must not have spaces!
+    IO.inspect("#{x},#{y},#{z}", label: "Part 2 largest power square is")
   end
 
   @doc """
