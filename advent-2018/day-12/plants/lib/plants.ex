@@ -20,9 +20,20 @@ defmodule Plants do
   - Part 1 answer is: ...
   """
   def part1(argv) do
-    argv
-    |> input_file
-    |> IO.inspect(label: "Part 1 foo is")
+    initial_state =
+      argv
+      |> input_file
+      |> File.stream!
+      |> Enum.take(1)
+      |> List.first
+      |> InputParser.parse_initial_state
+    notes =
+      argv
+      |> input_file
+      |> File.stream!
+      |> Enum.drop(2)
+      |> Enum.map(&InputParser.parse_note/1)
+    IO.inspect(label: "Part 1 foo is")
   end
 
   @doc """
