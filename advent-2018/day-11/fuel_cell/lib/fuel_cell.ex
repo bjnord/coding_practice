@@ -84,7 +84,7 @@ defmodule FuelCell do
     if elem(new_max_square, 1) > elem(max_square, 1), do: new_max_square, else: max_square
   end
 
-  defp new_max_square(max_square, squares, _),
+  defp new_max_square(max_square, _squares, _),
     do: max_square
 
   @doc """
