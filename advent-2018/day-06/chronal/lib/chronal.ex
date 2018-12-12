@@ -226,11 +226,11 @@ defmodule Chronal do
   #      square adds no further matching points, you're done
   def point_area({x0, y0}, points, {min_x, min_y, max_x, max_y}) do
     Enum.reduce(min_x..max_x, [], fn (x, acc) ->
-      Enum.reduce(min_y..max_y, acc, fn (y, accy) ->
+      Enum.reduce(min_y..max_y, acc, fn (y, acc) ->
         if closest_points({x, y}, points) == [{x0, y0}] do
-          [{x, y} | accy]
+          [{x, y} | acc]
         else
-          accy
+          acc
         end
       end)
     end)
