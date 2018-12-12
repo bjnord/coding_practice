@@ -51,6 +51,7 @@ defmodule Chronal do
     {min_x, min_y, max_x, max_y} = canvas_dimensions(points)
     # FIXME should come from argv as option!
     within = if max_x > 100, do: 10000, else: 32
+    # TODO rewrite as comprehension into MapSet
     Enum.reduce(min_x..max_x, [], fn (x, acc) ->
       Enum.reduce(min_y..max_y, acc, fn (y, accy) ->
         if total_distance({x, y}, points) < within do
@@ -219,7 +220,7 @@ defmodule Chronal do
 
   ## Parameters
 
-  - List of {x, y} points (integers)
+  - points: List of {x, y} points (integers)
 
   ## Returns
 
