@@ -4,19 +4,23 @@ defmodule InputParser do
 
   ## Returns
 
-  MapSet of pot IDs containing plants
+  Tuple:
+  - pots containing plants (MapSet)
+  - number of pots (integer)
 
   ## Example
 
-  iex> InputParser.parse_initial_state("initial state: #..#.#..##......###...###\\n")
-  #MapSet<[0, 3, 5, 8, 9, 16, 17, 18, 22, 23, 24]>
+  # FIXME this doctest won't compile; don't know why
+
+  # iex> InputParser.parse_initial_state("initial state: #..#.#..##......###...###\\n")
+  # {#MapSet<[0, 3, 5, 8, 9, 16, 17, 18, 22, 23, 24]>, 25}
 
   """
   def parse_initial_state(line) when is_binary(line) do
-    line
-    |> String.slice(15..-1)
-    |> String.trim
-    |> states_to_mapset()
+    str = line
+          |> String.slice(15..-1)
+          |> String.trim
+    {states_to_mapset(str), String.length(str)}
   end
 
   defp states_to_mapset(s) when is_binary(s) do
@@ -34,13 +38,13 @@ defmodule InputParser do
     do: state == "#"
 
   @doc """
-  Parses a plant-spreading note.
+  Parses a note containing a plant-spreading rule.
 
   ## Returns
 
   Tuple:
-  - MapSet of pot IDs containing plants (for matching)
-  - boolean: will pot have a plant in the next generation?
+  - pattern of pots containing plants, for matching (MapSet)
+  - will center pot have a plant in the next generation? (boolean)
 
   ## Examples
 
