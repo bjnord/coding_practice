@@ -32,7 +32,6 @@ defmodule Plants do
     |> Enum.take(1)
     |> List.first
     |> InputParser.parse_initial_state
-    |> IO.inspect(label: "initial_state, pots")
   end
 
   defp get_rules(argv) do
@@ -44,7 +43,78 @@ defmodule Plants do
     |> Enum.reduce(%{}, fn ({pots, result}, acc) ->
       Map.put(acc, pot_scalar(pots), result)
     end)
-    |> IO.inspect(label: "rules")
+  end
+
+  @doc """
+  Compute range of pots to consider for next generation.
+
+  We need to look 4 pots further than the leftmost and rightmost
+  pots that have a plant. 5 pots further will always be "....."
+  and the rules always say this pattern will not produce a plant.
+
+  ## Examples
+
+  iex> Plants.pot_range(MapSet.new([1, 3, 4]))
+  -3..8
+
+  iex> Plants.pot_range(MapSet.new([0, 3, 5, 7, 9, 11]))
+  -4..15
+
+  """
+  def pot_range(pots) do
+    {min, max} = Enum.min_max(pots)
+    min-4..max+4
+  end
+
+  @doc """
+  Compute the next state generation.
+
+  ## Parameters
+
+  - pots: pots containing plants (MapSet)
+  - n_pots: number of pots (integer)
+  - rules: rules for generating next pot state (Map)
+
+  ## Returns
+
+  New state of pots containing plants (MapSet)
+
+  """
+  def next_generation(pots, n_pots, rules) do
+    pot_range(pots)
+    |> Enum.reduce(MapSet.new(), fn (pot_no, acc) ->
+      if rules[pot_scalar(pots, pot_no-2)] do
+        MapSet.put(acc, pot_no)
+      else
+        acc
+      end
+    end)
+  end
+
+  @doc """
+  Render state of pots.
+  (Only used for testing.)
+
+  ## Examples
+
+  iex> Plants.render_state(MapSet.new([1, 3, 4]), 0..4)
+  ".#.##"
+
+  iex> Plants.render_state(MapSet.new([1, 3, 5, 7, 9, 11]), -3..16)
+  "....#.#.#.#.#.#....."
+
+  """
+  def render_state(pots, range) do
+    Enum.reduce(range, [], fn (i, acc) ->
+      case MapSet.member?(pots, i) do
+        true ->
+          [?# | acc]
+        _ ->
+          [?. | acc]
+      end
+    end)
+    |> Enum.reverse
+    |> to_string
   end
 
   @doc """
@@ -126,18 +196,5 @@ defmodule Plants do
       [filename] -> filename
       _          -> abort('Usage: plants filename', 64)
     end
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Plants.hello
-      :world
-
-  """
-  def hello do
-    :world
   end
 end
