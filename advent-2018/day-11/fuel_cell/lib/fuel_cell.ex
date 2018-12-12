@@ -173,17 +173,4 @@ defmodule FuelCell do
   defp hundreds_digit(n) do
     div(rem(n, 1000), 100)
   end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> FuelCell.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end
