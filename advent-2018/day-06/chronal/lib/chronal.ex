@@ -25,8 +25,9 @@ defmodule Chronal do
              |> File.stream!
              |> Enum.map(&Chronal.input_point/1)
     canvas = canvas_dimensions(points)
+    grid = grid(points, canvas)
     finite_area_points(points, canvas)
-    |> Enum.map(fn (p) -> point_area(p, points, canvas) end)
+    |> Enum.map(fn (p) -> point_area(p, grid) end)
     |> Enum.max
     |> IO.inspect(label: "Part 1 largest area is")
   end
@@ -211,29 +212,16 @@ defmodule Chronal do
 
   ## Parameters
 
-  - {x0, y0}: point to measure from (integers)
-  - points: list of points ({x, y} integer tuples)
-  - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
+  - {x, y}: point to measure from (integers)
+  - grid: (see `Chronal.grid/2` for details)
 
   ## Returns
 
-  Area closest to the given point.
+  Area surrounding to the given point.
 
   """
-  # TODO OPTIMIZE this is far too slow when O(n^2) gets large
-  #
-  #      perhaps start with {x0, y0} and spiral out? once a given
-  #      square adds no further matching points, you're done
-  def point_area({x0, y0}, points, {min_x, min_y, max_x, max_y}) do
-    Enum.reduce(min_x..max_x, [], fn (x, acc) ->
-      Enum.reduce(min_y..max_y, acc, fn (y, acc) ->
-        if closest_points({x, y}, points) == [{x0, y0}] do
-          [{x, y} | acc]
-        else
-          acc
-        end
-      end)
-    end)
+  def point_area({x, y}, grid) do
+    Enum.filter(grid, fn ({_, {_type, point}}) -> point == {x, y} end)
     |> length
   end
 
