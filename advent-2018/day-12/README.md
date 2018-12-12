@@ -71,4 +71,16 @@ After one generation, only seven plants remain. The one in pot 0 matched the rul
 
 In this example, after 20 generations, the pots shown as # contain plants, the furthest left of which is pot -2, and the furthest right of which is pot 34. Adding up all the numbers of plant-containing pots after the 20th generation produces **325**.
 
-After 20 generations, what is the sum of the numbers of all pots which contain a plant?
+**After 20 generations, what is the sum of the numbers of all pots which contain a plant?**
+
+## Part 2
+
+You realize that 20 generations aren't enough. After all, these plants will need to last another 1500 years to even reach your timeline, not to mention your future.
+
+**After fifty billion (50000000000) generations, what is the sum of the numbers of all pots which contain a plant?**
+
+### Part 2 Design
+
+As with [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), as soon as we see the pot/plant pattern stabilize (possibly shifted), we can stop computing new generations; we just extrapolate what the pot IDs will be after the remaining iterations.
+
+They could have been meaner, and given us an "oscillator" or "walker" (pot/plant patterns that cycle through multiple states), but [YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it) saved the day, and I didn't have to implement that.

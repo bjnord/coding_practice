@@ -1,5 +1,5 @@
 initial state: #..#.#..##......###...###
-
+[this is the example from the puzzle web page]
 ..... => .
 ....# => .
 ...#. => .
