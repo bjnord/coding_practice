@@ -26,7 +26,7 @@ defmodule Chronal do
              |> Enum.map(&Chronal.input_point/1)
     canvas = canvas_dimensions(points)
     grid = grid(points, canvas)
-    finite_area_points(points, canvas)
+    finite_area_points(points, grid, canvas)
     |> Enum.map(fn (p) -> point_area(p, grid) end)
     |> Enum.max
     |> IO.inspect(label: "Part 1 largest area is")
@@ -164,6 +164,7 @@ defmodule Chronal do
   ## Parameters
 
   - points: list of points ({x, y} integer tuples)
+  - grid: (see `Chronal.grid/2` for details)
   - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
 
   ## Returns
@@ -172,39 +173,27 @@ defmodule Chronal do
   (Returned points will be in the same order as they were in the input list.)
 
   """
-  def finite_area_points(points, {min_x, min_y, max_x, max_y}) do
-    # measure from canvas edges; any edge location that has a single closest
-    # point means that point will have an infinite area
-    infinite = MapSet.new()
-    infinite = Enum.reduce(min_x..max_x, infinite, fn (x, acc) ->
-      closest_points({x, min_y}, points)
-      |> pass_single_elem
-      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
-    end)
-    infinite = Enum.reduce(min_x..max_x, infinite, fn (x, acc) ->
-      closest_points({x, max_y}, points)
-      |> pass_single_elem
-      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
-    end)
-    infinite = Enum.reduce(min_y..max_y, infinite, fn (y, acc) ->
-      closest_points({min_x, y}, points)
-      |> pass_single_elem
-      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
-    end)
-    infinite = Enum.reduce(min_y..max_y, infinite, fn (y, acc) ->
-      closest_points({max_x, y}, points)
-      |> pass_single_elem
-      |> Enum.reduce(acc, fn (p, acc2) -> MapSet.put(acc2, p) end)
-    end)
-    # now the list of finite points is simply all the non-infinite ones
-    points
-    |> Enum.reject(fn (p) -> MapSet.member?(infinite, p) end)
+  def finite_area_points(points, grid, {min_x, min_y, max_x, max_y}) do
+    infinite = infinite_area_points(grid, {min_x, min_y, max_x, max_y})
+    Enum.reject(points, fn (p) -> MapSet.member?(infinite, p) end)
   end
 
-  # if list has more than one element, empty it
-  defp pass_single_elem(list) do
-    [_head | tail] = list
-    if tail == [], do: list, else: []
+  defp infinite_area_points(grid, {min_x, min_y, max_x, max_y}) do
+    # measure from canvas edges; any edge location that has a single closest
+    # point means that point will have an infinite area
+    #
+    # h/t José Valim - comprehensions make this much cleaner
+    x_edge_points =
+      for x <- min_x..max_x, y <- [min_y, max_y] do
+        {type, point} = grid[{x, y}]
+        if type == :multiple, do: nil, else: point
+      end
+    y_edge_points =
+      for y <- min_y..max_y, x <- [min_x, max_x] do
+        {type, point} = grid[{x, y}]
+        if type == :multiple, do: nil, else: point
+      end
+    MapSet.new(x_edge_points ++ y_edge_points)
   end
 
   @doc """

@@ -64,7 +64,8 @@ defmodule ChronalTest do
   test "finds points with finite areas" do
     points = [{1, 1}, {1, 6}, {8, 3}, {3, 4}, {5, 5}, {8, 9}]
     canvas = {-8, -9, 17, 19}
-    assert finite_area_points(points, canvas) == [{3, 4}, {5, 5}]
+    grid = grid(points, canvas)
+    assert finite_area_points(points, grid, canvas) == [{3, 4}, {5, 5}]
   end
 
   test "computes bounding box (minimal rectangle)" do
