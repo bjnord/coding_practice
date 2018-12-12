@@ -24,9 +24,9 @@ defmodule Chronal do
              |> input_file
              |> File.stream!
              |> Enum.map(&Chronal.input_point/1)
-    canvas = canvas_dimensions(points)
-    grid = grid(points, canvas)
-    finite_area_points(points, grid, canvas)
+    bounds = bounds(points)
+    grid = grid(points, bounds)
+    finite_area_points(points, grid, bounds)
     |> Enum.map(fn (p) -> point_area(p, grid) end)
     |> Enum.max
     |> IO.inspect(label: "Part 1 largest area is")
@@ -48,7 +48,7 @@ defmodule Chronal do
              |> input_file
              |> File.stream!
              |> Enum.map(&Chronal.input_point/1)
-    {min_x, min_y, max_x, max_y} = canvas_dimensions(points)
+    {min_x, min_y, max_x, max_y} = bounds(points)
     # FIXME should come from argv as option!
     within = if max_x > 100, do: 10000, else: 32
     # TODO rewrite as comprehension into MapSet
@@ -160,13 +160,13 @@ defmodule Chronal do
   end
 
   @doc """
-  Find the point(s) with finite areas within the canvas.
+  Find the point(s) with finite areas within the bounding box.
 
   ## Parameters
 
   - points: list of points ({x, y} integer tuples)
   - grid: (see `Chronal.grid/2` for details)
-  - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
+  - bounds: (see `Chronal.bounds/1` for details)
 
   ## Returns
 
@@ -180,7 +180,7 @@ defmodule Chronal do
   end
 
   defp infinite_area_points(grid, {min_x, min_y, max_x, max_y}) do
-    # measure from canvas edges; any edge location that has a single closest
+    # measure from edges; any edge location that has a single closest
     # point means that point will have an infinite area
     #
     # h/t José Valim - comprehensions make this much cleaner
@@ -198,7 +198,7 @@ defmodule Chronal do
   end
 
   @doc """
-  Find the area of a point within the canvas.
+  Find the area of a point.
 
   ## Parameters
 
@@ -207,7 +207,7 @@ defmodule Chronal do
 
   ## Returns
 
-  Area surrounding to the given point.
+  Area surrounding the given point.
 
   """
   def point_area({x, y}, grid) do
@@ -224,7 +224,7 @@ defmodule Chronal do
 
   ## Returns
 
-  Bounding coordinates as {min_x, min_y, max_x, max_y} (integers)
+  Bounding box coordinates as {min_x, min_y, max_x, max_y} (integers)
 
   """
   def bounds(points) do
@@ -235,25 +235,13 @@ defmodule Chronal do
     {min_x, min_y, max_x, max_y}
   end
 
-  # the canvas is infinite, but we compute a sufficiently large margin
-  # around the bounding box of the input points
-  defp canvas_dimensions(points) do
-    {min_x, min_y, max_x, max_y} = bounds(points)
-    {
-      min_x - (max_x - min_x + 2),
-      min_y - (max_y - min_y + 2),
-      max_x + (max_x - min_x + 2),
-      max_y + (max_y - min_y + 2)
-    }
-  end
-
   @doc """
   Compute grid of closest points.
 
   ## Parameters
 
   - points: list of points ({x, y} integer tuples)
-  - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
+  - bounds: (see `Chronal.bounds/1` for details)
 
   ## Returns
 
