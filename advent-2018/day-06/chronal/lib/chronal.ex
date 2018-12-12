@@ -91,8 +91,9 @@ defmodule Chronal do
 
   """
   def input_point(str) do
-    r = Regex.named_captures(~r/(?<x>\d+),\s+(?<y>\d+)/, str)
-    {String.to_integer(r["x"]), String.to_integer(r["y"])}
+    [xs, ys] = String.trim(str)
+               |> String.split(", ")
+    {String.to_integer(xs), String.to_integer(ys)}
   end
 
   @doc """
