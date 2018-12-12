@@ -57,7 +57,7 @@ end
 ###
 
 stream = File.stream!("input/input.txt")
-|> Stream.map(&String.trim/1)
+         |> Stream.map(&String.trim/1)
 
 ###
 # find two box IDs that differ in only one letter (same position)

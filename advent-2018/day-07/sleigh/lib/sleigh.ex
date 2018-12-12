@@ -75,8 +75,8 @@ defmodule Sleigh do
                    (step == rstep) || MapSet.member?(done_set, rstep)
                  end)
           case left do
-          [] -> [dstep | acc]
-          _  -> acc
+            [] -> [dstep | acc]
+            _  -> acc
           end
         end)
     end

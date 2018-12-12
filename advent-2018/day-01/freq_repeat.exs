@@ -9,10 +9,10 @@
 
 # "Streams are composable, lazy enumerables"
 stream = File.stream!("input/input.txt")
-|> Stream.map(&String.trim/1)
-|> Stream.map(&String.to_integer/1)
-|> Stream.cycle
-|> Stream.scan(fn(i, sum) -> i + sum end)
+         |> Stream.map(&String.trim/1)
+         |> Stream.map(&String.to_integer/1)
+         |> Stream.cycle
+         |> Stream.scan(fn(i, sum) -> i + sum end)
 
 ###
 # find the first frequency value that repeats

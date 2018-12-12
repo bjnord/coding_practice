@@ -57,9 +57,9 @@ defmodule Day4 do
     {sleepiest_guard_id, sleepiest_minute} = times
                                              |> sleep_minute_breakdown
                                              |> Enum.reduce(%{}, fn ({guard_id, breakdown}, acc) ->
-                                                  {min, count} = Enum.max_by(breakdown, fn ({_k, v}) -> v end)
-                                                  Map.put(acc, {guard_id, min}, count)
-                                                end)
+                                               {min, count} = Enum.max_by(breakdown, fn ({_k, v}) -> v end)
+                                               Map.put(acc, {guard_id, min}, count)
+                                             end)
                                              |> Enum.max_by(fn ({_k, v}) -> v end)
                                              |> elem(0)
     IO.inspect(sleepiest_guard_id * sleepiest_minute, label: "Part 2 checksum is")
@@ -141,17 +141,17 @@ defmodule Day4 do
   def sleepy_times(chron_lines) do
     Enum.map(chron_lines, &parse_line/1)
     |> Enum.reduce({-1, -1, []}, fn ({min, type, rem}, {guard_id, sleep_min, result}) ->
-         case {min, type, rem} do
-           {_, "Guard", _} ->
-             # FIXME replace with first-capture
-             r = Regex.named_captures(~r/#(?<guard>\d+)/, rem)
-             {String.to_integer(r["guard"]), sleep_min, result}
-           {_, "falls", "asleep"} ->
-             {guard_id, min, result}
-           {_, "wakes", "up"} ->
-             {guard_id, sleep_min, [{guard_id, sleep_min, min} | result]}
-         end
-       end)
+      case {min, type, rem} do
+        {_, "Guard", _} ->
+          # FIXME replace with first-capture
+          r = Regex.named_captures(~r/#(?<guard>\d+)/, rem)
+          {String.to_integer(r["guard"]), sleep_min, result}
+        {_, "falls", "asleep"} ->
+          {guard_id, min, result}
+        {_, "wakes", "up"} ->
+          {guard_id, sleep_min, [{guard_id, sleep_min, min} | result]}
+      end
+    end)
     |> elem(2)
     |> Enum.reverse
   end

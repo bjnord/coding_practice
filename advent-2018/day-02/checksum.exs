@@ -49,10 +49,10 @@ end
 ###
 
 stream = File.stream!("input/input.txt")
-|> Stream.map(&String.trim/1)
-|> Stream.map(&String.graphemes/1)
-|> Stream.map(&Inventory.count/1)
-|> Stream.map(&Inventory.two_and_three?/1)
+         |> Stream.map(&String.trim/1)
+         |> Stream.map(&String.graphemes/1)
+         |> Stream.map(&Inventory.count/1)
+         |> Stream.map(&Inventory.two_and_three?/1)
 
 ###
 # reduce the stream of binary has-2/has-3 tuples

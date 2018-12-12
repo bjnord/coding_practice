@@ -147,15 +147,16 @@ defmodule Stars do
 
   """
   def iteration_with_min_y_distance(stars, max_seconds) do
-    {_, second, stars, _} = 0..max_seconds
-    |> Enum.reduce({1_000_000, nil, [], stars}, fn (sec, {min_y_dist, min_sec, min_stars, stars}) ->
-      new_dist = y_dist_of(stars)
-      if new_dist < min_y_dist do
-        {new_dist, sec, stars, move_stars(stars)}
-      else
-        {min_y_dist, min_sec, min_stars, move_stars(stars)}
-      end
-    end)
+    {_, second, stars, _} =
+      0..max_seconds
+      |> Enum.reduce({1_000_000, nil, [], stars}, fn (sec, {min_y_dist, min_sec, min_stars, stars}) ->
+        new_dist = y_dist_of(stars)
+        if new_dist < min_y_dist do
+          {new_dist, sec, stars, move_stars(stars)}
+        else
+          {min_y_dist, min_sec, min_stars, move_stars(stars)}
+        end
+      end)
     {second, stars}
   end
 

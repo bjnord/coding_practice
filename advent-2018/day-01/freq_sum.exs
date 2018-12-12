@@ -5,8 +5,8 @@
 
 # "Streams are composable, lazy enumerables"
 stream = File.stream!("input/input.txt")
-|> Stream.map(&String.trim/1)
-|> Stream.map(&String.to_integer/1)
+         |> Stream.map(&String.trim/1)
+         |> Stream.map(&String.to_integer/1)
 
 ###
 # reduce the stream to an accumulated sum

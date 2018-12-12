@@ -23,12 +23,13 @@ defmodule FuelCell do
   - Part 1 answer is: "21,93"
   """
   def part1(argv) do
-    {x, y, _z} = argv
-    |> input_file
-    |> File.read!
-    |> String.trim
-    |> String.to_integer
-    |> max_power_square(3..3)
+    {x, y, _z} =
+      argv
+      |> input_file
+      |> File.read!
+      |> String.trim
+      |> String.to_integer
+      |> max_power_square(3..3)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 largest-power 3x3 square is")
   end
@@ -99,11 +100,12 @@ defmodule FuelCell do
   - Part 2 answer is: "231,108,14"
   """
   def part2(argv) do
-    {x, y, z} = argv
-    |> input_file
-    |> File.read!
-    |> String.trim
-    |> String.to_integer
+    {x, y, z} =
+      argv
+      |> input_file
+      |> File.read!
+      |> String.trim
+      |> String.to_integer
     #|> max_power_square(1..@grid_size)
     |> max_power_square(1..16)  # FIXME CHEATING
     # coordinates submitted to the puzzle web site must not have spaces!
@@ -152,17 +154,17 @@ defmodule FuelCell do
 
   ## Examples
 
-    iex> FuelCell.power_level({3, 5}, 8)
-    4
+  iex> FuelCell.power_level({3, 5}, 8)
+  4
 
-    iex> FuelCell.power_level({122, 79}, 57)
-    -5
+  iex> FuelCell.power_level({122, 79}, 57)
+  -5
 
-    iex> FuelCell.power_level({217, 196}, 39)
-    0
+  iex> FuelCell.power_level({217, 196}, 39)
+  0
 
-    iex> FuelCell.power_level({101, 153}, 71)
-    4
+  iex> FuelCell.power_level({101, 153}, 71)
+  4
 
   """
   def power_level({x, y}, grid_serial) do

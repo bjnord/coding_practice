@@ -66,7 +66,7 @@ defmodule StarsTest do
       {-6, 0, 2, 0},
       {5, 9, 1, -2},
       {14, 7, -2, 0},
-      {-3, 6, 2, -1}
+      {-3, 6, 2, -1},
     ]
     assert grid_dimensions(stars) == {-8, -5, 17, 12}
   end
@@ -103,7 +103,7 @@ defmodule StarsTest do
       {-6, 0, 2, 0},
       {5, 9, 1, -2},
       {14, 7, -2, 0},
-      {-3, 6, 2, -1}
+      {-3, 6, 2, -1},
     ]
     assert render_to_grid(stars) == [
       '..........................',
@@ -159,7 +159,7 @@ defmodule StarsTest do
       {-6, 0, 2, 0},
       {5, 9, 1, -2},
       {14, 7, -2, 0},
-      {-3, 6, 2, -1}
+      {-3, 6, 2, -1},
     ]
     {second, stars} = iteration_with_min_y_distance(stars, 10)
     assert second == 3
