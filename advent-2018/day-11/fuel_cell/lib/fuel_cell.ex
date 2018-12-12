@@ -126,7 +126,7 @@ defmodule FuelCell do
   def input_file(argv) do
     case argv do
       [filename] -> filename
-      _          -> abort('Usage: foo filename', 64)
+      _          -> abort('Usage: fuel_cell filename', 64)
     end
   end
 
