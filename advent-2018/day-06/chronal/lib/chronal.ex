@@ -305,18 +305,17 @@ defmodule Chronal do
 
   """
   def grid(points, {min_x, min_y, max_x, max_y}) do
-    Enum.reduce(min_x..max_x, %{}, fn (x, acc) ->
-      Enum.reduce(min_y..max_y, acc, fn (y, acc) ->
-        Map.put(acc, {x, y}, closest_point({x, y}, points))
-      end)
-    end)
+    for x <- min_x..max_x,
+      y <- min_y..max_y,
+      do: {{x, y}, grid_square({x, y}, points)},
+      into: %{}
   end
 
-  defp closest_point({x, y}, points) do
+  defp grid_square({x, y}, points) do
     case closest_points({x, y}, points) do
       [{^x, ^y}] -> {:self, {x, y}}
       [{_, _}, {_, _} | _] -> {:multiple, nil}
-      [point] -> {:closest, point}
+      [{x2, y2}] -> {:closest, {x2, y2}}
     end
   end
 
