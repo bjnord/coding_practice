@@ -84,13 +84,11 @@ defmodule Chronal do
   @doc """
   Parse input point from string.
 
-  ## Parameters
+  ## Example
 
-  - string of the form "23, 45\n"
+  iex> Chronal.input_point("23, 45\\n")
+  {23, 45}
 
-  ## Returns
-
-  Point coordinates as {x, y} tuple
   """
   def input_point(str) do
     r = Regex.named_captures(~r/(?<x>\d+),\s+(?<y>\d+)/, str)
@@ -104,14 +102,13 @@ defmodule Chronal do
   For example, if x=(a,b) and y=(c,d), the Manhattan distance between x and y is |a−c|+|b−d|."
   <https://math.stackexchange.com/a/139604>
 
-  ## Parameters
+  ## Examples
 
-  - {x1, y1}: coordinates of first point (integers)
-  - {x2, y2}: coordinates of second point (integers)
+  iex> Chronal.manhattan({2, 2}, {1, 1})
+  2
 
-  ## Returns
-
-  Manhattan distance between the two points (integer)
+  iex> Chronal.manhattan({6, 3}, {5, 7})
+  5
 
   """
   def manhattan({x1, y1}, {x2, y2}) do
