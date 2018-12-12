@@ -7,6 +7,7 @@ defmodule InputParser do
   Tuple:
   - pots containing plants (MapSet)
   - number of pots (integer)
+    -- TODO RF number of pots is never used; remove it
 
   ## Example
 

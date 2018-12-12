@@ -17,12 +17,17 @@ defmodule Plants do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 1987
   """
   def part1(argv) do
-    {initial_state, n_pots} = get_initial_state(argv)
+    {pots, _n_pots} = get_initial_state(argv)
     rules = get_rules(argv)
-    IO.inspect(label: "Part 1 foo is")
+    1..20
+    |> Enum.reduce(pots, fn (_n, pots) ->
+      Plants.next_generation(pots, rules)
+    end)
+    |> Enum.sum
+    |> IO.inspect(label: "Part 1 sum is")
   end
 
   defp get_initial_state(argv) do
@@ -72,7 +77,6 @@ defmodule Plants do
   ## Parameters
 
   - pots: pots containing plants (MapSet)
-  - n_pots: number of pots (integer)
   - rules: rules for generating next pot state (Map)
 
   ## Returns
@@ -80,7 +84,7 @@ defmodule Plants do
   New state of pots containing plants (MapSet)
 
   """
-  def next_generation(pots, n_pots, rules) do
+  def next_generation(pots, rules) do
     pot_range(pots)
     |> Enum.reduce(MapSet.new(), fn (pot_no, acc) ->
       if rules[pot_scalar(pots, pot_no-2)] do

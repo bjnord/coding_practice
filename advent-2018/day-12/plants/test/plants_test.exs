@@ -41,7 +41,7 @@ defmodule PlantsTest do
       30 => true,
       31 => false,
     }
-    generations = [
+    expected_generations = [
       "...#...#....#.....#..#..#..#...........",
       "...##..##...##....#..#..#..##..........",
       "..#.#...#..#.#....#..#..#...#..........",
@@ -63,13 +63,17 @@ defmodule PlantsTest do
       ".#..###.#..#.#.#######.#.#.#..#.#...#..",
       ".#....##....#####...#######....#.#..##.",
     ]
-    {pots, n_pots} = InputParser.parse_initial_state("initial state: #..#.#..##......###...###\n")
-    generations
-    |> Enum.reduce({1, pots}, fn (expect_gen, {n, pots}) ->
-      next_pots = Plants.next_generation(pots, n_pots, rules)
-      next_gen = Plants.render_state(next_pots, -3..35)
-      assert {n, next_gen} == {n, expect_gen}
-      {n+1, next_pots}
-    end)
+    {pots, _n_pots} = InputParser.parse_initial_state("initial state: #..#.#..##......###...###\n")
+    sum =
+      expected_generations
+      |> Enum.reduce({1, pots}, fn (expect, {n, pots}) ->
+        next_pots = next_generation(pots, rules)
+        actual = render_state(next_pots, -3..35)
+        assert {n, actual} == {n, expect}
+        {n+1, next_pots}
+      end)
+      |> elem(1)
+      |> Enum.sum
+    assert sum == 325
   end
 end
