@@ -16,16 +16,25 @@ defmodule ChronalTest do
     assert manhattan({-1, 5}, {2, 3}) == 5
   end
 
-  # aaaaa.cccc
-  # aAaaa.cccc
-  # aaaddecccc
-  # aadddeccCc
-  # ..dDdeeccc
-  # bb.deEeecc
-  # bBb.eeee..
-  # bbb.eeefff
-  # bbb.eeffff
-  # bbb.ffffFf
+  # something fun I thought of when watching José Valim's Twitch stream
+  # for day 6: why not test exactly what's listed in the puzzle notes?
+  test "builds and renders grid" do
+    points = [{1, 1}, {1, 6}, {8, 3}, {3, 4}, {5, 5}, {8, 9}]
+    bounds = {0, 0, 9, 9}
+    grid = grid(points, bounds)
+    assert render_grid(grid, points, bounds) == [
+      'aaaaa.cccc',
+      'aAaaa.cccc',
+      'aaaddecccc',
+      'aadddeccCc',
+      '..dDdeeccc',
+      'bb.deEeecc',
+      'bBb.eeee..',
+      'bbb.eeefff',
+      'bbb.eeffff',
+      'bbb.ffffFf',
+    ]
+  end
 
   test "finds closest points" do
     points = [{1, 1}, {1, 6}, {8, 3}, {3, 4}, {5, 5}, {8, 9}]

@@ -268,4 +268,109 @@ defmodule Chronal do
       max_y + (max_y - min_y + 2)
     }
   end
+
+  @doc """
+  Compute grid of closest points.
+
+  ## Parameters
+
+  - points: list of points ({x, y} integer tuples)
+  - {min_x, min_y, max_x, max_y}: dimensions of canvas (integers)
+
+  ## Returns
+
+  Map of points (the "grid"), each one of:
+  - {:self, {x, y}} - this square is a point
+  - {:closest, {x, y}} - {x, y} is the square closest to this square
+  - {:multiple, _} - multiple points equally close to this square
+
+  ## Example
+
+  iex> Chronal.grid([
+  ...>   {1, 1},
+  ...>   {3, 3},
+  ...>   {2, 3}
+  ...> ], {1, 1, 3, 3})
+  %{
+    {1, 1} => {:self, {1, 1}},
+    {1, 2} => {:closest, {1, 1}},
+    {1, 3} => {:closest, {2, 3}},
+    {2, 1} => {:closest, {1, 1}},
+    {2, 2} => {:closest, {2, 3}},
+    {2, 3} => {:self, {2, 3}},
+    {3, 1} => {:multiple, nil},
+    {3, 2} => {:closest, {3, 3}},
+    {3, 3} => {:self, {3, 3}}
+  }
+
+  """
+  def grid(points, {min_x, min_y, max_x, max_y}) do
+    Enum.reduce(min_x..max_x, %{}, fn (x, acc) ->
+      Enum.reduce(min_y..max_y, acc, fn (y, acc) ->
+        Map.put(acc, {x, y}, closest_point({x, y}, points))
+      end)
+    end)
+  end
+
+  defp closest_point({x, y}, points) do
+    case closest_points({x, y}, points) do
+      [{^x, ^y}] -> {:self, {x, y}}
+      [{_, _}, {_, _} | _] -> {:multiple, nil}
+      [point] -> {:closest, point}
+    end
+  end
+
+  @doc """
+  Render grid of closest points.
+  (Only used for testing.)
+
+  ## Example
+
+  iex> grid = %{
+  ...>   {1, 1} => {:self, {1, 1}},
+  ...>   {1, 2} => {:closest, {1, 1}},
+  ...>   {1, 3} => {:closest, {2, 3}},
+  ...>   {2, 1} => {:closest, {1, 1}},
+  ...>   {2, 2} => {:closest, {2, 3}},
+  ...>   {2, 3} => {:self, {2, 3}},
+  ...>   {3, 1} => {:multiple, nil},
+  ...>   {3, 2} => {:closest, {3, 3}},
+  ...>   {3, 3} => {:self, {3, 3}}
+  ...> }
+  iex> Chronal.render_grid(grid, [
+  ...>   {1, 1},
+  ...>   {3, 3},
+  ...>   {2, 3},
+  ...> ], {1, 1, 3, 3})
+  [
+    'Aa.',
+    'acb',
+    'cCB',
+  ]
+
+  """
+  def render_grid(grid, points, {min_x, min_y, max_x, max_y}) do
+    letters = letters_of(points)
+    Enum.reduce(min_y..max_y, [], fn (y, acc) ->
+      line =
+        Enum.reduce(min_x..max_x, [], fn (x, line_acc) ->
+          square =
+            case grid[{x, y}] do
+              {:self, point} -> letters[point]
+              {:closest, point} -> letters[point] + 32
+              _ -> ?.
+            end
+          [square | line_acc]
+        end)
+        |> Enum.reverse
+      [line | acc]
+    end)
+    |> Enum.reverse
+  end
+
+  defp letters_of(points) do
+    for {point, n} <- Enum.with_index(points),
+      do: {point, n+65},
+      into: %{}
+  end
 end
