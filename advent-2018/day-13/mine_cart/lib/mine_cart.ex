@@ -164,8 +164,7 @@ defmodule MineCart do
     turn_cart_for({{x, y}, direction, next_turn}, grid[{x, y}])
   end
 
-  # FIXME elide "square" except the "in [a, b]" one
-  defp turn_cart_for({{x, y}, direction, next_turn}, square) when square == :curve_ne do
+  defp turn_cart_for({{x, y}, direction, next_turn}, :curve_ne) do
     new_direction =
       case direction do
         :up -> :right
@@ -175,7 +174,7 @@ defmodule MineCart do
       end
     {{x, y}, new_direction, next_turn}
   end
-  defp turn_cart_for({{x, y}, direction, next_turn}, square) when square == :curve_nw do
+  defp turn_cart_for({{x, y}, direction, next_turn}, :curve_nw) do
     new_direction =
       case direction do
         :up -> :left
@@ -185,10 +184,11 @@ defmodule MineCart do
       end
     {{x, y}, new_direction, next_turn}
   end
-  defp turn_cart_for({{x, y}, direction, next_turn}, square) when square == :intersect do
+  defp turn_cart_for({{x, y}, direction, next_turn}, :intersect) do
     {{x, y}, change_direction(direction, next_turn), cycle_next_turn(next_turn)}
   end
-  defp turn_cart_for({{x, y}, direction, next_turn}, square) when square in [:horiz, :vert],
+  defp turn_cart_for({{x, y}, direction, next_turn}, square)
+    when square in [:horiz, :vert],
     do: {{x, y}, direction, next_turn}
 
   # TODO is there a circular-list mechanism that would be more elegant?
