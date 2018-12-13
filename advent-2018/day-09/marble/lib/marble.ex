@@ -39,7 +39,9 @@ defmodule Marble do
     1..10_000_000
     |> Enum.reduce_while({Circle.new(last_marble+1), %{}, 1}, fn (move, {circle, scores, player}) ->
       {circle, score} = Circle.insert(circle)
-      scores = Map.update(scores, player, score, &(&1 + score))
+      # the score is 0 most of the time (22/23 moves), so
+      # only do the Map.update when non-0 (makes this function ~25% faster)
+      scores = if score > 0, do: Map.update(scores, player, score, &(&1 + score)), else: scores
       case move do
         ^last_marble -> {:halt, scores}
         _            -> {:cont, {circle, scores, rem(player, n_players) + 1}}
