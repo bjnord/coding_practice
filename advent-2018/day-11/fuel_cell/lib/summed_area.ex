@@ -1,12 +1,13 @@
 defmodule SummedArea do
   @moduledoc """
-  Documentation for SummedArea.
+  Method for quickly finding the sum of all cells in an arbitrary
+  rectangle.
 
   This implements the impressive
   [summed-area table](https://en.wikipedia.org/wiki/Summed-area_table)
-  algorithm. This allows you to find the sum of all cells in an arbitrary
-  rectangle, by adding/subtracting just 4 values from the S.A.T. — _i.e._
-  in constant time.
+  algorithm, which finds the sum of all cells in an arbitrary rectangle,
+  by adding/subtracting just 4 values from the S.A.T. — _i.e._ in
+  constant time.
 
   Thanks to the folks at the Reddit day 11 solution megathread for the
   pointer, as well as elegant implementations
@@ -14,21 +15,21 @@ defmodule SummedArea do
   """
 
   @doc """
-  Create a summed-area map from a corresponding 2D map of values.
-  Coordinates of both maps are of the form `{x, y}`; that tuple is the key
-  used for both maps.
-
-  Each cell in the resulting S.A.T. is calculated as:
+  Create a summed-area table from a corresponding table of values.
+  
+  Coordinates of both tables are an `{x, y}` tuple (1-relative); the
+  tuple is the key for the Map that holds the table. Each cell in the
+  resulting S.A.T. is calculated as:
 
   `SAT{x, y} = cell{x, y} + SAT{x, y-1} + SAT{x-1, y} - SAT{x-1, y-1}`
 
-  The middle two terms (rectangles) overlap (_i.e._ they double-count), so
-  the last term subtracts out the overlap.
+  The middle two terms (rectangles) overlap (_i.e._ they double-count),
+  so the last term subtracts out the overlap.
 
   ## Parameters
 
   - source: Table of source cell values (Map w/key = {x, y} tuple)
-  - {x_range, y_range}: Dimensions of source and returned tables
+  - {x_range, y_range}: Dimensions of input and output tables
 
   ## Returns
 
@@ -82,12 +83,12 @@ defmodule SummedArea do
 
   `SAT{NxM} = SAT{x1, y1} - SAT{x1, y-1} - SAT{x-1, y1} + SAT{x-1, y-1}`
 
-  The middle two terms (rectangles) overlap (_i.e._ they double-count), so
-  the last term compensates.
+  The middle two terms (rectangles) overlap (_i.e._ they double-count),
+  so the last term compensates.
 
   ## Parameters
 
-  - sat: Summed-area table (key = {x, y} tuple)
+  - sat: Summed-area table (Map w/key = {x, y} tuple)
   - {x, y}: Upper-left coordinate of rectangle to calculate
   - {xs, ys}: Size of rectangle to calculate
 
