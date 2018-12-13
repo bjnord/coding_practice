@@ -32,7 +32,7 @@ defmodule MineCart do
       |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
         {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
       end)
-    {x, y} = drive_carts(grid, carts)
+    {y, x} = drive_carts(grid, carts)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 first crash location is")
   end
@@ -56,8 +56,8 @@ defmodule MineCart do
       #|> IO.inspect(label: "driven carts")
     case Enum.filter(driven_carts, &(elem(&1, 1) == :crashed)) do
       [first_crashed_cart | _tail] ->
-        {{x, y}, :crashed, _} = first_crashed_cart
-        {x, y}
+        {{y, x}, :crashed, _} = first_crashed_cart
+        {y, x}
       [] ->
         drive_carts(grid, driven_carts)  # tail recursion
     end
@@ -80,32 +80,32 @@ defmodule MineCart do
 
   ## Examples
 
-      iex> MineCart.move_cart({{2, 4}, :right, :left})
-      {{3, 4}, :right, :left}
+      iex> MineCart.move_cart({{4, 2}, :right, :left})
+      {{4, 3}, :right, :left}
 
-      iex> MineCart.move_cart({{2, 4}, :left, :straight})
-      {{1, 4}, :left, :straight}
+      iex> MineCart.move_cart({{4, 2}, :left, :straight})
+      {{4, 1}, :left, :straight}
 
-      iex> MineCart.move_cart({{2, 4}, :up, :right})
-      {{2, 3}, :up, :right}
+      iex> MineCart.move_cart({{4, 2}, :up, :right})
+      {{3, 2}, :up, :right}
 
-      iex> MineCart.move_cart({{2, 4}, :down, :straight})
-      {{2, 5}, :down, :straight}
+      iex> MineCart.move_cart({{4, 2}, :down, :straight})
+      {{5, 2}, :down, :straight}
 
   """
-  def move_cart({{x, y}, :right, next_turn}),
-    do: {{x+1, y}, :right, next_turn}
-  def move_cart({{x, y}, :up, next_turn}),
-    do: {{x, y-1}, :up, next_turn}
-  def move_cart({{x, y}, :left, next_turn}),
-    do: {{x-1, y}, :left, next_turn}
-  def move_cart({{x, y}, :down, next_turn}),
-    do: {{x, y+1}, :down, next_turn}
+  def move_cart({{y, x}, :right, next_turn}),
+    do: {{y, x+1}, :right, next_turn}
+  def move_cart({{y, x}, :up, next_turn}),
+    do: {{y-1, x}, :up, next_turn}
+  def move_cart({{y, x}, :left, next_turn}),
+    do: {{y, x-1}, :left, next_turn}
+  def move_cart({{y, x}, :down, next_turn}),
+    do: {{y+1, x}, :down, next_turn}
 
   @doc ~S"""
   Turn a cart according to its state (and the grid).
 
-  TODO too many examples here; move to MineCartTester
+  TODO too many examples here; move to MineCartTest
 
   ## Intersection Examples
 
@@ -158,13 +158,13 @@ defmodule MineCart do
       {{1, 1}, :down, :straight}
 
   """
-  def turn_cart({{x, y}, direction, next_turn}, grid) do
-    #IO.inspect({{x, y}, direction, next_turn}, label: "turn_cart")
-    #IO.inspect(grid[{x, y}], label: "square")
-    turn_cart_for({{x, y}, direction, next_turn}, grid[{x, y}])
+  def turn_cart({{y, x}, direction, next_turn}, grid) do
+    #IO.inspect({{y, x}, direction, next_turn}, label: "turn_cart")
+    #IO.inspect(grid[{y, x}], label: "square")
+    turn_cart_for({{y, x}, direction, next_turn}, grid[{y, x}])
   end
 
-  defp turn_cart_for({{x, y}, direction, next_turn}, :curve_ne) do
+  defp turn_cart_for({{y, x}, direction, next_turn}, :curve_ne) do
     new_direction =
       case direction do
         :up -> :right
@@ -172,9 +172,9 @@ defmodule MineCart do
         :down -> :left
         :right -> :up
       end
-    {{x, y}, new_direction, next_turn}
+    {{y, x}, new_direction, next_turn}
   end
-  defp turn_cart_for({{x, y}, direction, next_turn}, :curve_nw) do
+  defp turn_cart_for({{y, x}, direction, next_turn}, :curve_nw) do
     new_direction =
       case direction do
         :up -> :left
@@ -182,14 +182,14 @@ defmodule MineCart do
         :down -> :right
         :left -> :up
       end
-    {{x, y}, new_direction, next_turn}
+    {{y, x}, new_direction, next_turn}
   end
-  defp turn_cart_for({{x, y}, direction, next_turn}, :intersect) do
-    {{x, y}, change_direction(direction, next_turn), cycle_next_turn(next_turn)}
+  defp turn_cart_for({{y, x}, direction, next_turn}, :intersect) do
+    {{y, x}, change_direction(direction, next_turn), cycle_next_turn(next_turn)}
   end
-  defp turn_cart_for({{x, y}, direction, next_turn}, square)
+  defp turn_cart_for({{y, x}, direction, next_turn}, square)
     when square in [:horiz, :vert],
-    do: {{x, y}, direction, next_turn}
+    do: {{y, x}, direction, next_turn}
 
   # TODO is there a circular-list mechanism that would be more elegant?
   defp change_direction(direction, :left) do
@@ -222,30 +222,30 @@ defmodule MineCart do
       iex> carts = [
       ...>   {{2, 2}, :up, :straight},
       ...> ]
-      iex> MineCart.update_for_crash({{2, 0}, :down, :straight}, carts)
-      {{2, 0}, :down, :straight}
+      iex> MineCart.update_for_crash({{0, 2}, :down, :straight}, carts)
+      {{0, 2}, :down, :straight}
 
       iex> carts = [
-      ...>   {{2, 0}, :down, :straight},
+      ...>   {{0, 2}, :down, :straight},
       ...> ]
       iex> MineCart.update_for_crash({{2, 2}, :up, :straight}, carts)
       {{2, 2}, :up, :straight}
 
       iex> carts = [
-      ...>   {{2, 1}, :down, :straight},
+      ...>   {{1, 2}, :down, :straight},
       ...> ]
-      iex> MineCart.update_for_crash({{2, 1}, :up, :straight}, carts)
-      {{2, 1}, :crashed, :straight}
+      iex> MineCart.update_for_crash({{1, 2}, :up, :straight}, carts)
+      {{1, 2}, :crashed, :straight}
 
   """
-  def update_for_crash({{x, y}, direction, next_turn}, carts) do
-    crashes = Enum.filter(carts, fn ({{x0, y0}, _d0, _t0}) -> {x0, y0} == {x, y} end)
+  def update_for_crash({{y, x}, direction, next_turn}, carts) do
+    crashes = Enum.filter(carts, fn ({{x0, y0}, _d0, _t0}) -> {x0, y0} == {y, x} end)
               #|> IO.inspect(label: "crashes for #{x},#{y}")
     case crashes do
       [] ->
-        {{x, y}, direction, next_turn}
+        {{y, x}, direction, next_turn}
       _ ->
-        {{x, y}, :crashed, next_turn}
+        {{y, x}, :crashed, next_turn}
     end
   end
 end

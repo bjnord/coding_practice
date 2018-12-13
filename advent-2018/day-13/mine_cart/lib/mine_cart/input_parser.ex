@@ -6,36 +6,36 @@ defmodule MineCart.InputParser do
 
   - line: input line (String)
   - y: line number (integer, 0-relative)
-  - grid: squares from mine cart diagram (Map w/key={x, y} tuple)
-  - carts: list of carts (`{{x, y}, dir, state}`)
+  - grid: squares from mine cart diagram (Map w/key=`{y, x}`)
+  - carts: list of carts (`{{y, x}, dir, state}`)
 
   ## Returns
 
   Tuple:
-  - grid: squares from mine cart diagram (Map w/key={x, y} tuple)
-  - carts: list of carts (`{{x, y}, direction, next_turn}`)
+  - grid: squares from mine cart diagram (Map w/key=`{y, x}`)
+  - carts: list of carts (`{{y, x}, direction, next_turn}`)
 
   ## Example
 
       iex> {grid, carts} = MineCart.InputParser.parse_line("/-\\ |+ <^>v   \n", 42, %{}, [])
       iex> grid
       %{
-        {0, 42} => :curve_ne,
-        {1, 42} => :horiz,
-        {2, 42} => :curve_nw,
-        {4, 42} => :vert,
-        {5, 42} => :intersect,
-        {7, 42} => :horiz,
-        {8, 42} => :vert,
-        {9, 42} => :horiz,
-        {10, 42} => :vert,
+        {42, 0} => :curve_ne,
+        {42, 1} => :horiz,
+        {42, 2} => :curve_nw,
+        {42, 4} => :vert,
+        {42, 5} => :intersect,
+        {42, 7} => :horiz,
+        {42, 8} => :vert,
+        {42, 9} => :horiz,
+        {42, 10} => :vert,
       }
       iex> carts
       [
-        {{10, 42}, :down, :left},
-        {{9, 42}, :right, :left},
-        {{8, 42}, :up, :left},
-        {{7, 42}, :left, :left},
+        {{42, 10}, :down, :left},
+        {{42, 9}, :right, :left},
+        {{42, 8}, :up, :left},
+        {{42, 7}, :left, :left},
       ]
 
       FIXME move this one to MineCart.InputParserTest
@@ -43,10 +43,10 @@ defmodule MineCart.InputParser do
       iex> {grid, _carts} = MineCart.InputParser.parse_line("   \\--/   \n", 5, %{}, [])
       iex> grid
       %{
-        {3, 5} => :curve_nw,
-        {4, 5} => :horiz,
+        {5, 3} => :curve_nw,
+        {5, 4} => :horiz,
         {5, 5} => :horiz,
-        {6, 5} => :curve_ne,
+        {5, 6} => :curve_ne,
       }
 
   """
@@ -58,12 +58,12 @@ defmodule MineCart.InputParser do
     |> Enum.reduce({grid, carts}, fn ({square, x}, {grid_a, carts_a}) ->
       case square_type(square) do
         {:track, track_kind} ->
-          {Map.put(grid_a, {x, y}, track_kind), carts_a}
+          {Map.put(grid_a, {y, x}, track_kind), carts_a}
         {:cart, direction} ->
           track_kind = track_of_cart(direction)
           {
-            Map.put(grid_a, {x, y}, track_kind),
-            [{{x, y}, direction, :left} | carts_a]
+            Map.put(grid_a, {y, x}, track_kind),
+            [{{y, x}, direction, :left} | carts_a]
           }
         _ ->
           {grid_a, carts_a}
