@@ -26,8 +26,13 @@ defmodule MineCart do
   - Part 1 answer is: ...
   """
   def part1(input_file) do
-    input_file
-    |> IO.inspect(label: "Part 1 first crash location is")
+    {_y, {_grid, carts}} =
+      input_file
+      |> File.stream!
+      |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
+        {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
+      end)
+    IO.inspect(carts, label: "Part 1 first crash location is")
   end
 
   @doc """
