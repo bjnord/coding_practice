@@ -1,5 +1,5 @@
 defmodule InputParser do
-  @doc """
+  @doc ~S"""
   Parses the initial state.
 
   ## Returns
@@ -8,10 +8,8 @@ defmodule InputParser do
 
   ## Example
 
-  # FIXME this doctest won't compile; don't know why
-
-  # iex> InputParser.parse_initial_state("initial state: #..#.#..##......###...###\\n")
-  # {#MapSet<[0, 3, 5, 8, 9, 16, 17, 18, 22, 23, 24]>, 25}
+      iex> InputParser.parse_initial_state("initial state: #..#.#..##......###...###\n")
+      #MapSet<[0, 3, 5, 8, 9, 16, 17, 18, 22, 23, 24]>
 
   """
   def parse_initial_state(line) when is_binary(line) do
@@ -35,7 +33,7 @@ defmodule InputParser do
   defp has_plant?(state),
     do: state == "#"
 
-  @doc """
+  @doc ~S"""
   Parses a note containing a plant-spreading rule.
 
   ## Returns
@@ -46,13 +44,17 @@ defmodule InputParser do
 
   ## Examples
 
-  # FIXME these doctests won't compile; don't know why
+      iex> {pots, next} = InputParser.parse_note(".#.## => #\n")
+      iex> pots
+      #MapSet<[1, 3, 4]>
+      iex> next
+      true
 
-  # iex> InputParser.parse_note(".#.## => #\\n")
-  # {#MapSet<[1, 3, 4]>, true}
-
-  # iex> InputParser.parse_note("..#.# => .\\n")
-  # {#MapSet<[2, 4]>, false}
+      iex> {pots, next} = InputParser.parse_note("..#.# => .\n")
+      iex> pots
+      #MapSet<[2, 4]>
+      iex> next
+      false
 
   """
   def parse_note(line) when is_binary(line) do
