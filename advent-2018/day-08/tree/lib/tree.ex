@@ -3,10 +3,7 @@ defmodule Tree do
   Documentation for Tree.
   """
 
-  defp abort(message, excode) do
-    IO.puts(:stderr, message)
-    System.halt(excode)
-  end
+  import Tree.CLI
 
   @doc """
   Process input file and display part 1 solution.
@@ -20,8 +17,7 @@ defmodule Tree do
   - Part 1 answer is: 41760
   """
   def part1(argv) do
-    argv
-    |> input_file
+    parse_args(argv)
     |> File.read!
     |> parse_integers
     |> build_tree
@@ -65,8 +61,7 @@ defmodule Tree do
   - Part 2 answer is: 25737
   """
   def part2(argv) do
-    argv
-    |> input_file
+    parse_args(argv)
     |> File.read!
     |> parse_integers
     |> build_tree
@@ -88,24 +83,6 @@ defmodule Tree do
         # skipped. A metadata entry of 0 does not refer to any child node.
         if childmap[meta], do: meta_sum_p2(childmap[meta]) + acc, else: acc
       end)
-    end
-  end
-
-  @doc """
-  Get name of input file from command-line arguments.
-
-  ## Parameters
-
-  - argv: Command-line arguments
-
-  ## Returns
-
-  Input filename (or aborts if argv invalid)
-  """
-  def input_file(argv) do
-    case argv do
-      [filename] -> filename
-      _          -> abort('Usage: tree filename', 64)
     end
   end
 
