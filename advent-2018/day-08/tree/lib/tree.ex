@@ -10,14 +10,23 @@ defmodule Tree do
 
   ## Parameters
 
-  - argv: Command-line arguments (should be name of input file)
+  - argv: Command-line arguments
+  """
+  def main(argv) do
+    input_file = parse_args(argv)
+    part1(input_file)
+    part2(input_file)
+  end
+
+  @doc """
+  Process input file and display part 1 solution.
 
   ## Correct Answer
 
   - Part 1 answer is: 41760
   """
-  def part1(argv) do
-    parse_args(argv)
+  def part1(input_file) do
+    input_file
     |> File.read!
     |> parse_integers
     |> build_tree
@@ -52,16 +61,12 @@ defmodule Tree do
   @doc """
   Process input file and display part 2 solution.
 
-  ## Parameters
-
-  - argv: Command-line arguments (should be name of input file)
-
   ## Correct Answer
 
   - Part 2 answer is: 25737
   """
-  def part2(argv) do
-    parse_args(argv)
+  def part2(input_file) do
+    input_file
     |> File.read!
     |> parse_integers
     |> build_tree

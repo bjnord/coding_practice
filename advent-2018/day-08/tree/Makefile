@@ -1,5 +1,10 @@
-run:
-	mix test && mix run -e 'Tree.part1(["input/input.txt"])' && mix run -e 'Tree.part2(["input/input.txt"])'
+BIN = ./tree
 
-example:
-	mix test && mix run -e 'Tree.part1(["input/example1.txt"])' && mix run -e 'Tree.part2(["input/example1.txt"])'
+run: $(BIN)
+	mix test && $(BIN) input/input.txt
+
+examples: $(BIN)
+	mix test && $(BIN) input/example1.txt
+
+$(BIN):
+	mix escript.build
