@@ -55,8 +55,8 @@ defmodule MineCart do
       |> elem(1)
       #|> IO.inspect(label: "driven carts")
     case Enum.filter(driven_carts, &(elem(&1, 1) == :crashed)) do
-      [first_crashed_cart | _tail] ->
-        {{y, x}, :crashed, _} = first_crashed_cart
+      [head | tail] ->
+        {{y, x}, :crashed, _} = List.last([head | tail])
         {y, x}
       [] ->
         drive_carts(grid, driven_carts)  # tail recursion
