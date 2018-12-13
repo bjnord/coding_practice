@@ -113,10 +113,10 @@ defmodule Tree do
   Reduce input list to node tree structure. The input takes the form:
 
   ```
-  n_children n_meta [child_1] [child_2] ... [child_n] meta_1 meta_2 ... meta_n
+  n_children n_meta <child_1> <child_2> ... <child_n> meta_1 meta_2 ... meta_n
   ```
 
-  where each `[child_x]` is a nested example of the same form.
+  where each `<child_x>` is a nested example of the same form.
 
   ## Parameters
 
