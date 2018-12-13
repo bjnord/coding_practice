@@ -20,9 +20,8 @@ defmodule Plants do
   - Part 1 answer is: 1987
   """
   def part1(argv) do
-    {pots, _n_pots} = get_initial_state(argv)
-    rules = get_rules(argv)
-    run_generations(pots, rules, 20)
+    get_initial_state(argv)
+    |> run_generations(get_rules(argv), 20)
     |> IO.inspect(label: "Part 1 sum is")
   end
 
@@ -254,9 +253,8 @@ defmodule Plants do
   - Part 2 answer is: 1150000000358
   """
   def part2(argv) do
-    {pots, _n_pots} = get_initial_state(argv)
-    rules = get_rules(argv)
-    run_generations(pots, rules, 50_000_000_000)
+    get_initial_state(argv)
+    |> run_generations(get_rules(argv), 50_000_000_000)
     |> IO.inspect(label: "Part 2 sum is")
   end
 

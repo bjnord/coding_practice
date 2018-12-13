@@ -4,10 +4,7 @@ defmodule InputParser do
 
   ## Returns
 
-  Tuple:
-  - pots containing plants (MapSet)
-  - number of pots (integer)
-    -- TODO RF number of pots is never used; remove it
+  Pots containing plants (MapSet)
 
   ## Example
 
@@ -18,10 +15,10 @@ defmodule InputParser do
 
   """
   def parse_initial_state(line) when is_binary(line) do
-    str = line
-          |> String.slice(15..-1)
-          |> String.trim
-    {states_to_mapset(str), String.length(str)}
+    line
+    |> String.slice(15..-1)
+    |> String.trim
+    |> states_to_mapset()
   end
 
   defp states_to_mapset(s) when is_binary(s) do

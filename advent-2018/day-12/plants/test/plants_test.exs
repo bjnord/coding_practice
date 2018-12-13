@@ -63,7 +63,8 @@ defmodule PlantsTest do
       ".#..###.#..#.#.#######.#.#.#..#.#...#..",
       ".#....##....#####...#######....#.#..##.",
     ]
-    {pots, _n_pots} = InputParser.parse_initial_state("initial state: #..#.#..##......###...###\n")
+    pots =
+      InputParser.parse_initial_state("initial state: #..#.#..##......###...###\n")
     sum =
       expected_generations
       |> Enum.reduce({1, pots}, fn (expect, {n, pots}) ->
