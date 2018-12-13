@@ -8,7 +8,8 @@ run: $(BIN)
 	mix test && $(BIN) input/input.txt
 
 examples: $(BIN)
-	mix test && $(BIN) input/example1.txt
+	mix test && $(BIN) input/example1.txt \
+		&& $(BIN) input/example2.txt
 
 $(BIN): $(FILES)
 	mix escript.build
