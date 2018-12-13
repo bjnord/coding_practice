@@ -127,10 +127,7 @@ defmodule Tree do
   Node structure in the form {%{<children>}, [<metas>]}
   """
   def build_tree(input) do
-    {children, metas, remainder} = build_node(input)
-    if remainder != [] do
-      raise "non-empty remainder: implementation or input error?"
-    end
+    {children, metas, []} = build_node(input)
     {children, metas}
   end
 
