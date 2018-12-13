@@ -80,11 +80,11 @@ defmodule Plants do
 
   ## Examples
 
-  iex> Plants.pot_range(MapSet.new([1, 3, 4]))
-  -3..8
+      iex> Plants.pot_range(MapSet.new([1, 3, 4]))
+      -3..8
 
-  iex> Plants.pot_range(MapSet.new([0, 3, 5, 7, 9, 11]))
-  -4..15
+      iex> Plants.pot_range(MapSet.new([0, 3, 5, 7, 9, 11]))
+      -4..15
 
   """
   def pot_range(pots) do
@@ -132,26 +132,26 @@ defmodule Plants do
 
   ## Examples
 
-  iex> Plants.compare_states(MapSet.new([1, 3, 4]), MapSet.new([1, 3, 4]))
-  {true, 0}
+      iex> Plants.compare_states(MapSet.new([1, 3, 4]), MapSet.new([1, 3, 4]))
+      {true, 0}
 
-  iex> Plants.compare_states(MapSet.new([1, 3, 4]), MapSet.new([2, 4, 5]))
-  {true, 1}
+      iex> Plants.compare_states(MapSet.new([1, 3, 4]), MapSet.new([2, 4, 5]))
+      {true, 1}
 
-  iex> Plants.compare_states(MapSet.new([1, 3, 4]), MapSet.new([-1, 1, 2]))
-  {true, -2}
+      iex> Plants.compare_states(MapSet.new([1, 3, 4]), MapSet.new([-1, 1, 2]))
+      {true, -2}
 
-  iex> Plants.compare_states(MapSet.new([]), MapSet.new([]))
-  {true, 0}
+      iex> Plants.compare_states(MapSet.new([]), MapSet.new([]))
+      {true, 0}
 
-  iex> Plants.compare_states(MapSet.new([1, 3]), MapSet.new([1, 3, 4]))
-  {false, nil}
+      iex> Plants.compare_states(MapSet.new([1, 3]), MapSet.new([1, 3, 4]))
+      {false, nil}
 
-  iex> Plants.compare_states(MapSet.new([1, 3, 5]), MapSet.new([2, 4, 7]))
-  {false, nil}
+      iex> Plants.compare_states(MapSet.new([1, 3, 5]), MapSet.new([2, 4, 7]))
+      {false, nil}
 
-  iex> Plants.compare_states(MapSet.new([1]), MapSet.new([]))
-  {false, nil}
+      iex> Plants.compare_states(MapSet.new([1]), MapSet.new([]))
+      {false, nil}
 
   """
   def compare_states(a, b) do
@@ -175,11 +175,11 @@ defmodule Plants do
 
   ## Examples
 
-  iex> Plants.render_state(MapSet.new([1, 3, 4]), 0..4)
-  ".#.##"
+      iex> Plants.render_state(MapSet.new([1, 3, 4]), 0..4)
+      ".#.##"
 
-  iex> Plants.render_state(MapSet.new([1, 3, 5, 7, 9, 11]), -3..16)
-  "....#.#.#.#.#.#....."
+      iex> Plants.render_state(MapSet.new([1, 3, 5, 7, 9, 11]), -3..16)
+      "....#.#.#.#.#.#....."
 
   """
   def render_state(pots, range) do
@@ -205,32 +205,31 @@ defmodule Plants do
 
   ## Examples
 
-  iex> Plants.pot_scalar(MapSet.new())
-  0
+      iex> Plants.pot_scalar(MapSet.new())
+      0
 
-  # 2^3 + 2^1 + 2^0
-  iex> Plants.pot_scalar(MapSet.new([1, 3, 4]))
-  11
+      # 2^3 + 2^1 + 2^0
+      iex> Plants.pot_scalar(MapSet.new([1, 3, 4]))
+      11
 
-  # 2^4 + 2^3 + 2^2 + 2^1 = 30
-  iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3]))
-  30
+      # 2^4 + 2^3 + 2^2 + 2^1 = 30
+      iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3]))
+      30
 
-  iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3, 5, 8, 13]), 21)
-  0
+      iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3, 5, 8, 13]), 21)
+      0
 
-  # 2^3 + 2^0 = 9
-  iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3, 5, 8, 13]), 4)
-  9
+      # 2^3 + 2^0 = 9
+      iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3, 5, 8, 13]), 4)
+      9
 
-  # 2^4 + 2^1 = 18
-  iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3, 5, 8, 13]), 5)
-  18
+      # 2^4 + 2^1 = 18
+      iex> Plants.pot_scalar(MapSet.new([0, 1, 2, 3, 5, 8, 13]), 5)
+      18
 
-  # 2^3 + 2^1 = 10
-  iex> Plants.pot_scalar(MapSet.new([-1, 1]), -2)
-  10
-
+      # 2^3 + 2^1 = 10
+      iex> Plants.pot_scalar(MapSet.new([-1, 1]), -2)
+      10
   """
   def pot_scalar(pots, start \\ 0) do
     range = start..start+4
