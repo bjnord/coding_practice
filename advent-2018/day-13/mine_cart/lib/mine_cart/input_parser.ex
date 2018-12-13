@@ -17,12 +17,12 @@ defmodule MineCart.InputParser do
 
   ## Example
 
-      iex> {grid, carts} = MineCart.InputParser.parse_line("/-\\ |+ <^>v", 42, %{}, [])
+      iex> {grid, carts} = MineCart.InputParser.parse_line("/-\\ |+ <^>v   \n", 42, %{}, [])
       iex> grid
       %{
-        {0, 42} => :curve_ld,
+        {0, 42} => :curve_ne,
         {1, 42} => :horiz,
-        {2, 42} => :curve_rd,
+        {2, 42} => :curve_nw,
         {4, 42} => :vert,
         {5, 42} => :intersect,
         {7, 42} => :horiz,
@@ -38,10 +38,21 @@ defmodule MineCart.InputParser do
         {{7, 42}, :left, :left},
       ]
 
+      FIXME move this one to MineCart.InputParserTest
+
+      iex> {grid, _carts} = MineCart.InputParser.parse_line("   \\--/   \n", 5, %{}, [])
+      iex> grid
+      %{
+        {3, 5} => :curve_nw,
+        {4, 5} => :horiz,
+        {5, 5} => :horiz,
+        {6, 5} => :curve_ne,
+      }
+
   """
   def parse_line(line, y, grid, carts) when is_binary(line) do
     line
-    |> String.trim
+    |> String.trim_trailing
     |> String.graphemes
     |> Enum.with_index
     |> Enum.reduce({grid, carts}, fn ({square, x}, {grid_a, carts_a}) ->
@@ -64,8 +75,8 @@ defmodule MineCart.InputParser do
     case square do
       "-" -> {:track, :horiz}
       "|" -> {:track, :vert}
-      "/" -> {:track, :curve_ld}
-      "\\" -> {:track, :curve_rd}
+      "/" -> {:track, :curve_ne}
+      "\\" -> {:track, :curve_nw}
       "+" -> {:track, :intersect}
       "<" -> {:cart, :left}
       "^" -> {:cart, :up}
