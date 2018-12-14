@@ -106,23 +106,18 @@ defmodule MineCart do
     IO.inspect("#{x},#{y}", label: "Part 2 remaining cart location is")
   end
 
-  # returns lone cart after all others have crashed
+  # returns lone surviving cart after all others have crashed
   defp execute_ticks_part2(grid, carts) do
     Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
     |> drive_carts(grid)
     |> case do
-      {:crashed, driven_carts, _} ->
-        case driven_carts do
-          [survivor] ->
-            survivor
-          [_ | _] ->
-            execute_ticks_part2(grid, driven_carts)  # tail recursion
-          [] ->
-            # all carts crashed, none left: this only happens with example1
-            # which isn't really meant to be run against puzzle part 2
-            {{-1, -1}, nil, nil}
-        end
-      {:ok, driven_carts, _} ->
+      {:crashed, [lone_survivor], _} ->
+        lone_survivor
+      {:crashed, [], _} ->
+        # all carts crashed, none left: this only happens with example1
+        # which isn't really meant to be run against puzzle part 2
+        {{-1, -1}, nil, nil}
+      {_, driven_carts, _} ->
         execute_ticks_part2(grid, driven_carts)  # tail recursion
     end
   end
