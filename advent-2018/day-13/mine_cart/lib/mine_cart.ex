@@ -26,24 +26,29 @@ defmodule MineCart do
   - Part 1 answer is: "71,121"
   """
   def part1(input_file) do
-    {_y, {grid, carts}} =
-      input_file
-      |> File.stream!
-      |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
-        {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
-      end)
-    {y, x} = execute_ticks_part1(grid, carts)
+    {y, x} =
+      parse_input(input_file)
+      |> execute_ticks_part1()
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 first crash location is")
   end
 
+  defp parse_input(input_file) do
+    input_file
+    |> File.stream!
+    |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
+      {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
+    end)
+    |> elem(1)
+  end
+
   # returns position of first cart to crash
-  defp execute_ticks_part1(grid, carts) do
+  defp execute_ticks_part1({grid, carts}) do
     Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
     |> drive_carts(grid)
     |> case do
       {driven_carts, []} ->
-        execute_ticks_part1(grid, driven_carts)  # tail recursion
+        execute_ticks_part1({grid, driven_carts})  # tail recursion
       {_, crashed_carts} ->
         List.first(crashed_carts)
         |> elem(0)
@@ -90,21 +95,16 @@ defmodule MineCart do
   - Part 2 answer is: "71,76"
   """
   def part2(input_file) do
-    # FIXME DRY up (this code copied from part1)
-    {_y, {grid, carts}} =
-      input_file
-      |> File.stream!
-      |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
-        {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
-      end)
-    {y, x} = execute_ticks_part2(grid, carts)
-             |> elem(0)
+    {y, x} =
+      parse_input(input_file)
+      |> execute_ticks_part2()
+      |> elem(0)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 2 remaining cart location is")
   end
 
   # returns lone surviving cart after all others have crashed
-  defp execute_ticks_part2(grid, carts) do
+  defp execute_ticks_part2({grid, carts}) do
     driven_carts =
       Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
       |> drive_carts(grid)
@@ -117,7 +117,7 @@ defmodule MineCart do
         # which isn't really meant to be run against puzzle part 2
         {{-1, -1}, nil, nil}
       [head | tail] ->
-        execute_ticks_part2(grid, [head | tail])  # tail recursion
+        execute_ticks_part2({grid, [head | tail]})  # tail recursion
     end
   end
 
