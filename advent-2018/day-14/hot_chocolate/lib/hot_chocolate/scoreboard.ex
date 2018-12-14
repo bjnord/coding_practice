@@ -2,8 +2,12 @@ defmodule HotChocolate.Scoreboard do
   @moduledoc """
   Documentation for HotChocolate.Scoreboard.
 
-  TODO use @type @spec etc.
+  FIXME the yellow banner for iex h comes out e.g. "def get(arg, index)"
+        (1st arg is the board tuple); can "arg" show up as "scoreboard"?
   """
+
+  @type score() :: 0..9
+  @type scoreboard() :: {count :: non_neg_integer(), scores :: map()}
 
   @doc """
   Create a new scoreboard.
@@ -16,6 +20,7 @@ defmodule HotChocolate.Scoreboard do
       iex> HotChocolate.Scoreboard.new([3, 7])
       {2, %{0 => 3, 1 => 7}}
   """
+  @spec new([score()]) :: scoreboard()
   def new(scores \\ []) do
     Enum.reduce(scores, {0, %{}}, fn (score, {count, map}) ->
       HotChocolate.Scoreboard.add({count, map}, score)
@@ -31,11 +36,17 @@ defmodule HotChocolate.Scoreboard do
       ...> |> HotChocolate.Scoreboard.add(3)
       ...> |> HotChocolate.Scoreboard.add(7)
       {2, %{0 => 3, 1 => 7}}
+
+      iex> HotChocolate.Scoreboard.new()
+      ...> |> HotChocolate.Scoreboard.add(10)
+      ** (HotChocolate.InvalidScore) score 10 outside range 0..9
   """
-  # TODO assert score in 0..9
-  #      (then also test new() with bad score)
-  def add({count, map}, score) do
+  @spec add(scoreboard(), score()) :: scoreboard()
+  def add({count, map}, score) when score in 0..9 do
     {count + 1, Map.put(map, count, score)}
+  end
+  def add({_count, _map}, score) do
+    raise HotChocolate.InvalidScore, score
   end
 
   @doc """
@@ -49,12 +60,13 @@ defmodule HotChocolate.Scoreboard do
       iex> HotChocolate.Scoreboard.get(sb, 1)
       7
   """
+  @spec get(scoreboard(), non_neg_integer()) :: score()
   def get({_count, map}, index) do
     map[index]
   end
 
   @doc """
-  Get a subset of a scoreboard.
+  Get a subset of a scoreboard's scores.
 
   ## Examples
 
@@ -68,6 +80,7 @@ defmodule HotChocolate.Scoreboard do
       iex> HotChocolate.Scoreboard.slice(sb, -6, 6)
       [3, 7, 1, 0]
   """
+  @spec slice(scoreboard(), integer(), non_neg_integer()) :: [score()]
   def slice({count, map}, index, length) do
     range =
       cond do
@@ -92,6 +105,7 @@ defmodule HotChocolate.Scoreboard do
       ...> |> HotChocolate.Scoreboard.count()
       2
   """
+  @spec count(scoreboard()) :: non_neg_integer()
   def count({count, _map}) do
     count
   end
@@ -119,6 +133,7 @@ defmodule HotChocolate.Scoreboard do
       ...> |> HotChocolate.Scoreboard.create_scores(0, 1)
       {3, %{0 => 3, 1 => 6, 2 => 9}}
   """
+  @spec create_scores(scoreboard(), non_neg_integer(), non_neg_integer()) :: scoreboard()
   def create_scores({count, map}, index1, index2) do
     sum = map[index1] + map[index2]
     if sum >= 10 do
@@ -146,6 +161,7 @@ defmodule HotChocolate.Scoreboard do
       iex> HotChocolate.Scoreboard.inc_index(sb, 8, 5)
       3
   """
+  @spec inc_index(scoreboard(), non_neg_integer(), non_neg_integer()) :: non_neg_integer()
   def inc_index({count, _map}, index, increment) do
     rem(index + increment, count)
   end
