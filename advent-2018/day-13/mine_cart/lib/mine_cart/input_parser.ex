@@ -38,17 +38,6 @@ defmodule MineCart.InputParser do
         {{42, 7}, :left, :left},
       ]
 
-      FIXME move this one to MineCart.InputParserTest
-
-      iex> {grid, _carts} = MineCart.InputParser.parse_line("   \\--/   \n", 5, %{}, [])
-      iex> grid
-      %{
-        {5, 3} => :curve_nw,
-        {5, 4} => :horiz,
-        {5, 5} => :horiz,
-        {5, 6} => :curve_ne,
-      }
-
   """
   def parse_line(line, y, grid, carts) when is_binary(line) do
     line

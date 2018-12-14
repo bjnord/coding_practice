@@ -130,14 +130,8 @@ defmodule MineCart do
       iex> MineCart.move_cart({{4, 2}, :right, :left})
       {{4, 3}, :right, :left}
 
-      iex> MineCart.move_cart({{4, 2}, :left, :straight})
-      {{4, 1}, :left, :straight}
-
       iex> MineCart.move_cart({{4, 2}, :up, :right})
       {{3, 2}, :up, :right}
-
-      iex> MineCart.move_cart({{4, 2}, :down, :straight})
-      {{5, 2}, :down, :straight}
 
   """
   def move_cart({{y, x}, :right, next_turn}),
@@ -152,53 +146,15 @@ defmodule MineCart do
   @doc ~S"""
   Turn a cart according to its state (and the grid).
 
-  TODO too many examples here; move to MineCartTest
-
-  ## Intersection Examples
+  ## Examples
 
       iex> grid = %{{1, 1} => :intersect}
       iex> MineCart.turn_cart({{1, 1}, :up, :left}, grid)
       {{1, 1}, :left, :straight}
 
-      iex> grid = %{{1, 1} => :intersect}
-      iex> MineCart.turn_cart({{1, 1}, :down, :left}, grid)
-      {{1, 1}, :right, :straight}
-
-      iex> grid = %{{1, 1} => :intersect}
-      iex> MineCart.turn_cart({{1, 1}, :left, :straight}, grid)
-      {{1, 1}, :left, :right}
-
-      iex> grid = %{{1, 1} => :intersect}
-      iex> MineCart.turn_cart({{1, 1}, :down, :right}, grid)
-      {{1, 1}, :left, :left}
-
-      iex> grid = %{{1, 1} => :intersect}
-      iex> MineCart.turn_cart({{1, 1}, :left, :right}, grid)
-      {{1, 1}, :up, :left}
-
-  ## Curve Examples
-
       iex> grid = %{{1, 1} => :curve_ne}
       iex> MineCart.turn_cart({{1, 1}, :left, :straight}, grid)
       {{1, 1}, :down, :straight}
-
-      iex> grid = %{{1, 1} => :curve_ne}
-      iex> MineCart.turn_cart({{1, 1}, :up, :straight}, grid)
-      {{1, 1}, :right, :straight}
-
-      iex> grid = %{{1, 1} => :curve_nw}
-      iex> MineCart.turn_cart({{1, 1}, :right, :straight}, grid)
-      {{1, 1}, :down, :straight}
-
-      iex> grid = %{{1, 1} => :curve_nw}
-      iex> MineCart.turn_cart({{1, 1}, :up, :straight}, grid)
-      {{1, 1}, :left, :straight}
-
-  ## Straight Examples
-
-      iex> grid = %{{1, 1} => :horiz}
-      iex> MineCart.turn_cart({{1, 1}, :left, :straight}, grid)
-      {{1, 1}, :left, :straight}
 
       iex> grid = %{{1, 1} => :vert}
       iex> MineCart.turn_cart({{1, 1}, :down, :straight}, grid)
@@ -271,13 +227,6 @@ defmodule MineCart do
       ...>   {{0, 0}, :right, :straight},
       ...> ]
       iex> MineCart.cart_crashed_into_by({{0, 2}, :down, :straight}, carts)
-      nil
-
-      iex> carts = [
-      ...>   {{0, 2}, :down, :straight},
-      ...>   {{2, 0}, :right, :straight},
-      ...> ]
-      iex> MineCart.cart_crashed_into_by({{2, 2}, :up, :straight}, carts)
       nil
 
       iex> carts = [
