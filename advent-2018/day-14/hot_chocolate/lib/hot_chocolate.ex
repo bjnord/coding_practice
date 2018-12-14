@@ -23,12 +23,34 @@ defmodule HotChocolate do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: '2810862211'
   """
   def part1(input_file) do
     input_file
-    # NB this should emit a 10-digit number (as in puzzle notes)
-    |> IO.inspect(label: "Part 1 ten-recipe scores are")
+    |> File.stream!
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&String.to_integer/1)
+    |> run_trials
+    |> IO.inspect(label: "Part 1 ten-recipe score(s) are")
+  end
+
+  defp run_trials(trials) do
+    trials
+    |> Enum.map(fn (n_recipes) ->
+      acc = {HotChocolate.Scoreboard.new([3, 7]), 0, 1}
+      1..n_recipes+10
+      |> Enum.reduce(acc, fn (_n, {board, elf1_i, elf2_i}) ->
+        board = HotChocolate.Scoreboard.create(board, elf1_i, elf2_i)
+        elf1_s = HotChocolate.Scoreboard.get(board, elf1_i)
+        elf1_i = HotChocolate.Scoreboard.inc_index(board, elf1_i, 1 + elf1_s)
+        elf2_s = HotChocolate.Scoreboard.get(board, elf2_i)
+        elf2_i = HotChocolate.Scoreboard.inc_index(board, elf2_i, 1 + elf2_s)
+        {board, elf1_i, elf2_i}
+      end)
+      |> elem(0)
+      |> HotChocolate.Scoreboard.slice(n_recipes, 10)
+      |> Enum.map(fn (score) -> score + ?0 end)
+    end)
   end
 
   @doc """
