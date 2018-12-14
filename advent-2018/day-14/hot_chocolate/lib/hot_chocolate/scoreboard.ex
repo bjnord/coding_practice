@@ -71,21 +71,25 @@ defmodule HotChocolate.Scoreboard do
   ## Examples
 
       iex> sb = HotChocolate.Scoreboard.new([3, 7, 1, 0])
-      iex> HotChocolate.Scoreboard.slice(sb, 0, 2)
+      iex> HotChocolate.Scoreboard.slice(sb, 0..1)
       [3, 7]
-      iex> HotChocolate.Scoreboard.slice(sb, -2, 2)
-      [1, 0]
-      iex> HotChocolate.Scoreboard.slice(sb, 3, 3)
+      iex> HotChocolate.Scoreboard.slice(sb, 3..5)
       [0]
-      iex> HotChocolate.Scoreboard.slice(sb, -6, 6)
-      [3, 7, 1, 0]
+
+      iex> sb = HotChocolate.Scoreboard.new([3, 7, 1, 0, 1, 0, 1, 2, 4, 5])
+      iex> HotChocolate.Scoreboard.slice(sb, -2..-1)
+      [4, 5]
+      iex> HotChocolate.Scoreboard.slice(sb, -3..-2)
+      [2, 4]
+      iex> HotChocolate.Scoreboard.slice(sb, -12..-9)
+      [3, 7]
   """
-  @spec slice(scoreboard(), integer(), non_neg_integer()) :: [score()]
-  def slice({count, map}, index, length) do
+  @spec slice(scoreboard(), Range.t()) :: [score()]
+  def slice({count, map}, first..last) do
     range =
       cond do
-        index < 0 -> count+index..count+index+length-1
-        true      -> index..index+length-1
+        first < 0 -> count+first..count+last
+        true      -> first..last
       end
     range
     |> Enum.map(fn (i) -> map[i] end)

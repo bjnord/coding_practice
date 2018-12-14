@@ -48,7 +48,7 @@ defmodule HotChocolate do
         input_step({board, elf1_i, elf2_i})
       end)
       |> elem(0)
-      |> HotChocolate.Scoreboard.slice(n_recipes, 10)
+      |> HotChocolate.Scoreboard.slice(n_recipes..n_recipes+9)
     end)
   end
 
@@ -100,14 +100,14 @@ defmodule HotChocolate do
         # tricky! since create_scores() can add 2 new scores,
         # need to check the pattern one index back as well
         latest_scores =
-          HotChocolate.Scoreboard.slice(board, -n_scores, n_scores)
+          HotChocolate.Scoreboard.slice(board, (-n_scores)..-1)
         latest_scores_back1 =
-          HotChocolate.Scoreboard.slice(board, -n_scores-1, n_scores)
+          HotChocolate.Scoreboard.slice(board, (-n_scores-1)..-2)
         cond do
           latest_scores_back1 == score_pattern ->
             {:halt, HotChocolate.Scoreboard.count(board) - n_scores - 1}
           latest_scores == score_pattern ->
-            {:halt, HotChocolate.Scoreboard.count(board) - n_scores}
+              {:halt, HotChocolate.Scoreboard.count(board) - n_scores}
           true ->
             {:cont, {board, elf1_i, elf2_i}}
         end
