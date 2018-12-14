@@ -61,12 +61,22 @@ defmodule HotChocolate.Scoreboard do
       iex> ra = HotChocolate.Scoreboard.new([3, 7, 1, 0])
       iex> HotChocolate.Scoreboard.slice(ra, 0, 2)
       [3, 7]
-      iex> HotChocolate.Scoreboard.slice(ra, 2, 2)
+      iex> HotChocolate.Scoreboard.slice(ra, -2, 2)
       [1, 0]
+      iex> HotChocolate.Scoreboard.slice(ra, 3, 3)
+      [0]
+      iex> HotChocolate.Scoreboard.slice(ra, -6, 6)
+      [3, 7, 1, 0]
   """
-  def slice({_count, map}, index, length) do
-    index..index+length-1
+  def slice({count, map}, index, length) do
+    range =
+      cond do
+        index < 0 -> count+index..count+index+length-1
+        true      -> index..index+length-1
+      end
+    range
     |> Enum.map(fn (i) -> map[i] end)
+    |> Enum.reject(fn (score) -> score == nil end)
   end
 
   @doc """
