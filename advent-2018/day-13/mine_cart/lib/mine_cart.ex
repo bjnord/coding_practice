@@ -65,11 +65,8 @@ defmodule MineCart do
         {nil, [_ | _]} ->     # no crash, carts remaining
           {:cont, {pending_a, [cart | done_a], crashed_a}}
         {crashed_cart, _} ->  # crash
-          # remove offenders to the crash accumulator
-          # (important that they not be considered for future crashes)
-          pending_a = remove_carts(pending_a, [crashed_cart])
-          done_a = remove_carts(done_a, [crashed_cart])
-          crashed_a = [cart, crashed_cart | crashed_a]
+          {pending_a, done_a, crashed_a} =
+            move_crashed_carts([cart, crashed_cart], pending_a, done_a, crashed_a)
           if pending_a == [] do
             status = if crashed_a == [], do: :ok, else: :crashed
             {:halt, {status, done_a, Enum.reverse(crashed_a)}}
@@ -81,9 +78,11 @@ defmodule MineCart do
     #|> IO.inspect(label: "driven carts")
   end
 
-  # FIXME RF to remove_cart() if only ever called with one
-  defp remove_carts(carts, carts_to_remove) do
-    Enum.reject(carts, fn (cart) -> Enum.member?(carts_to_remove, cart) end)
+  defp move_crashed_carts(new_crashed, pending_a, done_a, crashed_a) do
+    pending_a = Enum.reject(pending_a, fn (cart) -> Enum.member?(new_crashed, cart) end)
+    done_a = Enum.reject(done_a, fn (cart) -> Enum.member?(new_crashed, cart) end)
+    crashed_a = new_crashed ++ crashed_a
+    {pending_a, done_a, crashed_a}
   end
 
   @doc """
