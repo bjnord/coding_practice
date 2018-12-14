@@ -186,7 +186,7 @@ Here is a longer example:
   \------/   
 ```
 
-After following their respective paths for a while, the carts eventually crash. To help prevent crashes, you'd like to know **the location of the first crash**. Locations are given in X,Y coordinates, where the furthest left column is X=0 and the furthest top row is Y=0:
+After following their respective paths for a while, the carts eventually crash. To help prevent crashes, you'd like to know **the location of the first crash**. Locations are given in `X,Y` coordinates, where the furthest left column is `X=0` and the furthest top row is `Y=0`:
 
 ```
            111
