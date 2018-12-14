@@ -8,9 +8,9 @@ two:
 run: $(BIN)
 	mix test && $(BIN) input/input.txt
 
-# FIXME need command-line argument to say which part(s) to run
 examples: $(BIN)
-	mix test && $(BIN) input/example1.txt
+	mix test && $(BIN) --parts 1 input/example1.txt \
+		&& $(BIN) --parts 2 input/example2.txt
 
 $(BIN): $(FILES)
 	mix escript.build

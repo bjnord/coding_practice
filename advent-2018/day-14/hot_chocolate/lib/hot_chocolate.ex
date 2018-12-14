@@ -13,9 +13,11 @@ defmodule HotChocolate do
   - argv: Command-line arguments
   """
   def main(argv) do
-    input_file = parse_args(argv)
-    part1(input_file)
-    part2(input_file)
+    {input_file, parts} = parse_args(argv)
+    if Enum.member?(parts, 1),
+      do: part1(input_file)
+    if Enum.member?(parts, 2),
+      do: part2(input_file)
   end
 
   @doc """
