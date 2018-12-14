@@ -77,7 +77,6 @@ defmodule MineCart do
           end
       end
     end)
-    #|> IO.inspect(label: "driven carts")
   end
 
   defp move_crashed_carts(new_crashed, pending_a, done_a, crashed_a) do
@@ -161,8 +160,6 @@ defmodule MineCart do
 
   """
   def turn_cart({{y, x}, direction, next_turn}, grid) do
-    #IO.inspect({{y, x}, direction, next_turn}, label: "turn_cart")
-    #IO.inspect(grid[{y, x}], label: "square")
     turn_cart_for({{y, x}, direction, next_turn}, grid[{y, x}])
   end
 
@@ -240,6 +237,5 @@ defmodule MineCart do
     # NB given the take-turns-moving nature of the puzzle, there can't be
     #    more than one
     Enum.find(carts, fn ({{x0, y0}, _d0, _t0}) -> {x0, y0} == {y, x} end)
-    #|> IO.inspect(label: "crashed-into by {#{y}, #{x}}")
   end
 end
