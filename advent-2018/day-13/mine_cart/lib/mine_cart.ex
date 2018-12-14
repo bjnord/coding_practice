@@ -42,15 +42,14 @@ defmodule MineCart do
     Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
     |> drive_carts(grid)
     |> case do
-      {:ok, driven_carts, _} ->
+      {driven_carts, []} ->
         execute_ticks_part1(grid, driven_carts)  # tail recursion
-      {:crashed, _, crashed_carts} ->
+      {_, crashed_carts} ->
         List.first(crashed_carts)
         |> elem(0)
     end
   end
 
-  # FIXME RF don't need to return :ok/:crashed; can tell if crashed_a == []
   defp drive_carts(carts, grid) do
     1..1_000_000
     |> Enum.reduce_while({carts, [], []}, fn (_c, {pending_a, done_a, crashed_a}) ->
@@ -60,16 +59,14 @@ defmodule MineCart do
       # note how we don't pass cart (self) in the list of candidates:
       case {cart_crashed_into_by(cart, pending_a ++ done_a), pending_a} do
         {nil, []} ->          # no crash, all carts now processed
-          status = if crashed_a == [], do: :ok, else: :crashed
-          {:halt, {status, [cart | done_a], Enum.reverse(crashed_a)}}
+          {:halt, {[cart | done_a], Enum.reverse(crashed_a)}}
         {nil, [_ | _]} ->     # no crash, carts remaining
           {:cont, {pending_a, [cart | done_a], crashed_a}}
         {crashed_cart, _} ->  # crash
           {pending_a, done_a, crashed_a} =
             move_crashed_carts([cart, crashed_cart], pending_a, done_a, crashed_a)
           if pending_a == [] do
-            status = if crashed_a == [], do: :ok, else: :crashed
-            {:halt, {status, done_a, Enum.reverse(crashed_a)}}
+            {:halt, {done_a, Enum.reverse(crashed_a)}}
           else
             {:cont, {pending_a, done_a, crashed_a}}
           end
@@ -108,17 +105,19 @@ defmodule MineCart do
 
   # returns lone surviving cart after all others have crashed
   defp execute_ticks_part2(grid, carts) do
-    Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
-    |> drive_carts(grid)
-    |> case do
-      {:crashed, [lone_survivor], _} ->
+    driven_carts =
+      Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
+      |> drive_carts(grid)
+      |> elem(0)
+    case driven_carts do
+      [lone_survivor] ->
         lone_survivor
-      {:crashed, [], _} ->
+      [] ->
         # all carts crashed, none left: this only happens with example1
         # which isn't really meant to be run against puzzle part 2
         {{-1, -1}, nil, nil}
-      {_, driven_carts, _} ->
-        execute_ticks_part2(grid, driven_carts)  # tail recursion
+      [head | tail] ->
+        execute_ticks_part2(grid, [head | tail])  # tail recursion
     end
   end
 
