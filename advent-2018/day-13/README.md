@@ -249,6 +249,6 @@ For example:
   \---/
 ```
 
-After four very expensive crashes, a tick ends with only one cart remaining; its final location is `6,4`.
+After four very expensive crashes, a tick ends with only one cart remaining; its final location is `6,4`. \[Note that the first cart to crash was at `2,0`.\]
 
 **What is the location of the last cart** at the end of the first tick where it is the only cart left?

@@ -32,35 +32,58 @@ defmodule MineCart do
       |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
         {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
       end)
-    {y, x} = drive_carts(grid, carts)
+    {y, x} = execute_ticks_part1(grid, carts)
     # coordinates submitted to the puzzle web site must not have spaces!
     IO.inspect("#{x},#{y}", label: "Part 1 first crash location is")
   end
 
-  # TODO too complex; refactor
-  # execute one "tick":
-  defp drive_carts(grid, carts) do
-    carts = Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
-    driven_carts =
-      Enum.reduce(carts, {carts, []}, fn (_c, {pending_a, done_a}) ->
-        [cart | pending_a] = pending_a
-        moved_cart =
-          move_cart(cart)
-          |> turn_cart(grid)
-          |> update_for_crash(pending_a)
-          |> update_for_crash(done_a)
-        done_a = [moved_cart | done_a]
-        {pending_a, done_a}
-      end)
-      |> elem(1)
-      #|> IO.inspect(label: "driven carts")
-    case Enum.filter(driven_carts, &(elem(&1, 1) == :crashed)) do
-      [head | tail] ->
-        {{y, x}, :crashed, _} = List.last([head | tail])
-        {y, x}
-      [] ->
-        drive_carts(grid, driven_carts)  # tail recursion
+  # returns position of first cart to crash
+  defp execute_ticks_part1(grid, carts) do
+    Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
+    |> drive_carts(grid)
+    |> case do
+      {:ok, driven_carts, _} ->
+        execute_ticks_part1(grid, driven_carts)  # tail recursion
+      {:crashed, _, crashed_carts} ->
+        List.first(crashed_carts)
+        |> elem(0)
     end
+  end
+
+  # FIXME RF don't need to return :ok/:crashed; can tell if crashed_a == []
+  defp drive_carts(carts, grid) do
+    1..1_000_000
+    |> Enum.reduce_while({carts, [], []}, fn (_c, {pending_a, done_a, crashed_a}) ->
+      [cart | pending_a] = pending_a
+      cart = move_cart(cart)
+             |> turn_cart(grid)
+      # note how we don't pass cart (self) in the list of candidates:
+      case {cart_crashed_into_by(cart, pending_a ++ done_a), pending_a} do
+        {nil, []} ->          # no crash, all carts now processed
+          status = if crashed_a == [], do: :ok, else: :crashed
+          {:halt, {status, [cart | done_a], Enum.reverse(crashed_a)}}
+        {nil, [_ | _]} ->     # no crash, carts remaining
+          {:cont, {pending_a, [cart | done_a], crashed_a}}
+        {crashed_cart, _} ->  # crash
+          # remove offenders to the crash accumulator
+          # (important that they not be considered for future crashes)
+          pending_a = remove_carts(pending_a, [crashed_cart])
+          done_a = remove_carts(done_a, [crashed_cart])
+          crashed_a = [cart, crashed_cart | crashed_a]
+          if pending_a == [] do
+            status = if crashed_a == [], do: :ok, else: :crashed
+            {:halt, {status, done_a, Enum.reverse(crashed_a)}}
+          else
+            {:cont, {pending_a, done_a, crashed_a}}
+          end
+      end
+    end)
+    #|> IO.inspect(label: "driven carts")
+  end
+
+  # FIXME RF to remove_cart() if only ever called with one
+  defp remove_carts(carts, carts_to_remove) do
+    Enum.reject(carts, fn (cart) -> Enum.member?(carts_to_remove, cart) end)
   end
 
   @doc """
@@ -68,11 +91,41 @@ defmodule MineCart do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: "71,76"
   """
   def part2(input_file) do
-    input_file
-    |> IO.inspect(label: "Part 2 #{false} is")
+    # FIXME DRY up (this code copied from part1)
+    {_y, {grid, carts}} =
+      input_file
+      |> File.stream!
+      |> Enum.reduce({0, {%{}, []}}, fn (line, {y, {grid, carts}}) ->
+        {y+1, MineCart.InputParser.parse_line(line, y, grid, carts)}
+      end)
+    {y, x} = execute_ticks_part2(grid, carts)
+             |> elem(0)
+    # coordinates submitted to the puzzle web site must not have spaces!
+    IO.inspect("#{x},#{y}", label: "Part 2 remaining cart location is")
+  end
+
+  # returns lone cart after all others have crashed
+  defp execute_ticks_part2(grid, carts) do
+    Enum.sort(carts, &(elem(&1, 0) <= elem(&2, 0)))
+    |> drive_carts(grid)
+    |> case do
+      {:crashed, driven_carts, _} ->
+        case driven_carts do
+          [survivor] ->
+            survivor
+          [_ | _] ->
+            execute_ticks_part2(grid, driven_carts)  # tail recursion
+          [] ->
+            # all carts crashed, none left: this only happens with example1
+            # which isn't really meant to be run against puzzle part 2
+            {{-1, -1}, nil, nil}
+        end
+      {:ok, driven_carts, _} ->
+        execute_ticks_part2(grid, driven_carts)  # tail recursion
+    end
   end
 
   @doc ~S"""
@@ -215,37 +268,36 @@ defmodule MineCart do
   defp cycle_next_turn(:right), do: :left
 
   @doc ~S"""
-  Update a cart if it crashed with other carts.
+  Return cart crashed into by input cart. (Return `nil` if none.)
 
   ## Examples
 
       iex> carts = [
       ...>   {{2, 2}, :up, :straight},
+      ...>   {{0, 0}, :right, :straight},
       ...> ]
-      iex> MineCart.update_for_crash({{0, 2}, :down, :straight}, carts)
-      {{0, 2}, :down, :straight}
+      iex> MineCart.cart_crashed_into_by({{0, 2}, :down, :straight}, carts)
+      nil
 
       iex> carts = [
       ...>   {{0, 2}, :down, :straight},
+      ...>   {{2, 0}, :right, :straight},
       ...> ]
-      iex> MineCart.update_for_crash({{2, 2}, :up, :straight}, carts)
-      {{2, 2}, :up, :straight}
+      iex> MineCart.cart_crashed_into_by({{2, 2}, :up, :straight}, carts)
+      nil
 
       iex> carts = [
       ...>   {{1, 2}, :down, :straight},
+      ...>   {{2, 1}, :right, :straight},
       ...> ]
-      iex> MineCart.update_for_crash({{1, 2}, :up, :straight}, carts)
-      {{1, 2}, :crashed, :straight}
+      iex> MineCart.cart_crashed_into_by({{1, 2}, :up, :straight}, carts)
+      {{1, 2}, :down, :straight}
 
   """
-  def update_for_crash({{y, x}, direction, next_turn}, carts) do
-    crashes = Enum.filter(carts, fn ({{x0, y0}, _d0, _t0}) -> {x0, y0} == {y, x} end)
-              #|> IO.inspect(label: "crashes for #{x},#{y}")
-    case crashes do
-      [] ->
-        {{y, x}, direction, next_turn}
-      _ ->
-        {{y, x}, :crashed, next_turn}
-    end
+  def cart_crashed_into_by({{y, x}, _direction, _next_turn}, carts) do
+    # NB given the take-turns-moving nature of the puzzle, there can't be
+    #    more than one
+    Enum.find(carts, fn ({{x0, y0}, _d0, _t0}) -> {x0, y0} == {y, x} end)
+    #|> IO.inspect(label: "crashed-into by {#{y}, #{x}}")
   end
 end
