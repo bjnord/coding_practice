@@ -43,10 +43,10 @@ defmodule HotChocolate.Scoreboard do
 
   ## Examples
 
-      iex> ra = HotChocolate.Scoreboard.new([3, 7, 1, 0])
-      iex> HotChocolate.Scoreboard.get(ra, 0)
+      iex> sb = HotChocolate.Scoreboard.new([3, 7, 1, 0])
+      iex> HotChocolate.Scoreboard.get(sb, 0)
       3
-      iex> HotChocolate.Scoreboard.get(ra, 1)
+      iex> HotChocolate.Scoreboard.get(sb, 1)
       7
   """
   def get({_count, map}, index) do
@@ -58,14 +58,14 @@ defmodule HotChocolate.Scoreboard do
 
   ## Examples
 
-      iex> ra = HotChocolate.Scoreboard.new([3, 7, 1, 0])
-      iex> HotChocolate.Scoreboard.slice(ra, 0, 2)
+      iex> sb = HotChocolate.Scoreboard.new([3, 7, 1, 0])
+      iex> HotChocolate.Scoreboard.slice(sb, 0, 2)
       [3, 7]
-      iex> HotChocolate.Scoreboard.slice(ra, -2, 2)
+      iex> HotChocolate.Scoreboard.slice(sb, -2, 2)
       [1, 0]
-      iex> HotChocolate.Scoreboard.slice(ra, 3, 3)
+      iex> HotChocolate.Scoreboard.slice(sb, 3, 3)
       [0]
-      iex> HotChocolate.Scoreboard.slice(ra, -6, 6)
+      iex> HotChocolate.Scoreboard.slice(sb, -6, 6)
       [3, 7, 1, 0]
   """
   def slice({count, map}, index, length) do
@@ -112,14 +112,14 @@ defmodule HotChocolate.Scoreboard do
   ## Examples
 
       iex> HotChocolate.Scoreboard.new([3, 7])
-      ...> |> HotChocolate.Scoreboard.create(0, 1)
+      ...> |> HotChocolate.Scoreboard.create_scores(0, 1)
       {4, %{0 => 3, 1 => 7, 2 => 1, 3 => 0}}
 
       iex> HotChocolate.Scoreboard.new([3, 6])
-      ...> |> HotChocolate.Scoreboard.create(0, 1)
+      ...> |> HotChocolate.Scoreboard.create_scores(0, 1)
       {3, %{0 => 3, 1 => 6, 2 => 9}}
   """
-  def create({count, map}, index1, index2) do
+  def create_scores({count, map}, index1, index2) do
     sum = map[index1] + map[index2]
     if sum >= 10 do
       HotChocolate.Scoreboard.add({count, map}, div(sum, 10))
@@ -134,16 +134,16 @@ defmodule HotChocolate.Scoreboard do
 
   ## Examples
 
-      iex> ra = HotChocolate.Scoreboard.new([3, 7, 1, 0])
-      iex> HotChocolate.Scoreboard.inc_index(ra, 0, 4)
+      iex> sb = HotChocolate.Scoreboard.new([3, 7, 1, 0])
+      iex> HotChocolate.Scoreboard.inc_index(sb, 0, 4)
       0
-      iex> HotChocolate.Scoreboard.inc_index(ra, 1, 8)
+      iex> HotChocolate.Scoreboard.inc_index(sb, 1, 8)
       1
 
-      iex> ra = HotChocolate.Scoreboard.new([3, 7, 1, 0, 1, 0, 1, 2, 4, 5])
-      iex> HotChocolate.Scoreboard.inc_index(ra, 4, 2)
+      iex> sb = HotChocolate.Scoreboard.new([3, 7, 1, 0, 1, 0, 1, 2, 4, 5])
+      iex> HotChocolate.Scoreboard.inc_index(sb, 4, 2)
       6
-      iex> HotChocolate.Scoreboard.inc_index(ra, 8, 5)
+      iex> HotChocolate.Scoreboard.inc_index(sb, 8, 5)
       3
   """
   def inc_index({count, _map}, index, increment) do
