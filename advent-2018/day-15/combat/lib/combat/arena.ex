@@ -192,8 +192,6 @@ defmodule Combat.Arena do
   #   {{1, 1}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
   # ]
 
-  # TODO test next_position() for README.md scenarios in Combat.ArenaTest
-
       iex> arena = {%{
       ...>     {0, 0} => :floor,     {0, 1} => :combatant, {0, 2} => :floor,
       ...>     {1, 0} => :floor,     {1, 1} => :floor,     {1, 2} => :combatant,
@@ -214,15 +212,16 @@ defmodule Combat.Arena do
   """
   @spec next_position(arena(), combatant(), roster()) :: candidate()
   def next_position({grid, roster}, mover, opponents) do
-    IO.inspect(mover, label: "Mover")
+    #IO.inspect(mover, label: "Mover")
     candidates_in_range({grid, roster}, mover, opponents)
-    |> IO.inspect(label: "In range")
+    #|> IO.inspect(label: "In range")
     |> reachable_candidates({grid, roster}, mover, opponents)
-    |> IO.inspect(label: "Reachable")
+    #|> IO.inspect(label: "Reachable")
     |> nearest_candidates({grid, roster}, mover, opponents)
-    |> IO.inspect(label: "Nearest")
-    |> List.first  # TODO here would go next steps in algor.
-    |> elem(0)
+    #|> IO.inspect(label: "Nearest")
+    |> Enum.map(fn (candidate) -> elem(candidate, 0) end)
+    |> Enum.min  # "reading order"
+    #|> IO.inspect(label: "Chosen")
   end
 
   ###
