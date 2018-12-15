@@ -7,7 +7,7 @@ defmodule Combat.Arena do
   @type combatant() :: tuple()  # {y_x :: position(), team :: atom(), power :: non_neg_integer(), hp :: integer()}
   @type candidate() :: {position(), [combatant()]}
   @type roster() :: MapSet.t()  # of combatant()
-  # FIXME In Elixr, for module Foo the main type for Foo should be named Foo.t
+  # FIXME In Elixir, for module Foo the main type for Foo should be named Foo.t
   @type arena() :: {grid(), roster()}
 
   @doc ~S"""
