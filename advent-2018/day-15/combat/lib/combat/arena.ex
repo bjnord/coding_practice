@@ -63,6 +63,19 @@ defmodule Combat.Arena do
     end
   end
 
+#  @spec occupiable?(arena(), position()) :: boolean()
+#  defp occupiable?({grid, roster}, {y, x}),
+#    do: occupiable?(grid, {y, x})
+#
+#  @spec occupiable?(grid(), position()) :: boolean()
+#  defp occupiable?(grid, {y, x}) do
+#    case grid[{y, x}] do
+#      :rock -> false
+#      nil -> false
+#      _ -> true
+#    end
+#  end
+
   @doc ~S"""
   Return the opposing team.
 
