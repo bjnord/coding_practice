@@ -5,6 +5,7 @@ defmodule Combat.Arena do
   @type grid() :: %{required(position()) => square()}
   @type team() :: :elf | :goblin  # {y_x :: position(), team(), power :: non_neg_integer(), hp :: integer()}
   @type combatant() :: tuple()  # {y_x :: position(), team :: atom(), power :: non_neg_integer(), hp :: integer()}
+  @type candidate() :: {position(), [combatant()]}
   @type roster() :: MapSet.t()  # of combatant()
   # FIXME In Elixr, for module Foo the main type for Foo should be named Foo.t
   @type arena() :: {grid(), roster()}
@@ -199,7 +200,7 @@ defmodule Combat.Arena do
       iex> Combat.Arena.next_position(arena, mover, opponents)
       {0, 0}
   """
-  @spec next_position(arena(), combatant(), roster()) :: {position(), [combatant()]}
+  @spec next_position(arena(), combatant(), roster()) :: candidate()
   def next_position({grid, roster}, mover, opponents) do
     candidates_in_range({grid, roster}, mover, opponents)
     |> IO.inspect(label: "In range")
@@ -213,7 +214,7 @@ defmodule Combat.Arena do
   # we don't use them (yet). (But see TODO below.)
   ###
 
-  @spec candidates_in_range(arena(), combatant(), roster()) :: [{position(), [combatant()]}]
+  @spec candidates_in_range(arena(), combatant(), roster()) :: [candidate()]
   defp candidates_in_range({grid, _roster}, _mover, opponents) do
     opponents
     #|> IO.inspect(label: "opponents")
