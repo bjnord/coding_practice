@@ -154,4 +154,83 @@ defmodule Combat.Arena do
       end
     end)
   end
+
+  @doc ~S"""
+  Find the position the given combatant should be moving toward.
+
+  This might be the current position of the combatant (meaning no move
+  is needed). But if a position is returned, it will always be reachable
+  (not blocked).
+
+  ## Parameters
+
+  - arena: The current arena
+  - mover: The combatant who will be moving
+  - opponents: The roster of _only_ the opponents
+
+  ## Returns
+
+  Position (`{y, x}`) to move toward, or `nil` if no such position exists
+
+  ## Example
+
+  # In range: [
+  #   {{0, 0}, [{{0, 1}, :goblin, 3, 20}]},
+  #   {{0, 2}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
+  #   {{1, 1}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
+  #   {{2, 2}, [{{1, 2}, :goblin, 3, 2}]}
+  # ]
+
+      iex> arena = {%{
+      ...>     {0, 0} => :floor,     {0, 1} => :combatant, {0, 2} => :floor,
+      ...>     {1, 0} => :floor,     {1, 1} => :floor,     {1, 2} => :combatant,
+      ...>     {2, 0} => :combatant, {2, 1} => :rock,      {2, 2} => :floor,
+      ...>   }, MapSet.new([
+      ...>     {{0, 1}, :goblin, 3, 20},
+      ...>     {{1, 2}, :goblin, 3, 2},
+      ...>     {{2, 0}, :elf, 3, 200},
+      ...>   ])
+      ...> }
+      iex> mover = {{2, 0}, :elf, 3, 200}
+      iex> opponents = [
+      ...>   {{0, 1}, :goblin, 3, 20},
+      ...>   {{1, 2}, :goblin, 3, 2},
+      ...> ]
+      iex> Combat.Arena.next_position(arena, mover, opponents)
+      {0, 0}
+  """
+  @spec next_position(arena(), combatant(), roster()) :: {position(), [combatant()]}
+  def next_position({grid, roster}, mover, opponents) do
+    candidates_in_range({grid, roster}, mover, opponents)
+    |> IO.inspect(label: "In range")
+    |> List.first  # TODO here would go next steps in algor.
+    |> elem(0)
+  end
+
+  ###
+  # Thinking ahead: What if the algorithm changes to find based on
+  # attributes of mover or opponent(s)? Thus we pass them along though
+  # we don't use them (yet). (But see TODO below.)
+  ###
+
+  @spec candidates_in_range(arena(), combatant(), roster()) :: [{position(), [combatant()]}]
+  defp candidates_in_range({grid, _roster}, _mover, opponents) do
+    opponents
+    #|> IO.inspect(label: "opponents")
+    |> Enum.map(fn (opponent) ->
+      {{y, x}, _team, _pw, _hp} = opponent
+      [  # in "reading order":
+        {{y-1, x}, opponent},
+        {{y, x-1}, opponent},
+        {{y, x+1}, opponent},
+        {{y+1, x}, opponent},
+      ]
+    end)
+    |> List.flatten
+    #|> IO.inspect(label: "all candidates")
+    # TODO replace uniq_by: merge opponents to single list as 2nd elem
+    |> Enum.uniq_by(fn ({pos, _opponent}) -> pos end)
+    |> Enum.filter(fn ({pos, _opponent}) -> grid[pos] == :floor end)
+    #|> IO.inspect(label: "floor candidates")
+  end
 end
