@@ -305,4 +305,64 @@ defmodule Combat.Arena do
     |> elem(1)
     |> Enum.reverse
   end
+
+  @doc ~S"""
+  Find the next step a combatant should take toward a position.
+
+  This might be the current position of the combatant (meaning no move is
+  needed). But if a step position is returned, it will always be reachable
+  (not blocked).
+
+  ## Parameters
+
+  - arena: The current arena
+  - mover: The combatant who will be moving
+  - candidate: The candidate position to move toward
+
+  ## Returns
+
+  Position to move toward, or `nil` if no such position exists
+
+  ## Example
+
+  # Mover: {{0, 0}, :elf, 3, 200}
+  # Position: {1, 2}
+
+  # Surrounding Me: [
+  #   {{0, 1}, {{0, 0}, :elf, 3, 200}},
+  #   {{1, 0}, {{0, 0}, :elf, 3, 200}},
+  # ]
+
+  # Nearest To Him: [
+  #   {{0, 1}, {{0, 0}, :elf, 3, 200}},
+  #   {{1, 0}, {{0, 0}, :elf, 3, 200}},
+  # ]
+
+      iex> arena = {%{
+      ...>     {0, 0} => :combatant,  {0, 1} => :floor,  {0, 2} => :floor,
+      ...>     {1, 0} => :floor,      {1, 1} => :floor,  {1, 2} => :floor,
+      ...>     {2, 0} => :floor,      {2, 1} => :floor,  {2, 2} => :combatant,
+      ...>   }, MapSet.new([
+      ...>     {{0, 0}, :elf, 3, 200},
+      ...>     {{2, 2}, :goblin, 3, 2},
+      ...>   ])
+      ...> }
+      iex> mover = {{0, 0}, :elf, 3, 200}
+      iex> candidate = {{1, 2}, {{2, 2}, :goblin, 3, 2}}
+      iex> Combat.Arena.next_step_toward(arena, mover, candidate)
+      {0, 1}
+  """
+  @spec next_step_toward(arena(), combatant(), candidate()) :: position()
+  def next_step_toward({grid, _roster}, mover, {position, _opponents}) do
+    #IO.inspect(mover, label: "Mover")
+    #IO.inspect(position, label: "Position")
+    floor_squares_around(grid, mover)
+    #|> IO.inspect(label: "Surrounding Me")
+    |> multi_min_by(fn ({pos, _}) -> manhattan(position, pos) end)
+    #|> IO.inspect(label: "Nearest To Him")
+    # first position in "reading order":
+    |> Enum.min_by(fn (candidate) -> elem(candidate, 0) end)
+    |> elem(0)
+    #|> IO.inspect(label: "Step")
+  end
 end
