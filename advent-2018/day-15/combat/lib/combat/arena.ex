@@ -258,11 +258,9 @@ defmodule Combat.Arena do
     candidates  # FIXME
   end
 
-  # FIXME refactor so we don't do map/filter twice
   @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
   defp nearest_candidates(candidates, {_grid, _roster}, mover, _opponents) do
-    func = fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) end
-    multi_min_by(candidates, func)
+    multi_min_by(candidates, fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) end)
   end
 
   # NOTE ripped off from day 6 puzzle, but with x and y flipped
