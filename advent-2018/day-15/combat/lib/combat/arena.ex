@@ -260,10 +260,8 @@ defmodule Combat.Arena do
   # FIXME refactor so we don't do map/filter twice
   @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
   defp nearest_candidates(candidates, {_grid, _roster}, mover, _opponents) do
-    min_distance =
-      Enum.map(candidates, fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) end)
-      |> Enum.min
-    Enum.filter(candidates, fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) == min_distance end)
+    func = fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) end
+    multi_min_by(candidates, func)
   end
 
   # NOTE ripped off from day 6 puzzle, but with x and y flipped
@@ -285,5 +283,22 @@ defmodule Combat.Arena do
   """
   def manhattan({y1, x1}, {y2, x2}) do
     abs(y1 - y2) + abs(x1 - x2)
+  end
+
+  # TODO surprised this isn't a standard Enum function
+  defp multi_min_by(enum, func) do
+    Enum.reduce(enum, {1_000_000, []}, fn (el, {min_v, min_list}) ->
+      v = func.(el)
+      cond do
+        v > min_v ->
+          {min_v, min_list}
+        v == min_v ->
+          {min_v, [el | min_list]}
+        v < min_v ->
+          {v, [el]}
+      end
+    end)
+    |> elem(1)
+    |> Enum.reverse
   end
 end
