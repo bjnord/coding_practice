@@ -236,21 +236,25 @@ defmodule Combat.Arena do
   defp candidates_in_range({grid, _roster}, _mover, opponents) do
     opponents
     #|> IO.inspect(label: "opponents")
-    |> Enum.map(fn (opponent) ->
-      {{y, x}, _team, _pw, _hp} = opponent
-      [  # in "reading order":
-        {{y-1, x}, opponent},
-        {{y, x-1}, opponent},
-        {{y, x+1}, opponent},
-        {{y+1, x}, opponent},
-      ]
-    end)
+    |> Enum.map(fn (opponent) -> floor_squares_around(grid, opponent) end)
     |> List.flatten
     #|> IO.inspect(label: "all candidates")
-    # TODO replace uniq_by: merge opponents to single list as 2nd elem
+    # FIXME merge all opponents to single list as 2nd elem
     |> Enum.uniq_by(fn ({pos, _opponent}) -> pos end)
-    |> Enum.filter(fn ({pos, _opponent}) -> grid[pos] == :floor end)
+    |> Enum.map(fn ({pos, opponent}) -> {pos, [opponent]} end)
     #|> IO.inspect(label: "floor candidates")
+  end
+
+  @spec floor_squares_around(grid(), combatant()) :: [candidate()]
+  defp floor_squares_around(grid, combatant) do
+    {{y, x}, _team, _pw, _hp} = combatant
+    [  # in "reading order":
+      {{y-1, x}, combatant},
+      {{y, x-1}, combatant},
+      {{y, x+1}, combatant},
+      {{y+1, x}, combatant},
+    ]
+    |> Enum.filter(fn ({pos, _combatant}) -> grid[pos] == :floor end)
   end
 
   @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
