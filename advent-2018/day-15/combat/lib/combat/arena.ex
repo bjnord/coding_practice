@@ -182,6 +182,13 @@ defmodule Combat.Arena do
   #   {{2, 2}, [{{1, 2}, :goblin, 3, 2}]}
   # ]
 
+  # Reachable: [
+  #   {{0, 0}, [{{0, 1}, :goblin, 3, 20}]},
+  #   {{1, 1}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
+  # ]
+
+  # TODO test next_position() for README.md scenarios in Combat.ArenaTest
+
       iex> arena = {%{
       ...>     {0, 0} => :floor,     {0, 1} => :combatant, {0, 2} => :floor,
       ...>     {1, 0} => :floor,     {1, 1} => :floor,     {1, 2} => :combatant,
@@ -204,6 +211,8 @@ defmodule Combat.Arena do
   def next_position({grid, roster}, mover, opponents) do
     candidates_in_range({grid, roster}, mover, opponents)
     |> IO.inspect(label: "In range")
+    |> reachable_candidates({grid, roster}, mover, opponents)
+    |> IO.inspect(label: "Reachable")
     |> List.first  # TODO here would go next steps in algor.
     |> elem(0)
   end
@@ -233,5 +242,10 @@ defmodule Combat.Arena do
     |> Enum.uniq_by(fn ({pos, _opponent}) -> pos end)
     |> Enum.filter(fn ({pos, _opponent}) -> grid[pos] == :floor end)
     #|> IO.inspect(label: "floor candidates")
+  end
+
+  @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
+  defp reachable_candidates(candidates, {_grid, _roster}, _mover, _opponents) do
+    candidates  # FIXME
   end
 end
