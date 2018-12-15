@@ -22,6 +22,9 @@ defmodule Combat.ArenaTest do
     mover =
       {{1, 1}, :elf, 3, 200}
     opponents = find_combatants(arena, :goblin)
-    assert next_position(arena, mover, opponents) == {1, 3}
+    assert next_position(arena, mover, opponents) == {
+      {1, 3},
+      [{{1, 4}, :goblin, 3, 200}]
+    }
   end
 end

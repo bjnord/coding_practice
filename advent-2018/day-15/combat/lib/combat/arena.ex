@@ -171,7 +171,8 @@ defmodule Combat.Arena do
 
   ## Returns
 
-  Position (`{y, x}`) to move toward, or `nil` if no such position exists
+  Candidate position to move toward (includes surrounding opponent list),
+  or `nil` if no such position exists
 
   ## Example
 
@@ -209,7 +210,7 @@ defmodule Combat.Arena do
       ...>   {{0, 1}, :goblin, 3, 20},
       ...>   {{1, 2}, :goblin, 3, 2},
       ...> ]
-      iex> Combat.Arena.next_position(arena, mover, opponents)
+      iex> Combat.Arena.next_position(arena, mover, opponents) |> elem(0)
       {0, 0}
   """
   @spec next_position(arena(), combatant(), roster()) :: candidate()
@@ -221,8 +222,8 @@ defmodule Combat.Arena do
     #|> IO.inspect(label: "Reachable")
     |> nearest_candidates({grid, roster}, mover, opponents)
     #|> IO.inspect(label: "Nearest")
-    |> Enum.map(fn (candidate) -> elem(candidate, 0) end)
-    |> Enum.min  # "reading order"
+    # first position in "reading order":
+    |> Enum.min_by(fn (candidate) -> elem(candidate, 0) end)
     #|> IO.inspect(label: "Chosen")
   end
 
