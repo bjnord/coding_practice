@@ -187,6 +187,11 @@ defmodule Combat.Arena do
   #   {{1, 1}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
   # ]
 
+  # Nearest: [
+  #   {{0, 0}, [{{0, 1}, :goblin, 3, 20}]},
+  #   {{1, 1}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
+  # ]
+
   # TODO test next_position() for README.md scenarios in Combat.ArenaTest
 
       iex> arena = {%{
@@ -209,10 +214,13 @@ defmodule Combat.Arena do
   """
   @spec next_position(arena(), combatant(), roster()) :: candidate()
   def next_position({grid, roster}, mover, opponents) do
+    IO.inspect(mover, label: "Mover")
     candidates_in_range({grid, roster}, mover, opponents)
     |> IO.inspect(label: "In range")
     |> reachable_candidates({grid, roster}, mover, opponents)
     |> IO.inspect(label: "Reachable")
+    |> nearest_candidates({grid, roster}, mover, opponents)
+    |> IO.inspect(label: "Nearest")
     |> List.first  # TODO here would go next steps in algor.
     |> elem(0)
   end
@@ -247,5 +255,35 @@ defmodule Combat.Arena do
   @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
   defp reachable_candidates(candidates, {_grid, _roster}, _mover, _opponents) do
     candidates  # FIXME
+  end
+
+  # FIXME refactor so we don't do map/filter twice
+  @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
+  defp nearest_candidates(candidates, {_grid, _roster}, mover, _opponents) do
+    min_distance =
+      Enum.map(candidates, fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) end)
+      |> Enum.min
+    Enum.filter(candidates, fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) == min_distance end)
+  end
+
+  # NOTE ripped off from day 6 puzzle, but with x and y flipped
+  @doc """
+  Compute the Manhattan distance between two points.
+
+  "Take the sum of the absolute values of the differences of the coordinates.
+  For example, if x=(a,b) and y=(c,d), the Manhattan distance between x and y is |a−c|+|b−d|."
+  <https://math.stackexchange.com/a/139604>
+
+  ## Examples
+
+  iex> Combat.Arena.manhattan({2, 2}, {1, 1})
+  2
+
+  iex> Combat.Arena.manhattan({6, 3}, {5, 7})
+  5
+
+  """
+  def manhattan({y1, x1}, {y2, x2}) do
+    abs(y1 - y2) + abs(x1 - x2)
   end
 end
