@@ -93,7 +93,7 @@ defmodule Combat.Arena do
   def opponent(:goblin), do: :elf
 
   @doc ~S"""
-  Find combatants for the given team.
+  Find combatants for a team.
 
   ## Example
 
@@ -157,7 +157,7 @@ defmodule Combat.Arena do
   end
 
   @doc ~S"""
-  Find the position the given combatant should be moving toward.
+  Find the position a combatant should be moving toward.
 
   This might be the current position of the combatant (meaning no move
   is needed). But if a position is returned, it will always be reachable
@@ -191,6 +191,8 @@ defmodule Combat.Arena do
   #   {{0, 0}, [{{0, 1}, :goblin, 3, 20}]},
   #   {{1, 1}, [{{0, 1}, :goblin, 3, 20}, {{1, 2}, :goblin, 3, 2}]},
   # ]
+
+  # Chosen: {{0, 0}, [{{0, 1}, :goblin, 3, 20}]},
 
       iex> arena = {%{
       ...>     {0, 0} => :floor,     {0, 1} => :combatant, {0, 2} => :floor,
