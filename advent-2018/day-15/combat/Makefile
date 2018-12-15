@@ -9,7 +9,12 @@ run: $(BIN)
 	$(BIN) input/input.txt
 
 examples: $(BIN)
-	$(BIN) input/example1.txt
+	$(BIN) input/example1.txt && \
+		$(BIN) input/example2.txt && \
+		$(BIN) input/example3.txt && \
+		$(BIN) input/example4.txt && \
+		$(BIN) input/example5.txt && \
+		$(BIN) input/example6.txt
 
 $(BIN): $(FILES)
 	mix escript.build

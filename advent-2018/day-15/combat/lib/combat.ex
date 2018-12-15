@@ -4,6 +4,7 @@ defmodule Combat do
   """
 
   import Combat.CLI
+  import Combat.Arena
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -13,9 +14,11 @@ defmodule Combat do
   - argv: Command-line arguments
   """
   def main(argv) do
-    input_file = parse_args(argv)
-    part1(input_file)
-    part2(input_file)
+    {input_file, parts} = parse_args(argv)
+    if Enum.member?(parts, 1),
+      do: part1(input_file)
+    if Enum.member?(parts, 2),
+      do: part2(input_file)
   end
 
   @doc """
@@ -26,8 +29,20 @@ defmodule Combat do
   - Part 1 answer is: ...
   """
   def part1(input_file) do
+    ans_type = "combat checksum"
+    parse_input(input_file)
+    |> elem(1)       # TODO run the battle
+    |> Enum.count()  # TODO run the battle
+    |> IO.inspect(label: "Part 1 #{ans_type} is")
+  end
+
+  defp parse_input(input_file) do
     input_file
-    |> IO.inspect(label: "Part 1 combat checksum is")
+    |> File.stream!
+    |> Enum.reduce({0, {%{}, MapSet.new()}}, fn (line, {y, {grid, combatants}}) ->
+      {y+1, parse_line({grid, combatants}, line, y)}
+    end)
+    |> elem(1)
   end
 
   @doc """
@@ -38,9 +53,11 @@ defmodule Combat do
   - Part 2 answer is: ...
   """
   def part2(input_file) do
-    combat = "foo"
-    input_file
-    |> IO.inspect(label: "Part 2 #{combat} is")
+    ans_type = "????"  # TODO
+    parse_input(input_file)
+    |> elem(0)         # TODO run the battle
+    |> Enum.count()    # TODO run the battle
+    |> IO.inspect(label: "Part 2 #{ans_type} is")
   end
 
   @doc """
