@@ -6,7 +6,7 @@ defmodule HotChocolate do
   import HotChocolate.CLI
 
   @doc """
-  Process input file and display part 1 solution.
+  Parse arguments and call puzzle part methods.
 
   ## Parameters
 
