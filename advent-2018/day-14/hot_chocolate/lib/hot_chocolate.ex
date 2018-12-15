@@ -37,7 +37,7 @@ defmodule HotChocolate do
     |> IO.inspect(label: "Part 1 ten-recipe score(s) are")
   end
 
-  # part 1: each input is the number of recipes the elves will try
+  # part 1: each input is the number of recipes the elves will try;
   # run that many and then 10 more; return the scores for the 10
   defp run_inputs_p1(inputs) do
     inputs
@@ -87,7 +87,7 @@ defmodule HotChocolate do
     |> Enum.map(&(&1 - ?0))
   end
 
-  # part 2: each input is a score pattern (list of scores)
+  # part 2: each input is a score pattern (list of scores);
   # run until we see it; return number of recipes that preceded it
   defp run_inputs_p2(inputs) do
     inputs
