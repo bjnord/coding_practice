@@ -97,6 +97,10 @@ defmodule Combat.Arena do
     end
   end
 
+  ###
+  # MOVEMENT AND COMBAT
+  ###
+
 #  @spec occupiable?(arena(), position()) :: boolean()
 #  defp occupiable?({grid, roster}, {y, x}),
 #    do: occupiable?(grid, {y, x})
@@ -703,6 +707,10 @@ defmodule Combat.Arena do
     {{new_grid, new_roster}, new_opponent}
   end
 
+  ###
+  # PATH FINDING
+  ###
+
   @doc ~S"""
   Find distance to all points from a position.
 
@@ -767,7 +775,10 @@ defmodule Combat.Arena do
     ]
   end
 
-  # (only used for testing)
+  ###
+  # TESTING SUPPORT
+  ###
+
   def dump_arena({grid, roster}, round \\ nil) do
     max_y =
       Map.keys(grid)
