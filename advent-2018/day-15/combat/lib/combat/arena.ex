@@ -356,8 +356,8 @@ defmodule Combat.Arena do
 
   @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
   defp reachable_candidates(candidates, {grid, _roster}, mover, _opponents) do
-    reachable = reachable_positions(grid, elem(mover, 0))
-    Enum.filter(candidates, fn ({pos, _opponents}) -> reachable[pos] end)
+    distances = path_distances(grid, elem(mover, 0))
+    Enum.filter(candidates, fn ({pos, _opponents}) -> distances[pos] != nil end)
   end
 
   @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
@@ -463,12 +463,11 @@ defmodule Combat.Arena do
   def next_step_toward({grid, _roster}, mover, {position, _opponents}) do
     #IO.inspect(mover, label: "Mover")
     #IO.inspect(position, label: "Position")
+    distances = path_distances(grid, position)
     possible_steps =
       floor_squares_around(grid, mover)
       #|> IO.inspect(label: "Surrounding Me")
-      |> reachable_via(grid, position)
-      #|> IO.inspect(label: "Reachable")
-      |> multi_min_by(fn ({pos, _}) -> manhattan(position, pos) end)
+      |> multi_min_by(fn ({pos, _}) -> distances[pos] end)
       #|> IO.inspect(label: "Nearest To Him")
     if possible_steps != [] do
       # choose first position in "reading order":
@@ -481,13 +480,6 @@ defmodule Combat.Arena do
       nil
     end
     #|> IO.inspect(label: "Step")
-  end
-
-  defp reachable_via(candidates, grid, position) do
-    Enum.filter(candidates, fn ({origin, _}) ->
-      reachable = reachable_positions(grid, origin)
-      reachable[position] == true
-    end)
   end
 
   @doc ~S"""
@@ -679,7 +671,7 @@ defmodule Combat.Arena do
   end
 
   @doc ~S"""
-  Find reachable points from a position.
+  Find distance to all points from a position.
 
   ## Examples
 
@@ -689,11 +681,11 @@ defmodule Combat.Arena do
       ...>   {2, 0} => :floor,      {2, 1} => :floor,      {2, 2} => :floor,
       ...> }
       iex> origin = {0, 0}
-      iex> Combat.Arena.reachable_positions(grid, origin)
+      iex> Combat.Arena.path_distances(grid, origin)
       %{
-        {0, 0} => false,  {0, 1} => true,   {0, 2} => true,
-        {1, 0} => false,  {1, 1} => false,  {1, 2} => true,
-        {2, 0} => true,   {2, 1} => true,   {2, 2} => true,
+        {0, 0} => 0,    {0, 1} => 1,    {0, 2} => 2,
+        {1, 0} => nil,  {1, 1} => nil,  {1, 2} => 3,
+        {2, 0} => 6,    {2, 1} => 5,    {2, 2} => 4,
       }
 
       iex> grid = %{
@@ -702,35 +694,34 @@ defmodule Combat.Arena do
       ...>   {2, 0} => :floor,      {2, 1} => :floor,  {2, 2} => :rock,
       ...> }
       iex> origin = {1, 0}
-      iex> Combat.Arena.reachable_positions(grid, origin)
+      iex> Combat.Arena.path_distances(grid, origin)
       %{
-        {0, 0} => true,   {0, 1} => true,   {0, 2} => false,
-        {1, 0} => false,  {1, 1} => false,
-        {2, 0} => true,   {2, 1} => true,   {2, 2} => false,
+        {0, 0} => 1,  {0, 1} => 2,    {0, 2} => nil,
+        {1, 0} => 0,  {1, 1} => nil,
+        {2, 0} => 1,  {2, 1} => 2,    {2, 2} => nil,
       }
   """
-  @spec reachable_positions(grid(), position()) :: map()
+  @spec path_distances(grid(), position()) :: map()
 
-  def reachable_positions(grid, origin) do
-    seen = %{origin => (grid[origin] == :floor)}
-    reachable_positions_around(grid, origin, origin, seen)
+  def path_distances(grid, origin) do
+    path_distances_around(grid, origin, origin, %{origin => 0}, 1)
   end
 
-  defp reachable_positions(grid, origin, next_pos, :floor, seen) do
-    reachable_positions_around(grid, origin, next_pos, Map.put(seen, next_pos, true))
+  defp path_distances(grid, origin, next_pos, :floor, seen, count) do
+    path_distances_around(grid, origin, next_pos, Map.put(seen, next_pos, count), count+1)
   end
 
-  defp reachable_positions(_grid, _origin, next_pos, _sq_type, seen) do
-    Map.put(seen, next_pos, false)  # non-:floor square ends branching
+  defp path_distances(_grid, _origin, next_pos, _sq_type, seen, _count) do
+    Map.put(seen, next_pos, nil)  # non-:floor square ends branching
   end
 
-  defp reachable_positions_around(grid, origin, next_pos, seen) do
+  defp path_distances_around(grid, origin, next_pos, seen, count) do
     # these are "potential paths forward" (branches that start with squares around me
     # that are in the grid, but that I haven't seen yet)
     positions_around(next_pos)
     |> Enum.reject(fn (pos) -> (grid[pos] == nil) || Map.has_key?(seen, pos) end)
     |> Enum.reduce(seen, fn (search_pos, seen) ->
-      reachable_positions(grid, origin, search_pos, grid[search_pos], seen)
+      path_distances(grid, origin, search_pos, grid[search_pos], seen, count)
     end)
   end
 
