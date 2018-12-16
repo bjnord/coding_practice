@@ -28,6 +28,37 @@ defmodule Combat.ArenaTest do
     }
   end
 
+  # :!mix test test/combat/arena_test.exs:32
+  test "next_position() after death in puzzle round 23" do
+    {grid, roster} =
+      {%{}, MapSet.new()}
+      |> parse_line("#######\n", 0)
+      |> parse_line("#...G.#\n", 1)
+      |> parse_line("#..G.G#\n", 2)
+      |> parse_line("#.#.#G#\n", 3)
+      |> parse_line("#...#E#\n", 4)
+      |> parse_line("#.....#\n", 5)
+      |> parse_line("#######\n", 6)
+    mover1 = Enum.find(roster, &(elem(&1, 0) == {1, 4}))
+    opponents = find_combatants({grid, roster}, :elf)
+    assert next_position({grid, roster}, mover1, opponents) == {
+      {5, 5},
+      [{{4, 5}, :elf, 3, 200}]
+    }
+    # mover 1 moves where next_step_toward() says he would:
+    {{grid, roster}, _} = move({grid, roster}, mover1, {1, 3})
+    # mover 2 moves where next_step_toward() says he would:
+    mover2 = Enum.find(roster, &(elem(&1, 0) == {2, 3}))
+    {{grid, roster}, _} = move({grid, roster}, mover2, {3, 3})
+    # now do mover 3:
+    mover3 = Enum.find(roster, &(elem(&1, 0) == {2, 5}))
+    opponents = find_combatants({grid, roster}, :elf)
+    assert next_position({grid, roster}, mover3, opponents) == {
+      {5, 5},
+      [{{4, 5}, :elf, 3, 200}]
+    }
+  end
+
   #  In range:     Nearest:      Chosen:       Distance:     Step:
   #  #######       #######       #######       #######       #######
   #  #.E...#       #.E...#       #.E...#       #4E212#       #..E..#
@@ -50,6 +81,37 @@ defmodule Combat.ArenaTest do
     candidate = next_position(arena, mover, opponents)
     assert elem(candidate, 0) == {2, 4}
     assert next_step_toward(arena, mover, candidate) == {1, 3}
+  end
+
+  # :!mix test test/combat/arena_test.exs:87
+  test "next_step_toward() after death in puzzle round 23" do
+    {grid, roster} =
+      {%{}, MapSet.new()}
+      |> parse_line("#######\n", 0)
+      |> parse_line("#...G.#\n", 1)
+      |> parse_line("#..G.G#\n", 2)
+      |> parse_line("#.#.#G#\n", 3)
+      |> parse_line("#...#E#\n", 4)
+      |> parse_line("#.....#\n", 5)
+      |> parse_line("#######\n", 6)
+    mover1 = Enum.find(roster, &(elem(&1, 0) == {1, 4}))
+    candidate = {  # see above
+      {5, 5},
+      [{{4, 5}, :elf, 3, 200}]
+    }
+    assert next_step_toward({grid, roster}, mover1, candidate) == {1, 3}
+    # mover 1 moves:
+    {{grid, roster}, _} = move({grid, roster}, mover1, {1, 3})
+    # mover 2 moves where next_step_toward() says he would:
+    mover2 = Enum.find(roster, &(elem(&1, 0) == {2, 3}))
+    {{grid, roster}, _} = move({grid, roster}, mover2, {3, 3})
+    # now do mover 3:
+    mover3 = Enum.find(roster, &(elem(&1, 0) == {2, 5}))
+    candidate = {  # see above
+      {5, 5},
+      [{{4, 5}, :elf, 3, 200}]
+    }
+    assert next_step_toward({grid, roster}, mover3, candidate) == {2, 4}
   end
 
   test "attack() when opponent dies" do

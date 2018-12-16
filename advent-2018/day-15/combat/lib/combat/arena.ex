@@ -342,6 +342,7 @@ defmodule Combat.Arena do
   end
 
   @spec floor_squares_around(grid(), combatant()) :: [candidate()]
+  # TODO can this be refactored to use positions_around() ?
   defp floor_squares_around(grid, combatant) do
     {{y, x}, _team, _pw, _hp} = combatant
     [  # in "reading order":
@@ -354,8 +355,9 @@ defmodule Combat.Arena do
   end
 
   @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
-  defp reachable_candidates(candidates, {_grid, _roster}, _mover, _opponents) do
-    candidates  # FIXME
+  defp reachable_candidates(candidates, {grid, _roster}, mover, _opponents) do
+    reachable = reachable_positions(grid, elem(mover, 0))
+    Enum.filter(candidates, fn ({pos, _opponents}) -> reachable[pos] end)
   end
 
   @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
@@ -464,6 +466,8 @@ defmodule Combat.Arena do
     possible_steps =
       floor_squares_around(grid, mover)
       #|> IO.inspect(label: "Surrounding Me")
+      |> reachable_via(grid, position)
+      #|> IO.inspect(label: "Reachable")
       |> multi_min_by(fn ({pos, _}) -> manhattan(position, pos) end)
       #|> IO.inspect(label: "Nearest To Him")
     if possible_steps != [] do
@@ -477,6 +481,13 @@ defmodule Combat.Arena do
       nil
     end
     #|> IO.inspect(label: "Step")
+  end
+
+  defp reachable_via(candidates, grid, position) do
+    Enum.filter(candidates, fn ({origin, _}) ->
+      reachable = reachable_positions(grid, origin)
+      reachable[position] == true
+    end)
   end
 
   @doc ~S"""
@@ -537,6 +548,7 @@ defmodule Combat.Arena do
       [{1, 1}]
   """
   @spec combatant_positions_around(arena(), combatant(), team()) :: [candidate()]
+  # TODO can this be refactored to use positions_around() ?
   def combatant_positions_around({grid, roster}, {{y, x}, _team, _pw, _hp}, vs_team) do
     [  # in "reading order":
       {y-1, x},
@@ -664,5 +676,120 @@ defmodule Combat.Arena do
     #new_opponent
     #|> IO.inspect(label: ">>>>> attack after")
     {{new_grid, new_roster}, new_opponent}
+  end
+
+  @doc ~S"""
+  Find reachable points from a position.
+
+  ## Examples
+
+      iex> grid = %{
+      ...>   {0, 0} => :combatant,  {0, 1} => :floor,      {0, 2} => :floor,
+      ...>   {1, 0} => :rock,       {1, 1} => :combatant,  {1, 2} => :floor,
+      ...>   {2, 0} => :floor,      {2, 1} => :floor,      {2, 2} => :floor,
+      ...> }
+      iex> origin = {0, 0}
+      iex> Combat.Arena.reachable_positions(grid, origin)
+      %{
+        {0, 0} => false,  {0, 1} => true,   {0, 2} => true,
+        {1, 0} => false,  {1, 1} => false,  {1, 2} => true,
+        {2, 0} => true,   {2, 1} => true,   {2, 2} => true,
+      }
+
+      iex> grid = %{
+      ...>   {0, 0} => :floor,      {0, 1} => :floor,  {0, 2} => :rock,
+      ...>   {1, 0} => :combatant,  {1, 1} => :rock,   {1, 2} => :floor,
+      ...>   {2, 0} => :floor,      {2, 1} => :floor,  {2, 2} => :rock,
+      ...> }
+      iex> origin = {1, 0}
+      iex> Combat.Arena.reachable_positions(grid, origin)
+      %{
+        {0, 0} => true,   {0, 1} => true,   {0, 2} => false,
+        {1, 0} => false,  {1, 1} => false,
+        {2, 0} => true,   {2, 1} => true,   {2, 2} => false,
+      }
+  """
+  @spec reachable_positions(grid(), position()) :: map()
+
+  def reachable_positions(grid, origin) do
+    seen = %{origin => (grid[origin] == :floor)}
+    reachable_positions_around(grid, origin, origin, seen)
+  end
+
+  defp reachable_positions(grid, origin, next_pos, :floor, seen) do
+    reachable_positions_around(grid, origin, next_pos, Map.put(seen, next_pos, true))
+  end
+
+  defp reachable_positions(_grid, _origin, next_pos, _sq_type, seen) do
+    Map.put(seen, next_pos, false)  # non-:floor square ends branching
+  end
+
+  defp reachable_positions_around(grid, origin, next_pos, seen) do
+    # these are "potential paths forward" (branches that start with squares around me
+    # that are in the grid, but that I haven't seen yet)
+    positions_around(next_pos)
+    |> Enum.reject(fn (pos) -> (grid[pos] == nil) || Map.has_key?(seen, pos) end)
+    |> Enum.reduce(seen, fn (search_pos, seen) ->
+      reachable_positions(grid, origin, search_pos, grid[search_pos], seen)
+    end)
+  end
+
+  defp positions_around({y, x}) do
+    [  # in "reading order":
+      {y-1, x},
+      {y, x-1},
+      {y, x+1},
+      {y+1, x},
+    ]
+  end
+
+  # (only used for testing)
+  def dump_arena({grid, roster}, round \\ nil) do
+    max_y =
+      Map.keys(grid)
+      |> Enum.max_by(&(elem(&1, 0)))
+      |> elem(0)
+    case round do
+      nil ->
+        nil
+      0 ->
+        IO.puts("Initially:")
+      1 ->
+        IO.puts("After 1 round:")
+      _ ->
+        IO.puts("After #{round} rounds:")
+    end
+    0..max_y
+    |> Enum.map(fn (y) -> dump_arena_line(y, {grid, roster}) end)
+    IO.write("\n")
+  end
+
+  defp dump_arena_line(y, {grid, roster}) do
+    Map.keys(grid)
+    |> Enum.filter(&(elem(&1, 0) == y))
+    |> Enum.sort()
+    |> Enum.map(&(emit_square(&1, {grid, roster})))
+    IO.write("   ")
+    # TODO emit HP here for combatants on this row
+    IO.write("\n")
+  end
+
+  defp emit_square(pos, {grid, roster}) do
+    case grid[pos] do
+      :rock -> '#'
+      :floor -> '.'
+      :combatant ->
+        combatant =
+          Enum.find(roster, &(elem(&1, 0) == pos))
+        team =
+          if combatant, do: elem(combatant, 1), else: nil
+        case team do
+          :elf -> 'E'
+          :goblin -> 'G'
+          _ -> '?'
+        end
+      _ -> ' '
+    end
+    |> IO.write
   end
 end

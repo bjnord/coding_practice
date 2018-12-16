@@ -30,7 +30,7 @@ defmodule Combat do
   """
   def part1(input_file) do
     initial_arena = parse_input(input_file)
-    {{_final_grid, final_roster}, n_rounds} =
+    {{final_grid, final_roster}, n_rounds} =
       1..1_000_000
       |> Enum.reduce_while(initial_arena, fn (round, arena) ->
         {{new_grid, new_roster}, done} = fight(arena, :puzzle)
@@ -38,6 +38,14 @@ defmodule Combat do
           true ->
             {:halt, {{new_grid, new_roster}, round}}
           false ->
+            ###
+            # DEBUG: dump each step, stop at 26
+            dump_arena({new_grid, new_roster}, round)
+            if round == 26 do
+              raise "DEBUG: quit here to inspect"
+            end
+            # END DEBUG
+            ###
             {:cont, {new_grid, new_roster}}
         end
       end)
