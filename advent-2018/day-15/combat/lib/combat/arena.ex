@@ -357,7 +357,7 @@ defmodule Combat.Arena do
   @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
   defp reachable_candidates(candidates, {grid, _roster}, mover, _opponents) do
     distances = path_distances(grid, elem(mover, 0))
-    Enum.filter(candidates, fn ({pos, _opponents}) -> distances[pos] != nil end)
+    Enum.filter(candidates, fn ({pos, _opponents}) -> distances[pos] end)
   end
 
   @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
