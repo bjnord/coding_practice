@@ -131,20 +131,7 @@ defmodule Combat.Arena do
   - updated arena
   - is the battle over? (boolean)
 
-  ## Example
-
-      iex> arena = {%{
-      ...>     {0, 0} => :floor,
-      ...>     {0, 1} => :combatant,
-      ...>     {1, 0} => :combatant,
-      ...>     {1, 1} => :floor,
-      ...>   }, MapSet.new([
-      ...>     {{0, 1}, :goblin, 3, 2},
-      ...>     {{1, 0}, :elf, 3, 200},
-      ...>   ])
-      ...> }
-      iex> Combat.Arena.fight(arena, :pacifist) |> elem(1)
-      false
+  ## Examples
 
       iex> arena = {%{
       ...>     {0, 0} => :combatant,  {0, 1} => :floor,  {0, 2} => :floor,
@@ -163,6 +150,26 @@ defmodule Combat.Arena do
         }, MapSet.new([
           {{0, 1}, :elf, 3, 200},
           {{1, 2}, :goblin, 3, 2},
+        ])
+      }
+
+      iex> arena = {%{
+      ...>     {0, 0} => :floor,  {0, 1} => :combatant,  {0, 2} => :rock,
+      ...>     {1, 0} => :rock,   {1, 1} => :floor,      {1, 2} => :combatant,
+      ...>     {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+      ...>   }, MapSet.new([
+      ...>     {{0, 1}, :elf, 3, 200},
+      ...>     {{1, 2}, :goblin, 2, 20},
+      ...>   ])
+      ...> }
+      iex> Combat.Arena.fight(arena, :puzzle) |> elem(0)
+      {%{
+          {0, 0} => :floor,  {0, 1} => :floor,      {0, 2} => :rock,
+          {1, 0} => :rock,   {1, 1} => :combatant,  {1, 2} => :combatant,
+          {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+        }, MapSet.new([
+          {{1, 1}, :elf, 3, 198},
+          {{1, 2}, :goblin, 2, 17},
         ])
       }
   """
@@ -195,17 +202,42 @@ defmodule Combat.Arena do
 
   defp fight_in_style({grid, roster}, fighter, opponents, :pacifist) do
     #IO.inspect(fighter, label: "next fighter (pacifist)")
+    {{grid, roster}, _fighter} =
+      movement_phase({grid, roster}, fighter, opponents)
+    {grid, roster}
+  end
+
+  defp fight_in_style({grid, roster}, fighter, opponents, :puzzle) do
+    #IO.inspect(fighter, label: "next fighter (puzzle)")
+    {{grid, roster}, fighter} =
+      movement_phase({grid, roster}, fighter, opponents)
+    attack_phase({grid, roster}, fighter)
+  end
+
+  defp movement_phase({grid, roster}, fighter, opponents) do
     if opponents_near?({grid, roster}, fighter) do
-      {grid, roster}  # no need to move
+      {{grid, roster}, fighter}  # no need to move
     else
       candidate = next_position({grid, roster}, fighter, opponents)
       next_step = next_step_toward({grid, roster}, fighter, candidate)
       if next_step == nil do
-        {grid, roster}
+        {{grid, roster}, fighter}  # no place to move
       else
         move({grid, roster}, fighter, next_step)
-        |> elem(0)
       end
+    end
+  end
+
+  defp attack_phase({grid, roster}, {pos, team, pw, hp}) do
+    positions =
+      combatant_positions_around({grid, roster}, {pos, team, pw, hp}, opponent(team))
+    if positions != [] do
+      target_pos = Enum.min(positions)
+      target = Enum.find(roster, fn (combatant) -> elem(combatant, 0) == target_pos end)
+      attack({grid, roster}, {pos, team, pw, hp}, target)
+      |> elem(0)
+    else
+      {grid, roster}  # no one to fight
     end
   end
 
@@ -474,11 +506,30 @@ defmodule Combat.Arena do
   """
   @spec opponents_near?(arena(), combatant()) :: boolean()
   def opponents_near?(arena, {pos, team, pw, hp}) do
-    combatants_around(arena, {pos, team, pw, hp}, opponent(team)) != []
+    combatant_positions_around(arena, {pos, team, pw, hp}, opponent(team)) != []
   end
 
-  @spec combatants_around(arena(), combatant(), team()) :: [candidate()]
-  defp combatants_around({grid, roster}, {{y, x}, _team, _pw, _hp}, vs_team) do
+  @doc ~S"""
+  Find opponent positions adjacent to a combatant.
+
+  ## Examples
+
+      iex> arena = {%{
+      ...>     {0, 0} => :combatant,  {0, 1} => :floor,      {0, 2} => :floor,
+      ...>     {1, 0} => :combatant,  {1, 1} => :combatant,  {1, 2} => :floor,
+      ...>     {2, 0} => :rock,       {2, 1} => :floor,      {2, 2} => :floor,
+      ...>   }, MapSet.new([
+      ...>     {{0, 0}, :elf, 3, 50},
+      ...>     {{1, 0}, :elf, 3, 200},
+      ...>     {{1, 1}, :goblin, 3, 2},
+      ...>   ])
+      ...> }
+      iex> combatant = {{1, 0}, :elf, 3, 200}
+      iex> Combat.Arena.combatant_positions_around(arena, combatant, :goblin)
+      [{1, 1}]
+  """
+  @spec combatant_positions_around(arena(), combatant(), team()) :: [candidate()]
+  def combatant_positions_around({grid, roster}, {{y, x}, _team, _pw, _hp}, vs_team) do
     [  # in "reading order":
       {y-1, x},
       {y, x-1},
@@ -491,7 +542,7 @@ defmodule Combat.Arena do
         (c_pos == pos) && (c_team == vs_team)
       end)
     end)
-    #|> IO.inspect(label: "combatants around #{y},#{x}")
+    #|> IO.inspect(label: "combatant positions around #{y},#{x}")
   end
 
   @doc ~S"""
@@ -537,15 +588,67 @@ defmodule Combat.Arena do
         new_roster = roster
                  |> MapSet.delete({old_pos, team, pw, hp})
                  |> MapSet.put({new_pos, team, pw, hp})
-        {old_pos, team, pw, hp}
+        #{old_pos, team, pw, hp}
         #|> IO.inspect(label: "<<<<< moved needed from")
-        {new_pos, team, pw, hp}
+        #{new_pos, team, pw, hp}
         #|> IO.inspect(label: "<<<<< moved needed to")
         {{new_grid, new_roster}, {new_pos, team, pw, hp}}
       old_pos == new_pos ->
-        {old_pos, team, pw, hp}
+        #{old_pos, team, pw, hp}
         #|> IO.inspect(label: "===== no move needed by")
         {{grid, roster}, {old_pos, team, pw, hp}}
     end
+  end
+
+  @doc ~S"""
+  Attack an opponent.
+
+  ## Example
+
+      iex> arena = {%{
+      ...>     {0, 0} => :floor,  {0, 1} => :floor,      {0, 2} => :floor,
+      ...>     {1, 0} => :rock,   {1, 1} => :combatant,  {1, 2} => :combatant,
+      ...>     {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+      ...>   }, MapSet.new([
+      ...>     {{1, 1}, :elf, 3, 200},
+      ...>     {{1, 2}, :goblin, 3, 20},
+      ...>   ])
+      ...> }
+      iex> combatant = {{1, 1}, :elf, 3, 200}
+      iex> opponent = {{1, 2}, :goblin, 3, 20}
+      iex> {arena_a, opponent_a} = Combat.Arena.attack(arena, combatant, opponent)
+      iex> arena_a
+      {%{
+          {0, 0} => :floor,  {0, 1} => :floor,      {0, 2} => :floor,
+          {1, 0} => :rock,   {1, 1} => :combatant,  {1, 2} => :combatant,
+          {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+        }, MapSet.new([
+          {{1, 1}, :elf, 3, 200},
+          {{1, 2}, :goblin, 3, 17},
+        ])
+      }
+      iex> opponent_a
+      {{1, 2}, :goblin, 3, 17}
+  """
+  @spec attack(arena(), combatant(), combatant()) :: {arena(), combatant()}
+  def attack({grid, roster}, {pos, _team, pw, _hp}, {o_pos, o_team, o_pw, o_hp}) do
+    new_opponent = {o_pos, o_team, o_pw, o_hp - pw}
+    new_roster =
+      cond do
+        manhattan(pos, o_pos) != 1 ->
+          raise "attempt to attack more than one square away"
+        o_hp > pw ->
+          roster
+          |> MapSet.delete({o_pos, o_team, o_pw, o_hp})
+          |> MapSet.put(new_opponent)
+        o_hp <= pw ->
+          roster
+          |> MapSet.delete({o_pos, o_team, o_pw, o_hp})
+      end
+    #{o_pos, o_team, o_pw, o_hp}
+    #|> IO.inspect(label: "<<<<< attack before")
+    #new_opponent
+    #|> IO.inspect(label: ">>>>> attack after")
+    {{grid, new_roster}, new_opponent}
   end
 end
