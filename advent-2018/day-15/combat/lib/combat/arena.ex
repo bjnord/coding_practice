@@ -120,6 +120,11 @@ defmodule Combat.Arena do
   @doc ~S"""
   Execute a round of combat.
 
+  ## Parameters
+
+  - arena: Current arena state
+  - style: Combat model
+
   ## Returns
 
   Tuple:
@@ -138,30 +143,76 @@ defmodule Combat.Arena do
       ...>     {{1, 0}, :elf, 3, 200},
       ...>   ])
       ...> }
-      iex> Combat.Arena.fight(arena) |> elem(1)
+      iex> Combat.Arena.fight(arena, :pacifist) |> elem(1)
       false
+
+      iex> arena = {%{
+      ...>     {0, 0} => :combatant,  {0, 1} => :floor,  {0, 2} => :floor,
+      ...>     {1, 0} => :rock,       {1, 1} => :floor,  {1, 2} => :floor,
+      ...>     {2, 0} => :floor,      {2, 1} => :rock,   {2, 2} => :combatant,
+      ...>   }, MapSet.new([
+      ...>     {{0, 0}, :elf, 3, 200},
+      ...>     {{2, 2}, :goblin, 3, 2},
+      ...>   ])
+      ...> }
+      iex> Combat.Arena.fight(arena, :pacifist) |> elem(0)
+      {%{
+          {0, 0} => :floor,  {0, 1} => :combatant,  {0, 2} => :floor,
+          {1, 0} => :rock,   {1, 1} => :floor,      {1, 2} => :combatant,
+          {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+        }, MapSet.new([
+          {{0, 1}, :elf, 3, 200},
+          {{1, 2}, :goblin, 3, 2},
+        ])
+      }
   """
-  @spec fight(arena()) :: {arena(), boolean()}
-  def fight({grid, roster}) do
-    Enum.sort(roster, &(elem(&1, 0) <= elem(&2, 0)))
-    |> Enum.reduce_while({{grid, roster}, false}, fn ({pos, team, pw, hp}, {{grid_a, roster_a}, _done}) ->
-      IO.inspect({pos, team, pw, hp}, label: "next combatant")
-      enemies = find_combatants({grid_a, roster_a}, opponent(team))
-      if enemies != [] do
-        # TODO inspect, move, attack, etc.
-        {:cont, {{grid_a, roster_a}, false}}
+  @spec fight(arena(), atom()) :: {arena(), boolean()}
+  def fight({grid, roster}, style) do
+    fighters =  # take turns in "reading order":
+      Enum.sort_by(roster, &(elem(&1, 0)))
+    # FIXME there's got to be a better way to iterate with 2 conditions
+    #       (end of list or out of opponents)
+    1..1_000_000 |>
+    Enum.reduce_while({{grid, roster}, fighters}, fn (_c, {{grid_a, roster_a}, f_left}) ->
+      [{pos, team, pw, hp} | f_left] = f_left
+      opponents = find_combatants({grid_a, roster_a}, opponent(team))
+      if opponents != [] do
+        {grid_a, roster_a} = fight_in_style({grid_a, roster_a}, {pos, team, pw, hp}, opponents, style)
+        if f_left != [] do
+          {:cont, {{grid_a, roster_a}, f_left}}
+        else
+          {:halt, {{grid_a, roster_a}, false}}
+        end
       else
         {:halt, {{grid_a, roster_a}, true}}
       end
     end)
+    #|> IO.inspect(label: "ding ding ding")
+  end
+
+  # fight_in_style(): one fighter takes their turn
+  @spec fight_in_style(arena(), combatant(), [combatant()], atom()) :: arena()
+
+  defp fight_in_style({grid, roster}, fighter, opponents, :pacifist) do
+    #IO.inspect(fighter, label: "next fighter (pacifist)")
+    if opponents_near?({grid, roster}, fighter) do
+      {grid, roster}  # no need to move
+    else
+      candidate = next_position({grid, roster}, fighter, opponents)
+      next_step = next_step_toward({grid, roster}, fighter, candidate)
+      if next_step == nil do
+        {grid, roster}
+      else
+        move({grid, roster}, fighter, next_step)
+        |> elem(0)
+      end
+    end
   end
 
   @doc ~S"""
   Find the position a combatant should be moving toward.
 
-  This might be the current position of the combatant (meaning no move
-  is needed). But if a position is returned, it will always be reachable
-  (not blocked).
+  If a position is returned, it will always be reachable (not blocked).
 
   ## Parameters
 
@@ -174,7 +225,7 @@ defmodule Combat.Arena do
   Candidate position to move toward (includes surrounding opponent list),
   or `nil` if no such position exists
 
-  ## Example
+  ## Examples
 
   # In range: [
   #   {{0, 0}, [{{0, 1}, :goblin, 3, 20}]},
@@ -206,12 +257,24 @@ defmodule Combat.Arena do
       ...>   ])
       ...> }
       iex> mover = {{2, 0}, :elf, 3, 200}
-      iex> opponents = [
-      ...>   {{0, 1}, :goblin, 3, 20},
-      ...>   {{1, 2}, :goblin, 3, 2},
-      ...> ]
+      iex> opponents = Combat.Arena.find_combatants(arena, :goblin)
       iex> Combat.Arena.next_position(arena, mover, opponents) |> elem(0)
       {0, 0}
+
+      iex> arena = {%{
+      ...>     {0, 0} => :rock,
+      ...>     {0, 1} => :combatant,
+      ...>     {1, 0} => :combatant,
+      ...>     {1, 1} => :rock,
+      ...>   }, MapSet.new([
+      ...>     {{0, 1}, :goblin, 3, 2},
+      ...>     {{1, 0}, :elf, 3, 200},
+      ...>   ])
+      ...> }
+      iex> mover = {{1, 0}, :elf, 3, 200}
+      iex> opponents = Combat.Arena.find_combatants(arena, :goblin)
+      iex> Combat.Arena.next_position(arena, mover, opponents)
+      nil
   """
   @spec next_position(arena(), combatant(), roster()) :: candidate()
   def next_position({grid, roster}, mover, opponents) do
@@ -222,8 +285,8 @@ defmodule Combat.Arena do
     #|> IO.inspect(label: "Reachable")
     |> nearest_candidates({grid, roster}, mover, opponents)
     #|> IO.inspect(label: "Nearest")
-    # first position in "reading order":
-    |> Enum.min_by(fn (candidate) -> elem(candidate, 0) end)
+    # choose first position in "reading order":
+    |> min_by_or_nil(fn (candidate) -> elem(candidate, 0) end)
     #|> IO.inspect(label: "Chosen")
   end
 
@@ -306,12 +369,19 @@ defmodule Combat.Arena do
     |> Enum.reverse
   end
 
+  # TODO seems I'm creating my own little Enum-extensions library
+  def min_by_or_nil(enum, func) do
+    if Enum.empty?(enum) do
+      nil
+    else
+      Enum.min_by(enum, func)
+    end
+  end
+
   @doc ~S"""
   Find the next step a combatant should take toward a position.
 
-  This might be the current position of the combatant (meaning no move is
-  needed). But if a step position is returned, it will always be reachable
-  (not blocked).
+  If a position is returned, it will always be reachable (not blocked).
 
   ## Parameters
 
@@ -353,6 +423,9 @@ defmodule Combat.Arena do
       {0, 1}
   """
   @spec next_step_toward(arena(), combatant(), candidate()) :: position()
+  def next_step_toward(_arena, _mover, nil) do
+    nil
+  end
   def next_step_toward({grid, _roster}, mover, {position, _opponents}) do
     #IO.inspect(mover, label: "Mover")
     #IO.inspect(position, label: "Position")
@@ -360,9 +433,119 @@ defmodule Combat.Arena do
     #|> IO.inspect(label: "Surrounding Me")
     |> multi_min_by(fn ({pos, _}) -> manhattan(position, pos) end)
     #|> IO.inspect(label: "Nearest To Him")
-    # first position in "reading order":
+    # choose first position in "reading order":
     |> Enum.min_by(fn (candidate) -> elem(candidate, 0) end)
     |> elem(0)
     #|> IO.inspect(label: "Step")
+  end
+
+  @doc ~S"""
+  Are there opponents adjacent to this combatant?
+
+  ## Examples
+
+      iex> arena = {%{
+      ...>     {0, 0} => :combatant,  {0, 1} => :floor,  {0, 2} => :floor,
+      ...>     {1, 0} => :combatant,  {1, 1} => :floor,  {1, 2} => :floor,
+      ...>     {2, 0} => :rock,       {2, 1} => :floor,  {2, 2} => :combatant,
+      ...>   }, MapSet.new([
+      ...>     {{0, 0}, :elf, 3, 50},
+      ...>     {{1, 0}, :elf, 3, 200},
+      ...>     {{2, 2}, :goblin, 3, 2},
+      ...>   ])
+      ...> }
+      iex> combatant = {{1, 0}, :elf, 3, 200}
+      iex> Combat.Arena.opponents_near?(arena, combatant)
+      false
+
+      iex> arena = {%{
+      ...>     {0, 0} => :combatant,  {0, 1} => :floor,      {0, 2} => :floor,
+      ...>     {1, 0} => :combatant,  {1, 1} => :combatant,  {1, 2} => :floor,
+      ...>     {2, 0} => :rock,       {2, 1} => :floor,      {2, 2} => :floor,
+      ...>   }, MapSet.new([
+      ...>     {{0, 0}, :elf, 3, 50},
+      ...>     {{1, 0}, :elf, 3, 200},
+      ...>     {{1, 1}, :goblin, 3, 2},
+      ...>   ])
+      ...> }
+      iex> combatant = {{1, 0}, :elf, 3, 200}
+      iex> Combat.Arena.opponents_near?(arena, combatant)
+      true
+  """
+  @spec opponents_near?(arena(), combatant()) :: boolean()
+  def opponents_near?(arena, {pos, team, pw, hp}) do
+    combatants_around(arena, {pos, team, pw, hp}, opponent(team)) != []
+  end
+
+  @spec combatants_around(arena(), combatant(), team()) :: [candidate()]
+  defp combatants_around({grid, roster}, {{y, x}, _team, _pw, _hp}, vs_team) do
+    [  # in "reading order":
+      {y-1, x},
+      {y, x-1},
+      {y, x+1},
+      {y+1, x},
+    ]
+    |> Enum.filter(fn pos -> grid[pos] == :combatant end)
+    |> Enum.filter(fn pos ->
+      Enum.any?(roster, fn {c_pos, c_team, _pw, _hp} ->
+        (c_pos == pos) && (c_team == vs_team)
+      end)
+    end)
+    #|> IO.inspect(label: "combatants around #{y},#{x}")
+  end
+
+  @doc ~S"""
+  Move a combatant to a new position.
+
+  ## Example
+
+      iex> arena = {%{
+      ...>     {0, 0} => :combatant,  {0, 1} => :floor,  {0, 2} => :floor,
+      ...>     {1, 0} => :rock,       {1, 1} => :floor,  {1, 2} => :floor,
+      ...>     {2, 0} => :floor,      {2, 1} => :rock,   {2, 2} => :combatant,
+      ...>   }, MapSet.new([
+      ...>     {{0, 0}, :elf, 3, 200},
+      ...>     {{2, 2}, :goblin, 3, 2},
+      ...>   ])
+      ...> }
+      iex> combatant = {{0, 0}, :elf, 3, 200}
+      iex> {arena_m, combatant_m} = Combat.Arena.move(arena, combatant, {0, 1})
+      iex> arena_m
+      {%{
+          {0, 0} => :floor,  {0, 1} => :combatant,  {0, 2} => :floor,
+          {1, 0} => :rock,   {1, 1} => :floor,      {1, 2} => :floor,
+          {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :combatant,
+        }, MapSet.new([
+          {{0, 1}, :elf, 3, 200},
+          {{2, 2}, :goblin, 3, 2},
+        ])
+      }
+      iex> combatant_m
+      {{0, 1}, :elf, 3, 200}
+  """
+  @spec move(arena(), combatant(), position()) :: {arena(), combatant()}
+  def move({grid, roster}, {old_pos, team, pw, hp}, new_pos) do
+    cond do
+      new_pos == nil ->
+        raise "attempt to move nowhere"
+      (old_pos != new_pos) && manhattan(old_pos, new_pos) != 1 ->
+        raise "attempt to move more than one square"
+      old_pos != new_pos ->
+        new_grid = grid
+               |> Map.replace!(old_pos, :floor)
+               |> Map.replace!(new_pos, :combatant)
+        new_roster = roster
+                 |> MapSet.delete({old_pos, team, pw, hp})
+                 |> MapSet.put({new_pos, team, pw, hp})
+        {old_pos, team, pw, hp}
+        #|> IO.inspect(label: "<<<<< moved needed from")
+        {new_pos, team, pw, hp}
+        #|> IO.inspect(label: "<<<<< moved needed to")
+        {{new_grid, new_roster}, {new_pos, team, pw, hp}}
+      old_pos == new_pos ->
+        {old_pos, team, pw, hp}
+        #|> IO.inspect(label: "===== no move needed by")
+        {{grid, roster}, {old_pos, team, pw, hp}}
+    end
   end
 end
