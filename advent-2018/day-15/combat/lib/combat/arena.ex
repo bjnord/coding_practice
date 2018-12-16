@@ -707,21 +707,21 @@ defmodule Combat.Arena do
     path_distances_around(grid, origin, origin, %{origin => 0}, 1)
   end
 
-  defp path_distances(grid, origin, next_pos, :floor, seen, count) do
-    path_distances_around(grid, origin, next_pos, Map.put(seen, next_pos, count), count+1)
+  defp path_distances(grid, origin, next_pos, :floor, seen, dist) do
+    path_distances_around(grid, origin, next_pos, Map.put(seen, next_pos, dist), dist+1)
   end
 
-  defp path_distances(_grid, _origin, next_pos, _sq_type, seen, _count) do
+  defp path_distances(_grid, _origin, next_pos, _sq_type, seen, _dist) do
     Map.put(seen, next_pos, nil)  # non-:floor square ends branching
   end
 
-  defp path_distances_around(grid, origin, next_pos, seen, count) do
+  defp path_distances_around(grid, origin, next_pos, seen, dist) do
     # these are "potential paths forward" (branches that start with squares around me
     # that are in the grid, but that I haven't seen yet)
     positions_around(next_pos)
     |> Enum.reject(fn (pos) -> (grid[pos] == nil) || Map.has_key?(seen, pos) end)
     |> Enum.reduce(seen, fn (search_pos, seen) ->
-      path_distances(grid, origin, search_pos, grid[search_pos], seen, count)
+      path_distances(grid, origin, search_pos, grid[search_pos], seen, dist)
     end)
   end
 
