@@ -10,8 +10,41 @@ defmodule Combat.Arena do
   # FIXME In Elixir, for module Foo the main type for Foo should be named Foo.t
   @type arena() :: {grid(), roster()}
 
+  ###
+  # PARSING
+  ###
+
   @doc ~S"""
-  Parses a line from the initial state, adding its data to accumulators.
+  Parse a complete puzzle.
+
+  ## Example
+
+      iex> {grid, roster} = Combat.Arena.parse_puzzle([
+      ...>   "#E#\n",
+      ...>   ".G.\n",
+      ...> ])
+      iex> grid
+      %{
+        {0, 0} => :rock,
+        {0, 1} => :combatant,
+        {0, 2} => :rock,
+        {1, 0} => :floor,
+        {1, 1} => :combatant,
+        {1, 2} => :floor,
+      }
+      iex> roster
+      #MapSet<[{{0, 1}, :elf, 3, 200}, {{1, 1}, :goblin, 3, 200}]>
+  """
+  @spec parse_puzzle([String.t()]) :: arena()
+  def parse_puzzle(lines) when is_list(lines) do
+    Enum.reduce(lines, {0, {%{}, MapSet.new()}}, fn (line, {y, {grid, combatants}}) ->
+      {y+1, parse_line({grid, combatants}, line, y)}
+    end)
+    |> elem(1)
+  end
+
+  @doc ~S"""
+  Parse a line from the initial state, adding its data to accumulators.
 
   ## Example
 

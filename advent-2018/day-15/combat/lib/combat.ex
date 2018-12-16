@@ -58,10 +58,8 @@ defmodule Combat do
   defp parse_input(input_file) do
     input_file
     |> File.stream!
-    |> Enum.reduce({0, {%{}, MapSet.new()}}, fn (line, {y, {grid, combatants}}) ->
-      {y+1, parse_line({grid, combatants}, line, y)}
-    end)
-    |> elem(1)
+    |> Enum.map(&(&1))  # FIXME
+    |> parse_puzzle()
   end
 
   @doc """
