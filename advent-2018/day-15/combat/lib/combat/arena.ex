@@ -641,22 +641,28 @@ defmodule Combat.Arena do
   @spec attack(arena(), combatant(), combatant()) :: {arena(), combatant()}
   def attack({grid, roster}, {pos, _team, pw, _hp}, {o_pos, o_team, o_pw, o_hp}) do
     new_opponent = {o_pos, o_team, o_pw, o_hp - pw}
-    new_roster =
+    {new_grid, new_roster} =
       cond do
         manhattan(pos, o_pos) != 1 ->
           raise "attempt to attack more than one square away"
         o_hp > pw ->
-          roster
-          |> MapSet.delete({o_pos, o_team, o_pw, o_hp})
-          |> MapSet.put(new_opponent)
+          new_roster =
+            roster
+            |> MapSet.delete({o_pos, o_team, o_pw, o_hp})
+            |> MapSet.put(new_opponent)
+          {grid, new_roster}
         o_hp <= pw ->
-          roster
-          |> MapSet.delete({o_pos, o_team, o_pw, o_hp})
+          new_grid =
+            Map.replace!(grid, o_pos, :floor)
+          new_roster =
+            roster
+            |> MapSet.delete({o_pos, o_team, o_pw, o_hp})
+          {new_grid, new_roster}
       end
     #{o_pos, o_team, o_pw, o_hp}
     #|> IO.inspect(label: "<<<<< attack before")
     #new_opponent
     #|> IO.inspect(label: ">>>>> attack after")
-    {{grid, new_roster}, new_opponent}
+    {{new_grid, new_roster}, new_opponent}
   end
 end

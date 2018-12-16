@@ -52,6 +52,32 @@ defmodule Combat.ArenaTest do
     assert next_step_toward(arena, mover, candidate) == {1, 3}
   end
 
+  test "attack() when opponent dies" do
+    arena = {%{
+        {0, 0} => :floor,  {0, 1} => :floor,      {0, 2} => :floor,
+        {1, 0} => :rock,   {1, 1} => :combatant,  {1, 2} => :combatant,
+        {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+      }, MapSet.new([
+        {{1, 1}, :elf, 3, 200},
+        {{1, 2}, :goblin, 3, 2},
+      ])
+    }
+    combatant = {{1, 1}, :elf, 3, 200}
+    opponent = {{1, 2}, :goblin, 3, 2}
+    {arena_a, opponent_a} = Combat.Arena.attack(arena, combatant, opponent)
+    assert arena_a ==
+      {%{
+          {0, 0} => :floor,  {0, 1} => :floor,      {0, 2} => :floor,
+          {1, 0} => :rock,   {1, 1} => :combatant,  {1, 2} => :floor,
+          {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :floor,
+        }, MapSet.new([
+          {{1, 1}, :elf, 3, 200},
+        ])
+      }
+    assert opponent_a ==
+      {{1, 2}, :goblin, 3, -1}
+  end
+
   test "fight(:pacifist) puzzle example" do
     round_0 =
       {%{}, MapSet.new()}
