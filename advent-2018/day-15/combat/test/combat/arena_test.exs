@@ -29,6 +29,29 @@ defmodule Combat.ArenaTest do
   end
 
   # :!mix test test/combat/arena_test.exs:32
+  test "next_position() puzzle movement example" do
+    # this is partway through round 1,
+    # after 4 goblins and 1 elf have moved
+    arena = parse_puzzle([
+      "#########\n",
+      "#.G...G.#\n",
+      "#...G...#\n",
+      "#...E...#\n",
+      "#.G....G#\n",
+      "#.......#\n",
+      "#.......#\n",
+      "#G..G..G#\n",
+      "#########\n",
+    ])
+    mover = {{4, 7}, :goblin, 3, 200}
+    opponents = find_combatants(arena, :elf)
+    assert next_position(arena, mover, opponents) == {
+      {3, 5},
+      [{{3, 4}, :elf, 3, 200}]
+    }
+  end
+
+  # :!mix test test/combat/arena_test.exs:32
   test "next_position() after death in puzzle round 23" do
     {grid, roster} =
       {%{}, MapSet.new()}
@@ -81,6 +104,30 @@ defmodule Combat.ArenaTest do
     candidate = next_position(arena, mover, opponents)
     assert elem(candidate, 0) == {2, 4}
     assert next_step_toward(arena, mover, candidate) == {1, 3}
+  end
+
+  # :!mix test test/combat/arena_test.exs:110
+  test "next_step_toward() puzzle movement example" do
+    # this is partway through round 1,
+    # after 4 goblins and 1 elf have moved
+    arena = parse_puzzle([
+      "#########\n",
+      "#.G...G.#\n",
+      "#...G...#\n",
+      "#...E...#\n",
+      "#.G....G#\n",
+      "#.......#\n",
+      "#.......#\n",
+      "#G..G..G#\n",
+      "#########\n",
+    ])
+    mover = {{4, 7}, :goblin, 3, 200}
+    # (make sure test is constructed correctly:)
+    assert MapSet.member?(elem(arena, 1), mover)
+    opponents = find_combatants(arena, :elf)
+    candidate = next_position(arena, mover, opponents)
+    assert elem(candidate, 0) == {3, 5}
+    assert next_step_toward(arena, mover, candidate) == {3, 7}
   end
 
   # :!mix test test/combat/arena_test.exs:87
