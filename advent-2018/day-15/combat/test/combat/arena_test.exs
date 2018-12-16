@@ -116,7 +116,7 @@ defmodule Combat.ArenaTest do
       |> parse_line("#.....#\n", 5)
       |> parse_line("#######\n", 6)
 
-    {grid_1, roster_1} =
+    {grid_1, _roster_1} =
       {%{}, MapSet.new()}
       |> parse_line("#######\n", 0)
       |> parse_line("#..G..#\n", 1)
@@ -139,7 +139,7 @@ defmodule Combat.ArenaTest do
   end
 
   test "fight(:puzzle) puzzle example [ending]" do
-    {grid_47, roster_47} =
+    {grid_47, _} =
       {%{}, MapSet.new()}
       |> parse_line("#######\n", 0)
       |> parse_line("#G....#\n", 1)

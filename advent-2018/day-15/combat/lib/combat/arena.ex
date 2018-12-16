@@ -461,13 +461,21 @@ defmodule Combat.Arena do
   def next_step_toward({grid, _roster}, mover, {position, _opponents}) do
     #IO.inspect(mover, label: "Mover")
     #IO.inspect(position, label: "Position")
-    floor_squares_around(grid, mover)
-    #|> IO.inspect(label: "Surrounding Me")
-    |> multi_min_by(fn ({pos, _}) -> manhattan(position, pos) end)
-    #|> IO.inspect(label: "Nearest To Him")
-    # choose first position in "reading order":
-    |> Enum.min_by(fn (candidate) -> elem(candidate, 0) end)
-    |> elem(0)
+    possible_steps =
+      floor_squares_around(grid, mover)
+      #|> IO.inspect(label: "Surrounding Me")
+      |> multi_min_by(fn ({pos, _}) -> manhattan(position, pos) end)
+      #|> IO.inspect(label: "Nearest To Him")
+    if possible_steps != [] do
+      # choose first position in "reading order":
+      possible_steps
+      |> Enum.min_by(fn (candidate) -> elem(candidate, 0) end)
+      |> elem(0)
+    else
+      # TODO once reachable_candidates() is done, this may never
+      #      happen; change to "raise"
+      nil
+    end
     #|> IO.inspect(label: "Step")
   end
 

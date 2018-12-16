@@ -29,11 +29,22 @@ defmodule Combat do
   - Part 1 answer is: ...
   """
   def part1(input_file) do
-    ans_type = "combat checksum"
-    parse_input(input_file)
-    |> elem(1)       # TODO run the battle
-    |> Enum.count()  # TODO run the battle
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+    initial_arena = parse_input(input_file)
+    {{_final_grid, final_roster}, n_rounds} =
+      1..1_000_000
+      |> Enum.reduce_while(initial_arena, fn (round, arena) ->
+        {{new_grid, new_roster}, done} = fight(arena, :puzzle)
+        case done do
+          true ->
+            {:halt, {{new_grid, new_roster}, round}}
+          false ->
+            {:cont, {new_grid, new_roster}}
+        end
+      end)
+    total_hp = final_roster
+               |> Enum.map(fn ({_pos, _team, _pw, hp}) -> hp end)
+               |> Enum.sum
+    IO.inspect((n_rounds-1) * total_hp, label: "Part 1 combat checksum is")
   end
 
   defp parse_input(input_file) do
