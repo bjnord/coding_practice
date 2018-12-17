@@ -26,7 +26,7 @@ defmodule Combat do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 INCORRECT answer (too high) is: 266216
   """
   def part1(input_file) do
     initial_arena = parse_input(input_file)
