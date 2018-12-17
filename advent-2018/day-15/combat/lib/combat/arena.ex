@@ -162,6 +162,36 @@ defmodule Combat.Arena do
   end
 
   @doc ~S"""
+  Fight a whole battle.
+
+  ## Returns
+
+  Final arena, and number of rounds fought (**including** a potential
+  incomplete final round).
+  """
+  @spec battle(arena(), atom()) :: {arena(), non_neg_integer()}
+  def battle(arena, style) do
+    1..1_000_000
+    |> Enum.reduce_while(arena, fn (round, arena) ->
+      {arena, done} = fight(arena, style)
+      case done do
+        true ->
+          {:halt, {arena, round}}
+        false ->
+          ###
+          # DEBUG: dump each step, stop at round, etc.
+          #dump_arena(arena, round)
+          #if round == 26 do
+          #  raise "DEBUG: quit here to inspect"
+          #end
+          # END DEBUG
+          ###
+          {:cont, arena}
+      end
+    end)
+  end
+
+  @doc ~S"""
   Execute a round of combat.
 
   ## Parameters

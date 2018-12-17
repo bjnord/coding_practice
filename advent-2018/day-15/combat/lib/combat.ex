@@ -30,28 +30,21 @@ defmodule Combat do
   """
   def part1(input_file) do
     initial_arena = parse_input(input_file)
-    {{final_grid, final_roster}, n_rounds} =
-      1..1_000_000
-      |> Enum.reduce_while(initial_arena, fn (round, arena) ->
-        {{new_grid, new_roster}, done} = fight(arena, :puzzle)
-        case done do
-          true ->
-            {:halt, {{new_grid, new_roster}, round}}
-          false ->
-            ###
-            # DEBUG: dump each step, stop at 26
-            dump_arena({new_grid, new_roster}, round)
-            if round == 26 do
-              raise "DEBUG: quit here to inspect"
-            end
-            # END DEBUG
-            ###
-            {:cont, {new_grid, new_roster}}
-        end
-      end)
+    ###
+    # DEBUG: dump initial state
+    #dump_arena(initial_arena, 0)
+    # END DEBUG
+    ###
+    {{final_grid, final_roster}, n_rounds} = battle(initial_arena, :puzzle)
     total_hp = final_roster
                |> Enum.map(fn ({_pos, _team, _pw, hp, _id}) -> hp end)
                |> Enum.sum
+    ###
+    # DEBUG: dump final state
+    #dump_arena({final_grid, final_roster}, n_rounds-1)
+    #IO.inspect(total_hp, label: "Total HP")
+    # END DEBUG
+    ###
     IO.inspect((n_rounds-1) * total_hp, label: "Part 1 combat checksum is")
   end
 
