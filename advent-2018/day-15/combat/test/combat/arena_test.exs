@@ -343,5 +343,21 @@ defmodule Combat.ArenaTest do
     ])
     {_arena, round} = battle(arena, :puzzle)
     assert (round-1) == 67
+    assert total_hp == 200
+  end
+
+  test "corner case #2" do
+    arena = parse_puzzle([
+      "#####\n",
+      "#GG##\n",
+      "#.###\n",
+      "#..E#\n",
+      "#.#G#\n",
+      "#.E##\n",
+      "#####\n",
+    ])
+    {_arena, round} = battle(arena, :puzzle)
+    assert (round-1) == 71
+    assert total_hp == 197
   end
 end

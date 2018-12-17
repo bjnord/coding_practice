@@ -365,3 +365,26 @@ Thank you Lebossle, gyorokpeter, et al for these _excellent_ [tips](https://www.
 - The rounds only end when a unit starts taking its turn and there are no enemies left. This is not the same as ending when the last unit of a team dies or as ending when a round ends with 0 units of a team, but only in the case that the last turn of a round resulted in the last death of the battle (in this case, you count one more round to have been completed before the battle end). (thanks jonathan\_paulson)
 
 - For part 2, binary search is not reliable, as there is significant butterfly-effect in the puzzle. You should use brute force instead. (thanks jlweinkam)
+
+Specific [corner cases](https://www.reddit.com/r/adventofcode/comments/a6f100/day_15_details_easy_to_be_wrong_on/ebuxcs6/):
+
+```
+####
+##E#
+#GG#
+####
+```
+
+This takes 67 full rounds [and ends with 200 HP]. After the first gnome dies on the 67th round, the other gnome takes his turn and kills the elf, the round ends, and on the next one the battle ends. Make sure that the last gnome does not take a second turn on the 67th round due to being in the same position as the dead gnome when it would be the dead gnome's turn.
+
+```
+#####
+#GG##
+#.###
+#..E#
+#.#G#
+#.E##
+#####
+```
+
+This takes 71 full rounds and ends with 197 HP]. In the 68th round, the bottom-left elf moves after being damaged, make sure that this doesn't trigger weird behavior. (thanks fizbin)
