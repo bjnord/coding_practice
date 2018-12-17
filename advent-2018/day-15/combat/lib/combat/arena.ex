@@ -773,6 +773,41 @@ defmodule Combat.Arena do
     {{new_grid, new_roster}, new_opponent}
   end
 
+  @doc ~S"""
+  Increase power of one team's combatants.
+
+  ## Example
+
+      iex> arena = {%{
+      ...>     {0, 0} => :floor,  {0, 1} => :combatant,  {0, 2} => :floor,
+      ...>     {1, 0} => :rock,   {1, 1} => :combatant,  {1, 2} => :combatant,
+      ...>     {2, 0} => :floor,  {2, 1} => :rock,       {2, 2} => :combatant,
+      ...>   }, MapSet.new([
+      ...>     {{0, 1}, :goblin, 3, 200, 1},
+      ...>     {{1, 1}, :elf, 3, 200, 2},
+      ...>     {{1, 2}, :goblin, 3, 200, 3},
+      ...>     {{2, 2}, :elf, 3, 200, 4},
+      ...>   ])
+      ...> }
+      iex> {grid, roster} = Combat.Arena.increase_power(arena, 5, :elf)
+      iex> roster
+      #MapSet<[{{0, 1}, :goblin, 3, 200, 1}, {{1, 1}, :elf, 5, 200, 2}, {{1, 2}, :goblin, 3, 200, 3}, {{2, 2}, :elf, 5, 200, 4}]>
+  """
+  @spec increase_power(arena(), non_neg_integer(), atom()) :: arena()
+  def increase_power({grid, roster}, power, to_team) do
+    new_roster = roster
+                 |> Enum.reduce(roster, fn ({pos, team, pw, hp, id}, roster) ->
+                   if team == to_team do
+                     roster
+                     |> MapSet.delete({pos, team, pw, hp, id})
+                     |> MapSet.put({pos, team, power, hp, id})
+                   else
+                     roster
+                   end
+                 end)
+    {grid, new_roster}
+  end
+
   ###
   # PATH FINDING
   ###
