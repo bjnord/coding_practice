@@ -393,6 +393,8 @@ defmodule Combat.Arena do
 
   @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
   defp reachable_candidates(candidates, {grid, _roster}, mover, _opponents) do
+    # this is a "forward" path check, from mover to candidate position
+    # we don't need the length, just nil/!nil to know if it's reachable
     distances = path_distances(grid, elem(mover, 0))
     Enum.filter(candidates, fn ({pos, _opponents}) -> distances[pos] end)
   end
@@ -500,7 +502,10 @@ defmodule Combat.Arena do
   def next_step_toward({grid, _roster}, mover, {position, _opponents}) do
     #IO.inspect(mover, label: "Mover")
     #IO.inspect(position, label: "Position")
+    # this is a "reverse" path check, from candidate position back to
+    # the squares around mover (move options); here we do need the length
     distances = path_distances(grid, position)
+                #|> IO.inspect(label: "distances")
     possible_steps =
       floor_squares_around(grid, mover)
       #|> IO.inspect(label: "Surrounding Me")
@@ -743,27 +748,55 @@ defmodule Combat.Arena do
       }
   """
   @spec path_distances(grid(), position()) :: map()
-
   def path_distances(grid, origin) do
-    path_distances_around(grid, origin, origin, %{origin => 0}, 1)
+    limit = path_limit(grid)
+            #|> IO.inspect(label: "<pf> Path limit")
+    {seen, _positions} =
+      0..limit
+      |> Enum.reduce({%{origin => 0}, [origin]}, fn (dist, {seen, next_posns}) ->
+        Enum.reduce(next_posns, {seen, []}, fn (next_pos, {seen, pos_acc}) ->
+          {seen, surr_posns} =
+            path_distances_around(grid, seen, next_pos, dist)
+          {seen, pos_acc ++ surr_posns}
+        end)
+        #|> IO.inspect(label: "<pf> (outer) New positions @ dist=#{dist}")
+      end)
+    seen
   end
 
-  defp path_distances(grid, origin, next_pos, :floor, seen, dist) do
-    path_distances_around(grid, origin, next_pos, Map.put(seen, next_pos, dist), dist+1)
-  end
-
-  defp path_distances(_grid, _origin, next_pos, _sq_type, seen, _dist) do
-    Map.put(seen, next_pos, nil)  # non-:floor square ends branching
-  end
-
-  defp path_distances_around(grid, origin, next_pos, seen, dist) do
-    # these are "potential paths forward" (branches that start with squares around me
-    # that are in the grid, but that I haven't seen yet)
-    positions_around(next_pos)
-    |> Enum.reject(fn (pos) -> (grid[pos] == nil) || Map.has_key?(seen, pos) end)
-    |> Enum.reduce(seen, fn (search_pos, seen) ->
-      path_distances(grid, origin, search_pos, grid[search_pos], seen, dist)
+  @spec path_distances_around(grid(), map(), position(), integer()) :: {map(), [position()]}
+  defp path_distances_around(grid, seen, pos, dist) do
+    #{db_y, db_x} = pos  # for <pf> IO.inspect, below
+    unseen_positions_around(grid, pos, seen)
+    #|> IO.inspect(label: "<pf> (inner) Unseen #{db_y},#{db_x} (dist=#{dist})")
+    |> Enum.reduce({seen, []}, fn (v_pos, {seen, added_pos}) ->
+      # NB unseen_positions include impassable ones:
+      #    (1) we add those to the path_map (seen), so they get distance=nil
+      #    (2) but we DON'T add them to the accumulator (no further traversal)
+      seen = add_to_path_map(v_pos, grid[v_pos], seen, dist+1)
+      case grid[v_pos] do
+        :floor ->
+          {seen, [v_pos | added_pos]}
+        _ ->
+          {seen, added_pos}
+      end
     end)
+    #|> IO.inspect(label: "<pf> (inner) Around #{db_y},#{db_x} (dist=#{dist})")
+  end
+
+  defp add_to_path_map(pos, :floor, seen, dist) do
+    Map.put(seen, pos, dist)
+  end
+
+  defp add_to_path_map(pos, _sq_type, seen, _dist) do
+    Map.put(seen, pos, nil)
+  end
+
+  # these are "potential paths forward" (branches that start with squares around me
+  # that are in the grid, but that I haven't seen yet)
+  defp unseen_positions_around(grid, pos, seen) do
+    positions_around(pos)
+    |> Enum.reject(fn (p) -> (grid[p] == nil) || Map.has_key?(seen, p) end)
   end
 
   defp positions_around({y, x}) do
@@ -773,6 +806,16 @@ defmodule Combat.Arena do
       {y, x+1},
       {y+1, x},
     ]
+  end
+
+  # OPTIMIZE n^2 is the "safe" value (all squares);
+  #          it could be smaller e.g. a "maze" has lots of rock
+  defp path_limit(grid) do
+    {min_y, max_y} =
+      Map.keys(grid)
+      |> Enum.map(&(elem(&1, 0)))
+      |> Enum.min_max
+    (max_y-min_y+1) * (max_y-min_y+1)
   end
 
   ###
