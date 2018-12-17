@@ -164,21 +164,29 @@ defmodule Combat.Arena do
   @doc ~S"""
   Fight a whole battle.
 
+  ## Parameters
+
+  - arena: Current arena state
+  - style: Combat model
+  - opts:
+    -- `:debug`: add debug output
+    -- `:preserve_all`: team whose combatants must all survive (e.g. `:elf`)
+
   ## Returns
 
   Final arena, and number of rounds fought (**including** the incomplete
   final round).
   """
-  @spec battle(arena(), atom(), boolean()) :: {arena(), non_neg_integer()}
-  def battle(arena, style, debug \\ false) do
+  @spec battle(arena(), atom(), keyword()) :: {arena(), non_neg_integer()}
+  def battle(arena, style, opts \\ []) do
     1..1_000_000
     |> Enum.reduce_while(arena, fn (round, arena) ->
-      {arena, done} = fight(arena, style, debug)
+      {arena, done} = fight(arena, style, opts)
       case done do
         true ->
           {:halt, {arena, round}}
         false ->
-          if debug do
+          if opts[:debug] do
             debug_inspect_arena(arena, :debug_rounds, round)
             debug_halt_at_round(:debug_halt, round)
           end
@@ -194,12 +202,17 @@ defmodule Combat.Arena do
 
   - arena: Current arena state
   - style: Combat model
+  - opts:
+    -- `:debug`: add debug output
+    -- `:preserve_all`: team whose combatants must all survive (e.g. `:elf`)
 
   ## Returns
 
   Tuple:
   - updated arena
   - is the battle over? (boolean)
+    -- if a combatant finds no opponents to fight
+    -- if a combatant from team `:preserve_all` dies
 
   ## Examples
 
@@ -243,8 +256,8 @@ defmodule Combat.Arena do
         ])
       }
   """
-  @spec fight(arena(), atom(), boolean()) :: {arena(), boolean()}
-  def fight({grid, roster}, style, debug \\ false) do
+  @spec fight(arena(), atom(), keyword()) :: {arena(), boolean()}
+  def fight({grid, roster}, style, opts \\ []) do
     fighters =  # take turns in "reading order":
       Enum.sort_by(roster, &(elem(&1, 0)))
     # FIXME there's got to be a better way to iterate with 2 conditions
@@ -266,14 +279,18 @@ defmodule Combat.Arena do
         {pos, team, pw, hp, id} = fighter
         opponents = find_combatants({grid_a, roster_a}, opponent(team))
         if opponents != [] do
-          {grid_a, roster_a} = fight_in_style({grid_a, roster_a}, {pos, team, pw, hp, id}, opponents, style, debug)
-          if f_left != [] do
-            {:cont, {{grid_a, roster_a}, f_left}}
-          else
-            {:halt, {{grid_a, roster_a}, false}}
+          {{grid_a, roster_a}, comrade_death} =
+            fight_in_style({grid_a, roster_a}, {pos, team, pw, hp, id}, opponents, style, opts)
+          cond do
+            comrade_death && opts[:preserve_all] ->
+              {:halt, {{grid_a, roster_a}, true}}
+            f_left != [] ->
+              {:cont, {{grid_a, roster_a}, f_left}}
+            true ->
+              {:halt, {{grid_a, roster_a}, false}}
           end
         else
-          if debug do
+          if opts[:debug] do
             debug_inspect(pos, :debug_actions, label: "combatant finds no opponents")
           end
           {:halt, {{grid_a, roster_a}, true}}
@@ -284,20 +301,20 @@ defmodule Combat.Arena do
   end
 
   # fight_in_style(): one fighter takes their turn
-  @spec fight_in_style(arena(), combatant(), [combatant()], atom(), boolean()) :: arena()
+  @spec fight_in_style(arena(), combatant(), [combatant()], atom(), keyword()) :: {arena(), boolean()}
 
-  defp fight_in_style({grid, roster}, fighter, opponents, :pacifist, debug) do
+  defp fight_in_style({grid, roster}, fighter, opponents, :pacifist, opts) do
     #IO.inspect(fighter, label: "next fighter (pacifist)")
     {{grid, roster}, _fighter} =
-      movement_phase({grid, roster}, fighter, opponents, debug)
-    {grid, roster}
+      movement_phase({grid, roster}, fighter, opponents, opts[:debug])
+    {{grid, roster}, false}
   end
 
-  defp fight_in_style({grid, roster}, fighter, opponents, :puzzle, debug) do
+  defp fight_in_style({grid, roster}, fighter, opponents, :puzzle, opts) do
     #IO.inspect(fighter, label: "next fighter (puzzle)")
     {{grid, roster}, fighter} =
-      movement_phase({grid, roster}, fighter, opponents, debug)
-    attack_phase({grid, roster}, fighter, debug)
+      movement_phase({grid, roster}, fighter, opponents, opts[:debug])
+    attack_phase({grid, roster}, fighter, opts)
   end
 
   defp movement_phase({grid, roster}, fighter, opponents, debug) do
@@ -314,7 +331,7 @@ defmodule Combat.Arena do
     end
   end
 
-  defp attack_phase({grid, roster}, {pos, team, pw, hp, id}, debug) do
+  defp attack_phase({grid, roster}, {pos, team, pw, hp, id}, opts) do
     combatants =
       combatants_around({grid, roster}, {pos, team, pw, hp, id}, opponent(team))
       |> multi_min_by(&(elem(&1, 3)))  # lowest HP
@@ -322,10 +339,15 @@ defmodule Combat.Arena do
     if (combatants != nil) && (combatants != []) do
       target = Enum.min_by(combatants, &(elem(&1, 0)))  # "reading order"
                #|> IO.inspect(label: "Reading Order")
-      attack({grid, roster}, {pos, team, pw, hp, id}, target, debug)
-      |> elem(0)
+      {{grid, roster}, target} =
+        attack({grid, roster}, {pos, team, pw, hp, id}, target, opts[:debug])
+      if opts[:preserve_all] && (elem(target, 3) <= 0) && (elem(target, 1) == opts[:preserve_all]) do
+        {{grid, roster}, true}  # target died, and we care
+      else
+        {{grid, roster}, false}  # target still alive, or fodder
+      end
     else
-      {grid, roster}  # no one to fight
+      {{grid, roster}, false}  # no one to fight
     end
   end
 

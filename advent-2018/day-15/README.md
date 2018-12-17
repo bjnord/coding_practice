@@ -399,7 +399,7 @@ However, you can't go too far: larger changes will be more likely to permanently
 
 So, you need to **find the outcome** of the battle in which the Elves have the **lowest integer attack power** (at least 4) that allows them to **win without a single death**. The Goblins always have an attack power of 3.
 
-In the first summarized example above, the lowest attack power the Elves need to win without losses is 15:
+In the first example above (the "entire sample combat"), the lowest attack power the Elves need to win without losses is 15:
 
 ```
 #######       #######
@@ -415,7 +415,9 @@ Elves win with 172 total hit points left
 Outcome: 29 * 172 = **4988**
 ```
 
-In the second example above, the Elves need only 4 attack power:
+\[The puzzle does not give the answer for the first summarized example above.\]
+
+In the second summarized example above, the Elves need only 4 attack power:
 
 ```
 #######       #######
@@ -431,7 +433,7 @@ Elves win with 948 total hit points left
 Outcome: 33 * 948 = **31284**
 ```
 
-In the third example above, the Elves need 15 attack power:
+In the third summarized example above, the Elves need 15 attack power:
 
 ```
 #######       #######
@@ -447,7 +449,7 @@ Elves win with 94 total hit points left
 Outcome: 37 * 94 = **3478**
 ```
 
-In the fourth example above, the Elves need 12 attack power:
+In the fourth summarized example above, the Elves need 12 attack power:
 
 ```
 #######       #######
@@ -463,7 +465,7 @@ Elves win with 166 total hit points left
 Outcome: 39 * 166 = **6474**
 ```
 
-In the last example above, the lone Elf needs 34 attack power:
+In the fifth (last) summarized example above, the lone Elf needs 34 attack power:
 
 ```
 #########       #########   

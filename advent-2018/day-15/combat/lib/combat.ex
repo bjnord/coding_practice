@@ -31,7 +31,7 @@ defmodule Combat do
   def part1(input_file) do
     initial_arena = parse_input(input_file)
     debug_inspect_arena(initial_arena, :debug_top, 0)
-    {final_arena, round} = battle(initial_arena, :puzzle, true)
+    {final_arena, round} = battle(initial_arena, :puzzle, debug: true)
     debug_inspect_arena(final_arena, :debug_top, round)
     dump_outcome(final_arena, round, 1)
   end
@@ -56,12 +56,12 @@ defmodule Combat do
 
   defp victors({_grid, roster}) do
     roster
-    |> Enum.take(1)
-    |> List.first
-    |> elem(1)
+    |> Enum.map(&(elem(&1, 1)))
+    |> Enum.uniq()
     |> case do
-      :elf -> 'Elves'
-      :goblin -> 'Goblins'
+      [:elf] -> 'Elves'
+      [:goblin] -> 'Goblins'
+      _ -> 'Draw'
     end
   end
 
@@ -70,7 +70,7 @@ defmodule Combat do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 52133 (19 attack power)
   """
   def part2(input_file) do
     initial_arena = parse_input(input_file)
@@ -79,16 +79,17 @@ defmodule Combat do
       4..1_000_000
       |> Enum.reduce_while(initial_arena, fn (elf_power, arena) ->
         arena = increase_power(arena, elf_power, :elf)
-        {final_arena, round} = battle(arena, :puzzle, true)
-        debug_inspect_arena(final_arena, :debug_top, round)
-        debug_inspect(elf_power, :debug_top, label: "Elf power")
+        {final_arena, round} = battle(arena, :puzzle, preserve_all: :elf, debug: true)
+        debug_inspect_arena(final_arena, :debug_rounds, round)
+        debug_inspect(elf_power, :debug_rounds, label: "Elf power")
         case victors(final_arena) do
           'Elves' ->
             {:halt, {final_arena, round, elf_power}}
-          'Goblins' ->
+          _ ->
             {:cont, initial_arena}
         end
       end)
+    debug_inspect_arena(final_arena, :debug_top, round)
     dump_outcome(final_arena, round, 2)
     IO.inspect(elf_power, label: "Elf power")
   end
