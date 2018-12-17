@@ -339,3 +339,29 @@ Outcome: 20 * 937 = **18740**
 ```
 
 **What is the outcome of the combat described in your puzzle input?**
+
+## Day 1 Implementation
+
+After a few false-starts with my pathfinding algorithm, I ended up with 4 of the 6 examples passing, and two failing. Since the puzzle only gives the summaries, I was at a loss to figure out why. I reviewed my code vs. the movement/combat rules and found a few things on my own, but those 2 examples were still failing.
+
+Thank you Lebossle, gyorokpeter, et al for these _excellent_ [tips](https://www.reddit.com/r/adventofcode/comments/a6f100/day_15_details_easy_to_be_wrong_on/) which got me out of the hole! Some of these I got easily due to the nature of Elixir's immutable data... but not all:
+
+- Turn-taking: make sure that each unit gets exactly one turn per round, even if another unit that was before it in reading order moves after it, or if it moves to after another unit that was after it in reading order.
+
+- Moving: you don't just take the path that takes you the fastest to an enemy, broken by reading order. You first choose the square adjacent to an enemy that you want to go to (closest, break ties by reading order), and then choose the move that takes you the fastest to it (break ties by reading order, again).
+
+- Moving may be blocked by other units
+
+- The shortest path for moving may take arbitrary twists and turns, make sure you're considering the possibility of moving farther from your target if that means clearing an obstacle (wall or unit) that was blocking a shortcut.
+
+- Attacking is prioritized very differently from moving (lowest hp first, but again break ties by reading order) [BJN I somehow missed adding the HP check in my first implementation]
+
+- Getting to exactly 0 HP means the unit dies
+
+- A dead unit must not take a turn, even if you're still in the same round that it died. Make sure that processing this does not affect other units' turns, though, like duplicating or skipping the turn of another unit (thanks gyorokpeter). [BJN I definitely fell prey to this one]
+
+- A dead unit must not be considered a blocker for others' movement, even if you're still in the same round that it died.
+
+- The rounds only end when a unit starts taking its turn and there are no enemies left. This is not the same as ending when the last unit of a team dies or as ending when a round ends with 0 units of a team, but only in the case that the last turn of a round resulted in the last death of the battle (in this case, you count one more round to have been completed before the battle end). (thanks jonathan\_paulson)
+
+- For part 2, binary search is not reliable, as there is significant butterfly-effect in the puzzle. You should use brute force instead. (thanks jlweinkam)

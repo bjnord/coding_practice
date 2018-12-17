@@ -50,7 +50,7 @@ defmodule Combat do
         end
       end)
     total_hp = final_roster
-               |> Enum.map(fn ({_pos, _team, _pw, hp}) -> hp end)
+               |> Enum.map(fn ({_pos, _team, _pw, hp, _id}) -> hp end)
                |> Enum.sum
     IO.inspect((n_rounds-1) * total_hp, label: "Part 1 combat checksum is")
   end
