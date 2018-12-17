@@ -31,12 +31,9 @@ defmodule Combat do
   def part1(input_file) do
     initial_arena = parse_input(input_file)
     debug_inspect_arena(initial_arena, :debug_top, 0)
-    {final_arena, n_rounds} = battle(initial_arena, :puzzle, true)
-    total_hp = total_hp(final_arena)
-    debug_inspect_arena(final_arena, :debug_top, n_rounds)
-    debug_inspect(n_rounds-1, :debug_top, label: "Complete Rounds")
-    debug_inspect(total_hp, :debug_top, label: "Total HP")
-    IO.inspect((n_rounds-1) * total_hp, label: "Part 1 combat checksum is")
+    {final_arena, round} = battle(initial_arena, :puzzle, true)
+    debug_inspect_arena(final_arena, :debug_top, round)
+    dump_outcome(final_arena, round, 1)
   end
 
   defp parse_input(input_file) do
@@ -44,6 +41,28 @@ defmodule Combat do
     |> File.stream!
     |> Enum.map(&(&1))  # FIXME
     |> parse_puzzle()
+  end
+
+  defp dump_outcome(arena, round, part) do
+    IO.puts("Part #{part}:")
+    IO.puts("Combat ends after #{round-1} full rounds")
+    total_hp = total_hp(arena)
+    victors = victors(arena)
+    IO.puts("#{victors} win with #{total_hp} total hit points left")
+    checksum = (round-1) * total_hp
+    IO.puts("Outcome: #{round-1} * #{total_hp} = #{checksum}")
+    IO.puts("")
+  end
+
+  defp victors({_grid, roster}) do
+    roster
+    |> Enum.take(1)
+    |> List.first
+    |> elem(1)
+    |> case do
+      :elf -> 'Elves'
+      :goblin -> 'Goblins'
+    end
   end
 
   @doc """
