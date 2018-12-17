@@ -347,12 +347,15 @@ defmodule Combat.Arena do
   """
   @spec next_position(arena(), combatant(), roster()) :: candidate()
   def next_position({grid, roster}, mover, opponents) do
+    # this is a "forward" path check, from mover to candidate position(s)
+    distances = path_distances(grid, elem(mover, 0))
+                #|> IO.inspect(label: "forward distances")
     #IO.inspect(mover, label: "Mover")
     candidates_in_range({grid, roster}, mover, opponents)
     #|> IO.inspect(label: "In range")
-    |> reachable_candidates({grid, roster}, mover, opponents)
+    |> reachable_candidates({grid, roster}, mover, opponents, distances)
     #|> IO.inspect(label: "Reachable")
-    |> nearest_candidates({grid, roster}, mover, opponents)
+    |> nearest_candidates({grid, roster}, mover, opponents, distances)
     #|> IO.inspect(label: "Nearest")
     # choose first position in "reading order":
     |> min_by_or_nil(fn (candidate) -> elem(candidate, 0) end)
@@ -391,17 +394,14 @@ defmodule Combat.Arena do
     |> Enum.filter(fn ({pos, _combatant}) -> grid[pos] == :floor end)
   end
 
-  @spec reachable_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
-  defp reachable_candidates(candidates, {grid, _roster}, mover, _opponents) do
-    # this is a "forward" path check, from mover to candidate position
-    # we don't need the length, just nil/!nil to know if it's reachable
-    distances = path_distances(grid, elem(mover, 0))
+  @spec reachable_candidates([candidate()], arena(), combatant(), roster(), map()) :: [candidate()]
+  defp reachable_candidates(candidates, _arena, _mover, _opponents, distances) do
     Enum.filter(candidates, fn ({pos, _opponents}) -> distances[pos] end)
   end
 
-  @spec nearest_candidates([candidate()], arena(), combatant(), roster()) :: [candidate()]
-  defp nearest_candidates(candidates, {_grid, _roster}, mover, _opponents) do
-    multi_min_by(candidates, fn ({pos, _opponents}) -> manhattan(elem(mover, 0), pos) end)
+  @spec nearest_candidates([candidate()], arena(), combatant(), roster(), map()) :: [candidate()]
+  defp nearest_candidates(candidates, _arena, _mover, _opponents, distances) do
+    multi_min_by(candidates, fn ({pos, _opponents}) -> distances[pos] end)
   end
 
   # NOTE ripped off from day 6 puzzle, but with x and y flipped
@@ -503,7 +503,7 @@ defmodule Combat.Arena do
     #IO.inspect(mover, label: "Mover")
     #IO.inspect(position, label: "Position")
     # this is a "reverse" path check, from candidate position back to
-    # the squares around mover (move options); here we do need the length
+    # the squares around mover (move options)
     distances = path_distances(grid, position)
                 #|> IO.inspect(label: "distances")
     possible_steps =
