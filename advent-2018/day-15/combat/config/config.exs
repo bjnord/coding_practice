@@ -5,6 +5,7 @@ use Mix.Config
 # enable these flags to get debug at various points in the code
 config :combat, debug_top: false
 config :combat, debug_rounds: false
+config :combat, debug_actions: false
 
 # if set, program will halt after the given round for inspection
 #config :combat, debug_halt: 26

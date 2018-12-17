@@ -173,7 +173,7 @@ defmodule Combat.Arena do
   def battle(arena, style, debug \\ false) do
     1..1_000_000
     |> Enum.reduce_while(arena, fn (round, arena) ->
-      {arena, done} = fight(arena, style)
+      {arena, done} = fight(arena, style, debug)
       case done do
         true ->
           {:halt, {arena, round}}
@@ -243,8 +243,8 @@ defmodule Combat.Arena do
         ])
       }
   """
-  @spec fight(arena(), atom()) :: {arena(), boolean()}
-  def fight({grid, roster}, style) do
+  @spec fight(arena(), atom(), boolean()) :: {arena(), boolean()}
+  def fight({grid, roster}, style, debug \\ false) do
     fighters =  # take turns in "reading order":
       Enum.sort_by(roster, &(elem(&1, 0)))
     # FIXME there's got to be a better way to iterate with 2 conditions
@@ -262,13 +262,16 @@ defmodule Combat.Arena do
       else
         opponents = find_combatants({grid_a, roster_a}, opponent(team))
         if opponents != [] do
-          {grid_a, roster_a} = fight_in_style({grid_a, roster_a}, {pos, team, pw, hp, id}, opponents, style)
+          {grid_a, roster_a} = fight_in_style({grid_a, roster_a}, {pos, team, pw, hp, id}, opponents, style, debug)
           if f_left != [] do
             {:cont, {{grid_a, roster_a}, f_left}}
           else
             {:halt, {{grid_a, roster_a}, false}}
           end
         else
+          if debug do
+            debug_inspect(pos, :debug_actions, label: "combatant finds no opponents")
+          end
           {:halt, {{grid_a, roster_a}, true}}
         end
       end
@@ -277,23 +280,23 @@ defmodule Combat.Arena do
   end
 
   # fight_in_style(): one fighter takes their turn
-  @spec fight_in_style(arena(), combatant(), [combatant()], atom()) :: arena()
+  @spec fight_in_style(arena(), combatant(), [combatant()], atom(), boolean()) :: arena()
 
-  defp fight_in_style({grid, roster}, fighter, opponents, :pacifist) do
+  defp fight_in_style({grid, roster}, fighter, opponents, :pacifist, debug) do
     #IO.inspect(fighter, label: "next fighter (pacifist)")
     {{grid, roster}, _fighter} =
-      movement_phase({grid, roster}, fighter, opponents)
+      movement_phase({grid, roster}, fighter, opponents, debug)
     {grid, roster}
   end
 
-  defp fight_in_style({grid, roster}, fighter, opponents, :puzzle) do
+  defp fight_in_style({grid, roster}, fighter, opponents, :puzzle, debug) do
     #IO.inspect(fighter, label: "next fighter (puzzle)")
     {{grid, roster}, fighter} =
-      movement_phase({grid, roster}, fighter, opponents)
-    attack_phase({grid, roster}, fighter)
+      movement_phase({grid, roster}, fighter, opponents, debug)
+    attack_phase({grid, roster}, fighter, debug)
   end
 
-  defp movement_phase({grid, roster}, fighter, opponents) do
+  defp movement_phase({grid, roster}, fighter, opponents, debug) do
     if opponents_near?({grid, roster}, fighter) do
       {{grid, roster}, fighter}  # no need to move
     else
@@ -302,12 +305,12 @@ defmodule Combat.Arena do
       if next_step == nil do
         {{grid, roster}, fighter}  # no place to move
       else
-        move({grid, roster}, fighter, next_step)
+        move({grid, roster}, fighter, next_step, debug)
       end
     end
   end
 
-  defp attack_phase({grid, roster}, {pos, team, pw, hp, id}) do
+  defp attack_phase({grid, roster}, {pos, team, pw, hp, id}, debug) do
     combatants =
       combatants_around({grid, roster}, {pos, team, pw, hp, id}, opponent(team))
       |> multi_min_by(&(elem(&1, 3)))  # lowest HP
@@ -315,7 +318,7 @@ defmodule Combat.Arena do
     if (combatants != nil) && (combatants != []) do
       target = Enum.min_by(combatants, &(elem(&1, 0)))  # "reading order"
                #|> IO.inspect(label: "Reading Order")
-      attack({grid, roster}, {pos, team, pw, hp, id}, target)
+      attack({grid, roster}, {pos, team, pw, hp, id}, target, debug)
       |> elem(0)
     else
       {grid, roster}  # no one to fight
@@ -673,8 +676,8 @@ defmodule Combat.Arena do
       iex> combatant_m
       {{0, 1}, :elf, 3, 200, 1}
   """
-  @spec move(arena(), combatant(), position()) :: {arena(), combatant()}
-  def move({grid, roster}, {old_pos, team, pw, hp, id}, new_pos) do
+  @spec move(arena(), combatant(), position(), boolean()) :: {arena(), combatant()}
+  def move({grid, roster}, {old_pos, team, pw, hp, id}, new_pos, debug \\ false) do
     cond do
       new_pos == nil ->
         raise "attempt to move nowhere"
@@ -687,14 +690,18 @@ defmodule Combat.Arena do
         new_roster = roster
                  |> MapSet.delete({old_pos, team, pw, hp, id})
                  |> MapSet.put({new_pos, team, pw, hp, id})
-        #{old_pos, team, pw, hp, id}
-        #|> IO.inspect(label: "<<<<< moved needed from")
-        #{new_pos, team, pw, hp, id}
-        #|> IO.inspect(label: "<<<<< moved needed to")
+        if debug do
+          #{old_pos, team, pw, hp, id}
+          #|> debug_inspect(:debug_actions, label: "combatant moves from")
+          {new_pos, team, pw, hp, id}
+          |> debug_inspect(:debug_actions, label: "combatant moves to")
+        end
         {{new_grid, new_roster}, {new_pos, team, pw, hp, id}}
       old_pos == new_pos ->
-        #{old_pos, team, pw, hp, id}
-        #|> IO.inspect(label: "===== no move needed by")
+        #if debug do
+        #  {old_pos, team, pw, hp, id}
+        #  |> debug_inspect(:debug_actions, label: "combatant already at")
+        #end
         {{grid, roster}, {old_pos, team, pw, hp, id}}
     end
   end
@@ -729,31 +736,36 @@ defmodule Combat.Arena do
       iex> opponent_a
       {{1, 2}, :goblin, 3, 17, 2}
   """
-  @spec attack(arena(), combatant(), combatant()) :: {arena(), combatant()}
-  def attack({grid, roster}, {pos, _team, pw, _hp, _id}, {o_pos, o_team, o_pw, o_hp, o_id}) do
-    new_opponent = {o_pos, o_team, o_pw, o_hp - pw, o_id}
+  @spec attack(arena(), combatant(), combatant(), boolean()) :: {arena(), combatant()}
+  def attack({grid, roster}, {{y, x}, _team, pw, _hp, _id}, {{o_y, o_x}, o_team, o_pw, o_hp, o_id}, debug \\ false) do
+    new_opponent = {{o_y, o_x}, o_team, o_pw, o_hp - pw, o_id}
     {new_grid, new_roster} =
       cond do
-        manhattan(pos, o_pos) != 1 ->
+        manhattan({y, x}, {o_y, o_x}) != 1 ->
           raise "attempt to attack more than one square away"
         o_hp > pw ->
           new_roster =
             roster
-            |> MapSet.delete({o_pos, o_team, o_pw, o_hp, o_id})
+            |> MapSet.delete({{o_y, o_x}, o_team, o_pw, o_hp, o_id})
             |> MapSet.put(new_opponent)
           {grid, new_roster}
         o_hp <= pw ->
           new_grid =
-            Map.replace!(grid, o_pos, :floor)
+            Map.replace!(grid, {o_y, o_x}, :floor)
           new_roster =
             roster
-            |> MapSet.delete({o_pos, o_team, o_pw, o_hp, o_id})
+            |> MapSet.delete({{o_y, o_x}, o_team, o_pw, o_hp, o_id})
           {new_grid, new_roster}
       end
-    #{o_pos, o_team, o_pw, o_hp, o_id}
-    #|> IO.inspect(label: "<<<<< attack before")
-    #new_opponent
-    #|> IO.inspect(label: ">>>>> attack after")
+    if debug do
+      #{{o_y, o_x}, o_team, o_pw, o_hp, o_id}
+      #|> debug_inspect(:debug_actions, label: "{#{y}, #{x}} before attack")
+      new_opponent
+      |> debug_inspect(:debug_actions, label: "{#{y}, #{x}} attacks")
+      if o_hp <= pw do
+        debug_inspect(o_hp - pw, :debug_actions, label: "combatant {#{o_y}, #{o_x}} dies")
+      end
+    end
     {{new_grid, new_roster}, new_opponent}
   end
 
@@ -890,6 +902,7 @@ defmodule Combat.Arena do
   end
 
   def dump_arena({grid, roster}, round \\ nil) do
+    IO.write("\n")
     max_y =
       Map.keys(grid)
       |> Enum.max_by(&(elem(&1, 0)))
@@ -906,7 +919,6 @@ defmodule Combat.Arena do
     end
     0..max_y
     |> Enum.map(fn (y) -> dump_arena_line(y, max_y, {grid, roster}) end)
-    IO.write("\n")
   end
 
   defp dump_arena_line(y, max_y, {grid, roster}) do
