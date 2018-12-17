@@ -244,10 +244,12 @@ defmodule Combat.ArenaTest do
 #      |> parse_line("#.......#\n", 7, 10)
 #      |> parse_line("#########\n", 8, 10)
 #    #{round_0_result, done_after_0} = fight(round_0, :pacifist)
+#    # FIXME rewrite as debug_inspect_arena(round_1, :debug_top, label: "<<<<< expect")
 #    #IO.puts("<<<<< expect")
-#    #dump_arena(round_1)
+#    #debug_inspect_arena(round_1, :debug_top)
+#    # FIXME rewrite as debug_inspect_arena(round_1, :debug_top, label: ">>>>> actual")
 #    #IO.puts("<<<<< actual")
-#    #dump_arena(round_0_result)
+#    #debug_inspect_arena(round_0_result, :debug_top)
 #    assert fight(round_0, :pacifist) == {round_1, false}
 #
 #    round_2 =

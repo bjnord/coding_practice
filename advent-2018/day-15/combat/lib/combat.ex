@@ -30,19 +30,12 @@ defmodule Combat do
   """
   def part1(input_file) do
     initial_arena = parse_input(input_file)
-    ###
-    # DEBUG: dump initial state
-    #dump_arena(initial_arena, 0)
-    # END DEBUG
-    ###
-    {final_arena, n_rounds} = battle(initial_arena, :puzzle)
+    debug_inspect_arena(initial_arena, :debug_top, 0)
+    {final_arena, n_rounds} = battle(initial_arena, :puzzle, true)
     total_hp = total_hp(final_arena)
-    ###
-    # DEBUG: dump final state
-    #dump_arena(final_arena, n_rounds-1)
-    #IO.inspect(total_hp, label: "Total HP")
-    # END DEBUG
-    ###
+    debug_inspect_arena(final_arena, :debug_top, n_rounds)
+    debug_inspect(n_rounds-1, :debug_top, label: "Complete Rounds")
+    debug_inspect(total_hp, :debug_top, label: "Total HP")
     IO.inspect((n_rounds-1) * total_hp, label: "Part 1 combat checksum is")
   end
 

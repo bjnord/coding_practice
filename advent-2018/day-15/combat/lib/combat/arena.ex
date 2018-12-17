@@ -166,11 +166,11 @@ defmodule Combat.Arena do
 
   ## Returns
 
-  Final arena, and number of rounds fought (**including** a potential
-  incomplete final round).
+  Final arena, and number of rounds fought (**including** the incomplete
+  final round).
   """
-  @spec battle(arena(), atom()) :: {arena(), non_neg_integer()}
-  def battle(arena, style) do
+  @spec battle(arena(), atom(), boolean()) :: {arena(), non_neg_integer()}
+  def battle(arena, style, debug \\ false) do
     1..1_000_000
     |> Enum.reduce_while(arena, fn (round, arena) ->
       {arena, done} = fight(arena, style)
@@ -178,14 +178,10 @@ defmodule Combat.Arena do
         true ->
           {:halt, {arena, round}}
         false ->
-          ###
-          # DEBUG: dump each step, stop at round, etc.
-          #dump_arena(arena, round)
-          #if round == 26 do
-          #  raise "DEBUG: quit here to inspect"
-          #end
-          # END DEBUG
-          ###
+          if debug do
+            debug_inspect_arena(arena, :debug_rounds, round)
+            debug_halt_at_round(:debug_halt, round)
+          end
           {:cont, arena}
       end
     end)
@@ -870,6 +866,28 @@ defmodule Combat.Arena do
   ###
   # TESTING SUPPORT
   ###
+
+  def debug_inspect(object, debug_key, opts \\ []) do
+    if Application.get_env(:combat, debug_key) do
+      IO.inspect(object, opts)
+    else
+      object
+    end
+  end
+
+  def debug_halt_at_round(debug_key, round) do
+    if Application.get_env(:combat, debug_key) == round do
+      IO.puts(:stderr, "DEBUG: inspect round #{round}")
+      System.halt(1)
+    end
+  end
+
+  def debug_inspect_arena(arena, debug_key, round \\ nil) do
+    if Application.get_env(:combat, debug_key) do
+      dump_arena(arena, round)
+    end
+    arena
+  end
 
   def dump_arena({grid, roster}, round \\ nil) do
     max_y =
