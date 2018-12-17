@@ -905,18 +905,39 @@ defmodule Combat.Arena do
         IO.puts("After #{round} rounds:")
     end
     0..max_y
-    |> Enum.map(fn (y) -> dump_arena_line(y, {grid, roster}) end)
+    |> Enum.map(fn (y) -> dump_arena_line(y, max_y, {grid, roster}) end)
     IO.write("\n")
   end
 
-  defp dump_arena_line(y, {grid, roster}) do
+  defp dump_arena_line(y, max_y, {grid, roster}) do
     Map.keys(grid)
     |> Enum.filter(&(elem(&1, 0) == y))
     |> Enum.sort()
     |> Enum.map(&(emit_square(&1, {grid, roster})))
     IO.write("   ")
-    # TODO emit HP here for combatants on this row
+    IO.write(hp_string({grid, roster}, y, max_y))
     IO.write("\n")
+  end
+
+  defp hp_string({grid, roster}, y, max_y) do
+    hps =
+      Enum.filter(roster, fn ({{cy, _cx}, _team, _pw, _hp, _id}) -> cy == y end)
+      |> Enum.sort_by(&(elem(&1, 0)))  # position
+      |> Enum.map(fn ({_pos, team, _pw, hp, _id}) -> "#{team_char(team)}(#{hp})" end)
+    hps =
+      if y == max_y do
+        hps ++ ["T:#{total_hp({grid, roster})}"]
+      else
+        hps
+      end
+    Enum.join(hps, ", ")
+  end
+
+  defp team_char(team) do
+    case team do
+      :elf -> "E"
+      :goblin -> "G"
+    end
   end
 
   defp emit_square(pos, {grid, roster}) do
