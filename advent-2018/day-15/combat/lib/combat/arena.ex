@@ -252,14 +252,18 @@ defmodule Combat.Arena do
     1..1_000_000 |>
     Enum.reduce_while({{grid, roster}, fighters}, fn (_c, {{grid_a, roster_a}, f_left}) ->
       [{pos, team, pw, hp, id} | f_left] = f_left
-      if Enum.find(roster_a, fn (combatant) -> elem(combatant, 4) == id end) == nil do
-        # gotcha: if fighter died, they don't get to take a turn
+      fighter = Enum.find(roster_a, fn (combatant) -> elem(combatant, 4) == id end)
+      if fighter == nil do
+        # gotcha #1: if fighter died, they don't get to take a turn
         if f_left != [] do
           {:cont, {{grid_a, roster_a}, f_left}}
         else
           {:halt, {{grid_a, roster_a}, false}}
         end
       else
+        # gotcha #2: must recapture stats from roster; fighter might have
+        # been damaged
+        {pos, team, pw, hp, id} = fighter
         opponents = find_combatants({grid_a, roster_a}, opponent(team))
         if opponents != [] do
           {grid_a, roster_a} = fight_in_style({grid_a, roster_a}, {pos, team, pw, hp, id}, opponents, style, debug)

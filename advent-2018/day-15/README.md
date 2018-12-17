@@ -344,21 +344,21 @@ Outcome: 20 * 937 = **18740**
 
 After a few false-starts with my pathfinding algorithm, I ended up with 4 of the 6 examples passing, and two failing. Since the puzzle only gives the summaries, I was at a loss to figure out why. I reviewed my code vs. the movement/combat rules and found a few things on my own, but those 2 examples were still failing.
 
-Thank you Lebossle, gyorokpeter, et al for these _excellent_ [tips](https://www.reddit.com/r/adventofcode/comments/a6f100/day_15_details_easy_to_be_wrong_on/) which got me out of the hole! Some of these I got easily due to the nature of Elixir's immutable data... but not all:
+**Thank you** Lebossle, gyorokpeter, fizbin, et al on the subreddit for these _excellent_ [tips](https://www.reddit.com/r/adventofcode/comments/a6f100/day_15_details_easy_to_be_wrong_on/) which got me out of the hole! Some of these I got easily due to the nature of Elixir's immutable data... but not all:
 
 - Turn-taking: make sure that each unit gets exactly one turn per round, even if another unit that was before it in reading order moves after it, or if it moves to after another unit that was after it in reading order.
 
 - Moving: you don't just take the path that takes you the fastest to an enemy, broken by reading order. You first choose the square adjacent to an enemy that you want to go to (closest, break ties by reading order), and then choose the move that takes you the fastest to it (break ties by reading order, again).
 
-- Moving may be blocked by other units
+- Moving may be blocked by other units.
 
 - The shortest path for moving may take arbitrary twists and turns, make sure you're considering the possibility of moving farther from your target if that means clearing an obstacle (wall or unit) that was blocking a shortcut.
 
-- Attacking is prioritized very differently from moving (lowest hp first, but again break ties by reading order) [BJN I somehow missed adding the HP check in my first implementation]
+- Attacking is prioritized very differently from moving (lowest hp first, but again break ties by reading order). \[**BJN** I somehow missed adding the HP check in my first implementation\]
 
-- Getting to exactly 0 HP means the unit dies
+- Getting to exactly 0 HP means the unit dies.
 
-- A dead unit must not take a turn, even if you're still in the same round that it died. Make sure that processing this does not affect other units' turns, though, like duplicating or skipping the turn of another unit (thanks gyorokpeter). [BJN I definitely fell prey to this one]
+- A dead unit must not take a turn, even if you're still in the same round that it died. Make sure that processing this does not affect other units' turns, though, like duplicating or skipping the turn of another unit. (thanks gyorokpeter) \[**BJN** I definitely fell prey to this one\]
 
 - A dead unit must not be considered a blocker for others' movement, even if you're still in the same round that it died.
 
@@ -375,7 +375,7 @@ Specific [corner cases](https://www.reddit.com/r/adventofcode/comments/a6f100/da
 ####
 ```
 
-This takes 67 full rounds [and ends with 200 HP]. After the first gnome dies on the 67th round, the other gnome takes his turn and kills the elf, the round ends, and on the next one the battle ends. Make sure that the last gnome does not take a second turn on the 67th round due to being in the same position as the dead gnome when it would be the dead gnome's turn.
+This takes 67 full rounds \[and ends with 200 HP, for a checksum of 13400\]. After the first gnome dies on the 67th round, the other gnome takes his turn and kills the elf, the round ends, and on the next one the battle ends. Make sure that the last gnome does not take a second turn on the 67th round due to being in the same position as the dead gnome when it would be the dead gnome's turn.
 
 ```
 #####
@@ -387,4 +387,4 @@ This takes 67 full rounds [and ends with 200 HP]. After the first gnome dies on 
 #####
 ```
 
-This takes 71 full rounds and ends with 197 HP]. In the 68th round, the bottom-left elf moves after being damaged, make sure that this doesn't trigger weird behavior. (thanks fizbin)
+This takes 71 full rounds \[and ends with 197 HP, for a checksum of 13987\]. In the 68th round, the bottom-left elf moves after being damaged, make sure that this doesn't trigger weird behavior. (thanks fizbin) \[**BJN** and this was my last bug, in the same place as the "dead unit" problem, above; I failed to use the latest HP for the moving unit\]

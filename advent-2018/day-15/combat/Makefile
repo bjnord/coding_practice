@@ -14,7 +14,9 @@ examples: $(BIN)
 		$(BIN) input/example3.txt && \
 		$(BIN) input/example4.txt && \
 		$(BIN) input/example5.txt && \
-		$(BIN) input/example6.txt
+		$(BIN) input/example6.txt && \
+		$(BIN) input/example-reddit1.txt && \
+		$(BIN) input/example-reddit2.txt
 
 $(BIN): $(FILES)
 	mix escript.build
