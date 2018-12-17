@@ -258,7 +258,11 @@ defmodule Combat.Arena do
       [{pos, team, pw, hp, id} | f_left] = f_left
       if Enum.find(roster_a, fn (combatant) -> elem(combatant, 4) == id end) == nil do
         # gotcha: if fighter died, they don't get to take a turn
-        {:cont, {{grid_a, roster_a}, f_left}}
+        if f_left != [] do
+          {:cont, {{grid_a, roster_a}, f_left}}
+        else
+          {:halt, {{grid_a, roster_a}, false}}
+        end
       else
         opponents = find_combatants({grid_a, roster_a}, opponent(team))
         if opponents != [] do

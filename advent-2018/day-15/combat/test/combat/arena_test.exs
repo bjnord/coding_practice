@@ -333,4 +333,15 @@ defmodule Combat.ArenaTest do
 #    assert roster_47_result == roster_47
 #    assert done_after_47 == true
 #  end
+
+  test "corner case #1" do
+    arena = parse_puzzle([
+      "####\n",
+      "##E#\n",
+      "#GG#\n",
+      "####\n",
+    ])
+    {_arena, round} = battle(arena, :puzzle)
+    assert (round-1) == 67
+  end
 end
