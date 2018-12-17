@@ -341,9 +341,9 @@ defmodule Combat.ArenaTest do
       "#GG#\n",
       "####\n",
     ])
-    {_arena, round} = battle(arena, :puzzle)
+    {arena, round} = battle(arena, :puzzle)
     assert (round-1) == 67
-    assert total_hp == 200
+    assert total_hp(arena) == 200
   end
 
   test "corner case #2" do
@@ -356,8 +356,8 @@ defmodule Combat.ArenaTest do
       "#.E##\n",
       "#####\n",
     ])
-    {_arena, round} = battle(arena, :puzzle)
+    {arena, round} = battle(arena, :puzzle)
     assert (round-1) == 71
-    assert total_hp == 197
+    assert total_hp(arena) == 197
   end
 end

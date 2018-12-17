@@ -919,4 +919,10 @@ defmodule Combat.Arena do
     end
     |> IO.write
   end
+
+  def total_hp({_grid, roster}) do
+    roster
+    |> Enum.map(fn ({_pos, _team, _pw, hp, _id}) -> hp end)
+    |> Enum.sum
+  end
 end

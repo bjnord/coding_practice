@@ -35,13 +35,11 @@ defmodule Combat do
     #dump_arena(initial_arena, 0)
     # END DEBUG
     ###
-    {{final_grid, final_roster}, n_rounds} = battle(initial_arena, :puzzle)
-    total_hp = final_roster
-               |> Enum.map(fn ({_pos, _team, _pw, hp, _id}) -> hp end)
-               |> Enum.sum
+    {final_arena, n_rounds} = battle(initial_arena, :puzzle)
+    total_hp = total_hp(final_arena)
     ###
     # DEBUG: dump final state
-    #dump_arena({final_grid, final_roster}, n_rounds-1)
+    #dump_arena(final_arena, n_rounds-1)
     #IO.inspect(total_hp, label: "Total HP")
     # END DEBUG
     ###
