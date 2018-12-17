@@ -266,11 +266,13 @@ defmodule Combat.Arena do
   end
 
   defp attack_phase({grid, roster}, {pos, team, pw, hp}) do
-    positions =
-      combatant_positions_around({grid, roster}, {pos, team, pw, hp}, opponent(team))
-    if positions != [] do
-      target_pos = Enum.min(positions)
-      target = Enum.find(roster, fn (combatant) -> elem(combatant, 0) == target_pos end)
+    combatants =
+      combatants_around({grid, roster}, {pos, team, pw, hp}, opponent(team))
+      |> multi_min_by(&(elem(&1, 3)))  # lowest HP
+      #|> IO.inspect(label: "Lowest HP")
+    if (combatants != nil) && (combatants != []) do
+      target = Enum.min_by(combatants, &(elem(&1, 0)))  # "reading order"
+               #|> IO.inspect(label: "Reading Order")
       attack({grid, roster}, {pos, team, pw, hp}, target)
       |> elem(0)
     else
@@ -426,7 +428,7 @@ defmodule Combat.Arena do
   end
 
   # TODO surprised this isn't a standard Enum function
-  defp multi_min_by(enum, func) do
+  def multi_min_by(enum, func) do
     Enum.reduce(enum, {1_000_000, []}, fn (el, {min_v, min_list}) ->
       v = func.(el)
       cond do
@@ -559,7 +561,7 @@ defmodule Combat.Arena do
   """
   @spec opponents_near?(arena(), combatant()) :: boolean()
   def opponents_near?(arena, {pos, team, pw, hp}) do
-    combatant_positions_around(arena, {pos, team, pw, hp}, opponent(team)) != []
+    combatants_around(arena, {pos, team, pw, hp}, opponent(team)) != []
   end
 
   @doc ~S"""
@@ -578,25 +580,26 @@ defmodule Combat.Arena do
       ...>   ])
       ...> }
       iex> combatant = {{1, 0}, :elf, 3, 200}
-      iex> Combat.Arena.combatant_positions_around(arena, combatant, :goblin)
-      [{1, 1}]
+      iex> Combat.Arena.combatants_around(arena, combatant, :goblin)
+      [{{1, 1}, :goblin, 3, 2}]
   """
-  @spec combatant_positions_around(arena(), combatant(), team()) :: [candidate()]
+  @spec combatants_around(arena(), combatant(), team()) :: [combatant()]
   # TODO can this be refactored to use positions_around() ?
-  def combatant_positions_around({grid, roster}, {{y, x}, _team, _pw, _hp}, vs_team) do
+  def combatants_around({grid, roster}, {{y, x}, _team, _pw, _hp}, vs_team) do
     [  # in "reading order":
       {y-1, x},
       {y, x-1},
       {y, x+1},
       {y+1, x},
     ]
-    |> Enum.filter(fn pos -> grid[pos] == :combatant end)
-    |> Enum.filter(fn pos ->
-      Enum.any?(roster, fn {c_pos, c_team, _pw, _hp} ->
+    |> Enum.filter(fn (pos) -> grid[pos] == :combatant end)
+    |> Enum.map(fn (pos) ->
+      Enum.find(roster, fn {c_pos, c_team, _pw, _hp} ->
         (c_pos == pos) && (c_team == vs_team)
       end)
     end)
-    #|> IO.inspect(label: "combatant positions around #{y},#{x}")
+    |> Enum.filter(fn (comb) -> comb end)
+    #|> IO.inspect(label: "combatants around #{y},#{x}")
   end
 
   @doc ~S"""

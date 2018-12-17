@@ -161,6 +161,33 @@ defmodule Combat.ArenaTest do
     assert next_step_toward({grid, roster}, mover3, candidate) == {2, 4}
   end
 
+  #  HP:            HP:
+  #  G....  9       G....  9  
+  #  ..G..  4       ..G..  4  
+  #  ..EG.  2  -->  ..E..     
+  #  ..G..  2       ..G..  2  
+  #  ...G.  1       ...G.  1  
+
+  test "combatants_around() puzzle example [altered]" do
+    arena = {%{
+        {0, 0} => :floor,      {0, 1} => :combatant,  {0, 2} => :floor,
+        {1, 0} => :combatant,  {1, 1} => :combatant,  {1, 2} => :combatant,
+        {2, 0} => :floor,      {2, 1} => :combatant,  {2, 2} => :floor,
+      }, MapSet.new([
+        {{0, 1}, :goblin, 3, 4},
+        {{1, 0}, :elf, 3, 1},
+        {{1, 1}, :elf, 3, 200},
+        {{1, 2}, :goblin, 3, 2},
+        {{2, 1}, :goblin, 3, 2},
+      ])
+    }
+    fighter = {{1, 1}, :elf, 3, 200}
+    combatants = Combat.Arena.combatants_around(arena, fighter, :goblin)
+    assert combatants |> Enum.map(&(elem(&1, 0))) == [{0, 1}, {1, 2}, {2, 1}]
+    lowest_hp = combatants |> multi_min_by(&(elem(&1, 3)))
+    assert lowest_hp |> Enum.map(&(elem(&1, 0))) == [{1, 2}, {2, 1}]
+  end
+
   test "attack() when opponent dies" do
     arena = {%{
         {0, 0} => :floor,  {0, 1} => :floor,      {0, 2} => :floor,
