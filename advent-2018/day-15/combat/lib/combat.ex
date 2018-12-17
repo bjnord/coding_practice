@@ -44,6 +44,7 @@ defmodule Combat do
   end
 
   defp dump_outcome(arena, round, part) do
+    IO.puts("")
     IO.puts("Part #{part}:")
     IO.puts("Combat ends after #{round-1} full rounds")
     total_hp = total_hp(arena)
@@ -51,7 +52,6 @@ defmodule Combat do
     IO.puts("#{victors} win with #{total_hp} total hit points left")
     checksum = (round-1) * total_hp
     IO.puts("Outcome: #{round-1} * #{total_hp} = #{checksum}")
-    IO.puts("")
   end
 
   defp victors({_grid, roster}) do
@@ -73,11 +73,24 @@ defmodule Combat do
   - Part 2 answer is: ...
   """
   def part2(input_file) do
-    ans_type = "????"  # TODO
-    parse_input(input_file)
-    |> elem(0)         # TODO run the battle
-    |> Enum.count()    # TODO run the battle
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
+    initial_arena = parse_input(input_file)
+    debug_inspect_arena(initial_arena, :debug_top, 0)
+    {final_arena, round, elf_power} =
+      4..1_000_000
+      |> Enum.reduce_while(initial_arena, fn (elf_power, arena) ->
+        arena = increase_power(arena, elf_power, :elf)
+        {final_arena, round} = battle(arena, :puzzle, true)
+        debug_inspect_arena(final_arena, :debug_top, round)
+        debug_inspect(elf_power, :debug_top, label: "Elf power")
+        case victors(final_arena) do
+          'Elves' ->
+            {:halt, {final_arena, round, elf_power}}
+          'Goblins' ->
+            {:cont, initial_arena}
+        end
+      end)
+    dump_outcome(final_arena, round, 2)
+    IO.inspect(elf_power, label: "Elf power")
   end
 
   @doc """
