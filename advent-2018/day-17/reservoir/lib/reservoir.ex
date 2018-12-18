@@ -4,6 +4,7 @@ defmodule Reservoir do
   """
 
   import Reservoir.CLI
+  import Reservoir.Flow
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -30,7 +31,16 @@ defmodule Reservoir do
   def part1(input_file) do
     ans_type = "tiles reached by water"
     input_file
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+    |> parse_input
+    |> dump_earth
+    IO.inspect(0, label: "Part 1 #{ans_type} is")
+  end
+
+  defp parse_input(input_file) do
+    input_file
+    |> File.stream!
+    |> Enum.map(&(&1))  # FIXME
+    |> parse_clay_input()
   end
 
   @doc """
