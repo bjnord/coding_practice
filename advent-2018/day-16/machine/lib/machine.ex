@@ -52,8 +52,9 @@ defmodule Machine do
   - Part 2 answer is: ...
   """
   def part2(input_file) do
-    arg_type = "?"
-    input_file
-    |> IO.inspect(label: "Part 2 #{arg_type} is")
+    {samples, _program} = parse_input(input_file)
+    opnames = determine_opcode_names(samples)
+    reg0 = Enum.count(opnames)  # TODO run program here
+    IO.inspect(reg0, label: "Part 2 register 0 value is")
   end
 end

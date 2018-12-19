@@ -76,7 +76,7 @@ defmodule Machine.Executor do
   @doc """
   Execute test samples, and find matching opcodes for each.
 
-  ## Example
+  ## Examples
 
   iex> [{opnum, matches}] = Machine.Executor.find_opcode_matches([
   ...>   {{3, 2, 1, 1}, {9, 2, 1, 2}, {3, 2, 2, 1}},
@@ -85,16 +85,27 @@ defmodule Machine.Executor do
   9
   iex> matches
   #MapSet<[:addi, :mulr, :seti]>
+
+  iex> [{opnum, matches}] = Machine.Executor.find_opcode_matches([
+  ...>   {{3, 2, 1, 1}, {9, 2, 1, 2}, {3, 2, 2, 1}},
+  ...> ], exclude: MapSet.new([:mulr]))
+  iex> opnum
+  9
+  iex> matches
+  #MapSet<[:addi, :seti]>
   """
-  def find_opcode_matches(samples) do
+  def find_opcode_matches(samples, opts \\ []) do
     Enum.map(samples, fn ({b4_reg, {opnum, a, b, c}, af_reg}) ->
       matches =
         @opnames
         |> Enum.reduce(MapSet.new(), fn (opname, matches) ->
-          if Machine.CPU.execute(mapreg(b4_reg), {opname, a, b, c}) == mapreg(af_reg) do
-            MapSet.put(matches, opname)
-          else
-            matches
+          cond do
+            opts[:exclude] && MapSet.member?(opts[:exclude], opname) ->
+              matches
+            Machine.CPU.execute(mapreg(b4_reg), {opname, a, b, c}) == mapreg(af_reg) ->
+              MapSet.put(matches, opname)
+            true ->
+              matches
           end
         end)
       {opnum, matches}
@@ -107,5 +118,31 @@ defmodule Machine.Executor do
     |> Map.put(1, elem(sample_reg, 1))
     |> Map.put(2, elem(sample_reg, 2))
     |> Map.put(3, elem(sample_reg, 3))
+  end
+
+  @doc """
+  Determine opcode names from numeric values, given a set
+  of samples.
+  """
+  def determine_opcode_names(samples) do
+    1..16
+    |> Enum.reduce_while({MapSet.new(), %{}}, fn (_t, {used_names, found_nums}) ->
+      lone_matches =
+        find_opcode_matches(samples, exclude: used_names)
+        |> Enum.filter(fn ({_opnum, matches}) -> Enum.count(matches) == 1 end)
+        |> Enum.uniq()
+      {used_names, found_nums} =
+        lone_matches
+        |> Enum.reduce({used_names, found_nums}, fn ({opnum, matches}, {used_names, found_nums}) ->
+          opname = List.first(MapSet.to_list(matches))
+          {MapSet.put(used_names, opname), Map.put(found_nums, opnum, opname)}
+        end)
+      if Enum.count(used_names) == Enum.count(@opnames) do
+        {:halt, {used_names, found_nums}}
+      else
+        {:cont, {used_names, found_nums}}
+      end
+    end)
+    |> elem(1)
   end
 end
