@@ -1,5 +1,8 @@
 BIN = ./machine
-FILES = config/config.exs lib/machine/cli.ex lib/machine.ex mix.exs test/test_helper.exs test/machine_test.exs
+FILES = config/config.exs lib/machine.ex lib/machine/executor.ex \
+	lib/machine/cpu.ex lib/machine/cli.ex mix.exs \
+	test/machine_test.exs test/machine/cpu_test.exs \
+	test/machine/executor_test.exs
 
 .PHONY: test
 test:
@@ -10,6 +13,9 @@ run: $(BIN)
 
 examples: $(BIN)
 	$(BIN) input/example1.txt
+
+clean:
+	rm -rf _build $(BIN)
 
 $(BIN): $(FILES)
 	mix escript.build

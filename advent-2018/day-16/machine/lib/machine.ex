@@ -3,6 +3,7 @@ defmodule Machine do
   Documentation for Machine.
   """
 
+  import Machine.Executor
   import Machine.CLI
 
   @doc """
@@ -29,7 +30,15 @@ defmodule Machine do
   """
   def part1(input_file) do
     input_file
+    |> parse_input
     |> IO.inspect(label: "Part 1 sample count is")
+  end
+
+  defp parse_input(input_file) do
+    input_file
+    |> File.stream!
+    |> Enum.map(&(&1))  # FIXME
+    |> parse_input_samples()
   end
 
   @doc """
@@ -43,18 +52,5 @@ defmodule Machine do
     arg_type = "?"
     input_file
     |> IO.inspect(label: "Part 2 #{arg_type} is")
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Machine.hello
-      :world
-
-  """
-  def hello do
-    :world
   end
 end
