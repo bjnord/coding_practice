@@ -21,3 +21,6 @@ This is the example from the puzzle description:
 "So, in the example above, counting both water at rest (`~`) and other
 sand tiles the water can hypothetically reach (`|`), the total number of
 tiles the water can reach is **57**."
+
+"In the example above, water that won't eventually drain out is shown
+as `~`, a total of **29** tiles."

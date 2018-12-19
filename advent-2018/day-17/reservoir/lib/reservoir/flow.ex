@@ -325,9 +325,9 @@ defmodule Reservoir.Flow do
   end
 
   @doc ~S"""
-  Return number of squares reached by water.
+  Count number of squares of the given type(s)
   """
-  def water_count(earth) do
+  def water_count(earth, kind) do
     # Puzzle: "To prevent counting forever, ignore tiles with a y
     # coordinate smaller than the smallest y coordinate in your scan
     # data" - Thus, even though water has to flow through y=1 etc.
@@ -341,7 +341,7 @@ defmodule Reservoir.Flow do
       cond do
         y < min_y ->
           acc
-        earth[{y, x}] in [:flow, :water] ->
+        earth[{y, x}] in kind ->
           acc + 1
         true ->
           acc

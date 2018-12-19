@@ -28,4 +28,8 @@ Result (worked first time):
 
 $ expr 20 + 15
 
-Part 1 tiles reached by water is: 35
+Part 1 squares reached by water is: 35
+
+$ expr 15
+
+Part 2 squares containing water is: 15

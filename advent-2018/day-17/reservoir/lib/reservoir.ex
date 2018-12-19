@@ -32,8 +32,8 @@ defmodule Reservoir do
     input_file
     |> parse_input()
     |> flow()
-    |> water_count()
-    |> IO.inspect(label: "Part 1 tiles reached by water is")
+    |> water_count([:flow, :water])
+    |> IO.inspect(label: "Part 1 squares reached by water is")
   end
 
   defp parse_input(input_file) do
@@ -48,11 +48,13 @@ defmodule Reservoir do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 28142
   """
   def part2(input_file) do
-    ans_type = "???"
     input_file
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
+    |> parse_input()
+    |> flow()
+    |> water_count([:water])
+    |> IO.inspect(label: "Part 2 squares containing water is")
   end
 end
