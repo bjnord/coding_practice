@@ -15,11 +15,11 @@ defmodule Machine do
   - argv: Command-line arguments
   """
   def main(argv) do
-    {input_file, parts} = parse_args(argv)
-    if Enum.member?(parts, 1),
-      do: part1(input_file)
-    if Enum.member?(parts, 2),
-      do: part2(input_file)
+    {input_file, opts} = parse_args(argv)
+    if Enum.member?(opts[:parts], 1),
+      do: part1(input_file, opts)
+    if Enum.member?(opts[:parts], 2),
+      do: part2(input_file, opts)
   end
 
   @doc """
@@ -29,11 +29,11 @@ defmodule Machine do
 
   - Part 1 answer is: 1152
   """
-  def part1(input_file) do
+  def part1(input_file, opts \\ []) do
     reg =
       input_file
       |> parse_input()
-      |> run_program()
+      |> run_program(opts)
     IO.inspect(reg[0], label: "Part 1 register 0 value is")
   end
 
@@ -51,11 +51,11 @@ defmodule Machine do
 
   - Part 2 answer is: ...
   """
-  def part2(input_file) do
+  def part2(input_file, opts \\ []) do
     reg =
       input_file
       |> parse_input()
-      |> run_program(1)
+      |> run_program(opts ++ [initial_r0: 1])
     IO.inspect(reg[0], label: "Part 2 register 0 value is")
   end
 end

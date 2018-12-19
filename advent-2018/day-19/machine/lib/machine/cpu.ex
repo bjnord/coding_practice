@@ -75,20 +75,32 @@ defmodule Machine.CPU do
 
   Program registers at end of program
   """
-  def run_program(program, initial_r0 \\ 0) do
+  def run_program(program, opts \\ []) do
     ###
     # "The instruction pointer starts at 0."
     initial_ip = 0
+    initial_r0 = if opts[:initial_r0], do: opts[:initial_r0], else: 0
     initial_reg = new(6)
                 |> set(:ip, program[:ip])
                 |> set(0, initial_r0)
+    if opts[:show_reg] do
+      IO.inspect({initial_ip, initial_reg}, label: "initial IP,registers")
+    end
     Stream.cycle([true])
     |> Enum.reduce_while({initial_ip, initial_reg}, fn (_t, {ip, reg}) ->
-      #IO.inspect({ip, reg}, label: "registers @ end")
+      #if opts[:show_reg] do
+      #  IO.inspect({ip, reg}, label: "IP,registers before execute()")
+      #end
       ###
       # "When the instruction pointer is bound to a register, its value is
       # written to that register just before each instruction is executed,"
-      reg = if reg[:ip], do: Map.replace!(reg, reg[:ip], ip), else: reg
+      reg =
+        if reg[:ip] do
+          #IO.inspect(ip, label: "IP written to R#{reg[:ip]}")
+          Map.replace!(reg, reg[:ip], ip)
+        else
+          reg
+        end
       ###
       # "If the instruction pointer ever causes the device to attempt to
       # load an instruction outside the instructions defined in the program,
@@ -98,7 +110,7 @@ defmodule Machine.CPU do
         # execute the instruction at IP
         #IO.inspect(program[ip], label: "execute opcode")
         reg = execute(reg, program[ip])
-        #IO.inspect({ip, reg}, label: "registers @ middle")
+        #IO.inspect({ip, reg}, label: "IP,registers after execute()")
         ###
         # "the value of that register is written back to the instruction
         # pointer immediately after each instruction finishes execution."
@@ -106,10 +118,20 @@ defmodule Machine.CPU do
         # "Afterward, move to the next instruction by adding one to the
         # instruction pointer, even if the value in the instruction pointer
         # was just updated by an instruction."
-        ip = if reg[:ip], do: reg[reg[:ip]] + 1, else: ip + 1
-        #IO.inspect({ip, reg}, label: "registers @ end")
+        ip =
+          if reg[:ip] do
+            (reg[reg[:ip]] + 1)
+            #|> IO.inspect(label: "IP read from R#{reg[:ip]} and incremented")
+          else
+            (ip + 1)
+            #|> IO.inspect(label: "IP incremented")
+          end
+        if opts[:show_reg] do
+          IO.inspect({ip, reg}, label: "new IP,registers")
+        end
         {:cont, {ip, reg}}
       else
+        #IO.inspect(ip, label: "no instruction at IP (halt)")
         {:halt, {ip, reg}}
       end
     end)

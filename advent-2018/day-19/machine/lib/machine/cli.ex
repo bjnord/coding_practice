@@ -3,18 +3,37 @@ defmodule Machine.CLI do
   Command-line parsing for `Machine`.
   """
 
+  @default_parts [1, 2]
+
   @doc """
   Parse the command-line arguments.
   """
   def parse_args(argv) do
-    case OptionParser.parse(argv) do
-      {[parts: parts], [input_file], _} ->
-        {input_file, part_list(parts)}
-      {_, [input_file], _} ->
-        {input_file, [1, 2]}
-      _ ->
+    switches = [strict: [parts: :string, show_reg: :boolean]]
+    {opts, argv, unhandled} = OptionParser.parse(argv, switches)
+    opts =
+      opts
+      |> Keyword.get_and_update(:parts, fn (value) ->
+        case value do
+          nil ->
+            {nil, @default_parts}
+          _ ->
+            {value, part_list(opts[:parts])}
+        end
+      end)
+      |> elem(1)
+    cond do
+      unhandled != [] ->
+        usage()
+      Enum.count(argv) == 1 ->
+        {List.first(argv), opts}
+      true ->
         usage()
     end
+  end
+
+  defp part_list(parts) when parts == nil do
+    @default_parts
   end
 
   defp part_list(parts) when is_binary(parts) do
@@ -27,7 +46,8 @@ defmodule Machine.CLI do
   Emit usage.
   """
   def usage() do
-    IO.puts(:stderr, "Usage: machine [--parts 12] <input_file>")
+    parts = Enum.join(@default_parts)
+    IO.puts(:stderr, "Usage: machine [--parts=#{parts}] [--show-reg] <input_file>")
     System.halt(64)
   end
 end
