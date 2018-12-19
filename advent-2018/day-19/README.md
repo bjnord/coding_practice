@@ -6,7 +6,7 @@ With the Elves well on their way constructing the North Pole base, you turn your
 
 You can't help but notice that the [device's opcodes](https://adventofcode.com/2018/day/16) don't contain any **flow control** like jump instructions. The device's [manual](https://adventofcode.com/2018/day/16) goes on to explain:
 
-"In programs where flow control is required, the [instruction pointer](https://en.wikipedia.org/wiki/Program_counter) can be **bound to a register** so that it can be manipulated directly. This way, setr/seti can function as absolute jumps, addr/addi can function as relative jumps, and other opcodes can cause truly fascinating effects."
+"In programs where flow control is required, the [instruction pointer](https://en.wikipedia.org/wiki/Program_counter) can be **bound to a register** so that it can be manipulated directly. This way, `setr`/`seti` can function as absolute jumps, `addr`/`addi` can function as relative jumps, and other opcodes can cause truly fascinating effects."
 
 This mechanism is achieved through a declaration like `#ip 1`, which would modify register 1 so that accesses to it let the program indirectly access the instruction pointer itself. To compensate for this kind of binding, there are now six registers (numbered 0 through 5); the five not bound to the instruction pointer behave as normal. Otherwise, the same rules apply as [the last time you worked with this device](https://adventofcode.com/2018/day/16).
 
