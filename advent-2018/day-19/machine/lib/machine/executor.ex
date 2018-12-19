@@ -1,4 +1,6 @@
 defmodule Machine.Executor do
+  import Machine.Register
+
   @doc ~S"""
   Parse the puzzle input.
 
@@ -118,11 +120,12 @@ defmodule Machine.Executor do
   end
 
   defp mapreg(sample_reg) do
-    %{}
-    |> Map.put(0, elem(sample_reg, 0))
-    |> Map.put(1, elem(sample_reg, 1))
-    |> Map.put(2, elem(sample_reg, 2))
-    |> Map.put(3, elem(sample_reg, 3))
+    new(4, [
+      elem(sample_reg, 0),
+      elem(sample_reg, 1),
+      elem(sample_reg, 2),
+      elem(sample_reg, 3),
+    ])
   end
 
   @doc """
