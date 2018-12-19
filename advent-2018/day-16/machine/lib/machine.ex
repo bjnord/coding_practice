@@ -26,11 +26,13 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 640
   """
   def part1(input_file) do
     input_file
-    |> parse_input
+    |> parse_input()
+    |> count_opcode_matches()
+    |> Enum.count(fn (matches) -> matches >= 3 end)
     |> IO.inspect(label: "Part 1 sample count is")
   end
 

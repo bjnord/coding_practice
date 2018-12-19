@@ -53,4 +53,44 @@ defmodule Machine.Executor do
     Enum.map(baft, &String.to_integer/1)
     |> List.to_tuple
   end
+
+  @opcodes [
+    :addr, :addi, :mulr, :muli,
+    :banr, :bani, :borr, :bori,
+    :setr, :seti,
+    :gtir, :gtri, :gtrr,
+    :eqir, :eqri, :eqrr,
+  ]
+
+  @doc """
+  Execute test samples, and determine how many opcodes match.
+
+  ## Example
+
+  iex> Machine.Executor.count_opcode_matches([
+  ...>   {{3, 2, 1, 1}, {9, 2, 1, 2}, {3, 2, 2, 1}},
+  ...> ])
+  [3]
+  """
+  def count_opcode_matches(samples) do
+    Enum.map(samples, fn ({b4_reg, {_opn, a, b, c}, af_reg}) ->
+      @opcodes
+      |> Enum.reduce(0, fn (opcode, matches) ->
+        {opcode, a, b, c}
+        if Machine.CPU.execute(mapreg(b4_reg), {opcode, a, b, c}) == mapreg(af_reg) do
+          matches + 1
+        else
+          matches
+        end
+      end)
+    end)
+  end
+
+  defp mapreg(sample_reg) do
+    %{}
+    |> Map.put(0, elem(sample_reg, 0))
+    |> Map.put(1, elem(sample_reg, 1))
+    |> Map.put(2, elem(sample_reg, 2))
+    |> Map.put(3, elem(sample_reg, 3))
+  end
 end
