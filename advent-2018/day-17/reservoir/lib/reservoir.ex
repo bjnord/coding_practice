@@ -26,14 +26,14 @@ defmodule Reservoir do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 38451
   """
   def part1(input_file) do
-    ans_type = "tiles reached by water"
     input_file
-    |> parse_input
-    |> dump_earth
-    IO.inspect(0, label: "Part 1 #{ans_type} is")
+    |> parse_input()
+    |> flow()
+    |> water_count()
+    |> IO.inspect(label: "Part 1 tiles reached by water is")
   end
 
   defp parse_input(input_file) do
@@ -54,18 +54,5 @@ defmodule Reservoir do
     ans_type = "???"
     input_file
     |> IO.inspect(label: "Part 2 #{ans_type} is")
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Reservoir.hello
-      :world
-
-  """
-  def hello do
-    :world
   end
 end

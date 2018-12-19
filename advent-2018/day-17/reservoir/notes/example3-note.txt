@@ -1,0 +1,31 @@
+About the time my input started getting in an infinite loop, I started to think of edge cases like a tunnel:
+
+      +
+..........
+#.........
+######....
+#.........
+#.#####...
+#.#.......
+#.######..
+#......#..
+#......#..
+########..
+
+Result (worked first time):
+
+.......+..
+.......X..
+.#.....|..
+.######|..
+.#|||||||.
+.#~#####|.
+.#~#||||||
+.#~######|
+.#~~~~~~#|
+.#~~~~~~#|
+.########|
+
+$ expr 20 + 15
+
+Part 1 tiles reached by water is: 35
