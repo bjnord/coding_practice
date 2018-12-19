@@ -27,22 +27,22 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Part 1 answer is: 640
+  - Part 1 answer is: ...
   """
   def part1(input_file) do
-    input_file
-    |> parse_input()
-    |> elem(0)
-    |> find_opcode_matches()
-    |> Enum.count(fn ({_opnum, matches}) -> Enum.count(matches) >= 3 end)
-    |> IO.inspect(label: "Part 1 sample count is")
+    reg =
+      input_file
+      |> parse_input()
+      |> IO.inspect(label: "program")
+      #|> run_program()
+    IO.inspect(reg[0], label: "Part 1 register 0 value is")
   end
 
   defp parse_input(input_file) do
     input_file
     |> File.stream!
     |> Enum.map(&(&1))  # FIXME
-    |> parse_input_samples()
+    |> parse_input_program()
   end
 
   @doc """
@@ -50,15 +50,11 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Part 2 answer is: 472
+  - Part 2 answer is: ...
   """
   def part2(input_file) do
-    {samples, n_program} = parse_input(input_file)
-    opnames = determine_opcode_names(samples)
-    program =
-      n_program
-      |> Enum.map(fn ({opnum, a, b, c}) -> {opnames[opnum], a, b, c} end)
-    reg = run_program(program)
-    IO.inspect(reg[0], label: "Part 2 register 0 value is")
+    input_file
+    |> parse_input()
+    IO.inspect(nil, label: "Part 2 foo is")
   end
 end
