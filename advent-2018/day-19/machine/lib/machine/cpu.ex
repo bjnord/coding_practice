@@ -76,10 +76,42 @@ defmodule Machine.CPU do
   Program registers at end of program
   """
   def run_program(program) do
-    reg = new(4)
-    program
-    |> Enum.reduce(reg, fn (opset, reg) ->
-      execute(reg, opset)
+    ###
+    # "The instruction pointer starts at 0."
+    initial_ip = 0
+    initial_reg = new(6)
+                |> set(:ip, program[:ip])
+    Stream.cycle([true])
+    |> Enum.reduce_while({initial_ip, initial_reg}, fn (_t, {ip, reg}) ->
+      #IO.inspect({ip, reg}, label: "registers @ end")
+      ###
+      # "When the instruction pointer is bound to a register, its value is
+      # written to that register just before each instruction is executed,"
+      reg = if reg[:ip], do: Map.replace!(reg, reg[:ip], ip), else: reg
+      ###
+      # "If the instruction pointer ever causes the device to attempt to
+      # load an instruction outside the instructions defined in the program,
+      # the program instead immediately halts."
+      if program[ip] do
+        ###
+        # execute the instruction at IP
+        #IO.inspect(program[ip], label: "execute opcode")
+        reg = execute(reg, program[ip])
+        #IO.inspect({ip, reg}, label: "registers @ middle")
+        ###
+        # "the value of that register is written back to the instruction
+        # pointer immediately after each instruction finishes execution."
+        #
+        # "Afterward, move to the next instruction by adding one to the
+        # instruction pointer, even if the value in the instruction pointer
+        # was just updated by an instruction."
+        ip = if reg[:ip], do: reg[reg[:ip]] + 1, else: ip + 1
+        #IO.inspect({ip, reg}, label: "registers @ end")
+        {:cont, {ip, reg}}
+      else
+        {:halt, {ip, reg}}
+      end
     end)
+    |> elem(1)
   end
 end

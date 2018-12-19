@@ -27,14 +27,13 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 1152
   """
   def part1(input_file) do
     reg =
       input_file
       |> parse_input()
-      |> IO.inspect(label: "program")
-      #|> run_program()
+      |> run_program()
     IO.inspect(reg[0], label: "Part 1 register 0 value is")
   end
 

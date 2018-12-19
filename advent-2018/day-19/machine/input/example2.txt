@@ -1,0 +1,4 @@
+seti 9 0 1
+seti 4 0 3
+mulr 3 3 2
+addr 1 2 0
