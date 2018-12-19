@@ -52,8 +52,10 @@ defmodule Machine do
   - Part 2 answer is: ...
   """
   def part2(input_file) do
-    input_file
-    |> parse_input()
-    IO.inspect(nil, label: "Part 2 foo is")
+    reg =
+      input_file
+      |> parse_input()
+      |> run_program(1)
+    IO.inspect(reg[0], label: "Part 2 register 0 value is")
   end
 end

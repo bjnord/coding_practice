@@ -49,3 +49,15 @@ In detail, when running this program, the following events occur:
 - The instruction pointer is 6, so the instruction `seti 9 0 5` stores 9 into register 5. The instruction pointer is incremented, causing it to point outside the program, and so the program ends.
 
 **What value is left in register 0** when the background process halts?
+
+## Part 2
+
+A new background process immediately spins up in its place. It appears identical, but on closer inspection, you notice that **this time, register 0 started with the value 1**.
+
+**What value is left in register 0** when this new background process halts?
+
+### Part 2 Design
+
+When I realized the actual puzzle input was taking forever, I peeked at the [day 19 subreddit solution megathread](https://www.reddit.com/r/adventofcode/comments/a7j9zc/2018_day_19_solutions/). Apparently this puzzle is like day 12, where you need to understand what's going on, and replace naïve brute-force with a shortcut of some kind.
+
+I think the fun thing to do here would be to write a disassembler, which takes the program opcodes and translates them into assembly or some higher-level language notation, so you can see what the program is doing. Then perhaps the program can be optimized so it will complete before the heat death of the universe.

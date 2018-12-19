@@ -75,12 +75,13 @@ defmodule Machine.CPU do
 
   Program registers at end of program
   """
-  def run_program(program) do
+  def run_program(program, initial_r0 \\ 0) do
     ###
     # "The instruction pointer starts at 0."
     initial_ip = 0
     initial_reg = new(6)
                 |> set(:ip, program[:ip])
+                |> set(0, initial_r0)
     Stream.cycle([true])
     |> Enum.reduce_while({initial_ip, initial_reg}, fn (_t, {ip, reg}) ->
       #IO.inspect({ip, reg}, label: "registers @ end")
