@@ -9,13 +9,14 @@ defmodule Machine.Executor do
 
   ## Example
 
-      iex> {samples, _opcodes} = Machine.Executor.parse_input_samples([
+      iex> {samples, program} = Machine.Executor.parse_input_samples([
       ...>   "Before: [3, 2, 1, 1]\n",
       ...>   "9 2 1 2\n",
       ...>   "After:  [3, 2, 2, 1]\n",
       ...>   "\n",
       ...>   "\n",
       ...>   "\n",
+      ...>   "10 2 1 2\n",
       ...>   "5 2 1 1\n",
       ...>   "4 1 0 0\n",
       ...> ])
@@ -23,13 +24,17 @@ defmodule Machine.Executor do
       [
         {{3, 2, 1, 1}, {9, 2, 1, 2}, {3, 2, 2, 1}},
       ]
+      iex> program
+      [
+        {10, 2, 1, 2}, {5, 2, 1, 1}, {4, 1, 0, 0}
+      ]
   """
   def parse_input_samples(lines) when is_list(lines) do
     Stream.cycle([true])
     |> Enum.reduce_while({lines, [], [], :sample}, fn (_t, {lines, samples, opcodes, mode}) ->
       cond do
         lines == [] ->
-          {:halt, {samples, opcodes}}
+          {:halt, {samples, Enum.reverse(opcodes)}}
         (mode == :sample) && (List.first(lines) == "\n") ->  # switch modes
           [blank, blank2 | lines] = lines
           if (blank != "\n") || (blank2 != "\n") do

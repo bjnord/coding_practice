@@ -5,6 +5,7 @@ defmodule Machine do
 
   import Machine.Executor
   import Machine.CLI
+  import Machine.CPU
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -49,12 +50,15 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 472
   """
   def part2(input_file) do
-    {samples, _program} = parse_input(input_file)
+    {samples, n_program} = parse_input(input_file)
     opnames = determine_opcode_names(samples)
-    reg0 = Enum.count(opnames)  # TODO run program here
-    IO.inspect(reg0, label: "Part 2 register 0 value is")
+    program =
+      n_program
+      |> Enum.map(fn ({opnum, a, b, c}) -> {opnames[opnum], a, b, c} end)
+    reg = run_program(program)
+    IO.inspect(reg[0], label: "Part 2 register 0 value is")
   end
 end

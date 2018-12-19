@@ -8,8 +8,8 @@ defmodule Machine.CPU do
   @doc """
   Execute an instruction.
   """
-  def execute(reg, {op, a, b, c}) do
-    case op do
+  def execute(reg, {opname, a, b, c}) do
+    case opname do
       #- `addr` (add register) stores into register `C` the result of adding register `A` and register `B`.
       :addr ->
         Map.replace!(reg, c, reg[a] + reg[b])
@@ -65,5 +65,22 @@ defmodule Machine.CPU do
         flag = if reg[a] == reg[b], do: 1, else: 0
         Map.replace!(reg, c, flag)
     end
+  end
+
+  @doc """
+  Run a program.
+
+  ## Returns
+
+  Program registers at end of program
+  """
+  def run_program(program) do
+    reg = %{0 => 0, 1 => 0, 2 => 0, 3 => 0}
+    program
+    |> Enum.reduce(reg, fn (opset, reg) ->
+      #IO.inspect(reg, label: "registers")
+      #IO.inspect(opset, label: "execute(opset)")
+      execute(reg, opset)
+    end)
   end
 end
