@@ -31,8 +31,9 @@ defmodule Machine do
   def part1(input_file) do
     input_file
     |> parse_input()
-    |> count_opcode_matches()
-    |> Enum.count(fn (matches) -> matches >= 3 end)
+    |> elem(0)
+    |> find_opcode_matches()
+    |> Enum.count(fn ({_opnum, matches}) -> Enum.count(matches) >= 3 end)
     |> IO.inspect(label: "Part 1 sample count is")
   end
 

@@ -1,14 +1,15 @@
 defmodule Machine.Executor do
   @doc ~S"""
-  Parse the first part of the puzzle input.
+  Parse the puzzle input.
 
   ## Returns
 
-  A set of before/instruction/after samples
+  - A set of before/instruction/after samples
+  - A set of instructions (test program)
 
   ## Example
 
-      iex> Machine.Executor.parse_input_samples([
+      iex> {samples, _opcodes} = Machine.Executor.parse_input_samples([
       ...>   "Before: [3, 2, 1, 1]\n",
       ...>   "9 2 1 2\n",
       ...>   "After:  [3, 2, 2, 1]\n",
@@ -18,24 +19,34 @@ defmodule Machine.Executor do
       ...>   "5 2 1 1\n",
       ...>   "4 1 0 0\n",
       ...> ])
+      iex> samples
       [
         {{3, 2, 1, 1}, {9, 2, 1, 2}, {3, 2, 2, 1}},
       ]
   """
   def parse_input_samples(lines) when is_list(lines) do
     Stream.cycle([true])
-    |> Enum.reduce_while({lines, []}, fn (_t, {lines, samples}) ->
-      [before | lines] = lines
+    |> Enum.reduce_while({lines, [], [], :sample}, fn (_t, {lines, samples, opcodes, mode}) ->
       cond do
-        String.slice(before, 0..5) == "Before" ->
-          [opcode, apres, blank | lines] = lines
+        lines == [] ->
+          {:halt, {samples, opcodes}}
+        (mode == :sample) && (List.first(lines) == "\n") ->  # switch modes
+          [blank, blank2 | lines] = lines
+          if (blank != "\n") || (blank2 != "\n") do
+            raise "input file format error, blank=#{blank}"
+          end
+          {:cont, {lines, samples, opcodes, :opcode}}
+        (mode == :sample) ->
+          [before, opcode, apres, blank | lines] = lines
           samples = [{parse_baft(before), parse_opcode(opcode), parse_baft(apres)} | samples]
           if blank != "\n" do
             raise "input file format error, blank=#{blank}"
           end
-          {:cont, {lines, samples}}
-        true ->
-          {:halt, samples}
+          {:cont, {lines, samples, opcodes, mode}}
+        (mode == :opcode) ->
+          [opcode | lines] = lines
+          opcodes = [parse_opcode(opcode) | opcodes]
+          {:cont, {lines, samples, opcodes, mode}}
       end
     end)
   end
@@ -54,7 +65,7 @@ defmodule Machine.Executor do
     |> List.to_tuple
   end
 
-  @opcodes [
+  @opnames [
     :addr, :addi, :mulr, :muli,
     :banr, :bani, :borr, :bori,
     :setr, :seti,
@@ -63,26 +74,30 @@ defmodule Machine.Executor do
   ]
 
   @doc """
-  Execute test samples, and determine how many opcodes match.
+  Execute test samples, and find matching opcodes for each.
 
   ## Example
 
-  iex> Machine.Executor.count_opcode_matches([
+  iex> [{opnum, matches}] = Machine.Executor.find_opcode_matches([
   ...>   {{3, 2, 1, 1}, {9, 2, 1, 2}, {3, 2, 2, 1}},
   ...> ])
-  [3]
+  iex> opnum
+  9
+  iex> matches
+  #MapSet<[:addi, :mulr, :seti]>
   """
-  def count_opcode_matches(samples) do
-    Enum.map(samples, fn ({b4_reg, {_opn, a, b, c}, af_reg}) ->
-      @opcodes
-      |> Enum.reduce(0, fn (opcode, matches) ->
-        {opcode, a, b, c}
-        if Machine.CPU.execute(mapreg(b4_reg), {opcode, a, b, c}) == mapreg(af_reg) do
-          matches + 1
-        else
-          matches
-        end
-      end)
+  def find_opcode_matches(samples) do
+    Enum.map(samples, fn ({b4_reg, {opnum, a, b, c}, af_reg}) ->
+      matches =
+        @opnames
+        |> Enum.reduce(MapSet.new(), fn (opname, matches) ->
+          if Machine.CPU.execute(mapreg(b4_reg), {opname, a, b, c}) == mapreg(af_reg) do
+            MapSet.put(matches, opname)
+          else
+            matches
+          end
+        end)
+      {opnum, matches}
     end)
   end
 
