@@ -1,0 +1,22 @@
+BIN = ./door
+FILES = config/config.exs lib/door/cli.ex lib/door.ex mix.exs test/test_helper.exs test/door_test.exs
+
+.PHONY: test
+test:
+	mix test && mix run -e 'Door.main(["input/example1.txt"])'
+
+run: $(BIN)
+	$(BIN) input/input.txt
+
+examples: $(BIN)
+	$(BIN) input/example1.txt && \
+		$(BIN) input/example2.txt && \
+		$(BIN) input/example3.txt && \
+		$(BIN) input/example4.txt && \
+		$(BIN) input/example5.txt
+
+clean:
+	rm -rf _build $(BIN)
+
+$(BIN): $(FILES)
+	mix escript.build
