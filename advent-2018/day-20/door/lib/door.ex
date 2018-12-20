@@ -4,6 +4,7 @@ defmodule Door do
   """
 
   import Door.CLI
+  import Door.InputParser
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -30,7 +31,16 @@ defmodule Door do
   def part1(input_file, _opts \\ []) do
     ans_type = "???"
     input_file
+    |> read_pattern()
+    |> parse_pattern()
     |> IO.inspect(label: "Part 1 #{ans_type} is")
+  end
+
+  defp read_pattern(input_file) do
+    {:ok, file} = File.open(input_file, [:read])
+    line = IO.read(file, :line)
+    File.close(file)
+    String.trim(line)
   end
 
   @doc """
