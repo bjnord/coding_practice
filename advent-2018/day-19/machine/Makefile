@@ -12,8 +12,8 @@ run: $(BIN)
 	$(BIN) input/input.txt
 
 examples: $(BIN)
-	$(BIN) --parts=1 input/example1.txt && \
-		$(BIN) --parts=1 input/example2.txt
+	$(BIN) --parts=13 input/example1.txt && \
+		$(BIN) --parts=13 input/example2.txt
 
 clean:
 	rm -rf _build $(BIN)

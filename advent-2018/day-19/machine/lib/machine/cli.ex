@@ -11,17 +11,7 @@ defmodule Machine.CLI do
   def parse_args(argv) do
     switches = [strict: [parts: :string, show_reg: :boolean]]
     {opts, argv, unhandled} = OptionParser.parse(argv, switches)
-    opts =
-      opts
-      |> Keyword.get_and_update(:parts, fn (value) ->
-        case value do
-          nil ->
-            {nil, @default_parts}
-          _ ->
-            {value, part_list(opts[:parts])}
-        end
-      end)
-      |> elem(1)
+    opts = Keyword.update(opts, :parts, @default_parts, &Machine.CLI.part_list/1)
     cond do
       unhandled != [] ->
         usage()
@@ -32,11 +22,7 @@ defmodule Machine.CLI do
     end
   end
 
-  defp part_list(parts) when parts == nil do
-    @default_parts
-  end
-
-  defp part_list(parts) when is_binary(parts) do
+  def part_list(parts) when is_binary(parts) do
     String.trim(parts)
     |> String.graphemes()
     |> Enum.map(&String.to_integer/1)
