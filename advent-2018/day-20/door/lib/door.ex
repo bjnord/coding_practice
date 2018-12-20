@@ -53,12 +53,18 @@ defmodule Door do
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Part 2 answer is: 8407
   """
   def part2(input_file, _opts \\ []) do
-    ans_type = "???"
     input_file
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
+    |> read_pattern()
+    |> parse_pattern()
+    |> reversed_shortest_paths()
+    |> Enum.filter(fn ({_k, v}) ->
+      Enum.count(v) >= 1000
+    end)
+    |> Enum.count()
+    |> IO.inspect(label: "Part 2 rooms past 1000+ doors")
   end
 
   @doc """

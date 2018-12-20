@@ -13,11 +13,11 @@ run: $(BIN)
 	$(BIN) input/input.txt
 
 examples: $(BIN)
-	$(BIN) input/example1.txt && \
-		$(BIN) input/example2.txt && \
-		$(BIN) input/example3.txt && \
-		$(BIN) input/example4.txt && \
-		$(BIN) input/example5.txt
+	$(BIN) --parts 1 input/example1.txt && \
+		$(BIN) --parts 1 input/example2.txt && \
+		$(BIN) --parts 1 input/example3.txt && \
+		$(BIN) --parts 1 input/example4.txt && \
+		$(BIN) --parts 1 input/example5.txt
 
 clean:
 	rm -rf _build $(BIN)
