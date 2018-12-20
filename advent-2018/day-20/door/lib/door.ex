@@ -27,16 +27,18 @@ defmodule Door do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 3839
   """
   def part1(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> read_pattern()
-    |> parse_pattern()
-    |> reversed_shortest_paths()
-    |> Enum.count  # FIXME
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+    {{y, x}, doors} =
+      input_file
+      |> read_pattern()
+      |> parse_pattern()
+      |> reversed_shortest_paths()
+      |> Enum.max_by(fn ({_k, v}) ->
+        Enum.count(v)
+      end)
+    IO.inspect(Enum.count(doors), label: "Part 1 room #{y},#{x} doors passed")
   end
 
   defp read_pattern(input_file) do
