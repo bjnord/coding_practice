@@ -5,6 +5,7 @@ defmodule Door do
 
   import Door.CLI
   import Door.InputParser
+  import Door.Path
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -33,6 +34,8 @@ defmodule Door do
     input_file
     |> read_pattern()
     |> parse_pattern()
+    |> reversed_shortest_paths()
+    |> Enum.count  # FIXME
     |> IO.inspect(label: "Part 1 #{ans_type} is")
   end
 

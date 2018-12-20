@@ -1,7 +1,9 @@
 BIN = ./door
-FILES = config/config.exs lib/door/cli.ex lib/door.ex mix.exs \
-	test/test_helper.exs test/door_test.exs \
-	lib/door/input_parser.ex test/door/input_parser_test.exs
+FILES = config/config.exs mix.exs test/test_helper.exs \
+	lib/door.ex test/door_test.exs \
+	lib/door/cli.ex test/door/cli_test.exs \
+	lib/door/input_parser.ex test/door/input_parser_test.exs \
+	lib/door/path.ex test/door/path_test.exs
 
 .PHONY: test
 test:
