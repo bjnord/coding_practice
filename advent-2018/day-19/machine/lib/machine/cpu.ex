@@ -230,7 +230,7 @@ defmodule Machine.CPU do
   end
 
   ###
-  # JMPx/JMRx are pseudo-instructions; they're a helpful way to visualize
+  # JMPx/JADx are pseudo-instructions; they're a helpful way to visualize
   # SETx/ADDx for the register bound to the IP
   #
   # so we keep these functions separate from the real ones
@@ -243,9 +243,9 @@ defmodule Machine.CPU do
       :seti ->
         format_jmp(i, :jmpi, a)
       :addr ->
-        format_jmp(i, :jmrr, a, b)
+        format_jmp(i, :jadr, a, b)
       :addi ->
-        format_jmp(i, :jmri, a, b)
+        format_jmp(i, :jadi, a, b)
     end
   end
 
@@ -276,8 +276,8 @@ defmodule Machine.CPU do
 
   defp jmp_reg(opatom) do
     case opatom do
-      :jmrr -> [:a, :b]
-      :jmri -> [:a]
+      :jadr -> [:a, :b]
+      :jadi -> [:a]
       :jmpr -> [:a]
       :jmpi -> []
     end
