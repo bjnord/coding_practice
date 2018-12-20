@@ -51,4 +51,35 @@ defmodule Machine.Register do
   def set(reg, key, value) do
     Map.replace!(reg, key, value)
   end
+
+  @doc """
+  Dump register values.
+  """
+  def dump_reg(reg, opts \\ []) do
+    if (opts[:ip]) do
+      label = if reg[:ip], do: "IP(R#{reg[:ip]}):", else: "    IP:"
+      IO.write(label <> String.pad_leading(Integer.to_string(opts[:ip]), 6, "0") <> "  ")
+    end
+    0..reg[:size]-1
+    |> Enum.map(fn (i) ->
+      if (i == reg[:ip]) do
+        IO.write("  R#{i}=------")
+      else
+        IO.write("  R#{i}=" <> String.pad_leading(Integer.to_string(reg[i]), 6, "0"))
+      end
+    end)
+    IO.write("\n")
+    reg
+  end
+
+  def dump_bound_ip_reg(reg) do
+    IO.write("               ")
+    if reg[:ip] > 0 do
+      0..reg[:ip]-1
+      |> Enum.map(fn (_i) -> IO.write("           ") end)
+    end
+    IO.write("  R#{reg[:ip]}=" <> String.pad_leading(Integer.to_string(reg[reg[:ip]]), 6, "0"))
+    IO.write("\n")
+    reg
+  end
 end

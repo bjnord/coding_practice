@@ -113,20 +113,20 @@ defmodule Machine.CPU do
                 |> set(:ip, program[:ip])
                 |> set(0, initial_r0)
     if opts[:show_reg] do
-      IO.inspect({initial_ip, initial_reg}, label: "initial IP,registers")
+      dump_reg(initial_reg, ip: initial_ip)
+      IO.puts("")
     end
     Stream.cycle([true])
     |> Enum.reduce_while({initial_ip, initial_reg}, fn (_t, {ip, reg}) ->
-      #if opts[:show_reg] do
-      #  IO.inspect({ip, reg}, label: "IP,registers before execute()")
-      #end
       ###
       # "When the instruction pointer is bound to a register, its value is
       # written to that register just before each instruction is executed,"
       reg =
         if reg[:ip] do
-          #IO.inspect(ip, label: "IP written to R#{reg[:ip]}")
-          Map.replace!(reg, reg[:ip], ip)
+          reg = Map.replace!(reg, reg[:ip], ip)
+          if opts[:show_reg] do
+            dump_bound_ip_reg(reg)
+          end
         else
           reg
         end
@@ -137,9 +137,10 @@ defmodule Machine.CPU do
       if program[ip] do
         ###
         # execute the instruction at IP
-        #IO.inspect(program[ip], label: "execute opcode")
+        if opts[:show_reg] do
+          IO.puts("       " <> disassemble_opcode(program, ip))
+        end
         reg = execute(reg, program[ip])
-        #IO.inspect({ip, reg}, label: "IP,registers after execute()")
         ###
         # "the value of that register is written back to the instruction
         # pointer immediately after each instruction finishes execution."
@@ -156,7 +157,8 @@ defmodule Machine.CPU do
             #|> IO.inspect(label: "IP incremented")
           end
         if opts[:show_reg] do
-          IO.inspect({ip, reg}, label: "new IP,registers")
+          dump_reg(reg, ip: ip)
+          IO.puts("")
         end
         {:cont, {ip, reg}}
       else
