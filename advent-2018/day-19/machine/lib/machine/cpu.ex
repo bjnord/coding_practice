@@ -68,6 +68,35 @@ defmodule Machine.CPU do
     end
   end
 
+  defp op_reg(opatom) do
+    case opatom do
+      :addr -> [:a, :b, :c]
+      :addi -> [:a, :c]
+      :mulr -> [:a, :b, :c]
+      :muli -> [:a, :c]
+      :banr -> [:a, :b, :c]
+      :bani -> [:a, :c]
+      :borr -> [:a, :b, :c]
+      :bori -> [:a, :c]
+      :setr -> [:a, :c]
+      :seti -> [:c]
+      :gtir -> [:b, :c]
+      :gtri -> [:a, :c]
+      :gtrr -> [:a, :b, :c]
+      :eqir -> [:b, :c]
+      :eqri -> [:a, :c]
+      :eqrr -> [:a, :b, :c]
+    end
+  end
+
+  defp op_b_ignored(opatom) do
+    case opatom do
+      :setr -> true
+      :seti -> true
+      _ -> false
+    end
+  end
+
   @doc """
   Run a program.
 
@@ -136,5 +165,123 @@ defmodule Machine.CPU do
       end
     end)
     |> elem(1)
+  end
+
+  @doc """
+  Disassemble a program.
+
+  ## Returns
+
+  Lines of disassembly output
+  """
+  def disassemble_program(program) do
+    0..i_count(program)
+    |> Enum.reduce([], fn (i, lines) ->
+      [disassemble_opcode(program, i) | lines]
+    end)
+    |> Enum.reverse
+  end
+
+  defp i_count(program) do
+    program
+    |> Enum.filter(fn ({k, _v}) -> is_integer(k) end)
+    |> Enum.max_by(fn ({k, _v}) -> k end)
+    |> elem(0)
+  end
+
+  defp disassemble_opcode(program, i) when is_integer(i) do
+    {opatom, a, b, c} = program[i]
+    if jmp?(opatom) && (c == program[:ip]) do
+      disassemble_jmp(i, opatom, a, b)
+    else
+      format_opcode(i, opatom, a, b, c)
+    end
+  end
+
+  defp format_opcode(i, opatom, a, b, c) do
+    {i, opname} = format_i_op(i, opatom)
+    {a, b, c} = format_reg(opatom, a, b, c)
+    if op_b_ignored(opatom) do
+      "#{i} #{opname} #{a} #{c}"
+    else
+      "#{i} #{opname} #{a} #{b} #{c}"
+    end
+  end
+
+  defp format_i_op(i, opatom) do
+    i = Integer.to_string(i)
+        |> String.pad_leading(6, "0")
+    opname = Atom.to_string(opatom)
+             |> String.upcase
+    {i, opname}
+  end
+
+  defp format_reg(opatom, a, b, c) do
+    a = "#{to_reg(opatom, a, :a)}"
+    b = "#{to_reg(opatom, b, :b)}"
+    c = "#{to_reg(opatom, c, :c)}"
+    {a, b, c}
+  end
+
+  defp to_reg(opatom, v, vkey) do
+    if vkey in op_reg(opatom), do: "R#{v}", else: "#{v}"
+  end
+
+  ###
+  # JMPx/JMRx are pseudo-instructions; they're a helpful way to visualize
+  # SETx/ADDx for the register bound to the IP
+  #
+  # so we keep these functions separate from the real ones
+  ###
+
+  defp disassemble_jmp(i, opatom, a, b) do
+    case opatom do
+      :setr ->
+        format_jmp(i, :jmpr, a)
+      :seti ->
+        format_jmp(i, :jmpi, a)
+      :addr ->
+        format_jmp(i, :jmrr, a, b)
+      :addi ->
+        format_jmp(i, :jmri, a, b)
+    end
+  end
+
+  defp format_jmp(i, opatom, a, b \\ nil) do
+    {i, opname} = format_i_op(i, opatom)
+    if b do
+      {a, b} = format_reg(opatom, a, b)
+      "#{i} #{opname} #{a} #{b}"
+    else
+      a = format_reg(opatom, a)
+      "#{i} #{opname} #{a}"
+    end
+  end
+
+  defp format_reg(opatom, a, b) do
+    a = format_reg(opatom, a)
+    b = "#{to_jmp_reg(opatom, b, :b)}"
+    {a, b}
+  end
+
+  defp format_reg(opatom, a) do
+    "#{to_jmp_reg(opatom, a, :a)}"
+  end
+
+  defp to_jmp_reg(opatom, v, vkey) do
+    if vkey in jmp_reg(opatom), do: "R#{v}", else: "#{v}"
+  end
+
+  defp jmp_reg(opatom) do
+    case opatom do
+      :jmrr -> [:a, :b]
+      :jmri -> [:a]
+      :jmpr -> [:a]
+      :jmpi -> []
+    end
+  end
+
+  defp jmp?(opatom) do
+    opatom in [:addr, :addi, :setr, :seti]
   end
 end

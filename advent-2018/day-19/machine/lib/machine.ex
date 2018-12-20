@@ -20,6 +20,8 @@ defmodule Machine do
       do: part1(input_file, opts)
     if Enum.member?(opts[:parts], 2),
       do: part2(input_file, opts)
+    if Enum.member?(opts[:parts], 3),
+      do: part3(input_file, opts)
   end
 
   @doc """
@@ -57,5 +59,20 @@ defmodule Machine do
       |> parse_input()
       |> run_program(opts ++ [initial_r0: 1])
     IO.inspect(reg[0], label: "Part 2 register 0 value is")
+  end
+
+  @doc """
+  Process input file and display part 3 solution.
+
+  This disassembles the input file program.
+  """
+  def part3(input_file, _opts \\ []) do
+    lines =
+      input_file
+      |> parse_input()
+      |> disassemble_program()
+    IO.puts("Part 3 program is:")
+    lines
+    |> Enum.map(fn (line) -> IO.puts(line) end)
   end
 end

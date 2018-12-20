@@ -3,7 +3,7 @@ defmodule Machine.CLI do
   Command-line parsing for `Machine`.
   """
 
-  @default_parts [1, 2]
+  @default_parts [1, 2, 3]
 
   @doc """
   Parse the command-line arguments.
