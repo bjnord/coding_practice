@@ -42,7 +42,7 @@ defmodule Machine do
       input_file
       |> parse_input()
       |> run_program(opts)
-    IO.inspect(reg[0], label: "Day 19 Part 1 register 0 value is")
+    IO.inspect(reg[0], label: "Day 19 Part 1 (icount=#{reg[:icount]}) register 0 value is")
   end
 
   defp parse_input(input_file) do
@@ -89,11 +89,11 @@ defmodule Machine do
   """
   def day21_part1(input_file, opts \\ []) do
     i_r0 = 0x0315E1
-    _reg =
+    reg =
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
-    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
+    IO.inspect(i_r0, label: "Day 21 Part 1 (icount=#{reg[:icount]}) initial register 0 value is")
   end
 
   @doc """
@@ -111,11 +111,11 @@ defmodule Machine do
         # TODO replace with correct part 2 answer
         0x0315E1
       end
-    _reg =
+    reg =
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
-    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
+    IO.inspect(i_r0, label: "Day 21 Part 2 (icount=#{reg[:icount]}) initial register 0 value is")
   end
 
   defp parse_initial(i) do

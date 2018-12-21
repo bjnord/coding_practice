@@ -134,6 +134,7 @@ defmodule Machine.CPU do
           IO.puts("       " <> disassemble_opcode(program, ip, opts))
         end
         reg = execute(reg, program[ip])
+              |> incr_icount()
         ###
         # "the value of that register is written back to the instruction
         # pointer immediately after each instruction finishes execution."
@@ -169,6 +170,10 @@ defmodule Machine.CPU do
 
   defp bound_to_ip(reg, ip) do
     if reg[:ip], do: reg[reg[:ip]], else: ip
+  end
+
+  defp incr_icount(reg) do
+    Map.update(reg, :icount, 1, &(&1 + 1))
   end
 
   @doc """
