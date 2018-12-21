@@ -15,6 +15,7 @@ defmodule Machine.CLI do
       numeric: :string,
       disassemble: :boolean,
       initial: :string,
+      limit: :integer,
     ]]
     {opts, argv, unhandled} = OptionParser.parse(argv, switches)
     opts = Keyword.update(opts, :parts, @default_parts, &Machine.CLI.part_list/1)

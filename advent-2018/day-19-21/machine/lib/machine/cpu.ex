@@ -147,7 +147,11 @@ defmodule Machine.CPU do
           dump_reg(reg, opts ++ [ip: ip])
           IO.puts("")
         end
-        {:cont, {ip, reg}}
+        if opts[:limit] && (reg[:icount] >= opts[:limit]) do
+          {:halt, {ip, reg}}
+        else
+          {:cont, {ip, reg}}
+        end
       else
         #IO.inspect(ip, label: "no instruction at IP (halt)")
         {:halt, {ip, reg}}
