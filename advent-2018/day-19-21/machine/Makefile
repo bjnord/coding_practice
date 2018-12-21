@@ -9,15 +9,16 @@ test:
 	mix test && mix run -e 'Machine.main(["input/example1.txt"])'
 
 run: $(BIN)
-	$(BIN) input/input.txt
+	$(BIN) --parts=1 input/input.txt && \
+		$(BIN) --parts=5 input-day-21/input.txt
 
 disasm: $(BIN)
-	$(BIN) --parts=3 input/input.txt && \
-		$(BIN) --parts=3 input-day-21/input.txt
+	$(BIN) --disassemble input/input.txt && \
+		$(BIN) --disassemble input-day-21/input.txt
 
 examples: $(BIN)
-	$(BIN) --parts=13 input/example1.txt && \
-		$(BIN) --parts=13 input/example2.txt
+	$(BIN) --parts=1 input/example1.txt && \
+		$(BIN) --parts=1 input/example2.txt
 
 clean:
 	rm -rf _build $(BIN)

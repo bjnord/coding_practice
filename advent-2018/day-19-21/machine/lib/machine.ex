@@ -16,27 +16,31 @@ defmodule Machine do
   """
   def main(argv) do
     {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1),
-      do: part1(input_file, opts)
-    if Enum.member?(opts[:parts], 2),
-      do: part2(input_file, opts)
-    if Enum.member?(opts[:parts], 3),
-      do: part3(input_file, opts)
+    if opts[:disassemble] do
+      disassemble(input_file, opts)
+    else
+      if Enum.member?(opts[:parts], 1),
+        do: day19_part1(input_file, opts)
+      if Enum.member?(opts[:parts], 2),
+        do: day19_part2(input_file, opts)
+      if Enum.member?(opts[:parts], 5),
+        do: day21_part1(input_file, opts)
+    end
   end
 
   @doc """
-  Process input file and display part 1 solution.
+  Process input file and display day 19 part 1 solution.
 
   ## Correct Answer
 
-  - Part 1 answer is: 1152
+  - Day 19 Part 1 answer is: 1152
   """
-  def part1(input_file, opts \\ []) do
+  def day19_part1(input_file, opts \\ []) do
     reg =
       input_file
       |> parse_input()
       |> run_program(opts)
-    IO.inspect(reg[0], label: "Part 1 register 0 value is")
+    IO.inspect(reg[0], label: "Day 19 Part 1 register 0 value is")
   end
 
   defp parse_input(input_file) do
@@ -47,32 +51,46 @@ defmodule Machine do
   end
 
   @doc """
-  Process input file and display part 2 solution.
+  Process input file and display day 19 part 2 solution.
 
   ## Correct Answer
 
-  - Part 2 answer is: ...
+  - Day 19 Part 2 answer is: ...
   """
-  def part2(input_file, opts \\ []) do
+  def day19_part2(input_file, opts \\ []) do
     reg =
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: 1])
-    IO.inspect(reg[0], label: "Part 2 register 0 value is")
+    IO.inspect(reg[0], label: "Day 19 Part 2 register 0 value is")
   end
 
   @doc """
-  Process input file and display part 3 solution.
-
-  This disassembles the input file program.
+  Process input file and display disassembled program.
   """
-  def part3(input_file, opts \\ []) do
+  def disassemble(input_file, opts \\ []) do
     lines =
       input_file
       |> parse_input()
       |> disassemble_program(opts)
-    IO.puts("Part 3 program is:")
+    IO.puts("Disassembled #{input_file} program:")
     lines
     |> Enum.map(fn (line) -> IO.puts(line) end)
+  end
+
+  @doc """
+  Process input file and display day 21 part 1 solution.
+
+  ## Correct Answer
+
+  - Day 21 Part 1 answer is: 202209
+  """
+  def day21_part1(input_file, opts \\ []) do
+    i_r0 = 0x0315E1
+    _reg =
+      input_file
+      |> parse_input()
+      |> run_program(opts ++ [initial_r0: i_r0])
+    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
   end
 end
