@@ -1,5 +1,10 @@
 # Day 19: Go With The Flow
 
+> No we got nothin' in common
+> No we can't talk at all
+> Please take me along
+> When you slide on down
+
 ## Part 1
 
 With the Elves well on their way constructing the North Pole base, you turn your attention back to understanding the inner workings of programming the device.
