@@ -3,13 +3,19 @@ defmodule Machine.CLI do
   Command-line parsing for `Machine`.
   """
 
-  @default_parts [1, 2, 3]
+  @default_parts [1, 2]
 
   @doc """
   Parse the command-line arguments.
   """
   def parse_args(argv) do
-    switches = [strict: [parts: :string, show_reg: :boolean, numeric: :string, disassemble: :boolean]]
+    switches = [strict: [
+      parts: :string,
+      show_reg: :boolean,
+      numeric: :string,
+      disassemble: :boolean,
+      initial: :string,
+    ]]
     {opts, argv, unhandled} = OptionParser.parse(argv, switches)
     opts = Keyword.update(opts, :parts, @default_parts, &Machine.CLI.part_list/1)
     cond do

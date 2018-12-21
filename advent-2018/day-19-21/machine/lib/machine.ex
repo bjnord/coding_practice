@@ -25,6 +25,8 @@ defmodule Machine do
         do: day19_part2(input_file, opts)
       if Enum.member?(opts[:parts], 5),
         do: day21_part1(input_file, opts)
+      if Enum.member?(opts[:parts], 6),
+        do: day21_part2(input_file, opts)
     end
   end
 
@@ -92,5 +94,40 @@ defmodule Machine do
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
     IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
+  end
+
+  @doc """
+  Process input file and display day 21 part 2 solution.
+
+  ## Correct Answer
+
+  - Day 21 Part 2 answer is: ...
+  """
+  def day21_part2(input_file, opts \\ []) do
+    i_r0 =
+      if opts[:initial] do
+        parse_initial(opts[:initial])
+      else
+        # TODO replace with correct part 2 answer
+        0x0315E1
+      end
+    _reg =
+      input_file
+      |> parse_input()
+      |> run_program(opts ++ [initial_r0: i_r0])
+    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
+  end
+
+  defp parse_initial(i) do
+    cond do
+      i == nil ->
+        0
+      String.slice(i, 0..1) == "0x" ->
+        String.to_integer(String.slice(i, 2..-1), 16)
+      String.slice(i, 0..1) == "0o" ->
+        String.to_integer(String.slice(i, 2..-1), 8)
+      true ->
+        String.to_integer(i)
+    end
   end
 end
