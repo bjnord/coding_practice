@@ -58,28 +58,64 @@ defmodule Machine.Register do
   def dump_reg(reg, opts \\ []) do
     if (opts[:ip]) do
       label = if reg[:ip], do: "IP(R#{reg[:ip]}):", else: "    IP:"
-      IO.write(label <> String.pad_leading(Integer.to_string(opts[:ip]), 6, "0") <> "  ")
+      ip = format_i(opts[:ip], opts)
+      IO.write("#{label}#{ip}  ")
     end
     0..reg[:size]-1
     |> Enum.map(fn (i) ->
       if (i == reg[:ip]) do
-        IO.write("  R#{i}=------")
+        dash = format_i_pad("-", opts)
+        IO.write("  R#{i}=#{dash}")
       else
-        IO.write("  R#{i}=" <> String.pad_leading(Integer.to_string(reg[i]), 6, "0"))
+        r_val = format_i(reg[i], opts)
+        IO.write("  R#{i}=#{r_val}")
       end
     end)
     IO.write("\n")
     reg
   end
 
-  def dump_bound_ip_reg(reg) do
-    IO.write("               ")
+  def dump_bound_ip_reg(reg, opts \\ []) do
+    # 7 spaces is width of "IP(Rx):" label, and 2 trailing separation
+    IO.write("         " <> format_i_pad(" ", opts))
     if reg[:ip] > 0 do
       0..reg[:ip]-1
-      |> Enum.map(fn (_i) -> IO.write("           ") end)
+      |> Enum.map(fn (_i) ->
+        # 3 spaces is width of "Rx=" label, and 2 leading separation
+        IO.write("     " <> format_i_pad(" ", opts))
+      end)
     end
-    IO.write("  R#{reg[:ip]}=" <> String.pad_leading(Integer.to_string(reg[reg[:ip]]), 6, "0"))
-    IO.write("\n")
+    r_val = format_i(reg[reg[:ip]], opts)
+    IO.write("  R#{reg[:ip]}=#{r_val}\n")
     reg
+  end
+
+  def format_i(i, opts \\ []) do
+    {base, lead, width} = i_format(opts)
+    n_pad = width - String.length(lead)
+    num_s =
+      Integer.to_string(i, base)
+      |> String.pad_leading(n_pad, "0")
+    "#{lead}#{num_s}"
+  end
+
+  def format_i_pad(ch, opts \\ []) do
+    {_, _, width} = i_format(opts)
+    String.pad_leading("", width, ch)
+  end
+
+  def format_r(i, opts \\ []) do
+    {base, lead, _} = i_format(opts)
+    num_s = Integer.to_string(i, base)
+    "#{lead}#{num_s}"
+  end
+
+  defp i_format(opts) do
+    case opts[:numeric] do
+      "hex" -> {16, "x", 7}
+      "dec" -> {10, "", 6}
+      "oct" -> {8, "o", 8}
+      _     -> {16, "x", 7}
+    end
   end
 end

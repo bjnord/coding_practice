@@ -113,7 +113,7 @@ defmodule Machine.CPU do
                 |> set(:ip, program[:ip])
                 |> set(0, initial_r0)
     if opts[:show_reg] do
-      dump_reg(initial_reg, ip: initial_ip)
+      dump_reg(initial_reg, opts ++ [ip: initial_ip])
       IO.puts("")
     end
     Stream.cycle([true])
@@ -130,7 +130,8 @@ defmodule Machine.CPU do
         ###
         # execute the instruction at IP
         if opts[:show_reg] do
-          IO.puts("       " <> disassemble_opcode(program, ip))
+          # 7 spaces is width of "IP(Rx):" label
+          IO.puts("       " <> disassemble_opcode(program, ip, opts))
         end
         reg = execute(reg, program[ip])
         ###
@@ -142,7 +143,7 @@ defmodule Machine.CPU do
         # was just updated by an instruction."
         ip = bound_to_ip(reg, ip) + 1
         if opts[:show_reg] do
-          dump_reg(reg, ip: ip)
+          dump_reg(reg, opts ++ [ip: ip])
           IO.puts("")
         end
         {:cont, {ip, reg}}
@@ -177,10 +178,10 @@ defmodule Machine.CPU do
 
   Lines of disassembly output
   """
-  def disassemble_program(program) do
+  def disassemble_program(program, opts \\ []) do
     0..i_count(program)
     |> Enum.reduce([], fn (i, lines) ->
-      [disassemble_opcode(program, i) | lines]
+      [disassemble_opcode(program, i, opts) | lines]
     end)
     |> Enum.reverse
   end
@@ -192,18 +193,18 @@ defmodule Machine.CPU do
     |> elem(0)
   end
 
-  defp disassemble_opcode(program, i) when is_integer(i) do
+  defp disassemble_opcode(program, i, opts) when is_integer(i) do
     {opatom, a, b, c} = program[i]
     if jmp?(opatom) && (c == program[:ip]) do
-      disassemble_jmp(i, opatom, a, b)
+      disassemble_jmp(i, opatom, a, b, opts)
     else
-      format_opcode(i, opatom, a, b, c)
+      format_opcode(i, opatom, a, b, c, opts)
     end
   end
 
-  defp format_opcode(i, opatom, a, b, c) do
-    {i, opname} = format_i_op(i, opatom)
-    {a, b, c} = format_reg(opatom, a, b, c)
+  defp format_opcode(i, opatom, a, b, c, opts) do
+    {i, opname} = format_i_op(i, opatom, opts)
+    {a, b, c} = format_reg(opatom, a, b, c, opts)
     if op_b_ignored(opatom) do
       "#{i} #{opname} #{a} #{c}"
     else
@@ -211,23 +212,25 @@ defmodule Machine.CPU do
     end
   end
 
-  defp format_i_op(i, opatom) do
-    i = Integer.to_string(i)
-        |> String.pad_leading(6, "0")
+  defp format_i_op(i, opatom, opts) do
     opname = Atom.to_string(opatom)
              |> String.upcase
-    {i, opname}
+    {format_i(i, opts), opname}
   end
 
-  defp format_reg(opatom, a, b, c) do
-    a = "#{to_reg(opatom, a, :a)}"
-    b = "#{to_reg(opatom, b, :b)}"
-    c = "#{to_reg(opatom, c, :c)}"
+  defp format_reg(opatom, a, b, c, opts) do
+    a = to_reg(opatom, a, :a, opts)
+    b = to_reg(opatom, b, :b, opts)
+    c = to_reg(opatom, c, :c, opts)
     {a, b, c}
   end
 
-  defp to_reg(opatom, v, vkey) do
-    if vkey in op_reg(opatom), do: "R#{v}", else: "#{v}"
+  defp to_reg(opatom, v, vkey, opts) do
+    if vkey in op_reg(opatom) do
+      "R#{v}"
+    else
+      format_r(v, opts)
+    end
   end
 
   ###
@@ -237,42 +240,47 @@ defmodule Machine.CPU do
   # so we keep these functions separate from the real ones
   ###
 
-  defp disassemble_jmp(i, opatom, a, b) do
+  defp disassemble_jmp(i, opatom, a, b, opts) do
     case opatom do
       :setr ->
-        format_jmp(i, :jmpr, a)
+        format_jmp(i, :jmpr, a, opts)
       :seti ->
-        format_jmp(i, :jmpi, a)
+        format_jmp(i, :jmpi, a, opts)
       :addr ->
-        format_jmp(i, :jadr, a, b)
+        format_jad(i, :jadr, a, b, opts)
       :addi ->
-        format_jmp(i, :jadi, a, b)
+        format_jad(i, :jadi, a, b, opts)
     end
   end
 
-  defp format_jmp(i, opatom, a, b \\ nil) do
-    {i, opname} = format_i_op(i, opatom)
-    if b do
-      {a, b} = format_reg(opatom, a, b)
-      "#{i} #{opname} #{a} #{b}"
-    else
-      a = format_reg(opatom, a)
-      "#{i} #{opname} #{a}"
-    end
+  defp format_jmp(i, opatom, a, opts) do
+    {i, opname} = format_i_op(i, opatom, opts)
+    a = format_jreg(opatom, a, opts)
+    "#{i} #{opname} #{a}"
   end
 
-  defp format_reg(opatom, a, b) do
-    a = format_reg(opatom, a)
-    b = "#{to_jmp_reg(opatom, b, :b)}"
+  defp format_jad(i, opatom, a, b, opts) do
+    {i, opname} = format_i_op(i, opatom, opts)
+    {a, b} = format_jreg(opatom, a, b, opts)
+    "#{i} #{opname} #{a} #{b}"
+  end
+
+  defp format_jreg(opatom, a, opts) do
+    to_jreg(opatom, a, :a, opts)
+  end
+
+  defp format_jreg(opatom, a, b, opts) do
+    a = format_jreg(opatom, a, opts)
+    b = to_jreg(opatom, b, :b, opts)
     {a, b}
   end
 
-  defp format_reg(opatom, a) do
-    "#{to_jmp_reg(opatom, a, :a)}"
-  end
-
-  defp to_jmp_reg(opatom, v, vkey) do
-    if vkey in jmp_reg(opatom), do: "R#{v}", else: "#{v}"
+  defp to_jreg(opatom, v, vkey, opts) do
+    if vkey in jmp_reg(opatom) do
+      "R#{v}"
+    else
+      format_r(v, opts)
+    end
   end
 
   defp jmp_reg(opatom) do

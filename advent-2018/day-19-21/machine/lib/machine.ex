@@ -66,11 +66,11 @@ defmodule Machine do
 
   This disassembles the input file program.
   """
-  def part3(input_file, _opts \\ []) do
+  def part3(input_file, opts \\ []) do
     lines =
       input_file
       |> parse_input()
-      |> disassemble_program()
+      |> disassemble_program(opts)
     IO.puts("Part 3 program is:")
     lines
     |> Enum.map(fn (line) -> IO.puts(line) end)

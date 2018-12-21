@@ -9,7 +9,7 @@ defmodule Machine.CLI do
   Parse the command-line arguments.
   """
   def parse_args(argv) do
-    switches = [strict: [parts: :string, show_reg: :boolean]]
+    switches = [strict: [parts: :string, show_reg: :boolean, numeric: :string]]
     {opts, argv, unhandled} = OptionParser.parse(argv, switches)
     opts = Keyword.update(opts, :parts, @default_parts, &Machine.CLI.part_list/1)
     cond do
@@ -33,7 +33,7 @@ defmodule Machine.CLI do
   """
   def usage() do
     parts = Enum.join(@default_parts)
-    IO.puts(:stderr, "Usage: machine [--parts=#{parts}] [--show-reg] <input_file>")
+    IO.puts(:stderr, "Usage: machine [--parts=#{parts}] [--show-reg] [--numeric=<hex|dec|oct>] <input_file>")
     System.halt(64)
   end
 end
