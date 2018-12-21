@@ -121,15 +121,7 @@ defmodule Machine.CPU do
       ###
       # "When the instruction pointer is bound to a register, its value is
       # written to that register just before each instruction is executed,"
-      reg =
-        if reg[:ip] do
-          reg = Map.replace!(reg, reg[:ip], ip)
-          if opts[:show_reg] do
-            dump_bound_ip_reg(reg)
-          end
-        else
-          reg
-        end
+      reg = ip_to_bound(reg, ip, opts)
       ###
       # "If the instruction pointer ever causes the device to attempt to
       # load an instruction outside the instructions defined in the program,
@@ -148,14 +140,7 @@ defmodule Machine.CPU do
         # "Afterward, move to the next instruction by adding one to the
         # instruction pointer, even if the value in the instruction pointer
         # was just updated by an instruction."
-        ip =
-          if reg[:ip] do
-            (reg[reg[:ip]] + 1)
-            #|> IO.inspect(label: "IP read from R#{reg[:ip]} and incremented")
-          else
-            (ip + 1)
-            #|> IO.inspect(label: "IP incremented")
-          end
+        ip = bound_to_ip(reg, ip) + 1
         if opts[:show_reg] do
           dump_reg(reg, ip: ip)
           IO.puts("")
@@ -167,6 +152,22 @@ defmodule Machine.CPU do
       end
     end)
     |> elem(1)
+  end
+
+  defp ip_to_bound(reg, ip, opts) do
+    cond do
+      reg[:ip] && opts[:show_reg] ->
+        Map.replace!(reg, reg[:ip], ip)
+        |> dump_bound_ip_reg(opts)
+      reg[:ip] ->
+        Map.replace!(reg, reg[:ip], ip)
+      true ->
+        reg
+    end
+  end
+
+  defp bound_to_ip(reg, ip) do
+    if reg[:ip], do: reg[reg[:ip]], else: ip
   end
 
   @doc """
