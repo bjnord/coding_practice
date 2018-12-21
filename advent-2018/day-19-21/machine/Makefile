@@ -11,6 +11,10 @@ test:
 run: $(BIN)
 	$(BIN) input/input.txt
 
+disasm: $(BIN)
+	$(BIN) --parts=3 input/input.txt && \
+		$(BIN) --parts=3 input-day-21/input.txt
+
 examples: $(BIN)
 	$(BIN) --parts=13 input/example1.txt && \
 		$(BIN) --parts=13 input/example2.txt
