@@ -7,6 +7,7 @@ defmodule Cave do
   defstruct depth: nil, target: {nil, nil}, erosion: %{}
 
   @type position() :: {integer(), integer()}
+  @type position_range() :: {Range.t(integer()), Range.t(integer())}
   @type t() :: %__MODULE__{
     depth: integer(),
     target: position(),
@@ -117,7 +118,7 @@ defmodule Cave do
       iex> Cave.risk_level(cave, {0..10, 0..10})
       114
   """
-  @spec risk_level(Cave.t(), position()) :: integer()
+  @spec risk_level(Cave.t(), position_range()) :: integer()
   def risk_level(cave, {y_range, x_range}) when is_map(y_range) and is_map(x_range) do
     squares =
       for y <- y_range,
@@ -143,7 +144,7 @@ defmodule Cave do
       iex> Cave.target_range(cave)
       {0..7, 0..9}
   """
-  @spec target_range(Cave.t()) :: {Range.t(), Range.t()}
+  @spec target_range(Cave.t()) :: position_range()
   def target_range(cave) do
     {target_y, target_x} = cave.target
     {0..target_y, 0..target_x}
@@ -159,16 +160,15 @@ defmodule Cave do
       iex> cave = Cave.new(21, {3, 3})
       iex> Cave.erosion_level(cave, {1, 1})
       9485
-      iex> fast_cave = Cave.cache_erosion(cave)
+      iex> fast_cave = Cave.cache_erosion(cave, {0..3, 0..3})
       iex> Cave.erosion_level(fast_cave, {1, 1})
       9485
       iex> Enum.count(fast_cave.erosion)
       16
   """
   # TODO OPTIMIZE can this be parallelized?
-  @spec cache_erosion(Cave.t()) :: Cave.t()
-  def cache_erosion(cave) do
-    {range_y, range_x} = target_range(cave)
+  @spec cache_erosion(Cave.t(), position_range()) :: Cave.t()
+  def cache_erosion(cave, {range_y, range_x}) do
     ###
     # we want reduce here, so {y, x} can take advantage of cached {y-1, x}
     # etc. as we go
