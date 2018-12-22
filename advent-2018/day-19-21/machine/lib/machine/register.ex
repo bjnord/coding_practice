@@ -113,7 +113,6 @@ defmodule Machine.Register do
 
   defp i_format(opts) do
     case opts[:numeric] do
-      "hex" -> {16, "x", 7}
       "dec" -> {10, "", 6}
       "oct" -> {8, "o", 8}
       _     -> {16, "x", 7}

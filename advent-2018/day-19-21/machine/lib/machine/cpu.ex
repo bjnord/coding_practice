@@ -429,8 +429,6 @@ defmodule Machine.CPU do
   defp postlude_lines(opts) do
     printf =
       case opts[:numeric] do
-        "hex" ->
-          "printf(\"R%d=x%06X \", di, r[di]);"
         "dec" ->
           "printf(\"R%d=%06d \", di, r[di]);"
         "oct" ->
@@ -557,8 +555,6 @@ defmodule Machine.CPU do
 
   defp decompile_i(i, opts) do
     case opts[:numeric] do
-      "hex" ->
-        "0#{format_i(i, opts)}"
       "dec" ->
         d = String.trim_leading(format_i(i, opts), "0")
         if d == "", do: "0", else: d
