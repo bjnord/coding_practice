@@ -3,7 +3,7 @@ defmodule Cave do
   Documentation for Cave.
   """
 
-  defstruct depth: 2, target: {1, 1}
+  defstruct depth: 2, target: {1, 1}, erosion: %{}
 
   @doc """
   Compute geologic index at a position.
@@ -35,7 +35,6 @@ defmodule Cave do
     if {y, x} == cave.target do
       0
     else
-      # TODO OPTIMIZE can this be parallelized?
       erosion_level(cave, {y-1, x}) * erosion_level(cave, {y, x-1})
     end
   end
@@ -58,7 +57,11 @@ defmodule Cave do
       510
   """
   def erosion_level(cave, {y, x}) do
-    rem(geologic_index(cave, {y, x}) + cave.depth, 20183)
+    if Map.has_key?(cave.erosion, {y, x}) do
+      Map.get(cave.erosion, {y, x})
+    else
+      rem(geologic_index(cave, {y, x}) + cave.depth, 20183)
+    end
   end
 
   @doc """
@@ -122,5 +125,38 @@ defmodule Cave do
   def target_range(cave) do
     {target_y, target_x} = cave.target
     {0..target_y, 0..target_x}
+  end
+
+  @doc """
+  Precalculate erosion for a cave.
+
+  Returns the updated cave, with cached erosion levels.
+
+  ## Example
+
+      iex> cave = %Cave{depth: 21, target: {3, 3}}
+      iex> Cave.erosion_level(cave, {1, 1})
+      9485
+      iex> fast_cave = Cave.cache_erosion(cave)
+      iex> Cave.erosion_level(fast_cave, {1, 1})
+      9485
+      iex> Enum.count(fast_cave.erosion)
+      16
+  """
+  # TODO OPTIMIZE can this be parallelized?
+  def cache_erosion(cave) do
+    {range_y, range_x} = target_range(cave)
+    ###
+    # we want reduce here, so {y, x} can take advantage of cached {y-1, x}
+    # etc. as we go
+    Enum.reduce(range_y, cave, fn (y, cave) ->
+      Enum.reduce(range_x, cave, fn (x, cave) ->
+        if Map.has_key?(cave.erosion, {y, x}) do
+          cave
+        else
+          %{cave | erosion: Map.put(cave.erosion, {y, x}, erosion_level(cave, {y, x}))}
+        end
+      end)
+    end)
   end
 end

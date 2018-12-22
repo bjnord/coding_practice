@@ -26,13 +26,14 @@ defmodule Geology do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 10395
   """
   def part1(input_file, _opts \\ []) do
-    cave =
+    fast_cave =
       input_file
-      |> parse_input
-    risk_level(cave, target_range(cave))
+      |> parse_input()
+      |> cache_erosion()
+    risk_level(fast_cave, target_range(fast_cave))
     |> IO.inspect(label: "Part 1 total risk level is")
   end
 
