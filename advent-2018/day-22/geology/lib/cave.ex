@@ -6,9 +6,17 @@ defmodule Cave do
   @enforce_keys [:depth, :target]
   defstruct depth: nil, target: {nil, nil}, erosion: %{}
 
+  @type position() :: {integer(), integer()}
+  @type t() :: %__MODULE__{
+    depth: integer(),
+    target: position(),
+    erosion: map()
+  }
+
   @doc """
   Construct a new cave.
   """
+  @spec new(integer(), position()) :: Cave.t()
   def new(depth, {y, x}) when is_integer(depth) and is_integer(y) and is_integer(x) do
     %Cave{depth: depth, target: {y, x}, erosion: %{}}
   end
@@ -30,6 +38,7 @@ defmodule Cave do
       iex> Cave.geologic_index(cave, {10, 10})
       0
   """
+  @spec geologic_index(Cave.t(), position()) :: integer()
   def geologic_index(_cave, {y, x}) when {y, x} == {0, 0} do
     0
   end
@@ -64,6 +73,7 @@ defmodule Cave do
       iex> Cave.erosion_level(cave, {10, 10})
       510
   """
+  @spec erosion_level(Cave.t(), position()) :: integer()
   def erosion_level(cave, {y, x}) do
     if Map.has_key?(cave.erosion, {y, x}) do
       Map.get(cave.erosion, {y, x})
@@ -89,6 +99,7 @@ defmodule Cave do
       iex> Cave.region_type(cave, {10, 10})
       :rocky
   """
+  @spec region_type(Cave.t(), position()) :: atom()
   def region_type(cave, {y, x}) do
     case risk_level(cave, {y, x}) do
       0 -> :rocky
@@ -106,6 +117,7 @@ defmodule Cave do
       iex> Cave.risk_level(cave, {0..10, 0..10})
       114
   """
+  @spec risk_level(Cave.t(), position()) :: integer()
   def risk_level(cave, {y_range, x_range}) when is_map(y_range) and is_map(x_range) do
     squares =
       for y <- y_range,
@@ -117,6 +129,7 @@ defmodule Cave do
   @doc """
   Compute risk level at a position.
   """
+  @spec risk_level(Cave.t(), position()) :: integer()
   def risk_level(cave, {y, x}) when is_integer(y) and is_integer(x) do
     rem(erosion_level(cave, {y, x}), 3)
   end
@@ -130,6 +143,7 @@ defmodule Cave do
       iex> Cave.target_range(cave)
       {0..7, 0..9}
   """
+  @spec target_range(Cave.t()) :: {Range.t(), Range.t()}
   def target_range(cave) do
     {target_y, target_x} = cave.target
     {0..target_y, 0..target_x}
@@ -152,6 +166,7 @@ defmodule Cave do
       16
   """
   # TODO OPTIMIZE can this be parallelized?
+  @spec cache_erosion(Cave.t()) :: Cave.t()
   def cache_erosion(cave) do
     {range_y, range_x} = target_range(cave)
     ###
