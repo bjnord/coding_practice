@@ -3,6 +3,15 @@
 
 #define NREG 6
 
+/***
+ * This was originally produced with:
+ *
+ * $ ./gadget --decompile --initial=202209 --numeric=hex input-day-21/input.txt >input.c
+ *
+ * Then it was cleaned up significantly (i.e. removing needless branches, using while(),
+ * etc.) as well as optimizing the inner loop (see below).
+ */
+
 void main(argc, argv)
 {
 	unsigned int r[NREG], di;
