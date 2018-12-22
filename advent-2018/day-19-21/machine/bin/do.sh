@@ -1,5 +1,5 @@
 #!/bin/sh
-NUM="--numeric=dec"
+#NUM="--numeric=dec"
 PARTS="--parts=1"
 if [ "$1" = -6 ]; then
 	PARTS="--parts=6"
@@ -29,11 +29,19 @@ BASE="`basename $FILE .txt`"
 make machine && \
 	./machine --decompile $INITIAL $NUM $FILE >$BASE.c && \
 	./machine --disassemble $INITIAL $NUM $FILE >$BASE.asm && \
-	tail $BASE.c $BASE.asm && \
-	echo "==> $FILE" && \
-	head -3 $FILE && \
-	echo "[...]" && \
-	tail $FILE
+
+# for the screen
+tail -20 $BASE.c
+tail $BASE.asm
+echo "==> $FILE <=="
+head -3 $FILE
+echo "[...]"
+tail $FILE
+
+# for analysis
+expand $BASE.c >/tmp/do-c$$
+(echo;echo;echo;echo;echo;echo;echo;cat $BASE.asm) | pr -m -t -w 200 /tmp/do-c$$ - >parallel-$BASE.out
+rm -f /tmp/do-c$$
 
 if [ "$RUN" = true ]; then
 	cc $BASE.c && \

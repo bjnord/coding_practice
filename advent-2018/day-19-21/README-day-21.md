@@ -47,3 +47,34 @@ I wrote a disassembler while working on day 19, and did that pay off in spades!
         [...]
 
 1. Voilà! Starting the program with `R0=x0315E1` (202209) makes the program exit, so that's the answer.
+
+## Part 2
+
+In order to determine the timing window for your underflow exploit, you also need an upper bound:
+
+**What is the lowest non-negative integer value for register 0 that causes the program to halt after executing the most instructions?** (The program must actually halt; running forever does not count as halting.)
+
+### Part 2 Solution
+
+After disassembling and decompiling and fiddling with optimizing the C code and trying to figure out what the "activation system" program does (see `notes/input-day21-rf.c`)... it finally occurred to me that I don't need to know what it does. It's a big add/multiply/shift state machine that produces a new big value from 0x000000-0xFFFFFF each time through.
+
+All that matters is figuring out when the first value repeats, because at that point it'll cycle forever. The value before the repetition will be the maximum times you can go through the loop without entering the infinite cycle. So:
+
+        $ cc -o machine-optimized src/machine-optimized.c
+        $ ./machine-optimized 2>r5-values.out
+        $ bin/repeat.pl r5-values.out
+        repeated r[5]=0xD01AE1
+        $ grep -1 -n 0xD01AE1 r5-values.out | head -7
+        6174-r[5]=0xD13DB9
+        6175:r[5]=0xD01AE1    <-- 0xD01AE1 seen for the first time
+        6176-r[5]=0x0A288E
+        --
+        11992-r[5]=0xB3B61C   <-- 0xB3B61C = last value before repeat
+        11993:r[5]=0xD01AE1   <-- 0xD01AE1 repeats
+        11994-r[5]=0x0A288E
+        $ grep -1 -n 0xB3B61C r5-values.out | head -3
+        11991-r[5]=0x8EC2B5
+        11992:r[5]=0xB3B61C   <-- ...and it is not seen before loop 11992
+        11993-r[5]=0xD01AE1
+
+Starting the program with `R0=xB3B61C` (11777564) does reach a halt state.

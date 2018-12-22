@@ -102,7 +102,7 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Day 21 Part 1 answer is: 202209
+  - Day 21 Part 1 answer is: 202209 (0x0315E1)
   """
   def day21_part1(input_file, opts \\ []) do
     i_r0 = 0x0315E1
@@ -110,7 +110,7 @@ defmodule Machine do
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
-    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
+    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 lower bound is")
     IO.puts("Day 21 Part 1 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
@@ -119,21 +119,20 @@ defmodule Machine do
 
   ## Correct Answer
 
-  - Day 21 Part 2 answer is: ...
+  - Day 21 Part 2 answer is: 11777564 (0xB3B61C)
   """
   def day21_part2(input_file, opts \\ []) do
     i_r0 =
       if opts[:initial] do
         parse_initial(opts[:initial])
       else
-        # TODO replace with correct part 2 answer
-        0x0315E1
+        0xB3B61C
       end
     reg =
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
-    IO.inspect(i_r0, label: "Day 21 Part 2 initial register 0 value is")
+    IO.inspect(i_r0, label: "Day 21 Part 2 initial register 0 upper bound is")
     IO.puts("Day 21 Part 2 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
