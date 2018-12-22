@@ -10,15 +10,15 @@ test:
 
 run: $(BIN)
 	$(BIN) --parts=1 input/input.txt && \
-		$(BIN) --parts=5 input-day-21/input.txt
+		$(BIN) --parts=56 input-day-21/input-fast.txt
 
 disasm: $(BIN)
 	$(BIN) --disassemble input/input.txt && \
-		$(BIN) --disassemble input-day-21/input.txt
+		$(BIN) --disassemble input-day-21/input-fast.txt
 
 decomp: $(BIN)
 	$(BIN) --decompile input/input.txt && \
-		$(BIN) --decompile input-day-21/input.txt
+		$(BIN) --decompile input-day-21/input-fast.txt
 
 examples: $(BIN)
 	$(BIN) --parts=1 input/example1.txt && \

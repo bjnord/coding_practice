@@ -56,7 +56,7 @@ In order to determine the timing window for your underflow exploit, you also nee
 
 ### Part 2 Solution
 
-After disassembling and decompiling and fiddling with optimizing the C code and trying to figure out what the "activation system" program does (see `notes/input-day21-rf.c`)... it finally occurred to me that I don't need to know what it does. It's a big add/multiply/shift state machine that produces a new big value from 0x000000-0xFFFFFF each time through.
+After disassembling and decompiling and fiddling with optimizing the C code and trying to figure out what the "activation system" program does (see `src/machine-optimized.c`)... it finally occurred to me that I don't need to know what it does. It's a big add/multiply/shift state machine that produces a new big value from 0x000000-0xFFFFFF each time through.
 
 All that matters is figuring out when the first value repeats, because at that point it'll cycle forever. The value before the repetition will be the maximum times you can go through the loop without entering the infinite cycle. So:
 
@@ -78,3 +78,7 @@ All that matters is figuring out when the first value repeats, because at that p
         11993-r[5]=0xD01AE1
 
 Starting the program with `R0=xB3B61C` (11777564) does reach a halt state.
+
+### Part 2 Optimization
+
+The Elf code machine, unfortunately, churns away on the Day 21 `input.txt` for longer than I'm willing to wait. I brought my optimization of the inner loop back to the Elf code... this required adding instructions for binary shift-right (`brsr` and `brsi`) and subtraction (`subr` and `subi`) to the CPU. The resulting `input-fast.txt` completes almost immediately.
