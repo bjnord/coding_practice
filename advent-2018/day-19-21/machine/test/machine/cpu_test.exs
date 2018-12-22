@@ -96,4 +96,14 @@ defmodule Machine.CPUTest do
     reg = execute(reg, {:eqrr, 2, 3, 0})
     assert reg == new(4, [1, 4, 0, 0])
   end
+
+  #- `brsr` (bitwise shift-right register) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count in register `B`.
+  #- `brsi` (bitwise shift-right immediate) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count of value `B`.
+  test "binary shift-right" do
+    reg = new(4, [170, 1, 2, 3])
+    reg = execute(reg, {:brsr, 0, 1, 2})
+    assert reg == new(4, [170, 1, 85, 3])
+    reg = execute(reg, {:brsi, 2, 3, 0})
+    assert reg == new(4, [10, 1, 85, 3])
+  end
 end

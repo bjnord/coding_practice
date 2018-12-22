@@ -65,6 +65,12 @@ defmodule Machine.CPU do
       :eqrr ->
         flag = if reg[a] == reg[b], do: 1, else: 0
         set(reg, c, flag)
+      #- `brsr` (bitwise shift-right register) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count in register `B`.
+      :brsr ->
+        set(reg, c, Bitwise.>>>(reg[a], reg[b]))
+      #- `brsi` (bitwise shift-right immediate) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count of value `B`.
+      :brsi ->
+        set(reg, c, Bitwise.>>>(reg[a], b))
     end
   end
 
@@ -86,6 +92,8 @@ defmodule Machine.CPU do
       :eqir -> [:b, :c]
       :eqri -> [:a, :c]
       :eqrr -> [:a, :b, :c]
+      :brsr -> [:a, :b, :c]
+      :brsi -> [:a, :c]
     end
   end
 
@@ -524,6 +532,12 @@ defmodule Machine.CPU do
       #- `eqrr` (equal register/register) sets register `C` to `1` if register `A` is equal to register `B`. Otherwise, register `C` is set to `0`.
       :eqrr ->
         {"r[#{c}] = (r[#{a}] == r[#{b}]) ? 1 : 0;", nil, c}
+      #- `brsr` (bitwise shift-right register) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count in register `B`.
+      :brsr ->
+        raise "unsupported"
+      #- `brsi` (bitwise shift-right immediate) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count of value `B`.
+      :brsi ->
+        {"r[#{c}] = r[#{a}] >> #{decompile_i(b, opts)};", nil, nil}
     end
   end
 
