@@ -16,7 +16,8 @@ examples: $(BIN)
 		$(BIN) --parts 1 input/example5.txt && \
 		$(BIN) --parts 1 input/example6.txt && \
 		$(BIN) --parts 1 input/example-reddit1.txt && \
-		$(BIN) --parts 1 input/example-reddit2.txt
+		$(BIN) --parts 1 input/example-reddit2.txt && \
+		$(BIN) --parts 1 input/example-reddit3.txt
 
 # NB puzzle doesn't give part 2 solution for input/example2.txt
 p2-examples: $(BIN)

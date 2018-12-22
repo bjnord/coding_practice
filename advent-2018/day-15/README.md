@@ -389,6 +389,19 @@ This takes 67 full rounds \[and ends with 200 HP, for a checksum of 13400\]. Aft
 
 This takes 71 full rounds \[and ends with 197 HP, for a checksum of 13987\]. In the 68th round, the bottom-left elf moves after being damaged, make sure that this doesn't trigger weird behavior. (thanks fizbin) \[**BJN** and this was my last bug, in the same place as the "dead unit" problem, above; I failed to use the latest HP for the moving unit\]
 
+```
+################
+#.......G......#
+#G.............#
+#..............#
+#....###########
+#....###########
+#.......EG.....#
+################
+```
+
+[Another test case](https://www.reddit.com/r/adventofcode/comments/a6f100/day_15_details_easy_to_be_wrong_on/ebws86n/) that has been useful for some people. The top goblin should move left here, not down and the second one should move right first not down. (This eventually ends with the score: 18468 (486 x 38) according to my code)
+
 ## Part 2
 
 According to your calculations, the Elves are going to lose badly. Surely, you won't mess up the timeline too much if you give them just a little advanced technology, right?
