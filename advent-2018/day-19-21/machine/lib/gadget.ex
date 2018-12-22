@@ -100,17 +100,4 @@ defmodule Gadget do
     IO.inspect(i_r0, label: "Part 2 initial register 0 upper bound is")
     IO.puts("Part 2 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
-
-  defp parse_initial(i) do
-    cond do
-      i == nil ->
-        0
-      String.slice(i, 0..1) == "0x" ->
-        String.to_integer(String.slice(i, 2..-1), 16)
-      String.slice(i, 0..1) == "0o" ->
-        String.to_integer(String.slice(i, 2..-1), 8)
-      true ->
-        String.to_integer(i)
-    end
-  end
 end

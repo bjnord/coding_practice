@@ -44,4 +44,20 @@ defmodule Machine.CLI do
     IO.puts(:stderr, "Usage: machine [--parts=#{parts}] [--show-reg] [--numeric=<hex|dec|oct>] [--disassemble] [--decompile] [--initial=<r0-value>] [--limit=<n>] <input_file>")
     System.halt(64)
   end
+
+  @doc """
+  Parse "initial R0" CLI value (hex/dec/oct).
+  """
+  def parse_initial(i) do
+    cond do
+      i == nil ->
+        0
+      String.slice(i, 0..1) == "0x" ->
+        String.to_integer(String.slice(i, 2..-1), 16)
+      String.slice(i, 0..1) == "0o" ->
+        String.to_integer(String.slice(i, 2..-1), 8)
+      true ->
+        String.to_integer(i)
+    end
+  end
 end

@@ -92,17 +92,4 @@ defmodule Machine do
     lines
     |> Enum.map(fn (line) -> IO.puts(line) end)
   end
-
-  defp parse_initial(i) do
-    cond do
-      i == nil ->
-        0
-      String.slice(i, 0..1) == "0x" ->
-        String.to_integer(String.slice(i, 2..-1), 16)
-      String.slice(i, 0..1) == "0o" ->
-        String.to_integer(String.slice(i, 2..-1), 8)
-      true ->
-        String.to_integer(i)
-    end
-  end
 end
