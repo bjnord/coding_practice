@@ -14,6 +14,7 @@ defmodule Machine.CLI do
       show_reg: :boolean,
       numeric: :string,
       disassemble: :boolean,
+      decompile: :boolean,
       initial: :string,
       limit: :integer,
     ]]
@@ -40,7 +41,7 @@ defmodule Machine.CLI do
   """
   def usage() do
     parts = Enum.join(@default_parts)
-    IO.puts(:stderr, "Usage: machine [--parts=#{parts}] [--show-reg] [--numeric=<hex|dec|oct>] [--disassemble] <input_file>")
+    IO.puts(:stderr, "Usage: machine [--parts=#{parts}] [--show-reg] [--numeric=<hex|dec|oct>] [--disassemble] [--decompile] [--initial=<r0-value>] [--limit=<n>] <input_file>")
     System.halt(64)
   end
 end

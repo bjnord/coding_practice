@@ -16,17 +16,20 @@ defmodule Machine do
   """
   def main(argv) do
     {input_file, opts} = parse_args(argv)
-    if opts[:disassemble] do
-      disassemble(input_file, opts)
-    else
-      if Enum.member?(opts[:parts], 1),
-        do: day19_part1(input_file, opts)
-      if Enum.member?(opts[:parts], 2),
-        do: day19_part2(input_file, opts)
-      if Enum.member?(opts[:parts], 5),
-        do: day21_part1(input_file, opts)
-      if Enum.member?(opts[:parts], 6),
-        do: day21_part2(input_file, opts)
+    cond do
+      opts[:disassemble] ->
+        disassemble(input_file, opts)
+      opts[:decompile] ->
+        decompile(input_file, opts)
+      true ->
+        if Enum.member?(opts[:parts], 1),
+          do: day19_part1(input_file, opts)
+        if Enum.member?(opts[:parts], 2),
+          do: day19_part2(input_file, opts)
+        if Enum.member?(opts[:parts], 5),
+          do: day21_part1(input_file, opts)
+        if Enum.member?(opts[:parts], 6),
+          do: day21_part2(input_file, opts)
     end
   end
 
@@ -42,7 +45,8 @@ defmodule Machine do
       input_file
       |> parse_input()
       |> run_program(opts)
-    IO.inspect(reg[0], label: "Day 19 Part 1 (icount=#{reg[:icount]}) register 0 value is")
+    IO.inspect(reg[0], label: "Day 19 Part 1 register 0 value is")
+    IO.puts("Day 19 Part 1 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
   defp parse_input(input_file) do
@@ -75,7 +79,20 @@ defmodule Machine do
       input_file
       |> parse_input()
       |> disassemble_program(opts)
-    IO.puts("Disassembled #{input_file} program:")
+    IO.puts(:stderr, "Disassembled #{input_file} program:")
+    lines
+    |> Enum.map(fn (line) -> IO.puts(line) end)
+  end
+
+  @doc """
+  Process input file and display decompiled program.
+  """
+  def decompile(input_file, opts \\ []) do
+    lines =
+      input_file
+      |> parse_input()
+      |> decompile_program(opts)
+    IO.puts(:stderr, "Decompiled #{input_file} program:")
     lines
     |> Enum.map(fn (line) -> IO.puts(line) end)
   end
@@ -93,7 +110,8 @@ defmodule Machine do
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
-    IO.inspect(i_r0, label: "Day 21 Part 1 (icount=#{reg[:icount]}) initial register 0 value is")
+    IO.inspect(i_r0, label: "Day 21 Part 1 initial register 0 value is")
+    IO.puts("Day 21 Part 1 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
   @doc """
@@ -115,7 +133,8 @@ defmodule Machine do
       input_file
       |> parse_input()
       |> run_program(opts ++ [initial_r0: i_r0])
-    IO.inspect(i_r0, label: "Day 21 Part 2 (icount=#{reg[:icount]}) initial register 0 value is")
+    IO.inspect(i_r0, label: "Day 21 Part 2 initial register 0 value is")
+    IO.puts("Day 21 Part 2 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
   defp parse_initial(i) do

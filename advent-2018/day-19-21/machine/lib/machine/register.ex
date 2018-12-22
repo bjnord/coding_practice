@@ -95,6 +95,7 @@ defmodule Machine.Register do
     n_pad = width - String.length(lead)
     num_s =
       Integer.to_string(i, base)
+      |> String.upcase()
       |> String.pad_leading(n_pad, "0")
     "#{lead}#{num_s}"
   end

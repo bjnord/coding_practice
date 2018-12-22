@@ -154,7 +154,7 @@ defmodule Machine.CPU do
         end
       else
         #IO.inspect(ip, label: "no instruction at IP (halt)")
-        {:halt, {ip, reg}}
+        {:halt, {ip, Map.put(reg, :halt, ip)}}
       end
     end)
     |> elem(1)
@@ -303,5 +303,241 @@ defmodule Machine.CPU do
 
   defp jmp?(opatom) do
     opatom in [:addr, :addi, :setr, :seti]
+  end
+
+  @doc """
+  Decompile a program.
+
+  ## Returns
+
+  Lines of decompilation output
+  """
+  def decompile_program(program, opts \\ []) do
+    ###
+    # decompile opcodes to program lines + jump targets
+    max_i = i_count(program)
+    r_statements =
+      0..i_count(program)
+      |> Enum.reduce({[], nil}, fn (i, {statements, last_cmp_r}) ->
+        {line, target, last_cmp_r} = decompile_opcode(program, i, last_cmp_r, opts)
+        {[{line, target, last_cmp_r} | statements], last_cmp_r}
+      end)
+      |> elem(0)
+    ###
+    # turn "goto" jump targets into labels
+    {lines, labels} =
+      r_statements
+      |> Enum.reduce({[], MapSet.new()}, fn ({line, target, goto_reg}, {statements, labels}) ->
+        cond do
+          (String.slice(line, 0..3) == "goto") && (target > max_i) ->
+            IO.inspect({line, target, goto_reg}, label: "jump beyond #{max_i}")
+            {
+              ["goto end;" | statements],
+              labels,
+            }
+          line == "goto" ->
+            {
+              ["goto label#{target};" | statements],
+              MapSet.put(labels, target),
+            }
+          line == "goto-if" ->
+            {
+              ["if (r[#{goto_reg}] == 1) goto label#{target+1};" | statements],
+              MapSet.put(labels, target+1),
+            }
+          line == "goto-if-else" ->
+            {
+              ["if (r[#{goto_reg}] == 1) goto label#{target+1}; else goto label#{target};" | statements],
+              MapSet.put(labels, target+1)
+              |> MapSet.put(target),
+            }
+          true ->
+            {
+              [line | statements],
+              labels,
+            }
+        end
+      end)
+    r_lines =
+      lines
+      |> Enum.reduce({[], 0}, fn (line, {lines, i}) ->
+        if MapSet.member?(labels, i) do
+          {["\t#{line}", "label#{i}:" | lines], i+1}  # NB assembling backwards
+        else
+          {["\t#{line}" | lines], i+1}
+        end
+      end)
+      |> elem(0)
+    lines = [final_bound(program, max_i, opts) | r_lines]
+            |> Enum.reverse()
+    ###
+    # return decompiled lines wrapped in main()
+    prelude_lines(opts ++ [bound_reg: program[:ip]]) ++ lines ++ postlude_lines(opts)
+  end
+
+  defp final_bound(program, max_i, _opts) do
+    if program[:ip] do
+      # TODO NOTE this only works if we "walk off the end"
+      "label#{max_i+1}:\n\tr[#{program[:ip]}] = #{max_i+1}; /* HALT (set bound reg) */"
+    else
+      "/* HALT */"
+    end
+  end
+
+  defp prelude_lines(opts) do
+    bound =
+      if opts[:bound_reg] do
+        " (r[#{opts[:bound_reg]}] bound to IP)"
+      else
+        ""
+      end
+    initial =
+      if opts[:initial] do
+        "r[0] = #{opts[:initial]};"
+      else
+        ""
+      end
+    [
+      "#include <stdio.h>",
+      "#include <stdlib.h>",
+      "#define NREG 6",
+      "void main(argc, argv) {",
+      "unsigned int r[NREG], di;",
+      "for (di = 0; di < NREG; di++) r[di] = 0;",
+      initial,
+      "",
+      "/* DECOMPILED PROGRAM:#{bound} */",
+    ]
+  end
+
+  defp postlude_lines(opts) do
+    printf =
+      case opts[:numeric] do
+        "hex" ->
+          "printf(\"R%d=x%06X \", di, r[di]);"
+        "dec" ->
+          "printf(\"R%d=%06d \", di, r[di]);"
+        "oct" ->
+          "printf(\"R%d=o%07o \", di, r[di]);"
+        _ ->
+          "printf(\"R%d=x%06X \", di, r[di]);"
+    end
+    [
+      "",
+      "end:",
+      "for (di = 0; di < NREG; di++)",
+      printf,
+      "printf(\"\\n\");",
+      "exit(0);",
+      "}",
+    ]
+  end
+
+  defp decompile_opcode(program, i, last_cmp_r, opts) when is_integer(i) do
+    {opname, a, b, c} = program[i]
+    case opname do
+      #- `addr` (add register) stores into register `C` the result of adding register `A` and register `B`.
+      :addr ->
+        cond do
+          (c == program[:ip]) && (a == last_cmp_r) && (b == c) ->
+            {"goto-if", i+1, a}
+          (c == program[:ip]) && (b == last_cmp_r) && (a == c) ->
+            {"goto-if", i+1, a}
+          (c == program[:ip]) && (a == last_cmp_r) ->
+            IO.puts(:stderr, "unsupported: `addr` w/bound register")
+            {"r[#{c}] = r[#{a}] + r[#{b}]; /* JUMP to r[#{b}] + comparison + 1 */", nil, nil}
+          (c == program[:ip]) && (b == last_cmp_r) ->
+            IO.puts(:stderr, "unsupported: `addr` w/bound register")
+            {"r[#{c}] = r[#{a}] + r[#{b}]; /* JUMP to r[#{a}] + comparison + 1 */", nil, nil}
+          (c == program[:ip]) ->
+            IO.puts(:stderr, "unsupported: `addr` w/bound register bound=#{program[:ip]} a=#{a} b=#{b} c=#{c} last=#{last_cmp_r}")
+            {"r[#{c}] = r[#{a}] + r[#{b}]; /* JUMP to r[#{a}] + r[#{b}] + 1 */", nil, nil}
+          true ->
+            {"r[#{c}] = r[#{a}] + r[#{b}];", nil, nil}
+        end
+      #- `addi` (add immediate) stores into register `C` the result of adding register `A` and value `B`.
+      :addi ->
+        cond do
+          (c == program[:ip]) && (a == last_cmp_r) ->
+            {"goto-if-else", i+b+1, a}
+          (c == program[:ip]) && (a == c) ->
+            {"goto", i+b+1, nil}
+          (c == program[:ip]) ->
+            IO.puts(:stderr, "unsupported: `addr` w/bound register")
+            {"r[#{c}] = r[#{a}] + #{decompile_i(b, opts)}; /* JUMP to r[#{a}] + #{decompile_i(b, opts)} + 1 */", nil, nil}
+          true ->
+            {"r[#{c}] = r[#{a}] + #{decompile_i(b, opts)};", nil, nil}
+        end
+      #- `mulr` (multiply register) stores into register `C` the result of multiplying register `A` and register `B`.
+      :mulr ->
+        {"r[#{c}] = r[#{a}] * r[#{b}];", nil, nil}
+      #- `muli` (multiply immediate) stores into register `C` the result of multiplying register `A` and value `B`.
+      :muli ->
+        {"r[#{c}] = r[#{a}] * #{decompile_i(b, opts)};", nil, nil}
+      #- `banr` (bitwise AND register) stores into register `C` the result of the bitwise AND of register `A` and register `B`.
+      :banr ->
+        raise "unsupported"
+      #- `bani` (bitwise AND immediate) stores into register `C` the result of the bitwise AND of register `A` and value `B`.
+      :bani ->
+        {"r[#{c}] = r[#{a}] & #{decompile_i(b, opts)};", nil, nil}
+      #- `borr` (bitwise OR register) stores into register `C` the result of the bitwise OR of register `A` and register `B`.
+      :borr ->
+        raise "unsupported"
+      #- `bori` (bitwise OR immediate) stores into register `C` the result of the bitwise OR of register `A` and value `B`.
+      :bori ->
+        {"r[#{c}] = r[#{a}] | #{decompile_i(b, opts)};", nil, nil}
+      #- `setr` (set register) copies the contents of register `A` into register `C`. (Input `B` is ignored.)
+      :setr ->
+        cond do
+          (c == program[:ip]) && (a == last_cmp_r) ->
+            {"goto-if", i+1, a}
+          (c == program[:ip]) && (a == c) ->
+            raise "why would you do this?!"
+          (c == program[:ip]) ->
+            IO.puts(:stderr, "unsupported: `addr` w/bound register")
+            {"r[#{c}] = r[#{a}]; /* JUMP to r[#{a}] + 1 */", nil, nil}
+          true ->
+            {"r[#{c}] = r[#{a}];", nil, nil}
+        end
+      #- `seti` (set immediate) stores value `A` into register `C`. (Input `B` is ignored.)
+      :seti ->
+        if c == program[:ip] do
+          {"goto", a+1, nil}
+        else
+          {"r[#{c}] = #{decompile_i(a, opts)};", nil, nil}
+        end
+      #- `gtir` (greater-than immediate/register) sets register `C` to `1` if value `A` is greater than register `B`. Otherwise, register `C` is set to `0`.
+      :gtir ->
+        {"r[#{c}] = (#{decompile_i(a, opts)} > r[#{b}]) ? 1 : 0;", nil, c}
+      #- `gtri` (greater-than register/immediate) sets register `C` to `1` if register `A` is greater than value `B`. Otherwise, register `C` is set to `0`.
+      :gtri ->
+        raise "unsupported"
+      #- `gtrr` (greater-than register/register) sets register `C` to `1` if register `A` is greater than register `B`. Otherwise, register `C` is set to `0`.
+      :gtrr ->
+        {"r[#{c}] = (r[#{a}] > r[#{b}]) ? 1 : 0;", nil, c}
+      #- `eqir` (equal immediate/register) sets register `C` to `1` if value `A` is equal to register `B`. Otherwise, register `C` is set to `0`.
+      :eqir ->
+        raise "unsupported"
+      #- `eqri` (equal register/immediate) sets register `C` to `1` if register `A` is equal to value `B`. Otherwise, register `C` is set to `0`.
+      :eqri ->
+        {"r[#{c}] = (r[#{a}] == #{decompile_i(b, opts)}) ? 1 : 0;", nil, c}
+      #- `eqrr` (equal register/register) sets register `C` to `1` if register `A` is equal to register `B`. Otherwise, register `C` is set to `0`.
+      :eqrr ->
+        {"r[#{c}] = (r[#{a}] == r[#{b}]) ? 1 : 0;", nil, c}
+    end
+  end
+
+  defp decompile_i(i, opts) do
+    case opts[:numeric] do
+      "hex" ->
+        "0#{format_i(i, opts)}"
+      "dec" ->
+        d = String.trim_leading(format_i(i, opts), "0")
+        if d == "", do: "0", else: d
+      "oct" ->
+        String.slice(format_i(i, opts), 1..-1)
+      _ ->
+        "0#{format_i(i, opts)}"
+    end
   end
 end

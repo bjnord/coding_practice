@@ -16,6 +16,10 @@ disasm: $(BIN)
 	$(BIN) --disassemble input/input.txt && \
 		$(BIN) --disassemble input-day-21/input.txt
 
+decomp: $(BIN)
+	$(BIN) --decompile input/input.txt && \
+		$(BIN) --decompile input-day-21/input.txt
+
 examples: $(BIN)
 	$(BIN) --parts=1 input/example1.txt && \
 		$(BIN) --parts=1 input/example2.txt
