@@ -13,6 +13,9 @@ run: $(BIN)
 examples: $(BIN)
 	$(BIN) input/example1.txt
 
+maps:
+	mix run -e 'Geology.cave_map(["input/example1.txt"])'
+
 clean:
 	rm -rf _build $(BIN)
 

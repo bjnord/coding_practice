@@ -182,4 +182,37 @@ defmodule Cave do
       end)
     end)
   end
+
+  @doc """
+  Generate printable map of a cave.
+  """
+  @spec map(Cave.t(), position_range()) :: [String.t()]
+  def map(cave, {y_range, x_range}) do
+    for y <- y_range,
+      do: map_row(cave, y, x_range)
+  end
+
+  # returns string
+  defp map_row(cave, y, x_range) do
+    row =
+      for x <- x_range,
+        do: map_position(cave, {y, x})
+    row
+    |> to_string()
+  end
+
+  # returns charlist
+  @spec map_position(Cave.t(), position()) :: integer()
+  defp map_position(cave, position) when position == {0, 0} do
+    ?M
+  end
+  defp map_position(cave, position) do
+    rtype = region_type(cave, position)
+    cond do
+      cave.target == position -> ?T
+      rtype == :rocky -> ?.
+      rtype == :wet -> ?=
+      rtype == :narrow -> ?|
+    end
+  end
 end

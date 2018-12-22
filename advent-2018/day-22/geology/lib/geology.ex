@@ -53,6 +53,21 @@ defmodule Geology do
   end
 
   @doc """
+  Print map of input file cave.
+  """
+  def cave_map(input_file, _opts \\ []) do
+    IO.puts("map of <#{input_file}>:")
+    cave =
+      input_file
+      |> parse_input()
+    fast_cave =
+      cave
+      |> cache_erosion(target_range(cave))
+    map(fast_cave, target_range(fast_cave))
+    |> Enum.map(fn (line) -> IO.puts(line) end)
+  end
+
+  @doc """
   Hello world.
 
   ## Examples
