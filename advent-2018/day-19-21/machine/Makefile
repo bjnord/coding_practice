@@ -1,8 +1,8 @@
 BIN19 = ./machine
 BIN21 = ./gadget
-FILES = config/config.exs lib/machine.ex lib/machine/executor.ex \
+FILES = config/config.exs lib/machine.ex lib/machine/input_parser.ex \
 	lib/machine/cpu.ex lib/machine/cli.ex lib/machine/register.ex \
-	mix.exs test/machine_test.exs test/machine/executor_test.exs \
+	mix.exs test/machine_test.exs test/machine/input_parser_test.exs \
 	test/machine/cpu_test.exs test/machine/register_test.exs
 
 .PHONY: test

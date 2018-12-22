@@ -1,4 +1,4 @@
-defmodule Machine.ExecutorTest do
+defmodule Machine.InputParserTest do
   use ExUnit.Case
-  doctest Machine.Executor
+  doctest Machine.InputParser
 end

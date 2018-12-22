@@ -3,8 +3,8 @@ defmodule Machine do
   Documentation for Machine (Day 19).
   """
 
-  import Machine.Executor
   import Machine.CLI
+  import Machine.InputParser
   import Machine.CPU
 
   @doc """
@@ -45,13 +45,6 @@ defmodule Machine do
     IO.puts("Part 1 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
-  defp parse_input(input_file) do
-    input_file
-    |> File.stream!
-    |> Enum.map(&(&1))  # FIXME
-    |> parse_input_program()
-  end
-
   @doc """
   Process input file and display part 2 solution.
 
@@ -65,31 +58,5 @@ defmodule Machine do
       |> parse_input()
       |> run_program(opts ++ [initial_r0: 1])
     IO.inspect(reg[0], label: "Part 2 register 0 value is")
-  end
-
-  @doc """
-  Process input file and display disassembled program.
-  """
-  def disassemble(input_file, opts \\ []) do
-    lines =
-      input_file
-      |> parse_input()
-      |> disassemble_program(opts)
-    IO.puts(:stderr, "Disassembled #{input_file} program:")
-    lines
-    |> Enum.map(fn (line) -> IO.puts(line) end)
-  end
-
-  @doc """
-  Process input file and display decompiled program.
-  """
-  def decompile(input_file, opts \\ []) do
-    lines =
-      input_file
-      |> parse_input()
-      |> decompile_program(opts)
-    IO.puts(:stderr, "Decompiled #{input_file} program:")
-    lines
-    |> Enum.map(fn (line) -> IO.puts(line) end)
   end
 end
