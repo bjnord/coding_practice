@@ -146,8 +146,8 @@ defmodule Cave do
   """
   @spec target_range(Cave.t()) :: position_range()
   def target_range(cave) do
-    {target_y, target_x} = cave.target
-    {0..target_y, 0..target_x}
+    {y, x} = cave.target
+    {0..y, 0..x}
   end
 
   @doc """
