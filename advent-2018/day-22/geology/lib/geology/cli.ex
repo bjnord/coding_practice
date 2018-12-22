@@ -36,4 +36,24 @@ defmodule Geology.CLI do
     IO.puts(:stderr, "Usage: geology [--parts=#{parts}] [--verbose] <input_file>")
     System.halt(64)
   end
+
+  @doc ~S"""
+  Parse the input file.
+  """
+  def parse_input(input_file) do
+    input_file
+    |> File.stream!
+    |> Enum.map(&(&1))  # FIXME
+    |> parse_lines()
+  end
+
+  defp parse_lines(lines) do
+    [line1, line2 | _] = lines
+    [_, d] = Regex.run(~r/depth:\s+(\d+)/, line1)
+    depth = String.to_integer(d)
+    [_, xc, yc] = Regex.run(~r/target:\s+(\d+),(\d+)/, line2)
+    x = String.to_integer(xc)
+    y = String.to_integer(yc)
+    %Cave{depth: depth, target: {y, x}}
+  end
 end

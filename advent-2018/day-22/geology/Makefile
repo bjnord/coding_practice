@@ -1,6 +1,7 @@
 BIN = ./geology
 FILES = config/config.exs mix.exs test/test_helper.exs \
-	lib/geology.ex test/geology_test.exs lib/geology/cli.ex
+	lib/geology.ex test/geology_test.exs lib/geology/cli.ex \
+	lib/cave.ex test/cave_test.exs
 
 .PHONY: test
 test:

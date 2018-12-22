@@ -3,6 +3,7 @@ defmodule Geology do
   Documentation for Geology.
   """
 
+  import Cave
   import Geology.CLI
 
   @doc """
@@ -28,9 +29,11 @@ defmodule Geology do
   - Part 1 answer is: ...
   """
   def part1(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+    cave =
+      input_file
+      |> parse_input
+    risk_level(cave, target_range(cave))
+    |> IO.inspect(label: "Part 1 total risk level is")
   end
 
   @doc """
