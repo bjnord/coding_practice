@@ -3,14 +3,22 @@ defmodule Cave do
   Documentation for Cave.
   """
 
-  defstruct depth: 2, target: {1, 1}, erosion: %{}
+  @enforce_keys [:depth, :target]
+  defstruct depth: nil, target: {nil, nil}, erosion: %{}
+
+  @doc """
+  Construct a new cave.
+  """
+  def new(depth, {y, x}) when is_integer(depth) and is_integer(y) and is_integer(x) do
+    %Cave{depth: depth, target: {y, x}, erosion: %{}}
+  end
 
   @doc """
   Compute geologic index at a position.
 
   ## Example
 
-      iex> cave = %Cave{depth: 510, target: {10, 10}}
+      iex> cave = Cave.new(510, {10, 10})
       iex> Cave.geologic_index(cave, {0, 0})
       0
       iex> Cave.geologic_index(cave, {0, 1})
@@ -44,7 +52,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = %Cave{depth: 510, target: {10, 10}}
+      iex> cave = Cave.new(510, {10, 10})
       iex> Cave.erosion_level(cave, {0, 0})
       510
       iex> Cave.erosion_level(cave, {0, 1})
@@ -69,7 +77,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = %Cave{depth: 510, target: {10, 10}}
+      iex> cave = Cave.new(510, {10, 10})
       iex> Cave.region_type(cave, {0, 0})
       :rocky
       iex> Cave.region_type(cave, {0, 1})
@@ -94,7 +102,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = %Cave{depth: 510, target: {10, 10}}
+      iex> cave = Cave.new(510, {10, 10})
       iex> Cave.risk_level(cave, {0..10, 0..10})
       114
   """
@@ -118,7 +126,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = %Cave{depth: 100, target: {7, 9}}
+      iex> cave = Cave.new(100, {7, 9})
       iex> Cave.target_range(cave)
       {0..7, 0..9}
   """
@@ -134,7 +142,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = %Cave{depth: 21, target: {3, 3}}
+      iex> cave = Cave.new(21, {3, 3})
       iex> Cave.erosion_level(cave, {1, 1})
       9485
       iex> fast_cave = Cave.cache_erosion(cave)

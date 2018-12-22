@@ -54,6 +54,6 @@ defmodule Geology.CLI do
     [_, xc, yc] = Regex.run(~r/target:\s+(\d+),(\d+)/, line2)
     x = String.to_integer(xc)
     y = String.to_integer(yc)
-    %Cave{depth: depth, target: {y, x}}
+    Cave.new(depth, {y, x})
   end
 end
