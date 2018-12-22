@@ -203,7 +203,7 @@ defmodule Cave do
 
   # returns charlist
   @spec map_position(Cave.t(), position()) :: integer()
-  defp map_position(cave, position) when position == {0, 0} do
+  defp map_position(_cave, position) when position == {0, 0} do
     ?M
   end
   defp map_position(cave, position) do
