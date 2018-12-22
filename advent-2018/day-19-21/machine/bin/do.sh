@@ -1,18 +1,15 @@
 #!/bin/sh
-#NUM="--numeric=dec"
 PARTS="--parts=1"
-if [ "$1" = -6 ]; then
-	PARTS="--parts=6"
-	INITIAL="--initial=202209"
+if [ "$1" = -21 ]; then
+	PARTS="--parts=12"
 	shift
 fi
 if [ "$1" = -r -o "$1" = --run ]; then
 	RUN=true
 	shift
 fi
-if [ "$1" = -6 ]; then
-	PARTS="--parts=6"
-	INITIAL="--initial=202209"
+if [ "$1" = -21 ]; then
+	PARTS="--parts=12"
 	shift
 fi
 if [ -z "$1" ]; then
@@ -27,8 +24,8 @@ if [ ! -r "$FILE" ]; then
 fi
 BASE="`basename $FILE .txt`"
 make machine && \
-	./machine --decompile $INITIAL $NUM $FILE >$BASE.c && \
-	./machine --disassemble $INITIAL $NUM $FILE >$BASE.asm && \
+	./machine --decompile $INITIAL $NUMERIC $FILE >$BASE.c && \
+	./machine --disassemble $INITIAL $NUMERIC $FILE >$BASE.asm && \
 
 # for the screen
 tail -20 $BASE.c
@@ -45,6 +42,6 @@ rm -f /tmp/do-c$$
 
 if [ "$RUN" = true ]; then
 	cc $BASE.c && \
-		./machine $PARTS $INITIAL $NUM --show-reg $FILE && \
+		./machine $PARTS $INITIAL $NUMERIC --show-reg $FILE && \
 		./a.out
 fi

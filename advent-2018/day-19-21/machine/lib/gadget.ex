@@ -1,6 +1,6 @@
-defmodule Machine do
+defmodule Gadget do
   @moduledoc """
-  Documentation for Machine (Day 19).
+  Documentation for Gadget (a clone of "Machine" for Day 21).
   """
 
   import Machine.Executor
@@ -29,42 +29,11 @@ defmodule Machine do
     end
   end
 
-  @doc """
-  Process input file and display part 1 solution.
-
-  ## Correct Answer
-
-  - Part 1 answer is: 1152
-  """
-  def part1(input_file, opts \\ []) do
-    reg =
-      input_file
-      |> parse_input()
-      |> run_program(opts)
-    IO.inspect(reg[0], label: "Part 1 register 0 value is")
-    IO.puts("Part 1 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
-  end
-
   defp parse_input(input_file) do
     input_file
     |> File.stream!
     |> Enum.map(&(&1))  # FIXME
     |> parse_input_program()
-  end
-
-  @doc """
-  Process input file and display part 2 solution.
-
-  ## Correct Answer
-
-  - Part 2 answer is: ...
-  """
-  def part2(input_file, opts \\ []) do
-    reg =
-      input_file
-      |> parse_input()
-      |> run_program(opts ++ [initial_r0: 1])
-    IO.inspect(reg[0], label: "Part 2 register 0 value is")
   end
 
   @doc """
@@ -91,6 +60,45 @@ defmodule Machine do
     IO.puts(:stderr, "Decompiled #{input_file} program:")
     lines
     |> Enum.map(fn (line) -> IO.puts(line) end)
+  end
+
+  @doc """
+  Process input file and display part 1 solution.
+
+  ## Correct Answer
+
+  - Part 1 answer is: 202209 (0x0315E1)
+  """
+  def part1(input_file, opts \\ []) do
+    i_r0 = 0x0315E1
+    reg =
+      input_file
+      |> parse_input()
+      |> run_program(opts ++ [initial_r0: i_r0])
+    IO.inspect(i_r0, label: "Part 1 initial register 0 lower bound is")
+    IO.puts("Part 1 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
+  end
+
+  @doc """
+  Process input file and display part 2 solution.
+
+  ## Correct Answer
+
+  - Part 2 answer is: 11777564 (0xB3B61C)
+  """
+  def part2(input_file, opts \\ []) do
+    i_r0 =
+      if opts[:initial] do
+        parse_initial(opts[:initial])
+      else
+        0xB3B61C
+      end
+    reg =
+      input_file
+      |> parse_input()
+      |> run_program(opts ++ [initial_r0: i_r0])
+    IO.inspect(i_r0, label: "Part 2 initial register 0 upper bound is")
+    IO.puts("Part 2 (icount=#{reg[:icount]} halt=#{Machine.Register.format_i(reg[:halt], opts)})")
   end
 
   defp parse_initial(i) do

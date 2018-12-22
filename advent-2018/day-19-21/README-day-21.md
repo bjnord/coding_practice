@@ -32,14 +32,14 @@ I wrote a disassembler while working on day 19, and did that pay off in spades!
 
 1. Now, if all we can control is R0, the first question is: How is R0 used in the activation system? The answer is, only one place, as a comparison before a jump:
 
-        $ ./machine --disassemble input-day-21/input.txt | grep -1 R0
+        $ ./gadget --disassemble input-day-21/input.txt | grep -1 R0
         x00001B JMPI x7
         x00001C EQRR R5 R0 R2
         x00001D JADR R2 R4
 
 1. So we need to know the value of R5, the first time `IP=x00001C` is executed:
 
-        $ ./machine --parts=5 --show-reg input-day-21/input.txt | grep -4 ':x00001C' | head
+        $ ./gadget --parts=1 --show-reg input-day-21/input.txt | grep -4 ':x00001C' | head
         [...]
                                                                           R4=x00001C
                x00001C EQRR R5 R0 R2
@@ -56,12 +56,12 @@ In order to determine the timing window for your underflow exploit, you also nee
 
 ### Part 2 Solution
 
-After disassembling and decompiling and fiddling with optimizing the C code and trying to figure out what the "activation system" program does (see `src/machine-optimized.c`)... it finally occurred to me that I don't need to know what it does. It's a big add/multiply/shift state machine that produces a new big value from 0x000000-0xFFFFFF each time through.
+After disassembling and decompiling and fiddling with optimizing the C code and trying to figure out what the "activation system" program does (see `src/gadget-optimized.c`)... it finally occurred to me that I don't need to know what it does. It's a big add/multiply/shift state machine that produces a new big value from 0x000000-0xFFFFFF each time through.
 
 All that matters is figuring out when the first value repeats, because at that point it'll cycle forever. The value before the repetition will be the maximum times you can go through the loop without entering the infinite cycle. So:
 
-        $ cc -o machine-optimized src/machine-optimized.c
-        $ ./machine-optimized 2>r5-values.out
+        $ cc -o gadget-optimized src/gadget-optimized.c
+        $ ./gadget-optimized 2>r5-values.out
         $ bin/repeat.pl r5-values.out
         repeated r[5]=0xD01AE1
         $ grep -1 -n 0xD01AE1 r5-values.out | head -7
