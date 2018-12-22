@@ -4,22 +4,26 @@ defmodule Cave do
   """
 
   @enforce_keys [:depth, :target]
-  defstruct depth: nil, target: {nil, nil}, erosion: %{}
+  defstruct depth: nil, target: {nil, nil}, erosion: %{}, path_cost: %{}
 
   @type position() :: {integer(), integer()}
   @type position_range() :: {Range.t(integer()), Range.t(integer())}
   @type t() :: %__MODULE__{
     depth: integer(),
     target: position(),
-    erosion: map()
+    erosion: map(),
+    path_cost: map(),
   }
+
+  @tool_switch_cost 7
+  @walk_cost 1
 
   @doc """
   Construct a new cave.
   """
   @spec new(integer(), position()) :: Cave.t()
   def new(depth, {y, x}) when is_integer(depth) and is_integer(y) and is_integer(x) do
-    %Cave{depth: depth, target: {y, x}, erosion: %{}}
+    %Cave{depth: depth, target: {y, x}, erosion: %{}, path_cost: %{}}
   end
 
   @doc """
@@ -213,6 +217,69 @@ defmodule Cave do
       rtype == :rocky -> ?.
       rtype == :wet -> ?=
       rtype == :narrow -> ?|
+    end
+  end
+
+  @doc """
+  Find the cost of moving to a neighboring position.
+
+  Returns
+  - new total cost (accounting for tool switch, if any)
+  - new equipped tool (same one if switch wasn't required)
+  """
+  @spec neighbor_move_cost(Cave.t(), integer(), atom(), atom(), position()) :: {integer(), atom()}
+
+  def neighbor_move_cost(_, _, _, _, {y, x}) when (y < 0) or (x < 0) do
+    {nil, nil}
+  end
+
+  def neighbor_move_cost(cave, cost, old_tool, old_region, new_position) do
+    new_region = region_type(cave, new_position)
+    {new_cost, new_tool} = best_tool_cost(cost, old_tool, old_region, new_region)
+    {new_cost, new_tool} = add_target_cost(cave, new_cost, new_position, new_tool)
+    {new_cost, new_tool}
+  end
+
+  @spec best_tool_cost(integer(), atom(), atom(), atom()) :: {integer(), atom()}
+
+  defp best_tool_cost(cost, old_tool, old_region, new_region) do
+    if tool_usable?(old_tool, new_region) do
+      # if old tool usable in new region, keep it (no switch cost)
+      {cost + @walk_cost, old_tool}
+    else
+      # otherwise must switch; new tool must be usable @ both old and
+      # new region -- at least one tool will always qualify
+      new_tool =
+        [:gear, :torch, :nothing]
+        |> Enum.find(fn (tool) ->
+          (tool != old_tool) &&
+            tool_usable?(tool, old_region) &&
+            tool_usable?(tool, new_region)
+        end)
+      {cost + @walk_cost + @tool_switch_cost, new_tool}
+    end
+  end
+
+  @spec tool_usable?(atom(), atom()) :: boolean()
+
+  defp tool_usable?(tool, new_region) do
+    usable =
+      case new_region do
+        :rocky  -> [:gear, :torch]
+        :wet    -> [:gear, :nothing]
+        :narrow -> [:torch, :nothing]
+      end
+    tool in usable
+  end
+
+  @spec add_target_cost(Cave.t(), integer(), position(), atom()) :: {integer(), atom()}
+
+  defp add_target_cost(cave, cost, position, tool) do
+    # puzzle requirement: when we reach the target, we must pay to equip the :torch
+    if (position == cave.target) && (tool != :torch) do
+      {cost + @tool_switch_cost, :torch}
+    else
+      {cost, tool}
     end
   end
 end
