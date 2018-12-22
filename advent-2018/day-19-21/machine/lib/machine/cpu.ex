@@ -71,6 +71,12 @@ defmodule Machine.CPU do
       #- `brsi` (bitwise shift-right immediate) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count of value `B`.
       :brsi ->
         set(reg, c, Bitwise.>>>(reg[a], b))
+      #- `subr` (subtract register) stores into register `C` the result of subtracting register `B` from register `A`.
+      :subr ->
+        set(reg, c, reg[a] - reg[b])
+      #- `subi` (subtract immediate) stores into register `C` the result of subtracting value `B` from register `A`.
+      :subi ->
+        set(reg, c, reg[a] - b)
     end
   end
 
@@ -94,6 +100,8 @@ defmodule Machine.CPU do
       :eqrr -> [:a, :b, :c]
       :brsr -> [:a, :b, :c]
       :brsi -> [:a, :c]
+      :subr -> [:a, :b, :c]
+      :subi -> [:a, :c]
     end
   end
 
@@ -538,6 +546,12 @@ defmodule Machine.CPU do
       #- `brsi` (bitwise shift-right immediate) stores into register `C` the result of the bitwise shift-right of register `A` by the bit count of value `B`.
       :brsi ->
         {"r[#{c}] = r[#{a}] >> #{decompile_i(b, opts)};", nil, nil}
+      #- `subr` (subtract register) stores into register `C` the result of subtracting register `B` from register `A`.
+      :subr ->
+        {"r[#{c}] = r[#{a}] - r[#{b}];", nil, nil}
+      #- `subi` (subtract immediate) stores into register `C` the result of subtracting value `B` from register `A`.
+      :subi ->
+        {"r[#{c}] = r[#{a}] - #{decompile_i(b, opts)};", nil, nil}
     end
   end
 

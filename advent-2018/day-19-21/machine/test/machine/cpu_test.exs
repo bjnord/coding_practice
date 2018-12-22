@@ -106,4 +106,16 @@ defmodule Machine.CPUTest do
     reg = execute(reg, {:brsi, 2, 3, 0})
     assert reg == new(4, [10, 1, 85, 3])
   end
+
+  #- `subr` (subtract register) stores into register `C` the result of subtracting register `B` from register `A`.
+  #- `subi` (subtract immediate) stores into register `C` the result of subtracting value `B` from register `A`.
+  test "subtract" do
+    reg = new(4, [7, 6, 3, 2])
+    reg = execute(reg, {:subr, 0, 1, 2})
+    assert reg == new(4, [7, 6, 1, 2])
+    reg = execute(reg, {:subi, 1, 4, 0})
+    assert reg == new(4, [2, 6, 1, 2])
+    reg = execute(reg, {:subi, 3, 2, 3})
+    assert reg == new(4, [2, 6, 1, 0])
+  end
 end
