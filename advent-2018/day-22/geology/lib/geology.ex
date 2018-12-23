@@ -32,9 +32,7 @@ defmodule Geology do
     cave =
       input_file
       |> parse_input()
-    fast_cave =
-      cave
-      |> cache_erosion(target_range(cave))
+    fast_cave = cache_erosion(cave)
     risk_level(fast_cave, target_range(fast_cave))
     |> IO.inspect(label: "Part 1 total risk level is")
   end
@@ -60,9 +58,7 @@ defmodule Geology do
     cave =
       input_file
       |> parse_input()
-    fast_cave =
-      cave
-      |> cache_erosion(target_range(cave))
+    fast_cave = cache_erosion(cave)
     map(fast_cave, target_range(fast_cave))
     |> Enum.map(fn (line) -> IO.puts(line) end)
   end

@@ -3,14 +3,15 @@ defmodule Cave do
   Documentation for Cave.
   """
 
-  @enforce_keys [:depth, :target]
-  defstruct depth: nil, target: {nil, nil}, erosion: %{}, path_cost: %{}
+  @enforce_keys [:depth, :target, :bounds]
+  defstruct depth: nil, target: {nil, nil}, bounds: {nil, nil}, erosion: %{}, path_cost: %{}
 
   @type position() :: {integer(), integer()}
   @type position_range() :: {Range.t(integer()), Range.t(integer())}
   @type t() :: %__MODULE__{
     depth: integer(),
     target: position(),
+    bounds: position(),
     erosion: map(),
     path_cost: map(),
   }
@@ -21,9 +22,9 @@ defmodule Cave do
   @doc """
   Construct a new cave.
   """
-  @spec new(integer(), position()) :: Cave.t()
-  def new(depth, {y, x}) when is_integer(depth) and is_integer(y) and is_integer(x) do
-    %Cave{depth: depth, target: {y, x}, erosion: %{}, path_cost: %{}}
+  @spec new(integer(), position(), integer()) :: Cave.t()
+  def new(depth, {y, x}, margin \\ 10) when is_integer(depth) and is_integer(y) and is_integer(x) do
+    %Cave{depth: depth, target: {y, x}, bounds: {y+margin, x+margin}, erosion: %{}, path_cost: %{}}
   end
 
   @doc """
@@ -155,24 +156,41 @@ defmodule Cave do
   end
 
   @doc """
+  Return range from mouth to bounds (rectangle).
+
+  ## Example
+
+      iex> cave = Cave.new(100, {7, 9}, 3)
+      iex> Cave.bounds_range(cave)
+      {0..10, 0..12}
+  """
+  @spec bounds_range(Cave.t()) :: position_range()
+
+  def bounds_range(cave) do
+    {y, x} = cave.bounds
+    {0..y, 0..x}
+  end
+
+  @doc """
   Precalculate erosion for a cave.
 
   Returns the updated cave, with cached erosion levels.
 
   ## Example
 
-      iex> cave = Cave.new(21, {3, 3})
+      iex> cave = Cave.new(21, {3, 3}, 1)
       iex> Cave.erosion_level(cave, {1, 1})
       9485
-      iex> fast_cave = Cave.cache_erosion(cave, {0..3, 0..3})
+      iex> fast_cave = Cave.cache_erosion(cave)
       iex> Cave.erosion_level(fast_cave, {1, 1})
       9485
       iex> Enum.count(fast_cave.erosion)
-      16
+      25
   """
   # TODO OPTIMIZE can this be parallelized?
-  @spec cache_erosion(Cave.t(), position_range()) :: Cave.t()
-  def cache_erosion(cave, {range_y, range_x}) do
+  @spec cache_erosion(Cave.t()) :: Cave.t()
+  def cache_erosion(cave) do
+    {range_y, range_x} = bounds_range(cave)
     ###
     # we want reduce here, so {y, x} can take advantage of cached {y-1, x}
     # etc. as we go
@@ -233,11 +251,15 @@ defmodule Cave do
     {nil, nil}
   end
 
-  def neighbor_move_cost(cave, cost, old_tool, old_region, new_position) do
-    new_region = region_type(cave, new_position)
-    {new_cost, new_tool} = best_tool_cost(cost, old_tool, old_region, new_region)
-    {new_cost, new_tool} = add_target_cost(cave, new_cost, new_position, new_tool)
-    {new_cost, new_tool}
+  def neighbor_move_cost(cave, cost, old_tool, old_region, {y, x}) do
+    {by, bx} = cave.bounds
+    if (y > by) or (x > bx) do
+      {nil, nil}
+    else
+      new_region = region_type(cave, {y, x})
+      {new_cost, new_tool} = best_tool_cost(cost, old_tool, old_region, new_region)
+      add_target_cost(cave, new_cost, {y, x}, new_tool)
+    end
   end
 
   @spec best_tool_cost(integer(), atom(), atom(), atom()) :: {integer(), atom()}

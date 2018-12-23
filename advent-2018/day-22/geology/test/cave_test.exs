@@ -3,9 +3,9 @@ defmodule CaveTest do
   doctest Cave
 
   test "cave mapper" do
-    fast_cave = Cave.new(510, {10, 10})
-                |> Cave.cache_erosion({0..15, 0..15})
-    assert Cave.map(fast_cave, {0..15, 0..15}) == [
+    fast_cave = Cave.new(510, {10, 10}, 5)
+                |> Cave.cache_erosion()
+    assert Cave.map(fast_cave, Cave.bounds_range(fast_cave)) == [
       "M=.|=.|.|=.|=|=.",
       ".|=|=|||..|.=...",
       ".==|....||=..|==",
@@ -48,9 +48,13 @@ defmodule CaveTest do
   end
 
   test "cost of move to neighbor (solid rock = invalid)" do
-    cave = Cave.new(510, {10, 10})
-    assert Cave.neighbor_move_cost(cave, 1, :torch, :rocky, {-1, 0}) == {nil, nil}
-    assert Cave.neighbor_move_cost(cave, 1, :torch, :rocky, {0, -1}) == {nil, nil}
+    fast_cave = Cave.new(510, {10, 10}, 5)
+                |> Cave.cache_erosion()
+    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {-1, 0}) == {nil, nil}
+    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {0, -1}) == {nil, nil}
+    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {15, 15}) != {nil, nil}
+    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {16, 15}) == {nil, nil}
+    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {15, 16}) == {nil, nil}
   end
 
   test "cost of move to neighbor (target)" do
