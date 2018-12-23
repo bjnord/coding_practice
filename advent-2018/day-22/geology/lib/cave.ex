@@ -23,6 +23,7 @@ defmodule Cave do
   Construct a new cave.
   """
   @spec new(integer(), position(), integer()) :: Cave.t()
+
   def new(depth, {y, x}, margin \\ 10) when is_integer(depth) and is_integer(y) and is_integer(x) do
     %Cave{depth: depth, target: {y, x}, bounds: {y+margin, x+margin}, erosion: %{}, path_cost: %{}}
   end
@@ -45,15 +46,19 @@ defmodule Cave do
       0
   """
   @spec geologic_index(Cave.t(), position()) :: integer()
+
   def geologic_index(_cave, {y, x}) when {y, x} == {0, 0} do
     0
   end
+
   def geologic_index(_cave, {y, x}) when (y == 0) do
     x * 16807
   end
+
   def geologic_index(_cave, {y, x}) when (x == 0) do
     y * 48271
   end
+
   def geologic_index(cave, {y, x}) do
     if {y, x} == cave.target do
       0
@@ -80,6 +85,7 @@ defmodule Cave do
       510
   """
   @spec erosion_level(Cave.t(), position()) :: integer()
+
   def erosion_level(cave, {y, x}) do
     if Map.has_key?(cave.erosion, {y, x}) do
       Map.get(cave.erosion, {y, x})
@@ -106,6 +112,7 @@ defmodule Cave do
       :rocky
   """
   @spec region_type(Cave.t(), position()) :: atom()
+
   def region_type(cave, {y, x}) do
     case risk_level(cave, {y, x}) do
       0 -> :rocky
@@ -124,6 +131,7 @@ defmodule Cave do
       114
   """
   @spec risk_level(Cave.t(), position_range()) :: integer()
+
   def risk_level(cave, {y_range, x_range}) when is_map(y_range) and is_map(x_range) do
     squares =
       for y <- y_range,
@@ -136,6 +144,7 @@ defmodule Cave do
   Compute risk level at a position.
   """
   @spec risk_level(Cave.t(), position()) :: integer()
+
   def risk_level(cave, {y, x}) when is_integer(y) and is_integer(x) do
     rem(erosion_level(cave, {y, x}), 3)
   end
@@ -150,6 +159,7 @@ defmodule Cave do
       {0..7, 0..9}
   """
   @spec target_range(Cave.t()) :: position_range()
+
   def target_range(cave) do
     {y, x} = cave.target
     {0..y, 0..x}
@@ -187,8 +197,9 @@ defmodule Cave do
       iex> Enum.count(fast_cave.erosion)
       25
   """
-  # TODO OPTIMIZE can this be parallelized?
   @spec cache_erosion(Cave.t()) :: Cave.t()
+
+  # TODO OPTIMIZE can this be parallelized?
   def cache_erosion(cave) do
     {range_y, range_x} = bounds_range(cave)
     ###
@@ -209,12 +220,14 @@ defmodule Cave do
   Generate printable map of a cave.
   """
   @spec map(Cave.t(), position_range()) :: [String.t()]
+
   def map(cave, {y_range, x_range}) do
     for y <- y_range,
       do: map_row(cave, y, x_range)
   end
 
-  # returns string
+  @spec map_row(Cave.t(), integer(), Range.t(integer())) :: String.t()
+
   defp map_row(cave, y, x_range) do
     row =
       for x <- x_range,
@@ -223,11 +236,12 @@ defmodule Cave do
     |> to_string()
   end
 
-  # returns charlist
   @spec map_position(Cave.t(), position()) :: integer()
+
   defp map_position(_cave, position) when position == {0, 0} do
     ?M
   end
+
   defp map_position(cave, position) do
     rtype = region_type(cave, position)
     cond do
