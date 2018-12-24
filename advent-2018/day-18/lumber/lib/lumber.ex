@@ -26,11 +26,15 @@ defmodule Lumber do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 603098
   """
   def part1(input_file, opts \\ []) do
-    input_file
-    |> parse_input(opts)
+    counts =
+      input_file
+      |> parse_input(opts)
+      |> strange_magic(10)
+      |> count()
+    (counts[:trees] * counts[:lumber])
     |> IO.inspect(label: "Part 1 total resource value is")
   end
 

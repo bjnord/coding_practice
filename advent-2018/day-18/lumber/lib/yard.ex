@@ -130,7 +130,7 @@ defmodule Yard do
   end
 
   @doc """
-  Find counts of surrounding grid cells.
+  Find count of types for surrounding grid cells.
 
   ## Examples
 
@@ -201,5 +201,28 @@ defmodule Yard do
       true ->
         now
     end
+  end
+
+  @doc """
+  Find count of types for all cells in the yard.
+
+  ## Examples
+
+      iex> yard = Yard.parse_lines([
+      ...>   ".#|#.",
+      ...>   "..#..",
+      ...>   ".|..|",
+      ...>   "..|#.",
+      ...>   "#.#||",
+      ...> ])
+      iex> Yard.count(yard)
+      %{open: 13, trees: 6, lumber: 6}
+  """
+  @spec count(Yard.t()) :: map()
+
+  def count(yard) do
+    Enum.reduce(yard.grid, %{open: 0, trees: 0, lumber: 0}, fn ({_pos, content}, counts) ->
+      Map.update(counts, content, 1, &(&1 + 1))
+    end)
   end
 end
