@@ -1,0 +1,46 @@
+[Help] [2018 Day 22 (Part 2)] Answer drops lower than accepted answer when x/y bounds are expanded (self.adventofcode)
+<https://www.reddit.com/r/adventofcode/comments/a8jk9c/2018_day_22_part_2_answer_drops_lower_than/>
+
+submitted 1 day ago * by dan_144
+
+  One aspect of my Part 2 solution was allowing my path to search outside the bounds of the target's x,y coordinates. When I bound my search to (2x, y), I get the accepted answer for my input. However when I bound it by (3x, y), it reports that a shorter path is available. This resulted in one of my submitted answers being too low.
+
+  Repo: https://github.com/dan144/aoc-2018
+
+  Code in day22.py, input in input22, day22/ contains the output from runs with the search bound to 2 and 3 times the target x value.
+
+  If someone else could run their solution against my input, I'm curious if this is a bug in my code or not.
+
+  My input:
+
+  depth: 11820
+  target: 7,782
+
+  Edit: sounds like I have a bug somewhere, which is exactly what I expected to hear. Thanks for all the confirmation! Will go back and review my code again now that it isn't the early hours of the morning.
+
+
+
+[–]vuryss 3 points 1 day ago
+
+  I get
+
+  Answer 1: 6318
+
+  Answer 2: 1075
+
+  Without any bounds, just a bit of A* heuristics for the coordinates.
+
+  Even without the heuristics still I find no shorter one :(
+
+
+[–]usbpc102 1 point 1 day ago
+
+  I get the same from my code with Dijkstra's Algorithm.
+
+
+[–]Vesiculus 1 point 1 day ago*
+
+  Can confirm, get the same.
+
+  Removed the values to not spoiler.
+

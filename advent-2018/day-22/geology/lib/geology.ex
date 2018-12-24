@@ -42,7 +42,7 @@ defmodule Geology do
 
   ## Correct Answer
 
-  - INCORRECT Part 2 answer is: 1052 (too high)
+  - INCORRECT Part 2 answer is: 1022 (too high)
   - Part 2 answer is: ...
   """
   def part2(input_file, opts \\ []) do
