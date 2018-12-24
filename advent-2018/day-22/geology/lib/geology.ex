@@ -42,12 +42,16 @@ defmodule Geology do
 
   ## Correct Answer
 
+  - INCORRECT Part 2 answer is: 1052 (too high)
   - Part 2 answer is: ...
   """
   def part2(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
+    cave =
+      input_file
+      |> parse_input()
+    fast_cave = cache_erosion(cave)
+    cheapest_path(fast_cave, {0, 0}, :torch, fast_cave.target)
+    |> IO.inspect(label: "Part 2 fewest minutes to target is")
   end
 
   @doc """

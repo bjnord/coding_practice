@@ -2,6 +2,19 @@ defmodule CaveTest do
   use ExUnit.Case
   doctest Cave
 
+  test "cheapest path (short paths)" do
+    fast_cave = Cave.new(510, {10, 10}, 5)
+                |> Cave.cache_erosion()
+    assert Cave.cheapest_path(fast_cave, {0, 0}, :torch, {0, 2}) == 16  # 2 steps, 2 tool changes
+    assert Cave.cheapest_path(fast_cave, {0, 0}, :torch, {3, 3}) == 20  # 6 steps, 2 tool changes
+  end
+
+  test "cheapest path (puzzle example)" do
+    fast_cave = Cave.new(510, {10, 10})
+                |> Cave.cache_erosion()
+    assert Cave.cheapest_path(fast_cave, {0, 0}, :torch, {10, 10}) == 45
+  end
+
   test "cave mapper" do
     fast_cave = Cave.new(510, {10, 10}, 5)
                 |> Cave.cache_erosion()

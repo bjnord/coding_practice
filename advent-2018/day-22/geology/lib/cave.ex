@@ -278,6 +278,10 @@ defmodule Cave do
 
   @spec best_tool_cost(integer(), atom(), atom(), atom()) :: {integer(), atom()}
 
+  defp best_tool_cost(nil, _, _, _) do
+    {nil, nil}
+  end
+
   defp best_tool_cost(cost, old_tool, old_region, new_region) do
     if tool_usable?(old_tool, new_region) do
       # if old tool usable in new region, keep it (no switch cost)
@@ -317,5 +321,228 @@ defmodule Cave do
     else
       {cost, tool}
     end
+  end
+
+  @doc """
+  Find lowest-cost path from origin to target.
+
+  Uses [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+  where nodes are in three dimensions (y, x, and "from region").
+  """
+  @spec cheapest_path(Cave.t(), position(), atom(), position()) :: integer()
+
+  def cheapest_path(_cave, origin, _tool, dest) when origin == dest do
+    0
+  end
+
+  def cheapest_path(cave, origin, tool, dest) do
+    origin_region = region_type(cave, origin)
+    validate_cheapest_path_args(cave, origin_region, dest)
+    dest_ways = ways_into_dest(cave, dest)
+    ###
+    # Start nodelist with 1 node for origin, which will become the first
+    # current_node. NB That 1 initial node is unclosed, and there must be
+    # a path_cost entry for it.
+    nodelist = [{{origin, origin_region}, tool}]
+    cave = %{cave | path_cost: %{{origin, origin_region} => {0, false}}}
+    ###
+    # Begin processing from the origin
+    process_nodes(cave, nodelist, {dest, dest_ways})
+  end
+
+  defp ways_into_dest(cave, {y, x}) do
+    # FIXME DRY
+    neighbor_positions = [{y-1, x}, {y, x-1}, {y, x+1}, {y+1, x}]
+    neighbor_positions
+    |> Enum.filter(fn ({y, x}) ->
+      {yb, xb} = cave.bounds
+      (y in 0..yb) && (x in 0..xb)
+    end)
+    |> Enum.map(fn (pos) -> region_type(cave, pos) end)
+    |> Enum.uniq
+    #|> IO.inspect(label: "ways_into_dest()")
+  end
+
+  defp validate_cheapest_path_args(cave, origin_region, dest) do
+    if origin_region != :rocky do
+      raise ArgumentError, "must start from rocky region"
+    end
+    dest_region = region_type(cave, dest)
+    if dest_region != :rocky do
+      raise ArgumentError, "must end in rocky region"
+    end
+    true
+  end
+
+  # Dijkstra's algorithm:
+  # 1. Find the best new current_node
+  # 2. Visit adjacent nodes, updating them to lowest cost
+  # 3. Close the current_node
+  # 4. Unless we've arrived at the target, go back to 1.
+  #
+  defp process_nodes(cave, nodelist, destination) do
+    Stream.cycle([true])
+    |> Enum.reduce_while({cave, nodelist}, fn (_t, {cave, nodelist}) ->
+      {nodelist, current_node, current_cost, _} = find_current_node(cave, nodelist, destination)
+      #IO.inspect({current_node, :cost, current_cost}, label: "found new current_node")
+      if nodelist == [] do
+        raise "exhausted nodelist"  # shouldn't happen
+      end
+      {cave, nodelist} = visit_neighbors(cave, nodelist, current_node, current_cost)
+      cave = close_current_node(cave, current_node, current_cost, destination)
+      lowest_cost = cost_at_destination(cave, current_node, destination)
+      if lowest_cost do
+        {:halt, lowest_cost}
+      else
+        {:cont, {cave, nodelist}}
+      end
+    end)
+  end
+
+  # Traverse the whole q, removing all closed nodes, and choosing the
+  # lowest-cost one as the current. Manhattan distance breaks ties
+  # (among equals, choose closest to target).
+  #
+  defp find_current_node(cave, nodelist, {dest, _destways}) do
+    nodelist
+    |> Enum.reduce({[], nil, 1_000_000_000, 1_000_000_000}, fn ({{pos, r}, tool}, {node_acc, min_node, min_cost, min_hattan}) ->
+      case {Map.get(cave.path_cost, {pos, r}), manhattan(pos, dest)} do
+        {nil, _man_hattan} ->
+          raise "node on nodelist but not in path_cost?!"  # shouldn't happen
+        ###
+        # discard closed nodes
+        {{_cost, true}, _man_hattan} ->
+          {node_acc, min_node, min_cost, min_hattan}
+        ###
+        # keep unclosed nodes: new min_node (better cost)
+        {{cost, false}, man_hattan} when cost < min_cost ->
+          {[{{pos, r}, tool} | node_acc], {{pos, r}, tool}, cost, man_hattan}
+        ###
+        # keep unclosed nodes: new min_node (cost tied, closer Manhattan)
+        {{cost, false}, man_hattan} when (cost == min_cost) and (man_hattan < min_hattan) ->
+          {[{{pos, r}, tool} | node_acc], {{pos, r}, tool}, cost, man_hattan}
+        ###
+        # keep unclosed nodes
+        {{cost, false}, _man_hattan} when cost >= min_cost ->
+          {[{{pos, r}, tool} | node_acc], min_node, min_cost, min_hattan}
+      end
+    end)
+  end
+
+  # Iterate current node's neighbors, updating their costs in the path cost
+  # map, and adding neighbors to the queue iff there was no entry in the
+  # cost map (newly seen node).
+  #
+  defp visit_neighbors(cave, nodelist, {{{y, x}, _r}, tool}, cost) do
+    # FIXME DRY
+    neighbor_positions = [{y-1, x}, {y, x-1}, {y, x+1}, {y+1, x}]
+    neighbor_positions
+    |> Enum.reduce({cave, nodelist}, fn (n_pos, {cave, node_acc}) ->
+      # NB  region of current_node  becomes:  "from" region of neighbor
+      region = region_type(cave, {y, x})
+      {new_n_cost, new_n_tool} = neighbor_move_cost(cave, cost, tool, region, n_pos)
+      #IO.inspect({{n_pos, region}, :n_cost, new_n_cost, new_n_tool}, label: " - visiting neighbor")
+      old_path_value = Map.get(cave.path_cost, {n_pos, region})
+      case {new_n_cost, old_path_value} do
+        ###
+        # can't visit inaccessible neighbors
+        {nil, _} ->
+          {cave, node_acc}
+        ###
+        # new neighbor: set initial path_cost, add to nodelist
+        {_, nil} ->
+          new_path_cost = Map.put(cave.path_cost, {n_pos, region}, {new_n_cost, false})
+          cave = %{cave | path_cost: new_path_cost}
+          {cave, [{{n_pos, region}, new_n_tool} | node_acc]}
+        ###
+        # don't visit closed neighbors
+        {_, {_cost, true}} ->
+          {cave, node_acc}
+        ###
+        # unclosed neighbor, lower cost: update path_cost
+        {nucost, {cost, false}} when nucost < cost ->
+          new_path_cost = Map.put(cave.path_cost, {n_pos, region}, {nucost, false})
+          cave = %{cave | path_cost: new_path_cost}
+          {cave, node_acc}
+        ###
+        # unclosed neighbor: keep existing path_cost
+        {nucost, {cost, false}} when nucost >= cost ->
+          {cave, node_acc}
+      end
+    end)
+  end
+
+  # Then close the current node, leaving the q alone; closed will be removed
+  # on next pass.
+  #
+  defp close_current_node(cave, {{pos, r}, tool}, cost, {dest, _destways}) do
+    # per puzzle requirements, must switch to torch when reaching target
+    switch_cost =
+      if (pos == dest) && (tool != :torch) do
+        @tool_switch_cost
+      else
+        0
+      end
+    #IO.inspect({{pos, r}, :cost, cost, :switch, switch_cost}, label: "closing current_node")
+    new_path_cost = Map.put(cave.path_cost, {pos, r}, {cost + switch_cost, true})
+    %{cave | path_cost: new_path_cost}
+  end
+
+  # Finally, determine if the target has been reached: keys must exist in
+  # the path cost map for all region types entering the target for us to
+  # be considered done. (The first arrival is not necessarily the best.)
+  #
+  defp cost_at_destination(cave, {node_key, tool}, destination) do
+    if dest_reached_from_all_ways?(cave, {node_key, tool}, destination) do
+      min_cost_to_destination(cave, destination)
+    else
+      nil
+    end
+  end
+
+  defp dest_reached_from_all_ways?(_cave, {{{y, x}, _r}, _tool}, {dest, _dest_ways}) when {y, x} != dest do
+    false
+  end
+
+  defp dest_reached_from_all_ways?(cave, _current_node, {dest, dest_ways}) do
+    dest_ways
+    |> Enum.all?(fn (way) ->
+      case Map.get(cave.path_cost, {dest, way}) do
+        nil -> false
+        {_, false} -> false
+        {_, true} -> true
+      end
+    end)
+  end
+
+  defp min_cost_to_destination(cave, {dest, dest_ways}) do
+    dest_ways
+    |> Enum.map(fn (way) ->
+      Map.get(cave.path_cost, {dest, way})
+      #|> IO.inspect(label: "#{inspect({dest, way})} cost + is_closed")
+      |> elem(0)
+    end)
+    |> Enum.min()
+    #|> IO.inspect(label: "** reached target #{inspect(dest)} via #{inspect(dest_ways)}, min_cost")
+  end
+
+  @doc """
+  Compute the Manhattan distance between two points.
+
+  "Take the sum of the absolute values of the differences of the coordinates.
+  For example, if x=(a,b) and y=(c,d), the Manhattan distance between x and y is |a−c|+|b−d|."
+  <https://math.stackexchange.com/a/139604>
+
+  ## Examples
+
+  iex> Cave.manhattan({2, 2}, {1, 1})
+  2
+
+  iex> Cave.manhattan({6, 3}, {5, 7})
+  5
+
+  """
+  def manhattan({y1, x1}, {y2, x2}) do
+    abs(y1 - y2) + abs(x1 - x2)
   end
 end
