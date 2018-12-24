@@ -91,9 +91,12 @@ defmodule Yard do
   @doc """
   Generate printable map of a yard.
   """
-  @spec map(Yard.t()) :: [String.t()]
+  @spec map(Yard.t(), map()) :: [String.t()]
 
-  def map(yard) do
+  def map(yard, opts \\ []) do
+    if opts[:label] do
+      IO.puts(opts[:label])
+    end
     for y <- y_range(yard),
       do: map_row(yard, y, x_range(yard))
   end
@@ -168,9 +171,9 @@ defmodule Yard do
   """
   @spec strange_magic(Yard.t(), integer(), map()) :: [String.t()]
 
-  def strange_magic(yard, minutes, opts \\ []) do
+  def strange_magic(yard, minutes, _opts \\ []) do
     1..minutes
-    |> Enum.reduce(yard, fn (m, yard) ->
+    |> Enum.reduce(yard, fn (_m, yard) ->
       new_grid =
         for j <- y_range(yard),
           i <- x_range(yard),
