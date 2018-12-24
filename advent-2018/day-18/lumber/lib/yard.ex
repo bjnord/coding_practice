@@ -79,8 +79,8 @@ defmodule Yard do
     |> parse_lines(opts)
   end
 
-  defp parse_lines(stream, _opts) do
-    stream
+  def parse_lines(lines, _opts \\ []) do
+    lines
     |> Enum.reduce({0, %{}}, fn (line, {y, grid}) ->
       {y+1, parse_line(line, y, grid)}
     end)
@@ -124,5 +124,37 @@ defmodule Yard do
       :wooded -> ?|
       :lumber -> ?#
     end
+  end
+
+  @doc """
+  Find counts of surrounding grid cells.
+
+  ## Examples
+
+      iex> yard = Yard.parse_lines([
+      ...>   ".#|#.",
+      ...>   "..#..",
+      ...>   ".|..|",
+      ...>   "..|#.",
+      ...>   "#.#||",
+      ...> ])
+      iex> Yard.surrounding_counts(yard, {1, 1})
+      %{open: 4, wooded: 2, lumber: 2}
+      iex> Yard.surrounding_counts(yard, {4, 4})
+      %{open: 1, wooded: 1, lumber: 1}
+  """
+  @spec surrounding_counts(Yard.t(), position()) :: map()
+
+  def surrounding_counts(yard, {y, x}) do
+    contents =
+      for j <- (y-1)..(y+1),
+        i <- (x-1)..(x+1),
+        j != y or i != x,
+        do: yard.grid[{j, i}]
+    contents
+    |> Enum.reject(&(&1 == nil))
+    |> Enum.reduce(%{}, fn (content, counts) ->
+      Map.update(counts, content, 1, &(&1 + 1))
+    end)
   end
 end
