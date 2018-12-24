@@ -13,6 +13,9 @@ run: $(BIN)
 examples: $(BIN)
 	$(BIN) input/example1.txt
 
+maps:
+	mix run -e 'Lumber.yard_map(["input/example1.txt"])'
+
 clean:
 	rm -rf _build $(BIN)
 

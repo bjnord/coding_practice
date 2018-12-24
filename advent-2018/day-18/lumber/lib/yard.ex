@@ -87,4 +87,42 @@ defmodule Yard do
     |> elem(1)
     |> Yard.new()
   end
+
+  @doc """
+  Generate printable map of a yard.
+  """
+  @spec map(Yard.t()) :: [String.t()]
+
+  def map(yard) do
+    for y <- y_range(yard),
+      do: map_row(yard, y, x_range(yard))
+  end
+
+  defp y_range(yard) do
+    0..(elem(yard.size, 0)-1)
+  end
+
+  defp x_range(yard) do
+    0..(elem(yard.size, 1)-1)
+  end
+
+  @spec map_row(Yard.t(), integer(), Range.t(integer())) :: String.t()
+
+  defp map_row(yard, y, x_range) do
+    row =
+      for x <- x_range,
+        do: map_position(yard, {y, x})
+    row
+    |> to_string()
+  end
+
+  @spec map_position(Yard.t(), position()) :: integer()
+
+  defp map_position(yard, position) do
+    case yard.grid[position] do
+      :open -> ?.
+      :wooded -> ?|
+      :lumber -> ?#
+    end
+  end
 end

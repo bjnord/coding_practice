@@ -48,6 +48,17 @@ defmodule Lumber do
   end
 
   @doc """
+  Print map of input file yard.
+  """
+  def yard_map(input_file, opts \\ []) do
+    IO.puts("map of <#{input_file}>:")
+    input_file
+    |> parse_input(opts)
+    |> Yard.map()
+    |> Enum.map(fn (line) -> IO.puts(line) end)
+  end
+
+  @doc """
   Hello world.
 
   ## Examples
