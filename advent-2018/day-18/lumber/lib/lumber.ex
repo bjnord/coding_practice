@@ -45,10 +45,29 @@ defmodule Lumber do
 
   - Part 2 answer is: ...
   """
-  def part2(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
+  def part2(input_file, opts \\ []) do
+    {yard, minute} =
+      input_file
+      |> parse_input(opts)
+      |> strange_magic_until_repeat()
+    counts =
+      yard
+      |> count()
+    (counts[:trees] * counts[:lumber])
+    |> IO.inspect(label: "Part 2 total resource value (after #{minute} minutes) is")
+
+    yard_next = strange_magic(yard, 1)
+#   Yard.map(yard, label_minute: minute)
+#   |> Enum.map(fn (line) -> IO.puts(line) end)
+    IO.puts("Yard is #{what_next(yard, yard_next)}")
+  end
+
+  defp what_next(yard, yard_next) do
+    if checksum(yard_next) == checksum(yard) do
+      "stable"
+    else
+      "oscillating or cycling"
+    end
   end
 
   @doc """

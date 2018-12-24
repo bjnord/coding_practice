@@ -94,11 +94,20 @@ defmodule Yard do
   @spec map(Yard.t(), map()) :: [String.t()]
 
   def map(yard, opts \\ []) do
-    if opts[:label] do
-      IO.puts(opts[:label])
-    end
+    IO.puts(map_label(opts[:label], opts[:label_minute]))
     for y <- y_range(yard),
       do: map_row(yard, y, x_range(yard))
+  end
+
+  defp map_label(label, minute) do
+    cond do
+      label ->
+        label
+      minute == 0 ->
+        "Initial state:"
+      true ->
+        "After #{minute} minute#{if minute == 1, do: "", else: "s"}:"
+    end
   end
 
   defp y_range(yard) do
@@ -252,5 +261,23 @@ defmodule Yard do
   defp cell_checksum({y, x}, content) do
     [a, b] = Enum.take(Atom.to_charlist(content), 2)
     (y * a * 101) + (x * b * 11)
+  end
+
+  @doc """
+  Iterate until yard state repeats any previous state.
+  """
+  @spec strange_magic_until_repeat(Yard.t(), map()) :: [String.t()]
+
+  def strange_magic_until_repeat(yard, _opts \\ []) do
+    Stream.iterate(1, &(&1+1))
+    |> Enum.reduce_while({yard, MapSet.new()}, fn (minute, {yard, checksums}) ->
+      next_yard = strange_magic(yard, 1)
+      next_yard_cs = checksum(yard)
+      if MapSet.member?(checksums, next_yard_cs) do
+        {:halt, {next_yard, minute}}
+      else
+        {:cont, {next_yard, MapSet.put(checksums, next_yard_cs)}}
+      end
+    end)
   end
 end
