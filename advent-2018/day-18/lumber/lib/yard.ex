@@ -1,4 +1,37 @@
 defmodule Yard do
+  @moduledoc """
+  Documentation for Yard.
+  """
+
+  @enforce_keys [:grid, :size]
+  defstruct grid: %{}, size: {nil, nil}
+
+  @type position() :: {integer(), integer()}
+  @type position_range() :: {Range.t(integer()), Range.t(integer())}
+  @type t() :: %__MODULE__{
+    grid: map(),
+    size: position(),
+  }
+
+  @doc """
+  Construct a new yard.
+  """
+  @spec new(map(), position()) :: Yard.t()
+
+  def new(grid, {y, x}) when is_map(grid) and is_integer(y) and is_integer(x) do
+    %Yard{grid: grid, size: {y, x}}
+  end
+
+  @spec new(map()) :: Yard.t()
+
+  def new(grid) when is_map(grid) do
+    y = Enum.map(grid, &(elem(elem(&1, 0), 0)))
+        |> Enum.max
+    x = Enum.map(grid, &(elem(elem(&1, 0), 1)))
+        |> Enum.max
+    new(grid, {y+1, x+1})
+  end
+
   @doc ~S"""
   Parses a line from the initial state, adding its data to an accumulator.
 
@@ -35,5 +68,23 @@ defmodule Yard do
       "|" -> :wooded
       "#" -> :lumber
     end
+  end
+
+  @doc ~S"""
+  Parse the input file.
+  """
+  def parse_input(input_file, opts \\ []) do
+    input_file
+    |> File.stream!
+    |> parse_lines(opts)
+  end
+
+  defp parse_lines(stream, _opts) do
+    stream
+    |> Enum.reduce({0, %{}}, fn (line, {y, grid}) ->
+      {y+1, parse_line(line, y, grid)}
+    end)
+    |> elem(1)
+    |> Yard.new()
   end
 end

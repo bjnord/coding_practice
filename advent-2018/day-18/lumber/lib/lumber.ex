@@ -4,6 +4,7 @@ defmodule Lumber do
   """
 
   import Lumber.CLI
+  import Yard
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -27,8 +28,9 @@ defmodule Lumber do
 
   - Part 1 answer is: ...
   """
-  def part1(input_file, _opts \\ []) do
+  def part1(input_file, opts \\ []) do
     input_file
+    |> parse_input(opts)
     |> IO.inspect(label: "Part 1 total resource value is")
   end
 
