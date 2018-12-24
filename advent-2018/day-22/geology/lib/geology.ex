@@ -66,17 +66,4 @@ defmodule Geology do
     map(fast_cave, target_range(fast_cave))
     |> Enum.map(fn (line) -> IO.puts(line) end)
   end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Geology.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end

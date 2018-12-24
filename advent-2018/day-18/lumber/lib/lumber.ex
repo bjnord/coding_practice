@@ -57,17 +57,4 @@ defmodule Lumber do
     |> Yard.map()
     |> Enum.map(fn (line) -> IO.puts(line) end)
   end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Lumber.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end

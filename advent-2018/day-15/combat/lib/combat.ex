@@ -93,17 +93,4 @@ defmodule Combat do
     dump_outcome(final_arena, round, 2)
     IO.inspect(elf_power, label: "Elf power")
   end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Combat.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end

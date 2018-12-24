@@ -66,17 +66,4 @@ defmodule Door do
     |> Enum.count()
     |> IO.inspect(label: "Part 2 rooms past 1000+ doors")
   end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Door.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end
