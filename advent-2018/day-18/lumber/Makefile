@@ -1,5 +1,7 @@
 BIN = ./lumber
-FILES = config/config.exs lib/lumber/cli.ex lib/lumber.ex mix.exs test/test_helper.exs test/lumber_test.exs
+FILES = config/config.exs mix.exs test/test_helper.exs \
+	lib/lumber/cli.ex lib/lumber.ex test/lumber_test.exs \
+	lib/yard.ex test/yard_test.exs \
 
 .PHONY: test
 test:
