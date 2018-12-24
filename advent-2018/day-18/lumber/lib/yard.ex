@@ -46,7 +46,7 @@ defmodule Yard do
         {42, 4} => :open,
         {42, 5} => :open,
         {42, 6} => :open,
-        {42, 7} => :wooded,
+        {42, 7} => :trees,
         {42, 8} => :lumber,
         {42, 9} => :open,
       }
@@ -65,7 +65,7 @@ defmodule Yard do
   defp cell_type(cell) do
     case cell do
       "." -> :open
-      "|" -> :wooded
+      "|" -> :trees
       "#" -> :lumber
     end
   end
@@ -121,7 +121,7 @@ defmodule Yard do
   defp map_position(yard, position) do
     case yard.grid[position] do
       :open -> ?.
-      :wooded -> ?|
+      :trees -> ?|
       :lumber -> ?#
     end
   end
@@ -138,10 +138,12 @@ defmodule Yard do
       ...>   "..|#.",
       ...>   "#.#||",
       ...> ])
+      iex> Yard.surrounding_counts(yard, {0, 0})
+      %{open: 2, trees: 0, lumber: 1}
       iex> Yard.surrounding_counts(yard, {1, 1})
-      %{open: 4, wooded: 2, lumber: 2}
+      %{open: 4, trees: 2, lumber: 2}
       iex> Yard.surrounding_counts(yard, {4, 4})
-      %{open: 1, wooded: 1, lumber: 1}
+      %{open: 1, trees: 1, lumber: 1}
   """
   @spec surrounding_counts(Yard.t(), position()) :: map()
 
@@ -153,8 +155,48 @@ defmodule Yard do
         do: yard.grid[{j, i}]
     contents
     |> Enum.reject(&(&1 == nil))
-    |> Enum.reduce(%{}, fn (content, counts) ->
+    |> Enum.reduce(%{open: 0, trees: 0, lumber: 0}, fn (content, counts) ->
       Map.update(counts, content, 1, &(&1 + 1))
     end)
+  end
+
+  @doc """
+  Iterate.
+
+  "Strange magic is at work here: each minute, the landscape looks
+  entirely different."
+  """
+  @spec strange_magic(Yard.t(), integer(), map()) :: [String.t()]
+
+  def strange_magic(yard, minutes, opts \\ []) do
+    1..minutes
+    |> Enum.reduce(yard, fn (m, yard) ->
+      new_grid =
+        for j <- y_range(yard),
+          i <- x_range(yard),
+          do: {{j, i}, new_content(yard, {j, i})},
+          into: %{}
+      %{yard | grid: new_grid}
+    end)
+  end
+
+  defp new_content(yard, {y, x}) do
+    now = yard.grid[{y, x}]
+    surr = surrounding_counts(yard, {y, x})
+#   if {y, x} == {0, 0} do
+#     IO.inspect({now, surr, surr[:trees]}, label: "now,surround,n_trees at {0, 0}")
+#   end
+    cond do
+      (now == :open) and (surr[:trees] >= 3) ->
+        :trees
+      (now == :trees) and (surr[:lumber] >= 3) ->
+        :lumber
+      (now == :lumber) and (surr[:lumber] >= 1) and (surr[:trees] >= 1) ->
+        :lumber
+      (now == :lumber) ->
+        :open
+      true ->
+        now
+    end
   end
 end
