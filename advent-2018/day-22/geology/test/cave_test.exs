@@ -3,14 +3,14 @@ defmodule CaveTest do
   doctest Cave
 
   test "cheapest path (short paths)" do
-    fast_cave = Cave.new(510, {10, 10}, 5)
+    fast_cave = Cave.new(510, {10, 10}, 0)
                 |> Cave.cache_erosion()
     assert Cave.cheapest_path(fast_cave, {0, 0}, :torch, {0, 2}) == 16  # 2 steps, 2 tool changes
     assert Cave.cheapest_path(fast_cave, {0, 0}, :torch, {3, 3}) == 20  # 6 steps, 2 tool changes
   end
 
   test "cheapest path (puzzle example)" do
-    fast_cave = Cave.new(510, {10, 10})
+    fast_cave = Cave.new(510, {10, 10}, 5)
                 |> Cave.cache_erosion()
     assert Cave.cheapest_path(fast_cave, {0, 0}, :torch, {10, 10}) == 45
   end
@@ -39,7 +39,7 @@ defmodule CaveTest do
   end
 
   test "cost of move to neighbor (tool switched)" do
-    cave = Cave.new(510, {10, 10})
+    cave = Cave.new(510, {10, 10}, 0)
     # {0, 1} is :wet
     assert Cave.neighbor_move_cost(cave, 1, :torch, :rocky, {0, 1}) == {9, :gear}
     # {1, 1} is :narrow
@@ -49,7 +49,7 @@ defmodule CaveTest do
   end
 
   test "cost of move to neighbor (no switch)" do
-    cave = Cave.new(510, {10, 10})
+    cave = Cave.new(510, {10, 10}, 0)
     # {1, 0} is :rocky
     assert Cave.neighbor_move_cost(cave, 1, :torch, :rocky, {1, 0}) == {2, :torch}
     # {1, 1} is :narrow
@@ -71,7 +71,7 @@ defmodule CaveTest do
   end
 
   test "cost of move to neighbor (target)" do
-    cave = Cave.new(510, {10, 10})
+    cave = Cave.new(510, {10, 10}, 0)
     # {10, 10} is :rocky
     assert Cave.neighbor_move_cost(cave, 30, :torch, :rocky, {10, 10}) == {31, :torch}
     assert Cave.neighbor_move_cost(cave, 30, :gear, :wet, {10, 10}) == {38, :torch}

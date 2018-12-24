@@ -24,8 +24,14 @@ defmodule Cave do
   """
   @spec new(integer(), position(), integer()) :: Cave.t()
 
-  def new(depth, {y, x}, margin \\ 10) when is_integer(depth) and is_integer(y) and is_integer(x) do
-    %Cave{depth: depth, target: {y, x}, bounds: {y+margin, x+margin}, erosion: %{}, path_cost: %{}}
+  def new(depth, {y, x}, margin_x, margin_y \\ nil) when is_integer(depth) and is_integer(y) and is_integer(x) do
+    margin_y =
+      if margin_y do
+        margin_y
+      else
+        margin_x  # caller wants equal margins
+      end
+    %Cave{depth: depth, target: {y, x}, bounds: {y+margin_y, x+margin_x}, erosion: %{}, path_cost: %{}}
   end
 
   @doc """
@@ -33,7 +39,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = Cave.new(510, {10, 10})
+      iex> cave = Cave.new(510, {10, 10}, 5)
       iex> Cave.geologic_index(cave, {0, 0})
       0
       iex> Cave.geologic_index(cave, {0, 1})
@@ -72,7 +78,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = Cave.new(510, {10, 10})
+      iex> cave = Cave.new(510, {10, 10}, 5)
       iex> Cave.erosion_level(cave, {0, 0})
       510
       iex> Cave.erosion_level(cave, {0, 1})
@@ -99,7 +105,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = Cave.new(510, {10, 10})
+      iex> cave = Cave.new(510, {10, 10}, 5)
       iex> Cave.region_type(cave, {0, 0})
       :rocky
       iex> Cave.region_type(cave, {0, 1})
@@ -126,7 +132,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = Cave.new(510, {10, 10})
+      iex> cave = Cave.new(510, {10, 10}, 5)
       iex> Cave.risk_level(cave, {0..10, 0..10})
       114
   """
@@ -154,7 +160,7 @@ defmodule Cave do
 
   ## Example
 
-      iex> cave = Cave.new(100, {7, 9})
+      iex> cave = Cave.new(100, {7, 9}, 0)
       iex> Cave.target_range(cave)
       {0..7, 0..9}
   """

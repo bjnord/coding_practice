@@ -28,10 +28,10 @@ defmodule Geology do
 
   - Part 1 answer is: 10395
   """
-  def part1(input_file, _opts \\ []) do
+  def part1(input_file, opts \\ []) do
     cave =
       input_file
-      |> parse_input()
+      |> parse_input(opts)
     fast_cave = cache_erosion(cave)
     risk_level(fast_cave, target_range(fast_cave))
     |> IO.inspect(label: "Part 1 total risk level is")
@@ -45,10 +45,10 @@ defmodule Geology do
   - INCORRECT Part 2 answer is: 1052 (too high)
   - Part 2 answer is: ...
   """
-  def part2(input_file, _opts \\ []) do
+  def part2(input_file, opts \\ []) do
     cave =
       input_file
-      |> parse_input()
+      |> parse_input(opts)
     fast_cave = cache_erosion(cave)
     cheapest_path(fast_cave, {0, 0}, :torch, fast_cave.target)
     |> IO.inspect(label: "Part 2 fewest minutes to target is")
