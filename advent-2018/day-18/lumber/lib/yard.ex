@@ -225,4 +225,32 @@ defmodule Yard do
       Map.update(counts, content, 1, &(&1 + 1))
     end)
   end
+
+  @doc """
+  Find yard checksum.
+
+  ## Examples
+
+      iex> yard = Yard.parse_lines([
+      ...>   ".#|#.",
+      ...>   "..#..",
+      ...>   ".|..|",
+      ...>   "..|#.",
+      ...>   "#.#||",
+      ...> ])
+      iex> Yard.checksum(yard)
+      627046
+  """
+  @spec checksum(Yard.t()) :: integer()
+
+  def checksum(yard) do
+    Enum.reduce(yard.grid, 0, fn ({{y, x}, content}, acc) ->
+      acc + cell_checksum({y, x}, content)
+    end)
+  end
+
+  defp cell_checksum({y, x}, content) do
+    [a, b] = Enum.take(Atom.to_charlist(content), 2)
+    (y * a * 101) + (x * b * 11)
+  end
 end
