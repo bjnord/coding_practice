@@ -13,11 +13,11 @@ defmodule Lumber do
   - argv: Command-line arguments
   """
   def main(argv) do
-    {input_file, parts} = parse_args(argv)
-    if Enum.member?(parts, 1),
-      do: part1(input_file)
-    if Enum.member?(parts, 2),
-      do: part2(input_file)
+    {input_file, opts} = parse_args(argv)
+    if Enum.member?(opts[:parts], 1),
+      do: part1(input_file, opts)
+    if Enum.member?(opts[:parts], 2),
+      do: part2(input_file, opts)
   end
 
   @doc """
@@ -27,10 +27,9 @@ defmodule Lumber do
 
   - Part 1 answer is: ...
   """
-  def part1(input_file) do
-    ans_type = "???"
+  def part1(input_file, _opts \\ []) do
     input_file
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+    |> IO.inspect(label: "Part 1 total resource value is")
   end
 
   @doc """
@@ -40,7 +39,7 @@ defmodule Lumber do
 
   - Part 2 answer is: ...
   """
-  def part2(input_file) do
+  def part2(input_file, _opts \\ []) do
     ans_type = "???"
     input_file
     |> IO.inspect(label: "Part 2 #{ans_type} is")
