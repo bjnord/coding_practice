@@ -2,7 +2,9 @@ defmodule TeleportTest do
   use ExUnit.Case
   doctest Teleport
 
-  test "greets the world" do
-    assert Teleport.hello() == :world
+  import Teleport
+
+  test "Manhattan distance 3-D" do
+    assert manhattan({1, 3, 2}, {4, 1, 5}) == 3 + 2 + 3
   end
 end

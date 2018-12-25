@@ -25,12 +25,22 @@ defmodule Teleport do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 613
   """
-  def part1(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+  def part1(input_file, opts \\ []) do
+    bots =
+      input_file
+      |> parse_input(opts)
+    {max_bot_pos, max_bot_r} =
+      bots
+      |> Enum.max_by(fn ({_pos, r}) -> r end)
+    bots_in_range =
+      bots
+      |> Enum.filter(fn ({pos, _r}) ->
+        manhattan(max_bot_pos, pos) <= max_bot_r
+      end)
+      |> Enum.count
+    IO.inspect(bots_in_range, label: "Part 1 nanobots in range is")
   end
 
   @doc """
@@ -47,15 +57,19 @@ defmodule Teleport do
   end
 
   @doc """
-  Hello world.
+  Compute the Manhattan distance between two 3-D points.
 
-  ## Examples
+  "Take the sum of the absolute values of the differences of the coordinates.
+  For example, if x=(a,b) and y=(c,d), the Manhattan distance between x and y is |a−c|+|b−d|."
+  <https://math.stackexchange.com/a/139604>
 
-      iex> Teleport.hello
-      :world
+  ## Example
+
+  iex> Teleport.manhattan({1, 2, 3}, {2, 3, 4})
+  3
 
   """
-  def hello do
-    :world
+  def manhattan({x1, y1, z1}, {x2, y2, z2}) do
+    abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
   end
 end

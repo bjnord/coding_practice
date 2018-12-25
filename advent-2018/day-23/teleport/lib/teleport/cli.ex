@@ -36,4 +36,29 @@ defmodule Teleport.CLI do
     IO.puts(:stderr, "Usage: teleport [--parts=#{parts}] [--verbose] <input_file>")
     System.halt(64)
   end
+
+  @doc ~S"""
+  Parse the input file.
+  """
+  def parse_input(input_file, opts \\ []) do
+    input_file
+    |> File.stream!
+    |> parse_lines(opts)
+  end
+
+  def parse_lines(lines, _opts \\ []) do
+    lines
+    |> Enum.reduce(MapSet.new(), fn (line, bots) ->
+      MapSet.put(bots, parse_line(line))
+    end)
+  end
+
+  def parse_line(line) do
+    [_, xc, yc, zc, rc] = Regex.run(~r/pos=<([\d-]+),([\d-]+),([\d-]+)>, r=([\d-]+)/, line)
+    x = String.to_integer(xc)
+    y = String.to_integer(yc)
+    z = String.to_integer(zc)
+    r = String.to_integer(rc)
+    {{x, y, z}, r}
+  end
 end
