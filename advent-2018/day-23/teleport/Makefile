@@ -3,13 +3,14 @@ FILES = config/config.exs lib/teleport/cli.ex lib/teleport.ex mix.exs test/test_
 
 .PHONY: test
 test:
-	mix test && mix run -e 'Teleport.main(["input/example1.txt"])'
+	mix test && mix run -e 'Teleport.main(["input/example2.txt"])'
 
 run: $(BIN)
 	$(BIN) input/input.txt
 
 examples: $(BIN)
-	$(BIN) input/example1.txt
+	$(BIN) --parts=1 input/example1.txt && \
+		$(BIN) --parts=2 input/example2.txt
 
 clean:
 	rm -rf _build $(BIN)

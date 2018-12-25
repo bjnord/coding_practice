@@ -3,6 +3,7 @@ defmodule Teleport do
   Documentation for Teleport.
   """
 
+  import Nanobot
   import Teleport.CLI
 
   @doc """
@@ -50,26 +51,18 @@ defmodule Teleport do
 
   - Part 2 answer is: ...
   """
-  def part2(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
-  end
-
-  @doc """
-  Compute the Manhattan distance between two 3-D points.
-
-  "Take the sum of the absolute values of the differences of the coordinates.
-  For example, if x=(a,b) and y=(c,d), the Manhattan distance between x and y is |a−c|+|b−d|."
-  <https://math.stackexchange.com/a/139604>
-
-  ## Example
-
-  iex> Teleport.manhattan({1, 2, 3}, {2, 3, 4})
-  3
-
-  """
-  def manhattan({x1, y1, z1}, {x2, y2, z2}) do
-    abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
+  def part2(input_file, opts \\ []) do
+    bots =
+      input_file
+      |> parse_input(opts)
+    {count, intersection_ranges} =
+      bots
+      |> Enum.map(fn (compare_bot) -> intersection_ranges_of(bots, compare_bot) end)
+      |> Enum.max_by(fn ({n, _ints}) -> n end)
+    IO.inspect(count, label: "maximum intersection count")
+    _ranges = reduced_ranges(intersection_ranges)
+             |> IO.inspect(label: "reduced intersection")
+    "?"
+    |> IO.inspect(label: "Part 2 distance to closest point is")
   end
 end
