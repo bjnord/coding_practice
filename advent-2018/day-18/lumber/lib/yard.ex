@@ -178,9 +178,9 @@ defmodule Yard do
   "Strange magic is at work here: each minute, the landscape looks
   entirely different."
   """
-  @spec strange_magic(Yard.t(), integer(), map()) :: [String.t()]
+  @spec strange_magic(Yard.t(), integer()) :: Yard.t()
 
-  def strange_magic(yard, minutes, _opts \\ []) do
+  def strange_magic(yard, minutes) do
     1..minutes
     |> Enum.reduce(yard, fn (_m, yard) ->
       new_grid =
@@ -195,9 +195,6 @@ defmodule Yard do
   defp new_content(yard, {y, x}) do
     now = yard.grid[{y, x}]
     surr = surrounding_counts(yard, {y, x})
-#   if {y, x} == {0, 0} do
-#     IO.inspect({now, surr, surr[:trees]}, label: "now,surround,n_trees at {0, 0}")
-#   end
     cond do
       (now == :open) and (surr[:trees] >= 3) ->
         :trees
@@ -265,19 +262,65 @@ defmodule Yard do
 
   @doc """
   Iterate until yard state repeats any previous state.
-  """
-  @spec strange_magic_until_repeat(Yard.t(), map()) :: [String.t()]
 
-  def strange_magic_until_repeat(yard, _opts \\ []) do
+  Returns the yard, minute, and states of the last step **before** the
+  repeat was observed, along with the checksum of the **repeated** step.
+  """
+  @spec strange_magic_until_repeat(Yard.t()) :: {Yard.t(), integer(), integer(), tuple()}
+
+  def strange_magic_until_repeat(yard) do
     Stream.iterate(1, &(&1+1))
-    |> Enum.reduce_while({yard, MapSet.new()}, fn (minute, {yard, checksums}) ->
+    |> Enum.reduce_while({yard, MapSet.new(), Map.new()}, fn (m, {yard, check_set, states}) ->
       next_yard = strange_magic(yard, 1)
-      next_yard_cs = checksum(yard)
-      if MapSet.member?(checksums, next_yard_cs) do
-        {:halt, {next_yard, minute}}
+      next_yard_cs = checksum(next_yard)
+      next_yard_ct = count(next_yard)
+      if MapSet.member?(check_set, next_yard_cs) do
+        # return previous yard/minute/states (last step *before* repeat)
+        # plus next yard's checksum (the repeat that caused the halt)
+        {:halt, {yard, m-1, next_yard_cs, states}}
       else
-        {:cont, {next_yard, MapSet.put(checksums, next_yard_cs)}}
+        {:cont, {next_yard, MapSet.put(check_set, next_yard_cs), Map.put(states, m, {next_yard_cs, next_yard_ct})}}
       end
     end)
+  end
+
+  @doc """
+  Return state after Nth iteration, extrapolating from cycle.
+  """
+  @spec extrapolate_state(list(), integer(), integer(), integer()) :: map()
+
+  def extrapolate_state(states, minute, halt_checksum, target_minute) do
+    {min_minute, n_states, cycle} = cycle(states, minute, halt_checksum)
+    minutes_left = target_minute - min_minute
+    cycle_left = rem(minutes_left, n_states)
+    Enum.at(cycle, cycle_left)
+    |> elem(1)
+  end
+
+  # minute = the last minute before we see a repeat
+  # i.e. the last minute of whatever states are stable/cycle/oscillating
+  def cycle(states, minute, halt_checksum) do
+    cycle =
+      minute..0
+      |> Enum.reduce_while([], fn (m, cycle) ->
+        new_cycle = [{m, elem(states[m], 1)} | cycle]
+        cond do
+          m < 1 ->
+            raise "hit the beginning"  # should not happen
+          elem(states[m], 0) == halt_checksum ->
+            {:halt, new_cycle}
+          true ->
+            {:cont, new_cycle}
+        end
+      end)
+      # ...and for once, Elixir list insertion order works in our favor
+    min_minute =
+      cycle
+      |> Enum.min_by(fn ({minute, _states}) -> minute end)
+      |> elem(0)
+    cycle_0 =
+      cycle
+      |> Enum.map(fn ({minute, states}) -> {minute-min_minute, states} end)
+    {min_minute, Enum.count(cycle_0), cycle_0}
   end
 end
