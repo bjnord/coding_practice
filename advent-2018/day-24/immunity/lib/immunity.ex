@@ -4,6 +4,7 @@ defmodule Immunity do
   """
 
   import Immunity.CLI
+  import Immunity.InputParser
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -27,10 +28,24 @@ defmodule Immunity do
 
   - Part 1 answer is: ...
   """
-  def part1(input_file, _opts \\ []) do
-    ans_type = "???"
+  def part1(input_file, opts \\ []) do
     input_file
-    |> IO.inspect(label: "Part 1 #{ans_type} is")
+    |> parse_input(opts)
+    "?"
+    |> IO.inspect(label: "Part 1 winning army units is")
+  end
+
+  defp parse_input(input_file, _opts) do
+    {:ok, input, _, _, {lines, chars}, parsed_chars} =
+      input_file
+      |> File.read!
+      |> input()
+    lines = lines - 1
+    if parsed_chars != chars do
+      raise "parser didn't consume all of #{input_file}"
+    end
+    IO.inspect({lines, chars}, label: "lines and characters parsed")
+    IO.inspect(input, label: "the input")
   end
 
   @doc """
@@ -44,18 +59,5 @@ defmodule Immunity do
     ans_type = "???"
     input_file
     |> IO.inspect(label: "Part 2 #{ans_type} is")
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Immunity.hello
-      :world
-
-  """
-  def hello do
-    :world
   end
 end
