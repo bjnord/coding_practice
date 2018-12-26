@@ -276,4 +276,41 @@ defmodule Immunity.InputParser do
     |> ignore(ws)
     |> integer(min: 1)
     |> label("integer")
+
+  @doc ~S"""
+  Parse input into two armies and their groups.
+  """
+  def parse_input_content(content, _opts \\ []) do
+    {:ok, input, _, _, {lines, chars}, parsed_chars} =
+      Immunity.InputParser.input(content)
+    lines = lines - 1
+    if parsed_chars != chars do
+      raise "parser didn't consume all of content"
+    end
+    IO.inspect({lines, chars}, label: "lines and characters parsed")
+    armies = Enum.map(input, &(parse_army(&1)))
+    IO.inspect(armies, label: "the armies")
+  end
+
+  defp parse_army(parsed_army) do
+    {:army, army_kwl} = parsed_army
+    army_kwl
+    |> Enum.filter(fn ({keyword, _v}) -> keyword == :group end)
+    |> Enum.map(fn ({_k, group_list}) ->
+      [units, hp, attr1, attr2, attack, attack_type, initiative] = group_list
+      {immunity, weakness} = swap_attributes(attr1, attr2)
+      Immunity.Group.new(units, hp, immunity, weakness, attack, attack_type, initiative)
+    end)
+  end
+
+  # returns {immunity, weakness}
+  defp swap_attributes(attr1, attr2) do
+    # a quirk of the input format (and our parser) is that these can be in either order
+    case elem(attr1, 0) do
+      :immunity ->
+        {elem(attr1, 1), elem(attr2, 1)}
+      :weakness ->
+        {elem(attr2, 1), elem(attr1, 1)}
+    end
+  end
 end
