@@ -289,21 +289,26 @@ defmodule Immunity.InputParser do
     end
     #IO.inspect({lines, chars}, label: "lines and characters parsed")
     armies =
-      Enum.with_index(input)
+      Enum.with_index(input, 1)
       |> Enum.map(&(parse_army(&1)))
     #IO.inspect(armies, label: "the armies")
   end
 
   @spec parse_army({{atom(), list()}, integer()}) :: [Immunity.Group.t()]
 
-  defp parse_army({{:army, army_kwl}, n}) do
+  defp parse_army({{:army, army_kwl}, army_n}) do
     army_kwl
     |> Enum.filter(fn ({keyword, _v}) -> keyword == :group end)
-    |> Enum.map(fn ({_k, group_list}) ->
+    |> Enum.with_index(1)
+    |> Enum.map(fn ({{_k, group_list}, group_n}) ->
       [units, hp, attr1, attr2, attack, attack_type, initiative] = group_list
       {immunity, weakness} = swap_attributes(attr1, attr2)
-      Immunity.Group.new(n, units, hp, immunity, weakness, attack, attack_type, initiative)
+      Immunity.Group.new(group_id(army_n, attack_type, group_n), units, hp, immunity, weakness, attack, attack_type, initiative)
     end)
+  end
+
+  defp group_id(army_n, attack_type, group_n) do
+    "#{army_n}-#{String.slice(Atom.to_string(attack_type), 0..4)}-#{group_n}"
   end
 
   # returns {immunity, weakness}

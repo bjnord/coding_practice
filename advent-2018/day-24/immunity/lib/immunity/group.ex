@@ -3,11 +3,11 @@ defmodule Immunity.Group do
   Documentation for Immunity.Group.
   """
 
-  @enforce_keys [:army_n, :units, :hp, :weakness, :immunity, :attack, :attack_type, :initiative]
-  defstruct army_n: 0, units: 0, hp: 0, weakness: [], immunity: [], attack: 0, attack_type: nil, initiative: 0
+  @enforce_keys [:id, :units, :hp, :weakness, :immunity, :attack, :attack_type, :initiative]
+  defstruct id: nil, units: 0, hp: 0, weakness: [], immunity: [], attack: 0, attack_type: nil, initiative: 0
 
   @type t() :: %__MODULE__{
-    army_n: integer(),
+    id: String.t(),
     units: integer(),
     hp: integer(),
     weakness: list(),
@@ -20,10 +20,18 @@ defmodule Immunity.Group do
   @doc """
   Construct a new group.
   """
-  @spec new(integer(), integer(), integer(), tuple(), tuple(), integer(), atom(), integer()) :: Immunity.Group.t()
+  @spec new(String.t(), integer(), integer(), tuple(), tuple(), integer(), atom(), integer()) :: Immunity.Group.t()
 
-  def new(army_n, units, hp, immunity, weakness, attack, attack_type, initiative) do
-    %Immunity.Group{army_n: army_n, units: units, hp: hp, weakness: weakness, immunity: immunity, attack: attack, attack_type: attack_type, initiative: initiative}
+  def new(id, units, hp, immunity, weakness, attack, attack_type, initiative) do
+    %Immunity.Group{id: id, units: units, hp: hp, weakness: weakness, immunity: immunity, attack: attack, attack_type: attack_type, initiative: initiative}
+  end
+
+  @doc """
+  Get army number from ID.
+  """
+  def army_n(group) do
+    String.slice(group.id, 0..0)
+    |> String.to_integer()
   end
 
   @doc """
