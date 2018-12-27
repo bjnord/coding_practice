@@ -29,7 +29,7 @@ defmodule Immunity.NarrativeTest do
       "input/example1.txt"
       |> File.read!
       |> Immunity.InputParser.parse_input_content()
-    {_new_army1, _new_army2, _targets, candidates_list, skirmishes} =
+    {_new_army1, _new_army2, candidates_list, skirmishes} =
       Immunity.Combat.fight(army1, army2)
     actual_narrative =
       for_fight(army1, army2, candidates_list, skirmishes)

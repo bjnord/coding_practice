@@ -18,7 +18,7 @@ defmodule Immunity.Combat do
     {new_army1, new_army2, skirmishes} =
       groups
       |> attack_phase(targets)
-    {new_army1, new_army2, targets, candidates_list, skirmishes}
+    {new_army1, new_army2, candidates_list, skirmishes}
   end
 
   @doc """

@@ -49,7 +49,7 @@ defmodule Immunity do
   defp this_means_war(army1, army2, opts) do
     Stream.cycle([true])
     |> Enum.reduce_while({army1, army2}, fn (_t, {army1, army2}) ->
-      {new_army1, new_army2, _targets, candidates_list, skirmishes} =
+      {new_army1, new_army2, candidates_list, skirmishes} =
         fight(army1, army2)
       if opts[:verbose] do
         Immunity.Narrative.for_fight(army1, army2, candidates_list, skirmishes)
