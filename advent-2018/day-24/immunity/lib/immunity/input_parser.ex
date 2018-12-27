@@ -288,18 +288,21 @@ defmodule Immunity.InputParser do
       raise "parser didn't consume all of content"
     end
     IO.inspect({lines, chars}, label: "lines and characters parsed")
-    armies = Enum.map(input, &(parse_army(&1)))
+    armies =
+      Enum.with_index(input)
+      |> Enum.map(&(parse_army(&1)))
     IO.inspect(armies, label: "the armies")
   end
 
-  defp parse_army(parsed_army) do
-    {:army, army_kwl} = parsed_army
+  @spec parse_army({{atom(), list()}, integer()}) :: [Immunity.Group.t()]
+
+  defp parse_army({{:army, army_kwl}, n}) do
     army_kwl
     |> Enum.filter(fn ({keyword, _v}) -> keyword == :group end)
     |> Enum.map(fn ({_k, group_list}) ->
       [units, hp, attr1, attr2, attack, attack_type, initiative] = group_list
       {immunity, weakness} = swap_attributes(attr1, attr2)
-      Immunity.Group.new(units, hp, immunity, weakness, attack, attack_type, initiative)
+      Immunity.Group.new(n, units, hp, immunity, weakness, attack, attack_type, initiative)
     end)
   end
 
