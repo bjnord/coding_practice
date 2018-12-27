@@ -287,11 +287,11 @@ defmodule Immunity.InputParser do
     if parsed_chars != chars do
       raise "parser didn't consume all of content"
     end
-    IO.inspect({lines, chars}, label: "lines and characters parsed")
+    #IO.inspect({lines, chars}, label: "lines and characters parsed")
     armies =
       Enum.with_index(input)
       |> Enum.map(&(parse_army(&1)))
-    IO.inspect(armies, label: "the armies")
+    #IO.inspect(armies, label: "the armies")
   end
 
   @spec parse_army({{atom(), list()}, integer()}) :: [Immunity.Group.t()]

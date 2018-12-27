@@ -4,6 +4,7 @@ defmodule Immunity do
   """
 
   import Immunity.CLI
+  import Immunity.Combat
   import Immunity.InputParser
 
   @doc """
@@ -29,8 +30,10 @@ defmodule Immunity do
   - Part 1 answer is: ...
   """
   def part1(input_file, opts \\ []) do
-    input_file
-    |> parse_input_file(opts)
+    [army1, army2] =
+      input_file
+      |> parse_input_file(opts)
+    fight(army1, army2)
     "?"
     |> IO.inspect(label: "Part 1 winning army units is")
   end
