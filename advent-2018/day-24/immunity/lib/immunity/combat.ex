@@ -9,19 +9,24 @@ defmodule Immunity.Combat do
   Fight!
   """
   def fight(army1, army2) do
-    army1 ++ army2
-    |> Enum.reduce(%{}, fn (group, acc) -> Map.put(acc, group.id, group) end)
-    |> target_selection()
+    groups =
+      army1 ++ army2
+      |> Enum.reduce(%{}, fn (group, acc) -> Map.put(acc, group.id, group) end)
+    {targets, candidates_list} =
+      groups
+      |> target_selection_phase()
+    attack_phase(groups, targets)
+    {targets, candidates_list}
   end
 
   @doc """
-  Perform target selection.
+  Perform target selection phase.
 
   "At the end of the target selection phase, each group has selected
   zero or one groups to attack, and each group is being attacked by
   zero or one groups."
   """
-  def target_selection(groups) do
+  def target_selection_phase(groups) do
     ###
     # determine order of groups getting to select their targets
     selector_list =
@@ -120,5 +125,90 @@ defmodule Immunity.Combat do
       true ->
         1
     end
+  end
+
+  @doc """
+  Perform attack phase.
+  """
+  def attack_phase(groups, targets) do
+    ###
+    # determine order of groups getting to attack their targets
+    attacker_list =
+      Map.values(groups)
+      |> Enum.sort_by(&(attacker_precedence(&1)))
+      #|> IO.inspect(label: "attacker precedence")
+    ###
+    # have groups attack their targets
+    {groups, _, r_skirmishes} =
+      attacker_list
+      |> Enum.reduce({groups, targets, []}, fn (att_group, {groups, targets, skirmishes}) ->
+        accumulate_attack(att_group, groups, targets, skirmishes)
+      end)
+    #IO.inspect(groups, label: "groups after attack")
+    IO.inspect(r_skirmishes |> Enum.reverse(), label: "skirmishes")
+    ###
+    # collate back to armies, removing groups with no units left
+    {new_army1, new_army2} =
+      groups
+      |> Enum.reduce({%{}, %{}}, fn ({_id, group}, {army1, army2}) ->
+        # TODO cheating this assumes only two armies with IDs 1 and 2
+        cond do
+          group.units <= 0 -> {army1, army2}
+          army_n(group) == 1 -> {[group | army1], army2}
+          army_n(group) == 2 -> {army1, [group | army2]}
+        end
+      end)
+    {new_army1, new_army2, r_skirmishes |> Enum.reverse()}
+  end
+
+  @doc """
+  Sort function that determines order of attacks.
+
+  "Groups attack in decreasing order of initiative, regardless of whether
+  they are part of the infection or the immune system."
+  """
+  def attacker_precedence(group) do
+    -group.initiative
+  end
+
+  @doc """
+  Attack a target, if possible.
+
+  "If a group contains no units, it cannot attack."
+  """
+  def accumulate_attack(att_group, groups, targets, skirmishes) do
+    ###
+    # get the latest data from groups map
+    # (attacker may have less units now, if it was attacked this round)
+    {def_group_id, _plan_damage} = targets[att_group.id]
+    att_group = groups[att_group.id]
+    def_group = groups[def_group_id]
+    damage = damage_from_attack(att_group, def_group)
+    ###
+    # determine how many units were killed
+    # if an attack happened, update groups and skirmishes
+    if att_group.units > 0 do
+      units_killed = units_lost_in_attack(def_group, damage)
+      new_def_group = clone(def_group, :units, def_group.units - units_killed)
+      skirmish = {att_group, new_def_group, units_killed}
+      {Map.put(groups, def_group.id, new_def_group), targets, [skirmish | skirmishes]}
+    else
+      {groups, targets, skirmishes}
+    end
+  end
+
+  @doc """
+  Find units lost during attack.
+
+  This will never return more than the defending group has.
+
+  "The defending group only loses whole units from damage; damage is
+  always dealt in such a way that it kills the most units possible, and any
+  remaining damage to a unit that does not immediately kill it is ignored."
+  """
+  def units_lost_in_attack(def_group, damage) do
+    unit_loss = div(damage, def_group.hp)
+    IO.inspect({def_group.units, def_group.hp, damage, unit_loss}, label: "units vs units lost")
+    min(def_group.units, unit_loss)
   end
 end

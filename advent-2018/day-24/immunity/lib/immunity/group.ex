@@ -25,6 +25,13 @@ defmodule Immunity.Group do
   end
 
   @doc """
+  Clone a group, replacing one of its values.
+  """
+  def clone(group, field, new_value) when field == :units do
+    %Immunity.Group{id: group.id, units: new_value, hp: group.hp, weakness: group.weakness, immunity: group.immunity, attack: group.attack, attack_type: group.attack_type, initiative: group.initiative}
+  end
+
+  @doc """
   Get army number of group.
   """
   def army_n(group) do

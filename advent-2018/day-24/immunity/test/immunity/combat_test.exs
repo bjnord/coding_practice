@@ -41,4 +41,17 @@ defmodule Immunity.CombatTest do
     assert damage_from_attack(group1, group0) == 0
     assert damage_from_attack(group1, group2) == 19 * 5
   end
+
+  # "For example, if a defending group contains 10 units with 10 hit
+  # points each and receives 75 damage, it loses exactly 7 units and
+  # is left with 3 units at full health."
+  test "units lost in attack" do
+    group0 = new({0, 0}, 10, 10, nil, nil, nil, nil, nil)
+    assert units_lost_in_attack(group0, 75) == 7
+  end
+
+  test "units lost in massive attack" do
+    group0 = new({0, 0}, 10, 10, nil, nil, nil, nil, nil)
+    assert units_lost_in_attack(group0, 75_000) == 10
+  end
 end
