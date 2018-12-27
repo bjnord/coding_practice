@@ -2,6 +2,8 @@ defmodule Immunity.NarrativeTest do
   use ExUnit.Case
   doctest Immunity.Narrative
 
+  import Immunity.Narrative
+
   test "fight" do
     expected_narrative = [
       "Immune System:",
@@ -23,7 +25,8 @@ defmodule Immunity.NarrativeTest do
       "input/example1.txt"
       |> File.read!
       |> Immunity.InputParser.parse_input_content()
-    actual_narrative = Immunity.Combat.fight(army1, army2)
+    {targets, candidates_list} = Immunity.Combat.fight(army1, army2)
+    actual_narrative = for_fight(army1, army2, targets, candidates_list)
     assert actual_narrative == expected_narrative
   end
 end

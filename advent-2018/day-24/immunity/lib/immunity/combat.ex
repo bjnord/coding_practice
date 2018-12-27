@@ -9,13 +9,9 @@ defmodule Immunity.Combat do
   Fight!
   """
   def fight(army1, army2) do
-    narrative_a = Immunity.Narrative.for_army(army1) ++ Immunity.Narrative.for_army(army2) ++ [""]
-    all_groups =
-      army1 ++ army2
-      |> Enum.reduce(%{}, fn (group, acc) -> Map.put(acc, group.id, group) end)
-    {targets, narrative_ts} =
-      target_selection(all_groups)
-    narrative_a ++ narrative_ts
+    army1 ++ army2
+    |> Enum.reduce(%{}, fn (group, acc) -> Map.put(acc, group.id, group) end)
+    |> target_selection()
   end
 
   @doc """
@@ -26,21 +22,21 @@ defmodule Immunity.Combat do
   zero or one groups."
   """
   def target_selection(groups) do
+    ###
+    # determine order of groups getting to select their targets
     selector_list =
       Map.values(groups)
       |> Enum.sort_by(&(target_selector_precedence(&1)))
       #|> IO.inspect(label: "target selector precedence")
-    {_, targets, r_narrative} =
+    ###
+    # have groups select their targets
+    {_, targets, r_candidates_list} =
       selector_list
-      |> Enum.reduce({groups, %{}, []}, fn (att_group, {groups, targets, narrative}) ->
-        select_target(att_group, groups, targets, narrative)
+      |> Enum.reduce({groups, %{}, []}, fn (att_group, {groups, targets, candidates_list}) ->
+        accumulate_target(att_group, groups, targets, candidates_list)
       end)
     #IO.inspect(targets, label: "targets")
-    narrative =
-      r_narrative
-      |> Enum.sort_by(fn ({order, _line}) -> order end)
-      |> Enum.map(&(elem(&1, 1)))
-    {targets, narrative ++ [""]}
+    {targets, r_candidates_list |> Enum.reverse()}
   end
 
   @doc """
@@ -54,31 +50,29 @@ defmodule Immunity.Combat do
   end
 
   @doc """
-  Select a target.
+  Select a target, if possible.
 
   "If [an attacking group" cannot deal any defending groups damage,
   it does not choose a target. Defending groups can only be chosen as
   a target by one attacking group."
   """
-  def select_target(att_group, groups, targets, narrative) do
-    best_targets =
+  def accumulate_target(att_group, groups, targets, candidates_list) do
+    candidates =
       Map.values(groups)
       |> Enum.reject(fn (group) -> army_n(group) == army_n(att_group) end)
       |> Enum.map(fn (group) -> {group, damage_from_attack(att_group, group)} end)
       |> Enum.reject(fn ({_group, damage}) -> damage <= 0 end)
       |> Enum.sort_by(fn ({group, damage}) -> target_choice(group, damage) end)
       #|> IO.inspect(label: "target priority for #{tag(att_group)}")
-    narrative =
-      best_targets
-      |> Enum.reduce(narrative, fn ({def_group, damage}, lines) ->
-        sorter = {-army_n(att_group), group_n(att_group), group_n(def_group)}
-        [{sorter, "#{army_name(att_group)} group #{group_n(att_group)} would deal defending group #{group_n(def_group)} #{damage} damage"} | lines]
-      end)
-    case best_targets do
+    case candidates do
       [] ->
-        {groups, targets, narrative}
-      [{best_group, damage} | _rest] ->
-        {Map.delete(groups, best_group.id), Map.put(targets, att_group.id, {best_group.id, damage}), narrative}
+        {groups, targets, candidates_list}
+      [{def_group, damage} | _rest] ->
+        {
+          Map.delete(groups, def_group.id),
+          Map.put(targets, att_group.id, {def_group.id, damage}),
+          [{att_group, candidates} | candidates_list]
+        }
     end
   end
 
