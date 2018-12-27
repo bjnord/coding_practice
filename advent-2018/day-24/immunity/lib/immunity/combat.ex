@@ -144,7 +144,11 @@ defmodule Immunity.Combat do
     {groups, _, r_skirmishes} =
       attacker_list
       |> Enum.reduce({groups, targets, []}, fn (att_group, {groups, targets, skirmishes}) ->
-        accumulate_attack(att_group, groups, targets, skirmishes)
+        if targets[att_group.id] do
+          accumulate_attack(att_group, groups, targets, skirmishes)
+        else
+          {groups, targets, skirmishes}
+        end
       end)
     #IO.inspect(groups, label: "groups after attack")
     #IO.inspect(r_skirmishes |> Enum.reverse(), label: "skirmishes")
@@ -152,7 +156,7 @@ defmodule Immunity.Combat do
     # collate back to armies, removing groups with no units left
     {new_army1, new_army2} =
       groups
-      |> Enum.reduce({%{}, %{}}, fn ({_id, group}, {army1, army2}) ->
+      |> Enum.reduce({[], []}, fn ({_id, group}, {army1, army2}) ->
         # TODO cheating this assumes only two armies with IDs 1 and 2
         cond do
           group.units <= 0 -> {army1, army2}

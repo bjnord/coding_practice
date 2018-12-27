@@ -71,4 +71,12 @@ defmodule Immunity.Group do
   def effective_power(group) do
     group.units * group.attack
   end
+
+  @doc """
+  Find total number of units of army.
+  """
+  def total_units(army) do
+    Enum.map(army, fn (group) -> group.units end)
+    |> Enum.sum()
+  end
 end

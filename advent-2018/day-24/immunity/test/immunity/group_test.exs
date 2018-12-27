@@ -20,4 +20,11 @@ defmodule Immunity.GroupTest do
     group = new({1, 1}, 18, 729, {:weakness, [:fire]}, {:immunity, [:cold, :slashing]}, 8, :radiation, 10)
     assert effective_power(group) == 144
   end
+
+  test "total units" do
+    group0 = new({0, 0}, 18, nil, nil, nil, nil, nil, nil)
+    group1 = new({0, 1}, 2019, nil, nil, nil, nil, nil, nil)
+    group2 = new({0, 2}, 1, nil, nil, nil, nil, nil, nil)
+    assert total_units([group0, group1, group2]) == 2038
+  end
 end
