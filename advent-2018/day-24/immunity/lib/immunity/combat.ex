@@ -15,8 +15,10 @@ defmodule Immunity.Combat do
     {targets, candidates_list} =
       groups
       |> target_selection_phase()
-    attack_phase(groups, targets)
-    {targets, candidates_list}
+    {new_army1, new_army2, skirmishes} =
+      groups
+      |> attack_phase(targets)
+    {new_army1, new_army2, targets, candidates_list, skirmishes}
   end
 
   @doc """
@@ -145,7 +147,7 @@ defmodule Immunity.Combat do
         accumulate_attack(att_group, groups, targets, skirmishes)
       end)
     #IO.inspect(groups, label: "groups after attack")
-    IO.inspect(r_skirmishes |> Enum.reverse(), label: "skirmishes")
+    #IO.inspect(r_skirmishes |> Enum.reverse(), label: "skirmishes")
     ###
     # collate back to armies, removing groups with no units left
     {new_army1, new_army2} =
@@ -208,7 +210,6 @@ defmodule Immunity.Combat do
   """
   def units_lost_in_attack(def_group, damage) do
     unit_loss = div(damage, def_group.hp)
-    IO.inspect({def_group.units, def_group.hp, damage, unit_loss}, label: "units vs units lost")
     min(def_group.units, unit_loss)
   end
 end

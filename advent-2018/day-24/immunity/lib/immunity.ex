@@ -33,10 +33,10 @@ defmodule Immunity do
     [army1, army2] =
       input_file
       |> parse_input_file(opts)
-    {targets, candidates_list} =
+    {_new_army1, _new_army2, targets, candidates_list, skirmishes} =
       fight(army1, army2)
     if opts[:verbose] do
-      Immunity.Narrative.for_fight(army1, army2, targets, candidates_list)
+      Immunity.Narrative.for_fight(army1, army2, targets, candidates_list, skirmishes)
       |> Enum.each(fn (line) -> IO.puts(line) end)
     end
     "?"

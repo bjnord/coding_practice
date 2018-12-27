@@ -20,13 +20,19 @@ defmodule Immunity.NarrativeTest do
       "Immune System group 1 would deal defending group 2 153238 damage",
       "Immune System group 2 would deal defending group 1 24725 damage",
       "",
+      "Infection group 2 attacks defending group 2, killing 84 units",
+      "Immune System group 2 attacks defending group 1, killing 4 units",
+      "Immune System group 1 attacks defending group 2, killing 51 units",
+      "Infection group 1 attacks defending group 1, killing 17 units",
     ]
     [army1, army2] =
       "input/example1.txt"
       |> File.read!
       |> Immunity.InputParser.parse_input_content()
-    {targets, candidates_list} = Immunity.Combat.fight(army1, army2)
-    actual_narrative = for_fight(army1, army2, targets, candidates_list)
+    {_new_army1, _new_army2, targets, candidates_list, skirmishes} =
+      Immunity.Combat.fight(army1, army2)
+    actual_narrative =
+      for_fight(army1, army2, targets, candidates_list, skirmishes)
     assert actual_narrative == expected_narrative
   end
 end
