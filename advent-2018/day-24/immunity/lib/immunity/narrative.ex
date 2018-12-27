@@ -30,10 +30,7 @@ defmodule Immunity.Narrative do
   @doc """
   Narrative for fight.
   """
-
-  ### FIXME for_fight() doesn't need 3rd argument "targets"
-
-  def for_fight(army1, army2, _targets, candidates_list, skirmishes) do
+  def for_fight(army1, army2, candidates_list, skirmishes) do
     narr_arm = army_narrative(army1, army2)
     narr_ts = target_selection_narrative(candidates_list)
     narr_att = attack_narrative(skirmishes)
