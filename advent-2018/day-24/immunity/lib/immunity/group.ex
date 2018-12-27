@@ -7,7 +7,7 @@ defmodule Immunity.Group do
   defstruct id: nil, units: 0, hp: 0, weakness: [], immunity: [], attack: 0, attack_type: nil, initiative: 0
 
   @type t() :: %__MODULE__{
-    id: String.t(),
+    id: tuple(),
     units: integer(),
     hp: integer(),
     weakness: list(),
@@ -20,18 +20,15 @@ defmodule Immunity.Group do
   @doc """
   Construct a new group.
   """
-  @spec new(String.t(), integer(), integer(), tuple(), tuple(), integer(), atom(), integer()) :: Immunity.Group.t()
-
   def new(id, units, hp, immunity, weakness, attack, attack_type, initiative) do
     %Immunity.Group{id: id, units: units, hp: hp, weakness: weakness, immunity: immunity, attack: attack, attack_type: attack_type, initiative: initiative}
   end
 
   @doc """
-  Get army number from group ID.
+  Get army number of group.
   """
   def army_n(group) do
-    String.slice(group.id, 0..0)
-    |> String.to_integer()
+    elem(group.id, 0)
   end
 
   @doc """
@@ -46,36 +43,25 @@ defmodule Immunity.Group do
   end
 
   @doc """
+  Get group number of group.
+  """
+  def group_n(group) do
+    elem(group.id, 1)
+  end
+
+  @doc """
+  Create tag for group.
+
+  This is used as a human-friendly ID for debug output etc.
+  """
+  def tag(group) do
+    "#{army_n(group)}-#{String.slice(Atom.to_string(group.attack_type), 0..4)}-#{group_n(group)}"
+  end
+
+  @doc """
   Find effective power of group.
   """
-  @spec effective_power(Immunity.Group.t()) :: integer()
-
   def effective_power(group) do
     group.units * group.attack
-  end
-
-  @doc """
-  Dump army state.
-  """
-  def dump_army(army) do
-    army_name =
-      army
-      |> Enum.take(1)
-      |> List.first
-      |> army_name()
-    army
-    |> Enum.reduce(["#{army_name}:"], fn (group, lines) ->
-      lines ++ [dump(group)]
-    end)
-  end
-
-  @doc """
-  Dump group state.
-  """
-  def dump(group) do
-    group_id =
-      String.split(group.id, "-")
-      |> Enum.at(2)
-    "Group #{group_id} contains #{group.units} units"
   end
 end

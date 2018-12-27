@@ -4,6 +4,7 @@ FILES = config/config.exs mix.exs test/test_helper.exs \
 	lib/immunity/combat.ex test/immunity/combat_test.exs \
 	lib/immunity/group.ex test/immunity/group_test.exs \
 	lib/immunity/input_parser.ex test/immunity/input_parser_test.exs \
+	lib/immunity/narrative.ex test/immunity/narrative_test.exs \
 
 .PHONY: test
 test:

@@ -281,20 +281,15 @@ defmodule Immunity.InputParser do
   Parse input into two armies and their groups.
   """
   def parse_input_content(content, _opts \\ []) do
-    {:ok, input, _, _, {lines, chars}, parsed_chars} =
+    {:ok, input, _, _, {_lines, chars}, parsed_chars} =
       Immunity.InputParser.input(content)
-    lines = lines - 1
     if parsed_chars != chars do
       raise "parser didn't consume all of content"
     end
-    #IO.inspect({lines, chars}, label: "lines and characters parsed")
     armies =
       Enum.with_index(input, 1)
       |> Enum.map(&(parse_army(&1)))
-    #IO.inspect(armies, label: "the armies")
   end
-
-  @spec parse_army({{atom(), list()}, integer()}) :: [Immunity.Group.t()]
 
   defp parse_army({{:army, army_kwl}, army_n}) do
     army_kwl
@@ -303,12 +298,8 @@ defmodule Immunity.InputParser do
     |> Enum.map(fn ({{_k, group_list}, group_n}) ->
       [units, hp, attr1, attr2, attack, attack_type, initiative] = group_list
       {immunity, weakness} = swap_attributes(attr1, attr2)
-      Immunity.Group.new(group_id(army_n, attack_type, group_n), units, hp, immunity, weakness, attack, attack_type, initiative)
+      Immunity.Group.new({army_n, group_n}, units, hp, immunity, weakness, attack, attack_type, initiative)
     end)
-  end
-
-  defp group_id(army_n, attack_type, group_n) do
-    "#{army_n}-#{String.slice(Atom.to_string(attack_type), 0..4)}-#{group_n}"
   end
 
   # returns {immunity, weakness}
