@@ -24,4 +24,13 @@ defmodule Immunity.Group do
   def new(units, hp, immunity, weakness, attack, attack_type, initiative) do
     %Immunity.Group{units: units, hp: hp, weakness: weakness, immunity: immunity, attack: attack, attack_type: attack_type, initiative: initiative}
   end
+
+  @doc """
+  Find effective power of group.
+  """
+  @spec effective_power(Immunity.Group.t()) :: integer()
+
+  def effective_power(group) do
+    group.units * group.attack
+  end
 end
