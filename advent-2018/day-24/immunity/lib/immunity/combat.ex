@@ -9,10 +9,13 @@ defmodule Immunity.Combat do
   Fight!
   """
   def fight(army1, army2) do
+    narrative_a = dump_army(army1) ++ dump_army(army2) ++ [""]
     all_groups =
       army1 ++ army2
       |> Enum.reduce(%{}, fn (group, acc) -> Map.put(acc, group.id, group) end)
-    target_selection(all_groups)
+    {targets, narrative_ts} =
+      target_selection(all_groups)
+    narrative_a ++ narrative_ts
   end
 
   @doc """
@@ -26,14 +29,18 @@ defmodule Immunity.Combat do
     selector_list =
       Map.values(groups)
       |> Enum.sort_by(&(target_selector_precedence(&1)))
-      |> IO.inspect(label: "target selector precedence")
-    targets =
+      #|> IO.inspect(label: "target selector precedence")
+    {_, targets, r_narrative} =
       selector_list
-      |> Enum.reduce({groups, %{}}, fn (att_group, {groups, targets}) ->
-        select_target(att_group, groups, targets)
+      |> Enum.reduce({groups, %{}, []}, fn (att_group, {groups, targets, narrative}) ->
+        select_target(att_group, groups, targets, narrative)
       end)
-      |> elem(1)
-      |> IO.inspect(label: "targets")
+    #IO.inspect(targets, label: "targets")
+    narrative =
+      r_narrative
+      |> Enum.sort_by(fn ({order, _line}) -> order end)
+      |> Enum.map(&(elem(&1, 1)))
+    {targets, narrative ++ [""]}
   end
 
   @doc """
@@ -53,19 +60,36 @@ defmodule Immunity.Combat do
   it does not choose a target. Defending groups can only be chosen as
   a target by one attacking group."
   """
-  def select_target(att_group, groups, targets) do
+  def select_target(att_group, groups, targets, narrative) do
     best_targets =
       Map.values(groups)
       |> Enum.reject(fn (group) -> army_n(group) == army_n(att_group) end)
       |> Enum.map(fn (group) -> {group, damage_from_attack(att_group, group)} end)
       |> Enum.reject(fn ({_group, damage}) -> damage <= 0 end)
       |> Enum.sort_by(fn ({group, damage}) -> target_choice(group, damage) end)
-      |> IO.inspect(label: "target priority for #{att_group.id}")
+      #|> IO.inspect(label: "target priority for #{att_group.id}")
+    narrative =
+      best_targets
+      |> Enum.reduce(narrative, fn ({def_group, damage}, lines) ->
+        army_name = army_name(att_group)
+        army_n =
+          String.split(att_group.id, "-")
+          |> Enum.at(0)
+          |> String.to_integer()
+        # FIXME DRY with Group dump() method
+        att_group_n =
+          String.split(att_group.id, "-")
+          |> Enum.at(2)
+        def_group_n =
+          String.split(def_group.id, "-")
+          |> Enum.at(2)
+        [{{-army_n, att_group_n, def_group_n}, "#{army_name} group #{att_group_n} would deal defending group #{def_group_n} #{damage} damage"} | lines]
+      end)
     case best_targets do
       [] ->
-        {groups, targets}
-      [{best_group, _damage} | _rest] ->
-        {Map.delete(groups, best_group.id), Map.put(targets, att_group.id, best_group.id)}
+        {groups, targets, narrative}
+      [{best_group, damage} | _rest] ->
+        {Map.delete(groups, best_group.id), Map.put(targets, att_group.id, {best_group.id, damage}), narrative}
     end
   end
 

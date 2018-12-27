@@ -27,11 +27,22 @@ defmodule Immunity.Group do
   end
 
   @doc """
-  Get army number from ID.
+  Get army number from group ID.
   """
   def army_n(group) do
     String.slice(group.id, 0..0)
     |> String.to_integer()
+  end
+
+  @doc """
+  Get army name of group.
+  """
+  def army_name(group) do
+    # TODO cheating; this should come from the parsed input.
+    case army_n(group) do
+      1 -> "Immune System"
+      2 -> "Infection"
+    end
   end
 
   @doc """
@@ -41,5 +52,30 @@ defmodule Immunity.Group do
 
   def effective_power(group) do
     group.units * group.attack
+  end
+
+  @doc """
+  Dump army state.
+  """
+  def dump_army(army) do
+    army_name =
+      army
+      |> Enum.take(1)
+      |> List.first
+      |> army_name()
+    army
+    |> Enum.reduce(["#{army_name}:"], fn (group, lines) ->
+      lines ++ [dump(group)]
+    end)
+  end
+
+  @doc """
+  Dump group state.
+  """
+  def dump(group) do
+    group_id =
+      String.split(group.id, "-")
+      |> Enum.at(2)
+    "Group #{group_id} contains #{group.units} units"
   end
 end

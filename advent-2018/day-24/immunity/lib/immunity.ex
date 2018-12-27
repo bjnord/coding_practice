@@ -33,7 +33,12 @@ defmodule Immunity do
     [army1, army2] =
       input_file
       |> parse_input_file(opts)
-    fight(army1, army2)
+    narrative =
+      fight(army1, army2)
+    if opts[:verbose] do
+      narrative
+      |> Enum.each(fn (line) -> IO.puts(line) end)
+    end
     "?"
     |> IO.inspect(label: "Part 1 winning army units is")
   end
