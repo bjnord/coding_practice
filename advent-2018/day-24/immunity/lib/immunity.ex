@@ -27,7 +27,7 @@ defmodule Immunity do
 
   ## Correct Answer
 
-  - Part 1 answer is: ...
+  - Part 1 answer is: 26937
   """
   def part1(input_file, opts \\ []) do
     [army1, army2] =
