@@ -43,9 +43,6 @@ defmodule Immunity do
     |> parse_input_content(opts)
   end
 
-  # FIXME is anybody using 3rd arg ("targets") of fight() return?
-  #       if not, remove that too
-
   defp this_means_war(army1, army2, opts) do
     Stream.cycle([true])
     |> Enum.reduce_while({army1, army2}, fn (_t, {army1, army2}) ->
