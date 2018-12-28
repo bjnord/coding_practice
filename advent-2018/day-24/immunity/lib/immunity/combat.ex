@@ -7,6 +7,8 @@ defmodule Immunity.Combat do
 
   @doc """
   Fight!
+
+  "Each fight consists of two phases: target selection and attacking."
   """
   def fight(army1, army2) do
     groups =
@@ -23,6 +25,9 @@ defmodule Immunity.Combat do
 
   @doc """
   Perform target selection phase.
+
+  "During the target selection phase, each group attempts to choose
+  one target."
 
   "At the end of the target selection phase, each group has selected
   zero or one groups to attack, and each group is being attacked by
@@ -59,7 +64,7 @@ defmodule Immunity.Combat do
   @doc """
   Select a target, if possible.
 
-  "If [an attacking group" cannot deal any defending groups damage,
+  "If [an attacking group] cannot deal any defending groups damage,
   it does not choose a target. Defending groups can only be chosen as
   a target by one attacking group."
   """
@@ -89,7 +94,7 @@ defmodule Immunity.Combat do
   "The attacking group chooses to target the group in the enemy army to
   which it would deal the most damage (after accounting for weaknesses
   and immunities, but not accounting for whether the defending group
-  has enough units to actually receive all of that damage)"
+  has enough units to actually receive all of that damage)."
 
   "If an attacking group is considering two defending groups to which
   it would deal equal damage, it chooses to target the defending group
@@ -103,8 +108,10 @@ defmodule Immunity.Combat do
   @doc """
   Find damage from attack.
 
-  "By default, an attacking group would deal damage equal to its
-  effective power to the defending group." [but see "However" below]
+  "The damage an attacking group deals to a defending group depends on
+  the attacking group's attack type and the defending group's immunities
+  and weaknesses. By default, an attacking group would deal damage equal
+  to its effective power to the defending group." [but see "However" below]
   """
   def damage_from_attack(att_group, def_group) do
     effective_power(att_group) * damage_multiplier(att_group, def_group)
@@ -131,6 +138,12 @@ defmodule Immunity.Combat do
 
   @doc """
   Perform attack phase.
+
+  "During the attacking phase, each group deals damage to the target it
+  selected, if any."
+
+  "Groups never have zero or negative units; instead, the group is removed
+  from combat."
   """
   def attack_phase(groups, targets) do
     ###
@@ -180,7 +193,7 @@ defmodule Immunity.Combat do
   @doc """
   Attack a target, if possible.
 
-  "If a group contains no units, it cannot attack."
+  "(If a group contains no units, it cannot attack.)"
   """
   def accumulate_attack(att_group, groups, targets, skirmishes) do
     ###
