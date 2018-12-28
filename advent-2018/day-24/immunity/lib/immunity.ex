@@ -77,11 +77,53 @@ defmodule Immunity do
 
   ## Correct Answer
 
+  - Part 2 INCORRECT answer is: 106 (too low)
   - Part 2 answer is: ...
   """
-  def part2(input_file, _opts \\ []) do
-    ans_type = "???"
-    input_file
-    |> IO.inspect(label: "Part 2 #{ans_type} is")
+  def part2(input_file, opts \\ []) do
+    [army1, army2] =
+      input_file
+      |> parse_input_file(opts)
+    {boost, units} =
+      Stream.cycle([true])
+      |> Enum.reduce_while(1..100_000, fn (_t, min_boost..max_boost) ->
+        try_boost = min_boost + div(max_boost - min_boost, 2)
+        IO.inspect({min_boost..max_boost, try_boost}, label: "trying boost")
+        units = boosted_war(army1, army2, try_boost, opts)
+        cond do
+          min_boost > 100_000 ->
+            raise "boom"
+          units && (min_boost == max_boost) ->
+            {:halt, {min_boost, units}}
+          min_boost == max_boost-1 ->
+            #IO.inspect({min_boost+1..max_boost}, label: "no units, raising lower fence")
+            {:cont, min_boost+1..max_boost}
+          min_boost == max_boost ->
+            #IO.inspect({min_boost+1..max_boost+1}, label: "no units, raising both fences")
+            {:cont, min_boost+1..max_boost+1}
+          units ->
+            #IO.inspect({min_boost..try_boost}, label: "units=#{units}, taking lower half")
+            {:cont, min_boost..try_boost}
+          true ->
+            #IO.inspect({try_boost..max_boost}, label: "no units, taking upper half")
+            {:cont, try_boost..max_boost}
+        end
+      end)
+    units
+    |> IO.inspect(label: "Part 2 Immune System units (with boost=#{boost}) is")
+  end
+
+  defp boosted_war(army1, army2, boost, opts) do
+    boosted_army1 =
+      army1
+      |> Enum.map(fn (group) -> Immunity.Group.clone(group, :attack, group.attack + boost) end)
+    victor = this_means_war(boosted_army1, army2, opts)
+    victor_name = List.first(victor)
+                  |> Immunity.Group.army_name()
+    if victor_name == "Immune System" do
+      Immunity.Group.total_units(victor)
+    else
+      nil
+    end
   end
 end
