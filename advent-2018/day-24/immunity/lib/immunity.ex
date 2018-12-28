@@ -34,6 +34,7 @@ defmodule Immunity do
       input_file
       |> parse_input_file(opts)
     this_means_war(army1, army2, opts)
+    |> Immunity.Group.total_units()
     |> IO.inspect(label: "Part 1 winning army units is")
   end
 
@@ -54,7 +55,7 @@ defmodule Immunity do
       end
       victor = victor(new_army1, new_army2)
       if victor do
-        {:halt, Immunity.Group.total_units(victor)}
+        {:halt, victor}
       else
         {:cont, {new_army1, new_army2}}
       end
