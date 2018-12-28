@@ -53,7 +53,7 @@ defmodule Immunity do
         Immunity.Narrative.for_fight(army1, army2, candidates_list, skirmishes)
         |> Enum.each(fn (line) -> IO.puts(line) end)
       end
-      victor = victor(new_army1, new_army2)
+      victor = victor(new_army1, new_army2, skirmishes)
       if victor do
         {:halt, victor}
       else
@@ -64,12 +64,21 @@ defmodule Immunity do
 
   # "After the fight is over, if both armies still contain units, a new
   # fight begins; combat only ends once one army has lost all of its units."
-  defp victor(army1, army2) do
+  defp victor(army1, army2, skirmishes) do
     cond do
+      # TODO cheating, assumes army2 is Infection
+      stalemate?(skirmishes) -> army2
       Enum.empty?(army1) -> army2
       Enum.empty?(army2) -> army1
       true -> nil
     end
+  end
+
+  defp stalemate?(skirmishes) do
+    units_killed =
+      Enum.map(skirmishes, &(elem(&1, 2)))
+      |> Enum.sum
+    units_killed == 0
   end
 
   @doc """
@@ -77,8 +86,7 @@ defmodule Immunity do
 
   ## Correct Answer
 
-  - Part 2 INCORRECT answer is: 106 (too low)
-  - Part 2 answer is: ...
+  - Part 2 answer is: 4893
   """
   def part2(input_file, opts \\ []) do
     [army1, army2] =
@@ -88,11 +96,11 @@ defmodule Immunity do
       Stream.cycle([true])
       |> Enum.reduce_while(1..100_000, fn (_t, min_boost..max_boost) ->
         try_boost = min_boost + div(max_boost - min_boost, 2)
-        IO.inspect({min_boost..max_boost, try_boost}, label: "trying boost")
+        #IO.inspect({min_boost..max_boost, try_boost}, label: "trying boost")
         units = boosted_war(army1, army2, try_boost, opts)
         cond do
           min_boost > 100_000 ->
-            raise "boom"
+            raise "boom"  # shouldn't happen; start with higher upper bound
           units && (min_boost == max_boost) ->
             {:halt, {min_boost, units}}
           min_boost == max_boost-1 ->
