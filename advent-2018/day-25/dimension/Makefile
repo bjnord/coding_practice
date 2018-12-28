@@ -3,13 +3,17 @@ FILES = config/config.exs lib/dimension/cli.ex lib/dimension.ex mix.exs test/tes
 
 .PHONY: test
 test:
-	mix test && mix run -e 'Dimension.main(["input/example1.txt"])'
+	mix test && mix run -e 'Dimension.main(["input/example2.txt"])'
 
 run: $(BIN)
 	$(BIN) input/input.txt
 
 examples: $(BIN)
-	$(BIN) input/example1.txt
+	$(BIN) --parts=1 input/example2.txt && \
+		$(BIN) --parts=1 input/example1.txt && \
+		$(BIN) --parts=1 input/example4.txt && \
+		$(BIN) --parts=1 input/example3.txt && \
+		$(BIN) --parts=1 input/example8.txt
 
 clean:
 	rm -rf _build $(BIN)
