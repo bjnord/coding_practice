@@ -51,19 +51,21 @@ defmodule Nanobot do
   Once all search dimensions are points, will return one (the input point).
   """
   def space_partitions({x_min..x_max, y_min..y_max, z_min..z_max}) do
-    x_half = half_range(x_min, x_max)
-    y_half = half_range(y_min, y_max)
-    z_half = half_range(z_min, z_max)
     all_parts =
-      for x <- [x_min..x_half, x_half..x_max],
-        y <- [y_min..y_half, y_half..y_max],
-        z <- [z_min..z_half, z_half..z_max],
-        do: {x, y, z}
+      for xr <- half_ranges(x_min, x_max),
+        yr <- half_ranges(y_min, y_max),
+        zr <- half_ranges(z_min, z_max),
+        do: {xr, yr, zr}
     Enum.uniq(all_parts)
   end
 
-  defp half_range(min, max) do
-    min + div(max - min, 2)
+  defp half_ranges(min, max) when min == max-1 do
+    [min..min, max..max]
+  end
+
+  defp half_ranges(min, max) do
+    half = min + div(max - min, 2)
+    [min..half, half..max]
   end
 
   @doc """
