@@ -96,19 +96,19 @@ defmodule NanobotTest do
     assert in_range_count(bots, {100..150, 150..200, 101..151}) == 0
   end
 
-  test "search space distance to origin" do
-    assert search_distance_to_0({12..14, 12..16, 14..16}) == 12 + 12 + 14
-    assert search_distance_to_0({3..33, 13..43, 23..53}) == 3 + 13 + 23
+  test "space distance to origin" do
+    assert space_distance_to_0({12..14, 12..16, 14..16}) == 12 + 12 + 14
+    assert space_distance_to_0({3..33, 13..43, 23..53}) == 3 + 13 + 23
   end
 
-  test "search space size" do
-    assert search_size({12..12, 12..12, 12..12}) == 1
-    assert search_size({12..14, 12..16, 14..16}) == 3 * 5 * 3
-    assert search_size({3..33, 13..43, 23..53}) == 31 * 31 * 31
+  test "space size" do
+    assert space_size({12..12, 12..12, 12..12}) == 1
+    assert space_size({12..14, 12..16, 14..16}) == 3 * 5 * 3
+    assert space_size({3..33, 13..43, 23..53}) == 31 * 31 * 31
   end
 
-  test "search space partitions" do
-    assert search_partitions({3..33, 13..43, 23..53}) == [
+  test "space partitions" do
+    assert space_partitions({3..33, 13..43, 23..53}) == [
       {3..18, 13..28, 23..38},
       {3..18, 13..28, 38..53},
       {3..18, 28..43, 23..38},
@@ -118,17 +118,17 @@ defmodule NanobotTest do
       {18..33, 28..43, 23..38},
       {18..33, 28..43, 38..53},
     ]
-    assert search_partitions({3..33, 28..28, 23..53}) == [
+    assert space_partitions({3..33, 28..28, 23..53}) == [
       {3..18, 28..28, 23..38},
       {3..18, 28..28, 38..53},
       {18..33, 28..28, 23..38},
       {18..33, 28..28, 38..53},
     ]
-    assert search_partitions({12..12, 12..12, 12..12}) ==
+    assert space_partitions({12..12, 12..12, 12..12}) ==
       [{12..12, 12..12, 12..12}]
   end
 
-  test "full search space (example1)" do
+  test "encompassing space (example1)" do
     bots = [
       {{0, 0, 0}, 4}, # x=-4 y=-4 z=-4
       {{1, 0, 0}, 1},
@@ -140,10 +140,10 @@ defmodule NanobotTest do
       {{1, 1, 2}, 1},
       {{1, 3, 1}, 1},
     ]
-    assert full_search_space(bots) == {-4..7, -4..8, -4..4}
+    assert encompassing_space(bots) == {-4..7, -4..8, -4..4}
   end
 
-  test "full search space (example2)" do
+  test "encompassing space (example2)" do
     bots = [
       {{10, 12, 12}, 2},
       {{12, 14, 12}, 2},
@@ -152,7 +152,7 @@ defmodule NanobotTest do
       {{50, 50, 50}, 200},
       {{10, 10, 10}, 5},
     ]
-    assert full_search_space(bots) == {-150..250, -150..250, -150..250}
+    assert encompassing_space(bots) == {-150..250, -150..250, -150..250}
   end
 
   test "Manhattan distance 3-D" do

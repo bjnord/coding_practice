@@ -33,14 +33,14 @@ defmodule Nanobot do
   @doc """
   Determine how far a 3-D search space is from the origin.
   """
-  def search_distance_to_0({x_min.._x_max, y_min.._y_max, z_min.._z_max}) do
+  def space_distance_to_0({x_min.._x_max, y_min.._y_max, z_min.._z_max}) do
     manhattan({0, 0, 0}, {x_min, y_min, z_min})
   end
 
   @doc """
   Determine size of a 3-D search space.
   """
-  def search_size({x_min..x_max, y_min..y_max, z_min..z_max}) do
+  def space_size({x_min..x_max, y_min..y_max, z_min..z_max}) do
     (x_max - x_min + 1) * (y_max - y_min + 1) * (z_max - z_min + 1)
   end
 
@@ -50,7 +50,7 @@ defmodule Nanobot do
   If one or more search dimensions are points, will return fewer than 2^3.
   Once all search dimensions are points, will return one (the input point).
   """
-  def search_partitions({x_min..x_max, y_min..y_max, z_min..z_max}) do
+  def space_partitions({x_min..x_max, y_min..y_max, z_min..z_max}) do
     x_half = half_range(x_min, x_max)
     y_half = half_range(y_min, y_max)
     z_half = half_range(z_min, z_max)
@@ -67,9 +67,9 @@ defmodule Nanobot do
   end
 
   @doc """
-  Determine the full search space encompassing all nanobots.
+  Determine the 3-D search space encompassing all nanobots.
   """
-  def full_search_space(bots) do
+  def encompassing_space(bots) do
     initial = {2_147_483_647..-2_147_483_647, 2_147_483_647..-2_147_483_647, 2_147_483_647..-2_147_483_647}
     bots
     |> Enum.reduce(initial, fn ({{x, y, z}, r}, {nx..mx, ny..my, nz..mz}) ->
