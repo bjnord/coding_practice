@@ -52,16 +52,9 @@ defmodule Teleport do
   - Part 2 answer is: ...
   """
   def part2(input_file, opts \\ []) do
-    bots =
+    _bots =
       input_file
       |> parse_input(opts)
-    {count, intersection_ranges} =
-      bots
-      |> Enum.map(fn (compare_bot) -> intersection_ranges_of(bots, compare_bot) end)
-      |> Enum.max_by(fn ({n, _ints}) -> n end)
-    IO.inspect(count, label: "maximum intersection count")
-    _ranges = reduced_ranges(intersection_ranges)
-             |> IO.inspect(label: "reduced intersection")
     "?"
     |> IO.inspect(label: "Part 2 distance to closest point is")
   end

@@ -4,107 +4,78 @@ defmodule Nanobot do
   """
 
   @doc """
-  Determine if two nanobots intersect.
+  Determine if a nanobot is in range of a 3-D search space.
   """
-  def intersect?({pos1, r1}, {pos2, r2}) do
-    manhattan(pos1, pos2) <= (r1 + r2)
-  end
-
-  def intersect?(pos1, {pos2, r2}) do
-    manhattan(pos1, pos2) <= r2
-  end
-
-  @doc """
-  Determine intersection ranges between two nanobots.
-
-  Returns nil if they don't overlap ranges in all 3 dimensions.
-  """
-  def intersection_ranges({{x1, y1, z1}, r1}, {{x2, y2, z2}, r2}) do
-    x_range = i_range(x1, r1, x2, r2)
-    y_range = i_range(y1, r1, y2, r2)
-    z_range = i_range(z1, r1, z2, r2)
-    if x_range && y_range && z_range do
-      {x_range, y_range, z_range}
+  def in_range_of?({{x, y, z}, r}, {x_min..x_max, y_min..y_max, z_min..z_max}) do
+    if (x in x_min..x_max) && (y in y_min..y_max) && (z in z_min..z_max) do
+      true
     else
-      # bot1 and bot2 **ranges** don't overlap (though they may intersect)
-      nil
-    end
-  end
-
-  def intersection_ranges({x1_range, y1_range, z1_range}, {x2_range, y2_range, z2_range}) do
-    x_range = r_range(x1_range, x2_range)
-    y_range = r_range(y1_range, y2_range)
-    z_range = r_range(z1_range, z2_range)
-    if x_range && y_range && z_range do
-      {x_range, y_range, z_range}
-    else
-      # bot1 and bot2 **ranges** don't overlap (though they may intersect)
-      nil
-    end
-  end
-
-  defp i_range(a_center, a_radius, b_center, b_radius) do
-    {a_min, a_max} = {a_center-a_radius, a_center+a_radius}
-    {b_min, b_max} = {b_center-b_radius, b_center+b_radius}
-    r_range(a_min..a_max, b_min..b_max)
-  end
-
-  defp r_range(a_min..a_max, b_min..b_max) do
-    cond do
-      (a_max < b_min) || (a_min > b_max) ->
-        nil  # ranges don't overlap
-      true ->
-        max(a_min, b_min)..min(a_max, b_max)
+      edges =
+        for ex <- [x_min, x_max], ey <- [y_min, y_max], ez <- [z_min, z_max],
+          do: manhattan({x, y, z}, {ex, ey, ez}) <= r
+      Enum.any?(edges)
     end
   end
 
   @doc """
-  Determine intersection ranges between one nanobot and the full list of nanobots.
+  Determine how many nanobots are in range of a 3-D search space.
   """
-  def intersection_ranges_of(bots, compare_bot) do
-    Enum.reduce(bots, {0, []}, fn (bot, {n_int, ints}) ->
-      ranges = intersection_ranges(bot, compare_bot)
-      if ranges do
-        {n_int+1, [{bot, ranges} | ints]}
-      else
-        {n_int, ints}
+  def in_range_count(bots, space) do
+    bots
+    |> Enum.reduce(0, fn (bot, count) ->
+      case in_range_of?(bot, space) do
+        true -> count + 1
+        false -> count
       end
     end)
   end
 
   @doc """
-  Determine the range common to a list of intersection ranges.
+  Determine how far a 3-D search space is from the origin.
   """
-  def reduced_ranges(intersection_ranges) do
-    [{_initial_bot, initial_range} | ranges] = intersection_ranges
-    ranges
-    |> Enum.reduce(initial_range, fn ({_bot, range}, reduced_ranges) ->
-      if range do
-        new_reduced_ranges = intersection_ranges(range, reduced_ranges)
-        if new_reduced_ranges do
-          new_reduced_ranges
-        else
-          reduced_ranges
-        end
-      else
-        reduced_ranges
-      end
-    end)
+  def search_distance_to_0({x_min.._x_max, y_min.._y_max, z_min.._z_max}) do
+    manhattan({0, 0, 0}, {x_min, y_min, z_min})
   end
 
   @doc """
-  Determine the point closest to the centers of a list of nanobots.
+  Determine size of a 3-D search space.
   """
-  def center_of_bots(intersection_ranges) do
-    {count, x_sum, y_sum, z_sum} =
-      intersection_ranges
-      |> Enum.reduce({0, 0, 0, 0}, fn ({bot, _range}, {count, x_sum, y_sum, z_sum}) ->
-        x = elem(elem(bot, 0), 0)
-        y = elem(elem(bot, 0), 1)
-        z = elem(elem(bot, 0), 2)
-        {count + 1, x_sum + x, y_sum + y, z_sum + z}
-      end)
-    {div(x_sum, count), div(y_sum, count), div(z_sum, count)}
+  def search_size({x_min..x_max, y_min..y_max, z_min..z_max}) do
+    (x_max - x_min + 1) * (y_max - y_min + 1) * (z_max - z_min + 1)
+  end
+
+  @doc """
+  Partition a 3-D search space into 2^3 spaces.
+
+  If one or more search dimensions are points, will return fewer than 2^3.
+  Once all search dimensions are points, will return one (the input point).
+  """
+  def search_partitions({x_min..x_max, y_min..y_max, z_min..z_max}) do
+    x_half = half_range(x_min, x_max)
+    y_half = half_range(y_min, y_max)
+    z_half = half_range(z_min, z_max)
+    all_parts =
+      for x <- [x_min..x_half, x_half..x_max],
+        y <- [y_min..y_half, y_half..y_max],
+        z <- [z_min..z_half, z_half..z_max],
+        do: {x, y, z}
+    Enum.uniq(all_parts)
+  end
+
+  defp half_range(min, max) do
+    min + div(max - min, 2)
+  end
+
+  @doc """
+  Determine the full search space encompassing all nanobots.
+  """
+  def full_search_space(bots) do
+    initial = {2_147_483_647..-2_147_483_647, 2_147_483_647..-2_147_483_647, 2_147_483_647..-2_147_483_647}
+    bots
+    |> Enum.reduce(initial, fn ({{x, y, z}, r}, {nx..mx, ny..my, nz..mz}) ->
+      # bigger than strictly necessary, but that won't hurt
+      {min(x-r, nx)..max(x+r, mx), min(y-r, ny)..max(y+r, my), min(z-r, nz)..max(z+r, mz)}
+    end)
   end
 
   @doc """
