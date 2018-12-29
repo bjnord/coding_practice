@@ -66,18 +66,19 @@ defmodule Teleport do
     initial_entry = encompassing_space(bots)
                     |> entry_for_space(bots)
                     #|> IO.inspect(label: "initial entry")
+    initial_pqueue = Teleport.PriorityQueue.new([initial_entry])
     {{x..x, y..y, z..z}, count} =
       Stream.cycle([true])
-      |> Enum.reduce_while([initial_entry], fn (_t, entries) ->
-        sorted_entries = Enum.sort_by(entries, fn ({sorter, _space}) -> sorter end)
-        [{{count, _distance, size}, space} | tail] = sorted_entries
+      |> Enum.reduce_while(initial_pqueue, fn (_t, pqueue) ->
+        {pqueue, {{count, _distance, size}, space}} =
+          Teleport.PriorityQueue.pop(pqueue)
         #IO.inspect({{count, distance, size}, space}, label: "head entry")
         if size == 1 do
           {:halt, {space, -count}}
         else
           new_entries = split_space_to_entries(space, bots)
                         #|> IO.inspect(label: "new entries")
-          {:cont, new_entries ++ tail}
+          {:cont, Teleport.PriorityQueue.add(pqueue, new_entries)}
         end
       end)
       #|> IO.inspect(label: "final entry (size=1)")
