@@ -60,13 +60,9 @@ defmodule Nanobot do
     Enum.uniq(all_parts)
   end
 
-  defp half_ranges(min, max) when min == max-1 do
-    [min..min, max..max]
-  end
-
   defp half_ranges(min, max) do
     half = min + div(max - min, 2)
-    [min..half, half..max]
+    [min..half, min(half+1,max)..max]
   end
 
   @doc """
