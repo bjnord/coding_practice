@@ -40,7 +40,7 @@ defmodule NanobotTest do
     space = {3..33, 13..43, 23..53}
     nanobot1 = {{2, 12, 22}, 2}
     nanobot2 = {{3, 10, 23}, 2}
-    assert in_range_of?(nanobot1, space) == false
+    assert in_range_of?(nanobot1, space) == true
     assert in_range_of?(nanobot2, space) == false
   end
 
@@ -48,7 +48,7 @@ defmodule NanobotTest do
     space = {3..33, 13..43, 23..53}
     nanobot1 = {{34, 44, 54}, 2}
     nanobot2 = {{36, 43, 53}, 2}
-    assert in_range_of?(nanobot1, space) == false
+    assert in_range_of?(nanobot1, space) == true
     assert in_range_of?(nanobot2, space) == false
   end
 
@@ -64,6 +64,20 @@ defmodule NanobotTest do
     space = {3..33, 13..43, 23..53}
     nanobot = {{18, 28, 38}, 3}
     assert in_range_of?(nanobot, space) == true
+  end
+
+  test "in range (example2)" do
+    space = {10..13, 10..13, 10..13}
+    nanobots = [
+      {{10, 12, 12}, 2},
+      {{12, 14, 12}, 2},
+      {{16, 12, 12}, 4},
+      {{14, 14, 14}, 6},
+      {{50, 50, 50}, 200},
+      {{10, 10, 10}, 5},
+    ]
+    nanobots
+    |> Enum.map(fn (bot) -> assert in_range_of?(bot, space) == true end)
   end
 
   test "in range count (example1)" do

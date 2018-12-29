@@ -7,14 +7,15 @@ defmodule Nanobot do
   Determine if a nanobot is in range of a 3-D search space.
   """
   def in_range_of?({{x, y, z}, r}, {x_min..x_max, y_min..y_max, z_min..z_max}) do
-    if (x in x_min..x_max) && (y in y_min..y_max) && (z in z_min..z_max) do
-      true
-    else
-      edges =
-        for ex <- [x_min, x_max], ey <- [y_min, y_max], ez <- [z_min, z_max],
-          do: manhattan({x, y, z}, {ex, ey, ez}) <= r
-      Enum.any?(edges)
-    end
+    bot_edges =
+      for ex <- [x-r, x, x+r], ey <- [y-r, y, y+r], ez <- [z-r, z, z+r],
+      do: (ex >= x_min && ex <= x_max) &&
+        (ey >= y_min && ey <= y_max) &&
+        (ez >= z_min && ez <= z_max)
+    space_edges =
+      for ex <- [x_min, x_max], ey <- [y_min, y_max], ez <- [z_min, z_max],
+        do: manhattan({x, y, z}, {ex, ey, ez}) <= r
+    Enum.any?(bot_edges) || Enum.any?(space_edges)
   end
 
   @doc """
