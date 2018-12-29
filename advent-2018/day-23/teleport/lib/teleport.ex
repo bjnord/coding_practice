@@ -49,13 +49,47 @@ defmodule Teleport do
 
   ## Correct Answer
 
+  - Part 2 Python answer (613 bots in range) is: 101599540
   - Part 2 answer is: ...
   """
   def part2(input_file, opts \\ []) do
-    _bots =
+    {closest_point, count} =
       input_file
       |> parse_input(opts)
-    "?"
-    |> IO.inspect(label: "Part 2 distance to closest point is")
+      |> find_closest_point()
+      #|> IO.inspect(label: "closest point, count")
+    manhattan(closest_point, {0, 0, 0})
+    |> IO.inspect(label: "Part 2 distance to closest point (bots=#{count}) is")
+  end
+
+  defp find_closest_point(bots) do
+    initial_entry = encompassing_space(bots)
+                    |> entry_for_space(bots)
+                    #|> IO.inspect(label: "initial entry")
+    {{x..x, y..y, z..z}, count} =
+      Stream.cycle([true])
+      |> Enum.reduce_while([initial_entry], fn (_t, entries) ->
+        sorted_entries = Enum.sort_by(entries, fn ({sorter, _space}) -> sorter end)
+        [{{count, _distance, size}, space} | tail] = sorted_entries
+        #IO.inspect({{count, distance, size}, space}, label: "head entry")
+        if size == 1 do
+          {:halt, {space, -count}}
+        else
+          new_entries = split_space_to_entries(space, bots)
+                        #|> IO.inspect(label: "new entries")
+          {:cont, new_entries ++ tail}
+        end
+      end)
+      #|> IO.inspect(label: "final entry (size=1)")
+    {{x, y, z}, count}
+  end
+
+  defp entry_for_space(space, bots) do
+    {{-in_range_count(bots, space), space_distance_to_0(space), space_size(space)}, space}
+  end
+
+  defp split_space_to_entries(space, bots) do
+    space_partitions(space)
+    |> Enum.map(fn (part) -> entry_for_space(part, bots) end)
   end
 end
