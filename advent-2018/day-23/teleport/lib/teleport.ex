@@ -49,8 +49,7 @@ defmodule Teleport do
 
   ## Correct Answer
 
-  - Part 2 Python answer (613 bots in range) is: 101599540
-  - Part 2 answer is: ...
+  - Part 2 answer (981 bots in range) is: 101599540
   """
   def part2(input_file, opts \\ []) do
     {closest_point, count} =
