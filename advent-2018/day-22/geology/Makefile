@@ -8,10 +8,10 @@ test:
 	mix test && mix run -e 'Geology.main(["input/example1.txt"])'
 
 run: $(BIN)
-	$(BIN) input/input.txt
+	$(BIN) --margin-x=50 --margin-y=5 input/input.txt
 
 examples: $(BIN)
-	$(BIN) input/example1.txt
+	$(BIN) --margin-x=5 --margin-y=5 input/example1.txt
 
 maps:
 	mix run -e 'Geology.cave_map(["input/example1.txt"])'

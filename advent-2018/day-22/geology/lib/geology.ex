@@ -42,13 +42,13 @@ defmodule Geology do
 
   ## Correct Answer
 
-  - INCORRECT Part 2 answer is: 1022 (too high)
-  - Part 2 answer is: ...
+  - Part 2 answer is: 1010
   """
   def part2(input_file, opts \\ []) do
     cave =
       input_file
       |> parse_input(opts)
+    #IO.inspect({cave.target, cave.bounds}, label: "cave target, bounds")
     fast_cave = cache_erosion(cave)
     cheapest_path(fast_cave, {0, 0}, :torch, fast_cave.target)
     |> IO.inspect(label: "Part 2 fewest minutes to target is")

@@ -329,31 +329,31 @@ defmodule Cave do
     end
   end
 
+  # NEW APPROACH BELOW
+  # (FIXME several methods above/below won't be needed any more)
+
   @doc """
   Find lowest-cost path from origin to target.
 
   Uses [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
-  where nodes are in three dimensions (y, x, and "from region").
+  where nodes are in three dimensions (y, x, and tool).
   """
   @spec cheapest_path(Cave.t(), position(), atom(), position()) :: integer()
 
-  def cheapest_path(_cave, origin, _tool, dest) when origin == dest do
+  def cheapest_path(_cave, origin, _tool, target) when origin == target do
     0
   end
 
-  def cheapest_path(cave, origin, tool, dest) do
-    origin_region = region_type(cave, origin)
-    validate_cheapest_path_args(cave, origin_region, dest)
-    dest_ways = ways_into_dest(cave, dest)
+  def cheapest_path(cave, origin, tool, target) do
     ###
     # Start nodelist with 1 node for origin, which will become the first
     # current_node. NB That 1 initial node is unclosed, and there must be
     # a path_cost entry for it.
-    nodelist = [{{origin, origin_region}, tool}]
-    cave = %{cave | path_cost: %{{origin, origin_region} => {0, false}}}
+    nodelist = [{origin, tool}]
+    cave = %{cave | path_cost: %{{origin, tool} => {0, false}}}
     ###
     # Begin processing from the origin
-    process_nodes(cave, nodelist, {dest, dest_ways})
+    process_nodes(cave, nodelist, {target, tool})
   end
 
   defp ways_into_dest(cave, {y, x}) do
@@ -386,19 +386,18 @@ defmodule Cave do
   # 3. Close the current_node
   # 4. Unless we've arrived at the target, go back to 1.
   #
-  defp process_nodes(cave, nodelist, destination) do
+  defp process_nodes(cave, nodelist, dest_node) do
     Stream.cycle([true])
     |> Enum.reduce_while({cave, nodelist}, fn (_t, {cave, nodelist}) ->
-      {nodelist, current_node, current_cost, _} = find_current_node(cave, nodelist, destination)
+      {nodelist, current_node, current_cost, _} = find_current_node(cave, nodelist, dest_node)
       #IO.inspect({current_node, :cost, current_cost}, label: "found new current_node")
       if nodelist == [] do
         raise "exhausted nodelist"  # shouldn't happen
       end
       {cave, nodelist} = visit_neighbors(cave, nodelist, current_node, current_cost)
-      cave = close_current_node(cave, current_node, current_cost, destination)
-      lowest_cost = cost_at_destination(cave, current_node, destination)
-      if lowest_cost do
-        {:halt, lowest_cost}
+      cave = close_current_node(cave, current_node, current_cost)
+      if current_node == dest_node do
+        {:halt, current_cost}
       else
         {:cont, {cave, nodelist}}
       end
@@ -409,10 +408,11 @@ defmodule Cave do
   # lowest-cost one as the current. Manhattan distance breaks ties
   # (among equals, choose closest to target).
   #
-  defp find_current_node(cave, nodelist, {dest, _destways}) do
+  defp find_current_node(cave, nodelist, {dest_pos, _dest_tool}) do
+    # TIL in Erlang/Elixir nil is big; "n < nil" will always be true
     nodelist
-    |> Enum.reduce({[], nil, 1_000_000_000, 1_000_000_000}, fn ({{pos, r}, tool}, {node_acc, min_node, min_cost, min_hattan}) ->
-      case {Map.get(cave.path_cost, {pos, r}), manhattan(pos, dest)} do
+    |> Enum.reduce({[], nil, nil, nil}, fn ({pos, tool}, {node_acc, min_node, min_cost, min_hattan}) ->
+      case {Map.get(cave.path_cost, {pos, tool}), manhattan(pos, dest_pos)} do
         {nil, _man_hattan} ->
           raise "node on nodelist but not in path_cost?!"  # shouldn't happen
         ###
@@ -422,15 +422,15 @@ defmodule Cave do
         ###
         # keep unclosed nodes: new min_node (better cost)
         {{cost, false}, man_hattan} when cost < min_cost ->
-          {[{{pos, r}, tool} | node_acc], {{pos, r}, tool}, cost, man_hattan}
+          {[{pos, tool} | node_acc], {pos, tool}, cost, man_hattan}
         ###
         # keep unclosed nodes: new min_node (cost tied, closer Manhattan)
         {{cost, false}, man_hattan} when (cost == min_cost) and (man_hattan < min_hattan) ->
-          {[{{pos, r}, tool} | node_acc], {{pos, r}, tool}, cost, man_hattan}
+          {[{pos, tool} | node_acc], {pos, tool}, cost, man_hattan}
         ###
-        # keep unclosed nodes
+        # keep unclosed nodes: keep min_node
         {{cost, false}, _man_hattan} when cost >= min_cost ->
-          {[{{pos, r}, tool} | node_acc], min_node, min_cost, min_hattan}
+          {[{pos, tool} | node_acc], min_node, min_cost, min_hattan}
       end
     end)
   end
@@ -439,17 +439,20 @@ defmodule Cave do
   # map, and adding neighbors to the queue iff there was no entry in the
   # cost map (newly seen node).
   #
-  defp visit_neighbors(cave, nodelist, {{{y, x}, _r}, tool}, cost) do
-    # FIXME DRY
-    neighbor_positions = [{y-1, x}, {y, x-1}, {y, x+1}, {y+1, x}]
+  defp visit_neighbors(cave, nodelist, {{y, x}, tool}, cost) do
+    neighbor_positions = [
+      {{y-1, x}, tool}, {{y+1, x}, tool},                 # change only y
+      {{y, x-1}, tool}, {{y, x+1}, tool},                 # change only x
+      {{y, x}, prevtool(tool)}, {{y, x}, nextool(tool)},  # change only tool
+    ]
     neighbor_positions
-    |> Enum.reduce({cave, nodelist}, fn (n_pos, {cave, node_acc}) ->
-      # NB  region of current_node  becomes:  "from" region of neighbor
-      region = region_type(cave, {y, x})
-      {new_n_cost, new_n_tool} = neighbor_move_cost(cave, cost, tool, region, n_pos)
-      #IO.inspect({{n_pos, region}, :n_cost, new_n_cost, new_n_tool}, label: " - visiting neighbor")
-      old_path_value = Map.get(cave.path_cost, {n_pos, region})
-      case {new_n_cost, old_path_value} do
+    |> Enum.reduce({cave, nodelist}, fn ({n_pos, n_tool}, {cave, node_acc}) ->
+      # FIXME change to take old cost as param, do the add
+      n_delta = new_move_cost(cave, {{y, x}, tool}, {n_pos, n_tool})
+      n_cost = if n_delta, do: cost + n_delta, else: nil
+      #IO.inspect({{n_pos, n_tool}, :n_cost, n_cost}, label: " - visiting neighbor")
+      old_path_value = Map.get(cave.path_cost, {n_pos, n_tool})
+      case {n_cost, old_path_value} do
         ###
         # can't visit inaccessible neighbors
         {nil, _} ->
@@ -457,9 +460,9 @@ defmodule Cave do
         ###
         # new neighbor: set initial path_cost, add to nodelist
         {_, nil} ->
-          new_path_cost = Map.put(cave.path_cost, {n_pos, region}, {new_n_cost, false})
+          new_path_cost = Map.put(cave.path_cost, {n_pos, n_tool}, {n_cost, false})
           cave = %{cave | path_cost: new_path_cost}
-          {cave, [{{n_pos, region}, new_n_tool} | node_acc]}
+          {cave, [{n_pos, n_tool} | node_acc]}
         ###
         # don't visit closed neighbors
         {_, {_cost, true}} ->
@@ -467,7 +470,7 @@ defmodule Cave do
         ###
         # unclosed neighbor, lower cost: update path_cost
         {nucost, {cost, false}} when nucost < cost ->
-          new_path_cost = Map.put(cave.path_cost, {n_pos, region}, {nucost, false})
+          new_path_cost = Map.put(cave.path_cost, {n_pos, n_tool}, {nucost, false})
           cave = %{cave | path_cost: new_path_cost}
           {cave, node_acc}
         ###
@@ -478,32 +481,22 @@ defmodule Cave do
     end)
   end
 
-  # Then close the current node, leaving the q alone; closed will be removed
-  # on next pass.
-  #
-  defp close_current_node(cave, {{pos, r}, tool}, cost, {dest, _destways}) do
-    # per puzzle requirements, must switch to torch when reaching target
-    switch_cost =
-      if (pos == dest) && (tool != :torch) do
-        @tool_switch_cost
-      else
-        0
-      end
-    #IO.inspect({{pos, r}, :cost, cost, :switch, switch_cost}, label: "closing current_node")
-    new_path_cost = Map.put(cave.path_cost, {pos, r}, {cost + switch_cost, true})
-    %{cave | path_cost: new_path_cost}
-  end
-
-  # Finally, determine if the target has been reached: keys must exist in
-  # the path cost map for all region types entering the target for us to
-  # be considered done. (The first arrival is not necessarily the best.)
-  #
-  defp cost_at_destination(cave, {node_key, tool}, destination) do
-    if dest_reached_from_all_ways?(cave, {node_key, tool}, destination) do
-      min_cost_to_destination(cave, destination)
-    else
-      nil
+  defp nextool(tool) do
+    case tool do
+      :torch -> :gear
+      :gear -> :nothing
+      :nothing -> :torch
     end
+  end
+  defp prevtool(tool), do: nextool(nextool(tool))
+
+  # Then close the current node, leaving the q alone (closed will be removed
+  # on next pass).
+  #
+  defp close_current_node(cave, {pos, tool}, cost) do
+    #IO.inspect({{pos, tool}, :cost, cost}, label: "closing current_node")
+    new_path_cost = Map.put(cave.path_cost, {pos, tool}, {cost, true})
+    %{cave | path_cost: new_path_cost}
   end
 
   defp dest_reached_from_all_ways?(_cave, {{{y, x}, _r}, _tool}, {dest, _dest_ways}) when {y, x} != dest do
