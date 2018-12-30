@@ -342,12 +342,7 @@ defmodule Cave do
   # cost map (newly seen node).
   #
   defp visit_neighbors(cave, nodelist, {{y, x}, tool}, cost) do
-    neighbor_positions = [
-      {{y-1, x}, tool}, {{y+1, x}, tool},                 # change only y
-      {{y, x-1}, tool}, {{y, x+1}, tool},                 # change only x
-      {{y, x}, prevtool(tool)}, {{y, x}, nextool(tool)},  # change only tool
-    ]
-    neighbor_positions
+    neighbor_positions({{y, x}, tool})
     |> Enum.reduce({cave, nodelist}, fn ({n_pos, n_tool}, {cave, node_acc}) ->
       n_cost = neighbor_cost(cave, cost, {{y, x}, tool}, {n_pos, n_tool})
       #IO.inspect({{n_pos, n_tool}, :n_cost, n_cost}, label: " - visiting neighbor")
@@ -379,6 +374,14 @@ defmodule Cave do
           {cave, node_acc}
       end
     end)
+  end
+
+  defp neighbor_positions({{y, x}, tool}) do
+    [
+      {{y-1, x}, tool}, {{y+1, x}, tool},                 # change only y
+      {{y, x-1}, tool}, {{y, x+1}, tool},                 # change only x
+      {{y, x}, prevtool(tool)}, {{y, x}, nextool(tool)},  # change only tool
+    ]
   end
 
   defp nextool(tool) do
