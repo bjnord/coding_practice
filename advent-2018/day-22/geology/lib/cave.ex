@@ -447,9 +447,7 @@ defmodule Cave do
     ]
     neighbor_positions
     |> Enum.reduce({cave, nodelist}, fn ({n_pos, n_tool}, {cave, node_acc}) ->
-      # FIXME change to take old cost as param, do the add
-      n_delta = new_move_cost(cave, {{y, x}, tool}, {n_pos, n_tool})
-      n_cost = if n_delta, do: cost + n_delta, else: nil
+      n_cost = neighbor_cost(cave, cost, {{y, x}, tool}, {n_pos, n_tool})
       #IO.inspect({{n_pos, n_tool}, :n_cost, n_cost}, label: " - visiting neighbor")
       old_path_value = Map.get(cave.path_cost, {n_pos, n_tool})
       case {n_cost, old_path_value} do
@@ -596,19 +594,18 @@ defmodule Cave do
   @doc """
   Find cost to change to neighboring location.
   """
-  # FIXME rename to neighbor_move_cost() and remove the other one
-  def new_move_cost(cave, {{y, x}, tool}, {{ny, nx}, ntool}) do
+  def neighbor_cost(cave, current_cost, {{y, x}, tool}, {{ny, nx}, ntool}) do
     cond do
       solid_rock?(cave, {ny, nx}) ->
         nil  # infinite cost
       banned_tool?(cave, {{ny, nx}, ntool}) ->
         nil  # infinite cost
       (y == ny) && (x == nx) && (tool != ntool) ->
-        7
+        current_cost + 7
       (y == ny) && (x != nx) && (tool == ntool) ->
-        1
+        current_cost + 1
       (y != ny) && (x == nx) && (tool == ntool) ->
-        1
+        current_cost + 1
       ###
       # either changed nothing, or changed more than one thing
       true ->
