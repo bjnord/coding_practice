@@ -551,4 +551,75 @@ defmodule Cave do
   def manhattan({y1, x1}, {y2, x2}) do
     abs(y1 - y2) + abs(x1 - x2)
   end
+
+  ## NEW CODE BELOW
+
+  @doc """
+  Is the given tool disallowed at the given location?
+
+  ## Examples
+
+      iex> cave = Cave.new(21, {3, 3}, 1)
+      iex> Cave.banned_tool?(cave, {{0, 0}, :torch})
+      false
+      iex> Cave.banned_tool?(cave, {{0, 0}, :nothing})
+      true
+  """
+  def banned_tool?(cave, {pos, tool}) do
+    region = region_type(cave, pos)
+    cond do
+      # "you'll likely slip and fall"
+      (region == :rocky) && (tool == :nothing) -> true
+      # "if it gets wet, you won't have a light source"
+      (region == :wet) && (tool == :torch) -> true
+      # "it's too bulky to fit"
+      (region == :narrow) && (tool == :gear) -> true
+      # otherwise OK
+      true -> false
+    end
+  end
+
+  @doc """
+  Is the given location "solid rock" (impassable)?
+
+  ## Examples
+
+      iex> cave = Cave.new(21, {3, 3}, 0)
+      iex> Cave.solid_rock?(cave, {0, -1})
+      true
+      iex> Cave.solid_rock?(cave, {3, 3})
+      false
+      iex> Cave.solid_rock?(cave, {4, 3})
+      true
+  """
+  def solid_rock?(cave, {y, x}) do
+    cond do
+      (y < 0) || (y > elem(cave.bounds, 0)) -> true
+      (x < 0) || (x > elem(cave.bounds, 1)) -> true
+      true -> false
+    end
+  end
+
+  @doc """
+  Find cost to change to neighboring location.
+  """
+  # FIXME rename to neighbor_move_cost() and remove the other one
+  def new_move_cost(cave, {{y, x}, tool}, {{ny, nx}, ntool}) do
+    cond do
+      solid_rock?(cave, {ny, nx}) ->
+        nil  # infinite cost
+      banned_tool?(cave, {{ny, nx}, ntool}) ->
+        nil  # infinite cost
+      (y == ny) && (x == nx) && (tool != ntool) ->
+        7
+      (y == ny) && (x != nx) && (tool == ntool) ->
+        1
+      (y != ny) && (x == nx) && (tool == ntool) ->
+        1
+      ###
+      # either changed nothing, or changed more than one thing
+      true ->
+        raise ArgumentError, "bad move #{inspect({{y, x}, tool})} to #{inspect({{ny, nx}, ntool})}"
+    end
+  end
 end
