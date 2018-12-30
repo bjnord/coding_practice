@@ -38,48 +38,6 @@ defmodule CaveTest do
     ]
   end
 
-  test "cost of move to neighbor (tool switched)" do
-    cave = Cave.new(510, {10, 10}, 0)
-    # {0, 1} is :wet
-    assert Cave.neighbor_move_cost(cave, 1, :torch, :rocky, {0, 1}) == {9, :gear}
-    # {1, 1} is :narrow
-    assert Cave.neighbor_move_cost(cave, 9, :gear, :wet, {1, 1}) == {17, :nothing}
-    # {1, 0} is :rocky
-    assert Cave.neighbor_move_cost(cave, 17, :nothing, :narrow, {1, 0}) == {25, :torch}
-  end
-
-  test "cost of move to neighbor (no switch)" do
-    cave = Cave.new(510, {10, 10}, 0)
-    # {1, 0} is :rocky
-    assert Cave.neighbor_move_cost(cave, 1, :torch, :rocky, {1, 0}) == {2, :torch}
-    # {1, 1} is :narrow
-    assert Cave.neighbor_move_cost(cave, 2, :torch, :rocky, {1, 1}) == {3, :torch}
-    # {1, 2} is :wet
-    assert Cave.neighbor_move_cost(cave, 3, :nothing, :narrow, {1, 2}) == {4, :nothing}
-    # {0, 2} is :rocky
-    assert Cave.neighbor_move_cost(cave, 4, :gear, :wet, {0, 2}) == {5, :gear}
-  end
-
-  test "cost of move to neighbor (solid rock = invalid)" do
-    fast_cave = Cave.new(510, {10, 10}, 5)
-                |> Cave.cache_erosion()
-    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {-1, 0}) == {nil, nil}
-    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {0, -1}) == {nil, nil}
-    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {15, 15}) != {nil, nil}
-    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {16, 15}) == {nil, nil}
-    assert Cave.neighbor_move_cost(fast_cave, 1, :torch, :rocky, {15, 16}) == {nil, nil}
-  end
-
-  test "cost of move to neighbor (target)" do
-    cave = Cave.new(510, {10, 10}, 0)
-    # {10, 10} is :rocky
-    assert Cave.neighbor_move_cost(cave, 30, :torch, :rocky, {10, 10}) == {31, :torch}
-    assert Cave.neighbor_move_cost(cave, 30, :gear, :wet, {10, 10}) == {38, :torch}
-    assert Cave.neighbor_move_cost(cave, 30, :nothing, :narrow, {10, 10}) == {38, :torch}
-  end
-
-  ## NEW CODE BELOW
-
   test "banned tool?" do
     cave = Cave.new(510, {10, 10}, 0)
     # {0, 1} is :wet
@@ -106,7 +64,7 @@ defmodule CaveTest do
     assert Cave.solid_rock?(cave, {4, 6}) == true
   end
 
-  test "(new) neighbor move cost" do
+  test "neighbor move cost" do
     cave = Cave.new(510, {10, 10}, 0)
     # {0, 0} is :rocky  {0, 1} is :wet  {1, 0} is :rocky
     assert Cave.neighbor_cost(cave, 0, {{0, 0}, :torch}, {{0, 0}, :gear}) == 7
@@ -131,7 +89,7 @@ defmodule CaveTest do
     assert Cave.neighbor_cost(cave, 16, {{1, 1}, :nothing}, {{2, 1}, :nothing}) == 17
   end
 
-  test "(new) neighbor move cost (change more than one axis)" do
+  test "neighbor move cost (change more than one axis)" do
     cave = Cave.new(510, {10, 10}, 0)
     assert_raise ArgumentError, fn ->
       Cave.neighbor_cost(cave, 0, {{0, 0}, :torch}, {{0, 1}, :gear})  # x and tool
@@ -144,7 +102,7 @@ defmodule CaveTest do
     end
   end
 
-  test "(new) neighbor move cost (change nothing)" do
+  test "neighbor move cost (change nothing)" do
     cave = Cave.new(510, {10, 10}, 0)
     assert_raise ArgumentError, fn ->
       Cave.neighbor_cost(cave, 0, {{0, 0}, :torch}, {{0, 0}, :torch})

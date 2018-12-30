@@ -259,80 +259,6 @@ defmodule Cave do
   end
 
   @doc """
-  Find the cost of moving to a neighboring position.
-
-  Returns
-  - new total cost (accounting for tool switch, if any)
-  - new equipped tool (same one if switch wasn't required)
-  """
-  @spec neighbor_move_cost(Cave.t(), integer(), atom(), atom(), position()) :: {integer(), atom()}
-
-  def neighbor_move_cost(_, _, _, _, {y, x}) when (y < 0) or (x < 0) do
-    {nil, nil}
-  end
-
-  def neighbor_move_cost(cave, cost, old_tool, old_region, {y, x}) do
-    {by, bx} = cave.bounds
-    if (y > by) or (x > bx) do
-      {nil, nil}
-    else
-      new_region = region_type(cave, {y, x})
-      {new_cost, new_tool} = best_tool_cost(cost, old_tool, old_region, new_region)
-      add_target_cost(cave, new_cost, {y, x}, new_tool)
-    end
-  end
-
-  @spec best_tool_cost(integer(), atom(), atom(), atom()) :: {integer(), atom()}
-
-  defp best_tool_cost(nil, _, _, _) do
-    {nil, nil}
-  end
-
-  defp best_tool_cost(cost, old_tool, old_region, new_region) do
-    if tool_usable?(old_tool, new_region) do
-      # if old tool usable in new region, keep it (no switch cost)
-      {cost + @walk_cost, old_tool}
-    else
-      # otherwise must switch; new tool must be usable @ both old and
-      # new region -- at least one tool will always qualify
-      new_tool =
-        [:gear, :torch, :nothing]
-        |> Enum.find(fn (tool) ->
-          (tool != old_tool) &&
-            tool_usable?(tool, old_region) &&
-            tool_usable?(tool, new_region)
-        end)
-      {cost + @walk_cost + @tool_switch_cost, new_tool}
-    end
-  end
-
-  @spec tool_usable?(atom(), atom()) :: boolean()
-
-  defp tool_usable?(tool, new_region) do
-    usable =
-      case new_region do
-        :rocky  -> [:gear, :torch]
-        :wet    -> [:gear, :nothing]
-        :narrow -> [:torch, :nothing]
-      end
-    tool in usable
-  end
-
-  @spec add_target_cost(Cave.t(), integer(), position(), atom()) :: {integer(), atom()}
-
-  defp add_target_cost(cave, cost, position, tool) do
-    # puzzle requirement: when we reach the target, we must pay to equip the :torch
-    if (position == cave.target) && (tool != :torch) do
-      {cost + @tool_switch_cost, :torch}
-    else
-      {cost, tool}
-    end
-  end
-
-  # NEW APPROACH BELOW
-  # (FIXME several methods above/below won't be needed any more)
-
-  @doc """
   Find lowest-cost path from origin to target.
 
   Uses [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
@@ -354,30 +280,6 @@ defmodule Cave do
     ###
     # Begin processing from the origin
     process_nodes(cave, nodelist, {target, tool})
-  end
-
-  defp ways_into_dest(cave, {y, x}) do
-    # FIXME DRY
-    neighbor_positions = [{y-1, x}, {y, x-1}, {y, x+1}, {y+1, x}]
-    neighbor_positions
-    |> Enum.filter(fn ({y, x}) ->
-      {yb, xb} = cave.bounds
-      (y in 0..yb) && (x in 0..xb)
-    end)
-    |> Enum.map(fn (pos) -> region_type(cave, pos) end)
-    |> Enum.uniq
-    #|> IO.inspect(label: "ways_into_dest()")
-  end
-
-  defp validate_cheapest_path_args(cave, origin_region, dest) do
-    if origin_region != :rocky do
-      raise ArgumentError, "must start from rocky region"
-    end
-    dest_region = region_type(cave, dest)
-    if dest_region != :rocky do
-      raise ArgumentError, "must end in rocky region"
-    end
-    true
   end
 
   # Dijkstra's algorithm:
@@ -486,6 +388,7 @@ defmodule Cave do
       :nothing -> :torch
     end
   end
+
   defp prevtool(tool), do: nextool(nextool(tool))
 
   # Then close the current node, leaving the q alone (closed will be removed
@@ -495,32 +398,6 @@ defmodule Cave do
     #IO.inspect({{pos, tool}, :cost, cost}, label: "closing current_node")
     new_path_cost = Map.put(cave.path_cost, {pos, tool}, {cost, true})
     %{cave | path_cost: new_path_cost}
-  end
-
-  defp dest_reached_from_all_ways?(_cave, {{{y, x}, _r}, _tool}, {dest, _dest_ways}) when {y, x} != dest do
-    false
-  end
-
-  defp dest_reached_from_all_ways?(cave, _current_node, {dest, dest_ways}) do
-    dest_ways
-    |> Enum.all?(fn (way) ->
-      case Map.get(cave.path_cost, {dest, way}) do
-        nil -> false
-        {_, false} -> false
-        {_, true} -> true
-      end
-    end)
-  end
-
-  defp min_cost_to_destination(cave, {dest, dest_ways}) do
-    dest_ways
-    |> Enum.map(fn (way) ->
-      Map.get(cave.path_cost, {dest, way})
-      #|> IO.inspect(label: "#{inspect({dest, way})} cost + is_closed")
-      |> elem(0)
-    end)
-    |> Enum.min()
-    #|> IO.inspect(label: "** reached target #{inspect(dest)} via #{inspect(dest_ways)}, min_cost")
   end
 
   @doc """
@@ -542,8 +419,6 @@ defmodule Cave do
   def manhattan({y1, x1}, {y2, x2}) do
     abs(y1 - y2) + abs(x1 - x2)
   end
-
-  ## NEW CODE BELOW
 
   @doc """
   Is the given tool disallowed at the given location?
@@ -601,11 +476,11 @@ defmodule Cave do
       banned_tool?(cave, {{ny, nx}, ntool}) ->
         nil  # infinite cost
       (y == ny) && (x == nx) && (tool != ntool) ->
-        current_cost + 7
+        current_cost + @tool_switch_cost
       (y == ny) && (x != nx) && (tool == ntool) ->
-        current_cost + 1
+        current_cost + @walk_cost
       (y != ny) && (x == nx) && (tool == ntool) ->
-        current_cost + 1
+        current_cost + @walk_cost
       ###
       # either changed nothing, or changed more than one thing
       true ->
