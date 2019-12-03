@@ -1,10 +1,6 @@
 var expect = require('chai').expect;
-var Module = require('../src/module');
+var module = require('../src/module');
 describe('module mass2fuel tests', function() {
-  var module;
-  beforeEach(function() {
-    module = new Module();
-  });
   it('should return 2 for 12', function() {
     var mass = 12;
     var fuel = module.mass2fuel(mass);
