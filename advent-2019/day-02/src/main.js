@@ -1,0 +1,10 @@
+var intcode = require('../src/intcode');
+const fs = require('fs');
+const input = fs.readFileSync('input/input.txt', 'utf8');
+var programStr = input.trim().split(/,/);
+var program = programStr.map((str) => Number(str));
+program[1] = 12;
+program[2] = 2;
+var result = intcode.run(program);
+console.log('part 1: expected answer is:  3850704');
+console.log(`part 1: value at position 0: ${result[0]}`);
