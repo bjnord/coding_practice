@@ -7,9 +7,8 @@ describe('wire intersect tests', () => {
     let intersections = wire.intersectionsWith(wire2);
     expect(intersections).to.be.an('array');
     expect(intersections).to.be.lengthOf(2);
-    expect(intersections).to.not.deep.include([0, 0]);
-    expect(intersections).to.deep.include([-3, 3]);
-    expect(intersections).to.deep.include([-5, 6]);
+    expect(intersections).to.deep.include({y: -3, x: 3, steps: 40});
+    expect(intersections).to.deep.include({y: -5, x: 6, steps: 30});
   });
   it("should find 2 wires' closest intersection correctly [case 1]", () => {
     let wire = new Wire('R8,U5,L5,D3');
