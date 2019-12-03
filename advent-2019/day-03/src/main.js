@@ -10,3 +10,8 @@ let distance = wire.closestIntersectionWith(wire2);
 console.log('part 1: expected answer is:               4981');
 console.log(`part 1: distance to closest intersection: ${distance}`);
 console.log('');
+
+// PART 2
+let steps = wire.shortestIntersectionWith(wire2);
+console.log('part 1: expected answer is:              164012');
+console.log(`part 1: fewest steps to an intersection: ${steps}`);

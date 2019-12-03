@@ -62,5 +62,15 @@ class Wire
     });
     return closest;
   }
+  shortestIntersectionWith(wire)
+  {
+    let shortest = 99999999999999;
+    this.intersectionsWith(wire).forEach((i) => {
+      if (i.steps < shortest) {  // TODO RF min() would be tidier
+        shortest = i.steps;
+      }
+    });
+    return shortest;
+  }
 }
 module.exports = Wire;
