@@ -39,5 +39,16 @@ class Wire
     let tupler = (s) => s.split(/,/).map((e) => Number(e));
     return intersectStr.map(tupler);
   }
+  closestIntersectionWith(wire)
+  {
+    let closest = 99999999999999;
+    this.intersectionsWith(wire).forEach((yx) => {
+      let distance = Math.abs(yx[0]) + Math.abs(yx[1]);
+      if (distance < closest) {  // TODO RF min() would be tidier
+        closest = distance;
+      }
+    });
+    return closest;
+  }
 }
 module.exports = Wire;
