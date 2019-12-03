@@ -28,5 +28,16 @@ class Wire
       count: Number(str.slice(1)),
     };
   }
+  intersectionsWith(wire)
+  {
+    let intersectStr = [];
+    Object.keys(this.grid).forEach((k) => {
+      if (wire.grid[k]) {
+        intersectStr.push(k);
+      }
+    });
+    let tupler = (s) => s.split(/,/).map((e) => Number(e));
+    return intersectStr.map(tupler);
+  }
 }
 module.exports = Wire;
