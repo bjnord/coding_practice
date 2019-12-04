@@ -1,10 +1,11 @@
-var expect = require('chai').expect;
-var password = require('../src/password');
-describe('password match tests', function() {
+'use strict';
+const expect = require('chai').expect;
+const password = require('../src/password');
+describe('password match tests', function () {
   it('should throw an exception if argument is missing', function () {
     const call = function () { password.passwordMatches(); };
     expect(call).to.throw(Error, 'Invalid argument');
-   });
+  });
   it('should match on 111111', function () {
     const pass = '111111';
     expect(password.passwordMatches(pass)).to.be.true;
@@ -18,11 +19,11 @@ describe('password match tests', function() {
     expect(password.passwordMatches(pass)).to.be.false;
   });
 });
-describe('password match(2) tests', function() {
+describe('password match(2) tests', function () {
   it('should throw an exception if argument is missing', function () {
     const call = function () { password.passwordMatchesToo(); };
     expect(call).to.throw(Error, 'Invalid argument');
-   });
+  });
   it('should match on 112233', function () {
     const pass = '112233';
     expect(password.passwordMatchesToo(pass)).to.be.true;

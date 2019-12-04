@@ -1,3 +1,4 @@
+'use strict';
 class Wire
 {
   // Create a grid map of a wire's path. The grid key is a "Y,X" coordinate
@@ -31,10 +32,10 @@ class Wire
   {
     let yi, xi;
     switch (str[0]) {
-      case 'U': yi = -1; xi =  0; break;
-      case 'D': yi =  1; xi =  0; break;
-      case 'R': yi =  0; xi =  1; break;
-      case 'L': yi =  0; xi = -1; break;
+    case 'U': yi = -1; xi =  0; break;
+    case 'D': yi =  1; xi =  0; break;
+    case 'R': yi =  0; xi =  1; break;
+    case 'L': yi =  0; xi = -1; break;
     }
     return {
       yi,

@@ -1,9 +1,10 @@
+'use strict';
 const mass2fuel = (mass) => {
   return Math.floor(mass / 3.0) - 2;
 };
 const mass2fullfuel = (mass) => {
-  var total = 0;
-  for (var fuel = mass2fuel(mass); fuel > 0; ) {
+  let total = 0;
+  for (let fuel = mass2fuel(mass); fuel > 0; ) {
     total += fuel;
     fuel = mass2fuel(fuel);
   }

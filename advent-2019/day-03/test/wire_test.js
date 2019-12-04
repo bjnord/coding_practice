@@ -1,8 +1,9 @@
-var expect = require('chai').expect;
-var Wire = require('../src/wire');
+'use strict';
+const expect = require('chai').expect;
+const Wire = require('../src/wire');
 describe('wire constructor tests', () => {
   it('should parse 4 segments correctly', () => {
-    let wire = new Wire('R8,U5,L5,D3');
+    const wire = new Wire('R8,U5,L5,D3');
     expect(wire.segments).to.have.lengthOf(4);
     expect(wire.segments[0]).to.eql({yi:  0, xi:  1, count: 8});
     expect(wire.segments[1]).to.eql({yi: -1, xi:  0, count: 5});
@@ -10,7 +11,7 @@ describe('wire constructor tests', () => {
     expect(wire.segments[3]).to.eql({yi:  1, xi:  0, count: 3});
   });
   it('should create a grid from 4 segments correctly', () => {
-    let wire = new Wire('R8,U5,L5,D3');
+    const wire = new Wire('R8,U5,L5,D3');
     expect(wire.grid).to.be.an('object');
     expect(wire.grid['0,0']).to.be.undefined;
     expect(wire.grid['0,1']).to.be.equal(1);
