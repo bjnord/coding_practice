@@ -4,10 +4,10 @@ describe('wire constructor tests', () => {
   it('should parse 4 segments correctly', () => {
     let wire = new Wire('R8,U5,L5,D3');
     expect(wire.segments).to.have.lengthOf(4);
-    expect(wire.segments[0]).to.eql({dir: 'R', count: 8});
-    expect(wire.segments[1]).to.eql({dir: 'U', count: 5});
-    expect(wire.segments[2]).to.eql({dir: 'L', count: 5});
-    expect(wire.segments[3]).to.eql({dir: 'D', count: 3});
+    expect(wire.segments[0]).to.eql({yi:  0, xi:  1, count: 8});
+    expect(wire.segments[1]).to.eql({yi: -1, xi:  0, count: 5});
+    expect(wire.segments[2]).to.eql({yi:  0, xi: -1, count: 5});
+    expect(wire.segments[3]).to.eql({yi:  1, xi:  0, count: 3});
   });
   it('should create a grid from 4 segments correctly', () => {
     let wire = new Wire('R8,U5,L5,D3');

@@ -6,17 +6,9 @@ class Wire
     this.grid = {};
     let y = 0, x = 0, steps = 0;
     this.segments.forEach((s) => {
-      // TODO RF move this into str2seg()
-      let yi, xi;
-      switch (s.dir) {
-        case 'U': yi = -1; xi =  0; break;
-        case 'D': yi =  1; xi =  0; break;
-        case 'R': yi =  0; xi =  1; break;
-        case 'L': yi =  0; xi = -1; break;
-      }
       for (let i = 0; i < s.count; i++) {
-        y += yi;
-        x += xi;
+        y += s.yi;
+        x += s.xi;
         steps += 1;
         // If a wire visits a position on the grid multiple times, use
         // the steps value from the first time it visits that position
@@ -29,8 +21,16 @@ class Wire
   }
   static str2seg(str)
   {
+    let yi, xi;
+    switch (str[0]) {
+      case 'U': yi = -1; xi =  0; break;
+      case 'D': yi =  1; xi =  0; break;
+      case 'R': yi =  0; xi =  1; break;
+      case 'L': yi =  0; xi = -1; break;
+    }
     return {
-      dir: str[0],
+      yi,
+      xi,
       count: Number(str.slice(1)),
     };
   }
