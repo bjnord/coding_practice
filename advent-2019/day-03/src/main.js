@@ -14,5 +14,5 @@ console.log('');
 
 // PART 2
 const steps = wire.shortestIntersectionWith(wire2);
-console.log('part 1: expected answer is:              164012');
-console.log(`part 1: fewest steps to an intersection: ${steps}`);
+console.log('part 2: expected answer is:              164012');
+console.log(`part 2: fewest steps to an intersection: ${steps}`);
