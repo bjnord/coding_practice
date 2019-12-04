@@ -36,10 +36,8 @@ class Wire
   }
   intersectionsWith(wire)
   {
-    let intersections = [];
     const tupler = (s) => s.split(/,/).map((e) => Number(e));
-    // TODO RF can .map() be used while rejecting all but intersections?
-    Object.keys(this.grid).forEach((k) => {
+    return Object.keys(this.grid).reduce((intersections, k) => {
       if (wire.grid[k]) {
         const yx = tupler(k);
         intersections.push({
@@ -48,8 +46,8 @@ class Wire
           steps: this.grid[k] + wire.grid[k],
         });
       }
-    });
-    return intersections;
+      return intersections;
+    }, []);
   }
   closestIntersectionWith(wire)
   {
