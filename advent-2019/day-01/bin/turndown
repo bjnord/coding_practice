@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+var TurndownService = require('turndown');
+const fs = require('fs');
+
+var turndownService = new TurndownService({
+  headingStyle: 'atx',
+  bulletListMarker: '-',
+  codeBlockStyle: 'fenced',
+  emDelimiter: '**',
+});
+const inFile = process.argv[2] ? process.argv[2] : 'README.html';
+const input = fs.readFileSync(inFile, 'utf8');
+var markdown = turndownService.turndown(input);
+fs.writeFile('README.md', markdown, (err) => {
+  if (err) {
+    throw err;
+  }
+  console.log(`processed ${inFile} to README.md`);
+});
