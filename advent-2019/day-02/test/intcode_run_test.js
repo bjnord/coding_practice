@@ -18,4 +18,9 @@ describe('intcode run tests', function () {
     const program = [1,1,1,4,99,5,6,0,99];
     expect(intcode.run(program)).to.eql([30,1,1,4,2,5,6,0,99]);
   });
+  it('should throw an exception for invalid opcode', function () {
+    const program = [3,0,0,5,99,0];
+    const call = function () { intcode.run(program); };
+    expect(call).to.throw(Error, 'invalid opcode 3 at PC=0');
+  });
 });
