@@ -2,6 +2,7 @@
   "name": "day-04",
   "version": "1.0.0",
   "description": "Advent of Code 2019 - Day 4",
+  "private": true,
   "main": "index.js",
   "directories": {
     "test": "test"
