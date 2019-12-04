@@ -11,3 +11,13 @@ for (var i = input[0], matches = 0; i <= input[1]; i++) {
 console.log('part 1: expected answer is: 1154');
 console.log(`part 1: count of matches:   ${matches}`);
 console.log('');
+
+// PART 2
+matches = 0;
+for (var i = input[0], matches = 0; i <= input[1]; i++) {
+  if (password.passwordMatchesToo(i.toString())) {
+    matches++;
+  }
+}
+console.log('part 2: expected answer is: 750');
+console.log(`part 2: count of matches:   ${matches}`);
