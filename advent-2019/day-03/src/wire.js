@@ -53,24 +53,12 @@ class Wire
   }
   closestIntersectionWith(wire)
   {
-    let closest = 99999999999999;
-    this.intersectionsWith(wire).forEach((i) => {
-      let distance = Math.abs(i.y) + Math.abs(i.x);
-      if (distance < closest) {  // TODO RF min() would be tidier
-        closest = distance;
-      }
-    });
-    return closest;
+    const manhattan = (y, x) => Math.abs(y) + Math.abs(x);
+    return this.intersectionsWith(wire).reduce((min, i) => Math.min(min, manhattan(i.y, i.x)), Number.MAX_SAFE_INTEGER);
   }
   shortestIntersectionWith(wire)
   {
-    let shortest = 99999999999999;
-    this.intersectionsWith(wire).forEach((i) => {
-      if (i.steps < shortest) {  // TODO RF min() would be tidier
-        shortest = i.steps;
-      }
-    });
-    return shortest;
+    return this.intersectionsWith(wire).reduce((min, i) => Math.min(min, i.steps), Number.MAX_SAFE_INTEGER);
   }
 }
 module.exports = Wire;
