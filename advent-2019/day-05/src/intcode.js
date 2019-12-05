@@ -1,15 +1,27 @@
 'use strict';
-const run = (program) => {
+const run = (program, debug = false) => {
   let pc = 0;
-  while (program[pc] !== 99) {
-    if (program[pc] === 1) {
-      program[program[pc+3]] = program[program[pc+1]] + program[program[pc+2]];
-    } else if (program[pc] === 2) {
-      program[program[pc+3]] = program[program[pc+1]] * program[program[pc+2]];
-    } else {
-      throw new Error(`invalid opcode ${program[pc]} at PC=${pc}`);
+  for (;;) {
+    const inst = decode(program.slice(pc, pc+4));
+    /* istanbul ignore if */
+    if (debug) {
+      console.debug(`[PC:${pc} ${instructionString(inst)}]`);
     }
-    pc += 4;
+    if (inst.opcode === 1) {  // ADD
+      // TODO RF mode/op picker function
+      const op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
+      const op1 = (inst.modes[1] === 1) ? inst.args[1] : program[inst.args[1]];
+      program[inst.args[2]] = op0 + op1;
+    } else if (inst.opcode === 2) {  // MUL
+      const op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
+      const op1 = (inst.modes[1] === 1) ? inst.args[1] : program[inst.args[1]];
+      program[inst.args[2]] = op0 * op1;
+    } else if (inst.opcode === 99) {  // HALT
+      break;
+    } else {
+      throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
+    }
+    pc += (inst.argCount + 1);
   }
   return program;
 };
