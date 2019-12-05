@@ -37,4 +37,17 @@ describe('intcode run tests', () => {
     const call = () => { intcode.run(program); };
     expect(call).to.throw(Error, 'invalid opcode 98 at PC=0');
   });
+  // I/O tests (not normally enabled, e.g. IN can't be automated):
+  //it('should transform 3,3,99,0 to 3,3,99,1', () => {
+  //  const program = [3,3,99,0];
+  //  expect(intcode.run(program)).to.eql([3,3,99,1]);
+  //});
+  //it('should not change 4,2,99', () => {
+  //  const program = [4,2,99];
+  //  expect(intcode.run(program)).to.eql(program);
+  //});
+  //it('should not change 104,7,99', () => {
+  //  const program = [104,7,99];
+  //  expect(intcode.run(program)).to.eql(program);
+  //});
 });

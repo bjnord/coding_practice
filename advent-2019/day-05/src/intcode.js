@@ -1,4 +1,5 @@
 'use strict';
+const reader = require('readline-sync');
 const run = (program, debug = false) => {
   let pc = 0;
   for (;;) {
@@ -7,19 +8,36 @@ const run = (program, debug = false) => {
     if (debug) {
       console.debug(`[PC:${pc} ${instructionString(inst)}]`);
     }
-    if (inst.opcode === 1) {  // ADD
+    let op0, op1;
+    switch (inst.opcode) {
+    case 1:  // ADD
       // TODO RF mode/op picker function
-      const op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
-      const op1 = (inst.modes[1] === 1) ? inst.args[1] : program[inst.args[1]];
+      op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
+      op1 = (inst.modes[1] === 1) ? inst.args[1] : program[inst.args[1]];
       program[inst.args[2]] = op0 + op1;
-    } else if (inst.opcode === 2) {  // MUL
-      const op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
-      const op1 = (inst.modes[1] === 1) ? inst.args[1] : program[inst.args[1]];
-      program[inst.args[2]] = op0 * op1;
-    } else if (inst.opcode === 99) {  // HALT
       break;
-    } else {
+    case 2:  // MUL
+      op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
+      op1 = (inst.modes[1] === 1) ? inst.args[1] : program[inst.args[1]];
+      program[inst.args[2]] = op0 * op1;
+      break;
+    /* istanbul ignore next */
+    case 3:  // IN
+      op0 = reader.question('INPUT: ');
+      program[inst.args[0]] = Number(op0);
+      break;
+    /* istanbul ignore next */
+    case 4:  // OUT
+      op0 = (inst.modes[0] === 1) ? inst.args[0] : program[inst.args[0]];
+      console.log(op0);
+      break;
+    case 99:  // HALT
+      break;
+    default:
       throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
+    }
+    if (inst.opcode === 99) {  // HALT
+      break;
     }
     pc += (inst.argCount + 1);
   }
