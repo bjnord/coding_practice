@@ -6,6 +6,7 @@ describe('intcode decode tests', () => {
     const program = [1,0,0,0,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 1,
+      opcodeName: 'ADD',
       argCount: 3,
       modes: [0, 0, 0],
       args: [0, 0, 0],
@@ -15,6 +16,7 @@ describe('intcode decode tests', () => {
     const program = [101,-1,2,3];
     expect(intcode.decode(program)).to.eql({
       opcode: 1,
+      opcodeName: 'ADD',
       argCount: 3,
       modes: [1, 0, 0],
       args: [-1, 2, 3],
@@ -24,6 +26,7 @@ describe('intcode decode tests', () => {
     const program = [1101,612,763,651,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 1,
+      opcodeName: 'ADD',
       argCount: 3,
       modes: [1, 1, 0],
       args: [612, 763, 651],
@@ -33,6 +36,7 @@ describe('intcode decode tests', () => {
     const program = [2,3,1,5];
     expect(intcode.decode(program)).to.eql({
       opcode: 2,
+      opcodeName: 'MUL',
       argCount: 3,
       modes: [0, 0, 0],
       args: [3, 1, 5],
@@ -42,6 +46,7 @@ describe('intcode decode tests', () => {
     const program = [1002,4,3,4,33];
     expect(intcode.decode(program)).to.eql({
       opcode: 2,
+      opcodeName: 'MUL',
       argCount: 3,
       modes: [0, 1, 0],
       args: [4, 3, 4],
@@ -51,6 +56,7 @@ describe('intcode decode tests', () => {
     const program = [3,50,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 3,
+      opcodeName: 'IN',
       argCount: 1,
       modes: [0],
       args: [50],
@@ -60,6 +66,7 @@ describe('intcode decode tests', () => {
     const program = [4,50];
     expect(intcode.decode(program)).to.eql({
       opcode: 4,
+      opcodeName: 'OUT',
       argCount: 1,
       modes: [0],
       args: [50],
@@ -69,6 +76,7 @@ describe('intcode decode tests', () => {
     const program = [104,55,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 4,
+      opcodeName: 'OUT',
       argCount: 1,
       modes: [1],
       args: [55],
@@ -78,6 +86,7 @@ describe('intcode decode tests', () => {
     const program = [99,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 99,
+      opcodeName: 'HALT',
       argCount: 0,
       modes: [],
       args: [],

@@ -12,27 +12,27 @@ const run = (program, debug = false) => {
       console.debug(`[PC:${pc} ${instructionString(inst)}]`);
     }
     const op = getOperands(program, inst);
-    switch (inst.opcode) {
-    case 1:  // ADD
+    switch (inst.opcodeName) {
+    case 'ADD':
       program[inst.args[2]] = op[0] + op[1];
       break;
-    case 2:  // MUL
+    case 'MUL':
       program[inst.args[2]] = op[0] * op[1];
       break;
     /* istanbul ignore next */
-    case 3:  // IN
+    case 'IN':
       program[inst.args[0]] = Number(reader.question('INPUT: '));
       break;
     /* istanbul ignore next */
-    case 4:  // OUT
+    case 'OUT':
       console.log(op[0]);
       break;
-    case 99:  // HALT
+    case 'HALT':
       break;
     default:
       throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
     }
-    if (inst.opcode === 99) {  // HALT
+    if (inst.opcodeName === 'HALT') {
       break;
     }
     pc += (inst.argCount + 1);
@@ -44,7 +44,8 @@ const run = (program, debug = false) => {
 const splitOpcode = (instruction) => {
   const opcode = instruction % 100;
   instruction -= opcode;
-  const argCount = ((opcode === 1) || (opcode === 2)) ? 3 : (((opcode === 3) || (opcode === 4)) ? 1 : 0);
+  const opcodeName = {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 99: 'HALT'}[opcode];
+  const argCount =   {1: 3,     2: 3,     3: 1,    4: 1,     99: 0}[opcode];
   const modes = [];
   for (let i = 0, mode = 100; i < argCount; i++, mode *= 10) {
     if ((instruction / mode) % 10 === 1) {
@@ -54,16 +55,10 @@ const splitOpcode = (instruction) => {
       modes[i] = 0;
     }
   }
-  return {
-    opcode,
-    argCount,
-    modes
-  };
+  return {opcode, opcodeName, argCount, modes};
 };
 const instructionString = (inst) => {
-  // TODO RF move this to decoder; change run() to select by name (incl exception)
-  const opcodeNames = {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 99: 'HALT'};
-  let str = opcodeNames[inst.opcode];
+  let str = inst.opcodeName;
   for (let i = 0; i < inst.argCount; i++) {
     str += ((i > 0) ? ',' : ' ');
     if (inst.modes[i] !== 1) {
