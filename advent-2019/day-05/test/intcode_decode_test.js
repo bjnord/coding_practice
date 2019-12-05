@@ -84,3 +84,17 @@ describe('intcode decode tests', () => {
     });
   });
 });
+describe('intcode instructionString tests', () => {
+  it('should render 1001,1,2,3 as "ADD M1,2,M3"', () => {
+    const program = [1001,1,2,3];
+    expect(intcode.instructionString(intcode.decode(program))).to.eql('ADD M1,2,M3');
+  });
+  it('should render 102,3,1,5 as "MUL 3,M1,M5"', () => {
+    const program = [102,3,1,5];
+    expect(intcode.instructionString(intcode.decode(program))).to.eql('MUL 3,M1,M5');
+  });
+  it('should render 4.50 as "OUT M50"', () => {
+    const program = [4,50];
+    expect(intcode.instructionString(intcode.decode(program))).to.eql('OUT M50');
+  });
+});

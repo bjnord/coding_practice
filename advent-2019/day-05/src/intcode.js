@@ -34,6 +34,19 @@ const splitOpcode = (instruction) => {
     modes
   };
 };
+const instructionString = (inst) => {
+  // TODO RF move this to decoder; change run() to select by name (incl exception)
+  const opcodeNames = {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 99: 'HALT'};
+  let str = opcodeNames[inst.opcode];
+  for (let i = 0; i < inst.argCount; i++) {
+    str += ((i > 0) ? ',' : ' ');
+    if (inst.modes[i] !== 1) {
+      str += 'M';
+    }
+    str += inst.args[i];
+  }
+  return str;
+};
 // TODO throw an exception if mode violates this:
 // "Parameters that an instruction writes to will never be in immediate mode."
 const decode = (program) => {
@@ -42,4 +55,5 @@ const decode = (program) => {
   return o;
 };
 exports.run = run;
+exports.instructionString = instructionString;
 exports.decode = decode;
