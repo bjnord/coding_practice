@@ -12,6 +12,7 @@ const run = (program, debug = false) => {
       console.debug(`[PC:${pc} ${instructionString(inst)}]`);
     }
     const op = getOperands(program, inst);
+    let jump = false;
     switch (inst.opcodeName) {
     case 'ADD':
       program[inst.args[2]] = op[0] + op[1];
@@ -27,6 +28,18 @@ const run = (program, debug = false) => {
     case 'OUT':
       console.log(op[0]);
       break;
+    case 'JTRU':
+      jump = (op[0] !== 0);
+      break;
+    case 'JFAL':
+      jump = (op[0] === 0);
+      break;
+    case 'LT':
+      program[inst.args[2]] = (op[0] < op[1]) ? 1 : 0;
+      break;
+    case 'EQ':
+      program[inst.args[2]] = (op[0] === op[1]) ? 1 : 0;
+      break;
     case 'HALT':
       break;
     default:
@@ -35,7 +48,11 @@ const run = (program, debug = false) => {
     if (inst.opcodeName === 'HALT') {
       break;
     }
-    pc += (inst.argCount + 1);
+    if (jump) {
+      pc = op[1];
+    } else {
+      pc += (inst.argCount + 1);
+    }
   }
   return program;
 };
@@ -44,8 +61,8 @@ const run = (program, debug = false) => {
 const splitOpcode = (instruction) => {
   const opcode = instruction % 100;
   instruction -= opcode;
-  const opcodeName = {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 99: 'HALT'}[opcode];
-  const argCount =   {1: 3,     2: 3,     3: 1,    4: 1,     99: 0}[opcode];
+  const opcodeName = {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT',  8: 'EQ',  99: 'HALT'}[opcode];
+  const argCount =   {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,     8: 3,     99: 0}[opcode];
   const modes = [];
   for (let i = 0, mode = 100; i < argCount; i++, mode *= 10) {
     if ((instruction / mode) % 10 === 1) {

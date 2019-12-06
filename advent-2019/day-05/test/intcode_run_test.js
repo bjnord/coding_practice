@@ -19,6 +19,30 @@ describe('intcode run tests', () => {
     const program = [1,1,1,4,99,5,6,0,99];
     expect(intcode.run(program)).to.eql([30,1,1,4,2,5,6,0,99]);
   });
+  it('should transform 8,5,6,7,99,8,8,-1 to 8,5,6,7,99,8,8,1', () => {
+    const program = [8,5,6,7,99,8,8,-1];
+    expect(intcode.run(program)).to.eql([8,5,6,7,99,8,8,1]);
+  });
+  it('should transform 8,5,6,7,99,7,8,-1 to 8,5,6,7,99,7,8,0', () => {
+    const program = [8,5,6,7,99,7,8,-1];
+    expect(intcode.run(program)).to.eql([8,5,6,7,99,7,8,0]);
+  });
+  it('should transform 7,5,6,7,99,8,8,-1 to 7,5,6,7,99,8,8,0', () => {
+    const program = [7,5,6,7,99,8,8,-1];
+    expect(intcode.run(program)).to.eql([7,5,6,7,99,8,8,0]);
+  });
+  it('should transform 7,5,6,7,99,7,8,-1 to 7,5,6,7,99,7,8,1', () => {
+    const program = [7,5,6,7,99,7,8,-1];
+    expect(intcode.run(program)).to.eql([7,5,6,7,99,7,8,1]);
+  });
+  it('should leave 6,8,11,1,9,10,9,99,0,0,1,7 untransformed', () => {
+    const program = [6,8,11,1,9,10,9,99,0,0,1,7];
+    expect(intcode.run(program)).to.eql(program);
+  });
+  it('should transform 6,8,11,1,9,10,9,99,55,0,1,7 to 6,8,11,1,9,10,9,99,55,1,1,7', () => {
+    const program = [6,8,11,1,9,10,9,99,55,0,1,7];
+    expect(intcode.run(program)).to.eql([6,8,11,1,9,10,9,99,55,1,1,7]);
+  });
   // immediate mode tests:
   it('should transform 1002,4,3,4,33 to 1002,4,3,4,99', () => {
     const program = [1002,4,3,4,33];
@@ -37,17 +61,28 @@ describe('intcode run tests', () => {
     const call = () => { intcode.run(program); };
     expect(call).to.throw(Error, 'invalid opcode 98 at PC=0');
   });
-  // I/O tests (not normally enabled, e.g. IN can't be automated):
-  //it('should transform 3,3,99,0 to 3,3,99,1', () => {
-  //  const program = [3,3,99,0];
-  //  expect(intcode.run(program)).to.eql([3,3,99,1]);
-  //});
-  //it('should not change 4,2,99', () => {
-  //  const program = [4,2,99];
-  //  expect(intcode.run(program)).to.eql(program);
-  //});
-  //it('should not change 104,7,99', () => {
-  //  const program = [104,7,99];
-  //  expect(intcode.run(program)).to.eql(program);
-  //});
+  it('should transform 1108,8,8,5,99,-1 to 1108,8,8,5,99,1', () => {
+    const program = [1108,8,8,5,99,-1];
+    expect(intcode.run(program)).to.eql([1108,8,8,5,99,1]);
+  });
+  it('should transform 1108,7,8,5,99,-1 to 1108,7,8,5,99,0', () => {
+    const program = [1108,7,8,5,99,-1];
+    expect(intcode.run(program)).to.eql([1108,7,8,5,99,0]);
+  });
+  it('should transform 1107,8,8,5,99,-1 to 1107,8,8,5,99,0', () => {
+    const program = [1107,8,8,5,99,-1];
+    expect(intcode.run(program)).to.eql([1107,8,8,5,99,0]);
+  });
+  it('should transform 1107,7,8,5,99,-1 to 1107,7,8,5,99,1', () => {
+    const program = [1107,7,8,5,99,-1];
+    expect(intcode.run(program)).to.eql([1107,7,8,5,99,1]);
+  });
+  it('should leave 1105,1,7,1101,0,0,8,99,1 untransformed', () => {
+    const program = [1105,1,7,1101,0,0,8,99,1];
+    expect(intcode.run(program)).to.eql(program);
+  });
+  it('should transform 1105,0,7,1101,0,0,8,99,1 to 1105,0,7,1101,0,0,8,99,0', () => {
+    const program = [1105,0,7,1101,0,0,8,99,1];
+    expect(intcode.run(program)).to.eql([1105,0,7,1101,0,0,8,99,0]);
+  });
 });
