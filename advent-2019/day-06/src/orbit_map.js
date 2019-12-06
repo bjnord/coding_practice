@@ -30,5 +30,33 @@ class OrbitMap
     }
     return count;
   }
+  parentDistance(fromName, toName)
+  {
+    let count = 0;
+    for (let o = this.orbitMap.get(fromName); o; ) {
+      if (o.parentName === toName) {
+        return count + 1;
+      }
+      o = this.orbitMap.get(o.parentName);
+      count++;
+    }
+    return undefined;
+  }
+  transferCount(fromName, toName)
+  {
+    // the transfer count is the sum of the distances to the common ancestor
+    // of from & to
+    for (let fromDist = 0, o = this.orbitMap.get(fromName); o; ) {
+      fromDist++;
+      // OPTIMIZE calculating toDist every time is inefficient - O(n^2)
+      // could precalculate a map of parents & their distances - O(n)
+      const toDist = this.parentDistance(toName, o.parentName);
+      if (toDist) {
+        return fromDist + toDist;
+      }
+      o = this.orbitMap.get(o.parentName);
+    }
+    return undefined;
+  }
 }
 module.exports = OrbitMap;
