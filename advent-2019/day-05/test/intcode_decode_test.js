@@ -2,7 +2,7 @@
 const expect = require('chai').expect;
 const intcode = require('../src/intcode');
 describe('intcode decode tests', () => {
-  it('should decode 1,0,0,0 to {1,3,[0,0,0],[0,0,0]}', () => {
+  it('should decode 1,0,0,0 to {1,ADD,3,[0,0,0],[0,0,0]}', () => {
     const program = [1,0,0,0,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 1,
@@ -12,7 +12,7 @@ describe('intcode decode tests', () => {
       args: [0, 0, 0],
     });
   });
-  it('should decode 101,-1,2,3 to {1,3,[1,0,0],[-1,2,3]}', () => {
+  it('should decode 101,-1,2,3 to {1,ADD,3,[1,0,0],[-1,2,3]}', () => {
     const program = [101,-1,2,3];
     expect(intcode.decode(program)).to.eql({
       opcode: 1,
@@ -22,7 +22,7 @@ describe('intcode decode tests', () => {
       args: [-1, 2, 3],
     });
   });
-  it('should decode 1101,612,763,651 to {1,3,[1,1,0],[612,763,651]}', () => {
+  it('should decode 1101,612,763,651 to {1,ADD,3,[1,1,0],[612,763,651]}', () => {
     const program = [1101,612,763,651,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 1,
@@ -32,7 +32,7 @@ describe('intcode decode tests', () => {
       args: [612, 763, 651],
     });
   });
-  it('should decode 2,3,1,5 to {2,3,[0,0,0],[3,1,5]}', () => {
+  it('should decode 2,3,1,5 to {2,MUL,3,[0,0,0],[3,1,5]}', () => {
     const program = [2,3,1,5];
     expect(intcode.decode(program)).to.eql({
       opcode: 2,
@@ -42,7 +42,7 @@ describe('intcode decode tests', () => {
       args: [3, 1, 5],
     });
   });
-  it('should decode 1002,4,3,4 to {2,3,[0,1,0],[4,3,4]}', () => {
+  it('should decode 1002,4,3,4 to {2,MUL,3,[0,1,0],[4,3,4]}', () => {
     const program = [1002,4,3,4,33];
     expect(intcode.decode(program)).to.eql({
       opcode: 2,
@@ -52,7 +52,7 @@ describe('intcode decode tests', () => {
       args: [4, 3, 4],
     });
   });
-  it('should decode 3,50 to {3,1,[0],[50]}', () => {
+  it('should decode 3,50 to {3,IN,1,[0],[50]}', () => {
     const program = [3,50,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 3,
@@ -62,7 +62,7 @@ describe('intcode decode tests', () => {
       args: [50],
     });
   });
-  it('should decode 4,50 to {4,1,[0],[50]}', () => {
+  it('should decode 4,50 to {4,OUT,1,[0],[50]}', () => {
     const program = [4,50];
     expect(intcode.decode(program)).to.eql({
       opcode: 4,
@@ -72,7 +72,7 @@ describe('intcode decode tests', () => {
       args: [50],
     });
   });
-  it('should decode 104,55 to {4,1,[1],[55]}', () => {
+  it('should decode 104,55 to {4,OUT,1,[1],[55]}', () => {
     const program = [104,55,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 4,
@@ -82,7 +82,7 @@ describe('intcode decode tests', () => {
       args: [55],
     });
   });
-  it('should decode 5,1,3 to {5,2,[0,0],[1,3]}', () => {
+  it('should decode 5,1,3 to {5,JTRU,2,[0,0],[1,3]}', () => {
     const program = [5,1,3];
     expect(intcode.decode(program)).to.eql({
       opcode: 5,
@@ -92,7 +92,7 @@ describe('intcode decode tests', () => {
       args: [1, 3],
     });
   });
-  it('should decode 1105,3,4 to {5,2,[1,1],[3,4]}', () => {
+  it('should decode 1105,3,4 to {5,JTRU,2,[1,1],[3,4]}', () => {
     const program = [1105,3,4,33];
     expect(intcode.decode(program)).to.eql({
       opcode: 5,
@@ -102,7 +102,7 @@ describe('intcode decode tests', () => {
       args: [3, 4],
     });
   });
-  it('should decode 106,0,7 to {6,2,[1,0],[0,7]}', () => {
+  it('should decode 106,0,7 to {6,JFAL,2,[1,0],[0,7]}', () => {
     const program = [106,0,7];
     expect(intcode.decode(program)).to.eql({
       opcode: 6,
@@ -112,7 +112,7 @@ describe('intcode decode tests', () => {
       args: [0, 7],
     });
   });
-  it('should decode 1006,1,8 to {6,2,[0,1],[1,8]}', () => {
+  it('should decode 1006,1,8 to {6,JFAL,2,[0,1],[1,8]}', () => {
     const program = [1006,1,8,33];
     expect(intcode.decode(program)).to.eql({
       opcode: 6,
@@ -122,7 +122,7 @@ describe('intcode decode tests', () => {
       args: [1, 8],
     });
   });
-  it('should decode 7,0,0,0 to {7,3,[0,0,0],[0,0,0]}', () => {
+  it('should decode 7,0,0,0 to {7,LT,3,[0,0,0],[0,0,0]}', () => {
     const program = [7,0,0,0,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 7,
@@ -132,7 +132,7 @@ describe('intcode decode tests', () => {
       args: [0, 0, 0],
     });
   });
-  it('should decode 1107,612,763,651 to {7,3,[1,1,0],[612,763,651]}', () => {
+  it('should decode 1107,612,763,651 to {7,LT,3,[1,1,0],[612,763,651]}', () => {
     const program = [1107,612,763,651,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 7,
@@ -142,7 +142,7 @@ describe('intcode decode tests', () => {
       args: [612, 763, 651],
     });
   });
-  it('should decode 8,3,1,5 to {8,3,[0,0,0],[3,1,5]}', () => {
+  it('should decode 8,3,1,5 to {8,EQ,3,[0,0,0],[3,1,5]}', () => {
     const program = [8,3,1,5];
     expect(intcode.decode(program)).to.eql({
       opcode: 8,
@@ -152,7 +152,7 @@ describe('intcode decode tests', () => {
       args: [3, 1, 5],
     });
   });
-  it('should decode 1008,4,3,4 to {8,3,[0,1,0],[4,3,4]}', () => {
+  it('should decode 1008,4,3,4 to {8,EQ,3,[0,1,0],[4,3,4]}', () => {
     const program = [1008,4,3,4,33];
     expect(intcode.decode(program)).to.eql({
       opcode: 8,
@@ -162,7 +162,7 @@ describe('intcode decode tests', () => {
       args: [4, 3, 4],
     });
   });
-  it('should decode 99 to {99,0,[],[]}', () => {
+  it('should decode 99 to {99,HALT,0,[],[]}', () => {
     const program = [99,77];
     expect(intcode.decode(program)).to.eql({
       opcode: 99,
