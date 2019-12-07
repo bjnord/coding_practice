@@ -3,11 +3,28 @@ const reader = require('readline-sync');
 const getOperands = (program, inst) => {
   return inst.modes.map((mode, i) => (mode === 1) ? inst.args[i] : program[inst.args[i]]);
 };
-// I implemented a "headless mode" for IN and OUT (if 3rd parameter is given):
-// - IN removes the first element of values[], rather than taking from stdin
-// - OUT adds a new first element to values[], rather than printing to stdout
-const run = (program, debug = false, values = undefined) => {
-  let pc = 0;
+// Run an Intcode program.
+//
+// PARAMETERS
+//   program: the Intcode program to run - NOTE that programs can be
+//     self-modifying ("program" is essentially a memory bank), so
+//     run() may alter the contents of program
+//   debug: if true, output instructions to the console (default false)
+//   inCallback: "headless mode": rather than taking from stdin, the
+//     IN instruction will call inCallback(), which is expected to
+//     return the input value - NOTE that if inCallback() returns
+//     undefined (no input available), execution will be paused (see
+//     "RETURNS" below)
+//   outCallback: "headless mode": rather than printing to stdout, the
+//     OUT instruction will call outCallback(v) with the output value
+//   startPc: initial program counter (PC) value (default 0)
+//
+// RETURNS
+//   if running in "headless mode", and inCallback() returns undefined,
+//     pauses execution and returns the PC at which execution should resume
+//   otherwise returns -1 to indicate execution has halted
+const run = (program, debug = false, inCallback = undefined, outCallback = undefined, startPc = 0) => {
+  let pc = startPc;
   for (;;) {
     const inst = decode(program.slice(pc, pc+4));
     /* istanbul ignore if */
@@ -25,16 +42,21 @@ const run = (program, debug = false, values = undefined) => {
       break;
     case 'IN':
       /* istanbul ignore else */
-      if (Array.isArray(values)) {
-        program[inst.args[0]] = values.shift();
+      if (inCallback) {
+        const v = inCallback();
+        if (v === undefined) {
+          return pc;  // pause execution for input
+        } else {
+          program[inst.args[0]] = v;
+        }
       } else {
         program[inst.args[0]] = Number(reader.question('INPUT: '));
       }
       break;
     case 'OUT':
       /* istanbul ignore else */
-      if (Array.isArray(values)) {
-        values.unshift(op[0]);
+      if (outCallback) {
+        outCallback(op[0]);
       } else {
         console.log(op[0]);
       }
@@ -65,7 +87,7 @@ const run = (program, debug = false, values = undefined) => {
       pc += (inst.argCount + 1);
     }
   }
-  return program;
+  return -1;
 };
 // TODO set "outputArg" attribute (2 for ADD/MUL, 0 for IN, null for others)
 // (to be used for the exception, below)
