@@ -47,18 +47,12 @@ const runFeedback = (program, settings) => {
   // Intcode inputs: FIRST the amp phase setting, SECOND the signal value
   amps[0].values.push(0);
   for (;;) {
-    //console.log(`< amp ${curAmp} PC: ${amps[curAmp].pc} values: ${amps[curAmp].values}`);
     amps[curAmp].pc = intcode.run(amps[curAmp].program, false, getValue, storeValue, amps[curAmp].pc);
-    //console.log(`> amp ${curAmp} PC: ${amps[curAmp].pc} values: ${amps[curAmp].values}`);
     if (amps.every((a) => a.pc < 0)) {
       break;
     }
     curAmp = (curAmp+1) % settings.length;
   }
-  //console.log('FINAL STATE');
-  //amps.forEach((amp, i) => {
-  //  console.log(`amp ${i} PC: ${amp.pc} values: ${amp.values}`);
-  //});
   return amps[0].values[0];
 };
 exports.runFeedback = runFeedback;
