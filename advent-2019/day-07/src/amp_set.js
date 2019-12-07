@@ -12,12 +12,14 @@ const intcode = require('../src/intcode');
 //   signal output from the last amp in the chain
 const run = (program, settings) => {
   const values = [0];
+  const popValue = () => values.shift();
+  const pushValue = (v) => values.unshift(v);
   for (const setting of settings) {
     // "Make sure that memory is not shared or reused between copies of the program."
     const programCopy = program.slice();
     // Intcode inputs: FIRST the amp phase setting, SECOND the signal value
     values.unshift(setting);
-    intcode.run(programCopy, false, values);
+    intcode.run(programCopy, false, popValue, pushValue);
   }
   return values[0];
 };
