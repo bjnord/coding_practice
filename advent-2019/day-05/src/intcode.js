@@ -74,12 +74,9 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
       program[inst.args[2]] = (op[0] === op[1]) ? 1 : 0;
       break;
     case 'HALT':
-      break;
+      return -1;
     default:
       throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
-    }
-    if (inst.opcodeName === 'HALT') {
-      break;
     }
     if (jump) {
       pc = op[1];
@@ -87,7 +84,6 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
       pc += (inst.argCount + 1);
     }
   }
-  return -1;
 };
 // TODO set "outputArg" attribute (2 for ADD/MUL, 0 for IN, null for others)
 // (to be used for the exception, below)
