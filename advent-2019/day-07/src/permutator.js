@@ -18,34 +18,22 @@ const permute = (choices, nPicks) => {
   if (nPicks === 0) {
     return new Set();
   } else if (nPicks === 1) {
-    const ret = new Set(choices.map((c) => [c]));
-    //console.log('short-circuit return:');
-    //console.dir(ret);
-    return ret;
+    return new Set(choices.map((c) => [c]));
   }
-  //console.log(`nPicks=${nPicks} choices: ${choices}`);
+  // recurse:
   const permutations = choices.map((choice, i) => {
     const remainingChoices = choices.slice();
     remainingChoices.splice(i, 1);  // NB splice() returns removed element
-    //console.log(`nPicks=${nPicks} i=${i} remainingChoices: ${remainingChoices}`);
-    //console.dir(remainingChoices);
     const remainingPermutations = Array.from(permute(remainingChoices, nPicks - 1));
-    //console.log(`nPicks=${nPicks} i=${i} remainingPermutations: ${remainingPermutations}`);
-    //console.dir(remainingPermutations);
-    // prepend this level's choice to all child levels' permutations:
-    const ret = remainingPermutations.map((p) => {
+    // prepend this level's choice to child level's permutations:
+    return remainingPermutations.map((p) => {
       p.unshift(choice);  // NB unshift() returns new length
       return p;
     });
-    //console.log(`nPicks=${nPicks} i=${i} recursive return: ${ret}`);
-    //console.dir(ret);
-    return ret;
   });
   // TODO Node v11+ has Array.prototype.flat()
-  // h/t <https://stackoverflow.com/a/10865042/291754>
+  //      h/t <https://stackoverflow.com/a/10865042/291754>
   const flattened = [].concat.apply([], permutations);
-  //console.log('flattened:');
-  //console.dir(flattened);
   return new Set(flattened);
 };
 exports.permute = permute;
