@@ -1,5 +1,6 @@
 NODEBIN = ./node_modules/.bin
-SRC = src/main.js src/intcode.js test/intcode_run_test.js
+SRC = src/main.js src/amp_set.js src/intcode.js src/permutator.js \
+	test/amp_set_test.js test/permutator_test.js
 
 .PHONY: main test lint coverage distclean
 
