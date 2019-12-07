@@ -85,4 +85,11 @@ describe('intcode run tests', () => {
     const program = [1105,0,7,1101,0,0,8,99,1];
     expect(intcode.run(program)).to.eql([1105,0,7,1101,0,0,8,99,0]);
   });
+  // I/O test, headless mode
+  it('should return n * 2 + 1 from headless mode', () => {
+    const program = [3,13,1002,13,2,13,1001,13,1,13,4,13,99,-1];
+    const values = [3];
+    expect(intcode.run(program, false, values)).to.eql(program);
+    expect(values[0]).to.eql(7);
+  });
 });

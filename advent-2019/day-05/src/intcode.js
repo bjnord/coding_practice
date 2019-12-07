@@ -3,7 +3,10 @@ const reader = require('readline-sync');
 const getOperands = (program, inst) => {
   return inst.modes.map((mode, i) => (mode === 1) ? inst.args[i] : program[inst.args[i]]);
 };
-const run = (program, debug = false) => {
+// I implemented a "headless mode" for IN and OUT (if 3rd parameter is given):
+// - IN removes the first element of values[], rather than taking from stdin
+// - OUT adds a new first element to values[], rather than printing to stdout
+const run = (program, debug = false, values = undefined) => {
   let pc = 0;
   for (;;) {
     const inst = decode(program.slice(pc, pc+4));
@@ -20,13 +23,21 @@ const run = (program, debug = false) => {
     case 'MUL':
       program[inst.args[2]] = op[0] * op[1];
       break;
-    /* istanbul ignore next */
     case 'IN':
-      program[inst.args[0]] = Number(reader.question('INPUT: '));
+      /* istanbul ignore else */
+      if (Array.isArray(values)) {
+        program[inst.args[0]] = values.shift();
+      } else {
+        program[inst.args[0]] = Number(reader.question('INPUT: '));
+      }
       break;
-    /* istanbul ignore next */
     case 'OUT':
-      console.log(op[0]);
+      /* istanbul ignore else */
+      if (Array.isArray(values)) {
+        values.unshift(op[0]);
+      } else {
+        console.log(op[0]);
+      }
       break;
     case 'JTRU':
       jump = (op[0] !== 0);
