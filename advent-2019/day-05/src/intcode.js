@@ -1,10 +1,19 @@
 'use strict';
 const reader = require('readline-sync');
 const ifunc = {};
+
+// Terminology note: I use
+// - "argument" to mean the raw value stored in the program
+// - "operand" to mean the value actually operated on, after fetching
+//   the value according to the mode
 const getOperands = (program, inst) => {
   return inst.modes.map((mode, i) => (mode === 1) ? inst.args[i] : program[inst.args[i]]);
 };
-// Run an Intcode program.
+const getStoreIndex = (inst) => {
+  return inst.args[inst.storeArgIndex];
+};
+
+// run(): Run an Intcode program.
 //
 // PARAMETERS
 //   program: the Intcode program to run - NOTE that programs can be
@@ -37,8 +46,7 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
     if (!ifunc[ifuncName]) {
       throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
     }
-    const storeIndex = inst.args[inst.storeArgIndex];
-    const state = ifunc[ifuncName](program, op, storeIndex, inCallback, outCallback);
+    const state = ifunc[ifuncName](program, op, getStoreIndex(inst), inCallback, outCallback);
     switch (state) {
     case 'iowait':
       return pc;
@@ -122,17 +130,30 @@ ifunc.doHALT = () => {
 // END Intcode instruction functions
 ////////////////////////////////////////////////////////////////////////////
 
+// decode(): Decode an instruction and its arguments.
+const decode = (program) => {
+  const o = splitOpcode(program[0]);
+  o.args = program.slice(1, 1 + o.argCount);
+  return o;
+};
+
+// splitOpcode(): Decode the opcode portion of an instruction.
+//
+// This does the bulk of the work for decode(). See also "Terminology note"
+// (above).
 const splitOpcode = (instruction) => {
   const opcode = instruction % 100;
   instruction -= opcode;
   const opcodeName =    {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT',  8: 'EQ',  99: 'HALT'}[opcode];
   const argCount =      {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,     8: 3,     99: 0}[opcode];
+  // which argument does the instruction store the result to (if any)?
   const storeArgIndex = {1: 2,     2: 2,     3: 0,    4: null,  5: null,   6: null,   7: 2,     8: 2,     99: null}[opcode];
+  // the mode of each argument: 0=positional(indirect) 1=immediate
   const modes = [];
   for (let i = 0, mode = 100; i < argCount; i++, mode *= 10) {
     if ((instruction / mode) % 10 === 1) {
       modes[i] = 1;
-      instruction -= mode;
+      instruction -= mode;  // TODO is this needed?
     } else {
       modes[i] = 0;
     }
@@ -143,6 +164,8 @@ const splitOpcode = (instruction) => {
   }
   return {opcode, opcodeName, argCount, storeArgIndex, modes};
 };
+
+// Reencode ("disassemble") an instruction to a string suitable for debug output.
 const instructionString = (inst) => {
   let str = inst.opcodeName;
   for (let i = 0; i < inst.argCount; i++) {
@@ -154,11 +177,7 @@ const instructionString = (inst) => {
   }
   return str;
 };
-const decode = (program) => {
-  const o = splitOpcode(program[0]);
-  o.args = program.slice(1, 1 + o.argCount);
-  return o;
-};
+
 exports.run = run;
 exports.instructionString = instructionString;
 exports.decode = decode;
