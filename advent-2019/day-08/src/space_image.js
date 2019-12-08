@@ -27,5 +27,13 @@ class SpaceImage
     }
     this.nLayers = this.layers.length;
   }
+  layerCount(n, digit)
+  {
+    if (this.layers[n] === undefined) {
+      throw new Error(`invalid layer ${n}`);
+    }
+    const digits = this.layers[n].split('').filter((d) => d === digit);
+    return digits.length;
+  }
 };
 module.exports = SpaceImage;
