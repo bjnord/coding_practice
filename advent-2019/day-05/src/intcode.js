@@ -121,13 +121,12 @@ ifunc.doHALT = () => {
 // END Intcode instruction functions
 ////////////////////////////////////////////////////////////////////////////
 
-// TODO set "outputArg" attribute (2 for ADD/MUL, 0 for IN, null for others)
-// (to be used for the exception, below)
 const splitOpcode = (instruction) => {
   const opcode = instruction % 100;
   instruction -= opcode;
-  const opcodeName = {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT',  8: 'EQ',  99: 'HALT'}[opcode];
-  const argCount =   {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,     8: 3,     99: 0}[opcode];
+  const opcodeName =    {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT',  8: 'EQ',  99: 'HALT'}[opcode];
+  const argCount =      {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,     8: 3,     99: 0}[opcode];
+  const storeArgIndex = {1: 2,     2: 2,     3: 0,    4: null,  5: null,   6: null,   7: 2,     8: 2,     99: null}[opcode];
   const modes = [];
   for (let i = 0, mode = 100; i < argCount; i++, mode *= 10) {
     if ((instruction / mode) % 10 === 1) {
@@ -136,6 +135,10 @@ const splitOpcode = (instruction) => {
     } else {
       modes[i] = 0;
     }
+  }
+  // "Parameters that an instruction writes to will never be in immediate mode."
+  if (modes[storeArgIndex] === 1) {
+    throw new Error('immediate mode is invalid for store argument');
   }
   return {opcode, opcodeName, argCount, modes};
 };
@@ -150,8 +153,6 @@ const instructionString = (inst) => {
   }
   return str;
 };
-// TODO throw an exception if mode violates this:
-// "Parameters that an instruction writes to will never be in immediate mode."
 const decode = (program) => {
   const o = splitOpcode(program[0]);
   o.args = program.slice(1, 1 + o.argCount);

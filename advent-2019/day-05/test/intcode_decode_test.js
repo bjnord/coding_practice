@@ -172,6 +172,16 @@ describe('intcode decode tests', () => {
       args: [],
     });
   });
+  it('should throw an exception for invalid immediate mode [ADD]', () => {
+    const program = [11101,1,2,3];
+    const call = () => { intcode.decode(program); };
+    expect(call).to.throw(Error, 'immediate mode is invalid for store argument');
+  });
+  it('should throw an exception for invalid immediate mode [IN]', () => {
+    const program = [103,4];
+    const call = () => { intcode.decode(program); };
+    expect(call).to.throw(Error, 'immediate mode is invalid for store argument');
+  });
 });
 describe('intcode instructionString tests', () => {
   it('should render 1001,1,2,3 as "ADD M1,2,M3"', () => {
