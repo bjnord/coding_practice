@@ -27,14 +27,13 @@ const getStoreIndex = (inst) => {
 //     "RETURNS" below)
 //   outCallback: "headless mode": rather than printing to stdout, the
 //     OUT instruction will call outCallback(v) with the output value
-//   startPc: initial program counter (PC) value (default 0)
+//   pc: initial program counter (PC) value (default 0)
 //
 // RETURNS
 //   if running in "headless mode", and inCallback() returns undefined,
 //     pauses execution and returns the PC at which execution should resume
 //   otherwise returns -1 to indicate execution has halted
-const run = (program, debug = false, inCallback = undefined, outCallback = undefined, startPc = 0) => {
-  let pc = startPc;
+const run = (program, debug = false, inCallback = undefined, outCallback = undefined, pc = 0) => {
   for (;;) {
     const inst = decode(program.slice(pc, pc+4));
     /* istanbul ignore if */
