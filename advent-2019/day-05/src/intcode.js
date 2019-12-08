@@ -1,5 +1,6 @@
 'use strict';
 const reader = require('readline-sync');
+const ifunc = {};
 const getOperands = (program, inst) => {
   return inst.modes.map((mode, i) => (mode === 1) ? inst.args[i] : program[inst.args[i]]);
 };
@@ -32,59 +33,94 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
       console.debug(`[PC:${pc} ${instructionString(inst)}]`);
     }
     const op = getOperands(program, inst);
-    let jump = false;
-    switch (inst.opcodeName) {
-    case 'ADD':
-      program[inst.args[2]] = op[0] + op[1];
-      break;
-    case 'MUL':
-      program[inst.args[2]] = op[0] * op[1];
-      break;
-    case 'IN':
-      /* istanbul ignore else */
-      if (inCallback) {
-        const v = inCallback();
-        if (v === undefined) {
-          return pc;  // pause execution for input
-        } else {
-          program[inst.args[0]] = v;
-        }
-      } else {
-        program[inst.args[0]] = Number(reader.question('INPUT: '));
-      }
-      break;
-    case 'OUT':
-      /* istanbul ignore else */
-      if (outCallback) {
-        outCallback(op[0]);
-      } else {
-        console.log(op[0]);
-      }
-      break;
-    case 'JTRU':
-      jump = (op[0] !== 0);
-      break;
-    case 'JFAL':
-      jump = (op[0] === 0);
-      break;
-    case 'LT':
-      program[inst.args[2]] = (op[0] < op[1]) ? 1 : 0;
-      break;
-    case 'EQ':
-      program[inst.args[2]] = (op[0] === op[1]) ? 1 : 0;
-      break;
-    case 'HALT':
-      return -1;
-    default:
+    const ifuncName = 'do'+inst.opcodeName;
+    if (!ifunc[ifuncName]) {
       throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
     }
-    if (jump) {
-      pc = op[1];
-    } else {
+    const state = ifunc[ifuncName](program, inst, op, inCallback, outCallback);
+    switch (state) {
+    case 'iowait':
+      return pc;
+    case 'halt':
+      return -1;
+    case 'run':
       pc += (inst.argCount + 1);
+      break;
+    case 'jump':
+      pc = op[1];
+      break;
+    /* istanbul ignore next */
+    default:
+      throw new Error(`invalid state ${state} from do${inst.opcodeName}()`);
     }
   }
 };
+
+////////////////////////////////////////////////////////////////////////////
+// BEGIN Intcode instruction functions
+//
+// each of these functions handles one instruction type
+// they return one of the following:
+//
+//   'iowait': stop execution waiting for I/O
+//   'halt': halt execution
+//   'run': continue execution with next instruction
+//   'jump': jump to new instruction, then continue execution
+//
+ifunc.doADD = (program, inst, op) => {
+  program[inst.args[2]] = op[0] + op[1];
+  return 'run';
+};
+ifunc.doMUL = (program, inst, op) => {
+  program[inst.args[2]] = op[0] * op[1];
+  return 'run';
+};
+ifunc.doIN = (program, inst, op, inCallback) => {
+  /* istanbul ignore else */
+  if (inCallback) {
+    const v = inCallback();
+    if (v === undefined) {
+      return 'iowait';
+    } else {
+      program[inst.args[0]] = v;
+    }
+  } else {
+    program[inst.args[0]] = Number(reader.question('INPUT: '));
+  }
+  return 'run';
+};
+// use destructuring to avoid lint "unused argument" errors
+// h/t <https://stackoverflow.com/a/58738236/291754>
+ifunc.doOUT = (...[, , op, , outCallback]) => {
+  /* istanbul ignore else */
+  if (outCallback) {
+    outCallback(op[0]);
+  } else {
+    console.log(op[0]);
+  }
+  return 'run';
+};
+ifunc.doJTRU = (program, inst, op) => {
+  return (op[0] !== 0) ? 'jump' : 'run';
+};
+ifunc.doJFAL = (program, inst, op) => {
+  return (op[0] === 0) ? 'jump' : 'run';
+};
+ifunc.doLT = (program, inst, op) => {
+  program[inst.args[2]] = (op[0] < op[1]) ? 1 : 0;
+  return 'run';
+};
+ifunc.doEQ = (program, inst, op) => {
+  program[inst.args[2]] = (op[0] === op[1]) ? 1 : 0;
+  return 'run';
+};
+ifunc.doHALT = () => {
+  return 'halt';
+};
+//
+// END Intcode instruction functions
+////////////////////////////////////////////////////////////////////////////
+
 // TODO set "outputArg" attribute (2 for ADD/MUL, 0 for IN, null for others)
 // (to be used for the exception, below)
 const splitOpcode = (instruction) => {
