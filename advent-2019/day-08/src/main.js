@@ -22,3 +22,7 @@ console.log(`part 1: layer with fewest 0 digits:       ${minLayer.n+1} (${minLay
 console.log('part 1: expected answer:                  828');
 console.log(`part 1: (1 digits) * (2 digits):          ${ones * twos}`);
 console.log('');
+
+// PART 2
+console.log('part 2: expected answer:  ZLBJF');
+image.dump();

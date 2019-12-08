@@ -47,3 +47,9 @@ describe('space image layer count tests', () => {
     expect(call).to.throw(Error, 'invalid layer 2');
   });
 });
+describe('space image render tests', () => {
+  it('should render 2x2 example image correctly', () => {
+    const image = new SpaceImage('0222112222120000', {width: 2, height: 2});
+    expect(image.render()).to.eql('0110');
+  });
+});
