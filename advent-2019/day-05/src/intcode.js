@@ -143,7 +143,6 @@ const decode = (program) => {
 // (above).
 const splitOpcode = (instruction) => {
   const opcode = instruction % 100;
-  instruction -= opcode;
   const opcodeName =    {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT',  8: 'EQ',  99: 'HALT'}[opcode];
   const argCount =      {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,     8: 3,     99: 0}[opcode];
   // which argument does the instruction store the result to (if any)?
@@ -151,12 +150,7 @@ const splitOpcode = (instruction) => {
   // the mode of each argument: 0=positional(indirect) 1=immediate
   const modes = [];
   for (let i = 0, mode = 100; i < argCount; i++, mode *= 10) {
-    if ((instruction / mode) % 10 === 1) {
-      modes[i] = 1;
-      instruction -= mode;  // TODO is this needed?
-    } else {
-      modes[i] = 0;
-    }
+    modes[i] = Math.floor((instruction % (mode * 10)) / mode) % 10;
   }
   // "Parameters that an instruction writes to will never be in immediate mode."
   if (modes[storeArgIndex] === 1) {
