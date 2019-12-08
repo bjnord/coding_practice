@@ -8,6 +8,7 @@ describe('intcode decode tests', () => {
       opcode: 1,
       opcodeName: 'ADD',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [0, 0, 0],
       args: [0, 0, 0],
     });
@@ -18,6 +19,7 @@ describe('intcode decode tests', () => {
       opcode: 1,
       opcodeName: 'ADD',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [1, 0, 0],
       args: [-1, 2, 3],
     });
@@ -28,6 +30,7 @@ describe('intcode decode tests', () => {
       opcode: 1,
       opcodeName: 'ADD',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [1, 1, 0],
       args: [612, 763, 651],
     });
@@ -38,6 +41,7 @@ describe('intcode decode tests', () => {
       opcode: 2,
       opcodeName: 'MUL',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [0, 0, 0],
       args: [3, 1, 5],
     });
@@ -48,6 +52,7 @@ describe('intcode decode tests', () => {
       opcode: 2,
       opcodeName: 'MUL',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [0, 1, 0],
       args: [4, 3, 4],
     });
@@ -58,6 +63,7 @@ describe('intcode decode tests', () => {
       opcode: 3,
       opcodeName: 'IN',
       argCount: 1,
+      storeArgIndex: 0,
       modes: [0],
       args: [50],
     });
@@ -68,6 +74,7 @@ describe('intcode decode tests', () => {
       opcode: 4,
       opcodeName: 'OUT',
       argCount: 1,
+      storeArgIndex: null,
       modes: [0],
       args: [50],
     });
@@ -78,6 +85,7 @@ describe('intcode decode tests', () => {
       opcode: 4,
       opcodeName: 'OUT',
       argCount: 1,
+      storeArgIndex: null,
       modes: [1],
       args: [55],
     });
@@ -88,6 +96,7 @@ describe('intcode decode tests', () => {
       opcode: 5,
       opcodeName: 'JTRU',
       argCount: 2,
+      storeArgIndex: null,
       modes: [0, 0],
       args: [1, 3],
     });
@@ -98,6 +107,7 @@ describe('intcode decode tests', () => {
       opcode: 5,
       opcodeName: 'JTRU',
       argCount: 2,
+      storeArgIndex: null,
       modes: [1, 1],
       args: [3, 4],
     });
@@ -108,6 +118,7 @@ describe('intcode decode tests', () => {
       opcode: 6,
       opcodeName: 'JFAL',
       argCount: 2,
+      storeArgIndex: null,
       modes: [1, 0],
       args: [0, 7],
     });
@@ -118,6 +129,7 @@ describe('intcode decode tests', () => {
       opcode: 6,
       opcodeName: 'JFAL',
       argCount: 2,
+      storeArgIndex: null,
       modes: [0, 1],
       args: [1, 8],
     });
@@ -128,6 +140,7 @@ describe('intcode decode tests', () => {
       opcode: 7,
       opcodeName: 'LT',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [0, 0, 0],
       args: [0, 0, 0],
     });
@@ -138,6 +151,7 @@ describe('intcode decode tests', () => {
       opcode: 7,
       opcodeName: 'LT',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [1, 1, 0],
       args: [612, 763, 651],
     });
@@ -148,6 +162,7 @@ describe('intcode decode tests', () => {
       opcode: 8,
       opcodeName: 'EQ',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [0, 0, 0],
       args: [3, 1, 5],
     });
@@ -158,6 +173,7 @@ describe('intcode decode tests', () => {
       opcode: 8,
       opcodeName: 'EQ',
       argCount: 3,
+      storeArgIndex: 2,
       modes: [0, 1, 0],
       args: [4, 3, 4],
     });
@@ -168,6 +184,7 @@ describe('intcode decode tests', () => {
       opcode: 99,
       opcodeName: 'HALT',
       argCount: 0,
+      storeArgIndex: null,
       modes: [],
       args: [],
     });

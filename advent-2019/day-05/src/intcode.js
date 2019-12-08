@@ -37,7 +37,8 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
     if (!ifunc[ifuncName]) {
       throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
     }
-    const state = ifunc[ifuncName](program, inst, op, inCallback, outCallback);
+    const storeIndex = inst.args[inst.storeArgIndex];
+    const state = ifunc[ifuncName](program, op, storeIndex, inCallback, outCallback);
     switch (state) {
     case 'iowait':
       return pc;
@@ -67,31 +68,31 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
 //   'run': continue execution with next instruction
 //   'jump': jump to new instruction, then continue execution
 //
-ifunc.doADD = (program, inst, op) => {
-  program[inst.args[2]] = op[0] + op[1];
+ifunc.doADD = (program, op, storeIndex) => {
+  program[storeIndex] = op[0] + op[1];
   return 'run';
 };
-ifunc.doMUL = (program, inst, op) => {
-  program[inst.args[2]] = op[0] * op[1];
+ifunc.doMUL = (program, op, storeIndex) => {
+  program[storeIndex] = op[0] * op[1];
   return 'run';
 };
-ifunc.doIN = (program, inst, op, inCallback) => {
+ifunc.doIN = (program, op, storeIndex, inCallback) => {
   /* istanbul ignore else */
   if (inCallback) {
     const v = inCallback();
     if (v === undefined) {
       return 'iowait';
     } else {
-      program[inst.args[0]] = v;
+      program[storeIndex] = v;
     }
   } else {
-    program[inst.args[0]] = Number(reader.question('INPUT: '));
+    program[storeIndex] = Number(reader.question('INPUT: '));
   }
   return 'run';
 };
 // use destructuring to avoid lint "unused argument" errors
 // h/t <https://stackoverflow.com/a/58738236/291754>
-ifunc.doOUT = (...[, , op, , outCallback]) => {
+ifunc.doOUT = (...[, op, , , outCallback]) => {
   /* istanbul ignore else */
   if (outCallback) {
     outCallback(op[0]);
@@ -100,18 +101,18 @@ ifunc.doOUT = (...[, , op, , outCallback]) => {
   }
   return 'run';
 };
-ifunc.doJTRU = (program, inst, op) => {
+ifunc.doJTRU = (program, op) => {
   return (op[0] !== 0) ? 'jump' : 'run';
 };
-ifunc.doJFAL = (program, inst, op) => {
+ifunc.doJFAL = (program, op) => {
   return (op[0] === 0) ? 'jump' : 'run';
 };
-ifunc.doLT = (program, inst, op) => {
-  program[inst.args[2]] = (op[0] < op[1]) ? 1 : 0;
+ifunc.doLT = (program, op, storeIndex) => {
+  program[storeIndex] = (op[0] < op[1]) ? 1 : 0;
   return 'run';
 };
-ifunc.doEQ = (program, inst, op) => {
-  program[inst.args[2]] = (op[0] === op[1]) ? 1 : 0;
+ifunc.doEQ = (program, op, storeIndex) => {
+  program[storeIndex] = (op[0] === op[1]) ? 1 : 0;
   return 'run';
 };
 ifunc.doHALT = () => {
@@ -140,7 +141,7 @@ const splitOpcode = (instruction) => {
   if (modes[storeArgIndex] === 1) {
     throw new Error('immediate mode is invalid for store argument');
   }
-  return {opcode, opcodeName, argCount, modes};
+  return {opcode, opcodeName, argCount, storeArgIndex, modes};
 };
 const instructionString = (inst) => {
   let str = inst.opcodeName;
