@@ -30,36 +30,41 @@ const getStoreIndex = (inst) => {
  * @param {function} [outCallback] - "headless mode": rather than printing
  *   to `stdout`, the OUT instruction will call `outCallback(v)` with the
  *   output value
- * @param {number} [pc=0] - initial program counter (PC) value
+ * @param {object} [iState={pc:0}] - initial Intcode state (Program Counter)
  *
- * @return {number}
- *   If running in "headless mode," and `inCallback()` returns undefined,
- *     pauses execution and returns the PC at which execution should resume.
- *   Otherwise, returns `-1` to indicate execution has halted.
+ * @return {object}
+ *   Returns Intcode state, with the following fields:
+ *   - `pc` - current Program Counter (number)
+ *   - `state` - processor state (string):
+ *     - `iowait` indicates the "headless mode" `inCallback()` returned
+ *       `undefined`, and execution is paused for input (`pc` is where
+ *       execution should resume)
+ *     - `halt` indicates execution is halted
  */
-exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, pc = 0) => {
+exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, iState = {pc: 0}) => {
   for (;;) {
-    const inst = module.exports.decode(program.slice(pc, pc+4));
+    const inst = module.exports.decode(program.slice(iState.pc, iState.pc+4));
     /* istanbul ignore if */
     if (debug) {
-      console.debug(`[PC:${pc} ${module.exports.instructionString(inst)}]`);
+      console.debug(`[PC:${iState.pc} ${module.exports.instructionString(inst)}]`);
     }
     const op = getOperands(program, inst);
     const ifuncName = 'do'+inst.opcodeName;
     if (!ifunc[ifuncName]) {
-      throw new Error(`invalid opcode ${inst.opcode} at PC=${pc}`);
+      throw new Error(`invalid opcode ${inst.opcode} at PC=${iState.pc}`);
     }
     const state = ifunc[ifuncName](program, op, getStoreIndex(inst), inCallback, outCallback);
     switch (state) {
     case 'iowait':
-      return pc;
+      return {pc: iState.pc, state: 'iowait'};
     case 'halt':
-      return -1;
+      iState.pc += (inst.argCount + 1);
+      return {pc: iState.pc, state: 'halt'};
     case 'run':
-      pc += (inst.argCount + 1);
+      iState.pc += (inst.argCount + 1);
       break;
     case 'jump':
-      pc = op[1];
+      iState.pc = op[1];
       break;
     /* istanbul ignore next */
     default:

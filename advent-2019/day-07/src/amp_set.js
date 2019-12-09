@@ -39,7 +39,7 @@ const runFeedback = (program, settings) => {
   const amps = settings.map((s) => ({
     program: program.slice(),
     values: [s],
-    pc: 0,
+    iState: {pc: 0},
   }));
   let curAmp = 0;
   const getValue = () => amps[curAmp].values.shift();
@@ -47,8 +47,8 @@ const runFeedback = (program, settings) => {
   // Intcode inputs: FIRST the amp phase setting, SECOND the signal value
   amps[0].values.push(0);
   for (;;) {
-    amps[curAmp].pc = intcode.run(amps[curAmp].program, false, getValue, storeValue, amps[curAmp].pc);
-    if (amps.every((a) => a.pc < 0)) {
+    amps[curAmp].iState = intcode.run(amps[curAmp].program, false, getValue, storeValue, amps[curAmp].iState);
+    if (amps.every((a) => a.iState.state === 'halt')) {
       break;
     }
     curAmp = (curAmp+1) % settings.length;
