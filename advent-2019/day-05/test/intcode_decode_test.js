@@ -24,6 +24,17 @@ describe('intcode decode tests', () => {
       args: [-1, 2, 3],
     });
   });
+  it('should decode 2101,-1,2,3 to {1,ADD,3,[1,2,0],[-1,2,3]}', () => {
+    const program = [2101,-1,2,3];
+    expect(intcode.decode(program)).to.eql({
+      opcode: 1,
+      opcodeName: 'ADD',
+      argCount: 3,
+      storeArgIndex: 2,
+      modes: [1, 2, 0],
+      args: [-1, 2, 3],
+    });
+  });
   it('should decode 1101,612,763,651 to {1,ADD,3,[1,1,0],[612,763,651]}', () => {
     const program = [1101,612,763,651,77];
     expect(intcode.decode(program)).to.eql({
@@ -54,6 +65,17 @@ describe('intcode decode tests', () => {
       argCount: 3,
       storeArgIndex: 2,
       modes: [0, 1, 0],
+      args: [4, 3, 4],
+    });
+  });
+  it('should decode 1202,4,3,4 to {2,MUL,3,[2,1,0],[4,3,4]}', () => {
+    const program = [1202,4,3,4,33];
+    expect(intcode.decode(program)).to.eql({
+      opcode: 2,
+      opcodeName: 'MUL',
+      argCount: 3,
+      storeArgIndex: 2,
+      modes: [2, 1, 0],
       args: [4, 3, 4],
     });
   });
@@ -205,9 +227,17 @@ describe('intcode instructionString tests', () => {
     const program = [1001,1,2,3];
     expect(intcode.instructionString(intcode.decode(program))).to.eql('ADD M1,2,M3');
   });
+  it('should render 1201,1,2,3 as "ADD *1,2,M3"', () => {
+    const program = [1201,1,2,3];
+    expect(intcode.instructionString(intcode.decode(program))).to.eql('ADD *1,2,M3');
+  });
   it('should render 102,3,1,5 as "MUL 3,M1,M5"', () => {
     const program = [102,3,1,5];
     expect(intcode.instructionString(intcode.decode(program))).to.eql('MUL 3,M1,M5');
+  });
+  it('should render 2102,3,1,5 as "MUL 3,*1,M5"', () => {
+    const program = [2102,3,1,5];
+    expect(intcode.instructionString(intcode.decode(program))).to.eql('MUL 3,*1,M5');
   });
   it('should render 4.50 as "OUT M50"', () => {
     const program = [4,50];

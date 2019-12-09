@@ -7,11 +7,21 @@ const ifunc = {};
 // - "argument" to mean the raw value stored in the program
 // - "operand" to mean the value actually operated on, after fetching
 //   the value according to the mode
-const getOperands = (program, inst) => {
-  return inst.modes.map((mode, i) => (mode === 1) ? inst.args[i] : program[inst.args[i]]);
+const getOperands = (program, inst, iState) => {
+  return inst.modes.map((mode, i) => {
+    switch (mode) {
+    case 1:   // immediate
+      return inst.args[i];
+    case 2:   // relative
+      return program[inst.args[i] + iState.rb];
+    default:  // position
+      return program[inst.args[i]];
+    }
+  });
 };
-const getStoreIndex = (inst) => {
-  return inst.args[inst.storeArgIndex];
+const getStoreLocation = (inst, iState) => {
+  const mode = inst.modes[inst.storeArgIndex];
+  return inst.args[inst.storeArgIndex] + ((mode === 2) ? iState.rb : 0);
 };
 
 /**
@@ -30,36 +40,41 @@ const getStoreIndex = (inst) => {
  * @param {function} [outCallback] - "headless mode": rather than printing
  *   to `stdout`, the OUT instruction will call `outCallback(v)` with the
  *   output value
- * @param {object} [iState={pc:0}] - initial Intcode state (Program Counter)
+ * @param {object} [iState={pc: 0, rb: 0}] - initial Intcode state (Program
+ *   Counter and Relative Base)
  *
  * @return {object}
  *   Returns Intcode state, with the following fields:
  *   - `pc` - current Program Counter (number)
+ *   - `rb` - current Relative Base (number)
  *   - `state` - processor state (string):
  *     - `iowait` indicates the "headless mode" `inCallback()` returned
  *       `undefined`, and execution is paused for input (`pc` is where
  *       execution should resume)
  *     - `halt` indicates execution is halted
  */
-exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, iState = {pc: 0}) => {
+exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, iState = {pc: 0, rb: 0}) => {
   for (;;) {
     const inst = module.exports.decode(program.slice(iState.pc, iState.pc+4));
     /* istanbul ignore if */
     if (debug) {
-      console.debug(`[PC:${iState.pc} ${module.exports.instructionString(inst)}]`);
+      console.debug(`[PC:${iState.pc} RB:${iState.rb} ${module.exports.instructionString(inst)}]`);
     }
-    const op = getOperands(program, inst);
+    const op = getOperands(program, inst, iState);
     const ifuncName = 'do'+inst.opcodeName;
     if (!ifunc[ifuncName]) {
       throw new Error(`invalid opcode ${inst.opcode} at PC=${iState.pc}`);
     }
-    const state = ifunc[ifuncName](program, op, getStoreIndex(inst), inCallback, outCallback);
+    const state = ifunc[ifuncName](program, op, getStoreLocation(inst, iState), inCallback, outCallback, iState);
     switch (state) {
     case 'iowait':
-      return {pc: iState.pc, state: 'iowait'};
+      // PC is unchanged (resume from same IN instruction)
+      iState.state = 'iowait';
+      return iState;
     case 'halt':
       iState.pc += (inst.argCount + 1);
-      return {pc: iState.pc, state: 'halt'};
+      iState.state = 'halt';
+      return iState;
     case 'run':
       iState.pc += (inst.argCount + 1);
       break;
@@ -84,25 +99,25 @@ exports.run = (program, debug = false, inCallback = undefined, outCallback = und
 //   'run': continue execution with next instruction
 //   'jump': jump to new instruction, then continue execution
 //
-ifunc.doADD = (program, op, storeIndex) => {
-  program[storeIndex] = op[0] + op[1];
+ifunc.doADD = (program, op, storeLocation) => {
+  program[storeLocation] = op[0] + op[1];
   return 'run';
 };
-ifunc.doMUL = (program, op, storeIndex) => {
-  program[storeIndex] = op[0] * op[1];
+ifunc.doMUL = (program, op, storeLocation) => {
+  program[storeLocation] = op[0] * op[1];
   return 'run';
 };
-ifunc.doIN = (program, op, storeIndex, inCallback) => {
+ifunc.doIN = (program, op, storeLocation, inCallback) => {
   /* istanbul ignore else */
   if (inCallback) {
     const v = inCallback();
     if (v === undefined) {
       return 'iowait';
     } else {
-      program[storeIndex] = v;
+      program[storeLocation] = v;
     }
   } else {
-    program[storeIndex] = Number(reader.question('INPUT: '));
+    program[storeLocation] = Number(reader.question('INPUT: '));
   }
   return 'run';
 };
@@ -123,12 +138,18 @@ ifunc.doJTRU = (program, op) => {
 ifunc.doJFAL = (program, op) => {
   return (op[0] === 0) ? 'jump' : 'run';
 };
-ifunc.doLT = (program, op, storeIndex) => {
-  program[storeIndex] = (op[0] < op[1]) ? 1 : 0;
+ifunc.doLT = (program, op, storeLocation) => {
+  program[storeLocation] = (op[0] < op[1]) ? 1 : 0;
   return 'run';
 };
-ifunc.doEQ = (program, op, storeIndex) => {
-  program[storeIndex] = (op[0] === op[1]) ? 1 : 0;
+ifunc.doEQ = (program, op, storeLocation) => {
+  program[storeLocation] = (op[0] === op[1]) ? 1 : 0;
+  return 'run';
+};
+// use destructuring to avoid lint "unused argument" errors
+// h/t <https://stackoverflow.com/a/58738236/291754>
+ifunc.doARB = (...[, op, , , , iState]) => {
+  iState.rb += op[0];
   return 'run';
 };
 ifunc.doHALT = () => {
@@ -164,10 +185,10 @@ exports.decode = (program) => {
 // (above).
 const splitOpcode = (instruction) => {
   const opcode = instruction % 100;
-  const opcodeName =    {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT',  8: 'EQ',  99: 'HALT'}[opcode];
-  const argCount =      {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,     8: 3,     99: 0}[opcode];
+  const opcodeName =    {1: 'ADD', 2: 'MUL', 3: 'IN', 4: 'OUT', 5: 'JTRU', 6: 'JFAL', 7: 'LT', 8: 'EQ', 9: 'ARB', 99: 'HALT'}[opcode];
+  const argCount =      {1: 3,     2: 3,     3: 1,    4: 1,     5: 2,      6: 2,      7: 3,    8: 3,    9: 1,     99: 0}[opcode];
   // which argument does the instruction store the result to (if any)?
-  const storeArgIndex = {1: 2,     2: 2,     3: 0,    4: null,  5: null,   6: null,   7: 2,     8: 2,     99: null}[opcode];
+  const storeArgIndex = {1: 2,     2: 2,     3: 0,    4: null,  5: null,   6: null,   7: 2,    8: 2,    9: null,  99: null}[opcode];
   // the mode of each argument: 0=positional(indirect) 1=immediate
   const modes = [];
   for (let i = 0, mode = 100; i < argCount; i++, mode *= 10) {
@@ -192,7 +213,9 @@ exports.instructionString = (inst) => {
   let str = inst.opcodeName;
   for (let i = 0; i < inst.argCount; i++) {
     str += ((i > 0) ? ',' : ' ');
-    if (inst.modes[i] !== 1) {
+    if (inst.modes[i] === 2) {
+      str += '*';
+    } else if (inst.modes[i] !== 1) {
       str += 'M';
     }
     str += inst.args[i];

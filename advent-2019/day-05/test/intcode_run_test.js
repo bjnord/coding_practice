@@ -3,6 +3,9 @@ const expect = require('chai').expect;
 const intcode = require('../src/intcode');
 describe('intcode run tests', () => {
   // TODO add tests for invalid/missing iState.pc and .rb values
+  //      passed into run()
+  // TODO add tests for illegal memory access: both relative mode
+  //      (operand + RB < 0) and position mode (operand < 0)
   // position (indirect) mode tests:
   it('should transform 1,0,0,0,99 to 2,0,0,0,99', () => {
     const program = [1,0,0,0,99];
@@ -106,6 +109,40 @@ describe('intcode run tests', () => {
     const program = [1105,0,7,1101,0,0,8,99,1];
     expect(intcode.run(program).state).to.eql('halt');
     expect(program).to.eql([1105,0,7,1101,0,0,8,99,0]);
+  });
+  // relative mode tests:
+  it('should transform 109,1,2101,0,7,9,99,7,77,-1 to 109,1,2101,0,7,9,99,7,77,77', () => {
+    const program = [109,1,2101,0,7,9,99,7,77,-1];  // relative +operand, +RB
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([109,1,2101,0,7,9,99,7,77,77]);
+  });
+  it('should transform 109,9,2101,0,-1,9,99,6,66,-1 to 109,9,2101,0,-1,9,99,6,66,66', () => {
+    const program = [109,9,2101,0,-1,9,99,6,66,-1];  // relative -operand, +RB
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([109,9,2101,0,-1,9,99,6,66,66]);
+  });
+  it('should transform 109,-2,2101,0,10,9,99,5,55,-1 to 109,-2,2101,0,10,9,99,5,55,55', () => {
+    const program = [109,-2,2101,0,10,9,99,5,55,-1];  // relative +operand, -RB
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([109,-2,2101,0,10,9,99,5,55,55]);
+  });
+  it('should transform 109,-1,21102,2,3,8,99,-1,-1 to 109,-1,21102,2,3,8,99,6,-1', () => {
+    const program = [109,-1,21102,2,3,8,99,-1,-1];  // relative store, -RB
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([109,-1,21102,2,3,8,99,6,-1]);
+  });
+  // ARB tests:
+  it('should return RB adjusted +15 (immediate mode)', () => {
+    const program = [109,15,99];
+    const iState = intcode.run(...[program, , , , {pc: 0, rb: 7}]);
+    expect(iState.state).to.eql('halt');
+    expect(iState.rb).to.eql(22);
+  });
+  it('should return RB adjusted -12 (position mode)', () => {
+    const program = [9,3,99,-12];
+    const iState = intcode.run(...[program, , , , {pc: 0, rb: 33}]);
+    expect(iState.state).to.eql('halt');
+    expect(iState.rb).to.eql(21);
   });
   // I/O test, headless mode
   it('should return n * 2 + 1 from headless mode', () => {
