@@ -1,4 +1,5 @@
 'use strict';
+/** @module */
 const reader = require('readline-sync');
 const ifunc = {};
 
@@ -13,32 +14,35 @@ const getStoreIndex = (inst) => {
   return inst.args[inst.storeArgIndex];
 };
 
-// run(): Run an Intcode program.
-//
-// PARAMETERS
-//   program: the Intcode program to run - NOTE that programs can be
-//     self-modifying ("program" is essentially a memory bank), so
-//     run() may alter the contents of program
-//   debug: if true, output instructions to the console (default false)
-//   inCallback: "headless mode": rather than taking from stdin, the
-//     IN instruction will call inCallback(), which is expected to
-//     return the input value - NOTE that if inCallback() returns
-//     undefined (no input available), execution will be paused (see
-//     "RETURNS" below)
-//   outCallback: "headless mode": rather than printing to stdout, the
-//     OUT instruction will call outCallback(v) with the output value
-//   pc: initial program counter (PC) value (default 0)
-//
-// RETURNS
-//   if running in "headless mode", and inCallback() returns undefined,
-//     pauses execution and returns the PC at which execution should resume
-//   otherwise returns -1 to indicate execution has halted
-const run = (program, debug = false, inCallback = undefined, outCallback = undefined, pc = 0) => {
+/**
+ * Run an Intcode program.
+ *
+ * @param {Array} program - the Intcode program to run - **NOTE** that
+ *   programs can be self-modifying (`program` is essentially a memory
+ *   bank), so `run()` may alter the contents of `program`
+ * @param {boolean} [debug=false] - if `true`, output instructions to the
+ *   console
+ * @param {function} [inCallback] - "headless mode": rather than taking
+ *   from `stdin`, the IN instruction will call `inCallback()`, which is
+ *   expected to return the input value - **NOTE** that if `inCallback()`
+ *   returns `undefined` (no input available), execution will be paused
+ *   (see "Returns" below)
+ * @param {function} [outCallback] - "headless mode": rather than printing
+ *   to `stdout`, the OUT instruction will call `outCallback(v)` with the
+ *   output value
+ * @param {number} [pc=0] - initial program counter (PC) value
+ *
+ * @return {number}
+ *   If running in "headless mode," and `inCallback()` returns undefined,
+ *     pauses execution and returns the PC at which execution should resume.
+ *   Otherwise, returns `-1` to indicate execution has halted.
+ */
+exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, pc = 0) => {
   for (;;) {
-    const inst = decode(program.slice(pc, pc+4));
+    const inst = module.exports.decode(program.slice(pc, pc+4));
     /* istanbul ignore if */
     if (debug) {
-      console.debug(`[PC:${pc} ${instructionString(inst)}]`);
+      console.debug(`[PC:${pc} ${module.exports.instructionString(inst)}]`);
     }
     const op = getOperands(program, inst);
     const ifuncName = 'do'+inst.opcodeName;
@@ -67,8 +71,8 @@ const run = (program, debug = false, inCallback = undefined, outCallback = undef
 ////////////////////////////////////////////////////////////////////////////
 // BEGIN Intcode instruction functions
 //
-// each of these functions handles one instruction type
-// they return one of the following:
+// Each of these functions handles one instruction type. They return one of
+// the following:
 //
 //   'iowait': stop execution waiting for I/O
 //   'halt': halt execution
@@ -129,14 +133,27 @@ ifunc.doHALT = () => {
 // END Intcode instruction functions
 ////////////////////////////////////////////////////////////////////////////
 
-// decode(): Decode an instruction and its arguments.
-const decode = (program) => {
+/**
+ * Decode an instruction and its arguments.
+ *
+ * @param {Array} program - subset of program containing instruction to
+ *   decode
+ *
+ * @return {object}
+ *   Returns the decoded instruction, with the following fields:
+ *   - `opcode` - opcode (number)
+ *   - `opcodeName` - opcode name (string)
+ *   - `argCount` - number of arguments the instruction takes
+ *   - `storeArgIndex` - argument the instruction stores to (if any)
+ *   - `modes` - mode of each argument (`0`=positional, `1`=immediate)
+ */
+exports.decode = (program) => {
   const o = splitOpcode(program[0]);
   o.args = program.slice(1, 1 + o.argCount);
   return o;
 };
 
-// splitOpcode(): Decode the opcode portion of an instruction.
+// Decode the opcode portion of an instruction.
 //
 // This does the bulk of the work for decode(). See also "Terminology note"
 // (above).
@@ -158,8 +175,15 @@ const splitOpcode = (instruction) => {
   return {opcode, opcodeName, argCount, storeArgIndex, modes};
 };
 
-// Reencode ("disassemble") an instruction to a string suitable for debug output.
-const instructionString = (inst) => {
+/**
+ * Reencode ("disassemble") an instruction to string.
+ *
+ * @param {object} inst - instruction object (as from `decode()`)
+ *
+ * @return {string}
+ *   Returns an "assembler" instruction string suitable for debug output.
+ */
+exports.instructionString = (inst) => {
   let str = inst.opcodeName;
   for (let i = 0; i < inst.argCount; i++) {
     str += ((i > 0) ? ',' : ' ');
@@ -170,7 +194,3 @@ const instructionString = (inst) => {
   }
   return str;
 };
-
-exports.run = run;
-exports.instructionString = instructionString;
-exports.decode = decode;

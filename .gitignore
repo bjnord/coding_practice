@@ -1,6 +1,7 @@
 *.beam
 */*/.nyc_output/
 */*/coverage/
+*/*/doc/
 */*/node_modules/
 # this is symlinked to day-05/src/intcode.js
 advent-2019/day-07/src/intcode.js
