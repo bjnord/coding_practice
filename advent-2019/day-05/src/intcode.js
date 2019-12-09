@@ -9,13 +9,17 @@ const ifunc = {};
 //   the value according to the mode
 const getOperands = (program, inst, iState) => {
   return inst.modes.map((mode, i) => {
+    let loc;
+    // "Memory beyond the initial program starts with the value 0"
     switch (mode) {
     case 1:   // immediate
       return inst.args[i];
     case 2:   // relative
-      return program[inst.args[i] + iState.rb];
+      loc = inst.args[i] + iState.rb;
+      return program[loc] ? program[loc] : 0;
     default:  // position
-      return program[inst.args[i]];
+      loc = inst.args[i];
+      return program[loc] ? program[loc] : 0;
     }
   });
 };

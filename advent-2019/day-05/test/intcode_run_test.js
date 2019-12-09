@@ -144,7 +144,7 @@ describe('intcode run tests', () => {
     expect(iState.state).to.eql('halt');
     expect(iState.rb).to.eql(21);
   });
-  // I/O test, headless mode
+  // I/O tests, headless mode:
   it('should return n * 2 + 1 from headless mode', () => {
     const program = [3,13,1002,13,2,13,1001,13,1,13,4,13,99,-1];
     const values = [3];
@@ -173,5 +173,28 @@ describe('intcode run tests', () => {
     expect(program[12]).to.eql(10);
     expect(program[13]).to.eql(313);
     expect(values[0]).to.eql(313);
+  });
+  // Infinite memory tests:
+  it('should get 0 for locations beyond end of program (position mode)', () => {
+    const program = [101,3,10,5,99,-1];
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([101,3,10,5,99,3]);
+  });
+  it('should get 0 for locations beyond end of program (relative mode)', () => {
+    const program = [2102,6,11,5,99,-1];
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([2102,6,11,5,99,0]);
+  });
+  it('should be able to store values at locations beyond end of program', () => {
+    const program = [1101,3,5,15,1101,2,3,14,1101,1,2,13,99];
+    expect(intcode.run(program).state).to.eql('halt');
+    expect(program).to.eql([1101,3,5,15,1101,2,3,14,1101,1,2,13,99,3,5,8]);
+  });
+  it('should produce a copy of itself as output (day 9 example #1)', () => {
+    const program = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99];
+    const values = [];
+    const storeValue = (v) => values.push(v);
+    expect(intcode.run(program, false, undefined, storeValue).state).to.eql('halt');
+    expect(values).to.eql([109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]);
   });
 });
