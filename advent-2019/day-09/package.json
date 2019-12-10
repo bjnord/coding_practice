@@ -1,0 +1,12 @@
+{
+  "name": "day-09",
+  "version": "1.0.0",
+  "description": "Advent of Code 2019 - Day 9",
+  "private": true,
+  "main": "index.js",
+  "author": "Brent J. Nordquist",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.7.2"
+  }
+}
