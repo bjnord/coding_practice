@@ -33,7 +33,7 @@ class AsteroidMap
       this._setWidth(rows[y]);
       for (let x = 0; x < this.width; x++) {
         if (rows[y].slice(x, x+1) === '#') {
-          this.grid.set(AsteroidMap._mapKey([y, x]), 1);
+          this.grid.set(AsteroidMap._mapKey([y, x]), [y, x]);
         }
       }
     }
@@ -75,6 +75,22 @@ class AsteroidMap
       }
     }
     return true;
+  }
+  /**
+   * Determine how many asteroids are visible from an observing origin.
+   *
+   * @param {Array} origin - [y, x] observing origin
+   *
+   * @return {number}
+   *   Returns the number of asteroids visible from the given origin
+   *   (excluding the origin asteroid itself).
+   */
+  asteroidsVisibleFrom(origin)
+  {
+    const asteroids = Array.from(this.grid.values()).filter((pos) => {
+      return ((pos[0] !== origin[0]) || (pos[1] !== origin[1]));
+    });
+    return asteroids.filter((pos) => this.isVisible(origin, pos)).length;
   }
   /**
    * Determine if a location is within the asteroid map.
