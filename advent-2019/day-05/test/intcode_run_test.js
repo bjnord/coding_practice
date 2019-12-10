@@ -197,4 +197,19 @@ describe('intcode run tests', () => {
     expect(intcode.run(program, false, undefined, storeValue).state).to.eql('halt');
     expect(values).to.eql([109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]);
   });
+  // Large number tests:
+  it('should output a 16-digit number (day 9 example #2)', () => {
+    const program = [1102,34915192,34915192,7,4,7,99,0];
+    const values = [];
+    const storeValue = (v) => values.push(v);
+    expect(intcode.run(program, false, undefined, storeValue).state).to.eql('halt');
+    expect(values[0].toString().length).to.eql(16);
+  });
+  it('should output a large number (day 9 example #3)', () => {
+    const program = [104,1125899906842624,99];
+    const values = [];
+    const storeValue = (v) => values.push(v);
+    expect(intcode.run(program, false, undefined, storeValue).state).to.eql('halt');
+    expect(values[0]).to.eql(1125899906842624);
+  });
 });
