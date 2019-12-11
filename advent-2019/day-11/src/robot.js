@@ -95,5 +95,22 @@ class Robot
   {
     return `${position[0]},${position[1]}`;
   }
+  /**
+   * Display the painted hull panels.
+   */
+  /* istanbul ignore next */
+  dump()
+  {
+    const panels = Array.from(this.grid.keys()).map((k) => k.split(/,/).map((str) => Number(str)));
+    const panelMin = panels.reduce((mins, p) => [Math.min(p[0], mins[0]), Math.min(p[1], mins[1])], [999999, 999999]);
+    const panelMax = panels.reduce((maxes, p) => [Math.max(p[0], maxes[0]), Math.max(p[1], maxes[1])], [-999999, -999999]);
+    for (let y = panelMin[0]; y <= panelMax[0]; y++) {
+      for (let x = panelMin[1]; x <= panelMax[1]; x++) {
+        const color = this.grid.get(Robot._mapKey([y, x])) ? 1 : 0;
+        process.stdout.write((color === 1) ? '\u25a0' : ' ');
+      }
+      process.stdout.write('\n');
+    }
+  }
 }
 module.exports = Robot;
