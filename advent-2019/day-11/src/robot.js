@@ -1,4 +1,5 @@
 'use strict';
+const intcode = require('../src/intcode');
 
 class Robot
 {
@@ -71,17 +72,21 @@ class Robot
   }
   /*
    * Run the paint controlling Intcode program until it halts.
-   *
+   */
+  // TODO should add at least one test case that exercises IN/OUT
+  /* istanbul ignore next */
   run()
   {
-    // method run() - go to it
-    //   arranges in callback to send currentColor()
-    //   arranges out callback
-    //     - if justPainted, call move(turn) with output value
-    //     - otherwise, call paint(color) with output value
-    // TODO
+    const getValue = (() => this.currentColor);
+    const storeValue = ((v) => {
+      if (this.justPainted) {
+        this.move(v);
+      } else {
+        this.paint(v);
+      }
+    });
+    intcode.run(this.program, false, getValue, storeValue);
   }
-   */
   // private: map key for a given [y, x] location
   static _mapKey(position)
   {
