@@ -16,7 +16,7 @@ coverage:
 	npm run coverage
 
 doc:
-	$(NODEBIN)/jsdoc -c jsdoc.json src
+	$(NODEBIN)/jsdoc -c jsdoc.json
 
 distclean:
 	-@rm -rf .nyc_output node_modules coverage
