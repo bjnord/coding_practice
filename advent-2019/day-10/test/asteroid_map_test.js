@@ -93,23 +93,23 @@ describe('asteroid map location count tests', () => {
     const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
     expect(asteroidMap.isVisible([4, 3], [0, 1])).to.be.false;
     expect(asteroidMap.isVisible([4, 3], [0, 4])).to.be.true;
-    expect(asteroidMap.asteroidsVisibleFrom([4, 3])).to.eql(8);
+    expect(asteroidMap.asteroidsVisibleFrom([4, 3]).length).to.eql(8);
   });
   it('should see 7 asteroids from location [0, 4] [puzzle example #1]', () => {
     const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
-    expect(asteroidMap.asteroidsVisibleFrom([0, 4])).to.eql(7);
+    expect(asteroidMap.asteroidsVisibleFrom([0, 4]).length).to.eql(7);
   });
   it('should see 7 asteroids from location [4, 4] [puzzle example #1]', () => {
     const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
-    expect(asteroidMap.asteroidsVisibleFrom([4, 4])).to.eql(7);
+    expect(asteroidMap.asteroidsVisibleFrom([4, 4]).length).to.eql(7);
   });
   it('should see 6 asteroids from location [2, 0] [puzzle example #1]', () => {
     const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
-    expect(asteroidMap.asteroidsVisibleFrom([2, 0])).to.eql(6);
+    expect(asteroidMap.asteroidsVisibleFrom([2, 0]).length).to.eql(6);
   });
   it('should see 5 asteroids from location [2, 4] [puzzle example #1]', () => {
     const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
-    expect(asteroidMap.asteroidsVisibleFrom([2, 4])).to.eql(5);
+    expect(asteroidMap.asteroidsVisibleFrom([2, 4]).length).to.eql(5);
   });
 });
 describe('asteroid map location tests', () => {
@@ -220,23 +220,23 @@ describe('asteroid vaporize tests', () => {
       [1, 6], [0, 6], [0, 7],  // 4-8 still visible, 9 hidden behind 8
     ];
     expect(asteroidMap.vaporizeFrom(origin)).to.eql(expectedFirst);
-    expect(asteroidMap.asteroidsVisibleFrom(origin)).to.eql(5);
+    expect(asteroidMap.asteroidsVisibleFrom(origin).length).to.eql(5);
     const expectedSecond = [
       [0, 8], [1, 10], [0, 14], [1, 16], [3, 13]
     ];
     expect(asteroidMap.vaporizeFrom(origin)).to.eql(expectedSecond);
-    expect(asteroidMap.asteroidsVisibleFrom(origin)).to.eql(1);
+    expect(asteroidMap.asteroidsVisibleFrom(origin).length).to.eql(1);
     const expectedThird = [
       [3, 14]
     ];
     expect(asteroidMap.vaporizeFrom(origin)).to.eql(expectedThird);
-    expect(asteroidMap.asteroidsVisibleFrom(origin)).to.eql(0);
+    expect(asteroidMap.asteroidsVisibleFrom(origin).length).to.eql(0);
   });
   it('should vaporize asteroids in correct order [puzzle example #6]', () => {
     const asteroidMap = new AsteroidMap('.#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##\n');
     const origin = asteroidMap.bestLocation().pos;
     let vaporized = [];
-    while (asteroidMap.asteroidsVisibleFrom(origin) > 0) {
+    while (asteroidMap.asteroidsVisibleFrom(origin).length) {
       vaporized = vaporized.concat(asteroidMap.vaporizeFrom(origin));
     }
     // The 1st asteroid to be vaporized is at 11,12.

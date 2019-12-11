@@ -77,22 +77,15 @@ class AsteroidMap
     return true;
   }
   /**
-   * Determine how many asteroids are visible from an observing origin.
+   * Find asteroids that are visible from an observing origin.
    *
    * @param {Array} origin - [y, x] observing origin
    *
-   * @return {number}
-   *   Returns the number of asteroids visible from the given origin
-   *   (excluding the origin asteroid itself).
+   * @return {Array}
+   *   Returns a list of the [y, x] positions of asteroids visible from the
+   *   given origin (excluding the origin asteroid itself).
    */
   asteroidsVisibleFrom(origin)
-  {
-    const asteroids = Array.from(this.grid.values()).filter((pos) => {
-      return ((pos[0] !== origin[0]) || (pos[1] !== origin[1]));
-    });
-    return asteroids.filter((pos) => this.isVisible(origin, pos)).length;
-  }
-  positionsOfAsteroidsVisibleFrom(origin)
   {
     const asteroids = Array.from(this.grid.values()).filter((pos) => {
       return ((pos[0] !== origin[0]) || (pos[1] !== origin[1]));
@@ -114,7 +107,7 @@ class AsteroidMap
   bestLocation()
   {
     return Array.from(this.grid.values()).reduce((acc, pos) => {
-      const count = this.asteroidsVisibleFrom(pos);
+      const count = this.asteroidsVisibleFrom(pos).length;
       return (count > acc.count) ? {pos, count} : acc;
     }, {pos: null, count: 0});
   }
@@ -130,7 +123,7 @@ class AsteroidMap
    */
   vaporizeFrom(origin)
   {
-    const positions = this.positionsOfAsteroidsVisibleFrom(origin).sort((a, b) => AsteroidMap._polarAngle(origin, a) - AsteroidMap._polarAngle(origin, b));
+    const positions = this.asteroidsVisibleFrom(origin).sort((a, b) => AsteroidMap._polarAngle(origin, a) - AsteroidMap._polarAngle(origin, b));
     positions.forEach((pos) => this.grid.delete(AsteroidMap._mapKey(pos)));
     return positions;
   }

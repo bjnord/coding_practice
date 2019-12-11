@@ -13,7 +13,7 @@ console.log('');
 // PART 2
 const origin = loc.pos;
 let vaporized = [];
-while (am.asteroidsVisibleFrom(origin) > 0) {
+while (am.asteroidsVisibleFrom(origin).length) {
   vaporized = vaporized.concat(am.vaporizeFrom(origin));
 }
 console.log('part 2: expected answer:                      1417');
