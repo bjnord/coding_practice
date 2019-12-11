@@ -261,3 +261,15 @@ describe('asteroid vaporize tests', () => {
     expect(vaporized.length).to.eql(299);
   });
 });
+describe('rectangular to polar conversion tests', () => {
+  it('should return correct polar angles', () => {
+    expect(AsteroidMap._polarAngle([0, 0], [-2, 0])).to.be.closeTo(0.0, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [-2, 2])).to.be.closeTo(0.785, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [0, 2])).to.be.closeTo(1.571, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [2, 2])).to.be.closeTo(2.356, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [2, 0])).to.be.closeTo(3.142, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [2, -2])).to.be.closeTo(3.927, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [0, -2])).to.be.closeTo(4.712, 0.001);
+    expect(AsteroidMap._polarAngle([0, 0], [-2, -2])).to.be.closeTo(5.498, 0.001);
+  });
+});
