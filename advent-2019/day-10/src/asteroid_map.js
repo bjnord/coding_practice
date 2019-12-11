@@ -128,19 +128,6 @@ class AsteroidMap
     return positions;
   }
   /**
-   * Determine if a location is within the asteroid map.
-   *
-   * @param {Array} position - [y, x] location to check
-   *
-   * @return {boolean}
-   *   Is the given location within the bounds of the asteroid map?
-   */
-  inBounds(position)
-  {
-    return ((position[0] >= 0) && (position[0] <= this.height) &&
-      (position[1] >= 0) && (position[1] <= this.width));
-  }
-  /**
    * Determine if there is an asteroid at a location in the asteroid map.
    *
    * @param {Array} position - [y, x] location to check

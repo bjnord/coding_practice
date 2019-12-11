@@ -76,9 +76,6 @@ describe('asteroid map visibility tests', () => {
     expect(asteroidMap.isVisible([2, 2], [0, 0])).to.be.false;
   });
 });
-describe('asteroid inBounds() tests', () => {
-  // TODO
-});
 describe('asteroid asteroidAt() tests', () => {
   // TODO
 });
