@@ -7,12 +7,14 @@ class Robot
    * Build a new "emergency hull painting robot" from an input string.
    *
    * @param {string} input - the input string, an Intcode program (which
-   * "will serve as the brain of the robot")
+   *   "will serve as the brain of the robot")
+   * @param {number} [originColor=0] - the initial panel color at the
+   *   origin position (0=black 1=white)
    *
    * @return {Robot}
    *   Returns a new Robot class object.
    */
-  constructor(input)
+  constructor(input, originColor = 0)
   {
     // private: our Intcode program
     this.program = input.trim().split(/,/).map((str) => Number(str));
@@ -20,6 +22,7 @@ class Robot
     this.grid = new Map();
     // private: [y, x] position of robot
     this.position = [0, 0];
+    this.grid.set(Robot._mapKey(this.position), originColor);
     // private: direction robot is facing (0=up 1=right 2=down 3=left)
     this.direction = 0;
     // private: whether the robot just painted (and now will move)

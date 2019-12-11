@@ -1,22 +1,49 @@
 'use strict';
 const expect = require('chai').expect;
 const Robot = require('../src/robot');
-describe('robot constructor tests', () => {
-  let testRobot;
+describe('robot constructor tests [black]', () => {
+  let blackRobot;
   before(() => {
-    testRobot = new Robot('99');
+    blackRobot = new Robot('99');
   });
   it('should parse Intcode program correctly', () => {
-    expect(testRobot.program).to.eql([99]);
+    expect(blackRobot.program).to.eql([99]);
   });
   it('should set initial position correctly', () => {
-    expect(testRobot.position).to.eql([0, 0]);
+    expect(blackRobot.position).to.eql([0, 0]);
   });
   it('should set initial direction correctly', () => {
-    expect(testRobot.direction).to.eql(0);
+    expect(blackRobot.direction).to.eql(0);
   });
   it('should set initial state correctly', () => {
-    expect(testRobot.justPainted).to.eql(false);
+    expect(blackRobot.justPainted).to.eql(false);
+  });
+  it('should set origin panel color correctly', () => {
+    expect(blackRobot.currentColor).to.eql(0);
+  });
+  it('should set painted panel count correctly', () => {
+    expect(blackRobot.panelPaintedCount).to.eql(1);
+  });
+});
+describe('robot constructor tests [white]', () => {
+  let whiteRobot;  // follow the white robot
+  before(() => {
+    whiteRobot = new Robot('99', 1);
+  });
+  it('should set initial position correctly', () => {
+    expect(whiteRobot.position).to.eql([0, 0]);
+  });
+  it('should set initial direction correctly', () => {
+    expect(whiteRobot.direction).to.eql(0);
+  });
+  it('should set initial state correctly', () => {
+    expect(whiteRobot.justPainted).to.eql(false);
+  });
+  it('should set origin panel color correctly', () => {
+    expect(whiteRobot.currentColor).to.eql(1);
+  });
+  it('should set painted panel count correctly', () => {
+    expect(whiteRobot.panelPaintedCount).to.eql(1);
   });
 });
 describe('robot paint tests', () => {
@@ -118,7 +145,7 @@ describe('robot move tests', () => {
 describe('robot paint count tests', () => {
   it('should only count a given panel once', () => {
     const newRobot = new Robot('99');
-    expect(newRobot.panelPaintedCount).to.eql(0);
+    expect(newRobot.panelPaintedCount).to.eql(1);
     newRobot.paint(0);
     expect(newRobot.panelPaintedCount).to.eql(1);
     newRobot.paint(1);
@@ -128,7 +155,7 @@ describe('robot paint count tests', () => {
   });
   it('should increase count as robot paints and moves around', () => {
     const newRobot = new Robot('99');
-    expect(newRobot.panelPaintedCount).to.eql(0);
+    expect(newRobot.panelPaintedCount).to.eql(1);
     newRobot.paint(0);
     newRobot.move(0);
     expect(newRobot.panelPaintedCount).to.eql(1);
@@ -146,7 +173,7 @@ describe('robot paint count tests', () => {
     const newRobot = new Robot('99');
     // TODO this is long-winded; rewrite as forEach()
     //      taking tuples of [color, dir, expectedCount]
-    expect(newRobot.panelPaintedCount).to.eql(0);
+    expect(newRobot.panelPaintedCount).to.eql(1);
     newRobot.paint(0);
     newRobot.move(0);
     expect(newRobot.panelPaintedCount).to.eql(1);
