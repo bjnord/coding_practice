@@ -13,4 +13,4 @@ lint:
 	$(NODEBIN)/eslint -c ../.eslintrc.js $(LINTSRC)
 
 distclean:
-	-@rm -rf node_modules
+	-@rm -rf node_modules src/intcode.js

@@ -10,7 +10,7 @@ main: src/intcode.js
 src/intcode.js:
 	@cd ./src ; ln -s ../../day-05/src/intcode.js
 
-test:
+test: src/intcode.js
 	npm test
 
 lint:
@@ -20,4 +20,4 @@ coverage:
 	npm run coverage
 
 distclean:
-	-@rm -rf .nyc_output node_modules coverage
+	-@rm -rf .nyc_output node_modules coverage src/intcode.js
