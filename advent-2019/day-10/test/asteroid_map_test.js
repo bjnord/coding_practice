@@ -82,7 +82,7 @@ describe('asteroid inBounds() tests', () => {
 describe('asteroid asteroidAt() tests', () => {
   // TODO
 });
-describe('asteroid map location tests', () => {
+describe('asteroid map location count tests', () => {
   // TODO move constructor to before/beforeEach, split tests to their own it() calls
   // .#..#
   // .....
@@ -110,5 +110,82 @@ describe('asteroid map location tests', () => {
   it('should see 5 asteroids from location [2, 4] [puzzle example #1]', () => {
     const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
     expect(asteroidMap.asteroidsVisibleFrom([2, 4])).to.eql(5);
+  });
+});
+describe('asteroid map location tests', () => {
+  // .#..#
+  // .....
+  // #####
+  // ....#
+  // ...##
+  it('should find the best location [puzzle example #1]', () => {
+    const asteroidMap = new AsteroidMap('.#..#\n.....\n#####\n....#\n...##\n');
+    expect(asteroidMap.bestLocation()).to.eql({pos: [4, 3], count: 8});
+  });
+  // ......#.#.
+  // #..#.#....
+  // ..#######.
+  // .#.#.###..
+  // .#..#.....
+  // ..#....#.#
+  // #..#....#.
+  // .##.#..###
+  // ##...#..#.
+  // .#....####
+  it('should find the best location [puzzle example #3]', () => {
+    const asteroidMap = new AsteroidMap('......#.#.\n#..#.#....\n..#######.\n.#.#.###..\n.#..#.....\n..#....#.#\n#..#....#.\n.##.#..###\n##...#..#.\n.#....####\n');
+    expect(asteroidMap.bestLocation()).to.eql({pos: [8, 5], count: 33});
+  });
+  // #.#...#.#.
+  // .###....#.
+  // .#....#...
+  // ##.#.#.#.#
+  // ....#.#.#.
+  // .##..###.#
+  // ..#...##..
+  // ..##....##
+  // ......#...
+  // .####.###.
+  it('should find the best location [puzzle example #4]', () => {
+    const asteroidMap = new AsteroidMap('#.#...#.#.\n.###....#.\n.#....#...\n##.#.#.#.#\n....#.#.#.\n.##..###.#\n..#...##..\n..##....##\n......#...\n.####.###.\n');
+    expect(asteroidMap.bestLocation()).to.eql({pos: [2, 1], count: 35});
+  });
+  // .#..#..###
+  // ####.###.#
+  // ....###.#.
+  // ..###.##.#
+  // ##.##.#.#.
+  // ....###..#
+  // ..#.#..#.#
+  // #..#.#.###
+  // .##...##.#
+  // .....#.#..
+  it('should find the best location [puzzle example #5]', () => {
+    const asteroidMap = new AsteroidMap('.#..#..###\n####.###.#\n....###.#.\n..###.##.#\n##.##.#.#.\n....###..#\n..#.#..#.#\n#..#.#.###\n.##...##.#\n.....#.#..\n');
+    expect(asteroidMap.bestLocation()).to.eql({pos: [3, 6], count: 41});
+  });
+  // .#..##.###...#######
+  // ##.############..##.
+  // .#.######.########.#
+  // .###.#######.####.#.
+  // #####.##.#.##.###.##
+  // ..#####..#.#########
+  // ####################
+  // #.####....###.#.#.##
+  // ##.#################
+  // #####.##.###..####..
+  // ..######..##.#######
+  // ####.##.####...##..#
+  // .#####..#.######.###
+  // ##...#.##########...
+  // #.##########.#######
+  // .####.#.###.###.#.##
+  // ....##.##.###..#####
+  // .#.#.###########.###
+  // #.#.#.#####.####.###
+  // ###.##.####.##.#..##
+  it('should find the best location [puzzle example #6]', () => {
+    const asteroidMap = new AsteroidMap('.#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##\n');
+    expect(asteroidMap.bestLocation()).to.eql({pos: [13, 11], count: 210});
   });
 });

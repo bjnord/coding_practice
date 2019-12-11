@@ -93,6 +93,25 @@ class AsteroidMap
     return asteroids.filter((pos) => this.isVisible(origin, pos)).length;
   }
   /**
+   * Determine observing location which can see the most asteroids.
+   *
+   * Has performance O(n^3): O(n^2) with the number of asteroids in the map,
+   * times O(n) with the size of the map.
+   *
+   * @return {object}
+   *   Returns the observing location which can see the most (other)
+   *   asteroids, with the following fields:
+   *   - `pos` - [y, x] coordinates of location
+   *   - `count` - number of asteroids visible from location
+   */
+  bestLocation()
+  {
+    return Array.from(this.grid.values()).reduce((acc, pos) => {
+      const count = this.asteroidsVisibleFrom(pos);
+      return (count > acc.count) ? {pos, count} : acc;
+    }, {pos: null, count: 0});
+  }
+  /**
    * Determine if a location is within the asteroid map.
    *
    * @param {Array} position - [y, x] location to check
