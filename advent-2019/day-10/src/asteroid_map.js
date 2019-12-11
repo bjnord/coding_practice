@@ -1,20 +1,10 @@
 'use strict';
 const euclid = require('../src/euclid');
 
-/** @class */
 class AsteroidMap
 {
   /**
-   * the width of the asteroid map
-   * @member {number} width
-   */
-  /**
-   * the height of the asteroid map
-   * @member {number} height
-   */
-  /**
    * Build a new asteroid map from an input string.
-   * @constructor
    *
    * @param {string} str - the input string, in puzzle format
    *   ("`.#.\n#.#\n.#.\n`"): rows of uniform length separated by
@@ -28,6 +18,10 @@ class AsteroidMap
   {
     const rows = str.trim().split(/\n/);
     this.grid = new Map();
+    /**
+     * the height of the asteroid map
+     * @member {number}
+     */
     this.height = rows.length;
     for (let y = 0; y < this.height; y++) {
       this._setWidth(rows[y]);
@@ -42,6 +36,10 @@ class AsteroidMap
   _setWidth(row)
   {
     if (!this.width) {
+      /**
+       * the width of the asteroid map
+       * @member {number}
+       */
       this.width = row.length;
     } else if (this.width !== row.length) {
       throw new Error('uneven row lengths in map');
