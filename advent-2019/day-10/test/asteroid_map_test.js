@@ -189,3 +189,78 @@ describe('asteroid map location tests', () => {
     expect(asteroidMap.bestLocation()).to.eql({pos: [13, 11], count: 210});
   });
 });
+describe('asteroid vaporize tests', () => {
+  it('should vaporize asteroids in correct order [puzzle example #7]', () => {
+    const asteroidMap = new AsteroidMap('.#....#####...#..\n##...##.#####..##\n##...#...#.#####.\n..#.....#...###..\n..#.#.....#....##\n');
+    const origin = [3, 8];
+    const expectedFirst = [
+      // .#....###24...#..
+      // ##...##.13#67..9#
+      // ##...#...5.8####.
+      // ..#.....X...###..
+      // ..#.#.....#....##
+      [1, 8], [0, 9], [1, 9], [0, 10], [2, 9], [1, 11], [1, 12], [2, 11], [1, 15],
+      // .#....###.....#..
+      // ##...##...#.....#
+      // ##...#......1234.
+      // ..#.....X...5##..
+      // ..#.9.....8....76
+      [2, 12], [2, 13], [2, 14], [2, 15], [3, 12], [4, 16], [4, 15], [4, 10], [4, 4],
+      // .8....###.....#..
+      // 56...9#...#.....#
+      // 34...7...........
+      // ..2.....X....##..
+      // ..1..............
+      [4, 2], [3, 2], [2, 0], [2, 1], [1, 0], [1, 1], [2, 5], [0, 1], [1, 5],
+      // ......234.....6..
+      // ......1...5.....7
+      // .................
+      // ........X....89..
+      // .................
+      [1, 6], [0, 6], [0, 7],  // 4-8 still visible, 9 hidden behind 8
+    ];
+    expect(asteroidMap.vaporizeFrom(origin)).to.eql(expectedFirst);
+    expect(asteroidMap.asteroidsVisibleFrom(origin)).to.eql(5);
+    const expectedSecond = [
+      [0, 8], [1, 10], [0, 14], [1, 16], [3, 13]
+    ];
+    expect(asteroidMap.vaporizeFrom(origin)).to.eql(expectedSecond);
+    expect(asteroidMap.asteroidsVisibleFrom(origin)).to.eql(1);
+    const expectedThird = [
+      [3, 14]
+    ];
+    expect(asteroidMap.vaporizeFrom(origin)).to.eql(expectedThird);
+    expect(asteroidMap.asteroidsVisibleFrom(origin)).to.eql(0);
+  });
+  it('should vaporize asteroids in correct order [puzzle example #6]', () => {
+    const asteroidMap = new AsteroidMap('.#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##\n');
+    const origin = asteroidMap.bestLocation().pos;
+    let vaporized = [];
+    while (asteroidMap.asteroidsVisibleFrom(origin) > 0) {
+      vaporized = vaporized.concat(asteroidMap.vaporizeFrom(origin));
+    }
+    // The 1st asteroid to be vaporized is at 11,12.
+    expect(vaporized[0]).to.eql([12, 11]);
+    // The 2nd asteroid to be vaporized is at 12,1.
+    expect(vaporized[1]).to.eql([1, 12]);
+    // The 3rd asteroid to be vaporized is at 12,2.
+    expect(vaporized[2]).to.eql([2, 12]);
+    // The 10th asteroid to be vaporized is at 12,8.
+    expect(vaporized[9]).to.eql([8, 12]);
+    // The 20th asteroid to be vaporized is at 16,0.
+    expect(vaporized[19]).to.eql([0, 16]);
+    // The 50th asteroid to be vaporized is at 16,9.
+    expect(vaporized[49]).to.eql([9, 16]);
+    // The 100th asteroid to be vaporized is at 10,16.
+    expect(vaporized[99]).to.eql([16, 10]);
+    // The 199th asteroid to be vaporized is at 9,6.
+    expect(vaporized[198]).to.eql([6, 9]);
+    // The 200th asteroid to be vaporized is at 8,2.
+    expect(vaporized[199]).to.eql([2, 8]);
+    // The 201st asteroid to be vaporized is at 10,9.
+    expect(vaporized[200]).to.eql([9, 10]);
+    // The 299th and final asteroid to be vaporized is at 11,1.
+    expect(vaporized[298]).to.eql([1, 11]);
+    expect(vaporized.length).to.eql(299);
+  });
+});

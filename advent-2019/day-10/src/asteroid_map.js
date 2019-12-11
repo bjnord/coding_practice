@@ -92,6 +92,13 @@ class AsteroidMap
     });
     return asteroids.filter((pos) => this.isVisible(origin, pos)).length;
   }
+  positionsOfAsteroidsVisibleFrom(origin)
+  {
+    const asteroids = Array.from(this.grid.values()).filter((pos) => {
+      return ((pos[0] !== origin[0]) || (pos[1] !== origin[1]));
+    });
+    return asteroids.filter((pos) => this.isVisible(origin, pos));
+  }
   /**
    * Determine observing location which can see the most asteroids.
    *
@@ -110,6 +117,22 @@ class AsteroidMap
       const count = this.asteroidsVisibleFrom(pos);
       return (count > acc.count) ? {pos, count} : acc;
     }, {pos: null, count: 0});
+  }
+  /**
+   * Vaporize asteroids visible from an observing origin. This **removes**
+   * the vaporized asteroids from the `AsteroidMap`.
+   *
+   * @param {Array} origin - [y, x] observing origin
+   *
+   * @return {Array}
+   *   Returns a list of [y, x] positions of the asteroids vaporized, in
+   *   order of clockwise laser beam sweep.
+   */
+  vaporizeFrom(origin)
+  {
+    const positions = this.positionsOfAsteroidsVisibleFrom(origin).sort((a, b) => AsteroidMap._polarAngle(origin, a) - AsteroidMap._polarAngle(origin, b));
+    positions.forEach((pos) => this.grid.delete(AsteroidMap._mapKey(pos)));
+    return positions;
   }
   /**
    * Determine if a location is within the asteroid map.
@@ -140,6 +163,20 @@ class AsteroidMap
   static _mapKey(position)
   {
     return `${position[0]},${position[1]}`;
+  }
+  // private: polar angle (radians) from origin to position
+  //          clockwise  [0, 2pi)  where 0 = along -Y axis
+  static _polarAngle(origin, position)
+  {
+    const dy = position[0] - origin[0];
+    const dx = position[1] - origin[1];
+    if (dy >= 0) {
+      return Math.PI + Math.atan(dx / -dy);
+    } else if ((dy < 0) && (dx < 0)) {
+      return Math.PI*2.0 + Math.atan(dx / -dy);
+    } else {
+      return Math.atan(dx / -dy);
+    }
   }
 }
 module.exports = AsteroidMap;
