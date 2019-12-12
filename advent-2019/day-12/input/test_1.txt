@@ -1,0 +1,77 @@
+<x=-1, y=0, z=2>
+<x=2, y=-10, z=-7>
+<x=4, y=-8, z=8>
+<x=3, y=5, z=-1>
+
+After 0 steps:
+pos=<x=-1, y=  0, z= 2>, vel=<x= 0, y= 0, z= 0>
+pos=<x= 2, y=-10, z=-7>, vel=<x= 0, y= 0, z= 0>
+pos=<x= 4, y= -8, z= 8>, vel=<x= 0, y= 0, z= 0>
+pos=<x= 3, y=  5, z=-1>, vel=<x= 0, y= 0, z= 0>
+
+After 1 step:
+pos=<x= 2, y=-1, z= 1>, vel=<x= 3, y=-1, z=-1>
+pos=<x= 3, y=-7, z=-4>, vel=<x= 1, y= 3, z= 3>
+pos=<x= 1, y=-7, z= 5>, vel=<x=-3, y= 1, z=-3>
+pos=<x= 2, y= 2, z= 0>, vel=<x=-1, y=-3, z= 1>
+
+After 2 steps:
+pos=<x= 5, y=-3, z=-1>, vel=<x= 3, y=-2, z=-2>
+pos=<x= 1, y=-2, z= 2>, vel=<x=-2, y= 5, z= 6>
+pos=<x= 1, y=-4, z=-1>, vel=<x= 0, y= 3, z=-6>
+pos=<x= 1, y=-4, z= 2>, vel=<x=-1, y=-6, z= 2>
+
+After 3 steps:
+pos=<x= 5, y=-6, z=-1>, vel=<x= 0, y=-3, z= 0>
+pos=<x= 0, y= 0, z= 6>, vel=<x=-1, y= 2, z= 4>
+pos=<x= 2, y= 1, z=-5>, vel=<x= 1, y= 5, z=-4>
+pos=<x= 1, y=-8, z= 2>, vel=<x= 0, y=-4, z= 0>
+
+After 4 steps:
+pos=<x= 2, y=-8, z= 0>, vel=<x=-3, y=-2, z= 1>
+pos=<x= 2, y= 1, z= 7>, vel=<x= 2, y= 1, z= 1>
+pos=<x= 2, y= 3, z=-6>, vel=<x= 0, y= 2, z=-1>
+pos=<x= 2, y=-9, z= 1>, vel=<x= 1, y=-1, z=-1>
+
+After 5 steps:
+pos=<x=-1, y=-9, z= 2>, vel=<x=-3, y=-1, z= 2>
+pos=<x= 4, y= 1, z= 5>, vel=<x= 2, y= 0, z=-2>
+pos=<x= 2, y= 2, z=-4>, vel=<x= 0, y=-1, z= 2>
+pos=<x= 3, y=-7, z=-1>, vel=<x= 1, y= 2, z=-2>
+
+After 6 steps:
+pos=<x=-1, y=-7, z= 3>, vel=<x= 0, y= 2, z= 1>
+pos=<x= 3, y= 0, z= 0>, vel=<x=-1, y=-1, z=-5>
+pos=<x= 3, y=-2, z= 1>, vel=<x= 1, y=-4, z= 5>
+pos=<x= 3, y=-4, z=-2>, vel=<x= 0, y= 3, z=-1>
+
+After 7 steps:
+pos=<x= 2, y=-2, z= 1>, vel=<x= 3, y= 5, z=-2>
+pos=<x= 1, y=-4, z=-4>, vel=<x=-2, y=-4, z=-4>
+pos=<x= 3, y=-7, z= 5>, vel=<x= 0, y=-5, z= 4>
+pos=<x= 2, y= 0, z= 0>, vel=<x=-1, y= 4, z= 2>
+
+After 8 steps:
+pos=<x= 5, y= 2, z=-2>, vel=<x= 3, y= 4, z=-3>
+pos=<x= 2, y=-7, z=-5>, vel=<x= 1, y=-3, z=-1>
+pos=<x= 0, y=-9, z= 6>, vel=<x=-3, y=-2, z= 1>
+pos=<x= 1, y= 1, z= 3>, vel=<x=-1, y= 1, z= 3>
+
+After 9 steps:
+pos=<x= 5, y= 3, z=-4>, vel=<x= 0, y= 1, z=-2>
+pos=<x= 2, y=-9, z=-3>, vel=<x= 0, y=-2, z= 2>
+pos=<x= 0, y=-8, z= 4>, vel=<x= 0, y= 1, z=-2>
+pos=<x= 1, y= 1, z= 5>, vel=<x= 0, y= 0, z= 2>
+
+After 10 steps:
+pos=<x= 2, y= 1, z=-3>, vel=<x=-3, y=-2, z= 1>
+pos=<x= 1, y=-8, z= 0>, vel=<x=-1, y= 1, z= 3>
+pos=<x= 3, y=-6, z= 1>, vel=<x= 3, y= 2, z=-3>
+pos=<x= 2, y= 0, z= 4>, vel=<x= 1, y=-1, z=-1>
+
+Energy after 10 steps:
+pot: 2 + 1 + 3 =  6;   kin: 3 + 2 + 1 = 6;   total:  6 * 6 = 36
+pot: 1 + 8 + 0 =  9;   kin: 1 + 1 + 3 = 5;   total:  9 * 5 = 45
+pot: 3 + 6 + 1 = 10;   kin: 3 + 2 + 3 = 8;   total: 10 * 8 = 80
+pot: 2 + 0 + 4 =  6;   kin: 1 + 1 + 1 = 3;   total:  6 * 3 = 18
+Sum of total energy: 36 + 45 + 80 + 18 = 179
