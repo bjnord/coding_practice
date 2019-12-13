@@ -1,5 +1,5 @@
 'use strict';
-const euclid = require('../src/euclid');
+const util = require('../../shared/src/util');
 
 class AsteroidMap
 {
@@ -64,7 +64,7 @@ class AsteroidMap
    */
   isVisible(origin, asteroidPosition)
   {
-    const g = euclid.gcd(asteroidPosition[0] - origin[0], asteroidPosition[1] - origin[1]);
+    const g = util.euclidGCD(asteroidPosition[0] - origin[0], asteroidPosition[1] - origin[1]);
     const dy = (asteroidPosition[0] - origin[0]) / g;
     const dx = (asteroidPosition[1] - origin[1]) / g;
     for (let y = origin[0] + dy, x = origin[1] + dx; (y !== asteroidPosition[0]) || (x !== asteroidPosition[1]); y += dy, x += dx) {

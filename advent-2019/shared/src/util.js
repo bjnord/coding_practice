@@ -13,6 +13,6 @@
  *   Returns the GCD of the two integers.
  */
 // h/t <https://codereview.stackexchange.com/a/166362>
-exports.gcd = (a, b) => {
-  return (b === 0) ? Math.abs(a) : module.exports.gcd(Math.abs(b), Math.abs(a) % Math.abs(b));
+exports.euclidGCD = (a, b) => {
+  return (b === 0) ? Math.abs(a) : module.exports.euclidGCD(Math.abs(b), Math.abs(a) % Math.abs(b));
 };
