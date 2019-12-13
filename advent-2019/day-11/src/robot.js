@@ -76,7 +76,6 @@ class Robot
   /*
    * Run the paint controlling Intcode program until it halts.
    */
-  // TODO should add at least one test case that exercises IN/OUT
   /* istanbul ignore next */
   run()
   {

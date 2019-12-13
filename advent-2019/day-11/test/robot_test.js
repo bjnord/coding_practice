@@ -200,3 +200,14 @@ describe('robot paint count tests', () => {
     expect(newRobot.panelPaintedCount).to.eql(4);
   });
 });
+describe('robot run tests', () => {
+  let runRobot;
+  before(() => {
+    runRobot = new Robot('104,1,104,1,104,1,104,1,104,1,104,1,104,1,104,1,99', 0);
+  });
+  it('should reflect four white painted panels (circle)', () => {
+    runRobot.run();
+    expect(runRobot.currentColor).to.eql(1);
+    expect(runRobot.panelPaintedCount).to.eql(4);
+  });
+});
