@@ -247,3 +247,13 @@ Of course, the universe might last for a **very long time** before repeating. He
 This set of initial positions takes `4686774924` steps before it repeats a previous state! Clearly, you might need to **find a more efficient way to simulate the universe**.
 
 **How many steps does it take** to reach the first state that exactly matches a previous state?
+
+### Part Two Design
+
+I read Part Two this morning and noodled on it from time to time during the day, and I wasn't able to see how I could optimize the orbital motion. This is an embarrassing admission, because space is an interest of mine, and during my time in the Air Force my division's responsibility was all about satellites and orbital motion.
+
+So I peeked at the [Advent of Code Reddit](https://www.reddit.com/r/adventofcode/) solution megathread... not at any code, but just enough to get the two key insights I needed:
+
+1. The way orbital motion is defined in the puzzle, the 3 axes are all independent, so they can be treated (and calculated) independently. This came up in last year's puzzles too, but it clearly didn't make a lasting impression. I need to remember this meme: **When optimizing calculations in multiple dimensions (or of compexity O(n^x)), see if any of them are independent from the others.**
+
+2. Someone on Reddit mentioned [Floyd's "Tortoise and Hare" algorithm for cycle detection](https://en.wikipedia.org/wiki/Cycle%5Fdetection#Floyd%27s%5FTortoise%5Fand%5FHare), and I realized I'd be better served learning and implementing that rather than rolling my own. Another meme: **Before reinventing the wheel, ask: "Is there already an algorithm to do this generically?"** The answer is probably "yes". (Last year I used Dijkstra's cheapest-path algorithm, the notion of a priority queue, etc.)
