@@ -151,3 +151,25 @@ describe('movement simulation test [puzzle example #2]', () => {
     expect(simulate(system, lines)).to.be.true;
   });
 });
+describe('cycle count test [puzzle example #1]', () => {
+  let system;
+  before(() => {
+    const lines = fs.readFileSync('input/test_1.txt', 'utf8').trim().split(/\n/);
+    const moonLines = lines.slice(0, 4);
+    system = jupiter.parse(moonLines.join('\n'));
+  });
+  it('should determine puzzle example #1 cycle length correctly', () => {
+    expect(jupiter.cycleLength(system)).to.be.eql(2772);
+  });
+});
+describe('cycle count test [puzzle example #2]', () => {
+  let system;
+  before(() => {
+    const lines = fs.readFileSync('input/test_2.txt', 'utf8').trim().split(/\n/);
+    const moonLines = lines.slice(0, 4);
+    system = jupiter.parse(moonLines.join('\n'));
+  });
+  it('should determine puzzle example #2 cycle length correctly', () => {
+    expect(jupiter.cycleLength(system)).to.be.eql(4686774924);
+  });
+});

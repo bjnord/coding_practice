@@ -12,3 +12,9 @@ const totalSystemEnergy = system.reduce((sum, moon) => sum + jupiter.totalEnergy
 console.log('part 1: expected answer:               5937');
 console.log(`part 1: total energy after 1000 steps: ${totalSystemEnergy}`);
 console.log('');
+
+// PART 2
+const cycleLength = jupiter.cycleLength(system);
+console.log('part 2: expected answer:                376203951569712');
+console.log(`part 2: steps to return to first state: ${cycleLength}`);
+console.log('');

@@ -1,4 +1,6 @@
 'use strict';
+const floyd = require('../../shared/src/floyd');
+const util = require('../../shared/src/util');
 /** @module */
 /**
  * Parse the puzzle input.
@@ -74,4 +76,37 @@ exports.totalEnergy = (moon) => {
   const kin = Object.keys(moon).reduce((sum, k) => sum + Math.abs(moon[k][1]), 0);
   //console.debug(`pos=${moon.pos} pot=${pot} vel=${moon.vel} kin=${kin}`);
   return pot * kin;
+};
+const axisCycleLength = (moons) => {
+  // moons = [[Z1, dZ1], [Z2, dZ2], ..., [Z<n>, dZ<n>]]
+  const f = (x) => {
+    const xCopy = x.map((t) => t.slice());
+    module.exports.stepAxis(xCopy);
+    return xCopy;
+  };
+  const eq = (a, b) => {
+    return a.every((t, i) => (t[0] === b[i][0]) && (t[1] === b[i][1]));
+  };
+  const lmu = floyd.run(f, eq, moons);
+  /* istanbul ignore if */
+  if (lmu[1] !== 0) {
+    throw new Error("axisCycleLength: cycle didn't return to index 0");
+  }
+  return lmu[0];
+};
+/**
+ * Calculate number of steps of moon movement before moons return to the
+ * original state.
+ *
+ * @param {Array} moons - list of moons, each an object with axis fields
+ *
+ * @return
+ *   Returns number of steps in the cycle.
+ */
+exports.cycleLength = (moons) => {
+  const cycles = ['z', 'y', 'x'].map((axis) => {
+    const aMoons = moons.map((moon) => moon[axis]);
+    return axisCycleLength(aMoons);
+  });
+  return util.LCM(cycles[0], util.LCM(cycles[1], cycles[2]));
 };
