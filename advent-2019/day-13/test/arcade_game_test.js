@@ -17,3 +17,13 @@ describe('arcade game count tests', () => {
     expect(arcadeGame.countOf(4)).to.eql(1);
   });
 });
+describe('arcade game score tests', () => {
+  let arcadeGame;
+  before(() => {
+    arcadeGame = new ArcadeGame('104,-1,104,0,104,55112,104,-1,104,0,104,55126,99');
+    arcadeGame.run();
+  });
+  it('should get final score', () => {
+    expect(arcadeGame.score).to.eql(55126);
+  });
+});

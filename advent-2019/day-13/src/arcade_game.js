@@ -27,6 +27,14 @@ class ArcadeGame
   setTile(position, tile)
   {
     this.grid.set(ArcadeGame._mapKey(position), tile);
+    if (tile === 4) {
+      // private: ball X coordinate
+      this.ballX = position[1];
+    }
+    if (tile === 3) {
+      // private: paddle X coordinate
+      this.paddleX = position[1];
+    }
   }
   /**
    * Count tiles of a given type.
@@ -41,20 +49,41 @@ class ArcadeGame
     return Array.from(this.grid.values()).filter((k) => k === tile).length;
   }
   /*
+   * Insert quarters into the arcade game.
+   */
+  /* istanbul ignore next */
+  insertQuarters()
+  {
+    this.program[0] = 2;
+  }
+  /*
    * Run the arcade game Intcode program until it halts.
    */
   /* istanbul ignore next */
   run()
   {
     let stack = [];
+    const getValue = (() => {
+      if (this.ballX < this.paddleX) {
+        return -1;  // tilt joystick left
+      } else if (this.ballX > this.paddleX) {
+        return 1;  // tilt joystick right
+      } else {
+        return 0;  // release joystick to neutral
+      }
+    });
     const storeValue = ((v) => {
       stack.push(v);
       if (stack.length === 3) {
-        this.setTile([stack[1], stack[0]], stack[2]);
+        if (stack[0] < 0) {
+          this.score = stack[2];
+        } else {
+          this.setTile([stack[1], stack[0]], stack[2]);
+        }
         stack = [];
       }
     });
-    intcode.run(this.program, false, undefined, storeValue);
+    intcode.run(this.program, false, getValue, storeValue);
   }
   // private: map key for a given [y, x] location
   static _mapKey(position)
