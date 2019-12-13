@@ -1,5 +1,5 @@
 NODEBIN = ./node_modules/.bin
-SRC = src/main.js
+LINTSRC = src/*.js
 
 .PHONY: main lint distclean
 
@@ -7,7 +7,7 @@ main:
 	node src/main.js
 
 lint:
-	$(NODEBIN)/eslint -c ../.eslintrc.js $(SRC)
+	$(NODEBIN)/eslint -c ../.eslintrc.js $(LINTSRC)
 
 distclean:
 	-@rm -rf node_modules

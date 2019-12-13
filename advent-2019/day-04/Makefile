@@ -1,5 +1,5 @@
 NODEBIN = ./node_modules/.bin
-SRC = src/main.js src/password.js test/password_test.js
+LINTSRC = src/*.js test/*.js
 
 .PHONY: main test lint coverage distclean
 
@@ -10,7 +10,7 @@ test:
 	npm test
 
 lint:
-	$(NODEBIN)/eslint -c ../.eslintrc.js $(SRC)
+	$(NODEBIN)/eslint -c ../.eslintrc.js $(LINTSRC)
 
 coverage:
 	npm run coverage

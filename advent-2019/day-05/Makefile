@@ -10,4 +10,4 @@ lint:
 	$(NODEBIN)/eslint -c ../.eslintrc.js $(LINTSRC)
 
 distclean:
-	-@rm -rf .nyc_output node_modules coverage
+	-@rm -rf node_modules
