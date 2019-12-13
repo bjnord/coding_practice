@@ -39,3 +39,13 @@ describe('euclid GCD tests', () => {
     expect(util.euclidGCD(48, 84)).to.eql(12);
   });
 });
+describe('LCM tests', () => {
+  it('should return 60 for [12, -20]', () => {
+    expect(util.LCM(12, -20)).to.eql(60);
+  });
+  it('should return 300 for [12, 20, 75]', () => {
+    expect(util.LCM(12, util.LCM(20, 75))).to.eql(300);
+    expect(util.LCM(20, util.LCM(75, 12))).to.eql(300);
+    expect(util.LCM(75, util.LCM(12, 20))).to.eql(300);
+  });
+});
