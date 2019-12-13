@@ -61,10 +61,6 @@ class Robot
    *
    * @param {number} turn - direction to turn before moving
    *   (0 = left 90 degrees, 1 = right 90 degrees)
-   *
-   * @return {Array}
-   *   Returns a list of the [y, x] positions of asteroids visible from the
-   *   given origin (excluding the origin asteroid itself).
    */
   move(turn)
   {
