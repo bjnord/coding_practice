@@ -17,10 +17,10 @@ describe('parsing tests', () => {
   });
   it('should parse a whole input set correctly [input.txt]', () => {
     const expected = [
-      {pos: [-8, -5, -6], vel: [0, 0, 0]},
-      {pos: [-13, -3, 0], vel: [0, 0, 0]},
-      {pos: [-11, 10, -15], vel: [0, 0, 0]},
-      {pos: [3, -8, -3], vel: [0, 0, 0]},
+      {z: [-8, 0], y: [-5, 0], x: [-6, 0]},
+      {z: [-13, 0], y: [-3, 0], x: [0, 0]},
+      {z: [-11, 0], y: [10, 0], x: [-15, 0]},
+      {z: [3, 0], y: [-8, 0], x: [-3, 0]},
     ];
     expect(jupiter.parse('<x=-6, y=-5, z=-8>\n<x=0, y=-3, z=-13>\n<x=-15, y=10, z=-11>\n<x=-3, y=-8, z=3>\n')).to.eql(expected);
   });
@@ -32,18 +32,23 @@ const parseExpect = (line) => {
   // pos=<x= 2, y=-8, z= 0>, vel=<x=-3, y=-2, z= 1>
   const c = line.trim().split(/=/).map((c) => parseInt(c));
   return {
-    pos: [c[4], c[3], c[2]],
-    vel: [c[8], c[7], c[6]],
+    z: [c[4], c[8]],
+    y: [c[3], c[7]],
+    x: [c[2], c[6]],
   };
 };
 const compareSystems = (actual, expected) => {
   for (let i = 0; i < actual.length; i++) {
-    if (actual[i].pos.join(',') !== expected[i].pos.join(',')) {
-      console.error(`i=${i} actual.pos=${actual[i].pos} mismatches expected.pos=${expected[i].pos}`);
+    if (actual[i].z.join(',') !== expected[i].z.join(',')) {
+      console.error(`i=${i} actual.z=${actual[i].z} mismatches expected.z=${expected[i].z}`);
       return false;
     }
-    if (actual[i].vel.join(',') !== expected[i].vel.join(',')) {
-      console.error(`i=${i} actual.vel=${actual[i].vel} mismatches expected.vel=${expected[i].vel}`);
+    if (actual[i].y.join(',') !== expected[i].y.join(',')) {
+      console.error(`i=${i} actual.y=${actual[i].y} mismatches expected.y=${expected[i].y}`);
+      return false;
+    }
+    if (actual[i].x.join(',') !== expected[i].x.join(',')) {
+      console.error(`i=${i} actual.x=${actual[i].x} mismatches expected.x=${expected[i].x}`);
       return false;
     }
   }
