@@ -9,9 +9,9 @@ const program = programStr.map((str) => Number(str));
 const iProgram = program.slice();
 iProgram[1] = 12;
 iProgram[2] = 2;
-const result = intcode.run(iProgram);
+intcode.run(iProgram);
 console.log('part 1: expected answer is:  3850704');
-console.log(`part 1: value at position 0: ${result[0]}`);
+console.log(`part 1: value at position 0: ${iProgram[0]}`);
 console.log('');
 
 // PART 2

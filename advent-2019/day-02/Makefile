@@ -1,19 +1,16 @@
 NODEBIN = ./node_modules/.bin
-SRC = src/main.js src/intcode.js test/intcode_run_test.js
+SRC = src/main.js
 
-.PHONY: main test lint coverage distclean
+.PHONY: main lint distclean
 
-main:
+main: src/intcode.js
 	node src/main.js
 
-test:
-	npm test
+src/intcode.js:
+	@cd ./src ; ln -s ../../day-05/src/intcode.js
 
 lint:
 	$(NODEBIN)/eslint -c ../.eslintrc.js $(SRC)
 
-coverage:
-	npm run coverage
-
 distclean:
-	-@rm -rf .nyc_output node_modules coverage
+	-@rm -rf node_modules src/intcode.js
