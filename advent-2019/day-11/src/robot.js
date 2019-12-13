@@ -69,10 +69,10 @@ class Robot
     this.position[1] += [0, 1, 0, -1][this.direction];  // dX
     this.justPainted = false;
   }
-  /*
+  /* istanbul ignore next */
+  /**
    * Run the paint controlling Intcode program until it halts.
    */
-  /* istanbul ignore next */
   run()
   {
     const getValue = (() => this.currentColor);
@@ -90,10 +90,10 @@ class Robot
   {
     return `${position[0]},${position[1]}`;
   }
+  /* istanbul ignore next */
   /**
    * Display the painted hull panels.
    */
-  /* istanbul ignore next */
   dump()
   {
     const panels = Array.from(this.grid.keys()).map((k) => k.split(/,/).map((str) => Number(str)));

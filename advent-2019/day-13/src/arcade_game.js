@@ -48,18 +48,18 @@ class ArcadeGame
   {
     return Array.from(this.grid.values()).filter((k) => k === tile).length;
   }
-  /*
+  /* istanbul ignore next */
+  /**
    * Insert quarters into the arcade game.
    */
-  /* istanbul ignore next */
   insertQuarters()
   {
     this.program[0] = 2;
   }
-  /*
+  /* istanbul ignore next */
+  /**
    * Run the arcade game Intcode program until it halts.
    */
-  /* istanbul ignore next */
   run()
   {
     let stack = [];
