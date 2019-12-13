@@ -1,5 +1,5 @@
 'use strict';
-const intcode = require('../src/intcode');
+const intcode = require('../../shared/src/intcode');
 const fs = require('fs');
 const input = fs.readFileSync('input/input.txt', 'utf8');
 const programStr = input.trim().split(/,/);

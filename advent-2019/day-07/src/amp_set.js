@@ -1,5 +1,5 @@
 'use strict';
-const intcode = require('../src/intcode');
+const intcode = require('../../shared/src/intcode');
 // Run program on a chain of amplifiers. Signal value "0" will be sent as
 // input to the first amp in the chain. Each amp's output will be sent to
 // the next amp's input.

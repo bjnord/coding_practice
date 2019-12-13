@@ -1,5 +1,5 @@
 'use strict';
-const intcode = require('../src/intcode');
+const intcode = require('../../shared/src/intcode');
 
 class Robot
 {
