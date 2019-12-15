@@ -24,6 +24,11 @@ class Droid
     this._grid.set(Droid._mapKey(this._position), 1);
     // private: path of moves from origin (directions)
     this._path = [];
+    /**
+     * distance from origin to oxygen system
+     * @member {number}
+     */
+    this.oxygenSystemDistance = undefined;
     // private: last move attempt direction
     this._lastDir = undefined;
     // private: was last move a backtrack?
@@ -40,14 +45,6 @@ class Droid
     };
     // private: opposites of each direction
     this._oppositeDir = {1: 2, 2: 1, 3: 4, 4: 3};
-  }
-  /**
-   * the path length from the origin to the current location
-   * @member {number}
-   */
-  get pathLength()
-  {
-    return this._path.length;
   }
   // private: choose next move
   _chooseMove()
@@ -95,9 +92,8 @@ class Droid
       this._grid.set(Droid._mapKey(this._newPosition(this._lastDir)), v);
       if (v !== 0) {  // v=0 (hit wall) means droid didn't move
         this._move(this._lastDir);
-        if (v === 2) {  // found the oxygen system
-          // FIXME Intcode computer needs a way to force a HALT or exit run()
-          throw new Error('oxygen system found');
+        if (v === 2) {
+          this.oxygenSystemDistance = this._path.length;
         }
       }
       this._lastDir = undefined;

@@ -12,5 +12,5 @@ try {
 catch (error) {
   console.error(error);
 };
-console.log(`part 1: length of path to oxygen system: ${droid.pathLength}`);
+console.log(`part 1: length of path to oxygen system: ${droid.oxygenSystemDistance}`);
 console.log('');
