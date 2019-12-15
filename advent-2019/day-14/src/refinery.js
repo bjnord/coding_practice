@@ -70,17 +70,18 @@ const parseChemUnits = (str) => {
   };
 };
 /**
- * Calculate ORE required to produce 1 unit of the provided chemical type.
+ * Calculate `ORE` required to produce 1 unit of the provided chemical type.
  *
  * @param {Map} inv - inventory of chemicals the refinery can produce
  * @param {object} product - item to produce, with `units` and `chem` fields
+ * @param {remains} [product={}] - remains from last round (if any)
  *
  * @return {number}
- *   Returns amount of input ORE required.
+ *   Returns amount of input `ORE` required.
  */
-exports.calculate = (inv, product) => {
+exports.calculate = (inv, product, remains = {}) => {
   let ore = 0;
-  const stack = [product], remains = {};
+  const stack = [product];
   //console.debug('inventory:');
   //console.dir(inv);
   //console.debug('initial stack:');
@@ -98,14 +99,20 @@ const processTopItem = (inv, stack, ore, remains) => {
   }
   // first use up any banked amount on hand:
   if (remains[oItem.chem] >= oItem.units) {
-    //console.debug(`use ${oItem.units} units of "${oItem.chem}" on hand`);
-    remains[oItem.chem] -= oItem.units;
-    //console.debug(`...leaving ${remains[oItem.chem]} units banked`);
+    if (remains[oItem.chem] > oItem.units) {
+      //console.debug(`use ${oItem.units} units of "${oItem.chem}" on hand`);
+      remains[oItem.chem] -= oItem.units;
+      //console.debug(`...leaving ${remains[oItem.chem]} units banked`);
+    } else {
+      //console.debug(`use all ${oItem.units} units of "${oItem.chem}" on hand`);
+      delete remains[oItem.chem];
+    }
     return ore;
   } else if (remains[oItem.chem] > 0) {
     //console.debug(`use all ${remains[oItem.chem]} units of "${oItem.chem}" on hand`);
     oItem.units -= remains[oItem.chem];
-    remains[oItem.chem] = 0;
+    delete remains[oItem.chem];
+    //console.debug(`...but ${oItem.units} more units are needed`);
   }
   // if not enough, find the formula needed to produce more:
   const formula = inv.get(oItem.chem);
@@ -131,4 +138,59 @@ const processTopItem = (inv, stack, ore, remains) => {
   //console.dir(remains);
   //console.debug(`ore=${ore}`);
   return ore;
+};
+/**
+ * Calculate amount of fuel that can be produced from the provided amount
+ * of `ORE`.
+ *
+ * @param {Map} inv - inventory of chemicals the refinery can produce
+ * @param {number} ore - amount of `ORE` on hand
+ *
+ * @return {number}
+ *   Returns the amount of fuel which can be produced.
+ */
+exports.fuelFromOre = (inv, ore) => {
+  const debug = false;
+  let fuelCount = 0, orePerCycle = 0;
+  const remains = {};
+  for (;;) {
+    const ore1 = module.exports.calculate(inv, {units: 1, chem: 'FUEL'}, remains);
+    orePerCycle += ore1;
+    fuelCount++;
+    if (debug) {
+      console.debug(`round ${fuelCount}, ore=${ore1}/${orePerCycle}, remains: ${Object.keys(remains).map((k) => `${k}: ${remains[k]}`)}`);
+    }
+    if (Object.keys(remains).length === 0) {
+      if (debug) {
+        console.debug('REMAINS EMPTY');
+      }
+      break;
+    }
+  }
+  const cycles = Math.floor(ore / orePerCycle);
+  const fuelMadeInCycles = cycles * fuelCount;
+  const remainingOre = ore - cycles * orePerCycle;
+  if (debug) {
+    console.debug(`from ${ore} ORE, in ${cycles} cycles, made ${fuelMadeInCycles} FUEL leaving ore=${remainingOre} ORE`);
+  }
+  let rFuelCount = 0, rOre = 0;
+  for (;;) {
+    const ore1 = module.exports.calculate(inv, {units: 1, chem: 'FUEL'}, remains);
+    if ((remainingOre - (rOre + ore1)) < 0) {
+      if (debug) {
+        console.debug('OUT OF ORE');
+      }
+      break;
+    }
+    rOre += ore1;
+    rFuelCount++;
+    if (debug) {
+      console.debug(`rem round ${rFuelCount}, ore=${ore1}/${rOre}, remains: ${Object.keys(remains).map((k) => `${k}: ${remains[k]}`)}`);
+    }
+  }
+  if (debug) {
+    console.debug(`from ${remainingOre} ORE, made ${rFuelCount} FUEL leaving ore=${remainingOre - rOre} ORE`);
+    console.debug(`final FUEL count=${fuelMadeInCycles + rFuelCount}`);
+  }
+  return fuelMadeInCycles + rFuelCount;
 };
