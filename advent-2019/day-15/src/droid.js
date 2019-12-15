@@ -18,7 +18,7 @@ class Droid
     this._program = input.trim().split(/,/).map((str) => Number(str));
     // private: the maze (key: position, value: 0=wall 1=open 2=oxygen)
     this._grid = new Map();
-    // private: [y, x] position of droid
+    // private: [Y, X] position of droid
     this._position = [0, 0];
     // "you already know [the starting] location is open"
     this._grid.set(Droid._mapKey(this._position), 1);
@@ -104,7 +104,7 @@ class Droid
     });
     intcode.run(this._program, false, getValue, storeValue);
   }
-  // private: map key for a given [y, x] location
+  // private: map key for a given [Y, X] position
   static _mapKey(position)
   {
     return `${position[0]},${position[1]}`;
