@@ -6,8 +6,9 @@ const Droid = require('../src/droid');
 //      to an Intcode program that would output the correct values
 //      (NOTE when implemented, remove run() "istanbul ignore next")
 describe('droid constructor tests', () => {
-  it('should initially have empty path', () => {
+  it('should initially have unknown oxygen system distance/position', () => {
     const droid = new Droid('99');
-    expect(droid.pathLength).to.eql(0);
+    expect(droid.oxygenSystemDistance).to.be.undefined;
+    expect(droid.oxygenSystemPosition).to.be.undefined;
   });
 });

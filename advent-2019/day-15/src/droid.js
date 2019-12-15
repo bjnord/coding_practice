@@ -29,6 +29,11 @@ class Droid
      * @member {number}
      */
     this.oxygenSystemDistance = undefined;
+    /**
+     * [Y, X] position of oxygen system
+     * @member {Array}
+     */
+    this.oxygenSystemPosition = undefined;
     // private: last move attempt direction
     this._lastDir = undefined;
     // private: was last move a backtrack?
@@ -97,12 +102,57 @@ class Droid
       if (v !== 0) {  // v=0 (hit wall) means droid didn't move
         this._move(this._lastDir);
         if (v === 2) {
+          this.oxygenSystemPosition = this._position.slice();
           this.oxygenSystemDistance = this._path.length;
         }
       }
       this._lastDir = undefined;
     });
     intcode.run(this._program, false, getValue, storeValue);
+  }
+  /**
+   * Explore the maze from a given position to find the longest path length.
+   *
+   * @param {Array} position - [Y, X] start position
+   *
+   * @return {number}
+   *   Returns the longest path length from the start position.
+   */
+  longestPathLengthFrom(position)
+  {
+    if (!this._explored) {
+      throw new Error('maze must first be explored with run()');
+    }
+    this._position = position.slice();
+    this._path = [];
+    return this._longestPathLength();
+  }
+  // private: recursive path explorer
+  _longestPathLength()
+  {
+    const sourceDir = this._oppositeDir[this._path[this._path.length-1]];
+    let longest = 0;
+    for (let dir = 1; dir <= 4; dir++) {
+      // only move further out from start position, don't double back:
+      if (dir === sourceDir) {
+        continue;
+      }
+      const position1 = this._newPosition(dir);
+      const what = this._grid.get(Droid._mapKey(position1));
+      // wall in this direction; no longest path that way:
+      if (what === 0) {
+        continue;
+      }
+      // open in this direction; recursively explore that way:
+      const prevPosition = this._position;
+      this._position = position1;
+      this._path.push(dir);
+      const longest1 = this._longestPathLength();
+      this._path.pop();
+      this._position = prevPosition;
+      longest = Math.max(longest, longest1);
+    }
+    return longest + 1;
   }
   // private: map key for a given [Y, X] position
   static _mapKey(position)
