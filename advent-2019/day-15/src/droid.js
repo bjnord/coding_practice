@@ -33,6 +33,8 @@ class Droid
     this._lastDir = undefined;
     // private: was last move a backtrack?
     this._backtracking = false;
+    // private: has whole maze been explored?
+    this._explored = false;
     /*
      * FIXME these two should be class/global, not per-instance
      */
@@ -55,10 +57,12 @@ class Droid
         return dir;
       }
     }
-    // all directions have been explored; backtrack
+    // the whole maze has now been explored; force Intcode machine to halt
     if (this._path.length === 0) {
-      throw new Error('path empty; entire maze explored');
+      this._explored = true;
+      return undefined;
     }
+    // all directions from this position have been explored; backtrack
     this._backtracking = true;
     return this._oppositeDir[this._path.pop()];
   }
