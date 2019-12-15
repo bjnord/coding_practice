@@ -199,6 +199,7 @@ class Droid
       process.stdout.write('\n');
     }
   }
+  /* istanbul ignore next */
   // private: display character for space type
   static _dumpCh(what)
   {
