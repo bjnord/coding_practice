@@ -1,6 +1,10 @@
 'use strict';
 const intcode = require('../../shared/src/intcode');
 
+// TODO RF this._grid, Klass._mapKey(), dump(), etc. are used by several
+//      days; extract them to a generalized PuzzleGrid class, with no
+//      coverage ignores (e.g. dump() returns list of lines)
+
 class Droid
 {
   /**
@@ -52,6 +56,18 @@ class Droid
     };
     // private: opposites of each direction
     this._oppositeDir = {1: 2, 2: 1, 3: 4, 4: 3};
+  }
+  /**
+   * Set grid map.
+   *
+   * Used for testing `longestPathLengthFrom()` method.
+   *
+   * @param {object} grid - the grid map
+   */
+  setGrid(grid)
+  {
+    this._grid = grid;
+    this._explored = true;
   }
   // private: choose next move
   _chooseMove()
@@ -137,12 +153,15 @@ class Droid
       if (dir === sourceDir) {
         continue;
       }
+      // TODO RF this._isBlocked(dir)
       const position1 = this._newPosition(dir);
       const what = this._grid.get(Droid._mapKey(position1));
       // wall in this direction; no longest path that way:
       if (what === 0) {
         continue;
       }
+      // TODO RF use this._move() for forward movement, and
+      //      create this._unmove() for backtracking [have run() use it]
       // open in this direction; recursively explore that way:
       const prevPosition = this._position;
       this._position = position1;
@@ -150,9 +169,9 @@ class Droid
       const longest1 = this._longestPathLength();
       this._path.pop();
       this._position = prevPosition;
-      longest = Math.max(longest, longest1);
+      longest = Math.max(longest, longest1 + 1);
     }
-    return longest + 1;
+    return longest;
   }
   // private: map key for a given [Y, X] position
   static _mapKey(position)

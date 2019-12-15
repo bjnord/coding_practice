@@ -11,6 +11,6 @@ console.log(`part 1: length of path to oxygen system: ${droid.oxygenSystemDistan
 console.log('');
 
 // PART 2
-console.log('part 2: expected answer:                  321 IS TOO HIGH');
+console.log('part 2: expected answer:                  320');
 const length = droid.longestPathLengthFrom(droid.oxygenSystemPosition);
 console.log(`part 2: minutes to fill maze with oxygen: ${length}`);
