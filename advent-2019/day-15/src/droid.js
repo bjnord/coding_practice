@@ -54,10 +54,7 @@ class Droid
   {
     // move in the next unexplored direction
     for (let dir = 1; dir <= 4; dir++) {
-      const pos = this._newPosition(dir);
-      const what = this._grid.get(Droid._mapKey(pos));
-      if (what === undefined) {
-        console.debug(`_chooseMove(): try dir=${dir} to ${pos}`);
+      if (this._grid.get(Droid._mapKey(this._newPosition(dir))) === undefined) {
         return dir;
       }
     }
@@ -66,11 +63,9 @@ class Droid
       throw new Error('path empty; entire maze explored');
     }
     this._backtracking = true;
-    const backMove = this._oppositeDir[this._path.pop()];
-    console.debug(`_chooseMove(): backtrack (${backMove}) from ${this._position}; path=${this._path}`);
-    return backMove;
+    return this._oppositeDir[this._path.pop()];
   }
-  // private: new position from direction
+  // private: calculate new position from direction
   _newPosition(dir)
   {
     const y = this._position[0] + this._offsets[dir][0];
@@ -81,13 +76,11 @@ class Droid
   _move(dir)
   {
     this._position = this._newPosition(dir);
-    const bt = this._backtracking;
     if (this._backtracking) {
       this._backtracking = false;
     } else {
       this._path.push(dir);
     }
-    console.debug(`_move(): ${bt ? 'back' : ''}moved to ${this._position}; path=${this._path}`);
   }
   /* istanbul ignore next */
   /**
@@ -99,20 +92,15 @@ class Droid
     const getValue = (() => (this._lastDir = this._chooseMove()));
     // OUT is used by the droid to tell us what happened
     const storeValue = ((v) => {
-      const dirPos = this._newPosition(this._lastDir);
-      this._grid.set(Droid._mapKey(dirPos), v);
-      console.debug(`run(): found "${Droid._dumpCh(v)}" at ${dirPos}`);
+      this._grid.set(Droid._mapKey(this._newPosition(this._lastDir)), v);
       if (v !== 0) {  // v=0 (hit wall) means droid didn't move
         this._move(this._lastDir);
         if (v === 2) {  // found the oxygen system
-          console.debug(`run(): oxygen system at ${this._position} along path=${this._path}`);
-          this.dump();
           // FIXME Intcode computer needs a way to force a HALT or exit run()
           throw new Error('oxygen system found');
         }
       }
       this._lastDir = undefined;
-      //this.dump();
     });
     intcode.run(this._program, false, getValue, storeValue);
   }
