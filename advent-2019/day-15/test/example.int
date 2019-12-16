@@ -1,0 +1,103 @@
+// PROGRAM (0-69)
+
+// get user input
+0       IN M70             // will be 1=north 2=south 3=west 4=east
+
+// compute proposed new Y, X position
+2       ARB M70
+4       ADD M71,*74,M73    // add curY + dY -> newY
+8       ADD M72,*78,M74    // add curX + dX -> newX
+12      MUL M70,-1,M70     // set ARB back to 0
+16      ARB M70
+
+// determine what's in maze at new Y, X position
+18      MUL M73,M100,M83   // newY * mazeWidth -> mazeIdx
+22      ADD M83,M74,M83    // mazeIdx + newX -> mazeIdx
+26      ARB M83
+28      ADD *116,0,M84     // maze[mazeIdx] -> mazeContent
+32      MUL M83,-1,M83     // set ARB back to 0
+36      ARB M83
+
+// if wall at position, jump around update
+38      JFAL M84, 49
+
+// update current Y, X with new Y, X
+41      ADD M73,0,M71
+45      ADD M74,0,M72
+
+// send user output
+49      OUT M84
+
+// begin the process again
+51      JTRU 1, 0
+
+// mark end of program (never reached)
+54      HALT
+
+// PROGRAM DATA (70-99)
+
+70      0   // direction from user
+71      0   // current Y
+72      0   // current X
+73      0   // proposed new Y
+74      0   // proposed new X
+75      -1  // north dY
+76      1   // south dY
+77      0   // west dY
+78      0   // east dY
+79      0   // north dX
+80      0   // south dX
+81      -1  // west dX
+82      1   // east dX
+83      0   // maze lookup index
+84      0   // maze position contents
+
+// MAZE DATA (100-)
+
+    //  ##   
+    // #..## 
+    // #.#:.#
+    // #.@.# 
+    //  ###  
+
+100     6   // maze width (height=5)
+
+    //               ['-2,-2', 0], ['-2,-1', 0],
+101     -1  // maze top-left [-2,-3]
+102     0
+103     0
+104     -1
+105     -1
+106     -1
+
+    // ['-1,-3', 0], ['-1,-2', 1], ['-1,-1', 1], ['-1,0',  0], ['-1,1',  0],
+107     0   // maze row 2 (Y=-1)
+108     1
+109     1
+110     0
+111     0
+112     -1
+
+    // ['0,-3',  0], ['0,-2',  1], ['0,-1',  0], ['0,0',   1], ['0,1',   1], ['0,2',   0],
+113     0   // maze row 3 (Y=0)
+114     1
+115     0
+116     1   // <- [0, 0]
+117     1
+118     0
+
+    // ['1,-3',  0], ['1,-2',  1], ['1,-1',  2], ['1,0',   1], ['1,1',   0],
+119     0   // maze row 4 (Y=1)
+120     1
+121     2
+122     1
+123     0
+124     -1
+
+    //               ['2,-2',  0], ['2,-1',  0], ['2,0',   0],
+125     -1  // maze row 5 (Y=2)
+126     0
+127     0
+128     0
+129     -1
+130     -1
