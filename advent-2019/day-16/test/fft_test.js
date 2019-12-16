@@ -18,9 +18,17 @@ describe('pattern tests', () => {
     const expected = /* 0, */ [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, -1, -1];
     expect(fft.pattern(16, 4)).to.eql(expected);
   });
+  it('should produce the 6th pattern correctly', () => {
+    const expected = /* 0, */ [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 1, 1, 1];
+    expect(fft.pattern(32, 5)).to.eql(expected);
+  });
   it('should produce the 8th pattern correctly', () => {
     const expected = /* 0, */ [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0];
     expect(fft.pattern(16, 7)).to.eql(expected);
+  });
+  it('should produce the 9th pattern correctly', () => {
+    const expected = /* 0, */ [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1];
+    expect(fft.pattern(32, 8)).to.eql(expected);
   });
   it('should throw an exception for invalid input (non-positive element count)', () => {
     const call = () => { fft.pattern(0, 2); };

@@ -23,18 +23,24 @@ exports.pattern = (count, index) => {
   // TODO Node v11+ has Array.prototype.flat()
   //      h/t <https://stackoverflow.com/a/10865042/291754>
   const flattened = [].concat.apply([], pattern);
-  // if pattern is shorter than requested, repeat it:
   const mod = flattened.length;
-  for (let i = mod; i < count; i++) {
-    flattened.push(flattened[i % mod]);
-  }
-  // rotate pattern one position left:
-  flattened.push(flattened.shift());
-  // if pattern is longer than requested, trim it:
-  if (mod > count) {
-    for (let i = mod; i > count; i--) {
+  if (mod < count) {
+    // pattern is shorter than requested; repeat it:
+    // (pattern will be rotated one position left)
+    for (let i = mod; i < count+1; i++) {
+      flattened.push(flattened[i % mod]);
+    }
+    flattened.shift();
+  } else if (mod > count) {
+    // pattern is longer than requested; trim it:
+    // (pattern will be rotated one position left)
+    flattened.shift();
+    for (let i = mod-1; i > count; i--) {
       flattened.pop();
     }
+  } else {
+    // pattern is exatly requested size; rotate it one position left:
+    flattened.push(flattened.shift());
   }
   return flattened;
 };
