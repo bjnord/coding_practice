@@ -148,16 +148,16 @@ describe('intcode run tests', () => {
   it('should return n * 2 + 1 from headless mode', () => {
     const program = [3,13,1002,13,2,13,1001,13,1,13,4,13,99,-1];
     const values = [3];
-    const popValue = () => values.shift();
-    const pushValue = (v) => values.unshift(v);
+    const popValue = () => values.pop();
+    const pushValue = (v) => values.push(v);
     expect(intcode.run(program, false, popValue, pushValue).state).to.eql('halt');
     expect(values[0]).to.eql(7);
   });
   it('should support pause in headless mode when no input is available', () => {
     const program = [3,11,3,12,1,11,12,13,4,13,99,-1,-2,-3];
     const values = [303];
-    const popValue = () => values.shift();
-    const pushValue = (v) => values.unshift(v);
+    const popValue = () => values.pop();
+    const pushValue = (v) => values.push(v);
     // step 1 (pauses at 2nd IN)
     let iState = intcode.run(program, false, popValue, pushValue);
     expect(iState.pc).to.eql(2);
@@ -166,7 +166,7 @@ describe('intcode run tests', () => {
     expect(program[12]).to.eql(-2);
     expect(program[13]).to.eql(-3);
     // step 2 (halts)
-    values.unshift(10);
+    values.push(10);
     iState = intcode.run(program, false, popValue, pushValue, iState);
     expect(iState.state).to.eql('halt');
     expect(program[11]).to.eql(303);
