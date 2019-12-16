@@ -174,7 +174,7 @@ class Droid
   // private: is there a wall in the given direction?
   _isBlocked(dir)
   {
-      return this._grid.get(Droid._mapKey(this._newPosition(dir))) === 0;
+    return this._grid.get(Droid._mapKey(this._newPosition(dir))) === 0;
   }
   // private: map key for a given [Y, X] position
   static _mapKey(position)
