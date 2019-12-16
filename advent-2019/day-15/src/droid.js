@@ -104,6 +104,12 @@ class Droid
       this._path.push(dir);
     }
   }
+  // private: backtrack
+  _moveBack()
+  {
+    const backDir = this._oppositeDir[this._path.pop()];
+    this._position = this._newPosition(backDir);
+  }
   /* istanbul ignore next */
   /**
    * Run the maze-running Intcode program until it halts.
@@ -160,15 +166,10 @@ class Droid
       if (what === 0) {
         continue;
       }
-      // TODO RF use this._move() for forward movement, and
-      //      create this._unmove() for backtracking [have run() use it]
       // open in this direction; recursively explore that way:
-      const prevPosition = this._position;
-      this._position = position1;
-      this._path.push(dir);
+      this._move(dir);
       const longest1 = this._longestPathLength();
-      this._path.pop();
-      this._position = prevPosition;
+      this._moveBack();
       longest = Math.max(longest, longest1 + 1);
     }
     return longest;
