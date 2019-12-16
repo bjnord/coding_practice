@@ -61,8 +61,8 @@ const patternList = (count) => {
  * @param {number} index - 0-relative index of phase (e.g. 1 = 2nd phase)
  *
  * @return {Array}
- *   Returns an array of length `count` with the FFT pattern for the given
- *   `index`.
+ *   Returns output elements (of same size as input `elements`) after
+ *   applying one phase of FFT.
  */
 exports.phase = (elements, index, _patterns = undefined) => {
   if (elements.length === 0) {
@@ -83,4 +83,27 @@ exports.phase = (elements, index, _patterns = undefined) => {
     return sum;
   });
   return newElements;
+};
+/**
+ * Do multiple phases of FFT.
+ *
+ * @param {Array} elements - input elements
+ * @param {number} count - number of FFT phases
+ *
+ * @return {Array}
+ *   Returns output elements (of same size as input `elements`) after
+ *   applying `count` phases of FFT.
+ */
+exports.phases = (elements, count) => {
+  if (elements.length === 0) {
+    throw new Error('empty element list');
+  } else if (count < 1) {
+    throw new Error('invalid phase count');
+  }
+  const patterns = patternList(elements.length);
+  for (let i = 0; i < count; i++) {
+    elements = module.exports.phase(elements, i, patterns);
+    //console.debug(`i=${i} new elements=${elements}`);
+  }
+  return elements;
 };

@@ -61,3 +61,41 @@ describe('single phase tests', () => {
     expect(call).to.throw(Error, 'invalid phase index');
   });
 });
+describe('multiple phase tests', () => {
+  it('should produce the 4th phase correctly [puzzle example #1]', () => {
+    const input = '12345678';
+    const iList = input.split('').map((i) => Number(i));
+    const expected = '01029498';
+    const eList = expected.split('').map((e) => Number(e));
+    expect(fft.phases(iList, 4).slice(0, 8)).to.eql(eList);
+  });
+  it('should produce the 100th phase correctly [puzzle example #2]', () => {
+    const input = '80871224585914546619083218645595';
+    const iList = input.split('').map((i) => Number(i));
+    const expected = '24176176';
+    const eList = expected.split('').map((e) => Number(e));
+    expect(fft.phases(iList, 100).slice(0, 8)).to.eql(eList);
+  });
+  it('should produce the 100th phase correctly [puzzle example #3]', () => {
+    const input = '19617804207202209144916044189917';
+    const iList = input.split('').map((i) => Number(i));
+    const expected = '73745418';
+    const eList = expected.split('').map((e) => Number(e));
+    expect(fft.phases(iList, 100).slice(0, 8)).to.eql(eList);
+  });
+  it('should produce the 100th phase correctly [puzzle example #4]', () => {
+    const input = '69317163492948606335995924319873';
+    const iList = input.split('').map((i) => Number(i));
+    const expected = '52432133';
+    const eList = expected.split('').map((e) => Number(e));
+    expect(fft.phases(iList, 100).slice(0, 8)).to.eql(eList);
+  });
+  it('should throw an exception for invalid input (empty element list)', () => {
+    const call = () => { fft.phases([], 1); };
+    expect(call).to.throw(Error, 'empty element list');
+  });
+  it('should throw an exception for invalid input (nonpositive phase count)', () => {
+    const call = () => { fft.phases([1, 2, 3, 4, 5, 6, 7, 8], 0); };
+    expect(call).to.throw(Error, 'invalid phase count');
+  });
+});
