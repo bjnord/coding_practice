@@ -38,3 +38,43 @@ exports.pattern = (count, index) => {
   }
   return flattened;
 };
+// private: list of patterns
+const patternList = (count) => {
+  const patterns = [];
+  //console.debug('patternList:');
+  for (let i = 0; i < count; i++) {
+    patterns.push(module.exports.pattern(count, i));
+    //console.debug(`i=${i} pattern=${patterns[i]}`);
+  }
+  return patterns;
+};
+/**
+ * Do one phase of FFT.
+ *
+ * @param {Array} elements - input elements
+ * @param {number} index - 0-relative index of phase (e.g. 1 = 2nd phase)
+ *
+ * @return {Array}
+ *   Returns an array of length `count` with the FFT pattern for the given
+ *   `index`.
+ */
+exports.phase = (elements, index, _patterns = undefined) => {
+  if (elements.length === 0) {
+    throw new Error('empty element list');
+  } else if (index < 0) {
+    throw new Error('invalid phase index');
+  }
+  const patterns = _patterns || patternList(elements.length);
+  const newElements = elements.map((el, y) => {
+    const cols = elements.map((el, x) => {
+      return el * patterns[y][x];
+    });
+    //console.debug(`< row=${y} elements=${elements}`);
+    //console.debug(`- row=${y}  pattern=${patterns[y]}`);
+    //console.debug(`= row=${y}     cols=${cols}`);
+    const sum = Math.abs(cols.reduce((sum, n) => sum + n, 0) % 10);
+    //console.debug(`> row=${y}      sum=${sum}`);
+    return sum;
+  });
+  return newElements;
+};

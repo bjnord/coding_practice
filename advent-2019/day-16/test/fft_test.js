@@ -31,3 +31,25 @@ describe('pattern tests', () => {
     expect(call).to.throw(Error, 'invalid pattern index');
   });
 });
+describe('single phase tests', () => {
+  it('should produce the first four phases correctly', () => {
+    const sequence = [
+      [1, 2, 3, 4, 5, 6, 7, 8],
+      [4, 8, 2, 2, 6, 1, 5, 8],
+      [3, 4, 0, 4, 0, 4, 3, 8],
+      [0, 3, 4, 1, 5, 5, 1, 8],
+      [0, 1, 0, 2, 9, 4, 9, 8],
+    ];
+    for (let i = 0; i < sequence.length-1; i++) {
+      expect(fft.phase(sequence[i], i)).to.eql(sequence[i+1]);
+    }
+  });
+  it('should throw an exception for invalid input (empty element list)', () => {
+    const call = () => { fft.phase([], 0); };
+    expect(call).to.throw(Error, 'empty element list');
+  });
+  it('should throw an exception for invalid input (negative phase index)', () => {
+    const call = () => { fft.phase([1, 2, 3, 4, 5, 6, 7, 8], -1); };
+    expect(call).to.throw(Error, 'invalid phase index');
+  });
+});
