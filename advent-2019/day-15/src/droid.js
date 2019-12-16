@@ -57,18 +57,6 @@ class Droid
     // private: opposites of each direction
     this._oppositeDir = {1: 2, 2: 1, 3: 4, 4: 3};
   }
-  /**
-   * Set grid map.
-   *
-   * Used for testing `longestPathLengthFrom()` method.
-   *
-   * @param {object} grid - the grid map
-   */
-  setGrid(grid)
-  {
-    this._grid = grid;
-    this._explored = true;
-  }
   // private: choose next move
   _chooseMove()
   {
@@ -110,7 +98,6 @@ class Droid
     const backDir = this._oppositeDir[this._path.pop()];
     this._position = this._newPosition(backDir);
   }
-  /* istanbul ignore next */
   /**
    * Run the maze-running Intcode program until it halts.
    */
