@@ -159,11 +159,8 @@ class Droid
       if (dir === sourceDir) {
         continue;
       }
-      // TODO RF this._isBlocked(dir)
-      const position1 = this._newPosition(dir);
-      const what = this._grid.get(Droid._mapKey(position1));
       // wall in this direction; no longest path that way:
-      if (what === 0) {
+      if (this._isBlocked(dir)) {
         continue;
       }
       // open in this direction; recursively explore that way:
@@ -173,6 +170,11 @@ class Droid
       longest = Math.max(longest, longest1 + 1);
     }
     return longest;
+  }
+  // private: is there a wall in the given direction?
+  _isBlocked(dir)
+  {
+      return this._grid.get(Droid._mapKey(this._newPosition(dir))) === 0;
   }
   // private: map key for a given [Y, X] position
   static _mapKey(position)
