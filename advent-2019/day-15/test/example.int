@@ -7,7 +7,7 @@
 2       ARB M70
 4       ADD M71,*74,M73    // curY + dY -> newY
 8       ADD M72,*78,M74    // curX + dX -> newX
-12      MUL M70,-1,M70     // set ARB back to 0
+12      MUL M70,-1,M70     // set RB back to 0
 16      ARB M70
 
 // determine what's in maze at new Y, X position
@@ -15,7 +15,7 @@
 22      ADD M83,M74,M83    // mazeIdx + newX -> mazeIdx
 26      ARB M83
 28      ADD *116,0,M84     // maze[mazeIdx] -> mazeContent
-32      MUL M83,-1,M83     // set ARB back to 0
+32      MUL M83,-1,M83     // set RB back to 0
 36      ARB M83
 
 // if wall at position, jump around update
