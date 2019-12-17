@@ -77,5 +77,36 @@ class Scaffold
     });
     intcode.run(this._program, false, undefined, storeValue);
   }
+  /**
+   * Find the scaffold intersections, setting them on the puzzle grid.
+   */
+  findIntersections()
+  {
+    // FIXME this should be a PuzzleGrid method "find positions with contents X"
+    const scaffolds = Array.from(this._grid._grid.keys())
+      .filter((k) => this._grid._grid.get(k) === 1)
+      .map((k) => k.split(',').map((p) => Number(p)));
+    const intersections = scaffolds.filter((pos) => {
+      // is there a scaffold in every direction from this position?
+      return Object.keys(_offsets).every((dir) => {
+        const dirPos = [pos[0] + _offsets[dir][0], pos[1] + _offsets[dir][1]];
+        return this._grid.get(dirPos) === 1;
+      });
+    });
+    intersections.forEach((pos) => this._grid.set(pos, 2));
+  }
+  /**
+   * Get the scaffold intersection positions.
+   *
+   * @return {Array}
+   *   Returns scaffold intersection [Y, X] positions.
+   */
+  intersections()
+  {
+    // FIXME this should be a PuzzleGrid method "find positions with contents X"
+    return Array.from(this._grid._grid.keys())
+      .filter((k) => this._grid._grid.get(k) === 2)
+      .map((k) => k.split(',').map((p) => Number(p)));
+  }
 }
 module.exports = Scaffold;
