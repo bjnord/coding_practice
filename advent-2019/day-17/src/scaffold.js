@@ -11,7 +11,7 @@ const _offsets = {
 };
 
 // private: map of direction characters to direction
-const _directions = {94: 1, 118: 2, 60: 3, 62: 4};
+const _directions = {94: 1, 118: 2, 60: 3, 62: 4, 88: undefined};
 
 // private: opposites of each direction
 const _oppositeDir = {1: 2, 2: 1, 3: 4, 4: 3};
@@ -65,9 +65,10 @@ class Scaffold
       case 118: // v = robot faces down
       case 60:  // < = robot faces left
       case 62:  // > = robot faces right
+      case 88:  // X = robot is tumbling through space
         this._position = [y, x];
         this._direction = _directions[v];
-        this._grid.set([y, x++], 1);  // scaffold underneath
+        this._grid.set([y, x++], (v === 88) ? 0 : 1);
         break;
       /* istanbul ignore next */
       default:
