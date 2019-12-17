@@ -33,6 +33,74 @@ class PuzzleGrid
     this._key = key;
   }
   /**
+   * Factory: Create a new puzzle grid by parsing a list of input strings.
+   *
+   * The input lines need not be of uniform length (a puzzle grid is a
+   * "sparse" map; any coordinates may have `undefined` contents). All
+   * characters in an input line are treated as significant, so lines
+   * should not have spaces, newlines, etc. (unless they are to be parsed
+   * and stored in the grid).
+   *
+   * If an `originOffset` is provided, those `[oY, oX]` values will be
+   * _subtracted_ from all coordinates. For example, with offset `[2, 2]`
+   * a 4x6 grid will run from `[-2, -2]` (upper-left corner) to `[1, 3]`
+   * (lower-right corner).
+   *
+   * The `unknownType` callback is useful for moveable objects. If provided,
+   * it will be called for any input line character that is not found in the
+   * `key` (as a `render` value), with these arguments:
+   * - `pos` - [Y, X] position in grid (including any `originOffset`)
+   * - `ch` - the character of unknown type
+   *
+   * The callback should return the contents that should be stored for this
+   * position (e.g. the grid type "underneath" a moveable object), or
+   * `undefined` to not store anything. If a value is returned, it should
+   * normally be one of the keys in `key`.
+   *
+   * If the `unknownType` callback is not provided, the parser will store
+   * `null` as the grid position contents for any unknown character type.
+   *
+   * @param {Array} lines - the list of input strings
+   * @param {object} key - the grid key (see constructor for format)
+   * @param {Array} [originOffset=[0, 0]] - the origin offset
+   * @param {function} [unknownType] - unknown-type callback
+   *
+   * @return {PuzzleGrid}
+   *   Returns a new PuzzleGrid class object.
+   */
+  static from(lines, key, originOffset = [0, 0], callback = undefined)
+  {
+    const puzzleGrid = new PuzzleGrid(key);
+    // "I have a dream."
+    const contentOfCharacter = new Map(Object.entries(key).map(([k, v]) => [v.render, Number(k)]));
+    let y = originOffset[0], x = originOffset[1];
+    while (lines.length > 0) {
+      // ignore empty lines at end, if any:
+      if (!lines[0] && lines.every((l) => !l)) {
+        break;
+      }
+      // TODO RF move guts to private "decode character" helper function WITH TESTS
+      //      should return `undefined` (don't store), or contents to store
+      lines.shift().split('').forEach((v) => {
+        let contents = contentOfCharacter.get(v);
+        //console.debug(`v=[${v}] contents @ [${y}, ${x}] = ${contents} type ${typeof contents}`);
+        if (contents !== undefined) {
+          puzzleGrid.set([y, x], contents);
+        } else if (callback) {
+          if ((contents = callback([y, x], v)) !== undefined) {
+            puzzleGrid.set([y, x], contents);
+          }
+        } else {
+          puzzleGrid.set([y, x], null);  // unknown type
+        }
+        x++;
+      });
+      y++;
+      x = originOffset[1];
+    }
+    return puzzleGrid;
+  }
+  /**
    * Get the contents of a given puzzle grid position.
    *
    * @param {Array} pos - position coordinates
@@ -52,7 +120,7 @@ class PuzzleGrid
    * @param {string} attrName - attribute name
    *
    * @return {number}
-   *   Returns the contents at the given position. (Will return `undefined`
+   *   Returns the attribute at the given position. (Will return `undefined`
    *   if contents have not yet been set there.)
    */
   getAttr(pos, attrName)
@@ -79,8 +147,10 @@ class PuzzleGrid
   /* istanbul ignore next */
   /**
    * Display the grid.
+   *
+   * @param {string} [unknownChar=' '] - character to display for unknown content type
    */
-  dump()
+  dump(unknownChar = ' ')
   {
     const squares = Array.from(this._grid.keys()).map((k) => k.split(/,/).map((str) => Number(str)));
     const squareMin = squares.reduce((mins, p) => [Math.min(p[0], mins[0]), Math.min(p[1], mins[1])], [999999, 999999]);
@@ -91,7 +161,7 @@ class PuzzleGrid
         //if ((y === 0) && (x === 0)) {
         //  process.stdout.write(':');  // origin
         //} else {
-          process.stdout.write(this.getAttr([y, x], 'render') || ' ');
+          process.stdout.write(this.getAttr([y, x], 'render') || unknownChar);
         //}
       }
       process.stdout.write('\n');
