@@ -175,6 +175,22 @@ class PuzzleGrid
   {
     this._grid.set(PuzzleGrid._gridKey(pos), value);
   }
+  /**
+   * Find puzzle grid positions matching the given type.
+   *
+   * @param {number} type - the content type - must be one of the values
+   *   defined in the puzzle grid key (see constructor)
+   *
+   * @return {Array}
+   *   Returns the list of [Y, X] positions whose contents are of the given
+   *   type.
+   */
+  positionsWithType(type)
+  {
+    return Array.from(this._grid.keys())
+      .filter((k) => this._grid.get(k) === type)
+      .map((k) => k.split(',').map((p) => Number(p)));
+  }
   // private: grid key for a given [Y, X] position
   static _gridKey(position)
   {

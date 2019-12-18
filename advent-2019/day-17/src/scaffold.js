@@ -191,10 +191,7 @@ class Scaffold
   // private: find scaffold intersections, setting them on the puzzle grid
   _findIntersections()
   {
-    // FIXME this should be a PuzzleGrid method "find positions with contents X"
-    const scaffolds = Array.from(this._grid._grid.keys())
-      .filter((k) => this._grid._grid.get(k) === 1)
-      .map((k) => k.split(',').map((p) => Number(p)));
+    const scaffolds = this._grid.positionsWithType(1);
     const intersections = scaffolds.filter((pos) => {
       // is there a scaffold in every direction from this position?
       return Object.keys(_offsets).every((dir) => {
@@ -212,10 +209,7 @@ class Scaffold
    */
   intersections()
   {
-    // FIXME this should be a PuzzleGrid method "find positions with contents X"
-    return Array.from(this._grid._grid.keys())
-      .filter((k) => this._grid._grid.get(k) === 2)
-      .map((k) => k.split(',').map((p) => Number(p)));
+    return this._grid.positionsWithType(2);
   }
 }
 module.exports = Scaffold;

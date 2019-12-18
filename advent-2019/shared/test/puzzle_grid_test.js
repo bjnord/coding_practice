@@ -38,6 +38,27 @@ describe('puzzle grid get-adjacent tests', () => {
     expect(getAdjGrid.getInDirection([0, 0], 4)).to.eql(3);
   });
 });
+describe('puzzle grid positions-of-type tests', () => {
+  const getTypeKey = {
+    1: {name: 'floor', render: '.'},
+    2: {name: 'vwall', render: '|'},
+    3: {name: 'hwall', render: '-'},
+    4: {name: 'gold', render: '$'},
+  };
+  const getTypeLines = [
+    '-------',
+    '|.$$..|',
+    '|....$|',
+    '|$.. .|',
+    '-------',
+  ];
+  it('should find positions containing a type of content', () => {
+    const getTypeGrid = PuzzleGrid.from(getTypeLines, getTypeKey);
+    const expected = new Set([[1, 2], [1, 3], [2, 5], [3, 1]]);
+    const actual = new Set(getTypeGrid.positionsWithType(4));
+    expect(actual).to.eql(expected);
+  });
+});
 describe('puzzle grid get attribute tests', () => {
   // TODO
 });
