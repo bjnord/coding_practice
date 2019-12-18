@@ -1,5 +1,13 @@
 'use strict';
 
+// private: map of directions to [dY, dX] offsets
+const _offsets = {
+  1: [-1, 0],  // up (north, -Y)
+  2: [1, 0],   // down (south, +Y)
+  3: [0, -1],  // left (west, -X)
+  4: [0, 1],   // right (east, +X)
+};
+
 class PuzzleGrid
 {
   /**
@@ -103,7 +111,7 @@ class PuzzleGrid
   /**
    * Get the contents of a given puzzle grid position.
    *
-   * @param {Array} pos - position coordinates
+   * @param {Array} pos - [Y, X] position coordinates
    *
    * @return {number}
    *   Returns the contents at the given position. (Will return `undefined`
@@ -112,6 +120,34 @@ class PuzzleGrid
   get(pos)
   {
     return this._grid.get(PuzzleGrid._gridKey(pos));
+  }
+  /**
+   * Get the contents adjacent to a given puzzle grid position in the
+   * provided direction.
+   *
+   * Directions are:
+   * - `1` - up (north, -Y)
+   * - `2` - down (south, +Y)
+   * - `3` - left (west, -X)
+   * - `4` - right (east, +X)
+   *
+   * @param {Array} pos - [Y, X] position coordinates
+   * @param {Array} dir - direction
+   *
+   * @return {number}
+   *   Returns the contents at the adjacent position. (Will return
+   *   `undefined` if contents have not yet been set there.)
+   */
+  getInDirection(pos, dir)
+  {
+    return this._grid.get(PuzzleGrid._gridKey(PuzzleGrid._newPosition(pos, dir)));
+  }
+  // private: calculate new position from direction
+  static _newPosition(pos, dir)
+  {
+    const y = pos[0] + _offsets[dir][0];
+    const x = pos[1] + _offsets[dir][1];
+    return [y, x];
   }
   /**
    * Get an attribute for a given puzzle grid position.

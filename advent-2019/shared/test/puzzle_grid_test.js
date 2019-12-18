@@ -7,9 +7,36 @@ describe('puzzle grid constructor tests', () => {
 });
 describe('puzzle grid get/set tests', () => {
   // TODO
-  // should throw exception if coordinates [Y, X] is not an Array
-  // should throw exception if coordinate Y & X are not numbers
   // should return `undefined` for spaces without content yet
+});
+describe('puzzle grid get-adjacent tests', () => {
+  const getAdjKey = {
+    1: {name: 'floor', render: '.'},
+    2: {name: 'vwall', render: '|'},
+    3: {name: 'hwall', render: '-'},
+  };
+  const getAdjLines = [
+    '-----',
+    '|...|',
+    '|...|',
+    '-----',
+  ];
+  let getAdjGrid;
+  before(() => {
+    getAdjGrid = PuzzleGrid.from(getAdjLines, getAdjKey);
+  });
+  it('should find adjacent contents [upper-left floor corner]', () => {
+    expect(getAdjGrid.getInDirection([1, 1], 1)).to.eql(3);
+    expect(getAdjGrid.getInDirection([1, 1], 2)).to.eql(1);
+    expect(getAdjGrid.getInDirection([1, 1], 3)).to.eql(2);
+    expect(getAdjGrid.getInDirection([1, 1], 4)).to.eql(1);
+  });
+  it('should find adjacent contents [upper-left edge corner]', () => {
+    expect(getAdjGrid.getInDirection([0, 0], 1)).to.be.undefined;
+    expect(getAdjGrid.getInDirection([0, 0], 2)).to.eql(2);
+    expect(getAdjGrid.getInDirection([0, 0], 3)).to.be.undefined;
+    expect(getAdjGrid.getInDirection([0, 0], 4)).to.eql(3);
+  });
 });
 describe('puzzle grid get attribute tests', () => {
   // TODO
