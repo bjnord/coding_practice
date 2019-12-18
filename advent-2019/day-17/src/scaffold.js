@@ -86,9 +86,8 @@ class Scaffold
      * NB: The final answer (accumulated dust) is a special case handled
      * outside the state machine.
      */
-    let state = 'getVideo', nextState, promptStr = '', commandStr, gPath, gFunctions;
-    let y = 0, x = 0;
-    // IN sends the next ASCII character
+    let state = 'getVideo', nextState, promptStr = '', commandStr, gPath, gFunctions, frame = [];
+    // IN sends the next ASCII code
     const getValue = (() => {
       if (state === 'getPrompt') {
         let m;
@@ -111,8 +110,6 @@ class Scaffold
         if (commandStr.length === 0) {
           state = nextState;
           if (nextState === 'getVideo') {
-            y = 0;
-            x = 0;
             this._position = undefined;
             this._direction = undefined;
           }
@@ -129,41 +126,14 @@ class Scaffold
         throw new Error(`getValue unhandled state ${state}`);
       }
     });
-    // OUT gives us the next ASCII character
-    const storeValue = ((v) => {
-      // "Once it finishes the programmed set of movements, [...] the
-      // cleaning robot will [...] report the amount of space dust it
-      // collected as a large, non-ASCII value in a single output
-      // instruction."
-      if (v > 127) {
-        this.dust = v;
-        state = 'done';
-        return;
-      }
-      if (state === 'getVideo') {
+    // process one video frame
+    const processFrame = (() => {
+      let y = 0, x = 0;
+      frame.forEach((v) => {
         switch (v) {
         case 10:  // \n (go to next line)
-          if ((x === 0) && (y > 0)) {
-            // extra \n at end signals video frame is done
-            if (this._continuousVideo) {
-              // TODO this isn't very useful, since dump() doesn't show the
-              //      robot on the grid
-              this._grid.dump();
-              console.log(`robot position: [${this._position}] direction: ${this._direction}`);
-              console.log('');
-            }
-            if (!gPath) {
-              // this was the initial video frame
-              gPath = pathAnalyzer.path(this._grid, this._position, this._direction);
-              gFunctions = pathAnalyzer.functions(gPath);
-              state = 'getPrompt';
-            } else {
-              // this was an intermediate/final video frame
-              state = this._continuousVideo ? 'getVideo' : 'done';
-            }
-            promptStr = '';
-            y = 0;
-          } else if (x > 0) {
+          // ignore extra \n at beginning
+          if (x > 0) {
             y++;
           }
           x = 0;
@@ -186,7 +156,48 @@ class Scaffold
           break;
         /* istanbul ignore next */
         default:
-          throw new Error(`got unknown video character ${v} [${String.fromCharCode(v)}]`);
+          throw new Error(`unknown video character ${v} [${String.fromCharCode(v)}] at [${y}, ${x}]`);
+        }
+      });
+    });
+    // OUT gives us the next ASCII code
+    const storeValue = ((v) => {
+      // "Once it finishes the programmed set of movements, [...] the
+      // cleaning robot will [...] report the amount of space dust it
+      // collected as a large, non-ASCII value in a single output
+      // instruction."
+      if (v > 127) {
+        this.dust = v;
+        state = 'done';
+        return;
+      }
+      if (state === 'getVideo') {
+        // double \n signals end of frame:
+        if ((v === 10) && (frame[frame.length-1] === 10)) {
+          processFrame();
+          if (this._continuousVideo) {
+            // TODO this isn't very useful, since dump() doesn't show the
+            //      robot on the grid
+            this._grid.dump();
+            console.log(`robot position: [${this._position}] direction: ${this._direction}`);
+            console.log('');
+          }
+          if (mode === 1) {
+            // we only get one video frame in this mode
+            state = 'done';
+          } else if (!gPath) {
+            // this was the initial video frame
+            gPath = pathAnalyzer.path(this._grid, this._position, this._direction);
+            gFunctions = pathAnalyzer.functions(gPath);
+            state = 'getPrompt';
+          } else {
+            // this was an intermediate/final video frame
+            state = this._continuousVideo ? 'getVideo' : 'done';
+          }
+          promptStr = '';
+          frame = [];
+        } else {
+          frame.push(v);
         }
       } else if (state === 'getPrompt') {
         promptStr += String.fromCharCode(v);
