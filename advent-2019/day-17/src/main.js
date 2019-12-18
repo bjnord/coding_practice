@@ -5,8 +5,7 @@ const input = fs.readFileSync('input/input.txt', 'utf8');
 
 // PART 1
 let scaffold = new Scaffold(input);
-scaffold.run();
-scaffold.findIntersections();
+scaffold.run(1);
 console.log('part 1: expected answer:                          5788');
 const alignmentSum = scaffold.intersections()
   .map((pos) => pos[0] * pos[1])

@@ -184,11 +184,12 @@ class Scaffold
       }
     });
     intcode.run(this._program, false, getValue, storeValue);
+    if (mode === 1) {
+      this._findIntersections();
+    }
   }
-  /**
-   * Find the scaffold intersections, setting them on the puzzle grid.
-   */
-  findIntersections()
+  // private: find scaffold intersections, setting them on the puzzle grid
+  _findIntersections()
   {
     // FIXME this should be a PuzzleGrid method "find positions with contents X"
     const scaffolds = Array.from(this._grid._grid.keys())

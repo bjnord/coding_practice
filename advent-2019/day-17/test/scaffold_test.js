@@ -55,8 +55,7 @@ describe('scaffold constructor tests [robot tumbling]', () => {
 describe('scaffold intersection tests [puzzle example]', () => {
   it('should find the scaffold intersections correctly', () => {
     const scaffold = new Scaffold(puzzleExample);
-    scaffold.run();
-    scaffold.findIntersections();
+    scaffold.run(1);
     const expected = new Set([[2, 2], [4, 2], [4, 6], [4, 10]]);
     const actual = new Set(scaffold.intersections());
     expect(actual).to.eql(expected);
