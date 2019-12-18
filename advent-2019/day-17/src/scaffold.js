@@ -50,6 +50,8 @@ class Scaffold
     this.dust = 0;
     // private: provide continuous video feed?
     this._continuousVideo = false;
+    // private: functions from robot path analysis
+    this._pathFunctions = undefined;
   }
   /**
    * Run the grid-producing Intcode program until it halts.
@@ -86,17 +88,23 @@ class Scaffold
      * NB: The final answer (accumulated dust) is a special case handled
      * outside the state machine.
      */
-    let state = 'getVideo', nextState, promptStr = '', commandStr, gPath, gFunctions, frame = [];
-    // IN sends the next ASCII code
+    let state = 'getVideo', nextState, promptStr = '', commandStr, frame = [];
+    // machine called IN; send the next ASCII code to it
     const getValue = (() => {
+      /*
+       * transitioning from OUT to IN:
+       */
       if (state === 'getPrompt') {
+        // we've received a complete prompt; machine is waiting for reply
+        // 1. choose what to send (`commandStr`)
+        // 2. choose what to do after that (`nextState`)
         let m;
         state = 'sendCommand';
         if (promptStr === 'Main:\n') {
-          commandStr = gFunctions[0];
+          commandStr = this._pathFunctions[0];
           nextState = 'getPrompt';
         } else if ((m = promptStr.match(/^Function (\w):\n$/))) {
-          commandStr = gFunctions[m[1].charCodeAt(0) - 64];  // A=1 etc.
+          commandStr = this._pathFunctions[m[1].charCodeAt(0) - 64];  // A=1 etc.
           nextState = 'getPrompt';
         } else if (promptStr === 'Continuous video feed?\n') {
           commandStr = this._continuousVideo ? 'y' : 'n';
@@ -106,13 +114,12 @@ class Scaffold
         }
         promptStr = '';
       }
+      /*
+       * handling IN:
+       */
       if (state === 'sendCommand') {
         if (commandStr.length === 0) {
           state = nextState;
-          if (nextState === 'getVideo') {
-            this._position = undefined;
-            this._direction = undefined;
-          }
           nextState = undefined;
           return 10;
         }
@@ -129,6 +136,8 @@ class Scaffold
     // process one video frame
     const processFrame = (() => {
       let y = 0, x = 0;
+      this._position = undefined;
+      this._direction = undefined;
       frame.forEach((v) => {
         switch (v) {
         case 10:  // \n (go to next line)
@@ -160,7 +169,7 @@ class Scaffold
         }
       });
     });
-    // OUT gives us the next ASCII code
+    // machine called OUT; receive the next ASCII code from it
     const storeValue = ((v) => {
       // "Once it finishes the programmed set of movements, [...] the
       // cleaning robot will [...] report the amount of space dust it
@@ -172,31 +181,27 @@ class Scaffold
         return;
       }
       if (state === 'getVideo') {
-        // double \n signals end of frame:
         if ((v === 10) && (frame[frame.length-1] === 10)) {
+          // double \n signals end of frame
           processFrame();
+          frame = [];
           if (this._continuousVideo) {
-            // TODO this isn't very useful, since dump() doesn't show the
-            //      robot on the grid
-            this._grid.dump();
-            console.log(`robot position: [${this._position}] direction: ${this._direction}`);
-            console.log('');
+            this._dumpFrame();
           }
+          // change state
           if (mode === 1) {
             // we only get one video frame in this mode
             state = 'done';
-          } else if (!gPath) {
+          } else if (!this._pathFunctions) {
             // this was the initial video frame
-            gPath = pathAnalyzer.path(this._grid, this._position, this._direction);
-            gFunctions = pathAnalyzer.functions(gPath);
+            this._analyzePath();
             state = 'getPrompt';
           } else {
             // this was an intermediate/final video frame
             state = this._continuousVideo ? 'getVideo' : 'done';
           }
-          promptStr = '';
-          frame = [];
         } else {
+          // still accumulating frame data
           frame.push(v);
         }
       } else if (state === 'getPrompt') {
@@ -211,6 +216,21 @@ class Scaffold
     if (mode === 1) {
       this._findIntersections();
     }
+  }
+  // private: analyze robot path and store path functions
+  _dumpFrame()
+  {
+    // TODO this isn't very useful, since dump() doesn't show the robot
+    //      on the grid
+    this._grid.dump();
+    console.log(`robot position: [${this._position}] direction: ${this._direction}`);
+    console.log('');
+  }
+  // private: analyze robot path and store path functions
+  _analyzePath()
+  {
+    const gPath = pathAnalyzer.path(this._grid, this._position, this._direction);
+    this._pathFunctions = pathAnalyzer.functions(gPath);
   }
   // private: find scaffold intersections, setting them on the puzzle grid
   _findIntersections()
