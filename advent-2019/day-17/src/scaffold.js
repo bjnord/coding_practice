@@ -72,10 +72,10 @@ class Scaffold
      *
      * getVideo            // [initial video frame]
      * getPrompt           // "Main:\n"
-     * sendFunction        // "A,B,...\n"
+     * sendCommand         // "A,B,...\n"
      * 3 times:            //
      *   getPrompt           // "Function _:\n" [_=A|B|C]
-     *   sendFunction        // "R,8,...\n"
+     *   sendCommand         // "R,8,...\n"
      * getPrompt           // "Continuous video feed?\n"
      * sendContFeed        // "_\n" [_=y|n]
      * if mode=3, repeat:  //
@@ -86,19 +86,19 @@ class Scaffold
      * NB: The final answer (accumulated dust) is a special case handled
      * outside the state machine.
      */
-    let state = 'getVideo', fno = 0, promptStr = '', gPath, gFunctions;
+    let state = 'getVideo', promptStr = '', commandStr, gPath, gFunctions;
     let y = 0, x = 0;
     // IN sends the next ASCII character
     const getValue = (() => {
       if (state === 'getPrompt') {
         let m;
         if (promptStr === 'Main:\n') {
-          state = 'sendFunction';
-          fno = 0;
+          state = 'sendCommand';
+          commandStr = gFunctions[0];
           promptStr = '';
         } else if ((m = promptStr.match(/^Function (\w):\n$/))) {
-          state = 'sendFunction';
-          fno = m[1].charCodeAt(0) - 64;
+          state = 'sendCommand';
+          commandStr = gFunctions[m[1].charCodeAt(0) - 64];  // A=1 etc.
           promptStr = '';
         } else if (promptStr === 'Continuous video feed?\n') {
           state = 'sendContFeed';
@@ -107,14 +107,14 @@ class Scaffold
           throw new Error(`getValue: unhandled promptStr [${promptStr}]`);
         }
       }
-      if (state === 'sendFunction') {
-        if (gFunctions[fno].length === 0) {
+      if (state === 'sendCommand') {
+        if (commandStr.length === 0) {
           state = 'getPrompt';
           return 10;
         }
-        const v = gFunctions[fno].slice(0, 1).charCodeAt(0);
-        gFunctions[fno] = gFunctions[fno].slice(1, gFunctions[fno].length);
-        //console.debug(`send char ${v} [${String.fromCharCode(v)}] for function ${fno}, remainder=[${gFunctions[fno]}]`);
+        const v = commandStr.slice(0, 1).charCodeAt(0);
+        commandStr = commandStr.slice(1, commandStr.length);
+        //console.debug(`send char ${v} [${String.fromCharCode(v)}] for function ${fno}, remainder=[${commandStr}]`);
         return v;
       } else if (state === 'sendContFeed') {
         if (promptStr.length === 1) {
