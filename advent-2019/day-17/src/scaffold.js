@@ -67,43 +67,62 @@ class Scaffold
       this._program[0] = 2;
       this._continuousVideo = (mode === 3);
     }
-    let state = 'video', fno = 0, promptStr = '', gPath, gFunctions;
+    /*
+     * In mode 2/3, this state machine will go through the following steps:
+     *
+     * getVideo            // [initial video frame]
+     * getPrompt           // "Main:\n"
+     * sendFunction        // "A,B,...\n"
+     * 3 times:            //
+     *   getPrompt           // "Function _:\n" [_=A|B|C]
+     *   sendFunction        // "R,8,...\n"
+     * getPrompt           // "Continuous video feed?\n"
+     * sendContFeed        // "_\n" [_=y|n]
+     * if mode=3, repeat:  //
+     *   getVideo            // [intermediate video frames]
+     * getVideo            // [final video frame]
+     * done                // [ignore all further I/O]
+     *
+     * NB: The final answer (accumulated dust) is a special case handled
+     * outside the state machine.
+     */
+    let state = 'getVideo', fno = 0, promptStr = '', gPath, gFunctions;
     let y = 0, x = 0;
     // IN sends the next ASCII character
     const getValue = (() => {
-      if (state === 'prompt') {
+      if (state === 'getPrompt') {
         let m;
         if (promptStr === 'Main:\n') {
-          state = 'function';
+          state = 'sendFunction';
           fno = 0;
           promptStr = '';
         } else if ((m = promptStr.match(/^Function (\w):\n$/))) {
-          state = 'function';
+          state = 'sendFunction';
           fno = m[1].charCodeAt(0) - 64;
           promptStr = '';
         } else if (promptStr === 'Continuous video feed?\n') {
-          state = 'feed';
+          state = 'sendContFeed';
           promptStr = this._continuousVideo ? 'y' : 'n';
         } else {
           throw new Error(`getValue: unhandled promptStr [${promptStr}]`);
         }
       }
-      if (state === 'function') {
+      if (state === 'sendFunction') {
         if (gFunctions[fno].length === 0) {
-          state = 'prompt';
+          state = 'getPrompt';
           return 10;
         }
         const v = gFunctions[fno].slice(0, 1).charCodeAt(0);
         gFunctions[fno] = gFunctions[fno].slice(1, gFunctions[fno].length);
         //console.debug(`send char ${v} [${String.fromCharCode(v)}] for function ${fno}, remainder=[${gFunctions[fno]}]`);
         return v;
-      } else if (state === 'feed') {
+      } else if (state === 'sendContFeed') {
         if (promptStr.length === 1) {
           const v = promptStr.charCodeAt(0);  // 'n' or 'y'
           promptStr = '';
           return v;
         } else {
-          state = 'video';
+          state = 'getVideo';
           y = 0;
           x = 0;
           this._position = undefined;
@@ -127,7 +146,7 @@ class Scaffold
         state = 'done';
         return;
       }
-      if (state === 'video') {
+      if (state === 'getVideo') {
         switch (v) {
         case 10:  // \n (go to next line)
           if ((x === 0) && (y > 0)) {
@@ -140,11 +159,13 @@ class Scaffold
               console.log('');
             }
             if (!gPath) {
+              // this was the initial video frame
               gPath = pathAnalyzer.path(this._grid, this._position, this._direction);
               gFunctions = pathAnalyzer.functions(gPath);
-              state = 'prompt';
+              state = 'getPrompt';
             } else {
-              state = this._continuousVideo ? 'video' : 'prompt';
+              // this was an intermediate/final video frame
+              state = this._continuousVideo ? 'getVideo' : 'done';
             }
             promptStr = '';
             y = 0;
@@ -173,7 +194,7 @@ class Scaffold
         default:
           throw new Error(`got unknown video character ${v} [${String.fromCharCode(v)}]`);
         }
-      } else if (state === 'prompt') {
+      } else if (state === 'getPrompt') {
         if (v < 128) {
           promptStr += String.fromCharCode(v);
         }
