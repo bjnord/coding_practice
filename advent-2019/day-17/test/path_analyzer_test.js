@@ -47,3 +47,6 @@ describe('puzzle path analyzer tests', () => {
     expect(pathAnalyzer.path(pe2, [6, 0], 1)).to.eql(pe2Expected);
   });
 });
+describe('puzzle path function breaker tests', () => {
+  // TODO
+});
