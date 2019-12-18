@@ -77,7 +77,7 @@ class Scaffold
      *   getPrompt           // "Function _:\n" [_=A|B|C]
      *   sendCommand         // "R,8,...\n"
      * getPrompt           // "Continuous video feed?\n"
-     * sendContFeed        // "_\n" [_=y|n]
+     * sendCommand         // "_\n" [_=y|n]
      * if mode=3, repeat:  //
      *   getVideo            // [intermediate video frames]
      * getVideo            // [final video frame]
@@ -86,49 +86,43 @@ class Scaffold
      * NB: The final answer (accumulated dust) is a special case handled
      * outside the state machine.
      */
-    let state = 'getVideo', promptStr = '', commandStr, gPath, gFunctions;
+    let state = 'getVideo', nextState, promptStr = '', commandStr, gPath, gFunctions;
     let y = 0, x = 0;
     // IN sends the next ASCII character
     const getValue = (() => {
       if (state === 'getPrompt') {
         let m;
+        state = 'sendCommand';
         if (promptStr === 'Main:\n') {
-          state = 'sendCommand';
           commandStr = gFunctions[0];
-          promptStr = '';
+          nextState = 'getPrompt';
         } else if ((m = promptStr.match(/^Function (\w):\n$/))) {
-          state = 'sendCommand';
           commandStr = gFunctions[m[1].charCodeAt(0) - 64];  // A=1 etc.
-          promptStr = '';
+          nextState = 'getPrompt';
         } else if (promptStr === 'Continuous video feed?\n') {
-          state = 'sendContFeed';
-          promptStr = this._continuousVideo ? 'y' : 'n';
+          commandStr = this._continuousVideo ? 'y' : 'n';
+          nextState = 'getVideo';
         } else {
           throw new Error(`getValue: unhandled promptStr [${promptStr}]`);
         }
+        promptStr = '';
       }
       if (state === 'sendCommand') {
         if (commandStr.length === 0) {
-          state = 'getPrompt';
+          state = nextState;
+          if (nextState === 'getVideo') {
+            y = 0;
+            x = 0;
+            this._position = undefined;
+            this._direction = undefined;
+          }
+          nextState = undefined;
           return 10;
         }
         const v = commandStr.slice(0, 1).charCodeAt(0);
         commandStr = commandStr.slice(1, commandStr.length);
         //console.debug(`send char ${v} [${String.fromCharCode(v)}] for function ${fno}, remainder=[${commandStr}]`);
         return v;
-      } else if (state === 'sendContFeed') {
-        if (promptStr.length === 1) {
-          const v = promptStr.charCodeAt(0);  // 'n' or 'y'
-          promptStr = '';
-          return v;
-        } else {
-          state = 'getVideo';
-          y = 0;
-          x = 0;
-          this._position = undefined;
-          this._direction = undefined;
-          return 10;
-        }
       } else if (state === 'done') {
         return undefined;
       } else {
