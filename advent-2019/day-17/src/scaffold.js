@@ -189,9 +189,7 @@ class Scaffold
           throw new Error(`got unknown video character ${v} [${String.fromCharCode(v)}]`);
         }
       } else if (state === 'getPrompt') {
-        if (v < 128) {
-          promptStr += String.fromCharCode(v);
-        }
+        promptStr += String.fromCharCode(v);
       } else if (state === 'done') {
         return;
       } else {
