@@ -1,13 +1,16 @@
 NODEBIN = ./node_modules/.bin
 LINTSRC = src/*.js# test/*.js
 
-.PHONY: main test lint coverage doc distclean
+.PHONY: main test intcode lint coverage doc distclean
 
 main:
 	node src/main.js
 
 test:
 	npm test
+
+intcode:
+	node src/example_intcode.js
 
 lint:
 	$(NODEBIN)/eslint -c ../.eslintrc.js $(LINTSRC)

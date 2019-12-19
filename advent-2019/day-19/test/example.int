@@ -1,0 +1,29 @@
+// PROGRAM (0-19)
+
+// get user input
+0       IN M20             // get X
+2       IN M21             // get Y
+
+// compute grid index
+4       MUL M21,M22,M24    // Y * width -> gridIdx
+8       ADD M24,M20,M24    // gridIdx + X -> gridIdx
+
+// return grid contents
+12      ARB M24
+14      OUT *25            // put grid[gridIdx]
+
+// done
+16      HALT
+
+17      0
+18      0
+19      0
+
+// PROGRAM DATA (20-)
+
+20      0   // X from user
+21      0   // Y from user
+22      -1  // grid width
+23      -1  // grid height
+24      0   // grid index
+25      0   // beginning of grid data
