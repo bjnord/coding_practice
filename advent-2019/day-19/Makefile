@@ -1,5 +1,5 @@
 NODEBIN = ./node_modules/.bin
-LINTSRC = src/*.js# test/*.js
+LINTSRC = src/*.js test/*.js
 
 .PHONY: main test intcode lint coverage doc distclean
 
