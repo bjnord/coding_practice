@@ -27,8 +27,11 @@ class TractorBeam
    *
    * This is done by running the Intcode program with the [Y, X] position of
    * every point.
+   *
+   * @param {number} height - the height (Y) of the grid
+   * @param {number} width - the width (X) of the grid
    */
-  mapGrid(size)
+  mapGrid(height, width)
   {
     let x = 0, y = 0, flipFlop = 0;
     const getValue = (() => {
@@ -42,9 +45,9 @@ class TractorBeam
     });
     for (;;) {
       intcode.run(this._program.slice(), false, getValue, storeValue);
-      if (++x >= size) {
+      if (++x >= width) {
         x = 0;
-        if (++y >= size) {
+        if (++y >= height) {
           break;
         }
       }

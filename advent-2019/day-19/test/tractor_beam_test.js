@@ -18,7 +18,7 @@ describe('tractor beam affected-points tests [puzzle example #1]', () => {
   let example1;
   before(() => {
     example1 = new TractorBeam(puzzleExample1);
-    example1.mapGrid(10);
+    example1.mapGrid(10, 10);
   });
   it('should compute affected points correctly', () => {
     expect(example1.pointsAffected).to.eql(27);
