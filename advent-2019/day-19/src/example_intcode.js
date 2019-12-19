@@ -27,7 +27,7 @@ const dimensions = (grid) => {
 };
 const dumpProgram = (n, grid) => {
   const dim = dimensions(grid);
-  console.log(`Intcode for example 1 (${dim[0]} x ${dim[1]}):`);
+  console.log(`Intcode for example ${n} (${dim[0]} x ${dim[1]}):`);
   const program = `3,20,3,21,2,21,22,24,1,24,20,24,9,24,204,25,99,0,0,0,0,0,${dim[1]},${dim[0]},0`.split(',').map((n) => Number(n));
   for (let y = 0; y < dim[0]; y++) {
     for (let x = 0; x < dim[1]; x++) {
@@ -40,5 +40,7 @@ const dumpProgram = (n, grid) => {
 
 const example1 = exampleGrid(1);
 dumpProgram(1, example1);
+console.log('');
 const example2 = exampleGrid(2);
 dumpProgram(2, example2);
+console.log('');
