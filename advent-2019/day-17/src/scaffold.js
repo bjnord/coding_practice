@@ -1,18 +1,8 @@
 'use strict';
 const PuzzleGrid = require('../../shared/src/puzzle_grid');
 const intcode = require('../../shared/src/intcode');
+const Vacuum = require('../src/vacuum');
 const pathAnalyzer = require('../src/path_analyzer');
-
-// private: map of directions to [dY, dX] offsets
-const _offsets = {
-  1: [-1, 0],  // up (north, -Y)
-  2: [1, 0],   // down (south, +Y)
-  3: [0, -1],  // left (west, -X)
-  4: [0, 1],   // right (east, +X)
-};
-
-// private: map of direction characters to direction
-const _directions = {94: 1, 118: 2, 60: 3, 62: 4, 88: undefined};
 
 class Scaffold
 {
@@ -33,18 +23,9 @@ class Scaffold
     // cumulative dust count (people are using it for visualizations)
     //console.debug(`address[438] = ${this._program[438]}`);
 
-    // private: the scaffold grid
-    this._grid = new PuzzleGrid({
-      0: {name: 'space', render: '.'},
-      1: {name: 'scaffold', render: '#'},
-      2: {name: 'intersection', render: 'O'},
-    });
-    // private: [Y, X] position of vacuum robot
-    this._position = undefined;
-    // private: direction of vacuum robot (1=up 2=down 3=left 4=right)
-    this._direction = undefined;
+    this._initializeGridAndVacuum();
     /**
-     * the amount of dust cleaned by the vacuum robot
+     * the amount of dust cleaned by the vacuum
      * @member {number}
      */
     this.dust = 0;
@@ -52,6 +33,18 @@ class Scaffold
     this._continuousVideo = false;
     // private: functions from robot path analysis
     this._pathFunctions = undefined;
+  }
+  // private: initialize PuzzleGrid and Vacuum
+  _initializeGridAndVacuum()
+  {
+    // private: the scaffold grid
+    this._grid = new PuzzleGrid({
+      0: {name: 'space', render: '.'},
+      1: {name: 'scaffold', render: '#'},
+      2: {name: 'intersection', render: 'O'},
+    });
+    // private: the vacuum robot
+    this._vacuum = new Vacuum(this._grid);
   }
   /**
    * Run the grid-producing Intcode program until it halts.
@@ -136,8 +129,7 @@ class Scaffold
     // process one video frame
     const processFrame = (() => {
       let y = 0, x = 0;
-      this._position = undefined;
-      this._direction = undefined;
+      this._initializeGridAndVacuum();
       frame.forEach((v) => {
         switch (v) {
         case 10:  // \n (go to next line)
@@ -153,15 +145,13 @@ class Scaffold
         case 35:  // # = scaffold
           this._grid.set([y, x++], 1);
           break;
-        case 94:  // ^ = robot faces up
-        case 118: // v = robot faces down
-        case 60:  // < = robot faces left
-        case 62:  // > = robot faces right
-        case 88:  // X = robot is tumbling through space
-          this._position = [y, x];
-          this._direction = _directions[v];
+        case 94:  // ^ = vacuum faces up
+        case 118: // v = vacuum faces down
+        case 60:  // < = vacuum faces left
+        case 62:  // > = vacuum faces right
+        case 88:  // X = vacuum is tumbling through space
+          this._vacuum.set([y, x], String.fromCharCode(v));
           this._grid.set([y, x++], (v === 88) ? 0 : 1);
-          //console.debug(`got ${v} [${String.fromCharCode(v)}] robot pos: ${this._position} dir: ${this._direction}`);
           break;
         /* istanbul ignore next */
         default:
@@ -223,25 +213,23 @@ class Scaffold
     // TODO this isn't very useful, since dump() doesn't show the robot
     //      on the grid
     this._grid.dump();
-    console.log(`robot position: [${this._position}] direction: ${this._direction}`);
+    console.log(`vacuum pos: [${this._vacuum.position}] dir: [${this._vacuum.directionChar}]`);
     console.log('');
   }
   // private: analyze robot path and store path functions
   _analyzePath()
   {
-    const gPath = pathAnalyzer.path(this._grid, this._position, this._direction);
+    const gPath = pathAnalyzer.path(this._vacuum);
     this._pathFunctions = pathAnalyzer.functions(gPath);
   }
   // private: find scaffold intersections, setting them on the puzzle grid
   _findIntersections()
   {
     const scaffolds = this._grid.positionsWithType(1);
+    const vacuum = new Vacuum(this._grid);
     const intersections = scaffolds.filter((pos) => {
-      // is there a scaffold in every direction from this position?
-      return Object.keys(_offsets).every((dir) => {
-        const dirPos = [pos[0] + _offsets[dir][0], pos[1] + _offsets[dir][1]];
-        return this._grid.get(dirPos) === 1;
-      });
+      vacuum.set(pos, '^');
+      return vacuum.atIntersection();
     });
     intersections.forEach((pos) => this._grid.set(pos, 2));
   }

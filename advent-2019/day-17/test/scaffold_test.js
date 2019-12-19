@@ -29,8 +29,8 @@ describe('scaffold constructor tests [puzzle example]', () => {
     expect(scaffold._grid.get([7, 0])).to.be.undefined;
   });
   it('should set the initial vacuum robot position/location correctly', () => {
-    expect(scaffold._position).to.eql([6, 10]);
-    expect(scaffold._direction).to.eql(1);
+    expect(scaffold._vacuum.position).to.eql([6, 10]);
+    expect(scaffold._vacuum.directionChar).to.eql('^');
   });
 });
 describe('scaffold constructor tests [robot tumbling]', () => {
@@ -48,8 +48,8 @@ describe('scaffold constructor tests [robot tumbling]', () => {
     expect(scaffold._grid.get([1, 0])).to.be.undefined;
   });
   it('should set the initial vacuum robot position/location correctly', () => {
-    expect(scaffold._position).to.eql([0, 1]);
-    expect(scaffold._direction).to.be.undefined;
+    expect(scaffold._vacuum.position).to.eql([0, 1]);
+    expect(scaffold._vacuum.directionChar).to.eql('X');
   });
 });
 describe('scaffold intersection tests [puzzle example]', () => {

@@ -82,6 +82,7 @@ class PuzzleGrid
     // "I have a dream."
     const contentOfCharacter = new Map(Object.entries(key).map(([k, v]) => [v.render, Number(k)]));
     let y = originOffset[0], x = originOffset[1];
+    lines = lines.slice();  // don't destroy original
     while (lines.length > 0) {
       // ignore empty lines at end, if any:
       if (!lines[0] && lines.every((l) => !l)) {
