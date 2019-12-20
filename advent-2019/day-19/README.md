@@ -79,6 +79,20 @@ For example, suppose you have the following tractor beam readings:
 
 ```
 
-In this example, the **10x10** square closest to the emitter that fits entirely within the tractor beam has been marked `O`. Within it, the point closest to the emitter (the highlighted `**0**`) is at X=`25`, Y=`20`.
+In this example, the **10x10** square closest to the emitter that fits entirely within the tractor beam has been marked `O`. Within it, the point closest to the emitter (the zero `0`) is at X=`25`, Y=`20`.
 
 Find the **100x100** square closest to the emitter that fits entirely within the tractor beam; within that square, find the point closest to the emitter. **What value do you get if you take that point's X coordinate, multiply it by `10000`, then add the point's Y coordinate?** (In the example above, this would be `250020`.)
+
+### Part Two Design
+
+\[thoughts before starting to code, or checking Reddit]
+
+The key insight here is that you don't have to map the whole grid; you only need to watch the upper-right and lower-left corners of the box, and find the spot where both of those just fit inside the beam. The rest of the box will be guaranteed to fit inside the beam also. So we just need to walk the edges of the beam; I'm picturing something like:
+
+1. Slide the box right until the lower-left corner crosses from space to beam.
+2. Slide the box down until the upper-right corner crosses from space into beam.
+3. Is the lower-left corner now in space? If so, slide the box right until that corner crosses into beam. If not, DONE.
+4. Is the upper-right corner in space? If so, slide the box down until that corner crosses into beam. If not, DONE.
+5. Repeat from step 3.
+
+I think that will give the minimal X and Y every time?

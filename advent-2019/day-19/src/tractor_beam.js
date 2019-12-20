@@ -33,6 +33,8 @@ class TractorBeam
    */
   mapGrid(height, width)
   {
+    // TODO RF rewrite this to use checkPoint() method
+    //      (but see note there about performance)
     let x = 0, y = 0, flipFlop = 0;
     const getValue = (() => {
       const send = flipFlop ? y : x;
@@ -54,12 +56,73 @@ class TractorBeam
     }
   }
   /**
+   * Check a point in the grid.
+   *
+   * @param {Array} pos - the [Y, X] position to check
+   *
+   * @return {number}
+   *   Returns `0` if the point is stationary, `1` if it's being pulled.
+   */
+  checkPoint(pos)
+  {
+    let result;
+    if ((result = this._grid.get(pos))) {
+      return result;
+    }
+    let flipFlop = 0;
+    // TODO OPTIMIZE setting up these functions every time is probably slow
+    const getValue = (() => {
+      const send = flipFlop ? pos[0] : pos[1];
+      //console.debug(`send ${send} as ${flipFlop ? 'Y' : 'X'} for [${pos}]`);
+      flipFlop = 1 - flipFlop;
+      return send;
+    });
+    const storeValue = ((pulled) => {
+      this._grid.set(pos, pulled);
+      result = pulled;
+    });
+    intcode.run(this._program.slice(), false, getValue, storeValue);
+    return result;
+  }
+  /**
    * the number of grid points affected by tractor beam
    * @member {number}
    */
   get pointsAffected()
   {
     return this._grid.positionsWithType(1).length;
+  }
+  /**
+   * Find the closest location at which a square box fits within the tractor
+   * beam.
+   *
+   * @param {number} size - box size
+   *
+   * @return {Array}
+   *   Returns [Y, X] position of upper-left corner of the box.
+   */
+  closestBoxPosition(size)
+  {
+    let lowerLeft = [size-1, 0], upperRight = [0, size-1];
+    for (;;) {
+      while (this.checkPoint(lowerLeft) === 0) {
+        //console.debug(`lower-left @ ${lowerLeft} in space; sliding right`);
+        lowerLeft[1]++;
+        upperRight[1]++;
+      }
+      while (this.checkPoint(upperRight) === 0) {
+        //console.debug(`upper-right @ ${upperRight} in space; sliding down`);
+        lowerLeft[0]++;
+        upperRight[0]++;
+      }
+      if ((this.checkPoint(lowerLeft) === 1) && (this.checkPoint(upperRight) === 1)) {
+        //console.debug(`SUCCESS :: lower-left @ ${lowerLeft} :: upper-right @ ${upperRight}`);
+        return [upperRight[0], lowerLeft[1]];
+      } else if ((this.checkPoint(lowerLeft) !== 0) && (this.checkPoint(upperRight) !== 0)) {
+        //console.debug(`FAIL :: lower-left @ ${lowerLeft} = ${this.checkPoint(lowerLeft)} :: upper-right @ ${upperRight} = ${this.checkPoint(upperRight)}`);
+        throw new Error('something went wrong');
+      }
+    }
   }
 }
 module.exports = TractorBeam;
