@@ -1,6 +1,6 @@
 'use strict';
+const AsciiIntcode = require('../../shared/src/ascii_intcode');
 const PuzzleGrid = require('../../shared/src/puzzle_grid');
-const intcode = require('../../shared/src/intcode');
 const Vacuum = require('../src/vacuum');
 const pathAnalyzer = require('../src/path_analyzer');
 
@@ -81,53 +81,50 @@ class Scaffold
      * NB: The final answer (accumulated dust) is a special case handled
      * outside the state machine.
      */
-    let state = 'getVideo', nextState, promptStr = '', commandStr, frame = [];
-    // machine called IN; send the next ASCII code to it
-    const getValue = (() => {
-      /*
-       * transitioning from OUT to IN:
-       */
-      if (state === 'getPrompt') {
-        // we've received a complete prompt; machine is waiting for reply
-        // 1. choose what to send (`commandStr`)
-        // 2. choose what to do after that (`nextState`)
-        let m;
-        state = 'sendCommand';
-        if (promptStr === 'Main:\n') {
-          commandStr = this._pathFunctions[0];
-          nextState = 'getPrompt';
-        } else if ((m = promptStr.match(/^Function (\w):\n$/))) {
-          commandStr = this._pathFunctions[m[1].charCodeAt(0) - 64];  // A=1 etc.
-          nextState = 'getPrompt';
-        } else if (promptStr === 'Continuous video feed?\n') {
-          commandStr = this._continuousVideo ? 'y' : 'n';
-          nextState = 'getVideo';
-        } else {
-          throw new Error(`getValue: unhandled promptStr [${promptStr}]`);
-        }
-        promptStr = '';
-      }
-      /*
-       * handling IN:
-       */
-      if (state === 'sendCommand') {
-        if (commandStr.length === 0) {
-          state = nextState;
-          nextState = undefined;
-          return 10;
-        }
-        const v = commandStr.slice(0, 1).charCodeAt(0);
-        commandStr = commandStr.slice(1, commandStr.length);
-        //console.debug(`send char ${v} [${String.fromCharCode(v)}] for function ${fno}, remainder=[${commandStr}]`);
-        return v;
-      } else if (state === 'done') {
-        return undefined;
+    // machine sent us a newline-terminated prompt string
+    // send the matching answer string (without newline)
+    const handlePrompt = ((s) => {
+      let m;
+      if (s === 'Main:\n') {
+        return this._pathFunctions[0];
+      } else if ((m = s.match(/^Function (\w):\n$/))) {
+        return this._pathFunctions[m[1].charCodeAt(0) - 64];  // A=1 etc.
+      } else if (s === 'Continuous video feed?\n') {
+        return this._continuousVideo ? 'y' : 'n';
       } else {
-        throw new Error(`getValue unhandled state ${state}`);
+        throw new Error(`handlePrompt: unhandled prompt string [${s.trim()}]`);
       }
     });
+    // machine sent us a video frame
+    // FOR NOW, return the next state
+    const handleVideoFrame = ((f) => {
+      processFrame(f);
+      if (this._continuousVideo) {
+        this._dumpFrame();
+      }
+      // FOR NOW, return the next state
+      if (mode === 1) {
+        // we only get one video frame in this mode
+        return 'done';
+      } else if (!this._pathFunctions) {
+        // this was the initial video frame
+        this._analyzePath();
+        return 'getPrompt';
+      } else {
+        // this was an intermediate/final video frame
+        return this._continuousVideo ? 'getVideo' : 'done';
+      }
+    });
+    // machine sent us a non-ASCII (numeric) value
+    const handleNumber = ((v) => {
+      // "Once it finishes the programmed set of movements, [...] the
+      // cleaning robot will [...] report the amount of space dust it
+      // collected as a large, non-ASCII value in a single output
+      // instruction."
+      this.dust = v;
+    });
     // process one video frame
-    const processFrame = (() => {
+    const processFrame = ((frame) => {
       let y = 0, x = 0;
       this._initializeGridAndVacuum();
       frame.forEach((v) => {
@@ -159,50 +156,8 @@ class Scaffold
         }
       });
     });
-    // machine called OUT; receive the next ASCII code from it
-    const storeValue = ((v) => {
-      // "Once it finishes the programmed set of movements, [...] the
-      // cleaning robot will [...] report the amount of space dust it
-      // collected as a large, non-ASCII value in a single output
-      // instruction."
-      if (v > 127) {
-        this.dust = v;
-        state = 'done';
-        return;
-      }
-      if (state === 'getVideo') {
-        if ((v === 10) && (frame[frame.length-1] === 10)) {
-          // double \n signals end of frame
-          processFrame();
-          frame = [];
-          if (this._continuousVideo) {
-            this._dumpFrame();
-          }
-          // change state
-          if (mode === 1) {
-            // we only get one video frame in this mode
-            state = 'done';
-          } else if (!this._pathFunctions) {
-            // this was the initial video frame
-            this._analyzePath();
-            state = 'getPrompt';
-          } else {
-            // this was an intermediate/final video frame
-            state = this._continuousVideo ? 'getVideo' : 'done';
-          }
-        } else {
-          // still accumulating frame data
-          frame.push(v);
-        }
-      } else if (state === 'getPrompt') {
-        promptStr += String.fromCharCode(v);
-      } else if (state === 'done') {
-        return;
-      } else {
-        throw new Error(`got character ${v} while in unsupported state ${state}`);
-      }
-    });
-    intcode.run(this._program, false, getValue, storeValue);
+    const machine = new AsciiIntcode(this._program  /* TODO ,states */);
+    machine.run(handlePrompt, handleVideoFrame, handleNumber);
     if (mode === 1) {
       this._findIntersections();
     }
