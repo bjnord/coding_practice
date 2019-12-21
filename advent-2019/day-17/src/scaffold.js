@@ -146,7 +146,7 @@ class Scaffold
       this._findIntersections();
     }
   }
-  // private: analyze robot path and store path functions
+  // private: dump video frame
   _dumpFrame()
   {
     const objects = {[this._vacuum.directionChar]: this._vacuum.position};
