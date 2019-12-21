@@ -58,29 +58,22 @@ class Scaffold
    */
   run(mode = 1)
   {
-    if (mode > 1) {
+    const states = {
+      '@':         {state: 'getVideo',  next: 'main'},
+      'main':      {state: 'getPrompt', next: 'funcA'},
+      'funcA':     {state: 'getPrompt', next: 'funcB'},
+      'funcB':     {state: 'getPrompt', next: 'funcC'},
+      'funcC':     {state: 'getPrompt', next: 'contvideo'},
+      'contvideo': {state: 'getPrompt', next: 'feed'},
+      'feed':      {state: 'getVideo',  next: 'feed', nextIfNumber: '!'},
+    };
+    if (mode === 1) {
+      // no prompts in mode 1, just a video frame
+      states['@'].next = '!';
+    } else {
       this._program[0] = 2;
       this._continuousVideo = (mode === 3);
     }
-    /*
-     * In mode 2/3, this state machine will go through the following steps:
-     *
-     * getVideo            // [initial video frame]
-     * getPrompt           // "Main:\n"
-     * sendCommand         // "A,B,...\n"
-     * 3 times:            //
-     *   getPrompt           // "Function _:\n" [_=A|B|C]
-     *   sendCommand         // "R,8,...\n"
-     * getPrompt           // "Continuous video feed?\n"
-     * sendCommand         // "_\n" [_=y|n]
-     * if mode=3, repeat:  //
-     *   getVideo            // [intermediate video frames]
-     * getVideo            // [final video frame]
-     * done                // [ignore all further I/O]
-     *
-     * NB: The final answer (accumulated dust) is a special case handled
-     * outside the state machine.
-     */
     // machine sent us a newline-terminated prompt string
     // send the matching answer string (without newline)
     const handlePrompt = ((s) => {
@@ -96,23 +89,14 @@ class Scaffold
       }
     });
     // machine sent us a video frame
-    // FOR NOW, return the next state
     const handleVideoFrame = ((f) => {
       processFrame(f);
       if (this._continuousVideo) {
         this._dumpFrame();
       }
-      // FOR NOW, return the next state
-      if (mode === 1) {
-        // we only get one video frame in this mode
-        return 'done';
-      } else if (!this._pathFunctions) {
+      if (!this._pathFunctions) {
         // this was the initial video frame
         this._analyzePath();
-        return 'getPrompt';
-      } else {
-        // this was an intermediate/final video frame
-        return this._continuousVideo ? 'getVideo' : 'done';
       }
     });
     // machine sent us a non-ASCII (numeric) value
@@ -156,7 +140,7 @@ class Scaffold
         }
       });
     });
-    const machine = new AsciiIntcode(this._program  /* TODO ,states */);
+    const machine = new AsciiIntcode(this._program, states);
     machine.run(handlePrompt, handleVideoFrame, handleNumber);
     if (mode === 1) {
       this._findIntersections();

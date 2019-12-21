@@ -23,6 +23,27 @@ class AsciiIntcode
     this._program = program;
     // private: our state table
     this._states = states;
+    if (!(this._stateEntry = this._states['@'])) {
+      throw new Error(`AsciiIntcode: initial '@' entry not found in state graph`);
+    }
+    this._state = this._stateEntry.state;
+  }
+  // private: move to next state
+  _nextState(isNumber = false)
+  {
+    // FIXME RF Uncle Bob Martin would say, don't use function args like
+    //       this; should be _nextState() and _nextStateNumber()
+    const next = isNumber
+      ? (this._stateEntry.nextIfNumber || this._stateEntry.next)
+      : this._stateEntry.next;
+    if ((this._state === 'done') || (next === '!')) {
+      this._state = 'done';
+      return;
+    }
+    if (!(this._stateEntry = this._states[next])) {
+      throw new Error(`AsciiIntcode: next entry '${next}' not found in state graph`);
+    }
+    this._state = this._stateEntry.state;
   }
   /**
    * Run the Intcode program until it halts.
@@ -40,76 +61,59 @@ class AsciiIntcode
    */
   run(handlePrompt, handleVideoFrame, handleNumber)
   {
-    let state = 'getVideo', nextState, promptStr = '', commandStr, frame = [];
+    let promptStr = '', commandStr, frame = [];
     // machine called IN; send the next ASCII code to it
     const getValue = (() => {
       /*
        * transitioning from OUT to IN:
        */
-      if (state === 'getPrompt') {
-        // we've received a complete prompt; machine is waiting for reply
-        // 1. choose what to send (`commandStr`)
-        // 2. choose what to do after that (`nextState`)
-        state = 'sendCommand';
-        let m;
-        if (promptStr === 'Main:\n') {
-          commandStr = handlePrompt(promptStr);
-          nextState = 'getPrompt';
-        } else if ((m = promptStr.match(/^Function (\w):\n$/))) {
-          commandStr = handlePrompt(promptStr);
-          nextState = 'getPrompt';
-        } else if (promptStr === 'Continuous video feed?\n') {
-          commandStr = handlePrompt(promptStr);
-          nextState = 'getVideo';
-        } else {
-          throw new Error(`AsciiIntcode getValue: unhandled prompt [${promptStr}]`);
-        }
+      if (this._state === 'getPrompt') {
+        this._state = 'sendCommand';
+        commandStr = handlePrompt(promptStr);
         promptStr = '';
       }
       /*
        * handling IN:
        */
-      if (state === 'sendCommand') {
+      if (this._state === 'sendCommand') {
         if (commandStr.length === 0) {
-          state = nextState;
-          nextState = undefined;
+          this._nextState();
           return 10;
         }
         const v = commandStr.slice(0, 1).charCodeAt(0);
         commandStr = commandStr.slice(1, commandStr.length);
-        //console.debug(`AsciiIntcode getValue: send char ${v} [${String.fromCharCode(v)}], remainder=[${commandStr}]`);
+        //console.debug(`AsciiIntcode.getValue: send char ${v} [${String.fromCharCode(v)}], remainder=[${commandStr}]`);
         return v;
-      } else if (state === 'done') {
+      } else if (this._state === 'done') {
         return undefined;
       } else {
-        throw new Error(`AsciiIntcode getValue: unhandled state ${state}`);
+        throw new Error(`AsciiIntcode.getValue: unhandled state ${this._state}`);
       }
     });
     // machine called OUT; receive the next ASCII code from it
     const storeValue = ((v) => {
       if (v > 127) {
         handleNumber(v);
-        state = 'done';
+        this._nextState(true);
         return;
       }
-      if (state === 'getVideo') {
+      if (this._state === 'getVideo') {
         if ((v === 10) && (frame[frame.length-1] === 10)) {
           // double \n signals end of frame
-          const tempHACK = handleVideoFrame(frame);
+          handleVideoFrame(frame);
           frame = [];
-          // change state
-          state = tempHACK;
+          this._nextState();
         } else {
           // accumulate video frame data
           frame.push(v);
         }
-      } else if (state === 'getPrompt') {
+      } else if (this._state === 'getPrompt') {
         // accumulate prompt characters
         promptStr += String.fromCharCode(v);
-      } else if (state === 'done') {
+      } else if (this._state === 'done') {
         return;
       } else {
-        throw new Error(`AsciiIntcode storeValue: got character ${v} while in unsupported state ${state}`);
+        throw new Error(`AsciiIntcode.storeValue: got character ${v} while in unsupported state ${this._state}`);
       }
     });
     intcode.run(this._program, false, getValue, storeValue);
