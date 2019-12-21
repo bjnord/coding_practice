@@ -201,21 +201,33 @@ class PuzzleGrid
   /**
    * Display the grid.
    *
-   * @param {string} [unknownChar=' '] - character to display for unknown content type
+   * If an inventory of moveable objects (`objects`) is provided, those will
+   * also be shown, taking precedence over the fixed position contents (from
+   * the constructor `key`).
+   *
+   * @param {string} [unknownChar=' '] - character to display for unknown
+   *   content type
+   * @param {object} [objects={}] - inventory of moveable objects
+   *   (key = character to display, value = [Y, X] position of object)
    */
-  dump(unknownChar = ' ')
+  dump(unknownChar = ' ', objects = {})
   {
     const squares = Array.from(this._grid.keys()).map((k) => k.split(/,/).map((str) => Number(str)));
     const squareMin = squares.reduce((mins, p) => [Math.min(p[0], mins[0]), Math.min(p[1], mins[1])], [999999, 999999]);
     const squareMax = squares.reduce((maxes, p) => [Math.max(p[0], maxes[0]), Math.max(p[1], maxes[1])], [-999999, -999999]);
+    const width = squareMax[1] - squareMin[1] + 1;
+    const objectAt = Object.keys(objects).reduce((acc, k) => {
+      acc[objects[k][0] * width + objects[k][1]] = k;
+      return acc;
+    }, {});
     for (let y = squareMin[0]; y <= squareMax[0]; y++) {
       for (let x = squareMin[1]; x <= squareMax[1]; x++) {
-        // TODO allow setting grid "options" for things like this
-        //if ((y === 0) && (x === 0)) {
-        //  process.stdout.write(':');  // origin
-        //} else {
+        const oIdx = y * width + x;
+        if (objectAt[oIdx]) {
+          process.stdout.write(objectAt[oIdx]);
+        } else {
           process.stdout.write(this.getAttr([y, x], 'render') || unknownChar);
-        //}
+        }
       }
       process.stdout.write('\n');
     }

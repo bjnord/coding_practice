@@ -149,10 +149,9 @@ class Scaffold
   // private: analyze robot path and store path functions
   _dumpFrame()
   {
-    // TODO this isn't very useful, since dump() doesn't show the robot
-    //      on the grid
-    this._grid.dump();
-    console.log(`vacuum pos: [${this._vacuum.position}] dir: [${this._vacuum.directionChar}]`);
+    const objects = {[this._vacuum.directionChar]: this._vacuum.position};
+    this._grid.dump(' ', objects);
+    console.log(`vacuum position: [${this._vacuum.position}]`);
     console.log('');
   }
   // private: analyze robot path and store path functions
