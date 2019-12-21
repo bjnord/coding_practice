@@ -71,7 +71,7 @@ class Vacuum
     if (!_directions[dirChar]) {
       throw new Error(`invalid direction character [${dirChar}]`);
     }
-    // private: current direction (1=up 2=down 3=left 4=right undefined=tumbling)
+    // private: current direction (1=up 2=down 3=left 4=right 5=tumbling)
     this._dir = _directions[dirChar];
   }
   /**
