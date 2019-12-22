@@ -2,6 +2,19 @@
 
 class Deck
 {
+  /**
+   * Create a new deck of N cards, in "factory order".
+   *
+   * "Positions within the deck count from 0 at the top, then 1 for the card
+   * immediately below the top card, and so on to the bottom. (That is,
+   * cards start in the position matching their number.)" The latter is what
+   * defines "factory order".
+   *
+   * @param {number} nCards - number of cards in the deck
+   *
+   * @return {Deck}
+   *   Returns a new Deck class object.
+   */
   constructor(nCards)
   {
     if (nCards < 2) {
@@ -15,6 +28,9 @@ class Deck
      */
     this.cards = [...Array(nCards).keys()];  // starts in "factory order"
   }
+  /**
+   * Deal cards into a new stack, reversing their order.
+   */
   dealIntoNewStack()
   {
     this.cards = this.cards.reduce((newDeck, card) => {
@@ -22,6 +38,16 @@ class Deck
       return newDeck;
     }, []);
   }
+  /**
+   * Cut the cards at position N.
+   *
+   * - If N is **positive**, cut the top N cards, and move them to the
+   *   bottom (in the same order).
+   * - If N is **negative**, cut the bottom -N cards, and move them to
+   *   the top (in the same order).
+   *
+   * @param {number} n - the position at which to cut the cards
+   */
   cutCards(n)
   {
     if (n === 0) {
@@ -34,6 +60,15 @@ class Deck
       this.cards = cutCards.concat(this.cards);
     }
   }
+  /**
+   * Redeal the cards in a modulo-N pattern.
+   *
+   * _e.g._ For 10 cards and `n=3`, the position 0 card is placed at
+   * position 0, the position 1 card is placed at position 3, the position
+   * 4 card is placed at position 2, etc.
+   *
+   * @param {number} n - the deal increment
+   */
   dealWithIncrement(n)
   {
     if (n < 1) {
@@ -49,10 +84,27 @@ class Deck
     }
     this.cards = dealtCards;
   }
+  /**
+   * Shuffle the cards using a list of our techniques.
+   *
+   * See `doTechnique()` for a list of techniques.
+   *
+   * @param {string} techniques - `\n`-separated list of techniques to perform
+   */
   doTechniques(techniques)
   {
     techniques.trim().split(/\n/).forEach((t) => this.doTechnique(t));
   }
+  /**
+   * Perform one shuffling technique.
+   *
+   * This can be one of:
+   * - "`deal into new stack`" (see `dealIntoNewStack()`)
+   * - "`cut <n>`" where `<n>` is a number (see `cutCards(n)`)
+   * - "`deal with increment <n>`" where `<n>` is a number (see `dealWithIncrement(n)`)
+   *
+   * @param {string} technique - the technique to perform
+   */
   doTechnique(technique)
   {
     let m;
