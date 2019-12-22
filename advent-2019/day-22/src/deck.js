@@ -29,6 +29,18 @@ class Deck
     this.cards = [...Array(nCards).keys()];  // starts in "factory order"
   }
   /**
+   * Retrieve a card at the given position.
+   *
+   * @param {number} pos - position of card to retrieve
+   *
+   * @return {number}
+   *   Returns the card at the given position.
+   */
+  cardAt(n)
+  {
+    return this.cards[n];
+  }
+  /**
    * Deal cards into a new stack, reversing their order.
    */
   dealIntoNewStack()
@@ -76,7 +88,7 @@ class Deck
     }
     const dealtCards = new Array(this.nCards).fill(null);
     for (let i = 0, m = 0; i < this.nCards; i++) {
-      dealtCards[m] = this.cards[i];
+      dealtCards[m] = this.cardAt(i);
       // faster than modulo operator:
       if ((m += n) >= this.nCards) {
         m -= this.nCards;

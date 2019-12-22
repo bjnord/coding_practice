@@ -12,6 +12,18 @@ describe('constructor tests', () => {
     expect(call).to.throw(Error, 'invalid number of cards');
   });
 });
+describe('card position tests', () => {
+  let positionDeck;
+  before(() => {
+    positionDeck = new Deck(11);
+  });
+  it ('should retrieve a card at the given position correctly', () => {
+    expect(positionDeck.cardAt(0)).to.eql(0);
+    expect(positionDeck.cardAt(3)).to.eql(3);
+    expect(positionDeck.cardAt(10)).to.eql(10);
+  });
+  // we don't check that position is in range, for speed
+});
 describe('"deal into new stack" tests', () => {
   it('it should "deal into new stack" correctly [puzzle example]', () => {
     const expected = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
