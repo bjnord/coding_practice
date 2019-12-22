@@ -22,11 +22,16 @@ class Deck
     }
     // private: number of cards in deck
     this.nCards = nCards;  // kept for better performance
-    /**
-     * our deck
-     * @member {Array}
-     */
-    this.cards = [...Array(nCards).keys()];  // starts in "factory order"
+    // private: deck storage
+    this._cards = [...Array(nCards).keys()];  // starts in "factory order"
+  }
+  /**
+   * our deck
+   * @member {Array}
+   */
+  get cards()
+  {
+    return this._cards;
   }
   /**
    * Retrieve a card at the given position.
@@ -38,14 +43,14 @@ class Deck
    */
   cardAt(n)
   {
-    return this.cards[n];
+    return this._cards[n];
   }
   /**
    * Deal cards into a new stack, reversing their order.
    */
   dealIntoNewStack()
   {
-    this.cards = this.cards.reduce((newDeck, card) => {
+    this._cards = this._cards.reduce((newDeck, card) => {
       newDeck.unshift(card);
       return newDeck;
     }, []);
@@ -65,11 +70,11 @@ class Deck
     if (n === 0) {
       return;
     } else if (n > 0) {
-      const cutCards = this.cards.splice(0, n);
-      this.cards = this.cards.concat(cutCards);
+      const cutCards = this._cards.splice(0, n);
+      this._cards = this._cards.concat(cutCards);
     } else {  // (n < 0)
-      const cutCards = this.cards.splice(n, -n);
-      this.cards = cutCards.concat(this.cards);
+      const cutCards = this._cards.splice(n, -n);
+      this._cards = cutCards.concat(this._cards);
     }
   }
   /**
@@ -94,7 +99,7 @@ class Deck
         m -= this.nCards;
       }
     }
-    this.cards = dealtCards;
+    this._cards = dealtCards;
   }
   /**
    * Shuffle the cards using a list of our techniques.
