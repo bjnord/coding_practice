@@ -17,8 +17,8 @@ class PuzzleGrid
    *
    * ```
    * {
-   *   0: {name: 'wall', render: '#'},
-   *   1: {name: 'open', render: '.'},
+   *   0: {name: 'wall', render: '#', passable: false},
+   *   1: {name: 'open', render: '.', passable: true},
    *   // ...
    * }
    * ```

@@ -1,9 +1,17 @@
 'use strict';
+const PuzzleGrid = require('../../shared/src/puzzle_grid');
+const PuzzleGridWalker = require('../../shared/src/puzzle_grid_walker');
 const intcode = require('../../shared/src/intcode');
 
-// TODO RF this._grid, Klass._mapKey(), dump(), etc. are used by several
-//      days; extract them to a generalized PuzzleGrid class, with no
-//      coverage ignores (e.g. dump() returns list of lines)
+// private: map of directions to [dY, dX] offsets
+const Droid_offsets = {
+  1: [-1, 0],  // north
+  2: [1, 0],   // south
+  3: [0, -1],  // west
+  4: [0, 1],   // east
+};
+// private: opposites of each direction
+const Droid_oppositeDir = {1: 2, 2: 1, 3: 4, 4: 3};
 
 class Droid
 {
@@ -20,12 +28,18 @@ class Droid
   {
     // private: our Intcode program
     this._program = input.trim().split(/,/).map((str) => Number(str));
-    // private: the maze (key: position, value: 0=wall 1=open 2=oxygen)
-    this._grid = new Map();
+    // private: the maze key
+    this._grid_key = {
+      0: {name: 'wall', render: '#', passable: false},
+      1: {name: 'open', render: '.', passable: true},
+      2: {name: 'oxygen', render: '@', passable: true},
+    };
+    // private: the maze
+    this._grid = new PuzzleGrid(this._grid_key);
     // private: [Y, X] position of droid
-    this._position = [0, 0];
+    this._pos = [0, 0];
     // "you already know [the starting] location is open"
-    this._grid.set(Droid._mapKey(this._position), 1);
+    this._grid.set(this._pos, 1);
     // private: path of moves from origin (directions)
     this._path = [];
     /**
@@ -44,25 +58,13 @@ class Droid
     this._backtracking = false;
     // private: has whole maze been explored?
     this._explored = false;
-    /*
-     * FIXME these two should be class/global, not per-instance
-     */
-    // private: map of directions to [dY, dX] offsets
-    this._offsets = {
-      1: [-1, 0],  // north
-      2: [1, 0],   // south
-      3: [0, -1],  // west
-      4: [0, 1],   // east
-    };
-    // private: opposites of each direction
-    this._oppositeDir = {1: 2, 2: 1, 3: 4, 4: 3};
   }
   // private: choose next move
   _chooseMove()
   {
     // move in the next unexplored direction
     for (let dir = 1; dir <= 4; dir++) {
-      if (this._grid.get(Droid._mapKey(this._newPosition(dir))) === undefined) {
+      if (this._grid.get(this._newPosition(dir)) === undefined) {
         return dir;
       }
     }
@@ -73,30 +75,24 @@ class Droid
     }
     // all directions from this position have been explored; backtrack
     this._backtracking = true;
-    return this._oppositeDir[this._path.pop()];
+    return Droid_oppositeDir[this._path.pop()];
   }
   // private: calculate new position from direction
   _newPosition(dir)
   {
-    const y = this._position[0] + this._offsets[dir][0];
-    const x = this._position[1] + this._offsets[dir][1];
+    const y = this._pos[0] + Droid_offsets[dir][0];
+    const x = this._pos[1] + Droid_offsets[dir][1];
     return [y, x];
   }
   // private: move in indicated direction
   _move(dir)
   {
-    this._position = this._newPosition(dir);
+    this._pos = this._newPosition(dir);
     if (this._backtracking) {
       this._backtracking = false;
     } else {
       this._path.push(dir);
     }
-  }
-  // private: backtrack
-  _moveBack()
-  {
-    const backDir = this._oppositeDir[this._path.pop()];
-    this._position = this._newPosition(backDir);
   }
   /**
    * Run the maze-running Intcode program until it halts.
@@ -107,11 +103,11 @@ class Droid
     const getValue = (() => (this._lastDir = this._chooseMove()));
     // OUT is used by the droid to tell us what happened
     const storeValue = ((v) => {
-      this._grid.set(Droid._mapKey(this._newPosition(this._lastDir)), v);
+      this._grid.set(this._newPosition(this._lastDir), v);
       if (v !== 0) {  // v=0 (hit wall) means droid didn't move
         this._move(this._lastDir);
         if (v === 2) {
-          this.oxygenSystemPosition = this._position.slice();
+          this.oxygenSystemPosition = this._pos.slice();
           this.oxygenSystemDistance = this._path.length;
         }
       }
@@ -122,78 +118,27 @@ class Droid
   /**
    * Explore the maze from a given position to find the longest path length.
    *
-   * @param {Array} position - [Y, X] start position
+   * @param {Array} pos - [Y, X] start position
    *
    * @return {number}
    *   Returns the longest path length from the start position.
    */
-  longestPathLengthFrom(position)
+  longestPathLengthFrom(pos)
   {
     if (!this._explored) {
       throw new Error('maze must first be explored with run()');
     }
-    this._position = position.slice();
-    this._path = [];
-    return this._longestPathLength();
-  }
-  // private: recursive path explorer
-  _longestPathLength()
-  {
-    const sourceDir = this._oppositeDir[this._path[this._path.length-1]];
-    let longest = 0;
-    for (let dir = 1; dir <= 4; dir++) {
-      // only move further out from start position, don't double back:
-      if (dir === sourceDir) {
-        continue;
-      }
-      // wall in this direction; no longest path that way:
-      if (this._isBlocked(dir)) {
-        continue;
-      }
-      // open in this direction; recursively explore that way:
-      this._move(dir);
-      const longest1 = this._longestPathLength();
-      this._moveBack();
-      longest = Math.max(longest, longest1 + 1);
-    }
-    return longest;
-  }
-  // private: is there a wall in the given direction?
-  _isBlocked(dir)
-  {
-    return this._grid.get(Droid._mapKey(this._newPosition(dir))) === 0;
-  }
-  // private: map key for a given [Y, X] position
-  static _mapKey(position)
-  {
-    return `${position[0]},${position[1]}`;
-  }
-  /* istanbul ignore next */
-  /**
-   * Display the maze.
-   */
-  dump()
-  {
-    const squares = Array.from(this._grid.keys()).map((k) => k.split(/,/).map((str) => Number(str)));
-    const squareMin = squares.reduce((mins, p) => [Math.min(p[0], mins[0]), Math.min(p[1], mins[1])], [999999, 999999]);
-    const squareMax = squares.reduce((maxes, p) => [Math.max(p[0], maxes[0]), Math.max(p[1], maxes[1])], [-999999, -999999]);
-    for (let y = squareMin[0]; y <= squareMax[0]; y++) {
-      for (let x = squareMin[1]; x <= squareMax[1]; x++) {
-        if ((y === 0) && (x === 0)) {
-          process.stdout.write(':');  // origin
-        } else {
-          const what = this._grid.get(Droid._mapKey([y, x]));
-          process.stdout.write(Droid._dumpCh(what));
-        }
-      }
-      process.stdout.write('\n');
-    }
-  }
-  /* istanbul ignore next */
-  // private: display character for space type
-  static _dumpCh(what)
-  {
-    return (what === 0) ? '#' : ((what === 1) ? '.' : ((what === 2) ? '@' : ' '));
+    let longestPathLength = 0;
+    // use destructuring to avoid lint "unused argument" errors
+    // h/t <https://stackoverflow.com/a/58738236/291754>
+    const movedTo = (...[, , steps]) => {
+      longestPathLength = Math.max(longestPathLength, steps);
+    };
+    const walker = new PuzzleGridWalker(this._grid);
+    walker.walk(pos, {
+      'movedTo': movedTo,
+    });
+    return longestPathLength;
   }
 }
 module.exports = Droid;
