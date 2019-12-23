@@ -1,6 +1,19 @@
 'use strict';
 const expect = require('chai').expect;
 const PuzzleGrid = require('../src/puzzle_grid');
+
+const boxKey = {
+  1: {name: 'floor', render: '.', passable: true},
+  2: {name: 'vwall', render: '|', passable: false},
+  3: {name: 'hwall', render: '-', passable: false},
+};
+const boxLines = [
+  '-----',
+  '|...|',
+  '|...|',
+  '-----',
+];
+
 describe('puzzle grid constructor tests', () => {
   // TODO
   // should ensure grid key is an object with >= 2 valid entries
@@ -10,20 +23,9 @@ describe('puzzle grid get/set tests', () => {
   // should return `undefined` for spaces without content yet
 });
 describe('puzzle grid get-adjacent tests', () => {
-  const getAdjKey = {
-    1: {name: 'floor', render: '.'},
-    2: {name: 'vwall', render: '|'},
-    3: {name: 'hwall', render: '-'},
-  };
-  const getAdjLines = [
-    '-----',
-    '|...|',
-    '|...|',
-    '-----',
-  ];
   let getAdjGrid;
   before(() => {
-    getAdjGrid = PuzzleGrid.from(getAdjLines, getAdjKey);
+    getAdjGrid = PuzzleGrid.from(boxLines, boxKey);
   });
   it('should find adjacent contents [upper-left floor corner]', () => {
     expect(getAdjGrid.getInDirection([1, 1], 1)).to.eql(3);
@@ -60,7 +62,19 @@ describe('puzzle grid positions-of-type tests', () => {
   });
 });
 describe('puzzle grid get attribute tests', () => {
-  // TODO
+  let getAttrGrid;
+  before(() => {
+    getAttrGrid = PuzzleGrid.from(boxLines, boxKey);
+  });
+  it('should return "passable" attribute for wall', () => {
+    expect(getAttrGrid.getAttr([0, 0], 'passable')).to.be.false;
+  });
+  it('should return "passable" attribute for floor', () => {
+    expect(getAttrGrid.getAttr([1, 1], 'passable')).to.be.true;
+  });
+  it('should return "passable" attribute for undefined content', () => {
+    expect(getAttrGrid.getAttr([-1, -1], 'passable')).to.be.undefined;
+  });
 });
 describe('puzzle grid render tests', () => {
   // TODO
