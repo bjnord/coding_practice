@@ -19,3 +19,6 @@ describe('multiple NIC tests [BJN simple 2-NIC example]', () => {
     expect(lastPacket.y).to.eql(256);
   });
 });
+describe('multiple NIC tests, NAT mode [BJN simple 2-NIC example]', () => {
+  it('should get the expected final result');
+});
