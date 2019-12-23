@@ -1,0 +1,52 @@
+// PROGRAM (0-59)
+
+// get my network address
+0       IN M60
+2       JTRU M60,18        // if I am NIC 1, jump around NIC 0 init
+
+// initialize NIC 0
+5       ADD 0,1,M61        // my peer is NIC 1
+
+// NIC 0 "primes the pump" by sending initial packet
+9       OUT M61            // A
+11      OUT 1011           // X=1011
+13      OUT 1              // Y=1
+15      JTRU 1,22          // I am NIC 0, jump around NIC 1 init
+
+// initialize NIC 1
+18      ADD 0,0,M61        // my peer is NIC 0
+
+// main loop (any NIC)
+22      IN M62             // attempt to receive packet: X part
+24      LT M62,0,M64       // -1 means no packet available
+28      JTRU M64,22        //   ...so try again
+31      IN M63             // receive Y part of packet
+33      MUL M63,2,M63      // double the Y
+
+// if we reach the exit condition, send to address 255
+37      LT M63,256,M65
+41      JTRU M65,48        // not done yet, jump around
+44      ADD 0,255,M61      // done: set A=255
+
+// send packet
+48      OUT M61            // send packet: A part
+50      OUT M62            //   X part
+52      OUT M63            //   Y part
+
+// return to main loop
+54      JTRU 1,22
+
+// done (not reached)
+57      HALT
+
+58      0
+59      0
+
+// PROGRAM DATA (60-)
+
+60      0   // my network address
+61      0   // packet A value (peer network address)
+62      0   // packet X value
+63      0   // packet Y value
+64      0   // packet available? 1=no 0=yes
+65      0   // done processing? 1=no 0=yes

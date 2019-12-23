@@ -29,25 +29,32 @@ class NIC
    *
    * @param {function} sendPacket - `sendPacket(packet)` will be called when
    *   the NIC sends a packet
-   * @param {function} receivePacket - `receivePacket()` will be called when
-   *   the NIC wants to receive a packet; it should return a packet `object`
-   *   or `undefined` if none is waiting
+   * @param {function} receivePacket - `receivePacket(addr)` will be called
+   *   when the NIC wants to receive a packet; it should return a packet
+   *   `object` or `undefined` if none is waiting
+   * @param {object} [iState={pc: 0, rb: 0}] - Intcode processor state at
+   *   which to resume (from previous return of `run()`)
+   *
+   * @return {object}
+   *   Returns the Intcode processor state when it halts.
    */
-  run(sendPacket, receivePacket)
+  run(sendPacket, receivePacket, iState = {pc: 0, rb: 0})
   {
-    let sendingPacket = {}, receivedPacket = undefined, sentAddress = false;
+    let sendingPacket = {}, receivedPacket = undefined, ioHalt = false;
+    // only do this once, the first time run() is called for this NIC:
+    let sentAddress = (iState.pc > 0);
     // machine sends us packets of three values: destAddress, X, Y
     const storeValue = ((v) => {
       if (sendingPacket.x !== undefined) {
-        //console.debug(`[3] got Y=${v}, packet done`);
+        //console.debug(`SV: [3] got Y=${v}, packet done`);
         sendingPacket.y = v;
         sendPacket(sendingPacket);
         sendingPacket = {};
       } else if (sendingPacket.destAddress !== undefined) {
-        //console.debug(`[2] got X=${v}`);
+        //console.debug(`SV: [2] got X=${v}`);
         sendingPacket.x = v;
       } else {
-        //console.debug(`[1] got A=${v}`);
+        //console.debug(`SV: [1] got A=${v}`);
         sendingPacket.destAddress = v;
       }
     });
@@ -56,28 +63,37 @@ class NIC
     const getValue = (() => {
       if (!sentAddress) {
         sentAddress = true;
-        //console.debug(`sending address ${this._address}`);
+        //console.debug(`GV: sending address ${this._address}`);
         return this._address;
       }
       if (!receivedPacket) {
-        receivedPacket = receivePacket();
+        receivedPacket = receivePacket(this._address);  // we trust you to behave
       }
       if (!receivedPacket) {
-        //console.debug(`sending -1 (no packet waiting)`);
-        return -1;
+        // every other time, need to halt Intcode so we can timeshare the
+        // other NICs
+        if (ioHalt) {
+          ioHalt = false;
+          //console.debug(`GV: sending undefined (no packet waiting)`);
+          return undefined;
+        } else {
+          ioHalt = true;
+          //console.debug(`GV: sending -1 (no packet waiting)`);
+          return -1;
+        }
       } else if (receivedPacket.x === undefined) {
         const y = receivedPacket.y;
         receivedPacket = undefined;
-        //console.debug(`[2] sending Y=${y}, packet done`);
+        //console.debug(`GV [2] sending Y=${y}, packet done`);
         return y;
       } else {
         const x = receivedPacket.x;
         receivedPacket.x = undefined;
-        //console.debug(`[1] sending X=${x}`);
+        //console.debug(`GV [1] sending X=${x}`);
         return x;
       }
     });
-    return intcode.run(this._program, false, getValue, storeValue);
+    return intcode.run(this._program, false, getValue, storeValue, iState);
   }
 }
 module.exports = NIC;
