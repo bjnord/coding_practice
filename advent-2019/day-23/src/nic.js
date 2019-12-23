@@ -40,7 +40,7 @@ class NIC
    */
   run(sendPacket, receivePacket, iState = {pc: 0, rb: 0})
   {
-    let sendingPacket = {}, receivedPacket = undefined, ioHalt = false;
+    let sendingPacket = {}, receivedPacket = undefined, ioWait = false;
     // only do this once, the first time run() is called for this NIC:
     let sentAddress = (iState.pc > 0);
     // machine sends us packets of three values: destAddress, X, Y
@@ -72,12 +72,12 @@ class NIC
       if (!receivedPacket) {
         // every other time, need to halt Intcode so we can timeshare the
         // other NICs
-        if (ioHalt) {
-          ioHalt = false;
+        if (ioWait) {
+          ioWait = false;
           //console.debug(`GV: sending undefined (no packet waiting)`);
           return undefined;
         } else {
-          ioHalt = true;
+          ioWait = true;
           //console.debug(`GV: sending -1 (no packet waiting)`);
           return -1;
         }
