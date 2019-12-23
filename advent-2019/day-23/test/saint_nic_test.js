@@ -2,6 +2,12 @@
 const expect = require('chai').expect;
 const SaintNIC = require('../src/saint_nic');
 
+describe('multiple NIC constructor tests', () => {
+  it ('should throw an exception if count < 2', () => {
+    const call = () => { new SaintNIC('99', 1); };
+    expect(call).to.throw(Error, 'NIC count must be 2 or more');
+  });
+});
 describe('multiple NIC tests [BJN simple 2-NIC example]', () => {
   let saintNic, lastPacket;
   before(() => {

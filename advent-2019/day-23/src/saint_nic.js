@@ -14,7 +14,9 @@ class SaintNIC
    */
   constructor(input, count)
   {
-    // FIXME validate count >= 2
+    if (count < 2) {
+      throw new Error('NIC count must be 2 or more');
+    }
     // private: the number of NICs we have
     this._count = count;
     // private: our NICs
