@@ -13,7 +13,7 @@ class PuzzleGrid
   /**
    * Create a new puzzle grid.
    *
-   * The key for the grid is an object that looks like this:
+   * The key for the grid is an `object` that looks like this:
    *
    * ```
    * {
@@ -54,14 +54,14 @@ class PuzzleGrid
    * a 4x6 grid will run from `[-2, -2]` (upper-left corner) to `[1, 3]`
    * (lower-right corner).
    *
-   * The `unknownType` callback is useful for moveable objects. If provided,
+   * The `unknownType` callback is useful for moveable items. If provided,
    * it will be called for any input line character that is not found in the
    * `key` (as a `render` value), with these arguments:
    * - `pos` - [Y, X] position in grid (including any `originOffset`)
    * - `ch` - the character of unknown type
    *
    * The callback should return the contents that should be stored for this
-   * position (e.g. the grid type "underneath" a moveable object), or
+   * position (e.g. the grid type "underneath" a moveable item), or
    * `undefined` to not store anything. If a value is returned, it should
    * normally be one of the keys in `key`.
    *
@@ -201,30 +201,30 @@ class PuzzleGrid
   /**
    * Display the grid.
    *
-   * If an inventory of moveable objects (`objects`) is provided, those will
+   * If an inventory of moveable items (`items`) is provided, those will
    * also be shown, taking precedence over the fixed position contents (from
    * the constructor `key`).
    *
    * @param {string} [unknownChar=' '] - character to display for unknown
    *   content type
-   * @param {object} [objects={}] - inventory of moveable objects
-   *   (key = character to display, value = [Y, X] position of object)
+   * @param {object} [items={}] - inventory of moveable items
+   *   (key = character to display, value = [Y, X] position of item)
    */
-  dump(unknownChar = ' ', objects = {})
+  dump(unknownChar = ' ', items = {})
   {
     const squares = Array.from(this._grid.keys()).map((k) => k.split(/,/).map((str) => Number(str)));
     const squareMin = squares.reduce((mins, p) => [Math.min(p[0], mins[0]), Math.min(p[1], mins[1])], [999999, 999999]);
     const squareMax = squares.reduce((maxes, p) => [Math.max(p[0], maxes[0]), Math.max(p[1], maxes[1])], [-999999, -999999]);
     const width = squareMax[1] - squareMin[1] + 1;
-    const objectAt = Object.keys(objects).reduce((acc, k) => {
-      acc[objects[k][0] * width + objects[k][1]] = k;
+    const itemAt = Object.keys(items).reduce((acc, k) => {
+      acc[items[k][0] * width + items[k][1]] = k;
       return acc;
     }, {});
     for (let y = squareMin[0]; y <= squareMax[0]; y++) {
       for (let x = squareMin[1]; x <= squareMax[1]; x++) {
         const oIdx = y * width + x;
-        if (objectAt[oIdx]) {
-          process.stdout.write(objectAt[oIdx]);
+        if (itemAt[oIdx]) {
+          process.stdout.write(itemAt[oIdx]);
         } else {
           process.stdout.write(this.getAttr([y, x], 'render') || unknownChar);
         }
