@@ -20,7 +20,10 @@ class Deck
     if (nCards < 2) {
       throw new Error('invalid number of cards');
     }
-    // private: number of cards in deck
+    /**
+     * number of cards in the deck
+     * @member {number}
+     */
     this.nCards = nCards;  // kept for better performance
     // private: deck storage
     this._cards = [...Array(nCards).keys()];  // starts in "factory order"
