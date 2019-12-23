@@ -27,11 +27,12 @@ class NIC
    * - `x` - X value
    * - `y` - Y value
    *
-   * @param {function} sendPacket - `sendPacket(packet)` will be called when
-   *   the NIC sends a packet
+   * @param {function} sendPacket - `sendPacket(packet, addr)` will be
+   *   called when the NIC with address `addr` sends a packet (`addr` is the
+   *   _source_ address, `packet.destAddress` is the _destination_)
    * @param {function} receivePacket - `receivePacket(addr)` will be called
-   *   when the NIC wants to receive a packet; it should return a packet
-   *   `object` or `undefined` if none is waiting
+   *   when the NIC with address `addr` wants to receive a packet - it
+   *   should return a packet `object`, or `undefined` if none is waiting
    * @param {object} [iState={pc: 0, rb: 0}] - Intcode processor state at
    *   which to resume (from previous return of `run()`)
    *
@@ -48,7 +49,7 @@ class NIC
       if (sendingPacket.x !== undefined) {
         //console.debug(`SV: [3] got Y=${v}, packet done`);
         sendingPacket.y = v;
-        sendPacket(sendingPacket);
+        sendPacket(sendingPacket, this._address);  // don't betray our trust
         sendingPacket = {};
       } else if (sendingPacket.destAddress !== undefined) {
         //console.debug(`SV: [2] got X=${v}`);

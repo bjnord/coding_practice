@@ -38,8 +38,8 @@ class SaintNIC
   routePackets()
   {
     let finalPacket = undefined;
-    const sendPacket = (packet) => {
-      //console.debug(`sendPacket() called; packet:`);  // TODO "by ${a}" would be helpful
+    const sendPacket = (packet/*, addr*/) => {
+      //console.debug(`sendPacket(${addr}) called; packet:`);
       //console.dir(packet);
       if (packet.destAddress === 255) {
         finalPacket = packet;
