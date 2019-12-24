@@ -1,4 +1,6 @@
-## \--- Day 24: Planet of Discord ---
+# Day 24: Planet of Discord
+
+## Part One
 
 You land on [Eris](https://en.wikipedia.org/wiki/Eris_(dwarf_planet)), your last stop before reaching Santa. As soon as you do, your sensors start picking up strange life forms moving around: Eris is infested with [bugs](https://www.nationalgeographic.org/thisday/sep9/worlds-first-computer-bug/)! With an over 24-hour roundtrip for messages between you and Earth, you'll have to deal with this problem on your own.
 
@@ -66,7 +68,7 @@ To calculate the **biodiversity rating** for this layout, consider each tile lef
 
 **What is the biodiversity rating for the first layout that appears twice?**
 
-## \--- Part Two ---
+## Part Two
 
 After careful analysis, one thing is certain: **you have no idea where all these bugs are coming from**.
 
