@@ -44,8 +44,13 @@ class PuzzleGridWalker
    * but any the caller does not need may be omitted. The supported
    * callbacks are:
    *
+   * - `isPassable`: will be called with `(newPos, pos, path, steps)`
+   *     _before_ moving to a new position - is only called for positions
+   *     whose contents do not have a `passable` attribute in the puzzle
+   *     grid `key` - is expected to return `true` if `newPos` is passable
+   *     from the current position (`pos`), or `false` otherwise
    * - `movedTo`: will be called with `(pos, path, steps)` after moving to
-   *     a new position (including once for start position)
+   *     a new position (including once for the start position)
    *
    * @param {Array} origin - the [Y, X] start position
    * @param {object} callbacks - callbacks, in the form `{'callbackName': function, ...}`
@@ -56,7 +61,7 @@ class PuzzleGridWalker
       throw new Error('at least one callback must be provided');
     }
     this._callbacks = callbacks;
-    if (this._grid.getAttr(origin, 'passable') !== true) {
+    if (!this._isPassable(origin)) {
       throw new Error('origin is impassable');
     }
     this._pos = origin.slice();
@@ -67,6 +72,18 @@ class PuzzleGridWalker
       this._callbacks['movedTo'](this._pos, this._path, this._steps);
     }
     return this._walkOn();
+  }
+  // private: is the given position passable?
+  _isPassable(pos)
+  {
+    let passable;
+    if ((passable = this._grid.getAttr(pos, 'passable')) !== undefined) {
+      return passable === true;
+    } else if (this._callbacks['isPassable']) {
+      return this._callbacks['isPassable'](pos, this._pos, this._path, this._steps);
+    } else {
+      throw new Error("can't determine passability"+` of ${this._grid.get(pos)} at ${pos}`);
+    }
   }
   // private: recursive path explorer
   _walkOn()
@@ -118,7 +135,7 @@ class PuzzleGridWalker
   // private: is the given direction impassable?
   _isBlocked(dir)
   {
-    return this._grid.getAttr(this._newPosition(dir), 'passable') !== true;
+    return !this._isPassable(this._newPosition(dir));
   }
 }
 module.exports = PuzzleGridWalker;
