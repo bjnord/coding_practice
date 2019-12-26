@@ -1,0 +1,59 @@
+// PROGRAM
+
+// send line 1
+        OUT 49
+        OUT 10
+
+// send prompt A?
+        OUT 65
+        OUT 63
+        OUT 10
+
+// get command
+        IN M100
+        IN M101
+
+// send line 2
+        OUT 50
+        OUT 10
+
+// send line 3
+        OUT 51
+        OUT 10
+
+// send prompt B?
+        OUT 66
+        OUT 63
+        OUT 10
+
+// get command
+        IN M100
+        IN M101
+
+// send line 4
+        OUT 52
+        OUT 10
+
+// send line 5
+        OUT 53
+        OUT 10
+
+// send line 6
+        OUT 54
+        OUT 10
+
+// send prompt C?
+        OUT 67
+        OUT 63
+        OUT 10
+
+// get command
+        IN M100
+        IN M101
+
+// send line 7
+        OUT 55
+        OUT 10
+
+// done
+        HALT
