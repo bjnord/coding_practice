@@ -78,10 +78,10 @@ class ShipState
    *
    * State will be available from the following members/methods:
    * - `.location` {string} - current location
-   * - `.description` {string} - description of current location
-   * - `.doorsHere` {string} - compass directions leading from current location
-   * - `.itemsHere` {string} - items at the current location
-   * - `.message` {string} - usually a response to the previous command
+   * - `.description` {string} - description of the current location
+   * - `.doorsHere` {Array} - list of compass directions leading from the current location (strings)
+   * - `.itemsHere` {Array} - list of items at the current location (strings)
+   * - `.message` {string} - response to the previous command (if any)
    *
    * @param {Array} lines - the machine output lines
    */
@@ -263,6 +263,9 @@ class ShipState
   }
   /**
    * Get our inventory.
+   *
+   * Inventory will be available from the following member:
+   * - `.haveItems` {Array} - list of inventory items (strings)
    */
   inventory()
   {
