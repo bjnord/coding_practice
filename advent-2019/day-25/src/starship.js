@@ -19,6 +19,14 @@ class Starship
     // private: known rooms
     this._rooms = {};
     this._rooms[this._state.location] = {location: this._state.location};
+    // private: list of directions from origin to here during `search()`
+    this._walkPath = [];
+    // private: location of Security Checkpoint
+    this._checkpointLocation = undefined;
+    // private: list of directions from origin to Security Checkpoint
+    this._checkpointPath = [];
+    // private: direction from Security Checkpoint to TODO <room-name>
+    this._sensorDir = undefined;
   }
   /**
    * Search the starship.
@@ -41,6 +49,7 @@ class Starship
     /*
      * walk the whole ship, picking up items as we go
      */
+    this._walkPath = [];
     this._walk(this._state.location);
     if (!this._state.inventory()) {
       console.error(`MESSAGE: ${this._state.message}`);
@@ -49,19 +58,9 @@ class Starship
     //console.debug(`inventory after walk: ${this._state.haveItems.join(', ')}`);
     //console.debug('');
     /*
-     * walk to the Security Checkpoint room (next to the sensor room)
-     *
-     * FIXME this is manual cheating; _walk should store this path
-     *
-     * Hull Breach ->
-     *   north -> Navigation ->
-     *   north -> Observatory ->
-     *   west -> Holodeck ->
-     *   north -> Stables ->
-     *   east -> Engineering ->
-     *   east -> Security Checkpoint
+     * move to the Security Checkpoint room (next to the sensor room)
      */
-    ['north', 'north', 'west', 'north', 'east', 'east'].forEach((dir) => {
+    this._checkpointPath.forEach((dir) => {
       if (!this._state.move(dir)) {
         console.error(`MESSAGE: ${this._state.message}`);
         throw new Error(`search ShipState.move(${dir}) failed`);
@@ -138,6 +137,7 @@ class Starship
       } else if (!this._state.move(dir)) {
         if (this._state.message.match(/^A loud, robotic voice says.*ejected/)) {
           this._checkpointLocation = location;
+          this._checkpointPath = this._walkPath.slice();
           this._sensorDir = dir;
         } else {
           throw new Error(`_walk(${location}) move(${dir}) failed: ${this._state.message}`);
@@ -157,10 +157,12 @@ class Starship
         nextRoom[backDir] = location;
         //console.debug(`_walk(${location}): added dir=${backDir} to next room:`);
         //console.dir(nextRoom);
+        this._walkPath.push(dir);
         this._walk(nextLocation);
         if (!this._state.move(backDir)) {
           throw new Error(`_walk(${location}) backtrack move(${backDir}) failed: ${this._state.message}`);
         }
+        this._walkPath.pop();
       }
     });
   }
