@@ -44,7 +44,7 @@ class Starship
     this._walk(this._state.location);
     if (!this._state.inventory()) {
       console.error(`MESSAGE: ${this._state.message}`);
-      throw new Error(`search ShipState.inventory() failed`);
+      throw new Error('search ShipState.inventory() failed');
     }
     //console.debug(`inventory after walk: ${this._state.haveItems.join(', ')}`);
     //console.debug('');
