@@ -77,6 +77,55 @@ describe('puzzle grid walker tests [no items, movedTo callback]', () => {
     expect(walkLongestPathLength).to.eql(82);
   });
 });
+describe('puzzle grid walker tests [maze with loops]', () => {
+  const walkKey = {
+    0: {name: 'floor', render: '.', passable: true},
+    1: {name: 'vwall', render: '|', passable: false},
+    2: {name: 'hwall', render: '-', passable: false},
+    3: {name: 'junction', render: '+', passable: false},
+  };
+  const walkLines = [
+    '+-------+---+-------+',
+    '|.......|...|.......|',
+    '|.--+--.|.|.|.|.|.+.|',
+    '|...|...|.|...|.|...|',
+    '+--.|.|.|.+---+-+---+',
+    '|...|.|.|.|.....|...|',
+    '|.+-+.|.|.|.--+.+-+.|',
+    '|.|...|.|.....|...|.|',
+    '|.+-+-+-+-+---+-+.|.|',
+    '|...|.....|.....|...|',
+    '|.+.|.+--.|.|.--+--.|',
+    '|.....|.....|.......|',
+    '+-----+-----+-------+',
+  ];
+  let walkGrid, walker, walkVisited, walkLongestPathLength, walkMovedTo;
+  beforeEach(() => {
+    walkVisited = {};
+    walkLongestPathLength = 0;
+    // use destructuring to avoid lint "unused argument" errors
+    // h/t <https://stackoverflow.com/a/58738236/291754>
+    walkMovedTo = (...[pos, , steps]) => {
+      const i = pos[0] * 256 + pos[1];
+      walkVisited[i] = true;
+      walkLongestPathLength = Math.max(walkLongestPathLength, steps);
+    };
+    walkGrid = PuzzleGrid.from(walkLines, walkKey);
+    walker = new PuzzleGridWalker(walkGrid);
+  });
+  it('should visit all the squares', () => {
+    walker.walk([1, 1], {
+      movedTo: walkMovedTo,
+    });
+    expect(Object.keys(walkVisited).length).to.eql(121);
+  });
+  it('should find the farthest square visited (longest path)', () => {
+    walker.walk([1, 1], {
+      movedTo: walkMovedTo,
+    });
+    expect(walkLongestPathLength).to.eql(83);
+  });
+});
 describe('puzzle grid walker tests [no items, isPassable+movedTo callbacks]', () => {
   const passKey = {
     0: {name: 'floor', render: '.', passable: true},

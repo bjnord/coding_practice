@@ -35,6 +35,8 @@ class PuzzleGridWalker
     this._dirs = [];
     // private: number of steps from origin to here
     this._steps = undefined;
+    // private: positions seen on current walk
+    this._seen = {};
   }
   /**
    * Walk to all positions in the puzzle grid.
@@ -68,6 +70,7 @@ class PuzzleGridWalker
     this._path = [origin.slice()];
     this._dirs = [];
     this._steps = 0;
+    this._seen = {};
     if (this._callbacks['movedTo']) {
       this._callbacks['movedTo'](this._pos, this._path, this._steps);
     }
@@ -94,6 +97,10 @@ class PuzzleGridWalker
     for (let dir = 1; dir <= 4; dir++) {
       // only move further out from start position, don't double back:
       if (dir === sourceDir) {
+        continue;
+      }
+      // don't move to positions we've seen (prevent infinite loop):
+      if (this._haveSeen(dir)) {
         continue;
       }
       // this direction is impassable; no route that way:
@@ -123,6 +130,7 @@ class PuzzleGridWalker
     this._path.push(this._pos);
     this._dirs.push(dir);
     this._steps++;
+    this._seen[PuzzleGridWalker._seenKey(this._pos)] = true;
   }
   // private: backtrack
   _moveBack()
@@ -132,10 +140,20 @@ class PuzzleGridWalker
     this._path.pop();
     this._pos = this._path[this._path.length-1];
   }
+  // private: have we already visited the position in the given direction?
+  _haveSeen(dir)
+  {
+    return this._seen[PuzzleGridWalker._seenKey(this._newPosition(dir))];
+  }
   // private: is the given direction impassable?
   _isBlocked(dir)
   {
     return !this._isPassable(this._newPosition(dir));
+  }
+  // private: seen key for a given [Y, X] position
+  static _seenKey(position)
+  {
+    return `${position[0]},${position[1]}`;
   }
 }
 module.exports = PuzzleGridWalker;
