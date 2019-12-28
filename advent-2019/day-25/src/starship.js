@@ -39,11 +39,7 @@ class Starship
     /*
      * show our initial state
      */
-    //if (!this._state.inventory()) {
-    //  console.error(`MESSAGE: ${this._state.message}`);
-    //  throw new Error(`search ShipState.inventory() failed`);
-    //}
-    //console.debug(`starting inventory: ${this._state.haveItems.join(', ')}`);
+    //console.debug(`starting inventory: ${this._state.inventory.join(', ')}`);
     //console.debug('');
     //this._state.dump('Origin');
     /*
@@ -51,11 +47,7 @@ class Starship
      */
     this._walkPath = [];
     this._walk(this._state.location);
-    if (!this._state.inventory()) {
-      console.error(`MESSAGE: ${this._state.message}`);
-      throw new Error('search ShipState.inventory() failed');
-    }
-    //console.debug(`inventory after walk: ${this._state.haveItems.join(', ')}`);
+    //console.debug(`inventory after walk: ${this._state.inventory.join(', ')}`);
     //console.debug('');
     /*
      * move to the Security Checkpoint room (next to the sensor room)
@@ -74,20 +66,16 @@ class Starship
      * play drop & take until we weigh the right amount
      */
     this._dropCombo();
-    //if (!this._state.inventory()) {
-    //  console.error(`MESSAGE: ${this._state.message}`);
-    //  throw new Error(`search ShipState.inventory() failed`);
-    //}
-    //console.debug(`inventory after drop combo: ${this._state.haveItems.join(', ')}`);
+    //console.debug(`inventory after drop combo: ${this._state.inventory.join(', ')}`);
     //console.debug('');
     return this._state.airlockPassword;
   }
   // private: drop/take all combinations of inventory objects
   _dropCombo()
   {
-    const nItems = this._state.haveItems.length;
-    for (let i = 1; i <= nItems; i++) {
-      const combos = Combinatorics.combination(this._state.haveItems, i);
+    const items = this._state.inventory.slice();
+    for (let i = 1; i <= items.length; i++) {
+      const combos = Combinatorics.combination(items, i);
       combos.forEach((combo) => {
         this._dropAndPickUp(combo);
       });

@@ -45,6 +45,17 @@ const stillCantError = [
   "You still can't go that way.",
   '',
 ];
+const inventoryOutput = [
+  'Items in your inventory:',
+  '- bacon',
+  '- eggs',
+  '- toast',
+  '',
+];
+const emptyInventoryOutput = [
+  "You aren't carrying any items.",
+  '',
+];
 
 describe('starship parsing tests', () => {
   let parseState;
@@ -101,5 +112,15 @@ describe('starship parsing tests', () => {
     expect(parseState.description).to.eql('This delicatessen has delicious eats!');
     expect(parseState.doorsHere).to.eql(['east']);
     expect(parseState.itemsHere).to.eql(['salami on rye', 'potato chips', 'jelly donut']);
+  });
+  it('should parse inventory correctly [with items]', () => {
+    // FIXME using private method
+    parseState._parseInventory(inventoryOutput);
+    expect(parseState.inventory).to.eql(['bacon', 'eggs', 'toast']);
+  });
+  it('should parse inventory correctly [with items]', () => {
+    // FIXME using private method
+    parseState._parseInventory(emptyInventoryOutput);
+    expect(parseState.inventory).to.eql([]);
   });
 });

@@ -27,6 +27,8 @@ class ShipState
     this._machine = new AsciiIntcode(program, states);
     // private: our machine's processor state
     this._machineState = {pc: 0, rb: 0};
+    // private: our memoized inventory
+    this._inventory = undefined;
     // get the initial state output from the machine
     this.move(undefined);
   }
@@ -47,6 +49,7 @@ class ShipState
    */
   _run(command)
   {
+    this._inventory = undefined;  // clear memoization
     // machine sent us a newline-terminated prompt string
     // send the next command (without newline)
     const handlePrompt = ((s) => {
@@ -165,24 +168,18 @@ class ShipState
   }
   _parseInventory(lines)
   {
-    this.haveItems = [];
+    this._inventory = [];
     let i = 0;
     if (lines[i] === "You aren't carrying any items.") {
-      if (lines[++i].trim().length === 0) {
-        return i+1;
+      i++;
+    } else if (lines[i] === 'Items in your inventory:') {
+      while (lines[++i].match(/^-\s/)) {
+        this._inventory.push(lines[i].trim().slice(2));
       }
-      return i;  // hm
-    } else if (lines[i] !== 'Items in your inventory:') {
-      this.message = lines[i] ? lines[i].trim() : undefined;
-      return i;
     }
-    while (lines[++i].match(/^-\s/)) {
-      this.haveItems.push(lines[i].trim().slice(2));
+    if (lines[i] && (lines[i].trim().length !== 0)) {
+      throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
     }
-    if (lines[i].trim().length === 0) {
-      return i+1;
-    }
-    throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
   }
   /**
    * Move in the given direction.
@@ -262,18 +259,20 @@ class ShipState
     return false;
   }
   /**
-   * Get our inventory.
-   *
-   * Inventory will be available from the following member:
-   * - `.haveItems` {Array} - list of inventory items (strings)
+   * items in our inventory
+   * @member {Array}
    */
-  inventory()
+  get inventory()
   {
+    if (this._inventory) {  // memoized
+      return this._inventory;
+    }
     this._run('inv');
     //this._lines.map((line) => {
     //  console.debug(`GOT LINE "${line}"`);
     //});
-    return (this._parseInventory(this._lines) > 0);
+    this._parseInventory(this._lines);
+    return this._inventory;
   }
   /* istanbul ignore next */
   /**
