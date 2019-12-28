@@ -179,10 +179,6 @@ class ShipState
     this.location = m[1].trim();
     return i+1;
   }
-  _isBlankLine(lines, i)
-  {
-    return !lines[i];
-  }
   _parseDescription(lines, i)
   {
     /* istanbul ignore next */
@@ -191,7 +187,7 @@ class ShipState
     }
     this.description = lines[i++].trim();
     /* istanbul ignore else */
-    if (this._isBlankLine(lines, i)) {
+    if (!lines[i]) {
       return i+1;
     } else {
       throw new Error(`_parseDescription unexpected line ${i}: ${lines[i].trim()}`);
@@ -208,7 +204,7 @@ class ShipState
       this.doorsHere.push(lines[i].trim().slice(2));
     }
     /* istanbul ignore else */
-    if (this._isBlankLine(lines, i)) {
+    if (!lines[i]) {
       return i+1;
     } else {
       throw new Error(`_parseDoors unexpected line ${i}: ${lines[i].trim()}`);
@@ -224,7 +220,7 @@ class ShipState
       this.itemsHere.push(lines[i].trim().slice(2));
     }
     /* istanbul ignore else */
-    if (this._isBlankLine(lines, i)) {
+    if (!lines[i]) {
       return i+1;
     } else {
       throw new Error(`_parseItems unexpected line ${i}: ${lines[i].trim()}`);
@@ -237,7 +233,7 @@ class ShipState
     }
     this.message = lines[i++].trim();
     /* istanbul ignore else */
-    if (this._isBlankLine(lines, i)) {
+    if (!lines[i]) {
       return i+1;
     } else {
       throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
@@ -257,7 +253,7 @@ class ShipState
       return i;
     }
     /* istanbul ignore else */
-    if (this._isBlankLine(lines, i)) {
+    if (!lines[i]) {
       return i+1;
     } else {
       throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
@@ -267,7 +263,7 @@ class ShipState
   {
     if (this._lines[i] && this._lines[i].match(/^You (drop|take) the [^.]+\.$/)) {
       /* istanbul ignore else */
-      if (this._isBlankLine(lines, ++i)) {
+      if (!lines[++i]) {
         return i+1;
       } else {
         throw new Error(`_parseDropOrTake unexpected line ${i}: ${lines[i].trim()}`);
