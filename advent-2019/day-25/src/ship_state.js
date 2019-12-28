@@ -140,6 +140,7 @@ class ShipState
      */
     else {
       i = this._parseInventory(lines, i);
+      i = this._parseDropOrTake(lines, i);
       i = this._parseMessage(lines, i);
     }
     if (i < lines.length) {
@@ -250,6 +251,16 @@ class ShipState
     }
     throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
   }
+  _parseDropOrTake(lines, i)
+  {
+    if (this._lines[i] && this._lines[i].match(/^You (drop|take) the [^.]+\.$/)) {
+      if (!this._isBlankLine(lines, ++i)) {
+        throw new Error(`_parseDropOrTake unexpected line ${i}: ${lines[i].trim()}`);
+      }
+      return i+1;
+    }
+    return i;
+  }
   /**
    * Move in the given direction.
    *
@@ -279,20 +290,11 @@ class ShipState
   take(item)
   {
     this._run(`take ${item}`);
-    if (this._lines[0] && this._lines[0].match(/^You take the [^.]+\.$/)) {
-      if (this._lines.length > 2) {
-        //this._lines.map((line) => {
-        //  console.debug(`GOT LINE "${line}"`);
-        //});
-        this.message = this._lines[2];
-        this.messageDetail = this._lines.slice(3);
-        return false;  // something unexpected happened; counts as failed
-      }
-      return true;
-    }
-    this.message = this._lines[0];
-    this.messageDetail = this._lines.slice(2);
-    return false;
+    //this._lines.map((line) => {
+    //  console.debug(`GOT LINE "${line}"`);
+    //});
+    this._parse(this._lines);
+    return this.message ? false : true;
   }
   /**
    * Drop an item.
@@ -305,20 +307,11 @@ class ShipState
   drop(item)
   {
     this._run(`drop ${item}`);
-    if (this._lines[0] && this._lines[0].match(/^You drop the [^.]+\.$/)) {
-      if (this._lines.length > 2) {
-        //this._lines.map((line) => {
-        //  console.debug(`GOT LINE "${line}"`);
-        //});
-        this.message = this._lines[2];
-        this.messageDetail = this._lines.slice(3);
-        return false;  // something unexpected happened; counts as failed
-      }
-      return true;
-    }
-    this.message = this._lines[0];
-    this.messageDetail = this._lines.slice(2);
-    return false;
+    //this._lines.map((line) => {
+    //  console.debug(`GOT LINE "${line}"`);
+    //});
+    this._parse(this._lines);
+    return this.message ? false : true;
   }
   /**
    * items in our inventory
