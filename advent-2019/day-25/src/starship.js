@@ -110,8 +110,12 @@ class Starship
   _dropCombo(dir)
   {
     const items = this._state.inventory.slice();
+    //console.debug(`we have ${items.length} items`);
     for (let i = 1; i <= items.length; i++) {
-      const combos = Combinatorics.combination(items, i);
+      // it goes faster when you have advance knowledge ;-)
+      const c = ((i + 2) % items.length) + 1;
+      //console.debug(`try dropping combinations of ${c} items`);
+      const combos = Combinatorics.combination(items, c);
       combos.forEach((itemsCombo) => {
         this._dropAndMoveAndPickUp(itemsCombo, dir);
       });
