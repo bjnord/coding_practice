@@ -10,9 +10,11 @@ const TestAsciiIntcode = require('../../shared/src/test_ascii_intcode');
  * all correctly.
  */
 
-// TODO make sure these output line groups are all verbatim instances from the
-//      real AsciiIntcode machine
-const breachOutput = [
+/*****************
+ * INITIAL STATE *
+ *****************/
+
+const initialOutput = [
   '== Hull Breach ==',
   'You got in through a hole in the floor here. To keep your ship from also freezing, the hole has been sealed.',
   '',
@@ -22,7 +24,36 @@ const breachOutput = [
   '- west',
   '',
 ];
-const hallOutput = [
+describe('ship state take tests', () => {
+  it('should take correctly [item here]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+    ]);
+    const initialState = new ShipState(mockMachine);
+    expect(initialState.message).to.be.undefined;
+    expect(initialState.location).to.eql('Hull Breach');
+    expect(initialState.description).to.eql('You got in through a hole in the floor here. To keep your ship from also freezing, the hole has been sealed.');
+    expect(initialState.doorsHere).to.eql(['north', 'south', 'west']);
+    expect(initialState.itemsHere).to.eql([]);
+  });
+});
+
+/*****************
+ * MOVE          *
+ *****************/
+
+const moveDirection = 'north';
+const noItemsHereOutput = [
+  '== Navigation ==',
+  'Status: Stranded. Please supply measurements from fifty stars to recalibrate.',
+  '',
+  'Doors here lead:',
+  '- north',
+  '- south',
+  '- west',
+  '',
+];
+const itemsHereOutput = [
   '== Hallway ==',
   "This area has been optimized for something; you're just not quite sure what.",
   '',
@@ -34,108 +65,185 @@ const hallOutput = [
   '- hologram',
   '',
 ];
-const deliOutput = [
-  '== West Side Deli ==',
-  'This delicatessen has delicious eats!',
-  '',
-  'Doors here lead:',
-  '- east',
-  '',
-  'Items here:',
-  '- salami on rye',
-  '- potato chips',
-  '- jelly donut',
-  '',
-];
-const cantError = [
+const cantMoveDirection = 'east';
+const cantMoveOutput = [
   "You can't go that way.",
   '',
 ];
-const stillCantError = [
-  "You still can't go that way.",
+describe('ship state move tests', () => {
+  it('should move correctly [no items]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      noItemsHereOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(moveDirection)).to.be.true;
+    expect(moveState.message).to.be.undefined;
+    expect(moveState.location).to.eql('Navigation');
+    expect(moveState.description).to.eql('Status: Stranded. Please supply measurements from fifty stars to recalibrate.');
+    expect(moveState.doorsHere).to.eql(['north', 'south', 'west']);
+    expect(moveState.itemsHere).to.eql([]);
+  });
+  it('should move correctly [items here]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      itemsHereOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(moveDirection)).to.be.true;
+    expect(moveState.message).to.be.undefined;
+    expect(moveState.location).to.eql('Hallway');
+    expect(moveState.description).to.eql("This area has been optimized for something; you're just not quite sure what.");
+    expect(moveState.doorsHere).to.eql(['north', 'south']);
+    expect(moveState.itemsHere).to.eql(['hologram']);
+  });
+});
+describe("ship state can't-move tests", () => {
+  it('should leave state unaffected [no items]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      noItemsHereOutput,
+      cantMoveOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(moveDirection)).to.be.true;
+    expect(moveState.move(cantMoveDirection)).to.be.false;
+    expect(moveState.message).to.be.eql("You can't go that way.");
+    expect(moveState.location).to.eql('Navigation');
+    expect(moveState.description).to.eql('Status: Stranded. Please supply measurements from fifty stars to recalibrate.');
+    expect(moveState.doorsHere).to.eql(['north', 'south', 'west']);
+    expect(moveState.itemsHere).to.eql([]);
+  });
+  it('should leave state unaffected [items here]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      itemsHereOutput,
+      cantMoveOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(moveDirection)).to.be.true;
+    expect(moveState.move(cantMoveDirection)).to.be.false;
+    expect(moveState.message).to.be.eql("You can't go that way.");
+    expect(moveState.location).to.eql('Hallway');
+    expect(moveState.description).to.eql("This area has been optimized for something; you're just not quite sure what.");
+    expect(moveState.doorsHere).to.eql(['north', 'south']);
+    expect(moveState.itemsHere).to.eql(['hologram']);
+  });
+});
+
+/*****************
+ * TAKE          *
+ *****************/
+
+const takeItem = 'manifold';
+const takeOutput = [
+  'You take the manifold.',
   '',
 ];
+const toxicTakeItem = 'molten lava';
+const toxicTakeOutput = [
+  'You take the molten lava.',
+  '',
+  'The molten lava is way too hot! You melt!',
+  '',
+];
+const cantTakeItem = 'wooden nickel';
+const cantTakeOutput = [
+  "You don't see that item here.",
+  '',
+];
+describe('ship state take tests', () => {
+  it('should take correctly [item here]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      takeOutput,
+    ]);
+    const takeState = new ShipState(mockMachine);
+    expect(takeState.take(takeItem)).to.be.true;
+    expect(takeState.message).to.be.undefined;
+  });
+  it('should take correctly [toxic item here]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      toxicTakeOutput,
+    ]);
+    const toxicTakeState = new ShipState(mockMachine);
+    expect(toxicTakeState.take(toxicTakeItem)).to.be.false;
+    expect(toxicTakeState.message).to.match(/You melt!/);
+  });
+  it('should take correctly [no item here]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      cantTakeOutput,
+    ]);
+    const cantTakeState = new ShipState(mockMachine);
+    expect(cantTakeState.take(cantTakeItem)).to.be.false;
+    expect(cantTakeState.message).to.eql("You don't see that item here.");
+  });
+});
+
+/*****************
+ * DROP          *
+ *****************/
+
+const dropItem = 'fuel cell';
+const dropOutput = [
+  'You drop the fuel cell.',
+  '',
+];
+const cantDropItem = 'everything';
+const cantDropOutput = [
+  "You don't have that item.",
+  '',
+];
+describe('ship state drop tests', () => {
+  it('should drop correctly [have item]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      dropOutput,
+    ]);
+    const dropState = new ShipState(mockMachine);
+    expect(dropState.drop(dropItem)).to.be.true;
+    expect(dropState.message).to.be.undefined;
+  });
+  it('should drop correctly [no item]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      cantDropOutput,
+    ]);
+    const cantDropState = new ShipState(mockMachine);
+    expect(cantDropState.drop(cantDropItem)).to.be.false;
+    expect(cantDropState.message).to.eql("You don't have that item.");
+  });
+});
+
+/*****************
+ * INVENTORY     *
+ *****************/
+
 const inventoryOutput = [
   'Items in your inventory:',
-  '- bacon',
-  '- eggs',
-  '- toast',
+  '- tambourine',
+  '- hologram',
+  '- fuel cell',
   '',
 ];
 const emptyInventoryOutput = [
   "You aren't carrying any items.",
   '',
 ];
-
-describe('ship state parsing tests', () => {
-  let parseState;
-  beforeEach(() => {
-    parseState = new ShipState('104,89,104,111,104,117,104,46,104,10,104,10,104,67,104,111,104,109,104,109,104,97,104,110,104,100,104,63,104,10,3,100,99');
-  });
-  it('should parse new state correctly [example #1]', () => {
-    parseState.parse(breachOutput);
-    expect(parseState.message).to.be.undefined;
-    expect(parseState.location).to.eql('Hull Breach');
-    expect(parseState.description).to.eql('You got in through a hole in the floor here. To keep your ship from also freezing, the hole has been sealed.');
-    expect(parseState.doorsHere).to.eql(['north', 'south', 'west']);
-    expect(parseState.itemsHere).to.eql([]);
-  });
-  it('should parse new state correctly [example #2]', () => {
-    parseState.parse(hallOutput);
-    expect(parseState.message).to.be.undefined;
-    expect(parseState.location).to.eql('Hallway');
-    expect(parseState.description).to.eql("This area has been optimized for something; you're just not quite sure what.");
-    expect(parseState.doorsHere).to.eql(['north', 'south']);
-    expect(parseState.itemsHere).to.eql(['hologram']);
-  });
-  it('should parse new state correctly [example #3]', () => {
-    parseState.parse(deliOutput);
-    expect(parseState.message).to.be.undefined;
-    expect(parseState.location).to.eql('West Side Deli');
-    expect(parseState.description).to.eql('This delicatessen has delicious eats!');
-    expect(parseState.doorsHere).to.eql(['east']);
-    expect(parseState.itemsHere).to.eql(['salami on rye', 'potato chips', 'jelly donut']);
-  });
-  it('should parse state update correctly [example #1]', () => {
-    parseState.parse(breachOutput);
-    parseState.parse(cantError);
-    expect(parseState.message).to.eql("You can't go that way.");
-    expect(parseState.location).to.eql('Hull Breach');
-    expect(parseState.description).to.eql('You got in through a hole in the floor here. To keep your ship from also freezing, the hole has been sealed.');
-    expect(parseState.doorsHere).to.eql(['north', 'south', 'west']);
-    expect(parseState.itemsHere).to.eql([]);
-  });
-  it('should parse state update correctly [example #2]', () => {
-    parseState.parse(hallOutput);
-    parseState.parse(cantError);
-    expect(parseState.message).to.eql("You can't go that way.");
-    expect(parseState.location).to.eql('Hallway');
-    expect(parseState.description).to.eql("This area has been optimized for something; you're just not quite sure what.");
-    expect(parseState.doorsHere).to.eql(['north', 'south']);
-    expect(parseState.itemsHere).to.eql(['hologram']);
-  });
-  it('should parse state update correctly [example #3]', () => {
-    parseState.parse(deliOutput);
-    parseState.parse(stillCantError);
-    expect(parseState.message).to.eql("You still can't go that way.");
-    expect(parseState.location).to.eql('West Side Deli');
-    expect(parseState.description).to.eql('This delicatessen has delicious eats!');
-    expect(parseState.doorsHere).to.eql(['east']);
-    expect(parseState.itemsHere).to.eql(['salami on rye', 'potato chips', 'jelly donut']);
-  });
-});
 describe('ship state inventory tests', () => {
-  it('should parse the inventory correctly [some items]', () => {
+  it('should take inventory correctly [some items]', () => {
     const mockMachine = new TestAsciiIntcode([
-      breachOutput,  // initial state
+      initialOutput,
       inventoryOutput,
     ]);
     const invState = new ShipState(mockMachine);
-    expect(invState.inventory).to.eql(['bacon', 'eggs', 'toast']);
+    expect(invState.inventory).to.eql(['tambourine', 'hologram', 'fuel cell']);
   });
-  it('should parse the inventory correctly [no items]', () => {
+  it('should take inventory correctly [no items]', () => {
     const mockMachine = new TestAsciiIntcode([
-      breachOutput,  // initial state
+      initialOutput,
       emptyInventoryOutput,
     ]);
     const invState = new ShipState(mockMachine);

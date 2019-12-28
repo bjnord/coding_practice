@@ -113,6 +113,7 @@ class ShipState
      * Otherwise, this is a state update (most remains the same):
      */
     else {
+      i = this._parseInventory(lines, i);
       i = this._parseMessage(lines, i);
     }
     if (lines[i] && lines[i].match(/^A loud, robotic voice says/)) {
@@ -124,16 +125,25 @@ class ShipState
   _parseLocation(lines, i)
   {
     let m;
-    if (!(m = lines[i].match(/^==\s+(.*)\s==\s*$/))) {
+    if (!lines[i] || !(m = lines[i].match(/^==\s+(.*)\s==\s*$/))) {
       return i;
     }
     this.location = m[1].trim();
     return i+1;
   }
+  // TODO after implementing this.messageDetail[] and removing throws,
+  //      change this to return true if lines[i] === undefined
+  _isBlankLine(lines, i)
+  {
+    return ((lines[i] !== undefined) && (lines[i].trim().length === 0));
+  }
   _parseDescription(lines, i)
   {
-    this.description = lines[i].trim();
-    if (lines[++i].trim().length === 0) {
+    if (!lines[i]) {
+      return i;
+    }
+    this.description = lines[i++].trim();
+    if (this._isBlankLine(lines, i)) {
       return i+1;
     }
     throw new Error(`_parseDescription unexpected line ${i}: ${lines[i].trim()}`);
@@ -147,7 +157,7 @@ class ShipState
     while (lines[++i].match(/^-\s/)) {
       this.doorsHere.push(lines[i].trim().slice(2));
     }
-    if (lines[i].trim().length === 0) {
+    if (this._isBlankLine(lines, i)) {
       return i+1;
     }
     throw new Error(`_parseDoors unexpected line ${i}: ${lines[i].trim()}`);
@@ -161,33 +171,39 @@ class ShipState
     while (lines[++i].match(/^-\s/)) {
       this.itemsHere.push(lines[i].trim().slice(2));
     }
-    if (lines[i].trim().length === 0) {
+    if (this._isBlankLine(lines, i)) {
       return i+1;
     }
     throw new Error(`_parseItems unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseMessage(lines, i)
   {
-    this.message = lines[i].trim();
-    if (lines[++i].trim().length === 0) {
+    if (!lines[i]) {
+      return i;
+    }
+    this.message = lines[i++].trim();
+    if (this._isBlankLine(lines, i)) {
       return i+1;
     }
     throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
   }
-  _parseInventory(lines)
+  _parseInventory(lines, i)
   {
-    this._inventory = [];
-    let i = 0;
     if (lines[i] === "You aren't carrying any items.") {
+      this._inventory = [];
       i++;
     } else if (lines[i] === 'Items in your inventory:') {
+      this._inventory = [];
       while (lines[++i].match(/^-\s/)) {
         this._inventory.push(lines[i].trim().slice(2));
       }
+    } else {
+      return i;
     }
-    if (lines[i] && (lines[i].trim().length !== 0)) {
-      throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
+    if (this._isBlankLine(lines, i)) {
+      return i+1;
     }
+    throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
   }
   /**
    * Move in the given direction.
@@ -231,13 +247,14 @@ class ShipState
   take(item)
   {
     this._run(`take ${item}`);
-    if (this._lines.length > 2) {
-      //this._lines.map((line) => {
-      //  console.debug(`GOT LINE "${line}"`);
-      //});
-      return false;  // something unexpected; say failed for now
-    }
     if (this._lines[0].match(/^You take the [^.]+\.$/)) {
+      if (this._lines.length > 2) {
+        //this._lines.map((line) => {
+        //  console.debug(`GOT LINE "${line}"`);
+        //});
+        this.message = this._lines[2];
+        return false;  // something unexpected; counts as failed
+      }
       return true;
     }
     this.message = this._lines[0];
@@ -279,7 +296,7 @@ class ShipState
     //this._lines.map((line) => {
     //  console.debug(`GOT LINE "${line}"`);
     //});
-    this._parseInventory(this._lines);
+    this.parse(this._lines);
     return this._inventory;
   }
   /* istanbul ignore next */
