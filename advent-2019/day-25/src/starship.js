@@ -197,23 +197,19 @@ class Starship
   // private: pick up all objects we can
   _pickUpAll()
   {
+    const toxicItems = {
+      'photons': true,
+      'molten lava': true,
+      'giant electromagnet': true,
+      'escape pod': true,
+      'infinite loop': true,
+    };
     for (let item = this._state.itemsHere.pop(); item; item = this._state.itemsHere.pop()) {
-      // taking photons plunges us into darkness, and we suffer Grue death
-      if (item === 'photons') {
+      // don't pick up items that cause death or paralysis:
+      if (toxicItems[item]) {
+        continue;
       }
-      // taking giant electromagnet paralyzes us
-      else if (item === 'giant electromagnet') {
-      }
-      // taking infinite loop, you guessed it, causes an infinite loop
-      else if (item === 'infinite loop') {
-      }
-      // taking molten lava is just a bad idea
-      else if (item === 'molten lava') {
-      }
-      // taking escape pod flings us from the ship
-      else if (item === 'escape pod') {
-      }
-      else if (!this._state.take(item)) {
+      if (!this._state.take(item)) {
         console.error(`MESSAGE: ${this._state.message}`);
         throw new Error(`_pickUpAll ShipState.take(${item}) failed`);
       }
