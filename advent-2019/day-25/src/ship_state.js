@@ -38,6 +38,31 @@ class ShipState
     // private: our memoized inventory
     this._inventory = undefined;
     /**
+     * the current location
+     * @member {string}
+     */
+    this.location = undefined;
+    /**
+     * description of the current location
+     * @member {string}
+     */
+    this.description = undefined;
+    /**
+     * list of compass directions leading from the current location (strings)
+     * @member {Array}
+     */
+    this.doorsHere = [];
+    /**
+     * list of items at the current location (strings)
+     * @member {Array}
+     */
+    this.itemsHere = [];
+    /**
+     * response to the previous command (if it failed)
+     * @member {string}
+     */
+    this.message = undefined;
+    /**
      * the airlock password
      * @member {string}
      */
@@ -89,20 +114,8 @@ class ShipState
     this._lines = [];
     this._machineState = this._machine.run(handlePrompt, undefined, undefined, handleLine, this._machineState);
   }
-  /**
-   * Parse ASCII Intcode machine output lines to set the current state.
-   *
-   * State will be available from the following members/methods:
-   * - `.location` {string} - current location
-   * - `.description` {string} - description of the current location
-   * - `.doorsHere` {Array} - list of compass directions leading from the current location (strings)
-   * - `.itemsHere` {Array} - list of items at the current location (strings)
-   * - `.message` {string} - response to the previous command (if any)
-   * - `.airlockPassword` {string} - the airlock password (if any)
-   *
-   * @param {Array} lines - the machine output lines
-   */
-  parse(lines)
+  // private: parse ASCII Intcode machine output to set the current state
+  _parse(lines)
   {
     let i = 0;
     i = this._parseLocation(lines, i);
@@ -124,7 +137,7 @@ class ShipState
       i = this._parseMessage(lines, i);
     }
     if (i < lines.length) {
-      throw new Error(`parse unexpected line ${i}: ${lines[i].trim()}`);
+      throw new Error(`_parse unexpected line ${i}: ${lines[i].trim()}`);
     }
   }
   _parseRobotVoice(lines, i)
@@ -135,7 +148,7 @@ class ShipState
       while ((lines[++i] !== undefined) && !lines[i].match(/^==\s/)) {
         ;
       }
-      this.parse(this._lines.slice(i));
+      this._parse(this._lines.slice(i));
       this.message = message;
       return this._lines.length;
     }
@@ -251,7 +264,7 @@ class ShipState
     //this._lines.map((line) => {
     //  console.debug(`GOT LINE "${line}"`);
     //});
-    this.parse(this._lines);
+    this._parse(this._lines);
     return this.message ? false : true;
   }
   /**
@@ -314,7 +327,7 @@ class ShipState
     //this._lines.map((line) => {
     //  console.debug(`GOT LINE "${line}"`);
     //});
-    this.parse(this._lines);
+    this._parse(this._lines);
     return this._inventory;
   }
   /* istanbul ignore next */
