@@ -70,6 +70,37 @@ const cantMoveOutput = [
   "You can't go that way.",
   '',
 ];
+const sensorDirection = 'north';
+const sensorFailOutput = [
+  '== Pressure-Sensitive Floor ==',
+  'Analyzing...',
+  '',
+  'Doors here lead:',
+  '- south',
+  '',
+  'A loud, robotic voice says "Alert! Droids on this ship are heavier than the detected value!" and you are ejected back to the checkpoint.',
+  '',
+  '',
+  '',
+  '== Security Checkpoint ==',
+  'In the next room, a pressure-sensitive floor will verify your identity.',
+  '',
+  'Doors here lead:',
+  '- north',
+  '- west',
+  '',
+];
+const sensorPassOutput = [
+  '== Pressure-Sensitive Floor ==',
+  'Analyzing...',
+  '',
+  'Doors here lead:',
+  '- south',
+  '',
+  'A loud, robotic voice says "Analysis complete! You may proceed." and you enter the cockpit.',
+  'Santa notices your small droid, looks puzzled for a moment, realizes what has happened, and radios your ship directly.',
+  '"Oh, hello! You should be able to get in by typing 1090529280 on the keypad at the main airlock."',
+];
 describe('ship state move tests', () => {
   it('should move correctly [no items]', () => {
     const mockMachine = new TestAsciiIntcode([
@@ -128,6 +159,36 @@ describe("ship state can't-move tests", () => {
     expect(moveState.description).to.eql("This area has been optimized for something; you're just not quite sure what.");
     expect(moveState.doorsHere).to.eql(['north', 'south']);
     expect(moveState.itemsHere).to.eql(['hologram']);
+  });
+});
+describe('ship state move-to-sensor tests', () => {
+  it('should move correctly [weight incorrect]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      sensorFailOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(sensorDirection)).to.be.false;
+    expect(moveState.message).to.be.eql('A loud, robotic voice says "Alert! Droids on this ship are heavier than the detected value!" and you are ejected back to the checkpoint.');
+    expect(moveState.location).to.eql('Security Checkpoint');
+    expect(moveState.description).to.eql('In the next room, a pressure-sensitive floor will verify your identity.');
+    expect(moveState.doorsHere).to.eql(['north', 'west']);
+    expect(moveState.itemsHere).to.eql([]);
+    expect(moveState.airlockPassword).to.be.undefined;
+  });
+  it('should move correctly and find password [weight correct]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      initialOutput,
+      sensorPassOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(sensorDirection)).to.be.true;
+    expect(moveState.message).to.be.undefined;
+    expect(moveState.location).to.eql('Pressure-Sensitive Floor');
+    expect(moveState.description).to.eql('Analyzing...');
+    expect(moveState.doorsHere).to.eql(['south']);
+    expect(moveState.itemsHere).to.eql([]);
+    expect(moveState.airlockPassword).to.eql('1090529280');
   });
 });
 

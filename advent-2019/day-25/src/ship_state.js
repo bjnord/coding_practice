@@ -37,6 +37,11 @@ class ShipState
     this._machineState = {pc: 0, rb: 0};
     // private: our memoized inventory
     this._inventory = undefined;
+    /**
+     * the airlock password
+     * @member {string}
+     */
+    this.airlockPassword = undefined;
     // get the initial state output from the machine
     this.move(undefined);
   }
@@ -93,6 +98,7 @@ class ShipState
    * - `.doorsHere` {Array} - list of compass directions leading from the current location (strings)
    * - `.itemsHere` {Array} - list of items at the current location (strings)
    * - `.message` {string} - response to the previous command (if any)
+   * - `.airlockPassword` {string} - the airlock password (if any)
    *
    * @param {Array} lines - the machine output lines
    */
@@ -108,6 +114,7 @@ class ShipState
       i = this._parseDescription(lines, i);
       i = this._parseDoors(lines, i);
       i = this._parseItems(lines, i);
+      i = this._parseRobotVoice(lines, i);
     }
     /*
      * Otherwise, this is a state update (most remains the same):
@@ -116,11 +123,35 @@ class ShipState
       i = this._parseInventory(lines, i);
       i = this._parseMessage(lines, i);
     }
-    if (lines[i] && lines[i].match(/^A loud, robotic voice says/)) {
-      this.message = lines[i];
-    } else if (i < lines.length) {
+    if (i < lines.length) {
       throw new Error(`parse unexpected line ${i}: ${lines[i].trim()}`);
     }
+  }
+  _parseRobotVoice(lines, i)
+  {
+    if (lines[i] && lines[i].match(/^A loud, robotic voice says.*ejected/)) {
+      const message = lines[i];
+      // output in this case has a double full state; we want the second one:
+      while ((lines[++i] !== undefined) && !lines[i].match(/^==\s/)) {
+        ;
+      }
+      this.parse(this._lines.slice(i));
+      this.message = message;
+      return this._lines.length;
+    }
+    if (lines[i] && lines[i].match(/^A loud, robotic voice says.*proceed/)) {
+      lines.forEach((line) => {
+        let m;
+        if ((m = line.match(/You should be able to get in by typing (\d+)/))) {
+          this.airlockPassword = m[1];
+        }
+      });
+      // TODO after implementing this.messageDetail[] and removing throws,
+      //      change this to "return i;" so the messages go into detail
+      //      (and change the test to look for it)
+      return this._lines.length;
+    }
+    return i;
   }
   _parseLocation(lines, i)
   {
@@ -221,19 +252,6 @@ class ShipState
     //  console.debug(`GOT LINE "${line}"`);
     //});
     this.parse(this._lines);
-    if (this.message && this.message.match(/^A loud, robotic voice says.*proceed/)) {
-      this._lines.forEach((line) => {
-        let m;
-        if ((m = line.match(/You should be able to get in by typing (\d+)/))) {
-          /**
-           * the airlock password
-           * @member {string}
-           */
-          this.airlockPassword = m[1];
-        }
-      });
-      return true;
-    }
     return this.message ? false : true;
   }
   /**
