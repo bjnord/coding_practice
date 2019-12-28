@@ -1,7 +1,17 @@
 'use strict';
 const expect = require('chai').expect;
 const ShipState = require('../src/ship_state');
+const TestAsciiIntcode = require('../../shared/src/test_ascii_intcode');
 
+/*
+ * This is a perfect use case for test mocks. The ASCII Intcode machine (our
+ * puzzle input) will never change, so we can easily catalog all the types of
+ * output line groups, and make sure our ShipState state/interface parses them
+ * all correctly.
+ */
+
+// TODO make sure these output line groups are all verbatim instances from the
+//      real AsciiIntcode machine
 const breachOutput = [
   '== Hull Breach ==',
   'You got in through a hole in the floor here. To keep your ship from also freezing, the hole has been sealed.',
@@ -57,7 +67,7 @@ const emptyInventoryOutput = [
   '',
 ];
 
-describe('starship parsing tests', () => {
+describe('ship state parsing tests', () => {
   let parseState;
   beforeEach(() => {
     parseState = new ShipState('104,89,104,111,104,117,104,46,104,10,104,10,104,67,104,111,104,109,104,109,104,97,104,110,104,100,104,63,104,10,3,100,99');
@@ -113,14 +123,22 @@ describe('starship parsing tests', () => {
     expect(parseState.doorsHere).to.eql(['east']);
     expect(parseState.itemsHere).to.eql(['salami on rye', 'potato chips', 'jelly donut']);
   });
-  it('should parse inventory correctly [with items]', () => {
-    // FIXME using private method
-    parseState._parseInventory(inventoryOutput);
-    expect(parseState.inventory).to.eql(['bacon', 'eggs', 'toast']);
+});
+describe('ship state inventory tests', () => {
+  it('should parse the inventory correctly [some items]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      breachOutput,  // initial state
+      inventoryOutput,
+    ]);
+    const invState = new ShipState(mockMachine);
+    expect(invState.inventory).to.eql(['bacon', 'eggs', 'toast']);
   });
-  it('should parse inventory correctly [with items]', () => {
-    // FIXME using private method
-    parseState._parseInventory(emptyInventoryOutput);
-    expect(parseState.inventory).to.eql([]);
+  it('should parse the inventory correctly [no items]', () => {
+    const mockMachine = new TestAsciiIntcode([
+      breachOutput,  // initial state
+      emptyInventoryOutput,
+    ]);
+    const invState = new ShipState(mockMachine);
+    expect(invState.inventory).to.eql([]);
   });
 });

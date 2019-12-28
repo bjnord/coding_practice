@@ -1,5 +1,6 @@
 'use strict';
 const AsciiIntcode = require('../../shared/src/ascii_intcode');
+const TestAsciiIntcode = require('../../shared/src/test_ascii_intcode');
 
 class ShipState
 {
@@ -17,14 +18,21 @@ class ShipState
    */
   constructor(input)
   {
-    const states = {
-      '@':        {state: 'getLine', next: 'message'},
-      'message':  {state: 'getLine', next: 'message', chainIfMatch: 'prompt', match: /^Command\?/},
-      'prompt':   {state: 'getPrompt', next: 'message'},
-    };
-    const program = input.trim().split(/,/).map((str) => Number(str));
+    let machine;
+    if (input instanceof TestAsciiIntcode) {
+      // this way of constructing is for testing with a test mock machine
+      machine = input;
+    } else {
+      const states = {
+        '@':        {state: 'getLine', next: 'message'},
+        'message':  {state: 'getLine', next: 'message', chainIfMatch: 'prompt', match: /^Command\?/},
+        'prompt':   {state: 'getPrompt', next: 'message'},
+      };
+      const program = input.trim().split(/,/).map((str) => Number(str));
+      machine = new AsciiIntcode(program, states);
+    }
     // private: our ASCII Intcode machine
-    this._machine = new AsciiIntcode(program, states);
+    this._machine = machine;
     // private: our machine's processor state
     this._machineState = {pc: 0, rb: 0};
     // private: our memoized inventory
