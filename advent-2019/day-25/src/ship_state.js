@@ -261,6 +261,15 @@ class ShipState
     }
     return i;
   }
+  // private: do an action and parse the resulting output
+  _accomplish(command)
+  {
+    this._run(command);
+    //this._lines.map((line) => {
+    //  console.debug(`GOT LINE "${line}"`);
+    //});
+    this._parse(this._lines);
+  }
   /**
    * Move in the given direction.
    *
@@ -272,11 +281,7 @@ class ShipState
    */
   move(direction)
   {
-    this._run(direction);
-    //this._lines.map((line) => {
-    //  console.debug(`GOT LINE "${line}"`);
-    //});
-    this._parse(this._lines);
+    this._accomplish(direction);
     return this.message ? false : true;
   }
   /**
@@ -289,11 +294,7 @@ class ShipState
    */
   take(item)
   {
-    this._run(`take ${item}`);
-    //this._lines.map((line) => {
-    //  console.debug(`GOT LINE "${line}"`);
-    //});
-    this._parse(this._lines);
+    this._accomplish(`take ${item}`);
     return this.message ? false : true;
   }
   /**
@@ -306,11 +307,7 @@ class ShipState
    */
   drop(item)
   {
-    this._run(`drop ${item}`);
-    //this._lines.map((line) => {
-    //  console.debug(`GOT LINE "${line}"`);
-    //});
-    this._parse(this._lines);
+    this._accomplish(`drop ${item}`);
     return this.message ? false : true;
   }
   /**
@@ -322,11 +319,7 @@ class ShipState
     if (this._inventory) {  // memoized
       return this._inventory;
     }
-    this._run('inv');
-    //this._lines.map((line) => {
-    //  console.debug(`GOT LINE "${line}"`);
-    //});
-    this._parse(this._lines);
+    this._accomplish('inv');
     return this._inventory;
   }
   /* istanbul ignore next */
