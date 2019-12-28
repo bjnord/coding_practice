@@ -5,7 +5,9 @@ const input = fs.readFileSync('input/input.txt', 'utf8');
 
 // PART 1
 const starship = new Starship(input);
-const password = starship.search();
+starship.search();
+starship.move(starship.checkpointPath);
+starship.moveThroughSensor(starship.sensorDirection);
 console.log('part 1: expected answer:  1090529280');
-console.log(`part 1: airlock password: ${password}`);
+console.log(`part 1: airlock password: ${starship.airlockPassword}`);
 console.log('');

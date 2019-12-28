@@ -16,6 +16,11 @@ class Starship
   {
     // private: our current state/interface to the Intcode machine
     this._state = new ShipState(input);
+    /**
+     * current location
+     * @member {string}
+     */
+    this.location = this._state.location;
     // private: known rooms
     this._rooms = {};
     this._rooms[this._state.location] = {location: this._state.location};
@@ -23,16 +28,30 @@ class Starship
     this._walkPath = [];
     // private: location of Security Checkpoint
     this._checkpointLocation = undefined;
-    // private: list of directions from origin to Security Checkpoint
-    this._checkpointPath = [];
-    // private: direction from Security Checkpoint to TODO <room-name>
-    this._sensorDir = undefined;
+    /**
+     * list of compass directions from "Hull Breach" (starting position) to
+     * "Security Checkpoint" (strings)
+     * @member {Array}
+     */
+    this.checkpointPath = [];
+    /**
+     * compass direction from "Security Checkpoint" to "Pressure-Sensitive Floor"
+     * @member {string}
+     */
+    this.sensorDirection = undefined;
+    /**
+     * the airlock password
+     * @member {string}
+     */
+    this.airlockPassword = undefined;
   }
   /**
-   * Search the starship.
+   * Search the whole starship.
    *
-   * @return {string}
-   *   Returns the "password for the main airlock".
+   * When finished, the following members will be set:
+   * - `location`
+   * - `checkpointPath`
+   * - `sensorDirection`
    */
   search()
   {
@@ -47,45 +66,66 @@ class Starship
      */
     this._walkPath = [];
     this._walk(this._state.location);
+    this.location = this._state.location;
     //console.debug(`inventory after walk: ${this._state.inventory.join(', ')}`);
     //console.debug('');
-    /*
-     * move to the Security Checkpoint room (next to the sensor room)
-     */
-    this._checkpointPath.forEach((dir) => {
+  }
+  /**
+   * Move along the given path.
+   *
+   * When finished, the following member will be set:
+   * - `location`
+   *
+   * @param {Array} dirs - the compass directions to take
+   */
+  move(dirs)
+  {
+    dirs.forEach((dir) => {
       if (!this._state.move(dir)) {
         console.error(`MESSAGE: ${this._state.message}`);
-        throw new Error(`search ShipState.move(${dir}) failed`);
+        throw new Error(`move ShipState.move(${dir}) failed`);
       }
     });
-    if (this._state.location !== this._checkpointLocation) {
-      throw new Error(`at ${this._state.location} not ${this._checkpointLocation}`);
-    }
+    this.location = this._state.location;
+  }
+  /**
+   * Move in the given direction, after adjusting weight by taking and
+   * dropping items.
+   *
+   * When finished, the following members will be set:
+   * - `location`
+   * - `airlockPassword`
+   */
+  moveThroughSensor(dir)
+  {
     //this._state.dump('Combo Position');
-    /*
-     * play drop & take until we weigh the right amount
-     */
-    this._dropCombo();
+    this._dropCombo(dir);
     //console.debug(`inventory after drop combo: ${this._state.inventory.join(', ')}`);
     //console.debug('');
-    return this._state.airlockPassword;
+    this.location = this._state.location;
+    this.airlockPassword = this._state.airlockPassword;
+    //console.debug(`airlockPassword = ${this.airlockPassword}`);
   }
   // private: drop/take all combinations of inventory objects
-  _dropCombo()
+  _dropCombo(dir)
   {
     const items = this._state.inventory.slice();
     for (let i = 1; i <= items.length; i++) {
       const combos = Combinatorics.combination(items, i);
-      combos.forEach((combo) => {
-        this._dropAndPickUp(combo);
+      combos.forEach((itemsCombo) => {
+        this._dropAndMoveAndPickUp(itemsCombo, dir);
       });
+      // stop once we find the password:
       if (this._state.airlockPassword) {
         break;
       }
     }
   }
-  _dropAndPickUp(items)
+  // private: try dropping a list of items and moving, picking them back up
+  // at the end
+  _dropAndMoveAndPickUp(items, dir)
   {
+    // stop once we find the password:
     if (this._state.airlockPassword) {
       //console.debug(`don't try dropping ${items.join(', ')}`);
       return;
@@ -94,17 +134,17 @@ class Starship
     items.forEach((item) => {
       if (!this._state.drop(item)) {
         console.error(`MESSAGE: ${this._state.message}`);
-        throw new Error(`search ShipState.drop(${item}) failed`);
+        throw new Error(`_dropAndMoveAndPickUp ShipState.drop(${item}) failed`);
       }
     });
-    if (this._state.move(this._sensorDir)) {
-      //console.debug(`airlockPassword = ${this._state.airlockPassword}`);
+    // stop once we move successfully (we found the right weight):
+    if (this._state.move(dir)) {
       return;
     }
     items.forEach((item) => {
       if (!this._state.take(item)) {
         console.error(`MESSAGE: ${this._state.message}`);
-        throw new Error(`search ShipState.take(${item}) failed`);
+        throw new Error(`_dropAndMoveAndPickUp ShipState.take(${item}) failed`);
       }
     });
   }
@@ -125,8 +165,8 @@ class Starship
       } else if (!this._state.move(dir)) {
         if (this._state.message.match(/^A loud, robotic voice says.*ejected/)) {
           this._checkpointLocation = location;
-          this._checkpointPath = this._walkPath.slice();
-          this._sensorDir = dir;
+          this.checkpointPath = this._walkPath.slice();
+          this.sensorDirection = dir;
         } else {
           throw new Error(`_walk(${location}) move(${dir}) failed: ${this._state.message}`);
         }
