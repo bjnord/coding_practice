@@ -181,34 +181,38 @@ class ShipState
   }
   _isBlankLine(lines, i)
   {
-    return !lines[i] || (lines[i].trim().length === 0);
+    return !lines[i];
   }
   _parseDescription(lines, i)
   {
+    /* istanbul ignore next */
     if (!lines[i]) {
-      return i;
+      throw new Error(`_parseDescription expected non-blank line ${i}`);
     }
     this.description = lines[i++].trim();
+    /* istanbul ignore else */
     if (this._isBlankLine(lines, i)) {
       return i+1;
+    } else {
+      throw new Error(`_parseDescription unexpected line ${i}: ${lines[i].trim()}`);
     }
-    /* istanbul ignore next */
-    throw new Error(`_parseDescription unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseDoors(lines, i)
   {
     this.doorsHere = [];
+    /* istanbul ignore next */
     if (lines[i] !== 'Doors here lead:') {
-      return i;
+      throw new Error(`_parseDoors expected "Doors here lead:" at line ${i}`);
     }
     while (lines[++i].match(/^-\s/)) {
       this.doorsHere.push(lines[i].trim().slice(2));
     }
+    /* istanbul ignore else */
     if (this._isBlankLine(lines, i)) {
       return i+1;
+    } else {
+      throw new Error(`_parseDoors unexpected line ${i}: ${lines[i].trim()}`);
     }
-    /* istanbul ignore next */
-    throw new Error(`_parseDoors unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseItems(lines, i)
   {
@@ -219,11 +223,12 @@ class ShipState
     while (lines[++i].match(/^-\s/)) {
       this.itemsHere.push(lines[i].trim().slice(2));
     }
+    /* istanbul ignore else */
     if (this._isBlankLine(lines, i)) {
       return i+1;
+    } else {
+      throw new Error(`_parseItems unexpected line ${i}: ${lines[i].trim()}`);
     }
-    /* istanbul ignore next */
-    throw new Error(`_parseItems unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseMessage(lines, i)
   {
@@ -231,11 +236,12 @@ class ShipState
       return i;
     }
     this.message = lines[i++].trim();
+    /* istanbul ignore else */
     if (this._isBlankLine(lines, i)) {
       return i+1;
+    } else {
+      throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
     }
-    /* istanbul ignore next */
-    throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseInventory(lines, i)
   {
@@ -250,20 +256,22 @@ class ShipState
     } else {
       return i;
     }
+    /* istanbul ignore else */
     if (this._isBlankLine(lines, i)) {
       return i+1;
+    } else {
+      throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
     }
-    /* istanbul ignore next */
-    throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseDropOrTake(lines, i)
   {
     if (this._lines[i] && this._lines[i].match(/^You (drop|take) the [^.]+\.$/)) {
+      /* istanbul ignore else */
       if (this._isBlankLine(lines, ++i)) {
         return i+1;
+      } else {
+        throw new Error(`_parseDropOrTake unexpected line ${i}: ${lines[i].trim()}`);
       }
-      /* istanbul ignore next */
-      throw new Error(`_parseDropOrTake unexpected line ${i}: ${lines[i].trim()}`);
     }
     return i;
   }

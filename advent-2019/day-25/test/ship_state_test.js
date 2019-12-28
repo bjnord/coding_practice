@@ -316,4 +316,13 @@ describe('ship state inventory tests', () => {
     const invState = new ShipState(mockMachine);
     expect(invState.inventory).to.eql([]);
   });
+  it('should get memoized inventory correctly', () => {
+    const mockMachine = new TestAsciiIntcode(['inv'], [
+      initialOutput,
+      inventoryOutput,
+    ]);
+    const invState = new ShipState(mockMachine);
+    const firstInventory = invState.inventory.slice();
+    expect(invState.inventory).to.eql(firstInventory);
+  });
 });
