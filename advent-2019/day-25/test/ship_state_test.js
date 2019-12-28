@@ -24,9 +24,9 @@ const initialOutput = [
   '- west',
   '',
 ];
-describe('ship state take tests', () => {
+describe('ship state constructor tests', () => {
   it('should take correctly [item here]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([], [
       initialOutput,
     ]);
     const initialState = new ShipState(mockMachine);
@@ -103,7 +103,7 @@ const sensorPassOutput = [
 ];
 describe('ship state move tests', () => {
   it('should move correctly [no items]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([moveDirection], [
       initialOutput,
       noItemsHereOutput,
     ]);
@@ -116,7 +116,7 @@ describe('ship state move tests', () => {
     expect(moveState.itemsHere).to.eql([]);
   });
   it('should move correctly [items here]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([moveDirection], [
       initialOutput,
       itemsHereOutput,
     ]);
@@ -131,7 +131,7 @@ describe('ship state move tests', () => {
 });
 describe("ship state can't-move tests", () => {
   it('should leave state unaffected [no items]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([moveDirection, cantMoveDirection], [
       initialOutput,
       noItemsHereOutput,
       cantMoveOutput,
@@ -146,7 +146,7 @@ describe("ship state can't-move tests", () => {
     expect(moveState.itemsHere).to.eql([]);
   });
   it('should leave state unaffected [items here]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([moveDirection, cantMoveDirection], [
       initialOutput,
       itemsHereOutput,
       cantMoveOutput,
@@ -163,7 +163,7 @@ describe("ship state can't-move tests", () => {
 });
 describe('ship state move-to-sensor tests', () => {
   it('should move correctly [weight incorrect]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([sensorDirection], [
       initialOutput,
       sensorFailOutput,
     ]);
@@ -178,7 +178,7 @@ describe('ship state move-to-sensor tests', () => {
     expect(moveState.airlockPassword).to.be.undefined;
   });
   it('should move correctly and find password [weight correct]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([sensorDirection], [
       initialOutput,
       sensorPassOutput,
     ]);
@@ -220,7 +220,7 @@ const cantTakeOutput = [
 ];
 describe('ship state take tests', () => {
   it('should take correctly [item here]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([`take ${takeItem}`], [
       initialOutput,
       takeOutput,
     ]);
@@ -229,7 +229,7 @@ describe('ship state take tests', () => {
     expect(takeState.message).to.be.undefined;
   });
   it('should take correctly [toxic item here]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([`take ${toxicTakeItem}`], [
       initialOutput,
       toxicTakeOutput,
     ]);
@@ -239,7 +239,7 @@ describe('ship state take tests', () => {
     expect(toxicTakeState.messageDetail.some((line) => line && (line.trim().length > 0))).to.be.false;
   });
   it('should take correctly [no item here]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([`take ${cantTakeItem}`], [
       initialOutput,
       cantTakeOutput,
     ]);
@@ -265,7 +265,7 @@ const cantDropOutput = [
 ];
 describe('ship state drop tests', () => {
   it('should drop correctly [have item]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([`drop ${dropItem}`], [
       initialOutput,
       dropOutput,
     ]);
@@ -274,7 +274,7 @@ describe('ship state drop tests', () => {
     expect(dropState.message).to.be.undefined;
   });
   it('should drop correctly [no item]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode([`drop ${cantDropItem}`], [
       initialOutput,
       cantDropOutput,
     ]);
@@ -301,7 +301,7 @@ const emptyInventoryOutput = [
 ];
 describe('ship state inventory tests', () => {
   it('should take inventory correctly [some items]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode(['inv'], [
       initialOutput,
       inventoryOutput,
     ]);
@@ -309,7 +309,7 @@ describe('ship state inventory tests', () => {
     expect(invState.inventory).to.eql(['tambourine', 'hologram', 'fuel cell']);
   });
   it('should take inventory correctly [no items]', () => {
-    const mockMachine = new TestAsciiIntcode([
+    const mockMachine = new TestAsciiIntcode(['inv'], [
       initialOutput,
       emptyInventoryOutput,
     ]);

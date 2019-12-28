@@ -8,11 +8,16 @@ class TestAsciiIntcode
    * This has the same interface as the `AsciiIntcode` class, but is a test
    * mock version that outputs groups of fixed lines.
    *
+   * @param {Array} expectedCommands - the commands we expect to receive
    * @param {Array} responses - the response outputs to send - each one is an array
    *   of strings
    */
-  constructor(responses)
+  constructor(expectedCommands, responses)
   {
+    // private: our expected input commands
+    this._expectedCommands = expectedCommands;
+    // private: our expected input command index
+    this._expectedCommandIndex = 0;
     // private: our output responses
     this._responses = responses;
     // private: our output response index
@@ -34,6 +39,14 @@ class TestAsciiIntcode
    */
   run(handlePrompt, handleVideoFrame, handleNumber, handleLine, iState = {pc: 0, rb: 0})
   {
+    // don't prompt for command first time (when sending initial response)
+    if ((this._responseIndex > 0) && this._expectedCommands[this._expectedCommandIndex]) {
+      const command = handlePrompt('Command?\n');
+      if (command !== this._expectedCommands[this._expectedCommandIndex]) {
+        throw new Error(`TestAsciiIntcode expected command "${this._expectedCommands[this._expectedCommandIndex]}" but got "${command}"`);
+      }
+      this._expectedCommandIndex++;
+    }
     this._responses[this._responseIndex].forEach((line) => {
       handleLine(`${line.trim()}\n`);
     });
