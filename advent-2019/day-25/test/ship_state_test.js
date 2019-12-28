@@ -170,6 +170,7 @@ describe('ship state move-to-sensor tests', () => {
     const moveState = new ShipState(mockMachine);
     expect(moveState.move(sensorDirection)).to.be.false;
     expect(moveState.message).to.be.eql('A loud, robotic voice says "Alert! Droids on this ship are heavier than the detected value!" and you are ejected back to the checkpoint.');
+    expect(moveState.messageDetail.some((line) => line && (line.trim().length > 0))).to.be.false;
     expect(moveState.location).to.eql('Security Checkpoint');
     expect(moveState.description).to.eql('In the next room, a pressure-sensitive floor will verify your identity.');
     expect(moveState.doorsHere).to.eql(['north', 'west']);
@@ -184,6 +185,10 @@ describe('ship state move-to-sensor tests', () => {
     const moveState = new ShipState(mockMachine);
     expect(moveState.move(sensorDirection)).to.be.true;
     expect(moveState.message).to.be.undefined;
+    expect(moveState.messageDetail.length).to.eql(3);
+    expect(moveState.messageDetail[0]).to.match(/You may proceed\."/);
+    expect(moveState.messageDetail[1]).to.match(/^Santa notices /);
+    expect(moveState.messageDetail[2]).to.match(/^"Oh, hello!/);
     expect(moveState.location).to.eql('Pressure-Sensitive Floor');
     expect(moveState.description).to.eql('Analyzing...');
     expect(moveState.doorsHere).to.eql(['south']);
@@ -231,6 +236,7 @@ describe('ship state take tests', () => {
     const toxicTakeState = new ShipState(mockMachine);
     expect(toxicTakeState.take(toxicTakeItem)).to.be.false;
     expect(toxicTakeState.message).to.match(/You melt!/);
+    expect(toxicTakeState.messageDetail.some((line) => line && (line.trim().length > 0))).to.be.false;
   });
   it('should take correctly [no item here]', () => {
     const mockMachine = new TestAsciiIntcode([

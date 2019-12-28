@@ -63,6 +63,11 @@ class ShipState
      */
     this.message = undefined;
     /**
+     * further output detail (if any) (strings)
+     * @member {Array}
+     */
+    this.messageDetail = [];
+    /**
      * the airlock password
      * @member {string}
      */
@@ -117,13 +122,14 @@ class ShipState
   // private: parse ASCII Intcode machine output to set the current state
   _parse(lines)
   {
+    this.message = undefined;
+    this.messageDetail = [];
     let i = 0;
     i = this._parseLocation(lines, i);
     /*
      * If output contains a location, this is a whole new state:
      */
     if (i > 0) {
-      this.message = undefined;
       i = this._parseDescription(lines, i);
       i = this._parseDoors(lines, i);
       i = this._parseItems(lines, i);
@@ -137,7 +143,7 @@ class ShipState
       i = this._parseMessage(lines, i);
     }
     if (i < lines.length) {
-      throw new Error(`_parse unexpected line ${i}: ${lines[i].trim()}`);
+      this.messageDetail = lines.slice(i);
     }
   }
   _parseRobotVoice(lines, i)
@@ -159,10 +165,7 @@ class ShipState
           this.airlockPassword = m[1];
         }
       });
-      // TODO after implementing this.messageDetail[] and removing throws,
-      //      change this to "return i;" so the messages go into detail
-      //      (and change the test to look for it)
-      return this._lines.length;
+      return i;
     }
     return i;
   }
@@ -175,11 +178,9 @@ class ShipState
     this.location = m[1].trim();
     return i+1;
   }
-  // TODO after implementing this.messageDetail[] and removing throws,
-  //      change this to return true if lines[i] === undefined
   _isBlankLine(lines, i)
   {
-    return ((lines[i] !== undefined) && (lines[i].trim().length === 0));
+    return !lines[i] || (lines[i].trim().length === 0);
   }
   _parseDescription(lines, i)
   {
@@ -278,17 +279,19 @@ class ShipState
   take(item)
   {
     this._run(`take ${item}`);
-    if (this._lines[0].match(/^You take the [^.]+\.$/)) {
+    if (this._lines[0] && this._lines[0].match(/^You take the [^.]+\.$/)) {
       if (this._lines.length > 2) {
         //this._lines.map((line) => {
         //  console.debug(`GOT LINE "${line}"`);
         //});
         this.message = this._lines[2];
-        return false;  // something unexpected; counts as failed
+        this.messageDetail = this._lines.slice(3);
+        return false;  // something unexpected happened; counts as failed
       }
       return true;
     }
     this.message = this._lines[0];
+    this.messageDetail = this._lines.slice(2);
     return false;
   }
   /**
@@ -302,16 +305,19 @@ class ShipState
   drop(item)
   {
     this._run(`drop ${item}`);
-    if (this._lines.length > 2) {
-      //this._lines.map((line) => {
-      //  console.debug(`GOT LINE "${line}"`);
-      //});
-      return false;  // something unexpected; say failed for now
-    }
-    if (this._lines[0].match(/^You drop the [^.]+\.$/)) {
+    if (this._lines[0] && this._lines[0].match(/^You drop the [^.]+\.$/)) {
+      if (this._lines.length > 2) {
+        //this._lines.map((line) => {
+        //  console.debug(`GOT LINE "${line}"`);
+        //});
+        this.message = this._lines[2];
+        this.messageDetail = this._lines.slice(3);
+        return false;  // something unexpected happened; counts as failed
+      }
       return true;
     }
     this.message = this._lines[0];
+    this.messageDetail = this._lines.slice(2);
     return false;
   }
   /**
