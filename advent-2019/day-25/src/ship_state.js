@@ -254,10 +254,11 @@ class ShipState
   _parseDropOrTake(lines, i)
   {
     if (this._lines[i] && this._lines[i].match(/^You (drop|take) the [^.]+\.$/)) {
-      if (!this._isBlankLine(lines, ++i)) {
-        throw new Error(`_parseDropOrTake unexpected line ${i}: ${lines[i].trim()}`);
+      if (this._isBlankLine(lines, ++i)) {
+        return i+1;
       }
-      return i+1;
+      /* istanbul ignore next */
+      throw new Error(`_parseDropOrTake unexpected line ${i}: ${lines[i].trim()}`);
     }
     return i;
   }
