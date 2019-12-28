@@ -192,6 +192,7 @@ class ShipState
     if (this._isBlankLine(lines, i)) {
       return i+1;
     }
+    /* istanbul ignore next */
     throw new Error(`_parseDescription unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseDoors(lines, i)
@@ -206,6 +207,7 @@ class ShipState
     if (this._isBlankLine(lines, i)) {
       return i+1;
     }
+    /* istanbul ignore next */
     throw new Error(`_parseDoors unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseItems(lines, i)
@@ -220,6 +222,7 @@ class ShipState
     if (this._isBlankLine(lines, i)) {
       return i+1;
     }
+    /* istanbul ignore next */
     throw new Error(`_parseItems unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseMessage(lines, i)
@@ -231,6 +234,7 @@ class ShipState
     if (this._isBlankLine(lines, i)) {
       return i+1;
     }
+    /* istanbul ignore next */
     throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseInventory(lines, i)
@@ -249,6 +253,7 @@ class ShipState
     if (this._isBlankLine(lines, i)) {
       return i+1;
     }
+    /* istanbul ignore next */
     throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
   }
   _parseDropOrTake(lines, i)
