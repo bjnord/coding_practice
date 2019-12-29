@@ -45,6 +45,9 @@ class Starship
      */
     this.airlockPassword = undefined;
   }
+  /***************************
+   * MAJOR FUNCTION METHODS  *
+   ***************************/
   /**
    * Search the whole starship.
    *
@@ -107,6 +110,9 @@ class Starship
     this.airlockPassword = this._state.airlockPassword;
     //console.debug(`airlockPassword = ${this.airlockPassword}`);
   }
+  /*******************************
+   * DROP AND TAKE COMBO METHODS *
+   *******************************/
   // private: drop/take all combinations of inventory objects
   _dropCombo(dir)
   {
@@ -125,8 +131,9 @@ class Starship
       });
     }
   }
-  // private: try dropping a list of items and moving, picking them back up
-  // at the end
+  // private: try dropping a list of items and moving, picking them back
+  // up at the end -- could OPTIMIZE: this would go faster if we only
+  // took/dropped the difference between the current combo and the next
   _dropAndMoveAndPickUp(items, dir)
   {
     // short-circuit once we find the password:
@@ -134,6 +141,7 @@ class Starship
       //console.debug(`don't try dropping ${items.join(', ')}`);
       return;
     }
+    // drop a combination of items:
     //console.debug(`try dropping ${items.join(', ')}`);
     items.forEach((item) => {
       /* istanbul ignore if */
@@ -142,10 +150,12 @@ class Starship
         throw new Error(`_dropAndMoveAndPickUp ShipState.drop(${item}) failed`);
       }
     });
-    // stop once we move successfully (we found the right weight):
+    // try moving:
     if (this._state.move(dir)) {
+      // stop once we move successfully (we found the right weight):
       return;
     }
+    // pick items back up for the next attempt:
     items.forEach((item) => {
       /* istanbul ignore if */
       if (!this._state.take(item)) {
@@ -154,6 +164,31 @@ class Starship
       }
     });
   }
+  // private: pick up all objects we can
+  _pickUpAll()
+  {
+    const toxicItems = {
+      'photons': true,
+      'molten lava': true,
+      'giant electromagnet': true,
+      'escape pod': true,
+      'infinite loop': true,
+    };
+    for (let item = this._state.itemsHere.pop(); item; item = this._state.itemsHere.pop()) {
+      // don't pick up items that cause death or paralysis:
+      if (toxicItems[item]) {
+        continue;
+      }
+      /* istanbul ignore if */
+      if (!this._state.take(item)) {
+        console.error(`MESSAGE: ${this._state.message}`);
+        throw new Error(`_pickUpAll ShipState.take(${item}) failed`);
+      }
+    }
+  }
+  /***************************
+   * WALKING-RELATED METHODS *
+   ***************************/
   // private: walk recursively starting from `location`
   _walkFromLocation(location)
   {
@@ -235,28 +270,6 @@ class Starship
     //console.debug(`_walkInDir(${location}): added dir=${backDir} to next room:`);
     //console.dir(nextRoom);
     return backDir;
-  }
-  // private: pick up all objects we can
-  _pickUpAll()
-  {
-    const toxicItems = {
-      'photons': true,
-      'molten lava': true,
-      'giant electromagnet': true,
-      'escape pod': true,
-      'infinite loop': true,
-    };
-    for (let item = this._state.itemsHere.pop(); item; item = this._state.itemsHere.pop()) {
-      // don't pick up items that cause death or paralysis:
-      if (toxicItems[item]) {
-        continue;
-      }
-      /* istanbul ignore if */
-      if (!this._state.take(item)) {
-        console.error(`MESSAGE: ${this._state.message}`);
-        throw new Error(`_pickUpAll ShipState.take(${item}) failed`);
-      }
-    }
   }
 }
 module.exports = Starship;

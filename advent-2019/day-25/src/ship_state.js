@@ -100,8 +100,7 @@ class ShipState
    */
   _run(command)
   {
-    this._inventory = undefined;  // clear memoization
-    // machine sent us a newline-terminated prompt string
+    // callback: machine sent us a newline-terminated prompt string
     // send the next command (without newline)
     const handlePrompt = ((s) => {
       if (command) {
@@ -116,7 +115,7 @@ class ShipState
       }
       return undefined;  // (3)
     });
-    // machine sent us a newline-terminated non-prompt string
+    // callback: machine sent us a newline-terminated non-prompt string
     const handleLine = ((s) => {
       s = s.trim();
       // ignore blank lines at beginning of output:
@@ -124,9 +123,19 @@ class ShipState
         this._lines.push(s);  // (2)
       }
     });
+    // make sure we fetch fresh state after command execution:
+    this._clearMemoizations();
     this._lines = [];
     this._machineState = this._machine.run(handlePrompt, undefined, undefined, handleLine, this._machineState);
   }
+  // private: clear any memoizations
+  _clearMemoizations()
+  {
+    this._inventory = undefined;
+  }
+  /***************************
+   * PARSING-RELATED METHODS *
+   ***************************/
   // private: parse ASCII Intcode machine output to set the current state
   _parse(lines)
   {
@@ -141,56 +150,38 @@ class ShipState
     else {
       i = this._parseStateUpdate(lines, i);
     }
+    // at the end, `this.messageDetail` soaks up whatever extra lines remain
     if (i < lines.length) {
       this.messageDetail = lines.slice(i);
     }
   }
+  // private: parse "full new state"-style lines
+  //   this replaces all existing state info
   _parseNewState(lines, i)
   {
+    // NB already got location
     i = this._parseDescription(lines, i);
     i = this._parseDoors(lines, i);
     i = this._parseItems(lines, i);
     i = this._parseRobotVoiceStop(lines, i);
     return this._parseRobotVoiceGo(lines, i);
   }
+  // private: parse "state update"-style lines:
+  //   this only updates selected state info
   _parseStateUpdate(lines, i)
   {
     i = this._parseInventory(lines, i);
     i = this._parseDropOrTake(lines, i);
     return this._parseMessage(lines, i);
   }
-  _parseRobotVoiceStop(lines, i)
-  {
-    if (lines[i] && lines[i].match(/^A loud, robotic voice says.*ejected/)) {
-      const message = lines[i];
-      i = this._parseSecondLocation(lines, i);
-      this.message = message;
-      return this._lines.length;  // force this parse() to ignore remainder
-    }
-    return i;
-  }
-  _parseSecondLocation(lines, i)
-  {
-    // output in this case has a double full state; we want the second one:
-    while ((lines[++i] !== undefined) && !lines[i].match(/^==\s/)) {
-      ;
-    }
-    // parse() again with second full state:
-    this._parse(this._lines.slice(i));
-    return i;
-  }
-  _parseRobotVoiceGo(lines, i)
-  {
-    if (lines[i] && lines[i].match(/^A loud, robotic voice says.*proceed/)) {
-      lines.forEach((line) => {
-        let m;
-        if ((m = line.match(/You should be able to get in by typing (\d+)/))) {
-          this.airlockPassword = m[1];
-        }
-      });
-    }
-    return i;
-  }
+  /*
+   * private: _parseXxx() methods
+   *
+   * These all follow the same pattern: They parse out whatever applies to
+   * their type (if anything), starting at line `i`, and return `i` pointing
+   * at the first line beyond what they took. If nothing applies to their
+   * type, `i` is left unchanged. The `lines` array is _never_ changed.
+   */
   _parseLocation(lines, i)
   {
     let m;
@@ -247,18 +238,37 @@ class ShipState
       throw new Error(`_parseItems unexpected line ${i}: ${lines[i].trim()}`);
     }
   }
-  _parseMessage(lines, i)
+  _parseRobotVoiceStop(lines, i)
   {
-    if (!lines[i]) {
-      return i;
+    if (lines[i] && lines[i].match(/^A loud, robotic voice says.*ejected/)) {
+      const message = lines[i];
+      i = this._parseSecondLocation(lines, i);
+      this.message = message;
+      return this._lines.length;  // force this parse() to ignore remainder
     }
-    this.message = lines[i++].trim();
-    /* istanbul ignore else */
-    if (!lines[i]) {
-      return i+1;
-    } else {
-      throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
+    return i;
+  }
+  _parseSecondLocation(lines, i)
+  {
+    // output in this case has a double full state; we want the second one:
+    while ((lines[++i] !== undefined) && !lines[i].match(/^==\s/)) {
+      ;
     }
+    // parse() again with second full state:
+    this._parse(this._lines.slice(i));
+    return i;
+  }
+  _parseRobotVoiceGo(lines, i)
+  {
+    if (lines[i] && lines[i].match(/^A loud, robotic voice says.*proceed/)) {
+      lines.forEach((line) => {
+        let m;
+        if ((m = line.match(/You should be able to get in by typing (\d+)/))) {
+          this.airlockPassword = m[1];
+        }
+      });
+    }
+    return i;
   }
   /* eslint-disable complexity */
   _parseInventory(lines, i)
@@ -294,6 +304,22 @@ class ShipState
     }
     return i;
   }
+  _parseMessage(lines, i)
+  {
+    if (!lines[i]) {
+      return i;
+    }
+    this.message = lines[i++].trim();
+    /* istanbul ignore else */
+    if (!lines[i]) {
+      return i+1;
+    } else {
+      throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
+    }
+  }
+  /***************************
+   * ACTION-RELATED METHODS  *
+   ***************************/
   // private: do an action and parse the resulting output
   _accomplish(command)
   {
