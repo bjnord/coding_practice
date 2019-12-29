@@ -58,20 +58,9 @@ class Starship
    */
   search()
   {
-    /*
-     * show our initial state
-     */
-    //console.debug(`starting inventory: ${this._state.inventory.join(', ')}`);
-    //console.debug('');
-    //this._state.dump('Origin');
-    /*
-     * walk the whole ship, picking up items as we go
-     */
     this._walkPath = [];
     this._walkFromLocation(this._state.location);
     this.location = this._state.location;
-    //console.debug(`inventory after walk: ${this._state.inventory.join(', ')}`);
-    //console.debug('');
   }
   /**
    * Move along the given path.
@@ -102,13 +91,9 @@ class Starship
    */
   moveThroughSensor(dir)
   {
-    //this._state.dump('Combo Position');
     this._dropCombo(dir);
-    //console.debug(`inventory after drop combo: ${this._state.inventory.join(', ')}`);
-    //console.debug('');
     this.location = this._state.location;
     this.airlockPassword = this._state.airlockPassword;
-    //console.debug(`airlockPassword = ${this.airlockPassword}`);
   }
   /*******************************
    * DROP AND TAKE COMBO METHODS *
@@ -120,11 +105,9 @@ class Starship
     // readjust the list slightly for code coverage:
     const item = items.splice(4, 1);
     items.splice(3, 0, item);
-    //console.debug(`we have ${items.length} items`);
     for (let i = 1; i <= items.length; i++) {
       // it goes faster when you have advance knowledge ;-)
       const c = ((i + 2) % items.length) + 1;
-      //console.debug(`try dropping combinations of ${c} items`);
       const combos = Combinatorics.combination(items, c);
       combos.forEach((itemsCombo) => {
         this._dropAndMoveAndPickUp(itemsCombo, dir);
@@ -138,11 +121,9 @@ class Starship
   {
     // short-circuit once we find the password:
     if (this._state.airlockPassword) {
-      //console.debug(`don't try dropping ${items.join(', ')}`);
       return;
     }
     // drop a combination of items:
-    //console.debug(`try dropping ${items.join(', ')}`);
     items.forEach((item) => {
       /* istanbul ignore if */
       if (!this._state.drop(item)) {
@@ -205,8 +186,6 @@ class Starship
   {
     // we already walked to this room:
     if (this._alreadyWalkedInDir(dir, location)) {
-      //console.debug(`_walkInDir(${location}): already walked ${dir} from here:`);
-      //console.dir(room);
       return;
     }
     // if the move fails, it's probably the checkpoint; note its info:
@@ -258,17 +237,12 @@ class Starship
     const nextLocation = this._state.location;
     this._rooms[nextLocation] = {location: nextLocation};
     const nextRoom = this._rooms[nextLocation];
-    //this._state.dump('Next Room');
     // add dir pointer from current location's room to next location:
     const room = this._rooms[location];
     room[dir] = nextLocation;
-    //console.debug(`_walkInDir(${location}): added dir=${dir} to this room:`);
-    //console.dir(room);
     // add dir pointer from next location's room back to current location:
     const backDir = {north: 'south', south: 'north', west: 'east', east: 'west'}[dir];
     nextRoom[backDir] = location;
-    //console.debug(`_walkInDir(${location}): added dir=${backDir} to next room:`);
-    //console.dir(nextRoom);
     return backDir;
   }
 }

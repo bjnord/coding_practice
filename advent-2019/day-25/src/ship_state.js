@@ -106,7 +106,6 @@ class ShipState
       if (command) {
         this.lastCommand = command;
         command = undefined;
-        //console.debug(`SENDING COMMAND "${this.lastCommand}"`);
         return this.lastCommand;  // (1)
       }
       /* istanbul ignore next */
@@ -324,9 +323,6 @@ class ShipState
   _accomplish(command)
   {
     this._run(command);
-    //this._lines.map((line) => {
-    //  console.debug(`GOT LINE "${line}"`);
-    //});
     this._parse(this._lines);
   }
   /**
