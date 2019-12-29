@@ -18,6 +18,13 @@ class ShipState
    */
   constructor(input)
   {
+    this._initializeMachine(input);
+    this._initializeMembers();
+    // get the initial state output from the machine:
+    this.move(undefined);
+  }
+  _initializeMachine(input)
+  {
     let machine;
     if (input instanceof TestAsciiIntcode) {
       // this way of constructing is for testing with a test mock machine
@@ -35,6 +42,9 @@ class ShipState
     this._machine = machine;
     // private: our machine's processor state
     this._machineState = {pc: 0, rb: 0};
+  }
+  _initializeMembers()
+  {
     // private: our memoized inventory
     this._inventory = undefined;
     /**
@@ -72,8 +82,6 @@ class ShipState
      * @member {string}
      */
     this.airlockPassword = undefined;
-    // get the initial state output from the machine
-    this.move(undefined);
   }
   /*
    * private: Run the ASCII Intcode machine to:
@@ -124,41 +132,55 @@ class ShipState
   {
     this.message = undefined;
     this.messageDetail = [];
-    let i = 0;
-    i = this._parseLocation(lines, i);
-    /*
-     * If output contains a location, this is a whole new state:
-     */
+    let i = this._parseLocation(lines, 0);
+    // if output contains a location, this is a whole new state:
     if (i > 0) {
-      i = this._parseDescription(lines, i);
-      i = this._parseDoors(lines, i);
-      i = this._parseItems(lines, i);
-      i = this._parseRobotVoice(lines, i);
+      i = this._parseNewState(lines, i);
     }
-    /*
-     * Otherwise, this is a state update (most remains the same):
-     */
+    // otherwise, this is a state update (most remains the same):
     else {
-      i = this._parseInventory(lines, i);
-      i = this._parseDropOrTake(lines, i);
-      i = this._parseMessage(lines, i);
+      i = this._parseStateUpdate(lines, i);
     }
     if (i < lines.length) {
       this.messageDetail = lines.slice(i);
     }
   }
-  _parseRobotVoice(lines, i)
+  _parseNewState(lines, i)
+  {
+    i = this._parseDescription(lines, i);
+    i = this._parseDoors(lines, i);
+    i = this._parseItems(lines, i);
+    i = this._parseRobotVoiceStop(lines, i);
+    return this._parseRobotVoiceGo(lines, i);
+  }
+  _parseStateUpdate(lines, i)
+  {
+    i = this._parseInventory(lines, i);
+    i = this._parseDropOrTake(lines, i);
+    return this._parseMessage(lines, i);
+  }
+  _parseRobotVoiceStop(lines, i)
   {
     if (lines[i] && lines[i].match(/^A loud, robotic voice says.*ejected/)) {
       const message = lines[i];
-      // output in this case has a double full state; we want the second one:
-      while ((lines[++i] !== undefined) && !lines[i].match(/^==\s/)) {
-        ;
-      }
-      this._parse(this._lines.slice(i));
+      i = this._parseSecondLocation(lines, i);
       this.message = message;
-      return this._lines.length;
+      return this._lines.length;  // force this parse() to ignore remainder
     }
+    return i;
+  }
+  _parseSecondLocation(lines, i)
+  {
+    // output in this case has a double full state; we want the second one:
+    while ((lines[++i] !== undefined) && !lines[i].match(/^==\s/)) {
+      ;
+    }
+    // parse() again with second full state:
+    this._parse(this._lines.slice(i));
+    return i;
+  }
+  _parseRobotVoiceGo(lines, i)
+  {
     if (lines[i] && lines[i].match(/^A loud, robotic voice says.*proceed/)) {
       lines.forEach((line) => {
         let m;
@@ -166,7 +188,6 @@ class ShipState
           this.airlockPassword = m[1];
         }
       });
-      return i;
     }
     return i;
   }
@@ -239,6 +260,7 @@ class ShipState
       throw new Error(`_parseMessage unexpected line ${i}: ${lines[i].trim()}`);
     }
   }
+  /* eslint-disable complexity */
   _parseInventory(lines, i)
   {
     if (lines[i] === "You aren't carrying any items.") {
@@ -259,6 +281,7 @@ class ShipState
       throw new Error(`_parseInventory unexpected line ${i}: ${lines[i].trim()}`);
     }
   }
+  /* eslint-enable complexity */
   _parseDropOrTake(lines, i)
   {
     if (this._lines[i] && this._lines[i].match(/^You (drop|take) the [^.]+\.$/)) {

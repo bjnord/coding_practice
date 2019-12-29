@@ -65,7 +65,7 @@ class Starship
      * walk the whole ship, picking up items as we go
      */
     this._walkPath = [];
-    this._walk(this._state.location);
+    this._walkFromLocation(this._state.location);
     this.location = this._state.location;
     //console.debug(`inventory after walk: ${this._state.inventory.join(', ')}`);
     //console.debug('');
@@ -154,50 +154,87 @@ class Starship
       }
     });
   }
-  // private: walk the whole ship recursively
-  _walk(location)
+  // private: walk recursively starting from `location`
+  _walkFromLocation(location)
   {
+    // pick up everything we can from each room:
     this._pickUpAll();
-    let room;
-    /* istanbul ignore if */
-    if (!(room = this._rooms[location])) {
-      throw new Error(`_walk(${location}): no room found`);
-    }
+    // walk all directions from this room:
     const dirs = this._state.doorsHere.slice();
     dirs.forEach((dir) => {
-      if (room[dir]) {
-        //console.debug(`_walk(${location}): already walked ${dir} from here:`);
-        //console.dir(room);
-      } else if (!this._state.move(dir)) {
-        /* istanbul ignore else */
-        if (this._state.message.match(/^A loud, robotic voice says.*ejected/)) {
-          this._checkpointLocation = location;
-          this.checkpointPath = this._walkPath.slice();
-          this.sensorDirection = dir;
-        } else {
-          throw new Error(`_walk(${location}) move(${dir}) failed: ${this._state.message}`);
-        }
-      } else {
-        const nextLocation = this._state.location;
-        this._rooms[nextLocation] = {location: nextLocation};
-        const nextRoom = this._rooms[nextLocation];
-        //this._state.dump('Next Room');
-        room[dir] = nextLocation;
-        //console.debug(`_walk(${location}): added dir=${dir} to this room:`);
-        //console.dir(room);
-        const backDir = {north: 'south', south: 'north', west: 'east', east: 'west'}[dir];
-        nextRoom[backDir] = location;
-        //console.debug(`_walk(${location}): added dir=${backDir} to next room:`);
-        //console.dir(nextRoom);
-        this._walkPath.push(dir);
-        this._walk(nextLocation);
-        /* istanbul ignore if */
-        if (!this._state.move(backDir)) {
-          throw new Error(`_walk(${location}) backtrack move(${backDir}) failed: ${this._state.message}`);
-        }
-        this._walkPath.pop();
-      }
+      this._walkInDir(dir, location);
     });
+  }
+  // private: walk in the given direction from a room
+  _walkInDir(dir, location)
+  {
+    // we already walked to this room:
+    if (this._alreadyWalkedInDir(dir, location)) {
+      //console.debug(`_walkInDir(${location}): already walked ${dir} from here:`);
+      //console.dir(room);
+      return;
+    }
+    // if the move fails, it's probably the checkpoint; note its info:
+    if (!this._state.move(dir)) {
+      /* istanbul ignore else */
+      if (this._state.message.match(/^A loud, robotic voice says.*ejected/)) {
+        this._recordCheckpointInfo(dir, location);
+      } else {
+        throw new Error(`_walkInDir(${location}) move ${dir} failed: ${this._state.message}`);
+      }
+      return;
+    }
+    // the move succeeded; first update room entries for paths both ways:
+    const backDir = this._updateRoomEntries(dir, location);
+    // then do the recursive walk:
+    this._walkStep(dir, location, backDir);
+  }
+  // private: continue the walk along the given path
+  _walkStep(dir, location, backDir)
+  {
+    this._walkPath.push(dir);
+    this._walkFromLocation(this._state.location);
+    /* istanbul ignore if */
+    if (!this._state.move(backDir)) {
+      throw new Error(`_walkInDir(${location}) backtrack move ${backDir} failed: ${this._state.message}`);
+    }
+    this._walkPath.pop();
+  }
+  // private: did we already walk in given direction from a location?
+  _alreadyWalkedInDir(dir, location)
+  {
+    /* istanbul ignore if */
+    if (!this._rooms[location]) {
+      throw new Error(`_alreadyWalkedInDir(${dir}, ${location}): no room found`);
+    }
+    return this._rooms[location][dir] ? true : false;
+  }
+  // private: record information about the checkpoint location
+  _recordCheckpointInfo(dir, location)
+  {
+    this._checkpointLocation = location;
+    this.checkpointPath = this._walkPath.slice();
+    this.sensorDirection = dir;
+  }
+  // private: update room entries for a valid path between locations
+  _updateRoomEntries(dir, location)
+  {
+    // create a new room entry for next location:
+    const nextLocation = this._state.location;
+    this._rooms[nextLocation] = {location: nextLocation};
+    const nextRoom = this._rooms[nextLocation];
+    //this._state.dump('Next Room');
+    // add dir pointer from current location's room to next location:
+    const room = this._rooms[location];
+    room[dir] = nextLocation;
+    //console.debug(`_walkInDir(${location}): added dir=${dir} to this room:`);
+    //console.dir(room);
+    // add dir pointer from next location's room back to current location:
+    const backDir = {north: 'south', south: 'north', west: 'east', east: 'west'}[dir];
+    nextRoom[backDir] = location;
+    //console.debug(`_walkInDir(${location}): added dir=${backDir} to next room:`);
+    //console.dir(nextRoom);
+    return backDir;
   }
   // private: pick up all objects we can
   _pickUpAll()

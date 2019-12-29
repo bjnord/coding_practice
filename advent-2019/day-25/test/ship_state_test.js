@@ -189,11 +189,19 @@ describe('ship state move-to-sensor tests', () => {
     expect(moveState.messageDetail[0]).to.match(/You may proceed\."/);
     expect(moveState.messageDetail[1]).to.match(/^Santa notices /);
     expect(moveState.messageDetail[2]).to.match(/^"Oh, hello!/);
+    expect(moveState.airlockPassword).to.eql('1090529280');
+  });
+  it('should get correct room state [weight correct]', () => {
+    const mockMachine = new TestAsciiIntcode([sensorDirection], [
+      initialOutput,
+      sensorPassOutput,
+    ]);
+    const moveState = new ShipState(mockMachine);
+    expect(moveState.move(sensorDirection)).to.be.true;
     expect(moveState.location).to.eql('Pressure-Sensitive Floor');
     expect(moveState.description).to.eql('Analyzing...');
     expect(moveState.doorsHere).to.eql(['south']);
     expect(moveState.itemsHere).to.eql([]);
-    expect(moveState.airlockPassword).to.eql('1090529280');
   });
 });
 
