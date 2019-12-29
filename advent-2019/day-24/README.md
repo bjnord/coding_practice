@@ -245,3 +245,7 @@ Depth 5:
 In this example, after 10 minutes, a total of `**99**` bugs are present.
 
 Starting with your scan, **how many bugs are present after 200 minutes?**
+
+### Part Two Design
+
+I got pretty close to solving this on my own, but when I wasn't getting the right answer to the puzzle example, I went looking on the subreddit for the intermediate states. Reddit user [Dataforce](https://www.reddit.com/user/Dataforce) [posted a link to](https://www.reddit.com/r/adventofcode/comments/ef1c9b/2019_day_24_part_2_problem_with_test/fbxnshd/) [the intermediate states](https://pastebin.com/raw/3tYPUHZz) and that helped me find a bug in my multi-generation iterator.
