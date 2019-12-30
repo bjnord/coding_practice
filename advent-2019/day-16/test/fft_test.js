@@ -109,32 +109,6 @@ describe('multiple phase tests', () => {
  *  PART TWO TESTS  *
  ********************/
 
-// see src/experiment.js for background
-describe('magical subset behavior tests [8-digit example]', () => {
-  let input, eList;
-  before(() => {
-    input = '80871224';
-    const expected = '30871224';
-    eList = expected.split('').map((e) => Number(e));
-  });
-  it('should produce same 100th phase ending [2 repetitions]', () => {
-    const input2 = input.repeat(2);
-    const iList = input2.split('').map((i) => Number(i));
-    expect(fft.phases(iList, 100).slice(-8)).to.eql(eList);
-  });
-  it('should produce same 100th phase ending [9 repetitions]', () => {
-    const input9 = input.repeat(9);
-    const iList = input9.split('').map((i) => Number(i));
-    expect(fft.phases(iList, 100).slice(-8)).to.eql(eList);
-  });
-  // [succeeds, but too slow:]
-  //it('should produce same 100th phase ending [61 repetitions]', () => {
-  //  const input61 = input.repeat(61);
-  //  const iList = input61.split('').map((i) => Number(i));
-  //  expect(fft.phases(iList, 100).slice(-8)).to.eql(eList);
-  //});
-});
-
 /*
  * This shows that the "second half" optimization algorithm gives the same
  * result as the full FFT.
