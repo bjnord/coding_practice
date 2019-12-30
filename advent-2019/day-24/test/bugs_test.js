@@ -71,24 +71,24 @@ describe('bugs format tests [puzzle example]', () => {
     expect(bugs.format(repeatedState.state)).to.eql(repeatedState.lines);
   });
 });
-describe('bugs count tests [puzzle example]', () => {
-  it('counts bugs in the middle correctly', () => {
-    expect(bugs.count(states[1].state, [1, 1])).to.eql(3);
-    expect(bugs.count(states[1].state, [1, 3])).to.eql(2);
-    expect(bugs.count(states[1].state, [3, 2])).to.eql(4);
-    expect(bugs.count(states[1].state, [3, 3])).to.eql(1);
+describe('bugs count-adjacent tests [puzzle example]', () => {
+  it('counts adjacent bugs in the middle correctly', () => {
+    expect(bugs.countAdjacent(states[1].state, [1, 1])).to.eql(3);
+    expect(bugs.countAdjacent(states[1].state, [1, 3])).to.eql(2);
+    expect(bugs.countAdjacent(states[1].state, [3, 2])).to.eql(4);
+    expect(bugs.countAdjacent(states[1].state, [3, 3])).to.eql(1);
   });
-  it('counts bugs at the edges correctly', () => {
-    expect(bugs.count(states[1].state, [0, 1])).to.eql(2);
-    expect(bugs.count(states[1].state, [1, 4])).to.eql(2);
-    expect(bugs.count(states[1].state, [4, 3])).to.eql(2);
-    expect(bugs.count(states[1].state, [3, 0])).to.eql(2);
+  it('counts adjacent bugs at the edges correctly', () => {
+    expect(bugs.countAdjacent(states[1].state, [0, 1])).to.eql(2);
+    expect(bugs.countAdjacent(states[1].state, [1, 4])).to.eql(2);
+    expect(bugs.countAdjacent(states[1].state, [4, 3])).to.eql(2);
+    expect(bugs.countAdjacent(states[1].state, [3, 0])).to.eql(2);
   });
-  it('counts bugs at the corners correctly', () => {
-    expect(bugs.count(states[1].state, [0, 0])).to.eql(1);
-    expect(bugs.count(states[1].state, [0, 4])).to.eql(1);
-    expect(bugs.count(states[1].state, [4, 0])).to.eql(2);
-    expect(bugs.count(states[1].state, [4, 4])).to.eql(1);
+  it('counts adjacent bugs at the corners correctly', () => {
+    expect(bugs.countAdjacent(states[1].state, [0, 0])).to.eql(1);
+    expect(bugs.countAdjacent(states[1].state, [0, 4])).to.eql(1);
+    expect(bugs.countAdjacent(states[1].state, [4, 0])).to.eql(2);
+    expect(bugs.countAdjacent(states[1].state, [4, 4])).to.eql(1);
   });
 });
 describe('bugs event tests [puzzle example]', () => {

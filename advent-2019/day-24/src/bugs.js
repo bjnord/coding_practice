@@ -1,12 +1,13 @@
 'use strict';
 /** @module */
+
 /**
  * Parse a grid state.
  *
- * @param {Array} lines - lines on the grid
+ * @param {Array} lines - list of grid lines
  *
  * @return {number}
- *   Returns the parsed state.
+ *   Returns the parsed grid state.
  */
 exports.parse = (lines) => {
   let state = 0b0;
@@ -39,7 +40,7 @@ const _isBugAt = (state, pos) => {
  * @param {number} state - the grid state
  *
  * @return {Array}
- *   Returns an array of grid lines (strings).
+ *   Returns a list of grid lines (strings).
  */
 exports.format = (state) => {
   const lines = [];
@@ -60,7 +61,7 @@ exports.format = (state) => {
  * @return {number}
  *   Returns the number of adjacent bugs.
  */
-exports.count = (state, pos) => {
+exports.countAdjacent = (state, pos) => {
   const dirs = [
     [-1, 0],  // up
     [1, 0],   // down
@@ -84,7 +85,7 @@ exports.count = (state, pos) => {
  */
 exports.event = (state, pos) => {
   const isBug = _isBugAt(state, pos);
-  const count = module.exports.count(state, pos);
+  const count = module.exports.countAdjacent(state, pos);
   //console.debug(`pos ${pos} bug? ${isBug} count ${count}`);
   /*
    * "A bug dies (becoming an empty space) unless there is exactly one bug
@@ -107,10 +108,10 @@ exports.event = (state, pos) => {
 /**
  * Generate next state from current state.
  *
- * @param {number} currentState - the current generation
+ * @param {number} currentState - the grid state for the current generation
  *
  * @return {number}
- *   Returns the next generation.
+ *   Returns the grid state for the next generation.
  */
 exports.generate = (currentState) => {
   let state = 0b0;
@@ -136,10 +137,10 @@ exports.generate = (currentState) => {
 /**
  * Iterate generations until a repeat is found.
  *
- * @param {number} state - the starting generation state
+ * @param {number} state - the grid state for the starting generation
  *
  * @return {number}
- *   Returns the first state that we have seen before.
+ *   Returns the first grid state that we have seen before.
  */
 exports.iterate = (state) => {
   for (const sawState = {}; !sawState[state]; state = module.exports.generate(state)) {
