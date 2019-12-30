@@ -90,3 +90,15 @@ Here is the eight-digit message in the final output list after 100 phases. The m
 -   `**0308177**0884921959731165446850517` becomes `53553731`.
 
 After repeating your input signal 10000 times and running 100 phases of FFT, **what is the eight-digit message embedded in the final output list?**
+
+### Part Two Design
+
+Ah, the [Fast Fourier Transform](https://en.wikipedia.org/wiki/Fast_Fourier_transform). In college I spent a summer working for [Prof. R. A. Carlsen](https://www.bethel.edu/undergrad/academics/physics/news/physics-focus-newsletter.pdf), building electronic circuits from schematics and doing Pascal programming on various HP and LeCroy electronics sampling devices.
+
+I was an implementer of other people's designs. My level of mathematics aptitude… let's say I only passed a few of my math classes by the skin of my teeth, on the way to my C.S. degree. Prof. Carlsen _loved_ the FFT; he would talk about it as long as you would listen. I knew vaguely what it was for and I could nod sagely when "time domain" or "frequency domain" was mentioned, but I didn't have the math to understand it. All I could do was implement it in code.
+
+Anyway: Clearly, Day 16 is another classic AoC scenario that leads you down the naïve implementation path in Part One, and then adds a few orders of complexity to ensure your code won't produce an answer before the [heat death of the universe](https://en.wikipedia.org/wiki/Heat_death_of_the_universe).
+
+Before Googling FFT or looking at the subreddit, I thought back to Day 12, and it occurred to me that the repetition of the inputs might make it possible to just do FFT on a subset of the problem. So I started looking at the output from various matrices with repeated patterns (see [this experimental code](src/experiment.js)), and I noticed something right away: The last few digits of the output appear to be the same no matter how many times you repeat the pattern.
+
+Mind you, I have no idea how that works, mathematically. This is purely an empirical observation of the black box's behavior. Is there a way I could take advantage of it? I started thinking about the problem and came up with an algorithm… which works for a small case, but doesn't reduce the input size sufficiently for my puzzle input, so it still takes too long (and too much memory).

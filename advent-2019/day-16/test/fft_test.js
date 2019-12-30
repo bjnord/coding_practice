@@ -99,3 +99,58 @@ describe('multiple phase tests', () => {
     expect(call).to.throw(Error, 'invalid phase count');
   });
 });
+// see src/experiment.js for background
+describe('magical subset behavior tests [8-digit example]', () => {
+  let input, eList;
+  before(() => {
+    input = '80871224';
+    const expected = '30871224';
+    eList = expected.split('').map((e) => Number(e));
+  });
+  it('should produce same 100th phase ending [2 repetitions]', () => {
+    const input2 = input.repeat(2);
+    const iList = input2.split('').map((i) => Number(i));
+    expect(fft.phases(iList, 100).slice(-8)).to.eql(eList);
+  });
+  it('should produce same 100th phase ending [9 repetitions]', () => {
+    const input9 = input.repeat(9);
+    const iList = input9.split('').map((i) => Number(i));
+    expect(fft.phases(iList, 100).slice(-8)).to.eql(eList);
+  });
+  // [succeeds, but too slow:]
+  //it('should produce same 100th phase ending [61 repetitions]', () => {
+  //  const input61 = input.repeat(61);
+  //  const iList = input61.split('').map((i) => Number(i));
+  //  expect(fft.phases(iList, 100).slice(-8)).to.eql(eList);
+  //});
+});
+
+const mpriInput = '12345678';
+const mpriRepeatCount = 64;
+const mpriPhaseCount = 10;
+const mpriMessageOffset = 485;
+const mpriExpectedOutput = '80242766';
+describe('multiple phase w/repeated input tests [Part One brute-force algorithm]', () => {
+  let iRepeatedList, oList;
+  before(() => {
+    iRepeatedList = mpriInput.repeat(mpriRepeatCount).split('').map((i) => Number(i));
+    oList = fft.phases(iRepeatedList, mpriPhaseCount);
+  });
+  it('should produce the 4th phase correctly [puzzle example #1]', () => {
+    const eList = mpriExpectedOutput.split('').map((e) => Number(e));
+    expect(oList.length).to.eql(iRepeatedList.length);
+    const message = oList.slice(mpriMessageOffset, mpriMessageOffset + 8);
+    expect(message).to.eql(eList);
+  });
+});
+describe('multiple phase w/repeated input tests [Part Two BJN algorithm]', () => {
+  let iList, message;
+  before(() => {
+    iList = mpriInput.split('').map((i) => Number(i));
+    message = fft.messageFromPhases(iList, mpriRepeatCount, mpriPhaseCount, mpriMessageOffset);
+  });
+  it('should produce the 4th phase correctly [puzzle example #1]', () => {
+    const eList = mpriExpectedOutput.split('').map((e) => Number(e));
+    expect(message).to.eql(eList);
+  });
+});

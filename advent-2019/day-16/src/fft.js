@@ -107,3 +107,83 @@ exports.phases = (elements, count) => {
   }
   return elements;
 };
+/**
+ * Do multiple phases of FFT, with repeated input elements, to find a
+ * message at a given location.
+ *
+ * @param {Array} elements - input elements
+ * @param {number} count - number of FFT phases
+ *
+ * @return {Array}
+ *   Returns output elements (of same size as input `elements`) after
+ *   applying `count` phases of FFT.
+ */
+exports.messageFromPhases = (elements, repeatCount, phaseCount, messageOffset) => {
+  // ALGORITHM
+  //
+  // 1. Define mrep size MS = size of input (e.g. 32 digits).
+  const ms = elements.length;
+  console.debug(`MS=${ms}`);
+  // 2. Start with Y = N such that D = 1.
+  const n = repeatCount;
+  const o = messageOffset;
+  let y = repeatCount;
+  let d = 1;
+  let yEdge;
+  for (;;) {
+    console.debug(`for N=${n}, try Y=${y} D=${d}`);
+    // 3. Find beginning of "mrep Y-1" as Yedge = (Y-1) * D * MS
+    yEdge = (y - 1) * d * ms;
+    console.debug(`  O=${o} < Yedge=${yEdge} ? ${o < yEdge}`);
+    // 4. If O < Yedge
+    if (o < yEdge) {
+      /*
+       * had to modify the algorithm slightly; our puzzle input
+       * runs out of powers of 2, and only has powers of 5 left:
+       */
+      //    a. Y /= 5, and if that doesn't divide evenly, we fail
+      if ((y % 2) !== 0) {
+        if ((y % 5) !== 0) {
+          throw new Error('algorithm fails');
+        }
+        y /= 5;
+        //    b. D *= 5
+        d *= 5;
+        //    c. Go back to step 3.
+        continue;
+      }
+      /*
+       * (original algorithm follows, works for test case:)
+       */
+      //    a. Y /= 2, and if that doesn't divide evenly, we fail
+      if ((y % 2) !== 0) {
+        throw new Error('algorithm fails');
+      }
+      y /= 2;
+      //    b. D *= 2
+      d *= 2;
+      //    c. Go back to step 3.
+    } else {
+      break;
+    }
+    // [Now we have the final mrep Y-1 encompassing O.]
+  }
+  // 5. Compute Orem = O - Yedge
+  // [function: (MS, N, O) => (D, Orem)]
+  const oRem = o - yEdge;
+  console.debug(`Orem=${oRem}`);
+  // 6. Create FFT input by repeating the input D * 2 times
+  //    (each drep is length D * MS -- we need to run two dreps)
+  let input = [];
+  for (let i = 0; i < d * 2; i++) {
+    input = input.concat(elements.slice());
+  }
+  console.debug(`for MS=${ms} D=${d} D*2=${d*2} FFT input length=${input.length}`);
+  // 7. Call FFT for the 100 phase rounds.
+  const oList = module.exports.phases(input, phaseCount);
+  // 8. Take 8 digits from the last D * MS digits in the output,
+  //    starting at Orem.
+  const oStart = d * ms + oRem;
+  console.debug(`Ostart=${oStart}`);
+  return oList.slice(oStart, oStart + 8);
+}
