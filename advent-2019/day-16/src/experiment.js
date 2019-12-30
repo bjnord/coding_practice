@@ -81,17 +81,17 @@ const phase = (elements, index, last = 4) => {
   const patterns = patternList(elements.length);
   const lastY = elements.length - last;
   const newElements = elements.map((el, y) => {
-    let s = '';
+    //let s = '';
     const cols = elements.map((el, x) => {
-      if (x > 0) {
-        s += ' +';
-      }
-      s += `${(' ' + el).slice(-2)}*${('' + patterns[y][x] + ' ').slice(0, 2)}`;
+      //if (x > 0) {
+      //  s += ' +';
+      //}
+      //s += `${(' ' + el).slice(-2)}*${('' + patterns[y][x] + ' ').slice(0, 2)}`;
       return el * patterns[y][x];
     });
     const sum = cols.reduce((sum, n) => sum + n, 0);
     const digit = Math.abs(sum) % 10;
-    s += ` = ${digit} (${sum})`;
+    //s += ` = ${digit} (${sum})`;
     if (y >= lastY) {
       //console.debug(s);  // full string
       //console.debug(` = ${digit} (${sum})`);  // only sums
