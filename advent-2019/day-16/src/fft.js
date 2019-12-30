@@ -112,78 +112,75 @@ exports.phases = (elements, count) => {
  * message at a given location.
  *
  * @param {Array} elements - input elements
- * @param {number} count - number of FFT phases
+ * @param {number} repeatCount - number of repetitions of the input elements
+ * @param {number} phaseCount - number of FFT phases
+ * @param {number} messageOffset - location of 8-element message to find
  *
  * @return {Array}
- *   Returns output elements (of same size as input `elements`) after
- *   applying `count` phases of FFT.
+ *   Returns 8-element message.
  */
 exports.messageFromPhases = (elements, repeatCount, phaseCount, messageOffset) => {
-  // ALGORITHM
+  // ALGORITHM [from Reddit user Arkoniak)
   //
-  // 1. Define mrep size MS = size of input (e.g. 32 digits).
-  const ms = elements.length;
-  console.debug(`MS=${ms}`);
-  // 2. Start with Y = N such that D = 1.
-  const n = repeatCount;
-  const o = messageOffset;
-  let y = repeatCount;
-  let d = 1;
-  let yEdge;
-  for (;;) {
-    console.debug(`for N=${n}, try Y=${y} D=${d}`);
-    // 3. Find beginning of "mrep Y-1" as Yedge = (Y-1) * D * MS
-    yEdge = (y - 1) * d * ms;
-    console.debug(`  O=${o} < Yedge=${yEdge} ? ${o < yEdge}`);
-    // 4. If O < Yedge
-    if (o < yEdge) {
-      /*
-       * had to modify the algorithm slightly; our puzzle input
-       * runs out of powers of 2, and only has powers of 5 left:
-       */
-      //    a. Y /= 5, and if that doesn't divide evenly, we fail
-      if ((y % 2) !== 0) {
-        if ((y % 5) !== 0) {
-          throw new Error('algorithm fails');
-        }
-        y /= 5;
-        //    b. D *= 5
-        d *= 5;
-        //    c. Go back to step 3.
-        continue;
+  // You should think step by step in reverse.
+  //
+  // 1) Let's take final digit and apply phase procedure to it. In case of
+  // last digit (no matter the length of the initial string) will always look
+  // like 0, 0, ..., 0, 1 (lots of zero and one 1 at the last position). So
+  // phase procedure applied to last digit will always give this same digit,
+  // no matter the length of input sequence. So, we write down
+  //
+  // s'[end] = s[end]
+  //
+  // 2) Let's take second from the end. It's filter will look like
+  // 0, 0, ...., 0, 1, 1. Now, you know, that new last digit equals last
+  // digit from original input, so new value for the second digit from the
+  // end will be the following:
+  //
+  // s'[end - 1] = mod(s[end - 1] + (s[end]), 10)
+  //             = mod(s[end - 1] + s'[end], 10)
+  //
+  // 3) Next digit will have filter 0, 0, ...., 0, 1, 1, 1, so new value
+  // will be
+  //
+  // s'[end - 2] = mod(s[end - 2] + (s[end - 1] + s[end]), 10)
+  //             = mod(s[end - 2] + s'[end - 1], 10)
+  //
+  // Here we have used following facts:
+  //
+  // 1) Digits always greater than zero, so we can use mod procedure,
+  //    without applying abs to it.
+  //
+  // 2) For all digits from the second half of the input we will always
+  //    have filter in the form 0, 0, ..., 0, 1, ..., 1
+  //
+  const elementsLen = elements.length;
+  const totalLen = elementsLen * repeatCount;
+  /*
+   * the "chunk" is the last N elements of the long repeated input,
+   * starting at messageOffset:
+   */
+  //    27         512      - 485
+  const chunkLen = totalLen - messageOffset;
+  /*
+   * prefill the chunk with the repeated pattern
+   */
+  const chunk = new Array(chunkLen);
+  for (let i = chunkLen - 1; i >= 0; i--) {
+    chunk[i] = elements[(i + messageOffset) % elementsLen];
+  }
+  /*
+   * do FFT phases on the chunk, working backward:
+   */
+  for (let p = 0; p < phaseCount; p++) {
+    for (let i = chunkLen - 1; i >= 0; i--) {
+      if (i < (chunkLen - 1)) {
+        chunk[i] = (chunk[i] + chunk[i+1]) % 10;
       }
-      /*
-       * (original algorithm follows, works for test case:)
-       */
-      //    a. Y /= 2, and if that doesn't divide evenly, we fail
-      if ((y % 2) !== 0) {
-        throw new Error('algorithm fails');
-      }
-      y /= 2;
-      //    b. D *= 2
-      d *= 2;
-      //    c. Go back to step 3.
-    } else {
-      break;
     }
-    // [Now we have the final mrep Y-1 encompassing O.]
   }
-  // 5. Compute Orem = O - Yedge
-  // [function: (MS, N, O) => (D, Orem)]
-  const oRem = o - yEdge;
-  console.debug(`Orem=${oRem}`);
-  // 6. Create FFT input by repeating the input D * 2 times
-  //    (each drep is length D * MS -- we need to run two dreps)
-  let input = [];
-  for (let i = 0; i < d * 2; i++) {
-    input = input.concat(elements.slice());
-  }
-  console.debug(`for MS=${ms} D=${d} D*2=${d*2} FFT input length=${input.length}`);
-  // 7. Call FFT for the 100 phase rounds.
-  const oList = module.exports.phases(input, phaseCount);
-  // 8. Take 8 digits from the last D * MS digits in the output,
-  //    starting at Orem.
-  const oStart = d * ms + oRem;
-  console.debug(`Ostart=${oStart}`);
-  return oList.slice(oStart, oStart + 8);
-}
+  /*
+   * the message is now the first 8 elements of the chunk:
+   */
+  return chunk.slice(0, 8);
+};

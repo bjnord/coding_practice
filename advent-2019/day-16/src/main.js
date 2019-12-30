@@ -13,8 +13,8 @@ console.log('');
 
 // PART 2
 const offset = Number(input.slice(0, 7));
-console.log(`part 2: message offset:                          ${offset}`);
+//console.log(`part 2: message offset:                          ${offset}`);
 const message = fft.messageFromPhases(iList, 10000, 100, offset);
 const mStr = message.join('');
-console.log('part 2: expected answer:                         ?');
+console.log('part 2: expected answer:                         37717791');
 console.log(`part 2: 8 digits at offset after 100 FFT phases: ${mStr}`);

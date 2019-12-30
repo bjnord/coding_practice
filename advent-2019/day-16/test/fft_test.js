@@ -1,6 +1,11 @@
 'use strict';
 const expect = require('chai').expect;
 const fft = require('../src/fft');
+
+/********************
+ *  PART ONE TESTS  *
+ ********************/
+
 describe('pattern tests', () => {
   it('should produce the 1st pattern correctly', () => {
     const expected = /* 0, */ [1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0];
@@ -99,6 +104,11 @@ describe('multiple phase tests', () => {
     expect(call).to.throw(Error, 'invalid phase count');
   });
 });
+
+/********************
+ *  PART TWO TESTS  *
+ ********************/
+
 // see src/experiment.js for background
 describe('magical subset behavior tests [8-digit example]', () => {
   let input, eList;
@@ -125,6 +135,10 @@ describe('magical subset behavior tests [8-digit example]', () => {
   //});
 });
 
+/*
+ * This shows that the "second half" optimization algorithm gives the same
+ * result as the full FFT.
+ */
 const mpriInput = '12345678';
 const mpriRepeatCount = 64;
 const mpriPhaseCount = 10;
@@ -136,21 +150,69 @@ describe('multiple phase w/repeated input tests [Part One brute-force algorithm]
     iRepeatedList = mpriInput.repeat(mpriRepeatCount).split('').map((i) => Number(i));
     oList = fft.phases(iRepeatedList, mpriPhaseCount);
   });
-  it('should produce the 4th phase correctly [puzzle example #1]', () => {
+  it('should find the message correctly', () => {
     const eList = mpriExpectedOutput.split('').map((e) => Number(e));
     expect(oList.length).to.eql(iRepeatedList.length);
     const message = oList.slice(mpriMessageOffset, mpriMessageOffset + 8);
     expect(message).to.eql(eList);
   });
 });
-describe('multiple phase w/repeated input tests [Part Two BJN algorithm]', () => {
+describe('multiple phase w/repeated input tests [Part Two Arkoniak algorithm]', () => {
   let iList, message;
   before(() => {
     iList = mpriInput.split('').map((i) => Number(i));
     message = fft.messageFromPhases(iList, mpriRepeatCount, mpriPhaseCount, mpriMessageOffset);
   });
-  it('should produce the 4th phase correctly [puzzle example #1]', () => {
+  it('should find the message correctly', () => {
     const eList = mpriExpectedOutput.split('').map((e) => Number(e));
+    expect(message).to.eql(eList);
+  });
+});
+
+/*
+ * Part Two puzzle examples
+ */
+const puzzRepeatCount = 10000;
+const puzzPhaseCount = 100;
+describe('multiple phase w/repeated input tests [Part Two example #1]', () => {
+  let iList, message;
+  before(() => {
+    const puzzInput = '03036732577212944063491565474664';
+    const puzzMessageOffset = Number(puzzInput.slice(0, 7));
+    iList = puzzInput.split('').map((i) => Number(i));
+    message = fft.messageFromPhases(iList, puzzRepeatCount, puzzPhaseCount, puzzMessageOffset);
+  });
+  it('should find the message correctly [puzzle example #1]', () => {
+    const puzzExpectedOutput = '84462026';
+    const eList = puzzExpectedOutput.split('').map((e) => Number(e));
+    expect(message).to.eql(eList);
+  });
+});
+describe('multiple phase w/repeated input tests [Part Two example #2]', () => {
+  let iList, message;
+  before(() => {
+    const puzzInput = '02935109699940807407585447034323';
+    const puzzMessageOffset = Number(puzzInput.slice(0, 7));
+    iList = puzzInput.split('').map((i) => Number(i));
+    message = fft.messageFromPhases(iList, puzzRepeatCount, puzzPhaseCount, puzzMessageOffset);
+  });
+  it('should find the message correctly [puzzle example #2]', () => {
+    const puzzExpectedOutput = '78725270';
+    const eList = puzzExpectedOutput.split('').map((e) => Number(e));
+    expect(message).to.eql(eList);
+  });
+});
+describe('multiple phase w/repeated input tests [Part Two example #3]', () => {
+  let iList, message;
+  before(() => {
+    const puzzInput = '03081770884921959731165446850517';
+    const puzzMessageOffset = Number(puzzInput.slice(0, 7));
+    iList = puzzInput.split('').map((i) => Number(i));
+    message = fft.messageFromPhases(iList, puzzRepeatCount, puzzPhaseCount, puzzMessageOffset);
+  });
+  it('should find the message correctly [puzzle example #3]', () => {
+    const puzzExpectedOutput = '53553731';
+    const eList = puzzExpectedOutput.split('').map((e) => Number(e));
     expect(message).to.eql(eList);
   });
 });
