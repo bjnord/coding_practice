@@ -262,3 +262,19 @@ describe('technique tests', () => {
     expect(call).to.throw(Error, 'unknown technique "well, shake it up, baby, now"');
   });
 });
+describe('repeated technique tests', () => {
+  it('it should use puzzle example technique #2 THRICE correctly', () => {
+    const result = '1 4 7 0 3 6 9 2 5 8'.split(/\s+/).map((n) => Number(n));
+    const techniques = 'cut 6\ndeal with increment 7\ndeal into new stack\n';
+    const deck = new Deck(10);
+    deck.doTechniquesNTimes(techniques, 3);
+    expect(deck.cards).to.eql(result);
+  });
+  it('it should use puzzle example technique #3 TWICE correctly', () => {
+    const result = '8 7 6 5 4 3 2 1 0 9'.split(/\s+/).map((n) => Number(n));
+    const techniques = 'deal with increment 7\ndeal with increment 9\ncut -2\n';
+    const deck = new Deck(10);
+    deck.doTechniquesNTimes(techniques, 2);
+    expect(deck.cards).to.eql(result);
+  });
+});

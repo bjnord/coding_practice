@@ -105,6 +105,21 @@ class Deck
     this._cards = dealtCards;
   }
   /**
+   * Shuffle the cards using a list of our techniques, repeated the given
+   * number of times.
+   *
+   * See `doTechnique()` for a list of techniques.
+   *
+   * @param {string} techniques - `\n`-separated list of techniques to perform
+   * @param {number} repeat - the number of times to repeat the techniques list
+   */
+  doTechniquesNTimes(techniques, repeat)
+  {
+    while (repeat-- > 0) {
+      this.doTechniques(techniques);
+    }
+  }
+  /**
    * Shuffle the cards using a list of our techniques.
    *
    * See `doTechnique()` for a list of techniques.
