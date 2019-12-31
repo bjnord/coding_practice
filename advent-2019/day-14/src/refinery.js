@@ -1,4 +1,6 @@
 'use strict';
+const math = require('mathjs');
+
 /** @module */
 // TODO with all the side-effects and args-passing in calculate(),
 //      this would be better as a class -- break processTopItem()
@@ -70,11 +72,11 @@ const parseChemUnits = (str) => {
   };
 };
 /**
- * Calculate `ORE` required to produce 1 unit of the provided chemical type.
+ * Calculate `ORE` required to produce the provided chemical type.
  *
  * @param {Map} inv - inventory of chemicals the refinery can produce
  * @param {object} product - item to produce, with `units` and `chem` fields
- * @param {remains} [product={}] - remains from last round (if any)
+ * @param {object} [remains={}] - remains from last round (if any)
  *
  * @return {number}
  *   Returns amount of input `ORE` required.
@@ -118,6 +120,7 @@ const processTopItem = (inv, stack, ore, remains) => {
   const formula = inv.get(oItem.chem);
   //console.debug(`formula for "${oItem.chem}":`);
   //console.dir(formula);
+  /* istanbul ignore if */
   if (!formula) {
     throw new Error(`formula not found to produce chemical "${oItem.chem}"`);
   }
@@ -149,48 +152,83 @@ const processTopItem = (inv, stack, ore, remains) => {
  * @return {number}
  *   Returns the amount of fuel which can be produced.
  */
-exports.fuelFromOre = (inv, ore) => {
-  const debug = false;
-  let fuelCount = 0, orePerCycle = 0;
-  const remains = {};
-  for (;;) {
-    const ore1 = module.exports.calculate(inv, {units: 1, chem: 'FUEL'}, remains);
-    orePerCycle += ore1;
-    fuelCount++;
-    if (debug) {
-      console.debug(`round ${fuelCount}, ore=${ore1}/${orePerCycle}, remains: ${Object.keys(remains).map((k) => `${k}: ${remains[k]}`)}`);
-    }
-    if (Object.keys(remains).length === 0) {
-      if (debug) {
-        console.debug('REMAINS EMPTY');
-      }
-      break;
-    }
-  }
-  const cycles = Math.floor(ore / orePerCycle);
-  const fuelMadeInCycles = cycles * fuelCount;
-  const remainingOre = ore - cycles * orePerCycle;
+exports.fuelFromOre = (inv, ore, debug = false) => {
+  const frac = module.exports.oreFractions(inv);
+  const decFuel = math.number(math.divide(ore, frac['FUEL']));
+  /* istanbul ignore if */
   if (debug) {
-    console.debug(`from ${ore} ORE, in ${cycles} cycles, made ${fuelMadeInCycles} FUEL leaving ore=${remainingOre} ORE`);
+    const ratio = math.format(frac['FUEL']).split('/');
+    console.debug(`ORE/FUEL ratio: ${ratio} decFuel=${decFuel}`);
   }
+  // due to rounding etc. we may not be able to make the last fuel unit:
+  const fuelCount = Math.floor(decFuel) - 1;
+  const fracOreUsed = math.multiply(fuelCount, frac['FUEL']);
+  const remainingOre = ore - Math.floor(math.number(fracOreUsed));
+  /* istanbul ignore if */
+  if (debug) {
+    console.debug(`from ${ore} ORE, made ${fuelCount} FUEL leaving ore=${remainingOre} ORE`);
+  }
+  // ...so we calculate ORE for the last one and see if we have enough:
+  const remains = {};
   let rFuelCount = 0, rOre = 0;
-  for (;;) {
-    const ore1 = module.exports.calculate(inv, {units: 1, chem: 'FUEL'}, remains);
-    if ((remainingOre - (rOre + ore1)) < 0) {
-      if (debug) {
-        console.debug('OUT OF ORE');
-      }
-      break;
+  const ore1 = module.exports.calculate(inv, {units: 1, chem: 'FUEL'}, remains);
+  if ((remainingOre - (rOre + ore1)) < 0) {
+    /* istanbul ignore if */
+    if (debug) {
+      console.debug('OUT OF ORE');
     }
+  } else {
     rOre += ore1;
     rFuelCount++;
+    /* istanbul ignore if */
     if (debug) {
       console.debug(`rem round ${rFuelCount}, ore=${ore1}/${rOre}, remains: ${Object.keys(remains).map((k) => `${k}: ${remains[k]}`)}`);
     }
   }
+  /* istanbul ignore if */
   if (debug) {
     console.debug(`from ${remainingOre} ORE, made ${rFuelCount} FUEL leaving ore=${remainingOre - rOre} ORE`);
-    console.debug(`final FUEL count=${fuelMadeInCycles + rFuelCount}`);
+    console.debug(`final FUEL count=${fuelCount + rFuelCount}`);
   }
-  return fuelMadeInCycles + rFuelCount;
+  return fuelCount + rFuelCount;
+};
+const _oreFractionOf = (inv, frac, chem) => {
+  if (frac[chem]) {
+    return;
+  }
+  if (chem === 'ORE') {
+    frac['ORE'] = math.fraction(1, 1);
+    return;
+  }
+  const formula = inv.get(chem);
+  /* istanbul ignore if */
+  if (!formula) {
+    throw new Error(`formula not found to produce chemical "${chem}"`);
+  }
+  const reqOre = formula.req.map((item) => {
+    _oreFractionOf(inv, frac, item.chem);
+    return math.multiply(item.units, frac[item.chem]);
+  });
+  const reqSum = reqOre.reduce((sum, ore) => math.add(sum, ore), math.fraction(0, 1));
+  // TODO can be math.divide(reqSum, formula.units);
+  frac[chem] = math.multiply(reqSum, math.fraction(1, formula.units));
+};
+/**
+ * Calculate fractional (exact) amount of `ORE` required to produce each
+ * chemical in our inventory, and to produce `FUEL`.
+ *
+ * In the returned object, `frac['FUEL']` is the `ORE/FUEL` ratio, as a
+ * fractional (exact) value.
+ *
+ * @param {Map} inv - inventory of chemicals the refinery can produce
+ *
+ * @return {object}
+ *   Returns an object whose keys are chemicals (including `FUEL`), and
+ *   whose values are the fractional amount of `ORE` required to produce
+ *   that chemical.
+ */
+exports.oreFractions = (inv) => {
+  const frac = {};
+  _oreFractionOf(inv, frac, 'FUEL');
+  return frac;
 };

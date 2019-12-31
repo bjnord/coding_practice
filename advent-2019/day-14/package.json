@@ -21,6 +21,7 @@
     "nyc": "^14.1.1"
   },
   "dependencies": {
+    "mathjs": "^6.3.0",
     "readline-sync": "^1.4.10"
   }
 }

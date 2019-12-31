@@ -12,8 +12,7 @@ console.log('');
 
 // PART 2
 inv = refinery.parse(input);
-console.log('part 2: expected time to run:      >8h');
-console.log('part 2: expected answer:           ?');
+console.log('part 2: expected answer:           1896688');
 const fuelProduced = refinery.fuelFromOre(inv, 1000000000000);
 console.log(`part 2: fuel produced from 1T ORE: ${fuelProduced}`);
 console.log('');

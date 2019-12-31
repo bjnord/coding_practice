@@ -1,5 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
+const math = require('mathjs');
 const refinery = require('../src/refinery');
 describe('parsing tests', () => {
   // 10 ORE => 10 A
@@ -136,7 +137,7 @@ describe('Part One calculation tests', () => {
     const inv = refinery.parse('171 ORE => 8 CNZTR\n7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL\n114 ORE => 4 BHXH\n14 VRPVC => 6 BMBT\n6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL\n6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT\n15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW\n13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW\n5 BMBT => 4 WPTQ\n189 ORE => 9 KTJDG\n1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP\n12 VRPVC, 27 CNZTR => 2 XDBXC\n15 KTJDG, 12 BHXH => 5 XCVML\n3 BHXH, 2 VRPVC => 7 MZWV\n121 ORE => 7 VRPVC\n7 XCVML => 6 RJRHP\n5 BHXH, 4 VRPVC => 5 LTCX\n');
     expect(refinery.calculate(inv, {units: 1, chem: 'FUEL'})).to.eql(2210736);
   });
-  it('should calculate ore amount correctly [my example #1]', () => {
+  it('should calculate ore amount correctly [BJN example]', () => {
     // 4 ORE => 4 A
     // 5 ORE => 3 C
     // 2 C => 2 B
@@ -146,7 +147,7 @@ describe('Part One calculation tests', () => {
   });
 });
 describe('Part Two calculation tests', () => {
-  it('should calculate ore amount correctly [puzzle example #3]', () => {
+  it('should calculate fuel amount correctly [puzzle example #3]', () => {
     // 157 ORE => 5 NZVS
     // 165 ORE => 6 DCFZ
     // 44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL
@@ -159,7 +160,7 @@ describe('Part Two calculation tests', () => {
     const inv = refinery.parse('157 ORE => 5 NZVS\n165 ORE => 6 DCFZ\n44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL\n12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ\n179 ORE => 7 PSHF\n177 ORE => 5 HKGWZ\n7 DCFZ, 7 PSHF => 2 XJWVT\n165 ORE => 2 GPVTF\n3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT\n');
     expect(refinery.fuelFromOre(inv, 1000000000000)).to.eql(82892753);
   });
-  it('should calculate ore amount correctly [puzzle example #4]', () => {
+  it('should calculate fuel amount correctly [puzzle example #4]', () => {
     // 2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
     // 17 NVRVD, 3 JNWZP => 8 VPVL
     // 53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
@@ -175,7 +176,28 @@ describe('Part Two calculation tests', () => {
     const inv = refinery.parse('2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG\n17 NVRVD, 3 JNWZP => 8 VPVL\n53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL\n22 VJHF, 37 MNCFX => 5 FWMGM\n139 ORE => 4 NVRVD\n144 ORE => 7 JNWZP\n5 MNCFX, 7 RFSQX, 2 FWMGM, 2 VPVL, 19 CXFTF => 3 HVMC\n5 VJHF, 7 MNCFX, 9 VPVL, 37 CXFTF => 6 GNMV\n145 ORE => 6 MNCFX\n1 NVRVD => 8 CXFTF\n1 VJHF, 6 MNCFX => 4 RFSQX\n176 ORE => 6 VJHF\n');
     expect(refinery.fuelFromOre(inv, 1000000000000)).to.eql(5586022);
   });
-  it('should calculate ore amount correctly [my example #1]', () => {
+  it('should calculate fuel amount correctly [puzzle example #5]', () => {
+    // 171 ORE => 8 CNZTR
+    // 7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL
+    // 114 ORE => 4 BHXH
+    // 14 VRPVC => 6 BMBT
+    // 6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL
+    // 6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT
+    // 15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW
+    // 13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW
+    // 5 BMBT => 4 WPTQ
+    // 189 ORE => 9 KTJDG
+    // 1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP
+    // 12 VRPVC, 27 CNZTR => 2 XDBXC
+    // 15 KTJDG, 12 BHXH => 5 XCVML
+    // 3 BHXH, 2 VRPVC => 7 MZWV
+    // 121 ORE => 7 VRPVC
+    // 7 XCVML => 6 RJRHP
+    // 5 BHXH, 4 VRPVC => 5 LTCX
+    const inv = refinery.parse('171 ORE => 8 CNZTR\n7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL\n114 ORE => 4 BHXH\n14 VRPVC => 6 BMBT\n6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL\n6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT\n15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW\n13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW\n5 BMBT => 4 WPTQ\n189 ORE => 9 KTJDG\n1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP\n12 VRPVC, 27 CNZTR => 2 XDBXC\n15 KTJDG, 12 BHXH => 5 XCVML\n3 BHXH, 2 VRPVC => 7 MZWV\n121 ORE => 7 VRPVC\n7 XCVML => 6 RJRHP\n5 BHXH, 4 VRPVC => 5 LTCX\n');
+    expect(refinery.fuelFromOre(inv, 1000000000000)).to.eql(460664);
+  });
+  it('should calculate fuel amount correctly [BJN example]', () => {
     // 4 ORE => 4 A
     // 5 ORE => 3 C
     // 2 C => 2 B
@@ -186,5 +208,22 @@ describe('Part Two calculation tests', () => {
     //  -----------                   ------------
     //     1000 ORE                       213 FUEL
     expect(refinery.fuelFromOre(inv, 1000)).to.eql(213);
+  });
+});
+describe('ore fractions calculation tests', () => {
+  it('should calculate ore fractions correctly [BJN example]', () => {
+    // 4 ORE => 4 A
+    // 5 ORE => 3 C
+    // 2 C => 2 B
+    // 3 A, 1 B => 1 FUEL
+    //
+    // 12 FUEL takes 56 ORE
+    const inv = refinery.parse('4 ORE => 4 A\n5 ORE => 3 C\n2 C => 2 B\n3 A, 1 B => 1 FUEL\n');
+    const frac = refinery.oreFractions(inv);
+    //Object.keys(frac).forEach((k) => console.log(`${k} = ${math.format(frac[k])}`));
+    expect(math.equal(frac['A'], math.fraction(4, 4))).to.be.true;
+    expect(math.equal(frac['C'], math.fraction(5, 3))).to.be.true;
+    expect(math.equal(frac['B'], math.fraction(5, 3))).to.be.true;
+    expect(math.equal(frac['FUEL'], math.fraction(56, 12))).to.be.true;
   });
 });
