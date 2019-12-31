@@ -30,15 +30,17 @@ describe('card position tests', () => {
   // we don't check that position is in range, for speed
 });
 describe('"deal into new stack" tests', () => {
+  let cardOfInt;
+  beforeEach(() => {
+    cardOfInt = new CardOfInterest(deckSize, cardPos);
+  });
   it('it should "deal into new stack" correctly [puzzle example]', () => {
     const expected = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.dealIntoNewStack();
     expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it('it should "deal into new stack" correctly, as technique [puzzle example]', () => {
     const expected = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechnique('deal into new stack');
     expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
@@ -129,20 +131,21 @@ describe('combined "cut N cards"/"deal into new stack" technique tests', () => {
   });
 });
 describe('"deal with increment N" tests', () => {
+  let cardOfInt;
+  beforeEach(() => {
+    cardOfInt = new CardOfInterest(deckSize, cardPos);
+  });
   it('it should "deal with increment N" correctly [puzzle example]', () => {
     const expected = [0, 7, 4, 1, 8, 5, 2, 9, 6, 3];
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.dealWithIncrement(3);
     expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it('it should "deal with increment N" correctly, as technique [puzzle example]', () => {
     const expected = [0, 7, 4, 1, 8, 5, 2, 9, 6, 3];
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechnique('deal with increment 3');
     expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it ('should throw an exception if N < 1', () => {
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     const call = () => { cardOfInt.dealWithIncrement(0); };
     expect(call).to.throw(Error, 'invalid increment');
   });
@@ -226,53 +229,54 @@ describe('combined all-technique tests', () => {
   });
 });
 describe('technique tests', () => {
+  let cardOfInt;
+  beforeEach(() => {
+    cardOfInt = new CardOfInterest(deckSize, cardPos);
+  });
   it('it should use puzzle example technique #1 correctly', () => {
-    const result = '0 3 6 9 2 5 8 1 4 7'.split(/\s+/).map((n) => Number(n));
+    const expected = '0 3 6 9 2 5 8 1 4 7'.split(/\s+/).map((n) => Number(n));
     const techniques = 'deal with increment 7\ndeal into new stack\ndeal into new stack\n';
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechniques(techniques);
-    expect(cardOfInt.card).to.eql(result[cardPos]);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it('it should use puzzle example technique #2 correctly', () => {
-    const result = '3 0 7 4 1 8 5 2 9 6'.split(/\s+/).map((n) => Number(n));
+    const expected = '3 0 7 4 1 8 5 2 9 6'.split(/\s+/).map((n) => Number(n));
     const techniques = 'cut 6\ndeal with increment 7\ndeal into new stack\n';
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechniques(techniques);
-    expect(cardOfInt.card).to.eql(result[cardPos]);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it('it should use puzzle example technique #3 correctly', () => {
-    const result = '6 3 0 7 4 1 8 5 2 9'.split(/\s+/).map((n) => Number(n));
+    const expected = '6 3 0 7 4 1 8 5 2 9'.split(/\s+/).map((n) => Number(n));
     const techniques = 'deal with increment 7\ndeal with increment 9\ncut -2\n';
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechniques(techniques);
-    expect(cardOfInt.card).to.eql(result[cardPos]);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it('it should use puzzle example technique #4 correctly', () => {
-    const result = '9 2 5 8 1 4 7 0 3 6'.split(/\s+/).map((n) => Number(n));
+    const expected = '9 2 5 8 1 4 7 0 3 6'.split(/\s+/).map((n) => Number(n));
     const techniques = 'deal into new stack\ncut -2\ndeal with increment 7\ncut 8\ncut -4\ndeal with increment 7\ncut 3\ndeal with increment 9\ndeal with increment 3\ncut -1\n';
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechniques(techniques);
-    expect(cardOfInt.card).to.eql(result[cardPos]);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it ('should throw an exception for an unknown technique', () => {
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     const call = () => { cardOfInt.doTechniques('well, shake it up, baby, now\ntwist and shout\n'); };
     expect(call).to.throw(Error, 'unknown technique "well, shake it up, baby, now"');
   });
 });
 describe('repeated technique tests', () => {
+  let cardOfInt;
+  beforeEach(() => {
+    cardOfInt = new CardOfInterest(deckSize, cardPos);
+  });
   it('it should use puzzle example technique #2 THRICE correctly', () => {
-    const result = '1 4 7 0 3 6 9 2 5 8'.split(/\s+/).map((n) => Number(n));
+    const expected = '1 4 7 0 3 6 9 2 5 8'.split(/\s+/).map((n) => Number(n));
     const techniques = 'cut 6\ndeal with increment 7\ndeal into new stack\n';
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechniquesNTimes(techniques, 3);
-    expect(cardOfInt.card).to.eql(result[cardPos]);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
   it('it should use puzzle example technique #3 TWICE correctly', () => {
-    const result = '8 7 6 5 4 3 2 1 0 9'.split(/\s+/).map((n) => Number(n));
+    const expected = '8 7 6 5 4 3 2 1 0 9'.split(/\s+/).map((n) => Number(n));
     const techniques = 'deal with increment 7\ndeal with increment 9\ncut -2\n';
-    const cardOfInt = new CardOfInterest(deckSize, cardPos);
     cardOfInt.doTechniquesNTimes(techniques, 2);
-    expect(cardOfInt.card).to.eql(result[cardPos]);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
 });
