@@ -68,6 +68,60 @@ describe('"cut N cards" tests', () => {
     deck.cutCards(0);
     expect(deck.cards).to.eql(expected);
   });
+  it('it should wrap position correctly for N > 0 [3 then 7]', () => {
+    const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    deck.cutCards(3);
+    deck.cutCards(7);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should wrap position correctly for N > 0 [9 then 2]', () => {
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+    deck.cutCards(9);
+    deck.cutCards(2);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should wrap position correctly for N < 0 [-4 then -6]', () => {
+    const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    deck.cutCards(-4);
+    deck.cutCards(-6);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should wrap position correctly for N < 0 [-9 then -2]', () => {
+    const expected = [9, 0, 1, 2, 3, 4, 5, 6, 7, 8];
+    deck.cutCards(-9);
+    deck.cutCards(-2);
+    expect(deck.cards).to.eql(expected);
+  });
+});
+describe('combined "cut N cards"/"deal into new stack" technique tests', () => {
+  let deck;
+  beforeEach(() => {
+    deck = new Deck(10);
+  });
+  it('it should "cut N cards" then "deal into new stack" correctly for N > 0', () => {
+    const expected = [4, 3, 2, 1, 0, 9, 8, 7, 6, 5];
+    deck.cutCards(5);
+    deck.dealIntoNewStack();
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "cut N cards" then "deal into new stack" correctly for N < 0', () => {
+    const expected = [7, 6, 5, 4, 3, 2, 1, 0, 9, 8];
+    deck.cutCards(-2);
+    deck.dealIntoNewStack();
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal into new stack" then "cut N cards" correctly for N > 0', () => {
+    const expected = [8, 7, 6, 5, 4, 3, 2, 1, 0, 9];
+    deck.dealIntoNewStack();
+    deck.cutCards(1);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal into new stack" then "cut N cards" correctly for N < 0', () => {
+    const expected = [5, 4, 3, 2, 1, 0, 9, 8, 7, 6];
+    deck.dealIntoNewStack();
+    deck.cutCards(-6);
+    expect(deck.cards).to.eql(expected);
+  });
 });
 describe('"deal with increment N" tests', () => {
   it('it should "deal with increment N" correctly [puzzle example]', () => {
@@ -93,6 +147,84 @@ describe('"deal with increment N" tests', () => {
     const deck = new Deck(10);
     const call = () => { deck.dealWithIncrement(0); };
     expect(call).to.throw(Error, 'invalid increment');
+  });
+});
+describe('combined "cut N cards"/"deal with increment N" technique tests', () => {
+  let deck;
+  beforeEach(() => {
+    deck = new Deck(10);
+  });
+  it('it should "cut N cards" then "deal with increment N" correctly for N > 0', () => {
+    const expected = [4, 7, 0, 3, 6, 9, 2, 5, 8, 1];
+    deck.cutCards(4);
+    deck.dealWithIncrement(7);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "cut N cards" then "deal with increment N" correctly for N < 0', () => {
+    const expected = [8, 5, 2, 9, 6, 3, 0, 7, 4, 1];
+    deck.cutCards(-2);
+    deck.dealWithIncrement(3);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal with increment N" then "cut N cards" correctly for N > 0', () => {
+    const expected = [5, 8, 1, 4, 7, 0, 3, 6, 9, 2];
+    deck.dealWithIncrement(7);
+    deck.cutCards(5);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal with increment N" then "cut N cards" correctly for N < 0', () => {
+    const expected = [9, 6, 3, 0, 7, 4, 1, 8, 5, 2];
+    deck.dealWithIncrement(3);
+    deck.cutCards(-3);
+    expect(deck.cards).to.eql(expected);
+  });
+});
+describe('combined all-technique tests', () => {
+  let deck;
+  beforeEach(() => {
+    deck = new Deck(10);
+  });
+  it('it should "cut N cards", "deal with increment N", "deal into new stack" correctly', () => {
+    const expected = [5, 8, 1, 4, 7, 0, 3, 6, 9, 2];
+    deck.cutCards(2);
+    deck.dealWithIncrement(3);
+    deck.dealIntoNewStack();
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "cut N cards", "deal into new stack", "deal with increment N" correctly', () => {
+    const expected = [4, 1, 8, 5, 2, 9, 6, 3, 0, 7];
+    deck.cutCards(-5);
+    deck.dealIntoNewStack();
+    deck.dealWithIncrement(7);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal into new stack", "cut N cards", "deal with increment N" correctly', () => {
+    const expected = [5, 2, 9, 6, 3, 0, 7, 4, 1, 8];
+    deck.dealIntoNewStack();
+    deck.cutCards(4);
+    deck.dealWithIncrement(7);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal into new stack", "deal with increment N", "cut N cards" correctly', () => {
+    const expected = [7, 0, 3, 6, 9, 2, 5, 8, 1, 4];
+    deck.dealIntoNewStack();
+    deck.dealWithIncrement(3);
+    deck.cutCards(-4);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal with increment N", "deal into new stack", "cut N cards" correctly', () => {
+    const expected = [4, 7, 0, 3, 6, 9, 2, 5, 8, 1];
+    deck.dealWithIncrement(3);
+    deck.dealIntoNewStack();
+    deck.cutCards(7);
+    expect(deck.cards).to.eql(expected);
+  });
+  it('it should "deal with increment N", "cut N cards", "deal into new stack" correctly', () => {
+    const expected = [0, 7, 4, 1, 8, 5, 2, 9, 6, 3];
+    deck.dealWithIncrement(7);
+    deck.cutCards(-9);
+    deck.dealIntoNewStack();
+    expect(deck.cards).to.eql(expected);
   });
 });
 describe('technique tests', () => {
