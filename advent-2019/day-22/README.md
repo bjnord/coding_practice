@@ -182,3 +182,149 @@ You decide to apply your complete shuffle process (your puzzle input) to the dec
 You'll need to be careful, though - one wrong move with this many cards and you might **overflow** your entire ship!
 
 After shuffling your new, giant, **factory order** deck that many times, **what number is on the card that ends up in position `2020`?**
+
+### Part Two Pre-Design Thoughts
+
+Subtitle: "Sometimes Your Own Thinking Doesn't Get You Far Enough"
+
+\[BJN: Here's as far as I got before I needed help:]
+
+Clearly we need to optimize how our cards are stored and accessed, so that each of our three techniques is really fast.
+
+- The "deal into new stack" technique simply reverses the cards, so we could keep an "is deck reversed?" flag, and access a card using position `nCards - n`.
+- The "cut N cards" technique simply rotates the cards, so we could keep a "top card position" index, and access a card using position `n + topCardPosition`. This needs to work modulo-style (but not using the modulo operator, which will be too slow).
+- The "deal with increment N" technique is the one I'm not sure how to optimize, other than replacing the modulo operator with "compare-and-add/-subtract N" for speed. If we keep the same algorithm (where we make a new array), this needs to reset the "is deck reversed?" flag and the "top card position" index.
+
+The thing is, these techniques have to work in combination, and the order will matter. It might not be enough to keep a simple deck state; do we need a stack of operations à la [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation)?
+
+As I mulled this further I realized:
+
+- We don't need a generalized solution for a deck of huge-N cards. We only care about the one card at position P when everything is done.
+- (Inspired by thoughts of RPN and stacks:) We could run the techniques **backwards** so the final "card at position P" condition would have been "card at position Q" one step prior, etc.
+- Since (1) we're only tracking "card at position P", and (2) `cardAt(P) === P` for a factory-order deck, and (3) we're not altering the deck, just the position of interest: We don't actually need an array.
+- There's no way we can do 101741582076661 of **anything** in a reasonable amount of time.
+
+When implementing the "shuffle N times" method, I noticed something interesting about puzzle example #4: It comes back to the initial state after 4 rounds:
+
+```
+[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+[ 9, 2, 5, 8, 1, 4, 7, 0, 3, 6 ]
+[ 6, 5, 4, 3, 2, 1, 0, 9, 8, 7 ]
+[ 7, 4, 1, 8, 5, 2, 9, 6, 3, 0 ]
+[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+...
+```
+
+I noticed also that card 0 appears in positions 0, 7, 6, and 9… and those 4 values appear in columns 0, 7, 6, and 9 (in various orders). The same thing is going on with values 1, 4, 5, and 2 -- and with values 3 and 8. Hmmm… I wonder if that example was a hint?
+
+\[BJN: …so I implemented the "one card of interest" class, and got really close to figuring out how to make the "deal with increment N" modulo go backwards… but I ran the machinery just 100x and even that took way too long. Time to look at the subreddit for help!]
+
+### Part Two Design
+
+#### metalim's solution
+
+Reddit user [metalim](https://www.reddit.com/user/metalim)
+posted [this](https://www.reddit.com/r/adventofcode/comments/ee0rqi/2019_day_22_solutions/fbwauzi/)
+
+[Python](https://github.com/metalim/metalim.adventofcode.2019.python/blob/master/22_cards_shuffle.ipynb)
+
+Second part is just composition of linear polynomials `ax+b mod L`, where `L` is length of the deck.
+
+First, convert all shuffling rules into linear polynomial. Remember to compose in reverse order. "deal into new stack" is just negative position. "cut" just adds to `b`. And "deal with increment" multiplies both `a` and `b` by `modinv`, effectively dividing them, modulo `L`. `modinv(x,n) == pow(x,n-2,n)` for prime `n` is everything you need to remember.
+
+Second, raise polynomial to the number of steps, mod `L`. Didn't use the formula, just did it recursively, because we practice programming here, right? Similar to `modpow`, it takes `O(log N)` time (which you hardly notice for numbers with less than million digits).
+
+Third, calculate initial position (and hence - card number) using resulting polynomial.
+
+All 3 steps take less than a millisecond.
+
+#### sasajuric's Solution
+
+\[BJN: This was the clearest explanation… they figured out the math enough to explain it to someone else, which is better than I could have done! So I started here.]
+
+Reddit user [sasajuric](https://www.reddit.com/user/sasajuric)
+posted [this](https://www.reddit.com/r/adventofcode/comments/ee0rqi/2019_day_22_solutions/fbvcnfr/)
+
+After failing miserably at doing it on my own, I spent a lot of time reading through the comments in this thread. However, I still had a hard time figuring out the exact math details. Finally, it dawned on me that I could just defer calculating remainders to the later stage, and this reduced the need to do `modinv`, or rely on other fancy principles.
+
+The other relevant insight was that `a*x+b` can be normalized to `rem(a, deck_size) * x + rem(b, deck_size)`, which keeps integers reasonably sized. Coupling that with general directions taken from this thread (representing shuffle as a function, exponentiation by squaring), I was able to finish it. Thank you all for your explanations!
+
+My solution in Elixir is [here](https://github.com/sasa1977/aoc/blob/master/lib/2019/201922.ex). I've included an expanded explanation of my approach in the code docs.
+
+\[BJN: Their Elixir code is really elegant! Here are some excerpts of comments and code:]
+
+##### Linear transformations
+
+Given such representation, we can express each transformation as a linear function that takes the initial position
+as its argument and returns the new position:
+
+- deal into new stack: `new_pos = -current_pos + deck_size - 1`
+- cut: `new_pos = current_pos - cut_pos`
+- deal with increment: `new_pos = increment * current_pos`
+
+\[BJN: The functions in their Elixir code show the `a` and `b` for all 3 cases:]
+
+```
+defp function("deal into new stack", deck_size), do: {-1, deck_size - 1}
+defp function("cut " <> position, _deck_size), do: {1, -String.to_integer(position)}
+defp function("deal with increment " <> step, _deck_size), do: {String.to_integer(step), 0}
+```
+
+Note that these functions can return positions which are not in the range `0..(deck_size - 1)`, but we can easily
+normalize the resulting positions with `rem(pos, deck_size)` for zero and positive positions, or
+`deck_size - rem(-pos, deck_size)` for negative positions.
+
+Notice that all of the listed functions are linear, i.e. they can be represented as `a*x + b`.
+This means that the entire shuffle sequence can be expressed as a single function which is a composition of
+all the steps.
+
+\[BJN: That's the **first key insight**: The three shuffle operations are linear expressions, and can easily be combined into a single function. I feel I deserve credit for being on the right track (see "stack of operations" above), but my math is too weak to have quite put it all together.]
+
+For example, suppose that we have only three steps in the sequence, called `f`, `g`, `h`. Then the entire transformation
+can be represented as `f(g(h(current_pos)))`. We can build this composition iteratively by composing `g` and `h`, and then
+composing `f` with the result. Given two functions `f = a*x+b` and `g = c*x+d`, composition `g(f(x))` is `c*a*x + c*b + d`.
+
+\[BJN: …and this (the formula for composing two of them) I would not have gotten. Here's their Elixir code for that; `normalize` is just modulo that handles negatives properly:]
+
+```
+defp compose({ga, gb}, {fa, fb}, deck_size),
+  do: {normalize(ga * fa, deck_size), normalize(ga * fb + gb, deck_size)}
+```
+
+This is all we need to solve part 1. We read the input, and build a collection of `{a, b}` pairs which represent
+each step as a function. Then we build a composition of these steps to produce the function which represents the
+entire transformation. Finally, we apply the function by simply calculating `a*2019+b` to get the new
+position of 2019 after the entire shuffle has been performed. Remember that we need to normalize the result
+to fall in the range of `0..(deck_size - 1)`.
+
+##### Inverting the direction
+
+Another challenge of part 2 is that we have to find the value that ends up in position 2020. However, our function
+works in the opposite direction - it computes the new position from the previous one. To solve this, we need
+to inverse the shuffle function.
+
+An inverse of a linear function `a*x + b` is `1/a - b/a` (obtained by swapping `x` and `y` in the original function
+definition, and transforming to standard representation). To make sure we don't end up with floats,
+we need to increase `1` and `b` (by repeatedly adding `deck_size`) to make sure the inverse function
+coefficients are still integers.
+
+\[BJN: Their beautiful Elixir code for this part:]
+
+```
+defp inverse({a, b}, deck_size),
+  do: {normalized_div(1, a, deck_size), normalized_div(-b, a, deck_size)}
+
+defp normalized_div(a, b, deck_size) do
+  a
+  |> Stream.iterate(&(&1 + deck_size))
+  |> Enum.find(&(rem(&1, b) == 0))
+  |> div(b)
+  |> normalize(deck_size)
+end
+```
+
+\[BJN: So again, I can take credit for realizing I'd need to run the shuffle operations in reverse for Part Two, but that "inverse of a linear function" bit completely stumped me when I tried to do a pencil-and-paper analysis. See, kids? Math is valuable!]
+
+### To Do
+
+\[BJN: Now it's time to optimize the "run the shuffle steps N times" method.]

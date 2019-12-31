@@ -22,14 +22,19 @@ class CardOfInterest
       throw new Error(`invalid card position for a ${nCards}-card deck`);
     }
     /**
-     * number of cards in the deck
+     * the number of cards in the deck
      * @member {number}
      */
-    this.nCards = nCards;  // kept for better performance
-    // private: deck storage
-    this._cards = [...Array(nCards).keys()];  // starts in "factory order"
-    // private: position of interest
-    this._cardPos = cardPos;
+    this.nCards = nCards;
+    /**
+     * the position of the card of interest
+     * @member {number}
+     */
+    this.cardPos = cardPos;
+    // private: our [A,B] linear function stack [f(x) = a*x + b]
+    this._abStack = [[1, 0]];  // identity
+    // private: our composed [A,B] linear function
+    this._abComposed = undefined;
   }
   /**
    * the card at the position of interest
@@ -37,17 +42,43 @@ class CardOfInterest
    */
   get card()
   {
-    return this._cards[this._cardPos];
+    if (!this._abComposed) {
+      this._composeFunction();
+    }
+    const a = this._abComposed[0];
+    const b = this._abComposed[1];
+    //console.debug(`composed A=${a} B=${b} for pos=${this.cardPos}`);
+    return CardOfInterest._negrem(a * this.cardPos + b, this.nCards);
+  }
+  _composeFunction()
+  {
+    while (this._abStack.length > 1) {
+      const fnG = this._abStack.shift();  // "outer" function g() of g(f(x))
+      const fnF = this._abStack.shift();  // "inner" function f() of g(f(x))
+      // "Given two functions `f = a*x+b` and `g = c*x+d`,
+      // composition `g(f(x))` is `c*a*x + c*b + d`."
+      const newA = CardOfInterest._negrem(fnG[0] * fnF[0], this.nCards);
+      const newB = CardOfInterest._negrem(fnG[0] * fnF[1] + fnG[1], this.nCards);
+      this._abStack.unshift([newA, newB]);
+    }
+    this._abComposed = this._abStack[0].slice();
+  }
+  // private: handle modulo of negatives
+  static _negrem(a, b)
+  {
+    if (a < 0) {
+      return b - (-a % b);
+    } else {
+      return a % b;
+    }
   }
   /**
    * Deal cards into a new stack, reversing their order.
    */
   dealIntoNewStack()
   {
-    this._cards = this._cards.reduce((newCardOfInterest, card) => {
-      newCardOfInterest.unshift(card);
-      return newCardOfInterest;
-    }, []);
+    this._abStack.push([-1, this.nCards - 1]);
+    this._abComposed = undefined;
   }
   /**
    * Cut the cards at position N.
@@ -61,15 +92,8 @@ class CardOfInterest
    */
   cutCards(n)
   {
-    if (n === 0) {
-      return;
-    } else if (n > 0) {
-      const cutCards = this._cards.splice(0, n);
-      this._cards = this._cards.concat(cutCards);
-    } else {  // (n < 0)
-      const cutCards = this._cards.splice(n, -n);
-      this._cards = cutCards.concat(this._cards);
-    }
+    this._abStack.push([1, n]);
+    this._abComposed = undefined;
   }
   /**
    * Redeal the cards in a modulo-N pattern.
@@ -85,15 +109,20 @@ class CardOfInterest
     if (n < 1) {
       throw new Error('invalid increment');
     }
-    const dealtCards = new Array(this.nCards).fill(null);
-    for (let i = 0, m = 0; i < this.nCards; i++) {
-      dealtCards[m] = this._cards[i];
-      // faster than modulo operator:
-      if ((m += n) >= this.nCards) {
-        m -= this.nCards;
+    this._abStack.push([CardOfInterest._m(n, this.nCards), 0]);
+    this._abComposed = undefined;
+  }
+  // private: "inverse modulo"-type function
+  // D = deck size
+  // M = (1+D*x)/N with the first x=0.. that makes M come out evenly
+  static _m(n, nCards)
+  {
+    for (let x = 0; ; x++) {
+      const numerator = 1 + nCards * x;
+      if ((numerator % n) === 0) {
+        return numerator / n;
       }
     }
-    this._cards = dealtCards;
   }
   /**
    * Shuffle the cards using a list of our techniques, repeated the given
@@ -106,9 +135,15 @@ class CardOfInterest
    */
   doTechniquesNTimes(techniques, repeat)
   {
-    while (repeat-- > 0) {
-      this.doTechniques(techniques);
+    // create the meta-function:
+    this.doTechniques(techniques);
+    this._composeFunction();
+    // compose the meta-function N times to create a meta-meta-function:
+    this._abStack = [];
+    for (let i = 0; i < repeat; i++) {
+      this._abStack.push(this._abComposed.slice());
     }
+    this._composeFunction();
   }
   /**
    * Shuffle the cards using a list of our techniques.
