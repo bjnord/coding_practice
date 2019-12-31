@@ -279,4 +279,12 @@ describe('repeated technique tests', () => {
     cardOfInt.doTechniquesNTimes(techniques, 2);
     expect(cardOfInt.card).to.eql(expected[cardPos]);
   });
+  it('it should use puzzle example technique #4 60x correctly', () => {
+    // this one has the interesting property of returning to the initial
+    // state every 4x
+    const expected = '0 1 2 3 4 5 6 7 8 9'.split(/\s+/).map((n) => Number(n));
+    const techniques = 'deal into new stack\ncut -2\ndeal with increment 7\ncut 8\ncut -4\ndeal with increment 7\ncut 3\ndeal with increment 9\ndeal with increment 3\ncut -1\n';
+    cardOfInt.doTechniquesNTimes(techniques, 60);
+    expect(cardOfInt.card).to.eql(expected[cardPos]);
+  });
 });
