@@ -6,10 +6,41 @@ class AsciiIntcode
   /**
    * Build an ASCII-interfaced Intcode computer from an input string.
    *
-   * TODO describe what that means (char-at-a-time as ASCII codes)
+   * The basic Intcode machine has two operations, IN and OUT, which can
+   * transfer one integer value at a time. This class "wraps" the Intcode
+   * machine with an interface that sends and receives lines of ASCII
+   * characters to and from the Intcode machine, for Intcode programs that
+   * use that type of interface. Each ASCII character is sent as its
+   * decimal code (_e.g._ `A` is 65 and `\n` is 10).
    *
-   * TODO describe format of `states`
-   *      - `@` is initial state, `!` is end state
+   * The interface needs a state table that defines the sequence of input
+   * and output lines expected from the Intcode machine. `@` is the initial
+   * state, and `!` is the end state. For example:
+   *
+   * ```
+   * const states = {
+   *   '@':         {state: 'getLine', next: 'blank'},
+   *   'blank':     {state: 'getLine', next: 'question'},
+   *   'question:'  {state: 'getPrompt', next: 'answer'},
+   *   'answer':    {state: 'getLine', next: '!'},
+   * };
+   * ```
+   *
+   * This state table says the Intcode machine is expected to output two
+   * lines, prompt for an input line, output one more line, and halt. The
+   * state labels (`blank` `question` etc.) are user-chosen.
+   *
+   * The allowed states are as follows (see `run()` for information about
+   * the callbacks):
+   *
+   * - `getLine` - the Intcode machine sends an ASCII line, and the
+   *     `handleLine` callback will be called to deliver it
+   * - `getPrompt` - the Intcode machine sends an ASCII prompt line,
+   *     and the `handlePrompt` callback will be called to deliver it,
+   *     and obtain the reply line
+   * - `getVideo` - the Intcode machine sends a video frame (a series of
+   *     ASCII lines ending with a blank line), and the `handleVideo`
+   *     callback will be called to deliver it
    *
    * @param {Array} program - the Intcode program (list of integers)
    * @param {object} states - the ASCII interface state table
@@ -72,23 +103,23 @@ class AsciiIntcode
   /**
    * Run the Intcode program until it halts.
    *
-   * TODO describe callbacks
-   *      - single argument (what Intcode has sent)
-   *      - single return value (what should be sent back to Intcode)
-   *
-   * @param {function} handlePrompt - will be called when the Intcode
-   *   computer has sent a newline-terminated prompt string
-   * @param {function} handleVideoFrame - will be called when the Intcode
-   *   computer has sent a video frame
-   * @param {function} handleNumber - will be called when the Intcode
-   *   computer has sent a non-ASCII value (treat as number)
-   * @param {function} handleLine - will be called when the Intcode
-   *   computer has sent a newline-terminated non-prompt line
-   * @param {object} [iState={pc: 0, rb: 0}] - initial Intcode state
+   * @param {function} handlePrompt - will be called with one argument when
+   *   the Intcode machine is sending a newline-terminated prompt string,
+   *   **and** is expected to return the reply string - can return
+   *   `undefined` if no reply is ready (which will cause the Intcode
+   *   machine to `iowait`)
+   * @param {function} handleVideoFrame - will be called with one argument
+   *   when the Intcode machine is sending a video frame (a series of
+   *   newline-terminated strings)
+   * @param {function} handleNumber - will be called with one argument when
+   *   the Intcode machine is sending a non-ASCII value (treat as a number)
+   * @param {function} handleLine - will be called with one argument when
+   *   the Intcode machine is sending a newline-terminated non-prompt line
+   * @param {object} [iState={pc: 0, rb: 0}] - starting Intcode state
    *   (see `Intcode.run()` for details)
    *
    * @return {object}
-   *   Returns Intcode state (see `Intcode.run()` for details).
+   *   Returns the new Intcode state (see `Intcode.run()` for details).
    */
   run(handlePrompt, handleVideoFrame, handleNumber, handleLine, iState = {pc: 0, rb: 0})
   {
