@@ -96,3 +96,15 @@ The key insight here is that you don't have to map the whole grid; you only need
 5. Repeat from step 3.
 
 I think that will give the minimal X and Y every time?
+
+## Unit Testing
+
+Unfortunately the puzzle description doesn't give Intcode programs to match the two examples. I like to do unit tests with the puzzle examples, so I wrote [an Intcode program](test/example.int) which is a "template" that can be used for both examples. The encoded program takes the form:
+
+```
+3,20,3,21,2,21,22,24,1,24,20,24,9,24,204,25,99,0,0,0,0,0,[width],[height],0,[data-here]
+```
+
+**NOTE** that this program returns indeterminate data (Mr. President, that means "wrong answers") for any points outside the visible grid, so for Part Two they'll only work if the box fits inside the grid (as the shown example does). Someone with better math skills than me could probably figure out the angles of the beam edges in the examples, and write an Intcode program to check if the requested point lies between them.
+
+I [posted the Intcode programs to Reddit](https://www.reddit.com/r/adventofcode/comments/ectl0x/2019_day_19_intcode_programs_for_the_puzzle/) ([short link](https://redd.it/ectl0x)).

@@ -159,3 +159,11 @@ And finally, the whole region is full of oxygen after a total of four minutes:
 So, in this example, all locations contain oxygen after `**4**` minutes.
 
 Use the repair droid to get a complete map of the area. **How many minutes will it take to fill with oxygen?**
+
+## Unit Testing
+
+Unfortunately the puzzle description doesn't give an Intcode program to match the 6x5 example. I like to do unit tests with the puzzle examples, so I wrote [an Intcode program that matches the example](test/example.int).
+
+This took me back to the days of my first computer, the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET). I didn't have an assembler so I learned the [6502](https://en.wikipedia.org/wiki/MOS_Technology_6502) by writing machine code (in decimal) and `POKE`ing it from BASIC `DATA` statements. That's [basically how I created the Intcode program](test/example-encoded.txt) in this case. The final encoded program is [here](input/example.txt).
+
+I [posted the Intcode program to Reddit](https://www.reddit.com/r/adventofcode/comments/eb9ms2/2019_day_15_intcode_program_for_the_puzzle_example/) ([short link](https://redd.it/eb9ms2)).

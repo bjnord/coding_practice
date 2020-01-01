@@ -29,3 +29,14 @@ The NAT also monitors all computers on the network. If all computers have **empt
 Once the network is idle, the NAT sends **only the last packet it received** to address `0`; this will cause the computers on the network to resume activity. In this way, the NAT can throttle power consumption of the network when the ship needs power in other areas.
 
 Monitor packets released to the computer at address `0` by the NAT. **What is the first `Y` value delivered by the NAT to the computer at address `0` twice in a row?**
+
+## Unit Testing
+
+The puzzle description doesn't give any Intcode program examples. I like to do unit tests with the puzzle examples, so I wrote two Intcode programs:
+
+- [Part One program](test/example.int): If you make two NICs with this program (one with address 0, the other with address 1), they will send a packet back and forth to each other, doubling the Y value each time. When Y reaches 256, the packet will get sent to address 255.
+- [Part Two program](test/example2.int): Make the same two NICs as with the Part One program; the Part Two program will idle the network, and eventually repeat Y=512 to the NAT.
+
+Here are the encoded programs for [Part One](input/example.txt) and [Part Two](input/example2.txt).
+
+I [posted the Intcode programs to Reddit](https://www.reddit.com/r/adventofcode/comments/eel8y3/2019_day_23_intcode_program_to_test_part_one/) ([short link](https://redd.it/eel8y3)).
