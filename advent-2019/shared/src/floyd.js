@@ -7,7 +7,7 @@
  * @param {function} f - function which transforms the current state to the
  *   next state in the sequence [`f(x0)` returns `x1`]
  * @param {function} eq - function which detects equality of two states
- *   [`f(a, b)` returns `true` if states are equal]
+ *   [`eq(a, b)` returns `true` if states are equal]
  * @param x0 - initial state (of the type `f(x)` expects)
  *
  * @return {Array}
