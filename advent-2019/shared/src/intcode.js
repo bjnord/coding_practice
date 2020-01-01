@@ -1,6 +1,6 @@
 'use strict';
 /** @module */
-const reader = require('readline-sync');
+let reader = undefined;
 const ifunc = {};
 
 // Terminology note: I use
@@ -46,6 +46,8 @@ const getStoreLocation = (inst, iState) => {
  *   output value
  * @param {object} [iState={pc: 0, rb: 0}] - initial Intcode state (Program
  *   Counter and Relative Base)
+ * @param {object} [readline] - readline library (if Intcode program will
+ *   use the `IN` operation interactively)
  *
  * @return {object}
  *   Returns Intcode state, with the following fields:
@@ -57,7 +59,8 @@ const getStoreLocation = (inst, iState) => {
  *       execution should resume)
  *     - `halt` indicates execution is halted
  */
-exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, iState = {pc: 0, rb: 0}) => {
+exports.run = (program, debug = false, inCallback = undefined, outCallback = undefined, iState = {pc: 0, rb: 0}, readline = undefined) => {
+  reader = readline;
   for (;;) {
     const inst = module.exports.decode(program.slice(iState.pc, iState.pc+4));
     /* istanbul ignore if */
