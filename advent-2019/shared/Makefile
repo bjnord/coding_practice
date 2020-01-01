@@ -4,7 +4,7 @@ LINTSRC = src/*.js test/*.js
 .PHONY: main test lint coverage doc distclean
 
 main:
-	exit 0
+	@exit 0
 
 test:
 	npm test

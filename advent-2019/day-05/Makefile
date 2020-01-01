@@ -7,13 +7,13 @@ main:
 	node src/main.js
 
 test:
-	exit 0
+	@exit 0
 
 lint:
 	$(NODEBIN)/eslint -c ../.eslintrc.js $(LINTSRC)
 
 coverage:
-	exit 0
+	@exit 0
 
 doc:
 	$(NODEBIN)/jsdoc -c jsdoc.json
