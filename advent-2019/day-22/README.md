@@ -325,6 +325,25 @@ end
 
 \[BJN: So again, I can take credit for realizing I'd need to run the shuffle operations in reverse for Part Two, but that "inverse of a linear function" bit completely stumped me when I tried to do a pencil-and-paper analysis. See, kids? Math is valuable!]
 
-### To Do
+##### Applying the function many times
 
-\[BJN: Now it's time to optimize the "run the shuffle steps N times" method.]
+To apply the function n times, we can simply compose it with it self. A shuffle applied 4 times is `f(f(f(f(x))))`.
+Unfortunately, the number of steps is quite large (101,741,582,076,661), so this won't finish in a reasonable
+amount of time. To speed things up, we can use the technique called [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring).
+
+For example to produce the function which performs the shuffle sequence 100 times, we can do the following:
+
+```
+1. f2(x) = f(f(x))
+2. f4(x) = f2(f2(x))
+3. f8(x) = f4(f4(x))
+4. f16(x) = f8(f8(x))
+5. f32(x) = f16(f16(x))
+6. f64(x) = f32(f32(x))
+7. f100(x) = f64(f32(f4(x)))
+```
+
+So instead of performing 100 compositions, we only did 7. For 101,741,582,076,661 steps we'll only need about
+100 compositions, which can be done quickly.
+
+\[BJN: And that's the **second key insight**: When computing linear expressions, there's a much faster way to compute it N times. If I ever learned this technique, I've long since forgotten it.]

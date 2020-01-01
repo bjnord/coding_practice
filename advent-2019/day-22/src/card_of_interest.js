@@ -140,9 +140,41 @@ class CardOfInterest
     this.doTechniques(techniques);
     this._abComposed = this._composeFunction(this._abStack);
     // compose the meta-function N times to create a meta-meta-function:
+    // (1) compose the squared functions for each 2^n:
+    let bitFunctions = {0: this._abComposed.slice()};
+    //console.debug(`composed i=${0} b=0b${0b1.toString(2)}`);
+    for (let i = 1, b = 0b10; b <= repeat; i++, b *= 2) {
+      const twoBits = [bitFunctions[i-1].slice(), bitFunctions[i-1].slice()];
+      bitFunctions[i] = this._composeFunction(twoBits);
+      //console.debug(`composed i=${i} b=0b${b.toString(2)}`);
+    }
+    // TIL JavaScript bitwise operations are limited to 32 bits, and
+    // all numbers are stored as IEEE 754 double-precision floats, so
+    // integers are limited to 53 bits
+    const repeatBottom = repeat % 0x100000000;
+    const repeatTop = Math.floor(repeat / 0x100000000);
+    // (2) compose a function matching bits in repeat:
     const abMetaStack = [];
-    for (let i = 0; i < repeat; i++) {
-      abMetaStack.push(this._abComposed.slice());
+    let b = 0b1;
+    for (let i = 0; i < 53; i++) {
+      if ((i < 32) && (repeatBottom & b)) {
+        abMetaStack.push(bitFunctions[i].slice());
+        //console.debug(`used i=${i} from bottom`);
+      } else if ((i >= 32) && (repeatTop & b)) {
+        abMetaStack.push(bitFunctions[i].slice());
+        //console.debug(`used i=${i} from top`);
+      } else {
+        //console.debug(`didnt use i=${i}`);
+      }
+      if (i === 31) {
+        if (repeatTop === 0) {
+          break;
+        } else {
+          b = 0b1;
+        }
+      } else {
+        b *= 2;
+      }
     }
     this._abComposed = this._composeFunction(abMetaStack);
   }
