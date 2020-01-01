@@ -240,6 +240,8 @@ Third, calculate initial position (and hence - card number) using resulting poly
 
 All 3 steps take less than a millisecond.
 
+\[BJN: They also posted comments on the amusing thread, [What would it take to brute force Day 22 Part 2?](https://www.reddit.com/r/adventofcode/comments/eejyb8/what_would_it_take_to_brute_force_day_22_part_2/).]
+
 #### sasajuric's Solution
 
 \[BJN: This was the clearest explanation… they figured out the math enough to explain it to someone else, which is better than I could have done! So I started here.]
