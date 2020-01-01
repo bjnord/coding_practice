@@ -1,6 +1,8 @@
 'use strict';
 const expect = require('chai').expect;
 const CardOfInterest = require('../src/card_of_interest');
+const fs = require('fs');
+
 const deckSize = 10;
 const cardPos = 3;  // could be any one of the 10
 describe('constructor tests', () => {
@@ -286,5 +288,16 @@ describe('repeated technique tests', () => {
     const techniques = 'deal into new stack\ncut -2\ndeal with increment 7\ncut 8\ncut -4\ndeal with increment 7\ncut 3\ndeal with increment 9\ndeal with increment 3\ncut -1\n';
     cardOfInt.doTechniquesNTimes(techniques, 60);
     expect(cardOfInt.card).to.eql(expected[cardPos]);
+  });
+});
+describe('our puzzle input tests', () => {
+  it('it should get the correct Part Two answer', () => {
+    const cardPos = 2020;
+    const deckSize = 119315717514047;  // prime
+    const cardOfInt = new CardOfInterest(deckSize, cardPos);
+    const shuffleTimes = 101741582076661;  // prime
+    const input = fs.readFileSync('input/input.txt', 'utf8');
+    cardOfInt.doTechniquesNTimes(input, shuffleTimes);
+    expect(cardOfInt.card).to.eql(41685581334351);
   });
 });

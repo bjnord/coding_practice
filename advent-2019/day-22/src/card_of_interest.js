@@ -1,4 +1,5 @@
 'use strict';
+/* global BigInt */
 
 class CardOfInterest
 {
@@ -143,7 +144,7 @@ class CardOfInterest
     this._abComposed = this._composeFunction(this._abStack);
     // compose the meta-function N times to create a meta-meta-function:
     // (1) compose the squared functions for each 2^n:
-    let bitFunctions = {0: this._abComposed.slice()};
+    const bitFunctions = {0: this._abComposed.slice()};
     //console.debug(`composed i=${0} b=0b${0b1.toString(2)}`);
     for (let i = 1, b = 0b10; b <= repeat; i++, b *= 2) {
       const twoBits = [bitFunctions[i-1].slice(), bitFunctions[i-1].slice()];
