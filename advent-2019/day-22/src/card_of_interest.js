@@ -64,20 +64,15 @@ class CardOfInterest
     }
     return abStack.shift();
   }
-  // private: calculate ax+b % d
-  // NOTE arguments are Number, return is Number
-  static _axb(a, x, b, d)
+  // private: calculate `(a*x+b) % m` using BigInt
+  static _axb(a, x, b, m)
   {
-    return Number(CardOfInterest._negrem(BigInt(a) * BigInt(x) + BigInt(b), BigInt(d)));
-  }
-  // private: handle modulo of negatives
-  // NOTE arguments are BigInt, return is BigInt
-  static _negrem(a, b)
-  {
-    if (a < 0) {
-      return b - (-a % b);
+    const axb = BigInt(a) * BigInt(x) + BigInt(b);
+    const mod = BigInt(m);
+    if (axb < 0) {
+      return Number(mod - (-axb % mod));
     } else {
-      return a % b;
+      return Number(axb % mod);
     }
   }
   /**
