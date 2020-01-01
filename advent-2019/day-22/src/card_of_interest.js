@@ -43,25 +43,26 @@ class CardOfInterest
   get card()
   {
     if (!this._abComposed) {
-      this._composeFunction();
+      this._abComposed = this._composeFunction(this._abStack);
     }
     const a = this._abComposed[0];
     const b = this._abComposed[1];
     //console.debug(`composed A=${a} B=${b} for pos=${this.cardPos}`);
     return CardOfInterest._negrem(a * this.cardPos + b, this.nCards);
   }
-  _composeFunction()
+  // private: create a composed function from a function stack
+  _composeFunction(abStack)
   {
-    while (this._abStack.length > 1) {
-      const fnG = this._abStack.shift();  // "outer" function g() of g(f(x))
-      const fnF = this._abStack.shift();  // "inner" function f() of g(f(x))
+    while (abStack.length > 1) {
+      const fnG = abStack.shift();  // "outer" function g() of g(f(x))
+      const fnF = abStack.shift();  // "inner" function f() of g(f(x))
       // "Given two functions `f = a*x+b` and `g = c*x+d`,
       // composition `g(f(x))` is `c*a*x + c*b + d`."
       const newA = CardOfInterest._negrem(fnG[0] * fnF[0], this.nCards);
       const newB = CardOfInterest._negrem(fnG[0] * fnF[1] + fnG[1], this.nCards);
-      this._abStack.unshift([newA, newB]);
+      abStack.unshift([newA, newB]);
     }
-    this._abComposed = this._abStack[0].slice();
+    return abStack.shift();
   }
   // private: handle modulo of negatives
   static _negrem(a, b)
@@ -137,13 +138,13 @@ class CardOfInterest
   {
     // create the meta-function:
     this.doTechniques(techniques);
-    this._composeFunction();
+    this._abComposed = this._composeFunction(this._abStack);
     // compose the meta-function N times to create a meta-meta-function:
-    this._abStack = [];
+    const abMetaStack = [];
     for (let i = 0; i < repeat; i++) {
-      this._abStack.push(this._abComposed.slice());
+      abMetaStack.push(this._abComposed.slice());
     }
-    this._composeFunction();
+    this._abComposed = this._composeFunction(abMetaStack);
   }
   /**
    * Shuffle the cards using a list of our techniques.
