@@ -54,7 +54,9 @@ In order to determine the timing window for your underflow exploit, you also nee
 
 **What is the lowest non-negative integer value for register 0 that causes the program to halt after executing the most instructions?** (The program must actually halt; running forever does not count as halting.)
 
-### Part 2 Solution
+### Part 2 Design
+
+> **Spoilers ahead!**
 
 After disassembling and decompiling and fiddling with optimizing the C code and trying to figure out what the "activation system" program does (see `src/gadget-optimized.c`)... it finally occurred to me that I don't need to know what it does. It's a big add/multiply/shift state machine that produces a new big value from 0x000000-0xFFFFFF each time through.
 

@@ -85,6 +85,8 @@ Find the **100x100** square closest to the emitter that fits entirely within the
 
 ### Part Two Design
 
+> **Spoilers ahead!**
+
 \[thoughts before starting to code, or checking Reddit]
 
 The key insight here is that you don't have to map the whole grid; you only need to watch the upper-right and lower-left corners of the box, and find the spot where both of those just fit inside the beam. The rest of the box will be guaranteed to fit inside the beam also. So we just need to walk the edges of the beam; I'm picturing something like:

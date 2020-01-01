@@ -59,6 +59,8 @@ Here are a few more examples:
 
 ### Part 1 Design
 
+> **Spoilers ahead!**
+
 My first attempted design (using simple Elixir linked lists) was very pretty and Elixiry, and unfortunately far too slow. Ah well, it was a good exercise; I just picked the wrong data structure.
 
 I'm now keeping the state of the circle as a [Deque](https://github.com/discordapp/deque) (Elixir double-ended queue implementation), plus the latest marble number inserted.

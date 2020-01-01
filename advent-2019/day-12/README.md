@@ -250,6 +250,8 @@ This set of initial positions takes `4686774924` steps before it repeats a previ
 
 ### Part Two Design
 
+> **Spoilers ahead!**
+
 I read Part Two this morning and noodled on it from time to time during the day, and I wasn't able to see how I could optimize the orbital motion. This is an embarrassing admission, because space is an interest of mine, and during my time in the Air Force my division's responsibility was all about satellites and orbital motion.
 
 So I peeked at the [Advent of Code Reddit](https://www.reddit.com/r/adventofcode/) solution megathread... not at any code, but just enough to get the two key insights I needed:

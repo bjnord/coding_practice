@@ -81,6 +81,8 @@ You realize that 20 generations aren't enough. After all, these plants will need
 
 ### Part 2 Design
 
+> **Spoilers ahead!**
+
 As with [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), as soon as we see the pot/plant pattern stabilize (possibly shifted), we can stop computing new generations; we just extrapolate what the pot IDs will be after the remaining iterations.
 
 They could have been meaner, and given us an "oscillator" or "walker" (pot/plant patterns that cycle through multiple states), but [YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it) saved the day, and I didn't have to implement that.

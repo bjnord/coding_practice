@@ -185,6 +185,8 @@ After shuffling your new, giant, **factory order** deck that many times, **what 
 
 ### Part Two Pre-Design Thoughts
 
+> **Spoilers ahead!**
+
 Subtitle: "Sometimes Your Own Thinking Doesn't Get You Far Enough"
 
 \[BJN: Here's as far as I got before I needed help:]

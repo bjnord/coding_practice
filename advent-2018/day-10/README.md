@@ -158,6 +158,8 @@ After 3 seconds, the message appeared briefly: **HI**. Of course, your message w
 
 ### Part 1 Design
 
+> **Spoilers ahead!**
+
 I could have solved this a lot faster if I'd realized a key insight at the start: The iteration (seconds) with the words is the one whose star Y values are most tightly clustered (_i.e._ `min_y..max_y` is the smallest range). You can see the commits for my attempts to only show iterations with visible stars, etc.
 
 ## Part 2

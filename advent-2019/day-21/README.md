@@ -98,6 +98,8 @@ Program the springdroid with logic that allows it to survey the hull without fal
 
 ### Part One Design
 
+> **Spoilers ahead!**
+
 This is obviously a truth table puzzle, in which we need to turn the table into a boolean "circuit" (equation) that reduces the `A-D` sensor inputs to a `J` jump decision.
 
 With only 4 states, it's small enough to solve by hand (and kinda fun). See the comments in `src/main.js`. But _wait for it:_ My prediction is that Part Two will greatly increase the truth table size, and we'll need a boolean solver. Stay tuned...

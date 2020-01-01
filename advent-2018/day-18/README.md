@@ -188,4 +188,6 @@ This important natural resource will need to last for at least thousands of year
 
 ### Part 2 Design
 
+> **Spoilers ahead!**
+
 As with the plants on Day 12, this involves detecting when the yard is either stable, or cycling through multiple states.

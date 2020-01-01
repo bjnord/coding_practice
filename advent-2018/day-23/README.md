@@ -67,6 +67,8 @@ Find the coordinates that are in range of the largest number of nanobots. **What
 
 ### Part 2 Design
 
+> **Spoilers ahead!**
+
 The nanobots in the puzzle input have huge X,Y,Z and R values (8 digits), so even with only 1000 nanobots, comparing every point to them would be infeasible.
 
 I thought of a few different approaches, and wrote and tested some necessary functions and fiddled around, and still couldn't arrive at an algorithm that quickly finds the solution.

@@ -354,4 +354,6 @@ You don't even know **how** you could boost the reindeer's immune system or what
 
 ### Part 2 Design
 
+> **Spoilers ahead!**
+
 (...wherein it is revealed that there is an additional case to consider: What happens when there are groups left in both armies which are immune to all the opposing armies' attacks?)

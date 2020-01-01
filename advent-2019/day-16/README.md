@@ -99,6 +99,8 @@ I was an implementer of other people's designs. My level of mathematics aptitude
 
 Anyway: Clearly, Day 16 is another classic AoC scenario that leads you down the naïve implementation path in Part One, and then adds a few orders of complexity to ensure your code won't produce an answer before the [heat death of the universe](https://en.wikipedia.org/wiki/Heat_death_of_the_universe).
 
+> **Spoilers ahead!**
+
 Before Googling FFT or looking at the subreddit, I thought back to Day 12, and it occurred to me that the repetition of the inputs might make it possible to just do FFT on a subset of the problem. So I started looking at the output from various matrices with repeated patterns (see [this experimental code](src/experiment.js)), and I noticed something right away: The last few digits of the output appear to be the same no matter how many times you repeat the pattern.
 
 Mind you, I have no idea how that works, mathematically. This is purely an empirical observation of the black box's behavior. Is there a way I could take advantage of it? I started thinking about the problem and came up with an algorithm… which works for a small case, but doesn't reduce the input size sufficiently for my puzzle input, so it still takes too long (and uses too much memory).

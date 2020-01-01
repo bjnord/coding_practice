@@ -122,6 +122,8 @@ Given 1 trillion `ORE`, **what is the maximum amount of `FUEL` you can produce?*
 
 ### Part Two Design
 
+> **Spoilers ahead!**
+
 Naïvely dividing one trillion by the `ORE` cost per `1 FUEL` (from Part One) won't work, because each time there are chemicals left over that effectively you'd be throwing away, rather than reusing for the next round.
 
 My first thought was to run the refinery over multiple successive rounds, keeping the chemical remainders from each round as a stockpile for the next round, and stop when a round finishes with no remainders. (Essentially the chemicals all have their own "cycle length", and eventually they will all hit 0 at the LCM of those cycle lengths.) Unfortunately, that takes too long for the puzzle input; more than 8 hours and it was still running.

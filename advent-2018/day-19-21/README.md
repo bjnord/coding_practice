@@ -63,6 +63,8 @@ A new background process immediately spins up in its place. It appears identical
 
 ### Part 2 Design
 
+> **Spoilers ahead!**
+
 When I realized the actual puzzle input was taking forever, I peeked at the [day 19 subreddit solution megathread](https://www.reddit.com/r/adventofcode/comments/a7j9zc/2018_day_19_solutions/). Apparently this puzzle is like day 12, where you need to understand what's going on, and replace naïve brute-force with a shortcut of some kind.
 
 I think the fun thing to do here would be to write a disassembler, which takes the program opcodes and translates them into assembly or some higher-level language notation, so you can see what the program is doing. Then perhaps the program can be optimized so it will complete before the heat death of the universe.

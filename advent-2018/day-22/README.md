@@ -369,6 +369,8 @@ This is tied with other routes as the **fastest way to reach the target**: **45*
 
 ### Part 2 Design
 
+> **Spoilers ahead!**
+
 Gah! This was my worst performance of any of the 2018 days and parts. I tried two approaches of my own, checked the subreddit and was reminded of [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) (haven't seen that since college!), and then it took two tries to implement a 3-D Dijkstra successfully. It was like I was doing Kent Beck's [test && commit || revert](https://medium.com/@kentbeck_7670/test-commit-revert-870bbd756864) but in really, really big chunks.
 
 My first Dijkstra attempt was much more complicated than it needed to be. In particular, I was trying to combine the `{y, x}` and tool change in a single path segment in the graph, and either that or some other bug was not getting me the right answer. The key insight is that the tool change **is** the third dimension; a node's "neighbors" are either `+y/-y`, `+x/-x`, or one of the two other tools; you only change one thing at a time. Once you block the illegal combinations, the rest is pure Dijkstra.
