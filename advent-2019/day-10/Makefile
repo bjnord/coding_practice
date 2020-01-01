@@ -19,4 +19,4 @@ doc:
 	$(NODEBIN)/jsdoc -c jsdoc.json
 
 distclean:
-	-@rm -rf .nyc_output node_modules coverage
+	-@rm -rf .nyc_output coverage doc node_modules

@@ -1,7 +1,10 @@
 NODEBIN = ./node_modules/.bin
 LINTSRC = src/*.js test/*.js
 
-.PHONY: test lint coverage doc distclean
+.PHONY: main test lint coverage doc distclean
+
+main:
+	exit 0
 
 test:
 	npm test
@@ -16,4 +19,4 @@ doc:
 	$(NODEBIN)/jsdoc -c jsdoc.json
 
 distclean:
-	-@rm -rf .nyc_output node_modules coverage doc
+	-@rm -rf .nyc_output coverage doc node_modules
