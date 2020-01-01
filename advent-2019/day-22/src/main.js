@@ -20,6 +20,6 @@ const cardOfInt = new CardOfInterest(deckSize, cardPos);
 // 0b010111001000100010001110110110111100101011110101, 48 bits (top 0)
 const shuffleTimes = 101741582076661;  // prime
 cardOfInt.doTechniquesNTimes(input, shuffleTimes);
-console.log('part 2: expected answer:           30450754046345 IS TOO LOW');
+console.log('part 2: expected answer:           41685581334351');
 console.log(`part 2: card at position ${cardPos} is:  ${cardOfInt.card}`);
 console.log('');

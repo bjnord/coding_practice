@@ -48,7 +48,7 @@ class CardOfInterest
     const a = this._abComposed[0];
     const b = this._abComposed[1];
     //console.debug(`composed A=${a} B=${b} for pos=${this.cardPos}`);
-    return CardOfInterest._negrem(a * this.cardPos + b, this.nCards);
+    return CardOfInterest._axb(a, this.cardPos, b, this.nCards);
   }
   // private: create a composed function from a function stack
   _composeFunction(abStack)
@@ -58,13 +58,20 @@ class CardOfInterest
       const fnF = abStack.shift();  // "inner" function f() of g(f(x))
       // "Given two functions `f = a*x+b` and `g = c*x+d`,
       // composition `g(f(x))` is `c*a*x + c*b + d`."
-      const newA = CardOfInterest._negrem(fnG[0] * fnF[0], this.nCards);
-      const newB = CardOfInterest._negrem(fnG[0] * fnF[1] + fnG[1], this.nCards);
+      const newA = CardOfInterest._axb(fnG[0], fnF[0], 0, this.nCards);
+      const newB = CardOfInterest._axb(fnG[0], fnF[1], fnG[1], this.nCards);
       abStack.unshift([newA, newB]);
     }
     return abStack.shift();
   }
+  // private: calculate ax+b % d
+  // NOTE arguments are Number, return is Number
+  static _axb(a, x, b, d)
+  {
+    return Number(CardOfInterest._negrem(BigInt(a) * BigInt(x) + BigInt(b), BigInt(d)));
+  }
   // private: handle modulo of negatives
+  // NOTE arguments are BigInt, return is BigInt
   static _negrem(a, b)
   {
     if (a < 0) {
