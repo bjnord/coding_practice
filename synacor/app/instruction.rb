@@ -21,17 +21,24 @@ class Instruction
   # * +:args+ [Array] The instruction's argument list (array of +ComplexValue+)
   # * +:pc+ [Integer] The updated +PC+
   def self.fetch(memory, pc)
-    ret = {args: []}
+    ret = {}
+    op = fetch_op(memory, pc)
+    ret[:opcode] = op[:opcode]
+    ret[:args] = fetch_args(memory, pc, op[:n_args])
+    ret[:pc] = pc + 1 + op[:n_args]
+    ret
+  end
+
+protected
+
+  def self.fetch_op(memory, pc)
     val = memory.get(pc)
     op = INSTRUCTIONS[val]
     raise InstructionError, "unknown instruction 0x#{val.to_s(16).rjust(2, '0')}" unless op
-    pc += 1
-    ret[:opcode] = op[:opcode]
-    op[:n_args].times do |n|
-      ret[:args] << ComplexValue.new(memory.get(pc))
-      pc += 1
-    end
-    ret[:pc] = pc
-    ret
+    op
+  end
+
+  def self.fetch_args(memory, pc, n_args)
+    n_args.times.collect {|n| ComplexValue.new(memory.get(pc + 1 + n)) }
   end
 end
