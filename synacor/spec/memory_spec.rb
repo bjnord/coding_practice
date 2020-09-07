@@ -4,7 +4,27 @@ describe Memory do
   let(:memory) { Memory.new }
   it 'should initialize all memory to 0' do
     expect(memory.get(0)).to be == 0x0
-    expect(memory.get(0x7fff)).to be == 0x0
+    expect(memory.get(Memory::MAX_ADDRESS)).to be == 0x0
+  end
+
+  describe '#get' do
+    let(:memory) { Memory.new }
+    it 'should disallow negative addresses' do
+      expect{ memory.get(-1) }.to raise_error(MemoryError, 'negative address')
+    end
+    it 'should disallow addresses outside address space' do
+      expect{ memory.get(Memory::MAX_ADDRESS+1) }.to raise_error(MemoryError, 'address outside address space')
+    end
+  end
+
+  describe '#set' do
+    let(:memory) { Memory.new }
+    it 'should disallow negative addresses' do
+      expect{ memory.set(-1, 0x1) }.to raise_error(MemoryError, 'negative address')
+    end
+    it 'should disallow addresses outside address space' do
+      expect{ memory.set(Memory::MAX_ADDRESS+1, 0x2) }.to raise_error(MemoryError, 'address outside address space')
+    end
   end
 
   describe '#load_program' do

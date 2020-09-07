@@ -5,16 +5,22 @@
 # - all numbers are unsigned integers 0..32767 (15-bit)
 # - address 0 is the first 16-bit value, address 1 is the second 16-bit value, etc
 
+class MemoryError < StandardError ; end
+
 class Memory
+  MAX_ADDRESS = 0x7FFF
+
   def initialize
-    @memory = Array.new(0x8000, 0)
+    @memory = Array.new(MAX_ADDRESS+1, 0)
   end
 
   def get(addr)
+    validate_address addr
     @memory[addr]
   end
 
   def set(addr, value)
+    validate_address addr
     @memory[addr] = value
   end
 
@@ -30,5 +36,12 @@ class Memory
       set(addr, msb * 0x100 + lsb)
     end
     size
+  end
+
+protected
+
+  def validate_address(addr)
+    raise MemoryError, 'negative address' if addr < 0x0
+    raise MemoryError, 'address outside address space' if addr > MAX_ADDRESS
   end
 end
