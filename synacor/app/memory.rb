@@ -9,6 +9,9 @@ class MemoryError < StandardError ; end
 
 class Memory
   MAX_ADDRESS = 0x7FFF
+  MAX_VALUE = 0xFFFF
+  REGISTER_MASK = 0x8000
+  VALUE_MASK = 0x7FFF
 
   def initialize
     @memory = Array.new(MAX_ADDRESS+1, 0)
@@ -21,6 +24,7 @@ class Memory
 
   def set(addr, value)
     validate_address addr
+    validate_value value
     @memory[addr] = value
   end
 
@@ -43,5 +47,16 @@ protected
   def validate_address(addr)
     raise MemoryError, 'negative address' if addr < 0x0
     raise MemoryError, 'address outside address space' if addr > MAX_ADDRESS
+  end
+
+  # Details from architecture spec:
+  # - all numbers are unsigned integers 0..32767 (15-bit)
+  # - numbers 0..32767 mean a literal value
+  # - numbers 32768..32775 instead mean registers 0..7
+  # - numbers 32776..65535 are invalid
+  def validate_value(value)
+    raise MemoryError, 'negative value' if value < 0x0
+    raise MemoryError, 'value overflow' if value > MAX_VALUE
+    raise MemoryError, 'invalid value' if ((value & REGISTER_MASK) != 0x0) && ((value & VALUE_MASK) > 0x7)
   end
 end

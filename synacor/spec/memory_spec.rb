@@ -25,6 +25,19 @@ describe Memory do
     it 'should disallow addresses outside address space' do
       expect{ memory.set(Memory::MAX_ADDRESS+1, 0x2) }.to raise_error(MemoryError, 'address outside address space')
     end
+    it 'should disallow negative values' do
+      expect{ memory.set(0x3, -1) }.to raise_error(MemoryError, 'negative value')
+    end
+    it 'should disallow too-large values' do
+      expect{ memory.set(0x4, Memory::MAX_VALUE+1) }.to raise_error(MemoryError, 'value overflow')
+    end
+    it 'should allow valid register values' do
+      expect{ memory.set(0x5, 0x8000) }.not_to raise_error
+      expect{ memory.set(0x6, 0x8007) }.not_to raise_error
+    end
+    it 'should disallow invalid register values' do
+      expect{ memory.set(0x7, 0x8008) }.to raise_error(MemoryError, 'invalid value')
+    end
   end
 
   describe '#load_program' do
