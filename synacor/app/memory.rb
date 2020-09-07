@@ -39,6 +39,15 @@ class Memory
     size
   end
 
+  def load_string(string)
+    values = string.split(/,/).map{|v| (v =~ %r{^0x}) ? v.to_i(16) : v.to_i }
+    size = values.size
+    (0..size-1).each do |addr|
+      set(addr, values[addr])
+    end
+    size
+  end
+
 protected
 
   def validate_address(addr)

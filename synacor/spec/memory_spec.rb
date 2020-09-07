@@ -67,4 +67,14 @@ describe Memory do
       expect(memory.get(0x46)).to be == 0x00
     end
   end
+
+  describe '#load_string' do
+    let(:memory) { Memory.new }
+    it 'should load the test string properly' do
+      expect(memory.load_string('0x15,0x15,0x00')).to be == 3
+      expect(memory.get(0x00)).to be == 0x15
+      expect(memory.get(0x01)).to be == 0x15
+      expect(memory.get(0x02)).to be == 0x00
+    end
+  end
 end
