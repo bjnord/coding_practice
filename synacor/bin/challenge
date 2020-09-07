@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require_relative '../app/machine'
+
+$m = Machine.new(program_file: 'challenge.bin')
+$m.run
