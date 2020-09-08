@@ -15,7 +15,7 @@ describe Instruction do
 
   context 'with mixed n-argument operations' do
     let(:memory) { Memory.new }
-    before(:each) { memory.load_string('0x15,0x13,0x57,0x00') }
+    before(:each) { memory.load_string('0x15,0x13,0x57,0x01,0x8003,0x44,0x00') }
 
     it 'should decode the instructions' do
       expect(Instruction.fetch(memory, 0)).to be == {opcode: 'NOP', args: [], pc: 1}
@@ -24,7 +24,14 @@ describe Instruction do
       expect(inst[:args].size).to be == 1
       expect(inst[:args][0].register?).to be_falsey
       expect(inst[:args][0].value).to be == 0x57
-      expect(Instruction.fetch(memory, 3)).to be == {opcode: 'HALT', args: [], pc: 4}
+      inst = Instruction.fetch(memory, 3)
+      expect(inst.slice(:opcode, :pc)).to be == {opcode: 'SET', pc: 6}
+      expect(inst[:args].size).to be == 2
+      expect(inst[:args][0].register?).to be_truthy
+      expect(inst[:args][0].value).to be == 3
+      expect(inst[:args][1].register?).to be_falsey
+      expect(inst[:args][1].value).to be == 0x44
+      expect(Instruction.fetch(memory, 6)).to be == {opcode: 'HALT', args: [], pc: 7}
     end
   end
 

@@ -7,6 +7,18 @@ class InstructionError < StandardError ; end
 class Instruction
   INSTRUCTIONS = {
     0x00 => {opcode: 'HALT', n_args: 0},
+    0x01 => {opcode: 'SET', n_args: 2},
+    0x02 => {opcode: 'PUSH', n_args: 1},
+    0x03 => {opcode: 'POP', n_args: 1},
+    0x04 => {opcode: 'EQ', n_args: 3},
+    0x05 => {opcode: 'GT', n_args: 3},
+    0x06 => {opcode: 'JMP', n_args: 1},
+    0x07 => {opcode: 'JT', n_args: 2},
+    0x08 => {opcode: 'JF', n_args: 2},
+    0x09 => {opcode: 'ADD', n_args: 3},
+    0x0c => {opcode: 'AND', n_args: 3},
+    0x0d => {opcode: 'OR', n_args: 3},
+    0x0e => {opcode: 'NOT', n_args: 2},
     0x13 => {opcode: 'OUT', n_args: 1},
     0x15 => {opcode: 'NOP', n_args: 0},
   }
