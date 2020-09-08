@@ -17,6 +17,29 @@ describe Logic do
     end
   end
 
+  describe '#gt' do
+    context 'with lesser values' do
+      it 'should be false (0)' do
+        expect(Logic.gt(0x00, 0x01)).to be == 0
+        expect(Logic.gt(0x4379, 0x437a)).to be == 0
+      end
+    end
+
+    context 'with equal values' do
+      it 'should be false (0)' do
+        expect(Logic.gt(0x00, 0x00)).to be == 0
+        expect(Logic.gt(0x4379, 0x4379)).to be == 0
+      end
+    end
+
+    context 'with greater values' do
+      it 'should be true (1)' do
+        expect(Logic.gt(0x02, 0x01)).to be == 1
+        expect(Logic.gt(0x437b, 0x437a)).to be == 1
+      end
+    end
+  end
+
   describe '#add' do
     context 'with no overflow' do
       it 'should calculate the correct values' do

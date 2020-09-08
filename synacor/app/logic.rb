@@ -9,6 +9,10 @@ class Logic
     (b == c) ? 1 : 0
   end
 
+  def self.gt(b, c)
+    (b > c) ? 1 : 0
+  end
+
   def self.add(b, c)
     (b + c) & 0x7fff
   end
