@@ -55,4 +55,31 @@ describe Logic do
       end
     end
   end
+
+  describe '#and' do
+    it 'should calculate the correct values' do
+      expect(Logic.and(0x3333, 0x1212)).to be == 0x1212
+      expect(Logic.and(0x3333, 0x569a)).to be == 0x1212
+      expect(Logic.and(0x5555, 0x7fff)).to be == 0x5555
+      expect(Logic.and(0x5555, 0x1256)).to be == 0x1054
+    end
+  end
+
+  describe '#or' do
+    it 'should calculate the correct values' do
+      expect(Logic.or(0x3333, 0x1212)).to be == 0x3333
+      expect(Logic.or(0x3333, 0x569a)).to be == 0x77bb
+      expect(Logic.or(0x5555, 0x7fff)).to be == 0x7fff
+      expect(Logic.or(0x5555, 0x0000)).to be == 0x5555
+    end
+  end
+
+  describe '#not' do
+    it 'should calculate the correct values' do
+      expect(Logic.not(0x1212)).to be == 0x6ded
+      expect(Logic.not(0x569a)).to be == 0x2965
+      expect(Logic.not(0x7fff)).to be == 0x0000
+      expect(Logic.not(0x0000)).to be == 0x7fff
+    end
+  end
 end

@@ -16,4 +16,16 @@ class Logic
   def self.add(b, c)
     (b + c) & 0x7fff
   end
+
+  def self.and(b, c)
+    (b & 0x7fff) & c
+  end
+
+  def self.or(b, c)
+    (b & 0x7fff) | (c & 0x7fff)
+  end
+
+  def self.not(b)
+    ~b & 0x7fff
+  end
 end
