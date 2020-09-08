@@ -1,6 +1,22 @@
 require_relative '../app/logic'
 
 describe Logic do
+  describe '#eq' do
+    context 'with equal values' do
+      it 'should be true (1)' do
+        expect(Logic.eq(0x00, 0x00)).to be == 1
+        expect(Logic.eq(0x4379, 0x4379)).to be == 1
+      end
+    end
+
+    context 'with unequal values' do
+      it 'should be false (0)' do
+        expect(Logic.eq(0x01, 0x02)).to be == 0
+        expect(Logic.eq(0x4379, 0x4378)).to be == 0
+      end
+    end
+  end
+
   describe '#add' do
     context 'with no overflow' do
       it 'should calculate the correct values' do

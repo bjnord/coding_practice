@@ -5,6 +5,10 @@
 # - all math is modulo 32768; 32758 + 15 => 5
 
 class Logic
+  def self.eq(b, c)
+    (b == c) ? 1 : 0
+  end
+
   def self.add(b, c)
     (b + c) & 0x7fff
   end
