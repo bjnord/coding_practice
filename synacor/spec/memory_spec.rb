@@ -10,6 +10,8 @@ describe Memory do
     expect(memory.get(0x55)).to be == 0x0
     memory.set(0x55, 0x9005)
     expect(memory.get(0x55)).to be == 0x9005
+    memory.set(0x55, 0x0)
+    expect(memory.get(0x55)).to be == 0x0
   end
 
   describe '#get' do
