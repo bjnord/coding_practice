@@ -6,7 +6,7 @@
 class StackError < StandardError ; end
 
 class Stack
-  MAX_VALUE = 0xFFFF
+  MAX_VALUE = 0x7FFF
 
   def initialize
     @stack = []
