@@ -82,7 +82,7 @@ class Machine
       when 'RET'
         new_pc = @stack.pop
       when 'OUT'
-        print inst[:args][0].value.chr
+        print arg_value(inst[:args][0]).chr
       when 'IN'
         raise MachineError, 'IN arg a is not a register' unless inst[:args][0].register?
         @buffer = gets if @buffer.empty?
