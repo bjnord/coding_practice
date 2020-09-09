@@ -24,6 +24,7 @@ class Machine
     $stderr.puts "[running]"
     while true do
       inst = Instruction.fetch(@memory, @pc)
+      #Instruction.dump(inst, @pc)
       new_pc = inst[:pc]
       case inst[:opcode]
       when 'NOP'

@@ -48,6 +48,21 @@ class Instruction
     ret
   end
 
+  def self.dump(inst, pc)
+    $stderr.print "%04x %-4s " % [pc, inst[:opcode]]
+    inst[:args].each do |arg|
+      ch = (arg.value < 0x7f) ? arg.value.chr : 0x00.chr
+      if arg.register?
+        $stderr.print "R%d " % [arg.value]
+      elsif (inst[:opcode] == 'OUT') && (ch =~ %r{[[:print:]]})
+        $stderr.print "'%s' " % [ch]
+      else
+        $stderr.print "0x%04x " % [arg.value]
+      end
+    end
+    $stderr.puts ''
+  end
+
 protected
 
   def self.fetch_op(memory, pc)
