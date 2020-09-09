@@ -12,6 +12,7 @@ class Machine
     @memory = Memory.new
     @registers = RegisterSet.new
     @stack = Stack.new
+    @buffer = ''
     if opts[:program_file]
       @memory.load_program(opts[:program_file])
     elsif opts[:program_string]
@@ -54,6 +55,12 @@ class Machine
       when 'ADD'
         raise MachineError, 'ADD arg a is not a register' unless inst[:args][0].register?
         @registers.set(inst[:args][0].value, Logic.add(arg_value(inst[:args][1]), arg_value(inst[:args][2])))
+      when 'MULT'
+        raise MachineError, 'MULT arg a is not a register' unless inst[:args][0].register?
+        @registers.set(inst[:args][0].value, Logic.mult(arg_value(inst[:args][1]), arg_value(inst[:args][2])))
+      when 'MOD'
+        raise MachineError, 'MOD arg a is not a register' unless inst[:args][0].register?
+        @registers.set(inst[:args][0].value, Logic.mod(arg_value(inst[:args][1]), arg_value(inst[:args][2])))
       when 'AND'
         raise MachineError, 'AND arg a is not a register' unless inst[:args][0].register?
         @registers.set(inst[:args][0].value, Logic.and(arg_value(inst[:args][1]), arg_value(inst[:args][2])))
@@ -63,8 +70,23 @@ class Machine
       when 'NOT'
         raise MachineError, 'NOT arg a is not a register' unless inst[:args][0].register?
         @registers.set(inst[:args][0].value, Logic.not(arg_value(inst[:args][1])))
+      when 'RMEM'
+        raise MachineError, 'RMEM arg a is not a register' unless inst[:args][0].register?
+        @registers.set(inst[:args][0].value, @memory.get(arg_value(inst[:args][1])))
+      when 'WMEM'
+        @memory.set(arg_value(inst[:args][0]), arg_value(inst[:args][1]))
+      when 'CALL'
+        @stack.push(new_pc)
+        new_pc = arg_value(inst[:args][0])
+      when 'RET'
+        new_pc = @stack.pop
       when 'OUT'
         print inst[:args][0].value.chr
+      when 'IN'
+        raise MachineError, 'IN arg a is not a register' unless inst[:args][0].register?
+        @buffer = gets if @buffer.empty?
+        @registers.set(inst[:args][0].value, @buffer[0].ord)
+        @buffer[0] = ''
       when 'HALT'
         $stderr.puts "[halted]"
         return

@@ -16,10 +16,17 @@ class Instruction
     0x07 => {opcode: 'JT', n_args: 2},
     0x08 => {opcode: 'JF', n_args: 2},
     0x09 => {opcode: 'ADD', n_args: 3},
+    0x0a => {opcode: 'MULT', n_args: 3},
+    0x0b => {opcode: 'MOD', n_args: 3},
     0x0c => {opcode: 'AND', n_args: 3},
     0x0d => {opcode: 'OR', n_args: 3},
     0x0e => {opcode: 'NOT', n_args: 2},
+    0x0f => {opcode: 'RMEM', n_args: 2},
+    0x10 => {opcode: 'WMEM', n_args: 2},
+    0x11 => {opcode: 'CALL', n_args: 1},
+    0x12 => {opcode: 'RET', n_args: 0},
     0x13 => {opcode: 'OUT', n_args: 1},
+    0x14 => {opcode: 'IN', n_args: 1},
     0x15 => {opcode: 'NOP', n_args: 0},
   }
 
