@@ -56,6 +56,29 @@ describe Logic do
     end
   end
 
+  describe '#mult' do
+    context 'with no overflow' do
+      it 'should calculate the correct values' do
+        expect(Logic.mult(0x02, 0x03)).to be == 0x06
+        expect(Logic.mult(0x65, 0xbf)).to be == 0x4b5b
+      end
+    end
+
+    context 'with overflow' do
+      it 'should calculate the correct values' do
+        expect(Logic.mult(32758, 15)).to be == 32618
+        expect(Logic.mult(0x38f, 0x3df)).to be == 0x4691
+      end
+    end
+  end
+
+  describe '#mod' do
+    it 'should calculate the correct values' do
+      expect(Logic.mod(32767, 3)).to be == 1
+      expect(Logic.mod(0x5432, 0xbf)).to be == 0xa2
+    end
+  end
+
   describe '#and' do
     it 'should calculate the correct values' do
       expect(Logic.and(0x3333, 0x1212)).to be == 0x1212

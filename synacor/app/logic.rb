@@ -17,6 +17,14 @@ class Logic
     (b + c) & 0x7fff
   end
 
+  def self.mult(b, c)
+    (b * c) & 0x7fff
+  end
+
+  def self.mod(b, c)
+    b % c
+  end
+
   def self.and(b, c)
     (b & 0x7fff) & c
   end
