@@ -2,5 +2,12 @@
 
 require_relative '../app/machine'
 
-$m = Machine.new(program_file: 'challenge.bin')
+opts = {}
+if file = ARGV.shift
+  opts[:program_file] = file
+end
+if file = ARGV.shift
+  opts[:input_file] = file
+end
+$m = Machine.new(opts)
 $m.run

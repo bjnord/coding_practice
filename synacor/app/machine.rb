@@ -18,6 +18,7 @@ class Machine
     elsif opts[:program_string]
       @memory.load_string(opts[:program_string])
     end
+    @input = opts[:input_file] ? File.readlines(opts[:input_file]) : []
   end
 
   def run
@@ -85,7 +86,14 @@ class Machine
         print arg_value(inst[:args][0]).chr
       when 'IN'
         raise MachineError, 'IN arg a is not a register' unless inst[:args][0].register?
-        @buffer = gets if @buffer.empty?
+        if @buffer.empty?
+          if @input.empty?
+            @buffer = gets
+          else
+            @buffer = @input.shift
+            print @buffer
+          end
+        end
         @registers.set(inst[:args][0].value, @buffer[0].ord)
         @buffer[0] = ''
       when 'HALT'
