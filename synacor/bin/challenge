@@ -3,6 +3,10 @@
 require_relative '../app/machine'
 
 opts = {}
+if ARGV[0] == '-d'
+  opts[:debug] = true
+  ARGV.shift
+end
 if file = ARGV.shift
   opts[:program_file] = file
 end

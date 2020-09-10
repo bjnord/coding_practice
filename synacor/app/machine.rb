@@ -13,6 +13,7 @@ class Machine
     @registers = RegisterSet.new
     @stack = Stack.new
     @buffer = ''
+    @debug = opts[:debug]
     if opts[:program_file]
       @memory.load_program(opts[:program_file])
     elsif opts[:program_string]
@@ -25,7 +26,7 @@ class Machine
     $stderr.puts "[running]"
     while true do
       inst = Instruction.fetch(@memory, @pc)
-      #Instruction.dump(inst, @pc)
+      Instruction.dump(inst, @pc) if @debug
       new_pc = inst[:pc]
       case inst[:opcode]
       when 'NOP'
