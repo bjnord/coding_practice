@@ -13,8 +13,7 @@ D-->|north|D
 A-->|east|E
 E[Gruesound]-->|west|A
 E-->|south|E
-E-->|east|N
-N[Gruetoo?]
+E-->|east|F
 E-->|north|K
 D-->|south|G
 G[Gruelikely]-->|north=code|H
@@ -22,7 +21,8 @@ H[Canroom]-->|west|A
 G-->|south|B
 G-->|west|C
 G-->|east|F
-F[Grue?]
+F[Gruearea]-->|north|C
+F-->|south|B
 K[Nintendo]-->|north|L
 K-->|south|K
 K-->|east|M
