@@ -54,5 +54,13 @@ module.exports = {
             "always",
         ],
         "no-extra-semi": "off",
+        "complexity": [
+            "error",
+            4,
+        ],
+        "max-statements": [
+            "error",
+            10,
+        ],
     },
 };
