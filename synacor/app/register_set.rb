@@ -10,8 +10,11 @@ class RegisterSet
   MAX_NUMBER = 7
   MAX_VALUE = 0x7FFF
 
-  def initialize
+  def initialize(init)
     @registers = Array.new(MAX_NUMBER+1, 0x0)
+    if init.respond_to?(:size) && (init.size == 2)
+      set(init[0], init[1])
+    end
   end
 
   def get(num)

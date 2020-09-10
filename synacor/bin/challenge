@@ -7,6 +7,12 @@ if ARGV[0] == '-d'
   opts[:debug] = true
   ARGV.shift
 end
+if ARGV[0] == '-r'
+  ARGV.shift
+  if (opts[:reg_init] = ARGV.shift.split(/,/).map(&:to_i)).size != 2
+    abort 'invalid -r argument'
+  end
+end
 if file = ARGV.shift
   opts[:program_file] = file
 end

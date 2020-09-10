@@ -10,7 +10,7 @@ class Machine
   def initialize(opts)
     @pc = 0
     @memory = Memory.new
-    @registers = RegisterSet.new
+    @registers = RegisterSet.new(opts[:reg_init])
     @stack = Stack.new
     @buffer = ''
     @debug = opts[:debug]
@@ -19,6 +19,7 @@ class Machine
     elsif opts[:program_string]
       @memory.load_string(opts[:program_string])
     end
+    @memory.patch(opts[:reg_init])
     @input = opts[:input_file] ? File.readlines(opts[:input_file]) : []
   end
 

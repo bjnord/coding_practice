@@ -48,6 +48,17 @@ class Memory
     size
   end
 
+  def patch(reg_init)
+    if reg_init.respond_to?(:size) && (reg_init.size == 2)
+      if reg_init[0] == 7
+        # 0209 JT   R7 0x0445
+        if (get(0x0209) == 0x07) && (get(0x020a) == 0x8007) && (get(0x020b) == 0x0445)
+          set(0x0209, 0x08)  # change to JF
+        end
+      end
+    end
+  end
+
 protected
 
   def validate_address(addr)
