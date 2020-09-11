@@ -15,9 +15,11 @@ class Machine
     @buffer = ''
     @debug = opts[:debug]
     if opts[:program_file]
-      @memory.load_program(opts[:program_file])
+      @size = @memory.load_program(opts[:program_file])
     elsif opts[:program_string]
-      @memory.load_string(opts[:program_string])
+      @size = @memory.load_string(opts[:program_string])
+    else
+      @size = 0
     end
     @memory.patch(opts[:reg_init])
     @input = opts[:input_file] ? File.readlines(opts[:input_file]) : []
@@ -105,6 +107,19 @@ class Machine
         raise MachineError, "unimplemented opcode #{inst[:opcode]} at PC=0x#{@pc.to_s(16).rjust(4, '0')} (byte=0x#{(@pc * 2).to_s(16).rjust(4, '0')})"
       end
       @pc = new_pc
+    end
+  end
+
+  def disassemble
+    while @pc < @size do
+      if (d = @memory.get(@pc)) > 0x15
+        $stderr.puts "%04x DATA 0x%04x " % [@pc, d]
+        @pc += 1
+      else
+        inst = Instruction.fetch(@memory, @pc)
+        Instruction.dump(inst, @pc)
+        @pc = inst[:pc]
+      end
     end
   end
 
