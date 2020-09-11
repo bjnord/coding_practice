@@ -22,6 +22,12 @@ class Stack
     @stack.pop
   end
 
+  def dump
+    $stderr.print "STACK(#{@stack.size}): "
+    @stack.each{|sv| $stderr.print "0x%04x " % [sv] }
+    $stderr.puts ""
+  end
+
 protected
 
   def validate_value(value)
