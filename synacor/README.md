@@ -197,6 +197,8 @@ The entry points here are `178b` `1793` and `17a0`, and only `178b` is called fr
   - watching the output, it looks like 30-40% of second- and third-section calls come from cache
 - I also [bumped up the Ruby (and Unix-level) stack size](https://stackoverflow.com/a/30816311/291754)
 - the resulting program `bin/try-r7` ran for an hour or so (good enough), and produced this!
+```
         with R7=25734 f([4, 1])=[6, 5]
         entries=91269 misses=91300(60.9%) hits=58512(39.1%)
         WINNER
+```
