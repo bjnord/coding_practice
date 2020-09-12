@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+# <https://harfangk.github.io/2017/01/01/how-to-enable-tail-call-recursion-in-ruby.html>
+# we're using option #2:
+# - include the `compile_option` code
+# - and then `require` the code we want TRO on
+
+RubyVM::InstructionSequence.compile_option = {
+  :tailcall_optimization => true,
+  :trace_instruction => false
+}
+
+require_relative '../app/fact'
+
+puts 'Iterator result'
+puts Fact.iterator(100000).to_f
+
+puts 'Tail-recursive result'
+puts Fact.tail_recursive(100000).to_f
+
+puts 'Non-tail-recursive result'
+puts Fact.non_tail_recursive(100000).to_f
