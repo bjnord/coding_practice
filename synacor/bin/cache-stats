@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require_relative '../app/array_cache'
+
+ArrayCache.write([1, 2], [3, 4])
+ArrayCache.write([5, 6], [7, 8])
+ArrayCache.write([0, 32767], [555, 1212])
+
+# hits
+ArrayCache.read([1, 2])
+ArrayCache.read([5, 6])
+ArrayCache.read([0, 32767])
+ArrayCache.read([0, 32767])
+ArrayCache.read([0, 32767])
+
+# misses
+ArrayCache.read([3, 4])
+ArrayCache.read([7, 8])
+ArrayCache.read([555, 1212])
+
+ArrayCache.dump
