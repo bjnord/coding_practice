@@ -1,0 +1,14 @@
+#!/bin/sh
+
+export RUBY_THREAD_VM_STACK_SIZE=16000000
+ulimit -s 128000
+
+r7=1
+while [ $r7 -lt 32768 ]; do
+    bin/optimized-f $r7
+    if [ $? -eq 0 ]; then
+        echo "WINNER" >&2
+        exit 0
+    fi
+    r7=`expr $r7 + 1`
+done

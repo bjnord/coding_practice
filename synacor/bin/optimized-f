@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+# <https://harfangk.github.io/2017/01/01/how-to-enable-tail-call-recursion-in-ruby.html>
+# we're using option #2:
+# - include the `compile_option` code
+# - and then `require` the code we want TRO on
+
+RubyVM::InstructionSequence.compile_option = {
+  :tailcall_optimization => true,
+  :trace_instruction => false
+}
+
+require_relative '../app/array_cache'
+require_relative '../app/optimized_f'
+
+abort 'must specify R7 value' unless ARGV[0]
+$r7 = ARGV[0].to_i
+$opt = OptimizedF.new($r7)
+begin
+  res = $opt.f([4, 1])
+  $stderr.puts "with R7=#{$r7} f([4, 1])=#{res.inspect}"
+  $ex = (res[0] == 6) ? 0 : 1
+rescue Exception => e
+  $stderr.puts "exception: #{e.message}"
+  $ex = 2
+ensure
+  ArrayCache.dump
+end
+exit $ex

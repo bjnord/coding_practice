@@ -91,5 +91,7 @@ describe ArrayCache do
         expect{ ArrayCache.write(1, [5, 6]) }.to raise_error ArrayCacheError, 'key must be Enumerable'
       end
     end
+
+    pending "ensure caller can't modify array after storage"
   end
 end
