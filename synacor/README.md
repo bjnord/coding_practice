@@ -34,8 +34,13 @@ you can read the first two sections spoiler-free, but starting with the "Text Ad
 
 see the dungeon maps in the `doc/maps/` directory (I used [Mermaid](https://mermaid-js.github.io/mermaid/))
 
-my machine implementation can be run using scripted input (2nd argument to `bin/challenge`); see `input.txt` for the dungeon run
+my machine implementation can be run using scripted input (2nd argument to `bin/challenge`)
+- run `bin/dungeon` for the first mode (`R7=0`), teleporting to Synacor HQ
+  - `dungeon.txt` is the script for this mode
+- run `bin/teleport` for the second mode (`R7>0`), teleporting to the rainy beach
+  - `teleport.txt` is the script for this mode
 
+first mode
 - code #4 is found by doing `use tablet`
 - code #5 is observed when walking between two rooms in the maze
 

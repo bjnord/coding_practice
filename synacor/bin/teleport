@@ -1,0 +1,9 @@
+#!/bin/sh -x
+#
+# this runs the adventure in the second mode (R7>0)
+# in which you teleport to the rainy beach
+
+export RUBY_THREAD_VM_STACK_SIZE=16000000
+ulimit -s 128000
+
+bin/challenge -r 7,25734 challenge.bin teleport.txt

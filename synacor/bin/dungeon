@@ -1,0 +1,6 @@
+#!/bin/sh -x
+#
+# this runs the adventure in the first mode (R7=0)
+# in which you arrive at Synacor HQ and read about teleportation
+
+bin/challenge challenge.bin dungeon.txt

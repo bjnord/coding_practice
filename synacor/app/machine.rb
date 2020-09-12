@@ -1,6 +1,19 @@
+# Main machine class
+
+# <https://harfangk.github.io/2017/01/01/how-to-enable-tail-call-recursion-in-ruby.html>
+# we're using option #2:
+# - include the `compile_option` code
+# - and then `require` the code we want TRO on
+#
+RubyVM::InstructionSequence.compile_option = {
+  :tailcall_optimization => true,
+  :trace_instruction => false
+}
+
 require_relative './instruction'
 require_relative './logic'
 require_relative './memory'
+require_relative './optimized_f'
 require_relative './register_set'
 require_relative './stack'
 
@@ -22,6 +35,8 @@ class Machine
       @size = 0
     end
     @memory.patch(opts[:reg_init])
+    r7 = @registers.get(7)
+    @call_178b = (r7 > 0) ? OptimizedF.new(r7) : nil
     @input = opts[:input_file] ? File.readlines(opts[:input_file]) : []
   end
 
@@ -82,8 +97,15 @@ class Machine
       when 'WMEM'
         @memory.set(arg_value(inst[:args][0]), arg_value(inst[:args][1]))
       when 'CALL'
-        @stack.push(new_pc)
-        new_pc = arg_value(inst[:args][0])
+        addr = arg_value(inst[:args][0])
+        if (addr == 0x178b) && @call_178b
+          r = @call_178b.f([@registers.get(0), @registers.get(1)])
+          @registers.set(0, r[0])
+          @registers.set(1, r[1])
+        else
+          @stack.push(new_pc)
+          new_pc = addr
+        end
       when 'RET'
         new_pc = @stack.pop
       when 'OUT'
