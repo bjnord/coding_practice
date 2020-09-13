@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+# - approach #2: arithmetic
+#   - we need to get from 22 to at least 41 (to account for the `- 11 * 1` at the end)
+#   - the only `+` is right next to the antechamber, and we can only add 4 each time
+#   - so the fastest way to get above 41 seems to be `* 4`
+#     - and the only way to do that is to do `+ 4` first
+#   - `+ 4 * 4` leaves me at 104 in 4 moves
+#   - then I can have as many `- 4`, `- 9`, `- 11`, and `- 18` operations as I want
+#     - as long as I do one `- 11` or `- 18` at the end, followed by `* 1` (or `- 1` for the 11 case)
+#   - so we need solutions for: `104 - 4*A - 9*B - 11*C - 1*D = 30`
+#     - where `D` can be `1` if `C > 0`
+#     - and where we want `A + B + C` to be minimized, and no more than 3 total
+#       - 4 initial moves, 6 mid moves, 2 final moves = 12 total moves
+#     - and where a double `B` can be replaced with a `- 18` instead (saving moves)
+
+$stderr.puts 'sadly, none of these solutions are shorter than 14 moves:'
+
+def try(i, m, a, b, c, d, e)
+  if i - 4*a - 9*b - 11*c - 1*d - 18*e == 30
+    moves = m + (a + b + c + e) * 2
+    $stderr.puts "solution I=#{i} A=#{a} B=#{b} C=#{c} D=#{d} E=#{e} moves=#{moves}"
+  end
+end
+
+def search(i, m)
+  (0..4).each do |a|
+    (0..4).each do |b|
+      (0..4).each do |c|
+        try(i, m, a, b, c, 0, 0)
+        try(i, m, a, b, c, 1, 0) if c > 0
+        if b > 1
+          b0 = b % 2
+          e = (b-b0) / 2
+          try(i, m, a, b0, c, 0, e)
+          try(i, m, a, b0, c, 1, e) if c > 0
+        end
+      end
+    end
+  end
+end
+
+# starting with "+ 4 * 4" (initial = 104)
+# ending with either "- 1" or "* 1"
+search(104, 4 + 2)
+
+# starting with "- 4 * 4 + 4" (initial = 76)
+# ending with either "- 1" or "* 1"
+search(76, 6 + 2)
+
+$stderr.puts 'fail.'
+exit 0

@@ -6,7 +6,7 @@ you can read the first two sections spoiler-free, but starting with the "Text Ad
 
 ## Architecture
 
-- code #1 is right in the `arch-spec.txt` file
+- code #1 is given in the `arch-spec.txt` file
 - architecture description was unclear in places, at first
   - operations like `SET` `POP` `ADD` and `IN` _etc._ only store to registers
     - `WMEM` is the only operation that writes to memory
@@ -54,7 +54,7 @@ first mode
 - corroded coin = 3
 - solution: blue, red, shiny, concave, corroded
 
-- code #6 is revealed after solving the coin puzzle and teleporting
+- code #6 is revealed after solving the coin puzzle and teleporting to Synacor HQ (in first mode `R7=0`)
 
 ### Teleporter Puzzle
 
@@ -207,3 +207,105 @@ The entry points here are `178b` `1793` and `17a0`, and only `178b` is called fr
         entries=91269 misses=91300(60.9%) hits=58512(39.1%)
         WINNER
 ```
+
+### Tropical Island
+
+code #7 is drawn in the sand on the beach, immediately after teleporting to the island (in second mode `R7>0`)
+
+typos here ("embankment" should be "embankments" plural; "come toegher" should be "come together"):
+```
+== Tropical Island ==
+The embankment of the cove come toegher here to your east and west.
+```
+
+### Vault Puzzle
+
+The map of my vault grid:
+
+```
++--------+--------+--------+--------+
+|        |        |        | Vault  |
+|   *    |   8    |   -    |  "30"  |
+|        |        |        |        |
++--------+--------+--------+--------+
+|        |        |        |        |
+|   4    |   *    |   11   |   *    |
+|        |        |        |        |
++--------+--------+--------+--------+
+|        |        |        |        |
+|   +    |   4    |   -    |   18   |
+|        |        |        |        |
++--------+--------+--------+--------+
+| Antech |        |        |        |
+|  "22"  |   -    |   9    |   *    |
+|    orb |        |        |        |
++--------+--------+--------+--------+
+```
+
+No matter how you walk from the Antechamber to the Vault Door, you get numbers alternating with operations, like an equation.
+
+The journal reads:
+
+> Day 1: We have reached what seems to be the final in a series of puzzles guarding an ancient treasure.  I suspect most adventurers give up long before this point, but we're so close!  We must press on!
+>
+> Day 1: P.S.: It's a good thing the island is tropical.  We should have food for weeks!
+>
+> Day 2: The vault appears to be sealed by a mysterious force - the door won't budge an inch.  We don't have the resources to blow it open, and I wouldn't risk damaging the contents even if we did.  We'll have to figure out the lock mechanism.
+>
+> Day 3: The door to the vault has a number carved into it.  Each room leading up to the vault has more numbers or symbols embedded in mosaics in the floors.  We even found a strange glass orb in the antechamber on a pedestal itself labeled with a number.  What could they mean?
+>
+> Day 5: We finally built up the courage to touch the strange orb in the antechamber.  It flashes colors as we carry it from room to room, and sometimes the symbols in the rooms flash colors as well.  It simply evaporates if we try to leave with it, but another appears on the pedestal in the antechamber shortly thereafter.  It also seems to do this even when we return with it to the antechamber from the other rooms.
+>
+> Day 8: When the orb is carried to the vault door, the numbers on the door flash black, and then the orb evaporates.  Did we do something wrong?  Doesn't the door like us?  We also found a small hourglass near the door, endlessly running.  Is it waiting for something?
+>
+> Day 13: Some of my crew swear the orb actually gets heaver or lighter as they walk around with it.  Is that even possible?  They say that if they walk through certain rooms repeatedly, they feel it getting lighter and lighter, but it eventually just evaporates and a new one appears as usual.
+>
+> Day 21: Now I can feel the orb changing weight as I walk around.  It depends on the area - the change is very subtle in some places, but certainly more noticeable in others, especially when I walk into a room with a larger number or out of a room marked '\*'.  Perhaps we can actually control the weight of this mysterious orb?
+>
+> Day 34: One of the crewmembers was wandering the rooms today and claimed that the numbers on the door flashed white as he approached!  He said the door still didn't open, but he noticed that the hourglass had run out and flashed black.  When we went to check on it, it was still running like it always does.  Perhaps he is going mad?  If not, which do we need to appease: the door or the hourglass?  Both?
+>
+> Day 55: The fireflies are getting suspicious.  One of them looked at me funny today and then flew off.  I think I saw another one blinking a little faster than usual.  Or was it a little slower?  We are getting better at controlling the weight of the orb, and we think that's what the numbers are all about.  The orb starts at the weight labeled on the pedestal, and goes down as we leave a room marked '-', up as we leave a room marked '+', and up even more as we leave a room marked '\*'.  Entering rooms with larger numbers has a greater effect.
+>
+> Day 89: Every once in a great while, one of the crewmembers has the same story: that the door flashes white, the hourglass had already run out, it flashes black, and the orb evaporates.  Are we too slow?  We can't seem to find a way to make the orb's weight match what the door wants before the hourglass runs out.  If only we could find a shorter route through the rooms...
+>
+> Day 144: We are abandoning the mission.  None of us can work out the solution to the puzzle.  I will leave this journal here to help future adventurers, though I am not sure what help it will give.  Good luck!
+
+#### Solution Approaches
+
+- some experimentation confirms my guess
+  - the movement operations need to transform 22 to 30
+  - there's no operator precedence (5 + 4 * 2 = 18, not 13)
+- approach #1: pencil-and-paper
+  - I found two paths that made the vault number flash white
+  - but the hourglass had expired; 14 moves is apparently too much
+- approach #2: arithmetic
+  - we need to get from 22 to at least 41 (to account for the `- 11 * 1` at the end)
+  - the only `+` is right next to the antechamber, and we can only add 4 each time
+  - so the fastest way to get above 41 seems to be `* 4`
+    - and the only way to do that is to do `+ 4` first
+  - `+ 4 * 4` leaves me at 104 in 4 moves
+  - then I can have as many `- 4`, `- 9`, `- 11`, and `- 18` operations as I want
+    - as long as I do one `- 11` or `- 18` at the end, followed by `* 1` (or `- 1` for the 11 case)
+  - so we need solutions for: `104 - 4*A - 9*B - 11*C - 1*D = 30`
+    - where `D` can be `1` if `C > 0`
+    - and where we want `A + B + C` to be minimized, and no more than 3 total
+      - 4 initial moves, 6 mid moves, 2 final moves = 12 total moves
+    - and where a double `B` can be replaced with a `- 18` instead (saving moves)
+  - sadly, none of these solutions are shorter than 14 moves
+- approach #3: recursively walk the maze (with maximum 12 moves)
+  - for the record, I think subconsciously I left this approach for last
+    - because of the battle scars from Advent of Code maze walking algorithms
+    - for which recursion didn't work or took too long etc.
+  - but this one was pretty easy, and it did work; there is one solution in 12 moves:
+    - north, east, east, north, west, south, east, east, west, north, north, east
+    - `22 + 4 - 11 * 4 - 18 - 11 - 1 = 30`
+
+#### Vault Door After Solution
+
+typo here ("hour hands" should be "your hands"):
+```
+As you approach the vault door, the number on the vault door flashes white!  The hourglass is still running!  It flashes white!  You hear a click from the vault door.  The orb evaporates out of hour hands.
+```
+
+- code #8 is printed on your forehead in charcoal
+  - use the mirror found in the vault, but of course, you're seeing it in a mirror, so... (this made me laugh!)

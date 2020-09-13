@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require_relative '../app/walker'
+
+begin
+  $walker = Walker.new
+  $walker.walk
+rescue Exception => e
+  $stderr.puts "EXCEPTION #{e.message}"
+  $stderr.puts "at #{e.backtrace_locations.first}"
+end
