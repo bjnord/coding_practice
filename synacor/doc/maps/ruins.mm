@@ -13,5 +13,5 @@ F[Ruins living=blue]-->|up|G
 G[Ruins throne=shiny]-->|down|F
 C-->|north|H
 H-->|south|C
-H[Ruins teleport]-->|teleport|I
+H[Mural room=teleporter]-->|teleport|I
 I[see Island map]
