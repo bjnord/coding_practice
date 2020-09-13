@@ -40,20 +40,28 @@ my machine implementation can be run using scripted input (2nd argument to `bin/
 - run `bin/teleport` for the second mode (`R7>0`), teleporting to the rainy beach
   - `teleport.txt` is the script for this mode
 
-first mode
-- code #4 is found by doing `use tablet`
-- code #5 is observed when walking between two rooms in the maze
+### Dungeon (first mode)
 
-### Coin Puzzle
+- code #4 is found by doing `use tablet`
+  - tablet is in Foothills where you start the game
+- then you need to
+  - get the lantern (room in Moss cavern)
+  - get the can (room in Maze)
+  - do `use can` to fill the latern with oil and make it happy
+- code #5 is observed when walking between two rooms in the maze
+- you need a lit lantern (`use lantern`) to navigate the Dark passage
+
+### Coin Puzzle (Ruins)
 
 - equation: `_ + _ * _^2 + _^3 - _ = 399`
-- red coin = 2
-- blue coin = 9
-- shiny coin = 5
-- concave coin = 7
-- corroded coin = 3
-- solution: blue, red, shiny, concave, corroded
-
+- coin values:
+  - red = 2
+  - blue = 9
+  - shiny = 5
+  - concave = 7
+  - corroded = 3
+- so insert coins in this order:
+  - blue, red, shiny, concave, corroded
 - code #6 is revealed after solving the coin puzzle and teleporting to Synacor HQ (in first mode `R7=0`)
 
 ### Teleporter Puzzle
@@ -208,7 +216,7 @@ The entry points here are `178b` `1793` and `17a0`, and only `178b` is called fr
         WINNER
 ```
 
-### Tropical Island
+### Tropical Island (second mode)
 
 code #7 is drawn in the sand on the beach, immediately after teleporting to the island (in second mode `R7>0`)
 
@@ -300,12 +308,15 @@ The journal reads:
     - north, east, east, north, west, south, east, east, west, north, north, east
     - `22 + 4 - 11 * 4 - 18 - 11 - 1 = 30`
 
-#### Vault Door After Solution
+#### Vault Door
 
 typo here ("hour hands" should be "your hands"):
 ```
 As you approach the vault door, the number on the vault door flashes white!  The hourglass is still running!  It flashes white!  You hear a click from the vault door.  The orb evaporates out of hour hands.
 ```
 
-- code #8 is printed on your forehead in charcoal
-  - use the mirror found in the vault, but of course, you're seeing it in a mirror, so... (this made me laugh!)
+#### Vault
+
+code #8 is printed on your forehead in charcoal
+
+- use the mirror found in the vault, but of course, you're seeing it in a mirror, so... (this made me laugh!)
