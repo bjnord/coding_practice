@@ -4,8 +4,8 @@ use std::io::{self, Write};
 
 fn main() {
     let name = get_name();
-    let greeting = form_greeting(name);
-    print_greeting(greeting);
+    let greeting = form_greeting(&name[..]);
+    print_greeting(&greeting[..]);
 }
 
 fn get_name() -> String {
@@ -27,11 +27,10 @@ fn read_response() -> String {
     String::from(name.trim())
 }
 
-fn form_greeting(name: String) -> String {
-    let g = format!("Hello, {}, nice to meet you!", name);
-    String::from(g)
+fn form_greeting(name: &str) -> String {
+    format!("Hello, {}, nice to meet you!", name)
 }
 
-fn print_greeting(greeting: String) {
+fn print_greeting(greeting: &str) {
     println!("{}", greeting);
 }
