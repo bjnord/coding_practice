@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use regex::Regex;
 // the "::{self, Write}" is for the flush() call
 // TODO what does this mean / how does this work?
@@ -57,10 +58,10 @@ impl Employee {
     }
 
     fn validate_emp_id(&self) -> bool {
-        // FIXME use lazy_static; see:
-        //       https://docs.rs/regex/1.3.9/regex/#example-avoid-compiling-the-same-regex-in-a-loop
-        let re = Regex::new(r"^(?i)[a-z]{2}-\d{4}$").unwrap();
-        if re.is_match(&self.emp_id[..]) {
+        lazy_static! {
+            static ref EMP_ID_RE: Regex = Regex::new(r"^(?i)[a-z]{2}-\d{4}$").unwrap();
+        }
+        if EMP_ID_RE.is_match(&self.emp_id[..]) {
             true
         } else {
             println!("{} is not a valid ID.", self.emp_id);
@@ -69,10 +70,10 @@ impl Employee {
     }
 
     fn validate_zip(&self) -> bool {
-        // FIXME use lazy_static; see:
-        //       https://docs.rs/regex/1.3.9/regex/#example-avoid-compiling-the-same-regex-in-a-loop
-        let re = Regex::new(r"^\d{5}(?:-\d{4})?$").unwrap();
-        if re.is_match(&self.zip[..]) {
+        lazy_static! {
+            static ref ZIP_RE: Regex = Regex::new(r"^\d{5}(?:-\d{4})?$").unwrap();
+        }
+        if ZIP_RE.is_match(&self.zip[..]) {
             true
         } else {
             println!("The ZIP code must be numeric.");
