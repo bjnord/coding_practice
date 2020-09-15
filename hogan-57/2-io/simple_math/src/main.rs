@@ -12,13 +12,15 @@ fn main() {
 }
 
 fn get_number(which: &str) -> u32 {
-    let prompt = format!("What is the {} number? ", which);
-    print_prompt(&prompt[..]);
-    let resp = read_response();
-    let n: u32 = resp
-        .parse()
-        .expect("Not a valid number");
-    n
+    loop {
+        let prompt = format!("What is the {} number? ", which);
+        print_prompt(&prompt[..]);
+        let resp = read_response();
+        match resp.parse::<u32>() {
+            Ok(i) => break i,
+            Err(e) => println!("That is not a valid number: {}", e)
+        }
+    }
 }
 
 fn print_prompt(prompt: &str) {
