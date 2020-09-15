@@ -43,7 +43,5 @@ fn are_anagrams(a: &str, b: &str) -> bool {
 fn sort_chars(s: &str) -> String {
     let mut s_ch: Vec<char> = s.chars().collect();
     s_ch.sort();
-    // NOTE this is a way to "inspect" a compound object:
-    //println!("test{:?}", s_ch);
     String::from_iter(s_ch)
 }
