@@ -12,6 +12,15 @@ struct Employee {
 }
 
 impl Employee {
+    fn from_input() -> Employee {
+        let f_name = read_input("Enter the first name: ");
+        let l_name = read_input("Enter the last name: ");
+        let zip = read_input("Enter the ZIP code: ");
+        let mut emp_id = read_input("Enter an employee ID: ");
+        emp_id.make_ascii_uppercase();
+        Employee {f_name, l_name, zip, emp_id}
+    }
+
     fn validate(&self) {
         // FIXME make this 4-way test more concise
         let e_f_name = self.validate_f_name();
@@ -73,19 +82,9 @@ impl Employee {
 }
 
 fn main() {
-    let emp = read_employee();
+    let emp = Employee::from_input();
     emp.validate();
     //println!("employee data: {:#?}", emp);
-}
-
-// TODO move this to impl also
-fn read_employee() -> Employee {
-    let f_name = read_input("Enter the first name: ");
-    let l_name = read_input("Enter the last name: ");
-    let zip = read_input("Enter the ZIP code: ");
-    let mut emp_id = read_input("Enter an employee ID: ");
-    emp_id.make_ascii_uppercase();
-    Employee {f_name, l_name, zip, emp_id}
 }
 
 fn read_input(prompt: &str) -> String {
