@@ -3,21 +3,30 @@
 use std::io::{self, Write};
 
 fn main() {
-    let mut sum = 0;
-    let n_num = loop {
+    let n_num = get_n_numbers();
+    let sum = add_numbers(n_num);
+    println!("The total is {}.", sum);
+}
+
+fn get_n_numbers() -> u32 {
+    loop {
         let x = get_inumber("How many numbers do you want to add? ");
         if x > 1 {
-            break x;
+            break x as u32;
         } else {
             println!("Adding requires two or more numbers.");
         }
-    };
+    }
+}
+
+fn add_numbers(n_num: u32) -> i32 {
+    let mut sum: i32 = 0;
     for i in 1..(n_num+1) {
         let prompt = format!("Enter number #{}: ", i);
         let n = get_inumber(&prompt[..]);
         sum += n;
     }
-    println!("The total is {}.", sum);
+    sum
 }
 
 fn get_inumber(prompt: &str) -> i32 {
