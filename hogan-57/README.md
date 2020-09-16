@@ -40,3 +40,11 @@ To avoid (re)compiling the regex at runtime, best practices is to use the `lazy_
          ...
      }
 ```
+
+## Constants
+
+A [global array of strings](https://stackoverflow.com/a/32383866/291754) looks like this:
+
+```
+const BROWSERS: &'static [&'static str] = &["firefox", "chrome"];
+```
