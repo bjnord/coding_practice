@@ -1,10 +1,12 @@
-use std::io::{self, Write};
+use std::fs::File;
+use std::io::{self, Write, BufRead, BufReader};
 
 struct EmployeeList {
     employees: Vec<String>,
 }
 
 impl EmployeeList {
+    #[allow(dead_code)]
     fn from_memory() -> EmployeeList {
         let mut employees = Vec::new();
         employees.push(String::from("Fred Flintstone"));
@@ -14,7 +16,17 @@ impl EmployeeList {
         EmployeeList {employees}
     }
 
-    // TODO from_file(filename)
+    fn from_file(filename: &str) -> EmployeeList {
+        let mut employees = Vec::new();
+        let reader = BufReader::new(File::open(filename).expect("Cannot open employee file"));
+        for line in reader.lines() {
+            match line {
+                Ok(name) => { employees.push(String::from(name)); },
+                Err(e) => { println!("line read error: {}", e); },
+            }
+        }
+        EmployeeList {employees}
+    }
 
     fn count(&self) -> usize {
         self.employees.len()
@@ -40,7 +52,7 @@ impl EmployeeList {
 }
 
 fn main() {
-    let mut emp_list = EmployeeList::from_memory();
+    let mut emp_list = EmployeeList::from_file("employees.txt");
     emp_list.dump();
     loop {
         println!("");

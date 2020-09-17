@@ -84,3 +84,22 @@ use std::io::{self, Write};
 use std::io;
 use std::io::Write;
 ```
+
+## I/O
+
+This [StackExchange answer](https://stackoverflow.com/a/39434382/291754) shows a concise way to stream the lines in a file:
+
+```
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+        let reader = BufReader::new(File::open(filename).expect("Cannot open file"));
+        for line in reader.lines() {
+            // or shorter than matching: line.unwrap()
+            match line {
+                Ok(content) => { ... },
+                Err(e) => { println!("line read error: {}", e); },
+            }
+        }
+```
+
