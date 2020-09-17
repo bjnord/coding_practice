@@ -28,6 +28,44 @@ fn print_type_of<T>(_: &T) {
 print_type_of(&foo);
 ```
 
+## Error Handling
+
+MEME: Don't just mindlessly short-circuit error handling in the interest of implementation speed. Think carefully about whether a panic is acceptable, or if the error might happen in production and needs to be handled.
+
+### Result
+
+Some standard Rust methods return a `Result` enum, which is matched with:
+
+```
+match fn(...) {
+    Ok(x) { println!("success, return={}", x); },
+    Err(e) { println!("failure, error={}", e); },
+}
+```
+
+`Result` can be short-circuited with `expect()` which will panic on error:
+
+```
+fn(...).expect("Failure");
+```
+
+### Option
+
+Other methods return an `Option<T>` which is Rust's replacement for null pointers (a value which may or may not be present); this is matched with:
+
+```
+match fn(...) {
+    Some(x) { println!("value present, x={}", x); },
+    None { println!("no value present"); },
+}
+```
+
+`Option<T>` can be short-circuited with `unwrap()` which will panic if no value is present:
+
+```
+let x = fn(...).unwrap();
+```
+
 ## Regular Expressions
 
 To avoid (re)compiling the regex at runtime, best practices is to use the `lazy_static` macro (see [Avoid compiling the same regex in a loop](https://docs.rs/regex/1.3.9/regex/#example-avoid-compiling-the-same-regex-in-a-loop)):
