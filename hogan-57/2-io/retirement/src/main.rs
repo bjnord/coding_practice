@@ -1,6 +1,4 @@
 use chrono::{Datelike, Utc};
-// the "::{self, Write}" is for the flush() call
-// TODO what does this mean / how does this work?
 use std::io::{self, Write};
 
 // TODO "as i32" will silently evaluate to 0 on overflow

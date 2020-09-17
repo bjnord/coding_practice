@@ -48,3 +48,39 @@ A [global array of strings](https://stackoverflow.com/a/32383866/291754) looks l
 ```
 const BROWSERS: &'static [&'static str] = &["firefox", "chrome"];
 ```
+
+## Importing
+
+Convention with `use` is to import one level above for _functions_ and call them with the prefix:
+
+```
+use foo::bar;
+...
+bar::do_something();
+```
+
+but to import the item itself in the case of _structs_, _enums_, etc.:
+
+```
+use foo::bar::Bazkind;
+...
+let qux: Bazkind = bar::return_something();
+```
+
+To condense the code, several `use` lines can be nested inside braces:
+
+```
+use foo::bar::{baz, qux};
+// (same as:)
+use foo::bar::baz;
+use foo::bar::qux;
+```
+
+and the `self` keyword stands for the same level:
+
+```
+use std::io::{self, Write};
+// (same as:)
+use std::io;
+use std::io::Write;
+```

@@ -1,6 +1,4 @@
 use rand::Rng;
-// the "::{self, Write}" is for the flush() call
-// TODO what does this mean / how does this work?
 use std::io::{self, Write};
 
 const ANSWERS: &'static [&'static str] = &["Yes", "No", "Maybe", "Ask again later"];

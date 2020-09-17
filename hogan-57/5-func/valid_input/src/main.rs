@@ -1,7 +1,5 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-// the "::{self, Write}" is for the flush() call
-// TODO what does this mean / how does this work?
 use std::io::{self, Write};
 
 #[derive(Debug)]

@@ -1,5 +1,3 @@
-// the "::{self, Write}" is for the flush() call
-// TODO what does this mean / how does this work?
 use std::io::{self, Write};
 use std::iter::FromIterator;
 
