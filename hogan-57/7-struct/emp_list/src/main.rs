@@ -42,8 +42,11 @@ fn load_employees() -> Vec<String> {
 }
 
 fn dump_employees(emp_list: &Vec<String>) {
-    // FIXME singular vs plural
-    println!("There are {} employees:", emp_list.len());
+    let count = emp_list.len();
+    match count {
+        1 => { println!("There is 1 employee:"); },
+        _ => { println!("There are {} employees:", count); },
+    }
     for emp in emp_list {
         println!("{}", emp);
     }
