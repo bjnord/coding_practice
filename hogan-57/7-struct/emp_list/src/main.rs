@@ -16,10 +16,12 @@ impl EmployeeList {
 
     // TODO from_file(filename)
 
-    // TODO count() [and use it in dump()]
+    fn count(&self) -> usize {
+        self.employees.len()
+    }
 
     fn dump(&self) {
-        let count = self.employees.len();
+        let count = self.count();
         match count {
             1 => { println!("There is 1 employee:"); },
             _ => { println!("There are {} employees:", count); },
