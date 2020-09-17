@@ -7,8 +7,8 @@ fn main() {
     dump_employees(&emp_list);
     println!("");
     let name = read_input("Enter an employee name to remove: ");
-    println!("");
     delete_employee(&mut emp_list, &name[..]);
+    println!("");
     dump_employees(&emp_list);
 }
 
@@ -50,7 +50,8 @@ fn dump_employees(emp_list: &Vec<String>) {
 }
 
 fn delete_employee(emp_list: &mut Vec<String>, name: &str) {
-    // FIXME use match rather than panicking
-    let i = emp_list.iter().position(|x| *x == name).expect("Employee not found.");
-    emp_list.remove(i);
+    match emp_list.iter().position(|x| *x == name) {
+        Some(i) => { emp_list.remove(i); },
+        None => { println!("Employee '{}' not found.", name); },
+    }
 }
