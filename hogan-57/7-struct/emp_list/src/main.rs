@@ -42,12 +42,17 @@ impl EmployeeList {
 fn main() {
     let mut emp_list = EmployeeList::from_memory();
     emp_list.dump();
-    println!("");
-    // TODO do the following in a loop; end when empty
-    let name = read_input("Enter an employee name to remove: ");
-    emp_list.remove(&name[..]);
-    println!("");
-    emp_list.dump();
+    loop {
+        println!("");
+        let name = read_input("Enter an employee name to remove: ");
+        emp_list.remove(&name[..]);
+        println!("");
+        match emp_list.count() {
+            0 => { break; },
+            _ => { emp_list.dump(); },
+        }
+    }
+    println!("All employees removed.");
 }
 
 fn read_input(prompt: &str) -> String {
