@@ -141,3 +141,30 @@ use std::io::{BufRead, BufReader};
         }
 ```
 
+## Strings
+
+### Concatenation
+
+The Rust `+` operator is a bit weird-looking and weird-behaving:
+
+```
+let s3 = s1 + &s2;
+```
+
+The operator's first argument is a `String` but its second argument is a `&str` (string slice). And as with all Rust, because `s1` is not a reference, the concatenation operation takes ownership of `s1` but then does not return it, so `s1` is no longer usable afterward. It is more efficient however than making a completely new copy.
+
+To avoid the weirdness (at the cost of efficiency), we can use the `format!()` macro, which does not taken ownership of its arguments:
+
+```
+let s3 = format!("{}{}", s1, s2);
+```
+
+### Characters
+
+Rust strings are Unicode. The `String` type is implemented as a `Vec<u8>` which means that foundationally, 8-bit values are being stored.
+
+1. You can't use array indexing like `s[1]` to get "one letter" of a string.
+1. When you use a slice (range) `s[0..2]`, or alternatively the `s.bytes()` method, you are getting **single bytes**, which for multi-byte strings may not be what you want.
+1. To get the 8-, 16-, 24-bit **scalar values** (ordinal code of each Unicode char), use the `s.chars()` method. But **note** that this will separate out diacritics and combining characters, which are not sensible on their own.
+1. To get **graphemes** (fully-combined characters), you have to use crate software outside the Rust standard library. (Graphemes are really what we would call "letters" when looking at words on a page.)
+
