@@ -59,7 +59,7 @@ impl Employee {
         lazy_static! {
             static ref EMP_ID_RE: Regex = Regex::new(r"^(?i)[a-z]{2}-\d{4}$").unwrap();
         }
-        if EMP_ID_RE.is_match(&self.emp_id[..]) {
+        if EMP_ID_RE.is_match(&self.emp_id) {
             true
         } else {
             println!("{} is not a valid ID.", self.emp_id);
@@ -71,7 +71,7 @@ impl Employee {
         lazy_static! {
             static ref ZIP_RE: Regex = Regex::new(r"^\d{5}(?:-\d{4})?$").unwrap();
         }
-        if ZIP_RE.is_match(&self.zip[..]) {
+        if ZIP_RE.is_match(&self.zip) {
             true
         } else {
             println!("The ZIP code must be numeric.");

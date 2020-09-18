@@ -12,7 +12,7 @@ fn main() {
 fn get_number(which: &str) -> u32 {
     loop {
         let prompt = format!("What is the {} number? ", which);
-        print_prompt(&prompt[..]);
+        print_prompt(&prompt);
         let resp = read_response();
         match resp.parse::<u32>() {
             Ok(i) => break i,

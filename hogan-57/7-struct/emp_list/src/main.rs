@@ -57,7 +57,7 @@ fn main() {
     loop {
         println!("");
         let name = read_input("Enter an employee name to remove: ");
-        emp_list.remove(&name[..]);
+        emp_list.remove(&name);
         println!("");
         match emp_list.count() {
             0 => { break; },

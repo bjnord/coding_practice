@@ -6,7 +6,7 @@ fn main() {
     let second = get_input("Enter the second string: ");
     if first == second {
         println!("{} and {} are the same string.", first, second);
-    } else if are_anagrams(&first[..], &second[..]) {
+    } else if are_anagrams(&first, &second) {
         println!("{} and {} are anagrams.", first, second);
     } else {
         println!("{} and {} are not anagrams.", first, second);

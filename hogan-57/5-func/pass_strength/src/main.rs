@@ -4,7 +4,7 @@ struct PasswordCount(u32, u32, u32, bool);
 
 fn main() {
     let passwd = get_input("Enter a password to test: ");
-    let pcount = password_count(&passwd[..]);
+    let pcount = password_count(&passwd);
     let grade = password_grade(pcount);
     println!("The password '{}' is a {} password.", passwd, grade);
 }

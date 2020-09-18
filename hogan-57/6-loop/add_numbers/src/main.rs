@@ -21,7 +21,7 @@ fn add_numbers(n_num: u32) -> i32 {
     let mut sum: i32 = 0;
     for i in 1..(n_num+1) {
         let prompt = format!("Enter number #{}: ", i);
-        let n = get_inumber(&prompt[..]);
+        let n = get_inumber(&prompt);
         sum += n;
     }
     sum

@@ -2,8 +2,8 @@ use std::io::{self, Write};
 
 fn main() {
     let name = get_name();
-    let greeting = form_greeting(&name[..]);
-    print_greeting(&greeting[..]);
+    let greeting = form_greeting(&name);
+    print_greeting(&greeting);
 }
 
 fn get_name() -> String {
