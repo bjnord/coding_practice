@@ -3,3 +3,10 @@
 [[package]]
 name = "emp_list"
 version = "0.1.0"
+dependencies = [
+ "interact_io",
+]
+
+[[package]]
+name = "interact_io"
+version = "0.1.0"

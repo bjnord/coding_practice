@@ -1,5 +1,7 @@
+extern crate interact_io;
+use interact_io::readln;
 use std::fs::File;
-use std::io::{self, Write, BufRead, BufReader};
+use std::io::{BufRead, BufReader};
 
 struct EmployeeList {
     employees: Vec<String>,
@@ -56,7 +58,7 @@ fn main() {
     emp_list.dump();
     loop {
         println!("");
-        let name = read_input("Enter an employee name to remove: ");
+        let name = readln::read_string("Enter an employee name to remove: ");
         emp_list.remove(&name);
         println!("");
         match emp_list.count() {
@@ -65,23 +67,4 @@ fn main() {
         }
     }
     println!("All employees removed.");
-}
-
-fn read_input(prompt: &str) -> String {
-    print_prompt(prompt);
-    read_response()
-}
-
-fn print_prompt(prompt: &str) {
-    print!("{}", prompt);
-    io::stdout().flush()
-        .expect("Failed to flush");
-}
-
-fn read_response() -> String {
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    String::from(input.trim())
 }

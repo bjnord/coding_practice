@@ -3,3 +3,10 @@
 [[package]]
 name = "count_chars"
 version = "0.1.0"
+dependencies = [
+ "interact_io",
+]
+
+[[package]]
+name = "interact_io"
+version = "0.1.0"

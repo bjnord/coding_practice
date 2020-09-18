@@ -1,9 +1,10 @@
-use std::io::{self, Write};
+extern crate interact_io;
+use interact_io::readln;
 use std::iter::FromIterator;
 
 fn main() {
-    let first = get_input("Enter the first string: ");
-    let second = get_input("Enter the second string: ");
+    let first = readln::read_string("Enter the first string: ");
+    let second = readln::read_string("Enter the second string: ");
     if first == second {
         println!("{} and {} are the same string.", first, second);
     } else if are_anagrams(&first, &second) {
@@ -11,25 +12,6 @@ fn main() {
     } else {
         println!("{} and {} are not anagrams.", first, second);
     }
-}
-
-fn get_input(prompt: &str) -> String {
-    print_prompt(prompt);
-    read_response()
-}
-
-fn print_prompt(prompt: &str) {
-    print!("{}", prompt);
-    io::stdout().flush()
-        .expect("Failed to flush");
-}
-
-fn read_response() -> String {
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    String::from(input.trim())
 }
 
 fn are_anagrams(a: &str, b: &str) -> bool {

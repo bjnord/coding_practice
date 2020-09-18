@@ -1,31 +1,13 @@
-use std::io::{self, Write};
+extern crate interact_io;
+use interact_io::readln;
 
 struct PasswordCount(u32, u32, u32, bool);
 
 fn main() {
-    let passwd = get_input("Enter a password to test: ");
+    let passwd = readln::read_string("Enter a password to test: ");
     let pcount = password_count(&passwd);
     let grade = password_grade(pcount);
     println!("The password '{}' is a {} password.", passwd, grade);
-}
-
-fn get_input(prompt: &str) -> String {
-    print_prompt(prompt);
-    read_response()
-}
-
-fn print_prompt(prompt: &str) {
-    print!("{}", prompt);
-    io::stdout().flush()
-        .expect("Failed to flush");
-}
-
-fn read_response() -> String {
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    String::from(input.trim())
 }
 
 fn password_count(passwd: &str) -> PasswordCount {

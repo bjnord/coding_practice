@@ -1,37 +1,11 @@
-use std::io::{self, Write};
+extern crate interact_io;
+use interact_io::readln;
 
 fn main() {
-    let a = get_number("first");
-    let b = get_number("second");
+    let a = readln::read_f64("What is the first number? ");
+    let b = readln::read_f64("What is the second number? ");
     println!("{} + {} = {}", a, b, a + b);
     println!("{} - {} = {}", a, b, a - b);
     println!("{} * {} = {}", a, b, a * b);
     println!("{} / {} = {}", a, b, a / b);
-}
-
-fn get_number(which: &str) -> i32 {
-    loop {
-        let prompt = format!("What is the {} number? ", which);
-        print_prompt(&prompt);
-        let resp = read_response();
-        match resp.parse::<i32>() {
-            Ok(i) => break i,
-            Err(e) => println!("That is not a valid number: {}", e)
-        }
-    }
-}
-
-fn print_prompt(prompt: &str) {
-    print!("{}", prompt);
-    io::stdout()
-        .flush()
-        .expect("Failed to flush");
-}
-
-fn read_response() -> String {
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    String::from(input.trim())
 }

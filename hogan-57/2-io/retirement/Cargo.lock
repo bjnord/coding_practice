@@ -18,6 +18,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "interact_io"
+version = "0.1.0"
+
+[[package]]
 name = "libc"
 version = "0.2.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -47,6 +51,7 @@ name = "retirement"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "interact_io",
 ]
 
 [[package]]

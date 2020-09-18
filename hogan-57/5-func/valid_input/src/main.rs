@@ -1,6 +1,7 @@
+extern crate interact_io;
+use interact_io::readln;
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::io::{self, Write};
 
 #[derive(Debug)]
 struct Employee {
@@ -12,10 +13,10 @@ struct Employee {
 
 impl Employee {
     fn from_input() -> Employee {
-        let f_name = read_input("Enter the first name: ");
-        let l_name = read_input("Enter the last name: ");
-        let zip = read_input("Enter the ZIP code: ");
-        let mut emp_id = read_input("Enter an employee ID: ");
+        let f_name = readln::read_string("Enter the first name: ");
+        let l_name = readln::read_string("Enter the last name: ");
+        let zip = readln::read_string("Enter the ZIP code: ");
+        let mut emp_id = readln::read_string("Enter an employee ID: ");
         emp_id.make_ascii_uppercase();
         Employee {f_name, l_name, zip, emp_id}
     }
@@ -84,23 +85,4 @@ fn main() {
     let emp = Employee::from_input();
     emp.validate();
     //println!("employee data: {:#?}", emp);
-}
-
-fn read_input(prompt: &str) -> String {
-    print_prompt(prompt);
-    read_response()
-}
-
-fn print_prompt(prompt: &str) {
-    print!("{}", prompt);
-    io::stdout().flush()
-        .expect("Failed to flush");
-}
-
-fn read_response() -> String {
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    String::from(input.trim())
 }
