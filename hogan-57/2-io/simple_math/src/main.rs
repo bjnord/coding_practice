@@ -9,12 +9,12 @@ fn main() {
     println!("{} / {} = {}", a, b, a / b);
 }
 
-fn get_number(which: &str) -> u32 {
+fn get_number(which: &str) -> i32 {
     loop {
         let prompt = format!("What is the {} number? ", which);
         print_prompt(&prompt);
         let resp = read_response();
-        match resp.parse::<u32>() {
+        match resp.parse::<i32>() {
             Ok(i) => break i,
             Err(e) => println!("That is not a valid number: {}", e)
         }
