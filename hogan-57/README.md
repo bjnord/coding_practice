@@ -170,6 +170,7 @@ Rust strings are Unicode. The `String` type is implemented as a `Vec<u8>` which 
 
 ## Map, Filter, Reduce
 
-1. `.map()` and `.filter()` operate on an iterator.
-1. `.map()` and `.filter()` seem to return some kind of proxy object; calling `.collect()` on the proxy yields a vector.
+1. In Rust, reduce is called `.fold()`: `let sum: i32 = iter.fold(0, |acc, x| acc + x);`
+1. `.map()` `.filter()` and `.fold()` operate on an iterator.
+1. `.fold()` returns the final value. `.map()` and `.filter()` seem to return some kind of proxy object; calling `.collect()` on the proxy yields a vector.
 1. Therefore transforming vector `x` into vector `y` looks like: `x.into_iter().map(|v| ...).collect()`.

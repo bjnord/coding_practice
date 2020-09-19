@@ -32,12 +32,7 @@ impl ValueList {
     }
 
     fn mean(&self) -> f64 {
-        // FIXME there should be a more elegant way of doing this
-        let mut sum: f64 = 0.0;
-        for n in &self.values {
-            let f = *n as f64;
-            sum += f;
-        }
+        let sum: f64 = self.values.iter().fold(0, |acc, x| acc + x) as f64;
         sum / (self.count() as f64)
     }
 
@@ -63,12 +58,7 @@ impl ValueList {
 
     fn std_dev(&self) -> f64 {
         let mean = self.mean();
-        // FIXME there should be a more elegant way of doing this
-        let mut sum: f64 = 0.0;
-        for n in &self.values {
-            let f = *n as f64;
-            sum += (f - mean).powi(2);
-        }
+        let sum: f64 = self.values.iter().fold(0.0, |acc, x| acc + (*x as f64 - mean).powi(2));
         let mean_of_squares = sum / (self.count() as f64);
         mean_of_squares.sqrt()
     }
