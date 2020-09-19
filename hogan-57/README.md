@@ -168,3 +168,8 @@ Rust strings are Unicode. The `String` type is implemented as a `Vec<u8>` which 
 1. To get the 8-, 16-, 24-bit **scalar values** (ordinal code of each Unicode char), use the `s.chars()` method. But **note** that this will separate out diacritics and combining characters, which are not sensible on their own.
 1. To get **graphemes** (fully-combined characters), you have to use crate software outside the Rust standard library. (Graphemes are really what we would call "letters" when looking at words on a page.)
 
+## Map, Filter, Reduce
+
+1. `.map()` and `.filter()` operate on an iterator.
+1. `.map()` and `.filter()` seem to return some kind of proxy object; calling `.collect()` on the proxy yields a vector.
+1. Therefore transforming vector `x` into vector `y` looks like: `x.into_iter().map(|v| ...).collect()`.
