@@ -37,23 +37,11 @@ impl ValueList {
     }
 
     fn min(&self) -> i32 {
-        let mut min = i32::MAX;
-        for n in &self.values {
-            if *n < min {
-                min = *n;
-            }
-        }
-        min
+        *self.values.iter().min().unwrap()
     }
 
     fn max(&self) -> i32 {
-        let mut max = i32::MIN;
-        for n in &self.values {
-            if *n > max {
-                max = *n;
-            }
-        }
-        max
+        *self.values.iter().max().unwrap()
     }
 
     fn std_dev(&self) -> f64 {

@@ -168,9 +168,18 @@ Rust strings are Unicode. The `String` type is implemented as a `Vec<u8>` which 
 1. To get the 8-, 16-, 24-bit **scalar values** (ordinal code of each Unicode char), use the `s.chars()` method. But **note** that this will separate out diacritics and combining characters, which are not sensible on their own.
 1. To get **graphemes** (fully-combined characters), you have to use crate software outside the Rust standard library. (Graphemes are really what we would call "letters" when looking at words on a page.)
 
-## Map, Filter, Reduce
+## Using Iterators
+
+1. By using `.enumerate()` on an iterator, you can get the index of each iterated value inline; `.enumerate()` returns `(index, value)` tuples.
+
+### Map, Filter, Reduce
 
 1. In Rust, reduce is called `.fold()`: `let sum: i32 = iter.fold(0, |acc, x| acc + x);`
 1. `.map()` `.filter()` and `.fold()` operate on an iterator.
 1. `.fold()` returns the final value. `.map()` and `.filter()` seem to return some kind of proxy object; calling `.collect()` on the proxy yields a vector.
 1. Therefore transforming vector `x` into vector `y` looks like: `x.into_iter().map(|v| ...).collect()`.
+
+### Min, Max
+
+1. Rust provides `.min()` and `.max()` for an iterator; note that it returns `Option<&T>` for a vector, which means the result has to be unwrapped and dereferenced: `*values_vector.iter().min().unwrap()`
+1. Rust also provides `.min_by()` and `.max_by()` which take a comparison function, useful for complex objects.
