@@ -1,4 +1,4 @@
-use password_gen::pass_gen::pw_charset::PasswordCharset;
+use password_gen::pw_charset::PasswordCharset;
 
 fn main() {
     let letters = PasswordCharset::from_range_incl('a', 'z');
