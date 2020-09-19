@@ -6,13 +6,12 @@ struct ValueList {
 }
 
 impl ValueList {
-    #[allow(dead_code)]
-    fn from_memory() -> ValueList {
+    #[cfg(test)]
+    fn from_array(a: &[i32]) -> ValueList {
         let mut values = Vec::new();
-        values.push(100);
-        values.push(200);
-        values.push(950);
-        values.push(300);
+        for v in a.iter() {
+            values.push(*v);
+        }
         ValueList {values}
     }
 
@@ -72,6 +71,35 @@ impl ValueList {
         }
         let mean_of_squares = sum / (self.count() as f64);
         mean_of_squares.sqrt()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn calculate_mean() {
+        let vl = ValueList::from_array(&[100, 200, 1000, 300]);
+        assert!((400.0 - vl.mean()).abs() < 0.000001);
+    }
+
+    #[test]
+    fn calculate_min() {
+        let vl = ValueList::from_array(&[100, 200, 1000, 300]);
+        assert_eq!(100, vl.min());
+    }
+
+    #[test]
+    fn calculate_max() {
+        let vl = ValueList::from_array(&[100, 200, 1000, 300]);
+        assert_eq!(1000, vl.max());
+    }
+
+    #[test]
+    fn calculate_std_dev() {
+        let vl = ValueList::from_array(&[100, 200, 1000, 300]);
+        assert!((353.553390 - vl.std_dev()).abs() < 0.000001);
     }
 }
 
