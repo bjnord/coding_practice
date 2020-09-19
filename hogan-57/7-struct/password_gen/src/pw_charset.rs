@@ -14,6 +14,13 @@ impl PasswordCharset {
         PasswordCharset {charset}
     }
 
+    pub fn add_range_incl(&mut self, start: char, end: char) {
+        for c in start..end {
+            self.charset.push(c);
+        }
+        self.charset.push(end);
+    }
+
     pub fn count(&self) -> usize {
         self.charset.len()
     }

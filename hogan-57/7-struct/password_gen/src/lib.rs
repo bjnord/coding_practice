@@ -4,10 +4,13 @@ use rand::Rng;
 
 pub fn generate(min_len: u32, n_numbers: u32, n_specials: u32) -> String {
     let mut password = String::new();
-    let letters = PasswordCharset::from_range_incl('a', 'z');
+    let mut letters = PasswordCharset::from_range_incl('a', 'z');
+    letters.add_range_incl('A', 'Z');
     let numbers = PasswordCharset::from_range_incl('0', '9');
-    let specials = PasswordCharset::from_range_incl('!', '/');
-    // TODO add range(':', '@') range('[', '`') range('{', '~')
+    let mut specials = PasswordCharset::from_range_incl('!', '/');
+    specials.add_range_incl(':', '@');
+    specials.add_range_incl('[', '`');
+    specials.add_range_incl('{', '~');
     for _ in 0..n_numbers {
         password.push(numbers.random_char());
     }
@@ -36,7 +39,7 @@ fn scramble(mut password: String) -> String {
 fn counts(password: String) -> (u32, u32, u32) {
     let (mut a, mut n, mut s) = (0, 0, 0);
     for c in password.chars() {
-        if c >= 'a' && c <= 'z' {
+        if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') {
             a += 1;
         } else if c >= '0' && c <= '9' {
             n += 1;
