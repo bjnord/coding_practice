@@ -3,8 +3,8 @@ pub mod readln {
 
     pub fn read_i32(prompt: &str) -> i32 {
         loop {
-            print_prompt(prompt);
-            let resp = read_response();
+            print_prompt(prompt).unwrap();
+            let resp = read_response().unwrap();
             match resp.parse::<i32>() {
                 Ok(n) => break n,
                 Err(e) => println!("That is not a valid number: {}", e)
@@ -14,8 +14,8 @@ pub mod readln {
 
     pub fn read_i32_range(prompt: &str, min: i32, max: i32) -> i32 {
         loop {
-            print_prompt(prompt);
-            let resp = read_response();
+            print_prompt(prompt).unwrap();
+            let resp = read_response().unwrap();
             match resp.parse::<i32>() {
                 Ok(n) => {
                     if n >= min && n <= max {
@@ -31,8 +31,8 @@ pub mod readln {
 
     pub fn read_u32(prompt: &str) -> u32 {
         loop {
-            print_prompt(prompt);
-            let resp = read_response();
+            print_prompt(prompt).unwrap();
+            let resp = read_response().unwrap();
             match resp.parse::<u32>() {
                 Ok(n) => break n,
                 Err(e) => println!("That is not a valid number: {}", e)
@@ -42,8 +42,8 @@ pub mod readln {
 
     pub fn read_f64(prompt: &str) -> f64 {
         loop {
-            print_prompt(prompt);
-            let resp = read_response();
+            print_prompt(prompt).unwrap();
+            let resp = read_response().unwrap();
             match resp.parse::<f64>() {
                 Ok(n) => break n,
                 Err(e) => println!("That is not a valid number: {}", e)
@@ -52,24 +52,20 @@ pub mod readln {
     }
 
     pub fn read_string(prompt: &str) -> String {
-        print_prompt(prompt);
-        read_response()
+        print_prompt(prompt).unwrap();
+        read_response().unwrap()
     }
 
     // private
-    fn print_prompt(prompt: &str) {
+    fn print_prompt(prompt: &str) -> Result<(), io::Error> {
         print!("{}", prompt);
-        io::stdout()
-            .flush()
-            .expect("Failed to flush");
+        io::stdout().flush()
     }
 
     // private
-    fn read_response() -> String {
+    fn read_response() -> Result<String, io::Error> {
         let mut response = String::new();
-        io::stdin()
-            .read_line(&mut response)
-            .expect("Failed to read line");
-        String::from(response.trim())
+        io::stdin().read_line(&mut response)?;
+        Ok(String::from(response.trim()))
     }
 }
