@@ -1,6 +1,6 @@
 extern crate interact_io;
 use interact_io::readln;
-use retirement::RetirementYears;
+use retirement::{RetirementYears, RetireWhen};
 
 fn main() {
     let cur_age = readln::read_i32_range("What is your current age? ", 1, 120).unwrap();
@@ -10,12 +10,12 @@ fn main() {
 }
 
 fn show_retirement(ry: RetirementYears) {
-    if ry.years < 0 {
-        println!("It's {}, and you could have retired back in {}.", ry.cur_year, ry.ret_year);
-    } else if ry.years == 0 {
-        println!("It's {}, and you can retire now.", ry.cur_year);
-    } else {
-        println!("You have {} years left until you can retire.", ry.years);
-        println!("It's {}, so you can retire in {}.", ry.cur_year, ry.ret_year);
+    match ry.retire_when() {
+        RetireWhen::Past => println!("It's {}, and you could have retired back in {}.", ry.cur_year, ry.ret_year),
+        RetireWhen::Now => println!("It's {}, and you can retire now.", ry.cur_year),
+        RetireWhen::Future => {
+            println!("You have {} years left until you can retire.", ry.years);
+            println!("It's {}, so you can retire in {}.", ry.cur_year, ry.ret_year);
+        }
     }
 }

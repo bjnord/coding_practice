@@ -1,5 +1,13 @@
 use chrono::{Datelike, Utc};
 
+// TODO try struct-like enum variants here (make RetirementYears fields private again)
+#[derive(Debug,PartialEq)]
+pub enum RetireWhen {
+    Future,
+    Now,
+    Past,
+}
+
 pub struct RetirementYears {
     pub years: i32,
     pub cur_year: i32,
@@ -14,15 +22,13 @@ impl RetirementYears {
         RetirementYears {years, cur_year, ret_year}
     }
 
-    // TODO change this to calculate() which returns an enum
-    pub fn show(&self) {
+    pub fn retire_when(&self) -> RetireWhen {
         if self.years < 0 {
-            println!("It's {}, and you could have retired back in {}.", self.cur_year, self.ret_year);
+            RetireWhen::Past
         } else if self.years == 0 {
-            println!("It's {}, and you can retire now.", self.cur_year);
+            RetireWhen::Now
         } else {
-            println!("You have {} years left until you can retire.", self.years);
-            println!("It's {}, so you can retire in {}.", self.cur_year, self.ret_year);
+            RetireWhen::Future
         }
     }
 
@@ -34,4 +40,49 @@ impl RetirementYears {
     }
 }
 
-// TODO add tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn future_retirement_calc() {
+        let cur_year = RetirementYears::get_cur_year() as i32;
+        let ry = RetirementYears::from_ages(49, 65);
+        assert_eq!(16, ry.years);
+        assert_eq!(cur_year + 16, ry.ret_year);
+    }
+
+    #[test]
+    fn future_retirement_when() {
+        let ry = RetirementYears::from_ages(49, 65);
+        assert_eq!(RetireWhen::Future, ry.retire_when());
+    }
+
+    #[test]
+    fn now_retirement_calc() {
+        let cur_year = RetirementYears::get_cur_year() as i32;
+        let ry = RetirementYears::from_ages(72, 72);
+        assert_eq!(0, ry.years);
+        assert_eq!(cur_year, ry.ret_year);
+    }
+
+    #[test]
+    fn now_retirement_when() {
+        let ry = RetirementYears::from_ages(72, 72);
+        assert_eq!(RetireWhen::Now, ry.retire_when());
+    }
+
+    #[test]
+    fn past_retirement_calc() {
+        let cur_year = RetirementYears::get_cur_year() as i32;
+        let ry = RetirementYears::from_ages(65, 55);
+        assert_eq!(-10, ry.years);
+        assert_eq!(cur_year - 10, ry.ret_year);
+    }
+
+    #[test]
+    fn past_retirement_when() {
+        let ry = RetirementYears::from_ages(65, 55);
+        assert_eq!(RetireWhen::Past, ry.retire_when());
+    }
+}
