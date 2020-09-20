@@ -1,6 +1,7 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::fs;
+use std::io::{self, ErrorKind};
 
 pub struct Employee {
     f_name: String,
@@ -42,17 +43,15 @@ impl EmployeeRoster {
             Jake       | Jacobson   | Programmer        |                \n\
             Jacquelyn  | Jackson    | DBA               | \n\
             Sally      | Weber      | Web Developer     | 2015-12-18\n\
-            ")
+            ").unwrap()
     }
 
-    // TODO change return type to Result for errors
-    pub fn from_file(filename: &str) -> EmployeeRoster {
-        let input: String = fs::read_to_string(filename).unwrap();
+    pub fn from_file(filename: &str) -> Result<EmployeeRoster, io::Error> {
+        let input: String = fs::read_to_string(filename)?;
         EmployeeRoster::from_string(&input)
     }
 
-    // TODO change return type to Result for errors
-    pub fn from_string(input: &str) -> EmployeeRoster {
+    pub fn from_string(input: &str) -> Result<EmployeeRoster, io::Error> {
         let mut roster: Vec<Employee> = Vec::<Employee>::new();
         let lines: Vec<&str> = input.split("\n").collect();
         for line in lines {
@@ -60,15 +59,15 @@ impl EmployeeRoster {
             if tokens.len() == 1 && tokens[0].trim().is_empty() {
                 continue;  // ignore blank lines
             } else if tokens.len() != 4 {
-                // FIXME return error Result
-                panic!("line in unknown format (tokens={}): [{}]", tokens.len(), line);
+                let e = format!("line in unknown format (tokens={}): [{}]", tokens.len(), line);
+                return Err(io::Error::new(ErrorKind::InvalidInput, e));
             }
             match Employee::from_tokens(tokens) {
                 Some(emp) => roster.push(emp),
                 None => (),
             }
         }
-        EmployeeRoster {roster}
+        Ok(EmployeeRoster {roster})
     }
 
     pub fn len(&self) -> usize {
@@ -98,5 +97,13 @@ mod tests {
         assert_eq!("Jacobson", emp.l_name);
         assert_eq!("Programmer", emp.position);
         assert_eq!("", emp.separation);
+    }
+
+    #[test]
+    fn parsing_bad_roster_line() {
+        match EmployeeRoster::from_string("First Name | Last Name | Position") {
+            Err(e) => assert_eq!(e.kind(), ErrorKind::InvalidInput),
+            Ok(_) => panic!("bad roster line did not return error"),
+        }
     }
 }
