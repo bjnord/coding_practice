@@ -2,7 +2,7 @@ extern crate interact_io;
 use interact_io::readln;
 
 fn main() {
-    let line = readln::read_string("Enter a list of numbers, separated by spaces: ");
+    let line = readln::read_string("Enter a list of numbers, separated by spaces: ").unwrap();
     // "The iterator returned will return string slices that are sub-slices of the original string slice, separated by any amount of whitespace."
     let token_iter: std::str::SplitWhitespace = line.split_whitespace();
     let numbers: Vec<i32> = token_iter.map(|s| s.parse().unwrap()).collect();

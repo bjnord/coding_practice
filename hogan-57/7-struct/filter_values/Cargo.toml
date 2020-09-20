@@ -7,4 +7,4 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-interact_io = { path = "../../../rust/interact_io", version = "0.1.0" }
+interact_io = { path = "../../../rust/interact_io", version = "0.2.0" }

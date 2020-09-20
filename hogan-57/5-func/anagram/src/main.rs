@@ -3,8 +3,8 @@ use interact_io::readln;
 use std::iter::FromIterator;
 
 fn main() {
-    let first = readln::read_string("Enter the first string: ");
-    let second = readln::read_string("Enter the second string: ");
+    let first = readln::read_string("Enter the first string: ").unwrap();
+    let second = readln::read_string("Enter the second string: ").unwrap();
     if first == second {
         println!("{} and {} are the same string.", first, second);
     } else if are_anagrams(&first, &second) {

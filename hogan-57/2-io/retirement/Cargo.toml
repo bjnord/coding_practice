@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 chrono = "0.4.15"
-interact_io = { path = "../../../rust/interact_io", version = "0.1.0" }
+interact_io = { path = "../../../rust/interact_io", version = "0.2.0" }

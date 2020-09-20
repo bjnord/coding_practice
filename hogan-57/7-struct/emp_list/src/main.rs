@@ -57,7 +57,7 @@ fn main() {
     emp_list.dump();
     loop {
         println!("");
-        let name = readln::read_string("Enter an employee name to remove: ");
+        let name = readln::read_string("Enter an employee name to remove: ").unwrap();
         emp_list.remove(&name);
         println!("");
         match emp_list.count() {

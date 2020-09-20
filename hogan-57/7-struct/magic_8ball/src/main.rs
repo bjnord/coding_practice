@@ -5,7 +5,7 @@ use rand::Rng;
 const ANSWERS: &'static [&'static str] = &["Yes", "No", "Maybe", "Ask again later"];
 
 fn main() {
-    let _question = readln::read_string("What's your question? ");
+    let _question = readln::read_string("What's your question? ").unwrap();
     let answer = pick_answer(4);
     println!("{}.", ANSWERS[answer]);
 }

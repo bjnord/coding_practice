@@ -13,10 +13,10 @@ struct Employee {
 
 impl Employee {
     fn from_input() -> Employee {
-        let f_name = readln::read_string("Enter the first name: ");
-        let l_name = readln::read_string("Enter the last name: ");
-        let zip = readln::read_string("Enter the ZIP code: ");
-        let mut emp_id = readln::read_string("Enter an employee ID: ");
+        let f_name = readln::read_string("Enter the first name: ").unwrap();
+        let l_name = readln::read_string("Enter the last name: ").unwrap();
+        let zip = readln::read_string("Enter the ZIP code: ").unwrap();
+        let mut emp_id = readln::read_string("Enter an employee ID: ").unwrap();
         emp_id.make_ascii_uppercase();
         Employee {f_name, l_name, zip, emp_id}
     }

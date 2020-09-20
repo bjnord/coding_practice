@@ -2,7 +2,7 @@ extern crate interact_io;
 use interact_io::readln;
 
 fn main() {
-    let name = readln::read_string("What is your name? ");
+    let name = readln::read_string("What is your name? ").unwrap();
     let greeting = form_greeting(&name);
     print_greeting(&greeting);
 }
