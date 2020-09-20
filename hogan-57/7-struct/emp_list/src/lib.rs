@@ -6,13 +6,12 @@ pub struct EmployeeList {
 }
 
 impl EmployeeList {
-    #[allow(dead_code)]
-    fn from_memory() -> EmployeeList {
+    #[cfg(test)]
+    pub fn from_array(a: &[&str]) -> EmployeeList {
         let mut employees = Vec::new();
-        employees.push(String::from("Fred Flintstone"));
-        employees.push(String::from("Wilma Flintstone"));
-        employees.push(String::from("Barney Rubble"));
-        employees.push(String::from("Betty Rubble"));
+        for v in a.iter() {
+            employees.push(String::from(*v));
+        }
         EmployeeList {employees}
     }
 
@@ -29,7 +28,18 @@ impl EmployeeList {
         self.employees.len()
     }
 
+    pub fn contains(&self, name: &str) -> bool {
+        match self.employees.iter().find(|n| *n == name) {
+            Some(_) => true,
+            None => false,
+        }
+    }
+
+    // TODO move output (here and remove()) to src/main.rs
+    //      needs method to return custom read-only Employee iterator
+    //      that does NOT allow the strings to be altered
     pub fn dump(&self) {
+        // FIXME any way to do "match self.count()" w/o count variable?
         let count = self.count();
         match count {
             1 => println!("There is 1 employee:"),
@@ -40,12 +50,44 @@ impl EmployeeList {
         }
     }
 
-    pub fn remove(&mut self, name: &str) {
+    pub fn remove(&mut self, name: &str) -> Option<String> {
         match self.employees.iter().position(|n| *n == name) {
-            Some(i) => { self.employees.remove(i); },
-            None => { println!("Employee '{}' not found.", name); },
+            Some(i) => {
+                Some(self.employees.remove(i))
+            },
+            None => {
+                println!("Employee '{}' not found.", name);
+                None
+            },
         }
     }
 }
 
-// TODO write tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_creation_and_count() {
+        let el = EmployeeList::from_array(&["Fred Flintstone", "Wilma Flintstone", "Barney Rubble", "Betty Rubble"]);
+        assert_eq!(4, el.count());
+        assert_eq!(true, el.contains("Betty Rubble"));
+        assert_eq!(false, el.contains("Bam Bam Rubble"));
+    }
+
+    #[test]
+    fn test_removal_when_contains() {
+        let mut el = EmployeeList::from_array(&["Fred Flintstone", "Wilma Flintstone", "Barney Rubble", "Betty Rubble"]);
+        el.remove("Barney Rubble").expect("failed to remove Barney Rubble");
+        assert_eq!(false, el.contains("Barney Rubble"));
+    }
+
+    #[test]
+    fn test_removal_when_doesnt_contain() {
+        let mut el = EmployeeList::from_array(&["Fred Flintstone", "Wilma Flintstone", "Barney Rubble", "Betty Rubble"]);
+        match el.remove("Pebbles Flintstone") {
+            Some(_) => panic!("removed nonexistent Pebbles Flintstone"),
+            None => (),
+        }
+    }
+}
