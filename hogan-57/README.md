@@ -215,6 +215,7 @@ Rust strings are Unicode. The `String` type is implemented as a `Vec<u8>` which 
 
 ## Using Iterators
 
+1. MEME: Length of a vector is `vec.len()` (think math), count of items in iterator is `iter.count()` (and it walks the iterator to do so; think counting people as they walk by).
 1. By using `.enumerate()` on an iterator, you can get the index of each iterated value inline; `.enumerate()` returns `(index, value)` tuples.
 
 ### Map, Filter, Reduce
