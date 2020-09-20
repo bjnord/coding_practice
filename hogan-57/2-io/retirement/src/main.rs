@@ -11,11 +11,11 @@ fn main() {
 
 fn show_retirement(ry: RetirementYears) {
     match ry.retire_when() {
-        RetireWhen::Past => println!("It's {}, and you could have retired back in {}.", ry.cur_year, ry.ret_year),
-        RetireWhen::Now => println!("It's {}, and you can retire now.", ry.cur_year),
-        RetireWhen::Future => {
-            println!("You have {} years left until you can retire.", ry.years);
-            println!("It's {}, so you can retire in {}.", ry.cur_year, ry.ret_year);
+        RetireWhen::Past {cur_year, ret_year} => println!("It's {}, and you could have retired back in {}.", cur_year, ret_year),
+        RetireWhen::Now {cur_year} => println!("It's {}, and you can retire now.", cur_year),
+        RetireWhen::Future {years, cur_year, ret_year} => {
+            println!("You have {} years left until you can retire.", years);
+            println!("It's {}, so you can retire in {}.", cur_year, ret_year);
         }
     }
 }

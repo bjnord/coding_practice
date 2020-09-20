@@ -1,17 +1,16 @@
 use chrono::{Datelike, Utc};
 
-// TODO try struct-like enum variants here (make RetirementYears fields private again)
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq)]  // for assert_eq!() in tests
 pub enum RetireWhen {
-    Future,
-    Now,
-    Past,
+    Future {years: i32, cur_year: i32, ret_year: i32},
+    Now {cur_year: i32},
+    Past {cur_year: i32, ret_year: i32},
 }
 
 pub struct RetirementYears {
-    pub years: i32,
-    pub cur_year: i32,
-    pub ret_year: i32,
+    years: i32,
+    cur_year: i32,
+    ret_year: i32,
 }
 
 impl RetirementYears {
@@ -24,11 +23,11 @@ impl RetirementYears {
 
     pub fn retire_when(&self) -> RetireWhen {
         if self.years < 0 {
-            RetireWhen::Past
+            RetireWhen::Past {cur_year: self.cur_year, ret_year: self.ret_year}
         } else if self.years == 0 {
-            RetireWhen::Now
+            RetireWhen::Now {cur_year: self.cur_year}
         } else {
-            RetireWhen::Future
+            RetireWhen::Future {years: self.years, cur_year: self.cur_year, ret_year: self.ret_year}
         }
     }
 
@@ -54,8 +53,10 @@ mod tests {
 
     #[test]
     fn future_retirement_when() {
+        let cur_year = RetirementYears::get_cur_year() as i32;
         let ry = RetirementYears::from_ages(49, 65);
-        assert_eq!(RetireWhen::Future, ry.retire_when());
+        let expect = RetireWhen::Future {years: 16, cur_year, ret_year: cur_year + 16};
+        assert_eq!(expect, ry.retire_when());
     }
 
     #[test]
@@ -68,8 +69,10 @@ mod tests {
 
     #[test]
     fn now_retirement_when() {
+        let cur_year = RetirementYears::get_cur_year() as i32;
         let ry = RetirementYears::from_ages(72, 72);
-        assert_eq!(RetireWhen::Now, ry.retire_when());
+        let expect = RetireWhen::Now {cur_year};
+        assert_eq!(expect, ry.retire_when());
     }
 
     #[test]
@@ -82,7 +85,9 @@ mod tests {
 
     #[test]
     fn past_retirement_when() {
+        let cur_year = RetirementYears::get_cur_year() as i32;
         let ry = RetirementYears::from_ages(65, 55);
-        assert_eq!(RetireWhen::Past, ry.retire_when());
+        let expect = RetireWhen::Past {cur_year, ret_year: cur_year - 10};
+        assert_eq!(expect, ry.retire_when());
     }
 }
