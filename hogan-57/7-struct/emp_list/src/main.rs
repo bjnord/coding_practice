@@ -22,10 +22,7 @@ impl EmployeeList {
         let mut employees = Vec::new();
         let reader = BufReader::new(File::open(filename).expect("Cannot open employee file"));
         for line in reader.lines() {
-            match line {
-                Ok(name) => { employees.push(String::from(name)); },
-                Err(e) => { println!("line read error: {}", e); },
-            }
+            employees.push(String::from(line.unwrap()));
         }
         EmployeeList {employees}
     }
@@ -37,8 +34,8 @@ impl EmployeeList {
     fn dump(&self) {
         let count = self.count();
         match count {
-            1 => { println!("There is 1 employee:"); },
-            _ => { println!("There are {} employees:", count); },
+            1 => println!("There is 1 employee:"),
+            _ => println!("There are {} employees:", count),
         }
         for emp in &self.employees {
             println!("{}", emp);
@@ -62,8 +59,8 @@ fn main() {
         emp_list.remove(&name);
         println!("");
         match emp_list.count() {
-            0 => { break; },
-            _ => { emp_list.dump(); },
+            0 => break,
+            _ => emp_list.dump(),
         }
     }
     println!("All employees removed.");

@@ -33,10 +33,12 @@ fn password_grade(pcount: PasswordCount) -> String {
     // I'm calling anything less than 8 characters "weak"
     // even if it has letters, numbers, and symbols
     let g = match pcount {
-        PasswordCount(0, _, 0, false) => { "very weak" },
-        PasswordCount(_, _, _, false) => { "weak" },
-        PasswordCount(_, _, 0, true) => { "strong" },
-        PasswordCount(_, _, _, true) => { "very strong" },
+        PasswordCount(0, _, 0, false) => "very weak",
+        PasswordCount(_, _, _, false) => "weak",
+        PasswordCount(_, _, 0, true) => "strong",
+        PasswordCount(_, _, _, true) => "very strong",
     };
     String::from(g)
 }
+
+// TODO add tests for `password_count` and `password_grade`

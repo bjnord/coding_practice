@@ -20,8 +20,8 @@ impl ValueList {
         let reader = BufReader::new(File::open(filename).expect("Cannot open file"));
         for line in reader.lines() {
             match line.unwrap().parse::<i32>() {
-                Ok(n) => { values.push(n); },
-                Err(e) => { println!("That is not a valid number: {}", e); },
+                Ok(n) => values.push(n),
+                Err(e) => println!("Invalid number in file: {}", e),
             }
         }
         ValueList {values}
