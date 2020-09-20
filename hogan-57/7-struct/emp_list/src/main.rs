@@ -3,6 +3,8 @@ use interact_io::readln;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+// TODO move EmployeeList to its own file; write tests
+
 struct EmployeeList {
     employees: Vec<String>,
 }
