@@ -28,25 +28,62 @@ fn print_type_of<T>(_: &T) {
 print_type_of(&foo);
 ```
 
+## Function Return Type
+
+Tip: As an alternative to consulting the documentation, you can "ask the compiler" what a function returns by inserting a known-wrong type and trying to compile:
+
+```
+error[E0308]: mismatched types
+ --> src/main.rs:4:18
+  |
+4 |     let f: u32 = File::open("hello.txt");
+  |            ---   ^^^^^^^^^^^^^^^^^^^^^^^ expected `u32`, found enum `std::result::Result`
+  |            |
+  |            expected due to this
+  |
+  = note: expected type `u32`
+             found enum `std::result::Result<std::fs::File, std::io::Error>`
+```
+
 ## Error Handling
 
 MEME: Don't just mindlessly short-circuit error handling in the interest of implementation speed. Think carefully about whether a panic is acceptable, or if the error might happen in production and needs to be handled.
 
 ### Result
 
-Some standard Rust methods return a `Result` enum, which is matched with:
+Some standard Rust methods return a `Result<T, E>` enum, which can be matched with:
 
 ```
 match fn(...) {
-    Ok(x) { println!("success, return={}", x); },
-    Err(e) { println!("failure, error={}", e); },
+    Ok(x) => println!("success, return={}", x),
+    Err(e) => println!("failure, error={:?}", e),
 }
 ```
 
-`Result` can be short-circuited with `expect()` which will panic on error:
+(The "arms" of the `match` are _closures_. They can be a bare expression, which will be returned from `match`. They can also be a block (in braces) which ends with an expression.)
+
+`Result` can be short-circuited with `unwrap()` which will panic on error. `expect()` does the same thing, but allows you to provide the text of the panic message:
 
 ```
-fn(...).expect("Failure");
+let r = fn(...).unwrap();
+let r = fn(...).expect("Custom failure text");
+```
+
+`Result` also has a method `unwrap_or_else()` which takes a closure for the error case:
+
+```
+let r = fn(...).unwrap_or_else(|error| {...});
+```
+
+#### Propagating Results
+
+Rust has the `?` operator which provides a concise way of propagating errors by returning them up the chain. In this example, in the `Ok` case, `?` will return the value to the `buf` assignment, and flow will continue to the next statement; in the `Err` case, `?` will cause `my_read_file()` to immediately return an error result to the caller:
+
+```
+fn my_read_file(file: &str) -> Result<String, io::Error> {
+    let buf = fs::read(file)?;
+    ...
+}
 ```
 
 ### Option
@@ -55,8 +92,8 @@ Other methods return an `Option<T>` which is Rust's replacement for null pointer
 
 ```
 match fn(...) {
-    Some(x) { println!("value present, x={}", x); },
-    None { println!("no value present"); },
+    Some(x) => { println!("value present, x={}", x); },
+    None => { println!("no value present"); },
 }
 ```
 
@@ -135,8 +172,8 @@ use std::io::{BufRead, BufReader};
         for line in reader.lines() {
             // or shorter than matching: line.unwrap()
             match line {
-                Ok(content) => { ... },
-                Err(e) => { println!("line read error: {}", e); },
+                Ok(content) => ...,
+                Err(e) => println!("line read error: {}", e),
             }
         }
 ```
