@@ -10,7 +10,7 @@ fn main() {
         let name = readln::read_string("Enter an employee name to remove: ").unwrap();
         emp_list.remove(&name);
         println!("");
-        match emp_list.count() {
+        match emp_list.len() {
             0 => break,
             _ => emp_list.dump(),
         }

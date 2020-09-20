@@ -24,7 +24,7 @@ impl EmployeeList {
         EmployeeList {employees}
     }
 
-    pub fn count(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.employees.len()
     }
 
@@ -39,7 +39,7 @@ impl EmployeeList {
     //      needs method to return custom read-only Employee iterator
     //      that does NOT allow the strings to be altered
     pub fn dump(&self) {
-        match self.count() {
+        match self.len() {
             1 => println!("There is 1 employee:"),
             n => println!("There are {} employees:", n),
         }
@@ -66,9 +66,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_creation_and_count() {
+    fn test_creation_and_len() {
         let el = EmployeeList::from_array(&["Fred Flintstone", "Wilma Flintstone", "Barney Rubble", "Betty Rubble"]);
-        assert_eq!(4, el.count());
+        assert_eq!(4, el.len());
         assert_eq!(true, el.contains("Betty Rubble"));
         assert_eq!(false, el.contains("Bam Bam Rubble"));
     }
