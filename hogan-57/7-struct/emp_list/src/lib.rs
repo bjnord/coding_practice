@@ -39,11 +39,9 @@ impl EmployeeList {
     //      needs method to return custom read-only Employee iterator
     //      that does NOT allow the strings to be altered
     pub fn dump(&self) {
-        // FIXME any way to do "match self.count()" w/o count variable?
-        let count = self.count();
-        match count {
+        match self.count() {
             1 => println!("There is 1 employee:"),
-            _ => println!("There are {} employees:", count),
+            n => println!("There are {} employees:", n),
         }
         for emp in &self.employees {
             println!("{}", emp);
