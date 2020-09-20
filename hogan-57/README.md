@@ -178,6 +178,14 @@ use std::io::{BufRead, BufReader};
         }
 ```
 
+If you do want to read a whole file into a string, Rust provides this method:
+
+```
+use std::fs;
+
+let s: String = fs::read_to_string("filename.txt").unwrap();
+```
+
 ## Strings
 
 ### Concatenation
