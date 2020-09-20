@@ -33,7 +33,7 @@ pub struct EmployeeRoster {
 impl EmployeeRoster {
     #[cfg(test)]
     fn for_tests() -> EmployeeRoster {
-        EmployeeRoster::from_string("\
+        EmployeeRoster::from_string("\n\
             First Name | Last Name  | Position          | Separation Date\n\
             -----------|------------|-------------------|----------------\n\
             John       | Johnson    | Manager           | 2016-12-31\n\
@@ -41,7 +41,8 @@ impl EmployeeRoster {
             Michaela   | Michaelson | District Manager  | 2015-12-19     \n\
             Jake       | Jacobson   | Programmer        |                \n\
             Jacquelyn  | Jackson    | DBA               | \n\
-            Sally      | Weber      | Web Developer     | 2015-12-18\n")
+            Sally      | Weber      | Web Developer     | 2015-12-18\n\
+            ")
     }
 
     // TODO change return type to Result for errors
@@ -57,7 +58,6 @@ impl EmployeeRoster {
         for line in lines {
             let tokens: Vec<&str> = line.split("|").collect();
             if tokens.len() == 1 && tokens[0].trim().is_empty() {
-                // FIXME add blank lines to test input, to exercise this check
                 continue;  // ignore blank lines
             } else if tokens.len() != 4 {
                 // FIXME return error Result
