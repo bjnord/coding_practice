@@ -14,14 +14,13 @@ impl Employee {
             static ref LINE_RE: Regex = Regex::new(r"^---*$").unwrap();
         }
         let name = String::from(tokens[0].trim());
-        if name == "Name" || LINE_RE.is_match(&name) {
+        if name == "First Name" || LINE_RE.is_match(&name) {
             return None;
         }
-        let names: Vec<&str> = name.split_whitespace().collect();
-        let f_name = String::from(names[0]);
-        let l_name = String::from(names[1]);
-        let position = String::from(tokens[1].trim());
-        let separation = String::from(tokens[2].trim());
+        let f_name = String::from(tokens[0].trim());
+        let l_name = String::from(tokens[1].trim());
+        let position = String::from(tokens[2].trim());
+        let separation = String::from(tokens[3].trim());
         Some(Employee {f_name, l_name, position, separation})
     }
 }
@@ -34,14 +33,14 @@ impl EmployeeRoster {
     #[cfg(test)]
     fn for_tests() -> EmployeeRoster {
         EmployeeRoster::from_string("\
-            Name                | Position          | Separation Date\n\
-            --------------------|-------------------|----------------\n\
-            John Johnson        | Manager           | 2016-12-31\n\
-            Tou Xiong           | Software Engineer | 2016-10-05\n\
-            Michaela Michaelson | District Manager  | 2015-12-19     \n\
-            Jake Jacobson       | Programmer        |                \n\
-            Jacquelyn Jackson   | DBA               | \n\
-            Sally Weber         | Web Developer     | 2015-12-18\n")
+            First Name | Last Name  | Position          | Separation Date\n\
+            -----------|------------|-------------------|----------------\n\
+            John       | Johnson    | Manager           | 2016-12-31\n\
+            Tou        | Xiong      | Software Engineer | 2016-10-05\n\
+            Michaela   | Michaelson | District Manager  | 2015-12-19     \n\
+            Jake       | Jacobson   | Programmer        |                \n\
+            Jacquelyn  | Jackson    | DBA               | \n\
+            Sally      | Weber      | Web Developer     | 2015-12-18\n")
     }
 
     pub fn from_file(_filename: &str) -> EmployeeRoster {
@@ -58,7 +57,7 @@ impl EmployeeRoster {
             if tokens.len() == 1 && tokens[0].trim().is_empty() {
                 // FIXME add blank lines to test input, to exercise this check
                 continue;  // ignore blank lines
-            } else if tokens.len() != 3 {
+            } else if tokens.len() != 4 {
                 // FIXME return error Result
                 panic!("line in unknown format (tokens={}): [{}]", tokens.len(), line);
             }
