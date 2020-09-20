@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::fs;
 
 pub struct Employee {
     f_name: String,
@@ -43,12 +44,13 @@ impl EmployeeRoster {
             Sally      | Weber      | Web Developer     | 2015-12-18\n")
     }
 
-    pub fn from_file(_filename: &str) -> EmployeeRoster {
-        // TODO read file to string, pass to from_string()
-        //      change return types of both to Result for errors
-        EmployeeRoster::from_string("")
+    // TODO change return type to Result for errors
+    pub fn from_file(filename: &str) -> EmployeeRoster {
+        let input: String = fs::read_to_string(filename).unwrap();
+        EmployeeRoster::from_string(&input)
     }
 
+    // TODO change return type to Result for errors
     pub fn from_string(input: &str) -> EmployeeRoster {
         let mut roster: Vec<Employee> = Vec::<Employee>::new();
         let lines: Vec<&str> = input.split("\n").collect();
