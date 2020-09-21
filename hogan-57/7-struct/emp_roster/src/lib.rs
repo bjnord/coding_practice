@@ -3,6 +3,7 @@ use regex::Regex;
 use std::fs;
 use std::io::{self, ErrorKind};
 
+#[derive(Debug, Clone)]
 pub struct Employee {
     f_name: String,
     l_name: String,
@@ -27,8 +28,17 @@ impl Employee {
     }
 }
 
+#[derive(PartialEq)]
+pub enum RosterSort {
+    Unsorted,
+    Name,
+    Position,
+    Separation,
+}
+
 pub struct EmployeeRoster {
     roster: Vec<Employee>,
+    sort_order: RosterSort,
 }
 
 impl EmployeeRoster {
@@ -67,7 +77,7 @@ impl EmployeeRoster {
                 None => (),
             }
         }
-        Ok(EmployeeRoster {roster})
+        Ok(EmployeeRoster {roster, sort_order: RosterSort::Unsorted})
     }
 
     pub fn len(&self) -> usize {
@@ -76,6 +86,36 @@ impl EmployeeRoster {
 
     pub fn find(&self, f_name: &str, l_name: &str) -> Option<&Employee> {
         self.roster.iter().find(|e| e.f_name == f_name && e.l_name == l_name)
+    }
+
+    pub fn sort_by(&mut self, order: RosterSort) {
+        self.sort_order = order;
+    }
+
+    pub fn print(&self) {
+        println!("\
+            First Name | Last Name  | Position          | Separation Date\n\
+            -----------|------------|-------------------|----------------");
+        for emp in self.sorted_roster() {
+            println!("{:<10} | {:<10} | {:<17} | {:<15}", emp.f_name, emp.l_name, emp.position, emp.separation);
+        }
+    }
+
+    // private
+    fn sorted_roster(&self) -> Vec<Employee> {
+        let mut roster_copy = self.roster.to_vec();
+        if self.sort_order != RosterSort::Unsorted {
+            roster_copy.sort_by(|a, b| match self.sort_order {
+                RosterSort::Unsorted => std::cmp::Ordering::Equal,
+                RosterSort::Name => match a.l_name.cmp(&b.l_name) {
+                    std::cmp::Ordering::Equal => a.f_name.cmp(&b.f_name),
+                    o => o,
+                },
+                RosterSort::Position => a.position.cmp(&b.position),
+                RosterSort::Separation => a.separation.cmp(&b.separation),
+            });
+        }
+        roster_copy
     }
 }
 
