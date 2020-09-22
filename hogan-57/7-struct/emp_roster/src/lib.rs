@@ -1,3 +1,4 @@
+use chrono::{Datelike, DateTime, Local, naive, NaiveDate};
 use lazy_static::lazy_static;
 use regex::{Regex, RegexBuilder};
 use std::fs;
@@ -8,7 +9,7 @@ pub struct Employee {
     f_name: String,
     l_name: String,
     position: String,
-    separation: String,  // TODO date type
+    separation: NaiveDate,
 }
 
 impl Employee {
@@ -18,7 +19,7 @@ impl Employee {
             f_name: String::from("Jonathan"),
             l_name: String::from("Doe"),
             position: String::from("Floor Sweeper"),
-            separation: String::from("2020-03-15"),
+            separation: NaiveDate::from_ymd(2020, 3, 15),
         }
     }
 
@@ -33,7 +34,10 @@ impl Employee {
         let f_name = String::from(tokens[0].trim());
         let l_name = String::from(tokens[1].trim());
         let position = String::from(tokens[2].trim());
-        let separation = String::from(tokens[3].trim());
+        let separation = match NaiveDate::parse_from_str(tokens[3].trim(), "%Y-%m-%d") {
+            Ok(d) => d,
+            Err(_) => naive::MAX_DATE,
+        };
         Some(Employee {f_name, l_name, position, separation})
     }
 
@@ -57,8 +61,33 @@ impl Employee {
     }
 
     pub fn separated_within(&self, months: u32) -> bool {
-        // FIXME compare using date type
-        !self.separation.is_empty()
+        let sep_months = Employee::months_since(&self.separation);
+        sep_months <= months
+    }
+
+    // future: 2020-09-22 since 2020-09-23 = 0*12 +  0 - 1 = -1 (= MAX)
+    // today:  2020-09-22 since 2020-09-22 = 0*12 +  0 - 0 = 0
+    // past:   2020-09-22 since 2020-08-23 = 0*12 +  1 - 1 = 0
+    //         2020-09-22 since 2020-08-22 = 0*12 +  1 - 0 = 1
+    //         2020-09-22 since 2019-12-22 = 1*12 + -3 - 0 = 9
+    //         2020-09-22 since 2019-09-22 = 1*12 +  0 - 0 = 12
+    //         2020-09-22 since 2019-08-22 = 1*12 +  1 - 0 = 13
+    //
+    // private
+    fn months_since(a: &NaiveDate) -> u32 {
+        let dt: DateTime<Local> = Local::now();
+        let mut months: i32 = (dt.year() as i32 - a.year() as i32) * 12 + (dt.month() as i32 - a.month() as i32);
+        if dt.day() < a.day() {
+            months -= 1;
+        }
+        if months < 0 { u32::MAX } else { months as u32 }
+    }
+
+    pub fn separation_str(&self) -> String {
+        match self.separation {
+            naive::MAX_DATE => String::new(),
+            d => String::from(d.format("%Y-%m-%d").to_string()),
+        }
     }
 }
 
@@ -144,7 +173,7 @@ impl EmployeeRoster {
             First Name | Last Name  | Position          | Separation Date\n\
             -----------|------------|-------------------|----------------");
         for emp in self.filtered_sorted_roster() {
-            println!("{:<10} | {:<10} | {:<17} | {:<15}", emp.f_name, emp.l_name, emp.position, emp.separation);
+            println!("{:<10} | {:<10} | {:<17} | {:<15}", emp.f_name, emp.l_name, emp.position, emp.separation_str());
         }
     }
 
@@ -223,6 +252,20 @@ mod tests {
     }
 
     #[test]
+    fn gone_separated_within() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(false, e.separated_within(1));
+        assert_eq!(true, e.separated_within(1200));
+    }
+
+    #[test]
+    fn here_separated_within() {
+        let e: Employee = Employee::from_tokens(vec!["Still", "Here", "Comptroller", ""]).unwrap();
+        assert_eq!(false, e.separated_within(1));
+        assert_eq!(false, e.separated_within(1200));
+    }
+
+    #[test]
     fn parsing_roster() {
         let er: EmployeeRoster = EmployeeRoster::for_tests();
         assert_eq!(6, er.len());
@@ -230,12 +273,12 @@ mod tests {
         assert_eq!("John", emp.f_name);
         assert_eq!("Johnson", emp.l_name);
         assert_eq!("Manager", emp.position);
-        assert_eq!("2016-12-31", emp.separation);
+        assert_eq!("2016-12-31", emp.separation_str());
         let emp = er.find("Jake", "Jacobson").unwrap();
         assert_eq!("Jake", emp.f_name);
         assert_eq!("Jacobson", emp.l_name);
         assert_eq!("Programmer", emp.position);
-        assert_eq!("", emp.separation);
+        assert_eq!("", emp.separation_str());
     }
 
     #[test]
