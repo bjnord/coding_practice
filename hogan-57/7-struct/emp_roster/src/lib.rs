@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Regex, RegexBuilder};
 use std::fs;
 use std::io::{self, ErrorKind};
 
@@ -12,6 +12,16 @@ pub struct Employee {
 }
 
 impl Employee {
+    #[cfg(test)]
+    fn for_tests() -> Employee {
+        Employee {
+            f_name: String::from("Jonathan"),
+            l_name: String::from("Doe"),
+            position: String::from("Floor Sweeper"),
+            separation: String::from("2020-03-15"),
+        }
+    }
+
     pub fn from_tokens(tokens: Vec<&str>) -> Option<Employee> {
         lazy_static! {
             static ref LINE_RE: Regex = Regex::new(r"^---*$").unwrap();
@@ -26,6 +36,30 @@ impl Employee {
         let separation = String::from(tokens[3].trim());
         Some(Employee {f_name, l_name, position, separation})
     }
+
+    pub fn name_matches(&self, pattern: &str) -> bool {
+        let re = RegexBuilder::new(pattern)
+            .case_insensitive(true)
+            .build()
+            .expect("invalid Regex");
+        match re.is_match(&self.f_name) {
+            true => true,
+            false => re.is_match(&self.l_name),
+        }
+    }
+
+    pub fn position_matches(&self, pattern: &str) -> bool {
+        let re = RegexBuilder::new(pattern)
+            .case_insensitive(true)
+            .build()
+            .expect("invalid Regex");
+        re.is_match(&self.position)
+    }
+
+    pub fn separated_within(&self, months: u32) -> bool {
+        // FIXME compare using date type
+        !self.separation.is_empty()
+    }
 }
 
 #[derive(PartialEq)]
@@ -36,8 +70,17 @@ pub enum RosterSort {
     Separation,
 }
 
+#[derive(PartialEq)]
+pub enum RosterFilter {
+    Unfiltered,
+    Name {pattern: String},
+    Position {pattern: String},
+    Separation {months: u32},
+}
+
 pub struct EmployeeRoster {
     roster: Vec<Employee>,
+    filter: RosterFilter,
     sort_order: RosterSort,
 }
 
@@ -77,7 +120,7 @@ impl EmployeeRoster {
                 None => (),
             }
         }
-        Ok(EmployeeRoster {roster, sort_order: RosterSort::Unsorted})
+        Ok(EmployeeRoster {roster, filter: RosterFilter::Unfiltered, sort_order: RosterSort::Unsorted})
     }
 
     pub fn len(&self) -> usize {
@@ -88,6 +131,10 @@ impl EmployeeRoster {
         self.roster.iter().find(|e| e.f_name == f_name && e.l_name == l_name)
     }
 
+    pub fn filter_by(&mut self, filter: RosterFilter) {
+        self.filter = filter;
+    }
+
     pub fn sort_by(&mut self, order: RosterSort) {
         self.sort_order = order;
     }
@@ -96,14 +143,21 @@ impl EmployeeRoster {
         println!("\
             First Name | Last Name  | Position          | Separation Date\n\
             -----------|------------|-------------------|----------------");
-        for emp in self.sorted_roster() {
+        for emp in self.filtered_sorted_roster() {
             println!("{:<10} | {:<10} | {:<17} | {:<15}", emp.f_name, emp.l_name, emp.position, emp.separation);
         }
     }
 
     // private
-    fn sorted_roster(&self) -> Vec<Employee> {
+    fn filtered_sorted_roster(&self) -> Vec<Employee> {
         let mut roster_copy = self.roster.to_vec();
+        roster_copy = roster_copy.into_iter()
+            .filter(|e| match &self.filter {
+                RosterFilter::Unfiltered => true,
+                RosterFilter::Name {pattern} => e.name_matches(&pattern),
+                RosterFilter::Position {pattern} => e.position_matches(&pattern),
+                RosterFilter::Separation {months} => e.separated_within(*months),
+            }).collect();
         if self.sort_order != RosterSort::Unsorted {
             roster_copy.sort_by(|a, b| match self.sort_order {
                 RosterSort::Unsorted => std::cmp::Ordering::Equal,
@@ -122,6 +176,51 @@ impl EmployeeRoster {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn first_name_matches() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(true, e.name_matches("Jo"));
+        assert_eq!(true, e.name_matches("jo"));
+        assert_eq!(true, e.name_matches("than"));
+    }
+
+    #[test]
+    fn first_name_doesnt_match() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(false, e.name_matches("John"));
+        assert_eq!(false, e.name_matches("john"));
+    }
+
+    #[test]
+    fn last_name_matches() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(true, e.name_matches("Do"));
+        assert_eq!(true, e.name_matches("Do"));
+        assert_eq!(true, e.name_matches("oe"));
+    }
+
+    #[test]
+    fn last_name_doesnt_match() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(false, e.name_matches("Roe"));
+        assert_eq!(false, e.name_matches("roe"));
+    }
+
+    #[test]
+    fn position_matches() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(true, e.position_matches("Flo"));
+        assert_eq!(true, e.position_matches("flo"));
+        assert_eq!(true, e.position_matches("per"));
+    }
+
+    #[test]
+    fn position_doesnt_match() {
+        let e: Employee = Employee::for_tests();
+        assert_eq!(false, e.position_matches("Jan"));
+        assert_eq!(false, e.position_matches("jan"));
+    }
 
     #[test]
     fn parsing_roster() {

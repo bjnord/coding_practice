@@ -69,9 +69,10 @@ let r = fn(...).unwrap();
 let r = fn(...).expect("Custom failure text");
 ```
 
-`Result` also has a method `unwrap_or_else()` which takes a closure for the error case:
+`Result` also has methods `unwrap_or()` and `unwrap_or_else()`; the latter takes a closure for the error case:
 
 ```
+let r = fn(...).unwrap_or(value);
 let r = fn(...).unwrap_or_else(|error| {...});
 ```
 
