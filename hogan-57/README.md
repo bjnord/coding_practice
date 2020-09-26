@@ -207,17 +207,34 @@ let s3 = format!("{}{}", s1, s2);
 
 ### Characters
 
-Rust strings are Unicode. The `String` type is implemented as a `Vec<u8>` which means that foundationally, 8-bit values are being stored.
+Rust characters (_e.g._ `'b'`) are 4-byte Unicode values.
+
+Rust strings are also Unicode, but the `String` type is implemented as a `Vec<u8>` which means that foundationally, a byte stream is being stored (UTF-8?).
 
 1. You can't use array indexing like `s[1]` to get "one letter" of a string.
 1. When you use a slice (range) `s[0..2]`, or alternatively the `s.bytes()` method, you are getting **single bytes**, which for multi-byte strings may not be what you want.
-1. To get the 8-, 16-, 24-bit **scalar values** (ordinal code of each Unicode char), use the `s.chars()` method. But **note** that this will separate out diacritics and combining characters, which are not sensible on their own.
+1. To get the 8-/16-/24-/32-bit **scalar values** (ordinal code of each Unicode char), use the `s.chars()` method. But **note** that this will separate out diacritics and combining characters, which are not sensible on their own.
 1. To get **graphemes** (fully-combined characters), you have to use crate software outside the Rust standard library. (Graphemes are really what we would call "letters" when looking at words on a page.)
 
 ## Using Iterators
 
-1. MEME: Length of a vector is `vec.len()` (think math), count of items in iterator is `iter.count()` (and it walks the iterator to do so; think counting people as they walk by).
+1. MEME: Length of a vector is `vec.len()` (think math), count of items in iterator is `iter.count()` (and it walks the iterator to do so; think counting people as they slowly walk by).
 1. By using `.enumerate()` on an iterator, you can get the index of each iterated value inline; `.enumerate()` returns `(index, value)` tuples.
+
+### For Loop
+
+MEME: Review the `for A in B` [definition in the language reference](https://doc.rust-lang.org/reference/expressions/loop-expr.html#iterator-loops) and [this StackExchange question and answer](https://stackoverflow.com/questions/27224927/what-is-the-exact-definition-of-the-for-loop-in-rust):
+
+1. The `B` after `in` must be convertable to `Iterator<T>`.
+1. The `A` after `for` is not a variable, it is an _"irrefutable pattern"_ that binds values of type T ("irrefutable" meaning it must work for all items passed to it).
+1. Since `A` is a pattern: Given `ref_iter` which is `Iterator<&i32>`, the `&n` in `for &n in ref_iter` is _destructuring_ the iterated value, binding the `i32` (pointed-to) value into `n`. Alternatively, you can use `for n in ref_iter` and then dereference with `*n`.
+1. By default `for` uses the `.into_iter()` form (see below), which means the `B` object will no longer be usable afterward; use `&B` to lend a reference to it.
+
+### The Three Iterator Methods
+
+1. `.into_iter()` works for anything that implements the `IntoIterator` trait. The trait implementation can be for any/all of `T`, `&T`, or `&mut T`, and the correct one is chosen for the calling context. This form **consumes** the collection object (borrows and doesn't return it); think "turn the source _into_ an iterator".
+1. `.iter()` simply returns an iterator giving _immutable_ references over the collection.
+1. `.iter_mut()` simply returns an iterator giving _mutable_ references over the collection.
 
 ### Map, Filter, Reduce
 
