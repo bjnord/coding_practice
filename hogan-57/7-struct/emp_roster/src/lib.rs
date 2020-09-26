@@ -61,10 +61,11 @@ impl Employee {
     }
 
     pub fn separated_within(&self, months: u32) -> bool {
-        let sep_months = Employee::months_since(&self.separation);
-        sep_months <= months
+        Employee::months_since(&self.separation) <= months
     }
 
+    // TODO extract months_since(a, b), rename this as today_months_since(a)
+    //      then convert this comment to tests
     // future: 2020-09-22 since 2020-09-23 = 0*12 +  0 - 1 = -1 (= MAX)
     // today:  2020-09-22 since 2020-09-22 = 0*12 +  0 - 0 = 0
     // past:   2020-09-22 since 2020-08-23 = 0*12 +  1 - 1 = 0
