@@ -2,6 +2,8 @@
 
 ## Pretty Printing
 
+1. Macros end with the bang character. The `println!()` macro outputs to `stdout`, while `eprintln!()` outputs to `stderr`.
+
 1. In the statement `println!("Number is {}.", a);` the `{}` part (with nothing in it) uses the `Display` _trait_ of the referent; this is defined for builtin types like `u32` and `String`. `Display` is meant for end-user formatting.
 
 1. Some compound types also have a `Debug` trait which is accessed using `{:?}` (show inline) or `{:#?}` (one attribute per line). `Debug` is meant for developer output (pretty-printing). You can _derive_ a `Debug` trait with this directive (which applies only to the `struct` that follows it):
