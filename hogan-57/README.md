@@ -6,27 +6,23 @@
 
 1. Some compound types also have a `Debug` trait which is accessed using `{:?}` (show inline) or `{:#?}` (one attribute per line). `Debug` is meant for developer output (pretty-printing). You can _derive_ a `Debug` trait with this directive (which applies only to the `struct` that follows it):
 
-```
-#[derive(Debug)]
-struct Position {
-    y: i32,
-    x: i32,
-}
-...
-let pos = Position {y: 2, x: -1};
-println!("position is {:?}", pos);
-```
+        #[derive(Debug)]
+        struct Position {
+            y: i32,
+            x: i32,
+        }
+        ...
+        let pos = Position {y: 2, x: -1};
+        println!("position is {:?}", pos);
 
 1. Here's a useful function to print the type of a variable:
 
-```
-// <https://stackoverflow.com/a/58119924/291754>
-fn print_type_of<T>(_: &T) {
-    println!("type {}", std::any::type_name::<T>())
-}
-...
-print_type_of(&foo);
-```
+        // <https://stackoverflow.com/a/58119924/291754>
+        fn print_type_of<T>(_: &T) {
+            println!("type {}", std::any::type_name::<T>())
+        }
+        ...
+        print_type_of(&foo);
 
 ## Function Return Type
 
@@ -247,3 +243,7 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 
 1. Rust provides `.min()` and `.max()` for an iterator; note that it returns `Option<&T>` for a vector, which means the result has to be unwrapped and dereferenced: `*values_vector.iter().min().unwrap()`
 1. Rust also provides `.min_by()` and `.max_by()` which take a comparison function, useful for complex objects.
+
+## Testing
+
+Rust's test system can perform [benchmarking measurements](https://doc.rust-lang.org/unstable-book/library-features/test.html) for testing performance.
