@@ -1,3 +1,4 @@
+use num_format::{Locale, ToFormattedString};
 use std::error::Error;
 
 pub struct Record {
@@ -23,19 +24,25 @@ impl Record {
         Ok(Record {l_name: String::new(), f_name: String::new(), salary: 0})
     }
 
+    fn fmt_dollars(dollars: u32) -> String {
+        format!("${}", dollars.to_formatted_string(&Locale::en))
+    }
+
     pub fn dump_header(widths: &Vec<usize>) {
-        println!("{ln:<lw$}{gn:<gw$}{sal:<sw$}", ln="Last", lw=widths[0]+1, gn="First", gw=widths[1]+1, sal="Salary", sw=widths[2]+1);
+        println!("{ln:<lw$}{gn:<gw$}{sal:>sw$}", ln="Last", lw=widths[0]+1, gn="First", gw=widths[1]+1, sal="Salary", sw=widths[2]+1);
         println!("{}", "-".repeat(widths[0]+widths[1]+widths[2]+3));
     }
 
     // "Make each column one space longer than the longest
     // value in the column."
     pub fn dump(&self, widths: &Vec<usize>) {
-        println!("{ln:<lw$}{gn:<gw$}{sal:<sw$}", ln=self.l_name, lw=widths[0]+1, gn=self.f_name, gw=widths[1]+1, sal=self.salary, sw=widths[2]+1);
+        let salary_str = Record::fmt_dollars(self.salary);
+        println!("{ln:<lw$}{gn:<gw$}{sal:>sw$}", ln=self.l_name, lw=widths[0]+1, gn=self.f_name, gw=widths[1]+1, sal=salary_str, sw=widths[2]+1);
     }
 
     fn field_widths(&self) -> Vec<usize> {
-        vec![self.l_name.len(), self.f_name.len(), 5]  // FIXME calculate salary width
+        let salary_str = Record::fmt_dollars(self.salary);
+        vec![self.l_name.len(), self.f_name.len(), salary_str.len()]
     }
 }
 
