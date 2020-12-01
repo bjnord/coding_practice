@@ -1,5 +1,6 @@
 use custom_error::custom_error;
 use itertools::Itertools;
+use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::time::Instant;
@@ -21,7 +22,7 @@ fn main() {
 
 /// Output solution for part 1.
 fn part1() {
-    let entries = read_entries("input/input.txt");
+    let entries = read_entries("input/input.txt").unwrap();
     let solution = find_solution(entries, 2, EXPECTED).unwrap();
     println!("== PART 1 ==");
     println!("{} + {} = {}", solution[0], solution[1], EXPECTED);
@@ -30,7 +31,7 @@ fn part1() {
 
 /// Output solution for part 2.
 fn part2() {
-    let entries = read_entries("input/input.txt");
+    let entries = read_entries("input/input.txt").unwrap();
     let solution = find_solution(entries, 3, EXPECTED).unwrap();
     println!("== PART 2 ==");
     println!("{} + {} + {} = {}", solution[0], solution[1], solution[2], EXPECTED);
@@ -40,16 +41,10 @@ fn part2() {
 /// Read expense report entries from `filename`.
 ///
 /// The file should have one integer per line.
-fn read_entries(filename: &str) -> Vec<i32> {
-    let reader = BufReader::new(File::open(filename).expect("Cannot open file"));
-    let mut entries = Vec::new();
-    for line in reader.lines() {
-        match line {
-            Ok(content) => entries.push(content.parse::<i32>().unwrap()),
-            Err(e) => eprintln!("line read error: {}", e),
-        }
-    }
-    entries
+fn read_entries(filename: &str) -> Result<Vec<i32>, Box<dyn Error>> {
+    let reader = BufReader::new(File::open(filename)?);
+    // FIXME instead of `parse().unwrap()`, should return error to caller
+    Ok(reader.lines().into_iter().map(|line| line.unwrap().parse::<i32>().unwrap()).collect())
 }
 
 /// Find `n` values from `entries` whose sum is `expected`.
@@ -69,13 +64,19 @@ mod tests {
 
     #[test]
     fn test_read_entries() {
-        let entries = read_entries("input/example1.txt");
+        let entries = read_entries("input/example1.txt").unwrap();
         assert_eq!(vec![1721, 979, 366, 299, 675, 1456], entries);
     }
 
     #[test]
+    fn test_read_entries_no_file() {
+        let entries = read_entries("input/example99.txt");
+        assert!(entries.is_err());
+    }
+
+    #[test]
     fn test_find_solution_for_2() {
-        let entries = read_entries("input/example1.txt");
+        let entries = read_entries("input/example1.txt").unwrap();
         let solution = find_solution(entries, 2, EXPECTED).unwrap();
         assert_eq!(2, solution.len());
         assert_eq!(514579, solution[0] * solution[1]);
@@ -83,7 +84,7 @@ mod tests {
 
     #[test]
     fn test_find_solution_for_3() {
-        let entries = read_entries("input/example1.txt");
+        let entries = read_entries("input/example1.txt").unwrap();
         let solution = find_solution(entries, 3, EXPECTED).unwrap();
         assert_eq!(3, solution.len());
         assert_eq!(241861950, solution[0] * solution[1] * solution[2]);
