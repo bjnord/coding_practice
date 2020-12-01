@@ -68,6 +68,12 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_read_entries() {
+        let entries = read_entries("input/example1.txt");
+        assert_eq!(vec![1721, 979, 366, 299, 675, 1456], entries);
+    }
+
+    #[test]
     fn test_find_solution_for_2() {
         let entries = read_entries("input/example1.txt");
         let solution = find_solution(entries, 2, EXPECTED).unwrap();
