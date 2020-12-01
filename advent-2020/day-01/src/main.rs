@@ -19,6 +19,7 @@ fn main() {
     eprintln!("Finished after {:?}", duration);
 }
 
+/// Output solution for part 1.
 fn part1() {
     let values = read_values("input/input.txt");
     let solution = find_solution(values, 2, EXPECTED).unwrap();
@@ -27,6 +28,7 @@ fn part1() {
     println!("{} * {} = {} (should be 776064)", solution[0], solution[1], solution[0] * solution[1]);
 }
 
+/// Output solution for part 2.
 fn part2() {
     let values = read_values("input/input.txt");
     let solution = find_solution(values, 3, EXPECTED).unwrap();
@@ -35,6 +37,9 @@ fn part2() {
     println!("{} * {} * {} = {} (should be 6964490)", solution[0], solution[1], solution[2], solution[0] * solution[1] * solution[2]);
 }
 
+/// Read values from `filename`.
+///
+/// The file should have one integer per line.
 fn read_values(filename: &str) -> Vec<i32> {
     let reader = BufReader::new(File::open(filename).expect("Cannot open file"));
     let mut values = Vec::new();
@@ -47,6 +52,7 @@ fn read_values(filename: &str) -> Vec<i32> {
     values
 }
 
+/// Find `choose` values from `values` whose sum is `expected`.
 fn find_solution(values: Vec<i32>, choose: usize, expected: i32) -> Result<Vec<i32>, SolutionError> {
     for p in values.iter().combinations(choose) {
         if p.iter().fold(0, |acc, x| acc + *x) == expected {
