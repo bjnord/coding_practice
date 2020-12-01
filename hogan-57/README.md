@@ -1,5 +1,9 @@
 # Things I've Learned About Rust
 
+## See Also
+
+- [Rust Language Cheat Sheet](https://cheats.rs/)
+
 ## Pretty Printing
 
 1. Macros end with the bang character. The `println!()` macro outputs to `stdout`, while `eprintln!()` outputs to `stderr`.
@@ -274,6 +278,8 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 ### Itertools
 
 The [itertools](https://crates.io/crates/itertools) crate has a lot of extra functionality for iterators, including `.permutations()` and `.combinations()`.
+
+Note also `.tuple_combinations()` which returns a vector rather than an iterator.
 
 ## Testing
 
