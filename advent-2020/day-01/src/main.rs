@@ -46,12 +46,8 @@ fn read_values(filename: &str) -> Vec<i32> {
 fn find_solution(values: Vec<i32>, choose: usize, expected: i32) -> Result<Vec<i32>, SolutionError> {
     for p in values.iter().combinations(choose) {
         if p.iter().fold(0, |acc, x| acc + *x) == expected {
-            // FIXME this is a hack; should copy p to new vector of same length
-            match choose {
-                2 => return Ok(vec![*p[0], *p[1]]),
-                3 => return Ok(vec![*p[0], *p[1], *p[2]]),
-                _ => {},
-            }
+            // clone vector, copying each &i32 to new i32
+            return Ok(p.iter().map(|x| **x).collect());
         }
     }
     Err(SolutionError::NotFound{expected})
