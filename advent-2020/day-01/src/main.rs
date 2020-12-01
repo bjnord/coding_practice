@@ -2,6 +2,7 @@ use custom_error::custom_error;
 use itertools::Itertools;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::time::Instant;
 
 const EXPECTED: i32 = 2020;
 
@@ -11,8 +12,11 @@ custom_error!{#[derive(PartialEq)]
 }
 
 fn main() {
+    let start = Instant::now();
     part1();
     part2();
+    let duration = start.elapsed();
+    eprintln!("Finished after {:?}", duration);
 }
 
 fn part1() {
