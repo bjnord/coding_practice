@@ -1,19 +1,25 @@
+use custom_error::custom_error;
 use itertools::Itertools;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-const EXPECT: i32 = 2020;
+const EXPECTED: i32 = 2020;
+
+custom_error!{#[derive(PartialEq)]
+    SolutionError
+    NotFound{expected: i32} = "no solution found for {expected}"
+}
 
 fn main() {
     let mut values = read_values("input/input.txt");
-    let mut solution = find_solution(values, 2, EXPECT);
+    let mut solution = find_solution(values, 2, EXPECTED).unwrap();
     println!("== PART 1 ==");
-    println!("{} + {} = {}", solution[0], solution[1], EXPECT);
+    println!("{} + {} = {}", solution[0], solution[1], EXPECTED);
     println!("{} * {} = {}", solution[0], solution[1], solution[0] * solution[1]);
     values = read_values("input/input.txt");
-    solution = find_solution(values, 3, EXPECT);
+    solution = find_solution(values, 3, EXPECTED).unwrap();
     println!("== PART 2 ==");
-    println!("{} + {} + {} = {}", solution[0], solution[1], solution[2], EXPECT);
+    println!("{} + {} + {} = {}", solution[0], solution[1], solution[2], EXPECTED);
     println!("{} * {} * {} = {}", solution[0], solution[1], solution[2], solution[0] * solution[1] * solution[2]);
 }
 
@@ -29,18 +35,18 @@ fn read_values(filename: &str) -> Vec<i32> {
     values
 }
 
-fn find_solution(values: Vec<i32>, choose: usize, expect: i32) -> Vec<i32> {
+fn find_solution(values: Vec<i32>, choose: usize, expected: i32) -> Result<Vec<i32>, SolutionError> {
     for p in values.iter().combinations(choose) {
-        if p.iter().fold(0, |acc, x| acc + *x) == expect {
+        if p.iter().fold(0, |acc, x| acc + *x) == expected {
             // FIXME this is a hack; should copy p to new vector of same length
             match choose {
-                2 => return vec![*p[0], *p[1]],
-                3 => return vec![*p[0], *p[1], *p[2]],
+                2 => return Ok(vec![*p[0], *p[1]]),
+                3 => return Ok(vec![*p[0], *p[1], *p[2]]),
                 _ => {},
             }
         }
     }
-    vec![]
+    Err(SolutionError::NotFound{expected})
 }
 
 #[cfg(test)]
@@ -50,7 +56,7 @@ mod tests {
     #[test]
     fn test_find_solution_for_2() {
         let values = read_values("input/example1.txt");
-        let solution = find_solution(values, 2, EXPECT);
+        let solution = find_solution(values, 2, EXPECTED).unwrap();
         assert_eq!(2, solution.len());
         assert_eq!(514579, solution[0] * solution[1]);
     }
@@ -58,8 +64,15 @@ mod tests {
     #[test]
     fn test_find_solution_for_3() {
         let values = read_values("input/example1.txt");
-        let solution = find_solution(values, 3, EXPECT);
+        let solution = find_solution(values, 3, EXPECTED).unwrap();
         assert_eq!(3, solution.len());
         assert_eq!(241861950, solution[0] * solution[1] * solution[2]);
+    }
+
+    #[test]
+    fn test_no_solution_found() {
+        let values = vec![1, 2, 3, 4, 5];
+        let result = find_solution(values, 2, EXPECTED);
+        assert_eq!(result.err().unwrap(), SolutionError::NotFound{expected: EXPECTED});
     }
 }

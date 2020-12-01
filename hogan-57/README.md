@@ -85,6 +85,31 @@ fn my_read_file(file: &str) -> Result<String, io::Error> {
 }
 ```
 
+#### Custom Errors
+
+The [custom\_error](https://crates.io/crates/custom_error/1.7.1) crate gives you a macro that supplies all the boilerplate needed for a custom error enumeration (note the lack of commas when the macro is used):
+
+```
+use custom_error::custom_error;
+
+custom_error!{#[derive(PartialEq)]
+    SolutionError
+    NotFound{expected: i32} = "no solution found for {expected}"
+}
+
+fn find_solution(values: Vec<i32>, choose: usize, expected: i32) -> Result<Vec<i32>, SolutionError> {
+    // ...
+    return Err(SolutionError::NotFound{expected});
+}
+
+    #[test]
+    fn test_no_solution_found() {
+        // ...
+        let result = find_solution(values, 2, EXPECTED);
+        assert_eq!(result.err().unwrap(), SolutionError::NotFound{expected: EXPECTED});
+    }
+```
+
 ### Option
 
 Other methods return an `Option<T>` which is Rust's replacement for null pointers (a value which may or may not be present); this is matched with:
