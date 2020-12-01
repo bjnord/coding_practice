@@ -30,7 +30,7 @@ fn read_values(filename: &str) -> Vec<i32> {
 }
 
 fn find_solution(values: Vec<i32>, choose: usize, expect: i32) -> Vec<i32> {
-    for p in values.iter().permutations(choose) {
+    for p in values.iter().combinations(choose) {
         if p.iter().fold(0, |acc, x| acc + *x) == expect {
             // FIXME this is a hack; should copy p to new vector of same length
             match choose {
