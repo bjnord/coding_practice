@@ -6,14 +6,11 @@ fn main() {
     let mut emp_list = EmployeeList::from_file("employees.txt");
     emp_list.dump();
     loop {
-        println!("");
+        println!();
         let name = readln::read_string("Enter an employee name to remove: ").unwrap();
         emp_list.remove(&name);
-        println!("");
-        match emp_list.len() {
-            0 => break,
-            _ => emp_list.dump(),
-        }
+        println!();
+        if emp_list.is_empty() { break } else { emp_list.dump() }
     }
     println!("All employees removed.");
 }

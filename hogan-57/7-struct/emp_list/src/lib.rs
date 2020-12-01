@@ -19,7 +19,7 @@ impl EmployeeList {
         let mut employees = Vec::new();
         let reader = BufReader::new(File::open(filename).expect("Cannot open employee file"));
         for line in reader.lines() {
-            employees.push(String::from(line.unwrap()));
+            employees.push(line.unwrap());
         }
         EmployeeList {employees}
     }
@@ -28,11 +28,12 @@ impl EmployeeList {
         self.employees.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.employees.is_empty()
+    }
+
     pub fn contains(&self, name: &str) -> bool {
-        match self.employees.iter().find(|n| *n == name) {
-            Some(_) => true,
-            None => false,
-        }
+        self.employees.iter().any(|n| *n == name)
     }
 
     // TODO move output (here and remove()) to src/main.rs
