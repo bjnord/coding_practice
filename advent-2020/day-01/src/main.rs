@@ -44,7 +44,7 @@ fn part2() {
 fn read_entries(filename: &str) -> Result<Vec<i32>, Box<dyn Error>> {
     let reader = BufReader::new(File::open(filename)?);
     // FIXME instead of `parse().unwrap()`, should return error to caller
-    Ok(reader.lines().into_iter().map(|line| line.unwrap().parse::<i32>().unwrap()).collect())
+    Ok(reader.lines().map(|line| line.unwrap().parse::<i32>().unwrap()).collect())
 }
 
 /// Find `n` values from `entries` whose sum is `expected`.
