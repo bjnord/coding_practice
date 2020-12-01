@@ -11,16 +11,24 @@ custom_error!{#[derive(PartialEq)]
 }
 
 fn main() {
-    let mut values = read_values("input/input.txt");
-    let mut solution = find_solution(values, 2, EXPECTED).unwrap();
+    part1();
+    part2();
+}
+
+fn part1() {
+    let values = read_values("input/input.txt");
+    let solution = find_solution(values, 2, EXPECTED).unwrap();
     println!("== PART 1 ==");
     println!("{} + {} = {}", solution[0], solution[1], EXPECTED);
-    println!("{} * {} = {}", solution[0], solution[1], solution[0] * solution[1]);
-    values = read_values("input/input.txt");
-    solution = find_solution(values, 3, EXPECTED).unwrap();
+    println!("{} * {} = {} (should be 776064)", solution[0], solution[1], solution[0] * solution[1]);
+}
+
+fn part2() {
+    let values = read_values("input/input.txt");
+    let solution = find_solution(values, 3, EXPECTED).unwrap();
     println!("== PART 2 ==");
     println!("{} + {} + {} = {}", solution[0], solution[1], solution[2], EXPECTED);
-    println!("{} * {} * {} = {}", solution[0], solution[1], solution[2], solution[0] * solution[1] * solution[2]);
+    println!("{} * {} * {} = {} (should be 6964490)", solution[0], solution[1], solution[2], solution[0] * solution[1] * solution[2]);
 }
 
 fn read_values(filename: &str) -> Vec<i32> {
