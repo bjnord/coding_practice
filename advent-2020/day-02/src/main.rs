@@ -49,8 +49,8 @@ impl Password {
         Ok(Password{first, second, letter, password})
     }
 
-    /// Is this password valid according to the given policy?
-    fn is_valid(&self) -> bool {
+    /// Is this password valid according to the "min/max" policy?
+    fn is_valid_minmax(&self) -> bool {
         let matches = self.password
             .chars()
             .filter(|c| *c == self.letter)
@@ -70,9 +70,9 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let passwords = read_passwords("input/input.txt").unwrap();
-    let count = count_valid_passwords(passwords);
+    let count = count_valid_minmax_passwords(passwords);
     println!("== PART 1 ==");
-    println!("file contains {} valid passwords (should be 393)", count);
+    println!("{} passwords valid according to the \"min/max\" policy (should be 393)", count);
 }
 
 /// Output solution for part 2.
@@ -92,10 +92,10 @@ fn read_passwords(filename: &str) -> Result<Vec<Password>, Box<dyn error::Error>
     }
 }
 
-/// Return count of valid `passwords`.
-fn count_valid_passwords(passwords: Vec<Password>) -> usize {
+/// Return count of `passwords` valid according to the "min/max" policy.
+fn count_valid_minmax_passwords(passwords: Vec<Password>) -> usize {
     passwords.iter()
-        .filter(|&p| p.is_valid())
+        .filter(|&p| p.is_valid_minmax())
         .count()
 }
 
@@ -104,15 +104,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_valid_password() {
+    fn test_valid_minmax_password() {
         let password = Password{first: 1, second: 3, letter: 'a', password: String::from("abcde")};
-        assert!(password.is_valid());
+        assert!(password.is_valid_minmax());
+        let password2 = Password{first: 2, second: 9, letter: 'c', password: String::from("ccccccccc")};
+        assert!(password2.is_valid_minmax());
     }
 
     #[test]
-    fn test_invalid_password() {
+    fn test_invalid_minmax_password() {
         let password = Password{first: 1, second: 3, letter: 'b', password: String::from("cdefg")};
-        assert!(!password.is_valid());
+        assert!(!password.is_valid_minmax());
     }
 
     #[test]
@@ -125,9 +127,9 @@ mod tests {
     }
 
     #[test]
-    fn test_count_valid_passwords() {
+    fn test_count_valid_minmax_passwords() {
         let passwords = read_passwords("input/example1.txt").unwrap();
-        assert_eq!(2, count_valid_passwords(passwords));
+        assert_eq!(2, count_valid_minmax_passwords(passwords));
     }
 
     #[test]
