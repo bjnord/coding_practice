@@ -48,6 +48,15 @@ impl Password {
         }
         Ok(Password{min, max, letter, password})
     }
+
+    /// Is this password valid according to the given policy?
+    fn is_valid(&self) -> bool {
+        let matches = self.password
+            .chars()
+            .filter(|c| *c == self.letter)
+            .count();
+        matches >= self.min && matches <= self.max
+    }
 }
 
 fn main() {
@@ -61,7 +70,9 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let passwords = read_passwords("input/input.txt").unwrap();
-    eprintln!("pass={:#?}", passwords[999]);
+    let count = count_valid_passwords(passwords);
+    println!("== PART 1 ==");
+    println!("file contains {} valid passwords (should be 393)", count);
 }
 
 /// Output solution for part 2.
@@ -81,9 +92,28 @@ fn read_passwords(filename: &str) -> Result<Vec<Password>, Box<dyn error::Error>
     }
 }
 
+/// Return count of valid `passwords`.
+fn count_valid_passwords(passwords: Vec<Password>) -> usize {
+    passwords.iter()
+        .filter(|&p| p.is_valid())
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_valid_password() {
+        let password = Password{min: 1, max: 3, letter: 'a', password: String::from("abcde")};
+        assert!(password.is_valid());
+    }
+
+    #[test]
+    fn test_invalid_password() {
+        let password = Password{min: 1, max: 3, letter: 'b', password: String::from("cdefg")};
+        assert!(!password.is_valid());
+    }
 
     #[test]
     fn test_read_passwords() {
@@ -92,6 +122,12 @@ mod tests {
         assert_eq!(Password{min: 1, max: 3, letter: 'a', password: String::from("abcde")}, passwords[0]);
         assert_eq!(Password{min: 1, max: 3, letter: 'b', password: String::from("cdefg")}, passwords[1]);
         assert_eq!(Password{min: 2, max: 9, letter: 'c', password: String::from("ccccccccc")}, passwords[2]);
+    }
+
+    #[test]
+    fn test_count_valid_passwords() {
+        let passwords = read_passwords("input/example1.txt").unwrap();
+        assert_eq!(2, count_valid_passwords(passwords));
     }
 
     #[test]
