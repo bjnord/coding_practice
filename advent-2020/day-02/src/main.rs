@@ -37,7 +37,7 @@ impl Password {
                 return Err(io::Error::new(ErrorKind::InvalidInput, e));
             },
         };
-        // FIXME handle ParseIntError for first and second
+        // all these unwrap() are safe, given a matching regex
         let first = String::from(cap.name("first").unwrap().as_str()).parse::<usize>().unwrap();
         let second = String::from(cap.name("second").unwrap().as_str()).parse::<usize>().unwrap();
         let letter = cap.name("letter").unwrap().as_str().chars().next().unwrap();
