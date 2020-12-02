@@ -243,6 +243,25 @@ Rust strings are also Unicode, but the `String` type is implemented as a `Vec<u8
 1. To get the 8-/16-/24-/32-bit **scalar values** (ordinal code of each Unicode char), use the `s.chars()` method. But **note** that this will separate out diacritics and combining characters, which are not sensible on their own.
 1. To get **graphemes** (fully-combined characters), you have to use crate software outside the Rust standard library. (Graphemes are really what we would call "letters" when looking at words on a page.)
 
+### Parsing
+
+If you just need to tokenize a `String` into variables, `.collect_tuple()` is simpler than using a regex:
+
+```
+let words = line.split_whitespace();
+let (name, phone, email) = words.collect_tuple().unwrap();
+```
+
+The `.parse()` method of `String` can convert it to another type:
+
+```
+let n: i32 = number.parse().unwrap();
+// or:
+let n = number.parse::<i32>().unwrap();
+```
+
+The [scan\_fmt](https://docs.rs/scan_fmt/) crate provides `scanf()`-like functionality that combines tokenizing and type conversion.
+
 ## Using Iterators
 
 1. MEME: Length of a vector is `vec.len()` (think math), count of items in iterator is `iter.count()` (and it walks the iterator to do so; think counting people as they slowly walk by).
