@@ -24,18 +24,20 @@ fn main() {
 fn part1() {
     let entries = read_entries("input/input.txt").unwrap();
     let solution = find_solution(entries, 2, EXPECTED).unwrap();
+    let prod = solution.iter().product::<i32>();
     println!("== PART 1 ==");
     println!("{} + {} = {}", solution[0], solution[1], EXPECTED);
-    println!("{} * {} = {} (should be 776064)", solution[0], solution[1], solution[0] * solution[1]);
+    println!("{} * {} = {} (should be 776064)", solution[0], solution[1], prod);
 }
 
 /// Output solution for part 2.
 fn part2() {
     let entries = read_entries("input/input.txt").unwrap();
     let solution = find_solution(entries, 3, EXPECTED).unwrap();
+    let prod = solution.iter().product::<i32>();
     println!("== PART 2 ==");
     println!("{} + {} + {} = {}", solution[0], solution[1], solution[2], EXPECTED);
-    println!("{} * {} * {} = {} (should be 6964490)", solution[0], solution[1], solution[2], solution[0] * solution[1] * solution[2]);
+    println!("{} * {} * {} = {} (should be 6964490)", solution[0], solution[1], solution[2], prod);
 }
 
 /// Read expense report entries from `filename`.
@@ -49,10 +51,9 @@ fn read_entries(filename: &str) -> Result<Vec<i32>, Box<dyn Error>> {
 
 /// Find `n` values from `entries` whose sum is `expected`.
 fn find_solution(entries: Vec<i32>, n: usize, expected: i32) -> Result<Vec<i32>, SolutionError> {
-    for p in entries.iter().combinations(n) {
-        if p.iter().fold(0, |acc, x| acc + *x) == expected {
-            // clone vector, copying each &i32 to new i32
-            return Ok(p.iter().map(|x| **x).collect());
+    for combo in entries.iter().copied().combinations(n) {
+        if combo.iter().sum::<i32>() == expected {
+            return Ok(combo);
         }
     }
     Err(SolutionError::NotFound{expected})
@@ -78,16 +79,18 @@ mod tests {
     fn test_find_solution_for_2() {
         let entries = read_entries("input/example1.txt").unwrap();
         let solution = find_solution(entries, 2, EXPECTED).unwrap();
+        let prod = solution.iter().product::<i32>();
         assert_eq!(2, solution.len());
-        assert_eq!(514579, solution[0] * solution[1]);
+        assert_eq!(514579, prod);
     }
 
     #[test]
     fn test_find_solution_for_3() {
         let entries = read_entries("input/example1.txt").unwrap();
         let solution = find_solution(entries, 3, EXPECTED).unwrap();
+        let prod = solution.iter().product::<i32>();
         assert_eq!(3, solution.len());
-        assert_eq!(241861950, solution[0] * solution[1] * solution[2]);
+        assert_eq!(241861950, prod);
     }
 
     #[test]
