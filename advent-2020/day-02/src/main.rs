@@ -51,10 +51,7 @@ impl Password {
 
     /// Is this password valid according to the "min/max" policy?
     fn is_valid_minmax(&self) -> bool {
-        let matches = self.password
-            .chars()
-            .filter(|c| *c == self.letter)
-            .count();
+        let matches = self.password.matches(self.letter).count();
         matches >= self.first && matches <= self.second
     }
 
