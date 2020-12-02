@@ -3,6 +3,7 @@ use itertools::Itertools;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::num::ParseIntError;
 use std::time::Instant;
 
 const EXPECTED: i32 = 2020;
@@ -45,8 +46,14 @@ fn part2() {
 /// The file should have one integer per line.
 fn read_entries(filename: &str) -> Result<Vec<i32>, Box<dyn Error>> {
     let reader = BufReader::new(File::open(filename)?);
-    // FIXME instead of `parse().unwrap()`, should return error to caller
-    Ok(reader.lines().map(|line| line.unwrap().parse::<i32>().unwrap()).collect())
+    let res: Result<Vec<i32>, ParseIntError> = reader
+        .lines()
+        .map(|line| line.unwrap().parse::<i32>())
+        .collect();
+    match res {
+        Ok(vec) => Ok(vec),
+        Err(e) => Err(Box::new(e)),
+    }
 }
 
 /// Find `n` values from `entries` whose sum is `expected`.
@@ -72,6 +79,12 @@ mod tests {
     #[test]
     fn test_read_entries_no_file() {
         let entries = read_entries("input/example99.txt");
+        assert!(entries.is_err());
+    }
+
+    #[test]
+    fn test_read_entries_bad_file() {
+        let entries = read_entries("input/bad1.txt");
         assert!(entries.is_err());
     }
 
