@@ -13,6 +13,43 @@ struct Password {
     password: String,
 }
 
+impl Password {
+    /// Construct by parsing input line.
+    ///
+    /// The line is in the form `M-N L: password` where
+    /// - `M` is the minimum count (integer)
+    /// - `N` is the maximum count (integer)
+    /// - `L` is the letter (char)
+    /// - `password` is the password (string)
+    fn from_input_line(line: String) -> Result<Password, io::Error> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"(?x)^
+                (?P<min>\d+)-
+                (?P<max>\d+)\s+
+                (?P<letter>[a-z]):\s+
+                (?P<password>[a-z]+)
+                $").unwrap();
+        }
+        let cap = match RE.captures(&line) {
+            Some(cap) => cap,
+            None => {
+                let e = format!("invalid input line format [{}]", line);
+                return Err(io::Error::new(ErrorKind::InvalidInput, e));
+            },
+        };
+        // FIXME handle ParseIntError for min and max
+        let min = String::from(cap.name("min").unwrap().as_str()).parse::<usize>().unwrap();
+        let max = String::from(cap.name("max").unwrap().as_str()).parse::<usize>().unwrap();
+        let letter = cap.name("letter").unwrap().as_str().chars().next().unwrap();
+        let password = String::from(cap.name("password").unwrap().as_str());
+        if min > max {
+            let e = format!("min > max on input line [{}]", line);
+            return Err(io::Error::new(ErrorKind::InvalidInput, e));
+        }
+        Ok(Password{min, max, letter, password})
+    }
+}
+
 fn main() {
     let start = Instant::now();
     part1();
@@ -31,48 +68,12 @@ fn part1() {
 fn part2() {
 }
 
-/// Parse password line.
-///
-/// The line is in the form `M-N L: password` where
-/// - `M` is the minimum count (integer)
-/// - `N` is the maximum count (integer)
-/// - `L` is the letter (char)
-/// - `password` is the password (string)
-// TODO make this impl method of Password
-fn parse_password_line(line: String) -> Result<Password, io::Error> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"(?x)^
-            (?P<min>\d+)-
-            (?P<max>\d+)\s+
-            (?P<letter>[a-z]):\s+
-            (?P<password>[a-z]+)
-            $").unwrap();
-    }
-    let cap = match RE.captures(&line) {
-        Some(cap) => cap,
-        None => {
-            let e = format!("invalid input line format [{}]", line);
-            return Err(io::Error::new(ErrorKind::InvalidInput, e));
-        },
-    };
-    // FIXME handle ParseIntError for min and max
-    let min = String::from(cap.name("min").unwrap().as_str()).parse::<usize>().unwrap();
-    let max = String::from(cap.name("max").unwrap().as_str()).parse::<usize>().unwrap();
-    let letter = cap.name("letter").unwrap().as_str().chars().next().unwrap();
-    let password = String::from(cap.name("password").unwrap().as_str());
-    if min > max {
-        let e = format!("min > max on input line [{}]", line);
-        return Err(io::Error::new(ErrorKind::InvalidInput, e));
-    }
-    Ok(Password{min, max, letter, password})
-}
-
 /// Read passwords from `filename`.
 fn read_passwords(filename: &str) -> Result<Vec<Password>, Box<dyn error::Error>> {
     let reader = BufReader::new(File::open(filename)?);
     let res: Result<Vec<Password>, io::Error> = reader
         .lines()
-        .map(|line| parse_password_line(line.unwrap()))
+        .map(|line| Password::from_input_line(line.unwrap()))
         .collect();
     match res {
         Ok(vec) => Ok(vec),
