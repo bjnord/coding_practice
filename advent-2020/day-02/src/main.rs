@@ -57,6 +57,14 @@ impl Password {
             .count();
         matches >= self.first && matches <= self.second
     }
+
+    /// Is this password valid according to the "1st/2nd" policy?
+    fn is_valid_1st2nd(&self) -> bool {
+        let first = self.password.chars().nth(self.first-1).unwrap_or('\0');
+        let second = self.password.chars().nth(self.second-1).unwrap_or('\0');
+        // to be valid, first OR second position must match, but not both
+        if first == self.letter { second != self.letter } else { second == self.letter }
+    }
 }
 
 fn main() {
@@ -77,6 +85,10 @@ fn part1() {
 
 /// Output solution for part 2.
 fn part2() {
+    let passwords = read_passwords("input/input.txt").unwrap();
+    let count = count_valid_1st2nd_passwords(passwords);
+    println!("== PART 2 ==");
+    println!("{} passwords valid according to the \"min/max\" policy (should be 690)", count);
 }
 
 /// Read passwords from `filename`.
@@ -99,6 +111,13 @@ fn count_valid_minmax_passwords(passwords: Vec<Password>) -> usize {
         .count()
 }
 
+/// Return count of `passwords` valid according to the "1st/2nd" policy.
+fn count_valid_1st2nd_passwords(passwords: Vec<Password>) -> usize {
+    passwords.iter()
+        .filter(|&p| p.is_valid_1st2nd())
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -118,6 +137,20 @@ mod tests {
     }
 
     #[test]
+    fn test_valid_1st2nd_password() {
+        let password = Password{first: 1, second: 3, letter: 'a', password: String::from("abcde")};
+        assert!(password.is_valid_1st2nd());
+    }
+
+    #[test]
+    fn test_invalid_1st2nd_password() {
+        let password = Password{first: 1, second: 3, letter: 'b', password: String::from("cdefg")};
+        assert!(!password.is_valid_1st2nd());
+        let password2 = Password{first: 2, second: 9, letter: 'c', password: String::from("ccccccccc")};
+        assert!(!password2.is_valid_1st2nd());
+    }
+
+    #[test]
     fn test_read_passwords() {
         let passwords = read_passwords("input/example1.txt").unwrap();
         assert_eq!(3, passwords.len());
@@ -130,6 +163,12 @@ mod tests {
     fn test_count_valid_minmax_passwords() {
         let passwords = read_passwords("input/example1.txt").unwrap();
         assert_eq!(2, count_valid_minmax_passwords(passwords));
+    }
+
+    #[test]
+    fn test_count_valid_1st2nd_passwords() {
+        let passwords = read_passwords("input/example1.txt").unwrap();
+        assert_eq!(1, count_valid_1st2nd_passwords(passwords));
     }
 
     #[test]
