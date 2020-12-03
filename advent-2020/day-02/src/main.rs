@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::error;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, ErrorKind};
@@ -21,7 +23,7 @@ impl Password {
     /// - `S` is the second value (integer)
     /// - `L` is the letter (char)
     /// - `password` is the password (string)
-    fn from_input_line(line: String) -> Result<Password, io::Error> {
+    fn from_input_line(line: &str) -> Result<Password, io::Error> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"(?x)^
                 (?P<first>\d+)-
@@ -30,12 +32,9 @@ impl Password {
                 (?P<password>[a-z]+)
                 $").unwrap();
         }
-        let cap = match RE.captures(&line) {
-            Some(cap) => cap,
-            None => {
-                let e = format!("invalid input line format [{}]", line);
-                return Err(io::Error::new(ErrorKind::InvalidInput, e));
-            },
+        let cap = if let Some(cap) = RE.captures(line) { cap } else {
+            let e = format!("invalid input line format [{}]", line);
+            return Err(io::Error::new(ErrorKind::InvalidInput, e));
         };
         // all these unwrap() are safe, given a matching regex
         let first = String::from(cap.name("first").unwrap().as_str()).parse::<usize>().unwrap();
@@ -93,7 +92,7 @@ fn read_passwords(filename: &str) -> Result<Vec<Password>, Box<dyn error::Error>
     let reader = BufReader::new(File::open(filename)?);
     let res: Result<Vec<Password>, io::Error> = reader
         .lines()
-        .map(|line| Password::from_input_line(line.unwrap()))
+        .map(|line| Password::from_input_line(&line.unwrap()))
         .collect();
     match res {
         Ok(vec) => Ok(vec),
@@ -103,15 +102,15 @@ fn read_passwords(filename: &str) -> Result<Vec<Password>, Box<dyn error::Error>
 
 /// Return count of `passwords` valid according to the "min/max" policy.
 fn count_valid_minmax_passwords(passwords: Vec<Password>) -> usize {
-    passwords.iter()
-        .filter(|&p| p.is_valid_minmax())
+    passwords.into_iter()
+        .filter(Password::is_valid_minmax)
         .count()
 }
 
 /// Return count of `passwords` valid according to the "1st/2nd" policy.
 fn count_valid_1st2nd_passwords(passwords: Vec<Password>) -> usize {
-    passwords.iter()
-        .filter(|&p| p.is_valid_1st2nd())
+    passwords.into_iter()
+        .filter(Password::is_valid_1st2nd)
         .count()
 }
 
