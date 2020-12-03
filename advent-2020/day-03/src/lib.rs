@@ -12,6 +12,10 @@ pub struct Forest {
 
 impl Forest {
     /// Construct from input file.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the input file cannot be opened.
     pub fn from_input_file(path: &str) -> Result<Forest, Box<dyn error::Error>> {
         let reader = BufReader::new(File::open(path)?);
         let mut width = 0;
@@ -27,11 +31,13 @@ impl Forest {
     }
 
     /// Return height of terrain map.
+    #[must_use]
     pub fn height(&self) -> usize {
         self.height
     }
 
     /// Is there a tree at position [y, x]?
+    #[must_use]
     pub fn is_tree_at(&self, y: usize, x: usize) -> bool {
         if y >= self.height {
             panic!("y > terrain map height");
