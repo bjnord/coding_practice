@@ -40,8 +40,7 @@ fn trees_on_trajectory(path: &str, dy: usize, dx: usize) -> usize {
     let mut x = dx;
     let mut y = dy;
     while y < forest.height() {
-        let tree = forest.is_tree_at(y, x);
-        if tree {
+        if forest.is_tree_at(y, x) {
             trees += 1;
         }
         x += dx;
