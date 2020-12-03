@@ -60,7 +60,7 @@ impl Password {
         let first = self.password.chars().nth(self.first-1).unwrap_or('\0');
         let second = self.password.chars().nth(self.second-1).unwrap_or('\0');
         // to be valid, first OR second position must match, but not both
-        if first == self.letter { second != self.letter } else { second == self.letter }
+        (first == self.letter) ^ (second == self.letter)
     }
 }
 
