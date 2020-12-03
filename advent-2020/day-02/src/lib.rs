@@ -25,7 +25,7 @@ impl Password {
     ///
     /// Returns `Err` if the line does not match the required format,
     /// or if the first value is greater than the second value.
-    pub fn from_input_line(line: &str) -> Result<Password, io::Error> {
+    pub fn from_input_line(line: &str) -> Result<Self, io::Error> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"(?x)^
                 (?P<first>\d+)-
@@ -47,7 +47,7 @@ impl Password {
             let e = format!("first > second on input line [{}]", line);
             Err(io::Error::new(ErrorKind::InvalidInput, e))
         } else {
-            Ok(Password{first, second, letter, password})
+            Ok(Self{first, second, letter, password})
         }
     }
 

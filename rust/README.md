@@ -47,6 +47,10 @@ error[E0308]: mismatched types
              found enum `std::result::Result<std::fs::File, std::io::Error>`
 ```
 
+## Structures
+
+The `impl` of a `struct` can use `Self` to refer to its own name; this keeps it DRY if you decide to rename it later.
+
 ## Error Handling
 
 MEME: Don't just mindlessly short-circuit error handling in the interest of implementation speed. Think carefully about whether a panic is acceptable, or if the error might happen in production and needs to be handled.

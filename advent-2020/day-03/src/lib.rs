@@ -16,7 +16,7 @@ impl Forest {
     /// # Errors
     ///
     /// Returns `Err` if the input file cannot be opened.
-    pub fn from_input_file(path: &str) -> Result<Forest, Box<dyn error::Error>> {
+    pub fn from_input_file(path: &str) -> Result<Self, Box<dyn error::Error>> {
         let reader = BufReader::new(File::open(path)?);
         let mut width = 0;
         let mut height = 0;
@@ -27,7 +27,7 @@ impl Forest {
             width = s.len();
             terrain.push_str(&s);
         }
-        Ok(Forest{width, height, terrain})
+        Ok(Self{width, height, terrain})
     }
 
     /// Return height of terrain map.
