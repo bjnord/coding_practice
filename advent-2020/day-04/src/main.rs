@@ -1,0 +1,51 @@
+#![warn(clippy::pedantic)]
+
+use std::collections::HashSet;
+use std::error;
+use std::fs;
+use std::io::{self, ErrorKind};
+
+struct Passport {
+    valid: bool,
+}
+
+fn main() {
+    let passports = read_passports("input/input.txt").unwrap();
+    let count = passports.into_iter().filter(|p| p.valid ).count();
+    println!("== PART 1 ==");
+    println!("{} passports are valid (should be 206)", count);
+}
+
+/// Read passports from file
+fn read_passports(path: &str) -> Result<Vec<Passport>, Box<dyn error::Error>> {
+    let s: String = fs::read_to_string(path).unwrap();
+    let mut passports = vec![];
+    for block in s.split("\n\n") {
+        let line = block.replace("\n", " ");
+        let mut names = HashSet::new();
+        for field in line.split(" ") {
+            if let Some(name) = field.split(":").next() {
+                if name != "" {
+                    names.insert(name);
+                }
+            } else {
+                let e = format!("invalid input field format [{}]", field);
+                return Err(Box::new(io::Error::new(ErrorKind::InvalidInput, e)));
+            };
+        }
+        passports.push(Passport{valid: is_passport_complete(&names)});
+    }
+    Ok(passports)
+}
+
+/// Is list of passport fields complete?
+fn is_passport_complete(names: &HashSet<&str>) -> bool {
+    // per puzzle, ignore cid
+    let expects = vec!["ecl", "pid", "eyr", "hcl", "byr", "iyr", "hgt"];
+    for expect in expects {
+        if !names.contains(expect) {
+            return false;
+        }
+    }
+    true
+}
