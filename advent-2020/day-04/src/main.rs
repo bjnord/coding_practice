@@ -63,3 +63,14 @@ fn is_passport_complete(names: &HashSet<&str>) -> bool {
     }
     true
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_read_passports() {
+        let passports = read_passports("input/example1.txt").unwrap();
+        assert_eq!(2, passports.into_iter().filter(|p| p.valid ).count());
+    }
+}
