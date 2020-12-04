@@ -4,6 +4,10 @@
 
 - [Rust Language Cheat Sheet](https://cheats.rs/)
 
+## Terms
+
+- "turbofish" refers to the `::<>` type coercion syntax
+
 ## Pretty Printing
 
 1. Macros end with the bang character. The `println!()` macro outputs to `stdout`, while `eprintln!()` outputs to `stderr`.
