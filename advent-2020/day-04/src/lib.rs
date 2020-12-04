@@ -6,7 +6,14 @@ use std::error;
 use std::io::{self, ErrorKind};
 use std::str::FromStr;
 
+pub struct Field {
+    name: String,
+    value: String,
+}
+
 pub struct Passport {
+    #[allow(dead_code)]
+    fields: Vec<Field>,
     valid: bool,
 }
 
@@ -16,15 +23,17 @@ impl FromStr for Passport {
     fn from_str(block: &str) -> Result<Self, Self::Err> {
         let line = block.replace("\n", " ");
         let mut names = HashSet::new();
+        let mut fields: Vec<Field> = vec![];
         for field in line.split_whitespace() {
-            if let Some((name, _value)) = field.split(":").collect_tuple() {
+            if let Some((name, value)) = field.split(":").collect_tuple() {
                 names.insert(name);
+                fields.push(Field{name: String::from(name), value: String::from(value)});
             } else {
                 let e = format!("invalid input field format [{}]", field);
                 return Err(Box::new(io::Error::new(ErrorKind::InvalidInput, e)));
             };
         }
-        Ok(Self{valid: Passport::is_complete(&names)})
+        Ok(Self{fields, valid: Passport::is_complete(&names)})
     }
 }
 
