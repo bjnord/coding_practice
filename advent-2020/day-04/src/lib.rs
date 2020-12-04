@@ -1,5 +1,6 @@
 #![warn(clippy::pedantic)]
 
+use itertools::Itertools;
 use std::collections::HashSet;
 use std::error;
 use std::io::{self, ErrorKind};
@@ -15,11 +16,9 @@ impl FromStr for Passport {
     fn from_str(block: &str) -> Result<Self, Self::Err> {
         let line = block.replace("\n", " ");
         let mut names = HashSet::new();
-        for field in line.split(" ") {
-            if let Some(name) = field.split(":").next() {
-                if name != "" {
-                    names.insert(name);
-                }
+        for field in line.split_whitespace() {
+            if let Some((name, _value)) = field.split(":").collect_tuple() {
+                names.insert(name);
             } else {
                 let e = format!("invalid input field format [{}]", field);
                 return Err(Box::new(io::Error::new(ErrorKind::InvalidInput, e)));
