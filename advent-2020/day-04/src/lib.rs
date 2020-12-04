@@ -22,18 +22,17 @@ impl FromStr for Passport {
 
     fn from_str(block: &str) -> Result<Self, Self::Err> {
         let line = block.replace("\n", " ");
-        let mut names = HashSet::new();
         let mut fields: Vec<Field> = vec![];
         for field in line.split_whitespace() {
             if let Some((name, value)) = field.split(":").collect_tuple() {
-                names.insert(name);
                 fields.push(Field{name: String::from(name), value: String::from(value)});
             } else {
                 let e = format!("invalid input field format [{}]", field);
                 return Err(Box::new(io::Error::new(ErrorKind::InvalidInput, e)));
             };
         }
-        Ok(Self{fields, valid: Passport::is_complete(&names)})
+        let valid = Passport::validate(&fields);
+        Ok(Self{fields, valid})
     }
 }
 
@@ -44,15 +43,17 @@ impl Passport {
         self.valid
     }
 
-    // Is list of passport fields complete?
-    fn is_complete(names: &HashSet<&str>) -> bool {
+    // Are passport fields valid and complete?
+    #[must_use]
+    fn validate(fields: &Vec<Field>) -> bool {
         // per puzzle, ignore cid
-        let expects = vec!["ecl", "pid", "eyr", "hcl", "byr", "iyr", "hgt"];
-        for expect in expects {
-            if !names.contains(expect) {
-                return false;
+        let required = vec!["ecl", "pid", "eyr", "hcl", "byr", "iyr", "hgt"];
+        let mut required: HashSet<&str> = required.into_iter().collect();
+        for field in fields {
+            if required.contains(&field.name[..]) {
+                required.remove(&field.name[..]);
             }
         }
-        true
+        required.is_empty()
     }
 }
