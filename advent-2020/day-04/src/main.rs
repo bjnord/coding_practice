@@ -4,16 +4,30 @@ use std::collections::HashSet;
 use std::error;
 use std::fs;
 use std::io::{self, ErrorKind};
+use std::time::Instant;
 
 struct Passport {
     valid: bool,
 }
 
 fn main() {
+    let start = Instant::now();
+    part1();
+    part2();
+    let duration = start.elapsed();
+    eprintln!("Finished after {:?}", duration);
+}
+
+/// Output solution for part 1.
+fn part1() {
     let passports = read_passports("input/input.txt").unwrap();
     let count = passports.into_iter().filter(|p| p.valid ).count();
     println!("== PART 1 ==");
     println!("{} passports are valid (should be 206)", count);
+}
+
+/// Output solution for part 2.
+fn part2() {
 }
 
 /// Read passports from file
