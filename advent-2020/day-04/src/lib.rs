@@ -3,14 +3,16 @@
 use std::collections::HashSet;
 use std::error;
 use std::io::{self, ErrorKind};
+use std::str::FromStr;
 
 pub struct Passport {
     valid: bool,
 }
 
-impl Passport {
-    /// Construct from multi-line string block.
-    pub fn from_str(block: &str) -> Result<Self, Box<dyn error::Error>> {
+impl FromStr for Passport {
+    type Err = Box<dyn error::Error>;
+
+    fn from_str(block: &str) -> Result<Self, Self::Err> {
         let line = block.replace("\n", " ");
         let mut names = HashSet::new();
         for field in line.split(" ") {
@@ -25,7 +27,9 @@ impl Passport {
         }
         Ok(Self{valid: Passport::is_complete(&names)})
     }
+}
 
+impl Passport {
     /// Is this passport valid?
     #[must_use]
     pub fn is_valid(&self) -> bool {

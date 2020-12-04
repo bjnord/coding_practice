@@ -30,7 +30,7 @@ fn read_passports(path: &str) -> Result<Vec<Passport>, Box<dyn error::Error>> {
     let s: String = fs::read_to_string(path).unwrap();
     let mut passports = vec![];
     for block in s.split("\n\n") {
-        passports.push(Passport::from_str(block)?);
+        passports.push(block.parse()?);
     }
     Ok(passports)
 }
