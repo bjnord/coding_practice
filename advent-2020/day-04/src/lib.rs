@@ -60,11 +60,7 @@ impl Passport {
     /// a passport is found with an invalid format.
     pub fn read_passports(path: &str) -> Result<Vec<Passport>> {
         let s: String = fs::read_to_string(path)?;
-        let mut passports = vec![];
-        for block in s.split("\n\n") {
-            passports.push(block.parse()?);
-        }
-        Ok(passports)
+        s.split("\n\n").map(str::parse).collect()
     }
 
     /// Are passport fields complete?
