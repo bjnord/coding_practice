@@ -1,5 +1,6 @@
 #![warn(clippy::pedantic)]
 
+use itertools::Itertools;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -112,8 +113,7 @@ impl BoardingPass {
         passes.iter().map(BoardingPass::seat).max()
     }
 
-    /// Find the seat ID with no boarding pass. (Note: This function sorts the
-    /// boarding pass list as a side-effect.)
+    /// Find the seat ID with no boarding pass.
     ///
     /// # Examples
     ///
@@ -126,13 +126,15 @@ impl BoardingPass {
     /// # // - row 3: full
     /// # // 2 * 8 + 3 = 19
     /// let passes = BoardingPass::read_from_file("input/example2.txt").unwrap();
-    /// assert_eq!(Some(19), BoardingPass::empty_seat(passes));
+    /// assert_eq!(Some(19), BoardingPass::empty_seat(&passes));
     /// ```
     #[must_use]
-    pub fn empty_seat(mut passes: Vec<BoardingPass>) -> Option<usize> {
-        passes.sort_by_key(BoardingPass::seat);
-        match passes.windows(2).find(|pair| pair[1].seat() - pair[0].seat() == 2) {
-            Some(pair) => Some(pair[0].seat() + 1),
+    pub fn empty_seat(passes: &[BoardingPass]) -> Option<usize> {
+        match passes.iter()
+                .sorted_by_key(|p| p.seat())
+                .tuple_windows()
+                .find(|(a, b)| b.seat() - a.seat() == 2) {
+            Some((a, _b)) => Some(a.seat() + 1),
             None => None,
         }
     }

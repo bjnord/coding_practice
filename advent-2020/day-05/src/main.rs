@@ -22,7 +22,7 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let passes = BoardingPass::read_from_file("input/input.txt").unwrap();
-    let empty_seat = BoardingPass::empty_seat(passes).unwrap();
+    let empty_seat = BoardingPass::empty_seat(&passes).unwrap();
     println!("== PART 2 ==");
     println!("empty seat ID is {} (should be 682)", empty_seat);
 }
