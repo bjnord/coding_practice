@@ -92,9 +92,7 @@ impl BoardingPass {
     /// a line is found with an invalid boarding pass format.
     pub fn read_from_file(path: &str) -> Result<Vec<BoardingPass>> {
         let s: String = fs::read_to_string(path)?;
-        s.lines()
-            .map(|line| line.parse::<BoardingPass>())
-            .collect()
+        s.lines().map(str::parse).collect()
     }
 
     /// Find the highest seat ID on any boarding pass.
