@@ -1,5 +1,6 @@
 #![warn(clippy::pedantic)]
 
+use itertools::Itertools;
 use std::error;
 use std::fs;
 use std::io::{self, ErrorKind};
@@ -60,6 +61,28 @@ impl BoardingPass {
         }
         Ok(boarding_passes)
     }
+
+    /// Find the highest seat ID on any boarding pass.
+    pub fn max_seat(passes: &[BoardingPass]) -> Option<usize> {
+        passes.iter().map(BoardingPass::seat).max()
+    }
+
+    /// Find the seat ID with no boarding pass.
+    pub fn empty_seat(passes: &[BoardingPass]) -> Option<usize> {
+        let mut i = passes.iter().sorted_by_key(|p| p.seat());
+        let mut last_seat = i.next().unwrap().seat();
+        for pass in i {
+            let seat = pass.seat();
+            if seat <= last_seat {
+                panic!("sort failure");
+            }
+            if seat > last_seat + 1 {
+                return Some(last_seat + 1);
+            }
+            last_seat = seat;
+        }
+        None
+    }
 }
 
 #[cfg(test)]
@@ -114,5 +137,28 @@ mod tests {
     fn test_read_from_file_bad_path() {
         let result = BoardingPass::read_from_file("input/example99.txt");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_max_seat() {
+        let passes = BoardingPass::read_from_file("input/example1.txt").unwrap();
+        assert_eq!(Some(820), BoardingPass::max_seat(&passes));
+    }
+
+    #[test]
+    fn test_max_seat_empty_list() {
+        let passes: Vec<BoardingPass> = vec![];
+        assert_eq!(None, BoardingPass::max_seat(&passes));
+    }
+
+    #[test]
+    fn test_empty_seat() {
+        // this file (not in order) has:
+        // - row 0: empty
+        // - row 1: full
+        // - row 2: one empty seat in column 3
+        // - row 3: full
+        let passes = BoardingPass::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(Some(2 * 8 + 3), BoardingPass::empty_seat(&passes));
     }
 }
