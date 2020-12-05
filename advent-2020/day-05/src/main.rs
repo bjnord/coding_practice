@@ -14,13 +14,13 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let passes = BoardingPass::read_from_file("input/input.txt").unwrap();
-    let max_seat = max_seat(passes).unwrap();
+    let max_seat = max_seat(&passes).unwrap();
     println!("== PART 1 ==");
     println!("highest seat ID is {} (should be 848)", max_seat);
 }
 
 /// Find the highest seat ID on any boarding pass.
-fn max_seat(passes: Vec<BoardingPass>) -> Option<usize> {
+fn max_seat(passes: &[BoardingPass]) -> Option<usize> {
     passes.iter().map(BoardingPass::seat).max()
 }
 
@@ -34,7 +34,7 @@ fn part2() {
 
 /// Find the seat ID with no boarding pass.
 fn empty_seat(mut passes: Vec<BoardingPass>) -> Option<usize> {
-    passes.sort_by(|a, b| a.seat().cmp(&b.seat()));
+    passes.sort_by_key(BoardingPass::seat);
     let mut i = passes.iter();
     let mut last_seat = i.next().unwrap().seat();
     for pass in i {
@@ -57,13 +57,13 @@ mod tests {
     #[test]
     fn test_max_seat() {
         let passes = BoardingPass::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(Some(820), max_seat(passes));
+        assert_eq!(Some(820), max_seat(&passes));
     }
 
     #[test]
     fn test_max_seat_empty_list() {
         let passes: Vec<BoardingPass> = vec![];
-        assert_eq!(None, max_seat(passes));
+        assert_eq!(None, max_seat(&passes));
     }
 
     #[test]
