@@ -28,6 +28,15 @@ pub struct BoardingPass {
 impl FromStr for BoardingPass {
     type Err = Box<dyn error::Error>;
 
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_05::BoardingPass;
+    /// let pass: BoardingPass = "FBFBBFFRLR".parse().unwrap();
+    /// assert_eq!(44, pass.row());
+    /// assert_eq!(5, pass.column());
+    /// assert_eq!(357, pass.seat());
+    /// ```
     fn from_str(line: &str) -> Result<Self> {
         let (row, column, err_char) = line.chars().fold((0, 0, '\0'), |(r, c, ech), ch|
             match ch {
@@ -68,6 +77,14 @@ impl BoardingPass {
 
     /// Read boarding passes from file.
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_05::BoardingPass;
+    /// let passes = BoardingPass::read_from_file("input/example1.txt").unwrap();
+    /// assert_eq!(4, passes.len());
+    /// ```
+    ///
     /// # Errors
     ///
     /// Returns `Err` if the input file cannot be opened, or if
@@ -82,12 +99,34 @@ impl BoardingPass {
     }
 
     /// Find the highest seat ID on any boarding pass.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_05::BoardingPass;
+    /// let passes = BoardingPass::read_from_file("input/example1.txt").unwrap();
+    /// assert_eq!(Some(820), BoardingPass::max_seat(&passes));
+    /// ```
     #[must_use]
     pub fn max_seat(passes: &[BoardingPass]) -> Option<usize> {
         passes.iter().map(BoardingPass::seat).max()
     }
 
     /// Find the seat ID with no boarding pass.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_05::BoardingPass;
+    /// # // this file (not in order) has:
+    /// # // - row 0: empty
+    /// # // - row 1: full
+    /// # // - row 2: one empty seat in column 3
+    /// # // - row 3: full
+    /// # // 2 * 8 + 3 = 19
+    /// let passes = BoardingPass::read_from_file("input/example2.txt").unwrap();
+    /// assert_eq!(Some(19), BoardingPass::empty_seat(&passes));
+    /// ```
     #[must_use]
     pub fn empty_seat(passes: &[BoardingPass]) -> Option<usize> {
         let mut i = passes.iter().sorted_by_key(|p| p.seat());
@@ -109,14 +148,6 @@ impl BoardingPass {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_parse_example_1() {
-        let pass: BoardingPass = "FBFBBFFRLR".parse().unwrap();
-        assert_eq!(44, pass.row());
-        assert_eq!(5, pass.column());
-        assert_eq!(357, pass.seat());
-    }
 
     #[test]
     fn test_parse_example_2() {
@@ -149,37 +180,13 @@ mod tests {
     }
 
     #[test]
-    fn test_read_from_file() {
-        let passes = BoardingPass::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(4, passes.len());
-    }
-
-    #[test]
     fn test_read_from_file_bad_path() {
         let result = BoardingPass::read_from_file("input/example99.txt");
         assert!(result.is_err());
     }
-
-    #[test]
-    fn test_max_seat() {
-        let passes = BoardingPass::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(Some(820), BoardingPass::max_seat(&passes));
-    }
-
     #[test]
     fn test_max_seat_empty_list() {
         let passes: Vec<BoardingPass> = vec![];
         assert_eq!(None, BoardingPass::max_seat(&passes));
-    }
-
-    #[test]
-    fn test_empty_seat() {
-        // this file (not in order) has:
-        // - row 0: empty
-        // - row 1: full
-        // - row 2: one empty seat in column 3
-        // - row 3: full
-        let passes = BoardingPass::read_from_file("input/example2.txt").unwrap();
-        assert_eq!(Some(2 * 8 + 3), BoardingPass::empty_seat(&passes));
     }
 }
