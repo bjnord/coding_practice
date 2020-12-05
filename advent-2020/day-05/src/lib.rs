@@ -38,11 +38,11 @@ impl FromStr for BoardingPass {
                 _   => (r, c, ch),
             }
         );
-        if err_char != '\0' {
+        if err_char == '\0' {
+            Ok(Self{row, column})
+        } else {
             let e = format!("invalid character '{}' in line [{}]", err_char, line);
             Err(BoardingPassError(e).into())
-        } else {
-            Ok(Self{row, column})
         }
     }
 }
@@ -67,6 +67,11 @@ impl BoardingPass {
     }
 
     /// Read boarding passes from file.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the input file cannot be opened, or if
+    /// a line is found with an invalid boarding pass format.
     pub fn read_from_file(path: &str) -> Result<Vec<BoardingPass>> {
         let s: String = fs::read_to_string(path)?;
         let mut boarding_passes = vec![];
@@ -77,11 +82,13 @@ impl BoardingPass {
     }
 
     /// Find the highest seat ID on any boarding pass.
+    #[must_use]
     pub fn max_seat(passes: &[BoardingPass]) -> Option<usize> {
         passes.iter().map(BoardingPass::seat).max()
     }
 
     /// Find the seat ID with no boarding pass.
+    #[must_use]
     pub fn empty_seat(passes: &[BoardingPass]) -> Option<usize> {
         let mut i = passes.iter().sorted_by_key(|p| p.seat());
         let mut last_seat = i.next().unwrap().seat();
