@@ -3,14 +3,32 @@
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::error;
+use std::fmt;
+use std::fs;
 use std::io::{self, ErrorKind};
+use std::result;
 use std::str::FromStr;
 
+type Result<Passport> = result::Result<Passport, Box<dyn error::Error>>;
+
+#[derive(Debug, Clone)]
+struct PassportError(String);
+
+impl fmt::Display for PassportError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Passport error: {}", self.0)
+    }
+}
+
+impl error::Error for PassportError {}
+
+#[derive(Debug, Clone)]
 pub struct Field {
     name: String,
     value: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct Passport {
     fields: Vec<Field>,
 }
@@ -18,7 +36,7 @@ pub struct Passport {
 impl FromStr for Passport {
     type Err = Box<dyn error::Error>;
 
-    fn from_str(block: &str) -> Result<Self, Self::Err> {
+    fn from_str(block: &str) -> Result<Self> {
         let line = block.replace("\n", " ");
         let mut fields: Vec<Field> = vec![];
         for field in line.split_whitespace() {
@@ -34,6 +52,21 @@ impl FromStr for Passport {
 }
 
 impl Passport {
+    /// Read passports from file.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the input file cannot be opened, or if
+    /// a passport is found with an invalid format.
+    pub fn read_passports(path: &str) -> Result<Vec<Passport>> {
+        let s: String = fs::read_to_string(path).unwrap();
+        let mut passports = vec![];
+        for block in s.split("\n\n") {
+            passports.push(block.parse()?);
+        }
+        Ok(passports)
+    }
+
     /// Are passport fields complete?
     #[must_use]
     pub fn is_complete(&self) -> bool {
@@ -135,6 +168,18 @@ impl Passport {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_read_passports() {
+        let passports = Passport::read_passports("input/example1.txt").unwrap();
+        assert_eq!(2, passports.into_iter().filter(|p| p.is_valid() ).count());
+    }
+
+    #[test]
+    fn test_read_passports2() {
+        let passports = Passport::read_passports("input/example2.txt").unwrap();
+        assert_eq!(4, passports.into_iter().filter(|p| p.is_valid() ).count());
+    }
 
     #[test]
     fn test_year_in_range_too_small() {
