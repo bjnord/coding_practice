@@ -92,11 +92,9 @@ impl BoardingPass {
     /// a line is found with an invalid boarding pass format.
     pub fn read_from_file(path: &str) -> Result<Vec<BoardingPass>> {
         let s: String = fs::read_to_string(path)?;
-        let mut boarding_passes = vec![];
-        for line in s.lines() {
-            boarding_passes.push(line.parse()?);
-        }
-        Ok(boarding_passes)
+        s.lines()
+            .map(|line| line.parse::<BoardingPass>())
+            .collect()
     }
 
     /// Find the highest seat ID on any boarding pass.
@@ -179,6 +177,13 @@ mod tests {
         let result = BoardingPass::read_from_file("input/example99.txt");
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_read_from_file_invalid_format() {
+        let result = BoardingPass::read_from_file("input/bad1.txt");
+        assert!(result.is_err());
+    }
+
     #[test]
     fn test_max_seat_empty_list() {
         let passes: Vec<BoardingPass> = vec![];
