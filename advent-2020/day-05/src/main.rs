@@ -1,6 +1,7 @@
 #![warn(clippy::pedantic)]
 
 use day_05::BoardingPass;
+use itertools::Itertools;
 use std::time::Instant;
 
 fn main() {
@@ -27,15 +28,14 @@ fn max_seat(passes: &[BoardingPass]) -> Option<usize> {
 /// Output solution for part 2.
 fn part2() {
     let passes = BoardingPass::read_from_file("input/input.txt").unwrap();
-    let empty_seat = empty_seat(passes).unwrap();
+    let empty_seat = empty_seat(&passes).unwrap();
     println!("== PART 2 ==");
     println!("empty seat ID is {} (should be 682)", empty_seat);
 }
 
 /// Find the seat ID with no boarding pass.
-fn empty_seat(mut passes: Vec<BoardingPass>) -> Option<usize> {
-    passes.sort_by_key(BoardingPass::seat);
-    let mut i = passes.iter();
+fn empty_seat(passes: &[BoardingPass]) -> Option<usize> {
+    let mut i = passes.iter().sorted_by_key(|p| p.seat());
     let mut last_seat = i.next().unwrap().seat();
     for pass in i {
         let seat = pass.seat();
@@ -74,6 +74,6 @@ mod tests {
         // - row 2: one empty seat in column 3
         // - row 3: full
         let passes = BoardingPass::read_from_file("input/example2.txt").unwrap();
-        assert_eq!(Some(2 * 8 + 3), empty_seat(passes));
+        assert_eq!(Some(2 * 8 + 3), empty_seat(&passes));
     }
 }
