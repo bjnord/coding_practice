@@ -22,7 +22,7 @@ impl FromStr for Passport {
         let line = block.replace("\n", " ");
         let mut fields: Vec<Field> = vec![];
         for field in line.split_whitespace() {
-            if let Some((name, value)) = field.split(":").collect_tuple() {
+            if let Some((name, value)) = field.split(':').collect_tuple() {
                 fields.push(Field{name: String::from(name), value: String::from(value)});
             } else {
                 let e = format!("invalid input field format [{}]", field);
