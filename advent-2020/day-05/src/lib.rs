@@ -2,9 +2,23 @@
 
 use itertools::Itertools;
 use std::error;
+use std::fmt;
 use std::fs;
-use std::io::{self, ErrorKind};
+use std::result;
 use std::str::FromStr;
+
+type Result<BoardingPass> = result::Result<BoardingPass, Box<dyn error::Error>>;
+
+#[derive(Debug, Clone)]
+struct BoardingPassError(String);
+
+impl fmt::Display for BoardingPassError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Boarding pass error: {}", self.0)
+    }
+}
+
+impl error::Error for BoardingPassError {}
 
 pub struct BoardingPass {
     row: usize,
@@ -14,7 +28,7 @@ pub struct BoardingPass {
 impl FromStr for BoardingPass {
     type Err = Box<dyn error::Error>;
 
-    fn from_str(line: &str) -> Result<Self, Self::Err> {
+    fn from_str(line: &str) -> Result<Self> {
         let (row, column, err_char) = line.chars().fold((0, 0, '\0'), |(r, c, ech), ch|
             match ch {
                 'F' => (r * 2, c, ech),
@@ -26,7 +40,7 @@ impl FromStr for BoardingPass {
         );
         if err_char != '\0' {
             let e = format!("invalid character '{}' in line [{}]", err_char, line);
-            return Err(Box::new(io::Error::new(ErrorKind::InvalidInput, e)));
+            Err(BoardingPassError(e).into())
         } else {
             Ok(Self{row, column})
         }
@@ -53,7 +67,7 @@ impl BoardingPass {
     }
 
     /// Read boarding passes from file.
-    pub fn read_from_file(path: &str) -> Result<Vec<BoardingPass>, Box<dyn error::Error>> {
+    pub fn read_from_file(path: &str) -> Result<Vec<BoardingPass>> {
         let s: String = fs::read_to_string(path)?;
         let mut boarding_passes = vec![];
         for block in s.trim_end().split('\n') {
@@ -123,7 +137,7 @@ mod tests {
 
     #[test]
     fn test_parse_bad_character() {
-        let result: Result<BoardingPass, _> = "FBMBBFFRLR".parse();
+        let result: Result<BoardingPass> = "FBMBBFFRLR".parse();
         assert!(result.is_err());
     }
 
