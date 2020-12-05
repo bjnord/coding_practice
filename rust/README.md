@@ -8,6 +8,11 @@
 
 - "turbofish" refers to the `::<>` type coercion syntax
 
+## Useful Crates
+
+- [itertools](https://docs.rs/itertools/) is the iterator super-charger (see more below)
+- [maplit](https://docs.rs/maplit/) provides a `hashmap!{}` macro
+
 ## Pretty Printing
 
 1. Macros end with the bang character. The `println!()` macro outputs to `stdout`, while `eprintln!()` outputs to `stderr`.
