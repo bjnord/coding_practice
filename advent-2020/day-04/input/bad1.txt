@@ -1,0 +1,2 @@
+:gry pid: eyr:2020:french : hcl:#fffffd
+byr:1937 iyr:2017 cid:147 hgt:183cm

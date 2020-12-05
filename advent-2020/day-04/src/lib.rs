@@ -59,7 +59,7 @@ impl Passport {
     /// Returns `Err` if the input file cannot be opened, or if
     /// a passport is found with an invalid format.
     pub fn read_passports(path: &str) -> Result<Vec<Passport>> {
-        let s: String = fs::read_to_string(path).unwrap();
+        let s: String = fs::read_to_string(path)?;
         let mut passports = vec![];
         for block in s.split("\n\n") {
             passports.push(block.parse()?);
@@ -179,6 +179,18 @@ mod tests {
     fn test_read_passports2() {
         let passports = Passport::read_passports("input/example2.txt").unwrap();
         assert_eq!(4, passports.into_iter().filter(|p| p.is_valid() ).count());
+    }
+
+    #[test]
+    fn test_read_passports_no_file() {
+        let passports = Passport::read_passports("input/example99.txt");
+        assert!(passports.is_err());
+    }
+
+    #[test]
+    fn test_read_passports_bad_format() {
+        let passports = Passport::read_passports("input/bad1.txt");
+        assert!(passports.is_err());
     }
 
     #[test]
