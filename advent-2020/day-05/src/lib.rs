@@ -92,8 +92,8 @@ impl BoardingPass {
     pub fn read_from_file(path: &str) -> Result<Vec<BoardingPass>> {
         let s: String = fs::read_to_string(path)?;
         let mut boarding_passes = vec![];
-        for block in s.trim_end().split('\n') {
-            boarding_passes.push(block.parse()?);
+        for line in s.lines() {
+            boarding_passes.push(line.parse()?);
         }
         Ok(boarding_passes)
     }
