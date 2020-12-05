@@ -58,7 +58,7 @@ impl Passport {
     ///
     /// Returns `Err` if the input file cannot be opened, or if
     /// a passport is found with an invalid format.
-    pub fn read_passports(path: &str) -> Result<Vec<Passport>> {
+    pub fn read_from_file(path: &str) -> Result<Vec<Passport>> {
         let s: String = fs::read_to_string(path)?;
         s.split("\n\n").map(str::parse).collect()
     }
@@ -166,26 +166,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_read_passports() {
-        let passports = Passport::read_passports("input/example1.txt").unwrap();
+    fn test_read_from_file() {
+        let passports = Passport::read_from_file("input/example1.txt").unwrap();
         assert_eq!(2, passports.into_iter().filter(|p| p.is_valid() ).count());
     }
 
     #[test]
-    fn test_read_passports2() {
-        let passports = Passport::read_passports("input/example2.txt").unwrap();
+    fn test_read_from_file2() {
+        let passports = Passport::read_from_file("input/example2.txt").unwrap();
         assert_eq!(4, passports.into_iter().filter(|p| p.is_valid() ).count());
     }
 
     #[test]
-    fn test_read_passports_no_file() {
-        let passports = Passport::read_passports("input/example99.txt");
+    fn test_read_from_file_no_file() {
+        let passports = Passport::read_from_file("input/example99.txt");
         assert!(passports.is_err());
     }
 
     #[test]
-    fn test_read_passports_bad_format() {
-        let passports = Passport::read_passports("input/bad1.txt");
+    fn test_read_from_file_bad_format() {
+        let passports = Passport::read_from_file("input/bad1.txt");
         assert!(passports.is_err());
     }
 
