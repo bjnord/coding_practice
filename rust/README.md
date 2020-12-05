@@ -102,6 +102,12 @@ fn my_read_file(file: &str) -> Result<String, io::Error> {
 }
 ```
 
+#### Simplifying Result With a Custom Type and Error
+
+[This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<T, ...>` with just `Result<T>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit.
+
+It also shows how to create a custom error (they call it `EmptyVec`), and how to define traits for it, such that a custom boxed error is easy to create when needed.
+
 #### Custom Errors
 
 The [custom\_error](https://crates.io/crates/custom_error/1.7.1) crate gives you a macro that supplies all the boilerplate needed for a custom error enumeration (note the lack of commas when the macro is used):
@@ -203,7 +209,7 @@ use std::io::Write;
 
 ## I/O
 
-This [StackExchange answer](https://stackoverflow.com/a/39434382/291754) shows a concise way to stream the lines in a file:
+This [StackExchange answer](https://stackoverflow.com/a/39434382/291754) shows one way to stream the lines in a file:
 
 ```
 use std::fs::File;
@@ -226,6 +232,28 @@ use std::fs;
 
 let s: String = fs::read_to_string("filename.txt").unwrap();
 ```
+
+### Delegating Parsing to the `FromStr` Trait
+
+The `str::parse()` function uses the `FromStr` trait to do its work; as long as Rust can infer the type wanted, it calls the appropriate `FromStr`. An example is:
+
+        type Result<MyStruct> = result::Result<MyStruct, Box<dyn error::Error>>;
+
+        impl FromStr for MyStruct {
+            type Err = Box<dyn error::Error>;
+            fn from_str(line: &str) -> Result<Self> {
+                // ...
+            }
+        }
+
+Once this trait is defined, and generates its own errors (bad format, etc.), it becomes very easy to read a whole file, propagating any error to the caller:
+
+        pub fn read_from_file(path: &str) -> Result<Vec<MyStruct>> {
+            let s: String = fs::read_to_string(path)?;
+            s.lines().map(str::parse).collect()
+        }
+
+Rust knows it's returning a vector of `MyStruct`, so it can push that type inwards to the `parse()` call to know what it needs.
 
 ## Strings
 
