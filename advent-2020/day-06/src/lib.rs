@@ -26,21 +26,18 @@ impl FromStr for Group {
     /// assert_eq!(3, group.all_yes_answers());
     /// ```
     fn from_str(block: &str) -> Result<Self> {
-        let grid: Vec<Vec<char>> = block
-            .lines()
-            .map(|line| line.chars().collect())
-            .collect();
-        let people: usize = grid.len();
-        let answers: Vec<char> = grid
-            .into_iter()
-            .flatten()
-            .collect();
-        let hm: HashMap<char, usize> = answers
-            .into_iter()
+        let mut hm: HashMap<char, usize> = block
+            .trim()
+            .chars()
             .fold(HashMap::new(), |mut acc, c| {
                 *acc.entry(c).or_insert(0) += 1;
                 acc
             });
+        let people: usize = match hm.get(&'\n') {
+            Some(n) => n + 1,
+            None => 1,
+        };
+        hm.remove(&'\n');
         let any_answers: Vec<char> = hm.keys().cloned().collect();
         let all_answers: Vec<char> = hm
             .keys()
