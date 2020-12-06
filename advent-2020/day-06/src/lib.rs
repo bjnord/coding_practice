@@ -1,5 +1,7 @@
 #![warn(clippy::pedantic)]
 
+#[macro_use] extern crate maplit;
+
 use std::collections::HashMap;
 use std::error;
 use std::fs;
@@ -10,8 +12,8 @@ type Result<Group> = result::Result<Group, Box<dyn error::Error>>;
 
 #[derive(Debug, Clone)]
 pub struct Group {
-    any_answers: String,
-    all_answers: String,
+    any_answers: usize,
+    all_answers: usize,
 }
 
 impl FromStr for Group {
@@ -22,14 +24,14 @@ impl FromStr for Group {
     /// ```
     /// # use day_06::Group;
     /// let group: Group = "abcx\nabcy\nabcz\n".parse().unwrap();
-    /// assert_eq!(6, group.any_yes_answers());
-    /// assert_eq!(3, group.all_yes_answers());
+    /// assert_eq!(6, group.any_answers());
+    /// assert_eq!(3, group.all_answers());
     /// ```
     fn from_str(block: &str) -> Result<Self> {
-        let mut hm: HashMap<char, usize> = block
+        let hm: HashMap<char, usize> = block
             .trim()
             .chars()
-            .fold(HashMap::new(), |mut acc, c| {
+            .fold(hashmap!{'\n' => 0}, |mut acc, c| {
                 *acc.entry(c).or_insert(0) += 1;
                 acc
             });
@@ -37,19 +39,17 @@ impl FromStr for Group {
             Some(n) => n + 1,
             None => 1,
         };
-        hm.remove(&'\n');
-        let any_answers: Vec<char> = hm.keys().cloned().collect();
-        let all_answers: Vec<char> = hm
+        let any_answers = hm.len() - 1;  // ignore '\n'
+        let all_answers = hm
             .keys()
             .filter(|k|
                 match hm.get(k) {
-                    Some(&v) => v >= people,
+                    Some(&v) => (v >= people) && k.is_alphabetic(),
                     None => false,
                 }
             )
-            .cloned()
-            .collect();
-        Ok(Group { any_answers: any_answers.into_iter().collect(), all_answers: all_answers.into_iter().collect() })
+            .count();
+        Ok(Group { any_answers, all_answers })
     }
 }
 
@@ -57,15 +57,15 @@ impl Group {
     /// Return count of questions to which ANY person in the group answered
     /// "yes".
     #[must_use]
-    pub fn any_yes_answers(&self) -> usize {
-        self.any_answers.len()
+    pub fn any_answers(&self) -> usize {
+        self.any_answers
     }
 
     /// Return count of questions to which ALL people in the group answered
     /// "yes".
     #[must_use]
-    pub fn all_yes_answers(&self) -> usize {
-        self.all_answers.len()
+    pub fn all_answers(&self) -> usize {
+        self.all_answers
     }
 
     /// Read groups from a file.
@@ -75,9 +75,9 @@ impl Group {
     /// ```
     /// # use day_06::Group;
     /// let groups = Group::read_from_file("input/example1.txt").unwrap();
-    /// let count_any: usize = groups.iter().map(Group::any_yes_answers).sum();
+    /// let count_any: usize = groups.iter().map(Group::any_answers).sum();
     /// assert_eq!(11, count_any);
-    /// let count_all: usize = groups.iter().map(Group::all_yes_answers).sum();
+    /// let count_all: usize = groups.iter().map(Group::all_answers).sum();
     /// assert_eq!(6, count_all);
     /// ```
     ///
