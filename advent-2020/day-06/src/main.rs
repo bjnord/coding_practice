@@ -23,11 +23,11 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    // TODO
+    let groups = Group::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    let ans = 0;  // TODO
+    let count: usize = groups.iter().map(Group::all_yes_answers).sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 6 - Part 2 : {} <=> _ expected", ans);
+    println!("Day 6 - Part 2 : {} <=> 3447 expected", count);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
