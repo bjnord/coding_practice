@@ -335,6 +335,10 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 1. Rust provides `.min()` and `.max()` for an iterator; note that it returns `Option<&T>` for a vector, which means the result has to be unwrapped and dereferenced: `*values_vector.iter().min().unwrap()`
 1. Rust also provides `.min_by()` and `.max_by()` which take a comparison function, useful for complex objects.
 
+### Ranges
+
+In the range `(0..10)` the end value is not included (will go up to `9`). There is a notation to make it inclusive: `('a'..='z')` will go up to `'z'`.
+
 ### Itertools
 
 The [itertools](https://crates.io/crates/itertools) crate has a lot of extra functionality for iterators, including:
