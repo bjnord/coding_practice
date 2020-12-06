@@ -4,36 +4,39 @@ use day_03::Forest;
 use std::time::Instant;
 
 fn main() {
-    let start = Instant::now();
     part1();
     part2();
-    let duration = start.elapsed();
-    eprintln!("Finished after {:?}", duration);
 }
 
 /// Output solution for part 1.
 fn part1() {
-    let dx = 3;
-    let dy = 1;
+    let start = Instant::now();
     let forest = Forest::from_input_file("input/input.txt").unwrap();
-    let trees = trees_on_trajectory(&forest, dy, dx);
-    println!("== PART 1 ==");
-    println!("will encounter {} trees on trajectory right={} down={} (should be 151)", trees, dx, dy);
+    let gen_time = start.elapsed();
+    let trees = trees_on_trajectory(&forest, 1, 3);
+    let run_time = start.elapsed() - gen_time;
+    println!("Day 3 - Part 1 : {} <=> 151 expected", trees);
+    println!("    generator: {:?}", gen_time);
+    println!("    runner: {:?}", run_time);
 }
 
 /// Output solution for part 2.
 fn part2() {
+    let start = Instant::now();
+    let forest = Forest::from_input_file("input/input.txt").unwrap();
+    let gen_time = start.elapsed();
     let dx = [1, 3, 5, 7, 1];
     let dy = [1, 1, 1, 1, 2];
-    println!("== PART 2 ==");
-    let forest = Forest::from_input_file("input/input.txt").unwrap();
     let mut prod = 1;
     for i in 0..5 {
         let trees = trees_on_trajectory(&forest, dy[i], dx[i]);
-        println!("will encounter {} trees on trajectory right={} down={}", trees, dx[i], dy[i]);
+        //eprintln!("will encounter {} trees on trajectory right={} down={}", trees, dx[i], dy[i]);
         prod *= trees;
     }
-    println!("product of trees is {} (should be 7540141059)", prod);
+    let run_time = start.elapsed() - gen_time;
+    println!("Day 3 - Part 2 : {} <=> 7540141059 expected", prod);
+    println!("    generator: {:?}", gen_time);
+    println!("    runner: {:?}", run_time);
 }
 
 fn trees_on_trajectory(forest: &Forest, dy: usize, dx: usize) -> usize {

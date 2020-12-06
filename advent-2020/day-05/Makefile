@@ -4,7 +4,7 @@ debug:
 	cargo run
 
 release:
-	cargo run --release
+	@cargo run --release
 
 test:
 	cargo test

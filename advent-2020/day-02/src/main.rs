@@ -7,27 +7,32 @@ use std::io::{self, BufRead, BufReader};
 use std::time::Instant;
 
 fn main() {
-    let start = Instant::now();
     part1();
     part2();
-    let duration = start.elapsed();
-    eprintln!("Finished after {:?}", duration);
 }
 
 /// Output solution for part 1.
 fn part1() {
+    let start = Instant::now();
     let passwords = read_passwords("input/input.txt").unwrap();
+    let gen_time = start.elapsed();
     let count = count_valid_minmax_passwords(passwords);
-    println!("== PART 1 ==");
-    println!("{} passwords valid according to the \"min/max\" policy (should be 393)", count);
+    let run_time = start.elapsed() - gen_time;
+    println!("Day 2 - Part 1 : {} <=> 393 expected", count);
+    println!("    generator: {:?}", gen_time);
+    println!("    runner: {:?}", run_time);
 }
 
 /// Output solution for part 2.
 fn part2() {
+    let start = Instant::now();
     let passwords = read_passwords("input/input.txt").unwrap();
+    let gen_time = start.elapsed();
     let count = count_valid_1st2nd_passwords(passwords);
-    println!("== PART 2 ==");
-    println!("{} passwords valid according to the \"min/max\" policy (should be 690)", count);
+    let run_time = start.elapsed() - gen_time;
+    println!("Day 2 - Part 2 : {} <=> 690 expected", count);
+    println!("    generator: {:?}", gen_time);
+    println!("    runner: {:?}", run_time);
 }
 
 /// Read passwords from `filename`.
