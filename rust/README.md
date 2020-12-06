@@ -253,7 +253,7 @@ Once this trait is defined, and generates its own errors (bad format, etc.), it 
             s.lines().map(str::parse).collect()
         }
 
-Rust knows it's returning a vector of `MyStruct`, so it can push that type inwards to the `parse()` call to know what it needs.
+Rust knows it's returning a vector of `MyStruct`, so it can push that type inwards to the `parse()` call to know what it needs. Collecting `Error` to the returned `Result` is described by the "Fail the entire operation with collect()" section of [this page](https://doc.rust-lang.org/rust-by-example/error/iter_result.html), which also has other options for handling errors when iterating.
 
 ## Strings
 
@@ -337,10 +337,12 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 
 ### Itertools
 
-The [itertools](https://crates.io/crates/itertools) crate has a lot of extra functionality for iterators, including `.permutations()` and `.combinations()`.
+The [itertools](https://crates.io/crates/itertools) crate has a lot of extra functionality for iterators, including:
 
-Note also `.tuple_combinations()` which returns a vector rather than an iterator.
+- `.permutations()` and `.combinations()` which return another iterator that produces all permutations/combinations of the original
+- `.tuple_permutations()` and `.tuple_combinations()` which return vectors rather than iterators
+- `.tuple_windows(n)` which returns an iterator that produces tuples of n; _e.g._ with _2_ it will return `(1st_el, 2nd_el)`, then `(2nd_el, 3rd_el)`, etc. (this is similar to `Vec` `.windows(n)` which produces a new vector)
 
 ## Testing
 
-Rust's test system can perform [benchmarking measurements](https://doc.rust-lang.org/unstable-book/library-features/test.html) for testing performance.
+Rust's test system will soon be able to perform [benchmarking measurements](https://doc.rust-lang.org/unstable-book/library-features/test.html) for testing performance. As of Dec 2020 (Rust v1.46.0) this is currently an "unstable" feature.
