@@ -9,7 +9,7 @@ type Result<Group> = result::Result<Group, Box<dyn error::Error>>;
 
 #[derive(Debug, Clone)]
 pub struct Group {
-    answers: String,
+    any_answers: String,
 }
 
 impl FromStr for Group {
@@ -20,28 +20,29 @@ impl FromStr for Group {
     /// ```
     /// # use day_06::Group;
     /// let group: Group = "abcx\nabcy\nabcz\n".parse().unwrap();
-    /// assert_eq!(6, group.yes_answers());
+    /// assert_eq!(6, group.any_yes_answers());
     /// ```
     fn from_str(block: &str) -> Result<Self> {
         let grid: Vec<Vec<char>> = block
             .lines()
             .map(|line| line.chars().collect())
             .collect();
-        let mut answers: Vec<char> = grid
+        let mut any_answers: Vec<char> = grid
             .into_iter()
             .flatten()
             .collect();
-        answers.sort();
-        answers.dedup();
-        Ok(Group { answers: answers.into_iter().collect() })
+        any_answers.sort();
+        any_answers.dedup();
+        Ok(Group { any_answers: any_answers.into_iter().collect() })
     }
 }
 
 impl Group {
-    /// Return count of questions with "yes" answers from this group.
+    /// Return count of questions to which ANY person in the group answered
+    /// "yes".
     #[must_use]
-    pub fn yes_answers(&self) -> usize {
-        self.answers.len()
+    pub fn any_yes_answers(&self) -> usize {
+        self.any_answers.len()
     }
 
     /// Read groups from a file.
@@ -51,7 +52,7 @@ impl Group {
     /// ```
     /// # use day_06::Group;
     /// let groups = Group::read_from_file("input/example1.txt").unwrap();
-    /// let count: usize = groups.iter().map(Group::yes_answers).sum();
+    /// let count: usize = groups.iter().map(Group::any_yes_answers).sum();
     /// assert_eq!(11, count);
     /// ```
     ///
