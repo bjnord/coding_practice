@@ -9,3 +9,10 @@ edition = "2018"
 [dependencies]
 custom_error = "1.8.0"
 itertools = "0.9"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "find_solution"
+harness = false
