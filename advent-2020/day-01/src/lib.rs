@@ -114,7 +114,11 @@ mod tests {
             .into_iter()
             .map(|amount| Entry { amount })
             .collect();
-        let result = Entry::find_solution(&entries, 2, ENTRY_SUM);
-        assert!(result.is_err());
+        if let Err(e) = Entry::find_solution(&entries, 2, ENTRY_SUM) {
+            let x = format!("no solution found for {}", ENTRY_SUM);
+            assert_eq!(x, e.to_string());
+        } else {
+            panic!("test did not fail");
+        }
     }
 }
