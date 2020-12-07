@@ -346,6 +346,7 @@ The [itertools](https://crates.io/crates/itertools) crate has a lot of extra fun
 - `.permutations()` and `.combinations()` which return another iterator that produces all permutations/combinations of the original
 - `.tuple_permutations()` and `.tuple_combinations()` which return vectors rather than iterators
 - `.tuple_windows(n)` which returns an iterator that produces tuples of n; _e.g._ with _2_ it will return `(1st_el, 2nd_el)`, then `(2nd_el, 3rd_el)`, etc. (this is similar to `Vec` `.windows(n)` which produces a new vector)
+- `.unique()` to filter out duplicates (`Vec` has `.dedup()` but that's an in-place mutation)
 
 ## Testing
 
