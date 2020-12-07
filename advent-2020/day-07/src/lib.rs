@@ -23,8 +23,15 @@ impl fmt::Display for RuleError {
 impl error::Error for RuleError {}
 
 #[derive(Debug)]
+pub struct Rule {
+    color: String,
+    count: u32,
+}
+
+#[derive(Debug)]
 pub struct Rules {
     can_contain: HashMap<String, Vec<String>>,
+    contains: HashMap<String, Vec<Rule>>,
 }
 
 impl FromStr for Rules {
@@ -39,17 +46,18 @@ impl FromStr for Rules {
                 (?P<contained>.+)\.
                 $").unwrap();
             static ref BAG_RE: Regex = Regex::new(r"(?x)^
-                (\d+|no)\s+
+                (?P<count>\d+|no)\s+
                 (?P<color>.+)\s+bags?
                 $").unwrap();
         }
         let mut can_contain: HashMap<String, Vec<String>> = HashMap::new();
+        let mut contains: HashMap<String, Vec<Rule>> = HashMap::new();
         for line in input.lines() {
             let cap = if let Some(cap) = LINE_RE.captures(line) { cap } else {
                 let e = format!("invalid input line format [{}]", line);
                 return Err(RuleError(e).into());
             };
-            // all these unwrap() are safe, given a matching regex
+            // all these unwrap() are now safe, given a matching regex
             let container_color = String::from(cap.name("container").unwrap().as_str());
             let contained_bags = String::from(cap.name("contained").unwrap().as_str());
             for bag in contained_bags.split(", ") {
@@ -57,14 +65,17 @@ impl FromStr for Rules {
                     let e = format!("invalid contained bag format [{}]", bag);
                     return Err(RuleError(e).into());
                 };
-                // this unwrap() is safe, given a matching regex
+                // all these unwrap() are now safe, given a matching regex
                 let contained_color = String::from(capb.name("color").unwrap().as_str());
+                let contained_count = String::from(capb.name("count").unwrap().as_str());
                 if contained_color != "other" {
-                    can_contain.entry(contained_color).or_insert(vec![]).push(container_color.clone());
+                    can_contain.entry(contained_color.clone()).or_insert(vec![]).push(container_color.clone());
+                    let count: u32 = contained_count.parse::<u32>().unwrap();
+                    contains.entry(container_color.clone()).or_insert(vec![]).push(Rule { color: contained_color.clone(), count });
                 }
             }
         }
-        Ok(Rules { can_contain })
+        Ok(Rules { can_contain, contains })
     }
 }
 
@@ -81,8 +92,8 @@ impl Rules {
     #[must_use]
     pub fn can_contain(&self, color: &str) -> Vec<String> {
         let mut colors: Vec<String> = vec![];
-        if let Some(rule) = self.can_contain.get(color) {
-            for c_color in rule.to_vec() {
+        if let Some(entry) = self.can_contain.get(color) {
+            for c_color in entry.to_vec() {
                 colors.push(c_color.clone());
                 colors.append(&mut self.can_contain(&c_color));
             }
@@ -91,6 +102,28 @@ impl Rules {
         }
         colors
     }
+
+    /// Return count of bags contained by the provided bag color.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_07::Rules;
+    /// let rules = Rules::read_from_file("input/example1.txt").unwrap();
+    /// assert_eq!(32, rules.contained_by("shiny gold"));
+    /// ```
+    #[must_use]
+    pub fn contained_by(&self, color: &str) -> u32 {
+        let mut count = 0;
+        if let Some(entry) = self.contains.get(color) {
+            for rule in entry {
+                let contained_count = self.contained_by(&rule.color);
+                count += rule.count + contained_count * rule.count;
+            }
+        }
+        count
+    }
+
 
     /// Read rules from a file.
     ///
@@ -111,5 +144,11 @@ mod tests {
     fn test_read_from_file_bad_path() {
         let result = Rules::read_from_file("input/example99.txt");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_example2_contained_by() {
+        let rules = Rules::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(126, rules.contained_by("shiny gold"));
     }
 }

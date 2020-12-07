@@ -25,9 +25,9 @@ fn part2() {
     let start = Instant::now();
     let rules = Rules::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    let count = rules.contained_by("shiny gold");
     let run_time = start.elapsed() - gen_time;
-    println!("Day 7 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 7 - Part 2 : {} <=> 39645 expected", count);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
