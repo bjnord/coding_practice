@@ -31,7 +31,7 @@ pub struct Program {
 }
 
 pub enum HaltType {
-    Ended,
+    Ended {acc: i32},
     Looped {acc: i32},
 }
 
@@ -88,11 +88,12 @@ impl Program {
     /// # use day_08::{Program, HaltType};
     /// let program = Program::read_from_file("input/example1.txt").unwrap();
     /// let ended = match program.run_until_halt(7) {
-    ///     HaltType::Ended => true,
+    ///     HaltType::Ended { acc } => true,
     ///     _ => false,
     /// };
     /// assert_eq!(true, ended);
     /// ```
+    #[must_use]
     pub fn run_until_halt(&self, flip_pc: usize) -> HaltType {
         let mut acc: i32 = 0;
         let mut pc: usize = 0;
@@ -113,8 +114,10 @@ impl Program {
                 },
                 "jmp" => {
                     if inst.arg.is_negative() {
+                        // #[allow(clippy::cast_sign_loss)]
                         pc -= inst.arg.wrapping_abs() as usize;
                     } else {
+                        // #[allow(clippy::cast_sign_loss)]
                         pc += inst.arg as usize;
                     }
                 },
@@ -125,7 +128,7 @@ impl Program {
         }
         match pc {
             pc if seen[pc] => HaltType::Looped { acc },
-            _ => HaltType::Ended,
+            _ => HaltType::Ended { acc },
         }
     }
 
@@ -135,6 +138,34 @@ impl Program {
             "nop" => "jmp",
             _ => opcode,
         }
+    }
+
+    /// Find PC to flip such that the program ends. Returns the accumulator
+    /// value when the program ends.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_08::{Program, HaltType};
+    /// let program = Program::read_from_file("input/example1.txt").unwrap();
+    /// assert_eq!(8, program.find_pc_flip_acc().unwrap());
+    /// ```
+    #[must_use]
+    pub fn find_pc_flip_acc(&self) -> Option<i32> {
+        let mut acc_opt = None;
+        self.instructions.iter().enumerate().find(|(pc, inst)|
+            if inst.opcode == "jmp" || inst.opcode == "nop" {
+                if let HaltType::Ended { acc } = self.run_until_halt(*pc) {
+                    acc_opt = Some(acc);
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        );
+        acc_opt
     }
 }
 
