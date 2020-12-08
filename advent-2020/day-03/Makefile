@@ -10,7 +10,7 @@ test:
 	cargo test
 
 clippy:
-	cargo clippy
+	cargo clippy -- -Dclippy::pedantic
 
 doc:
 	cargo doc

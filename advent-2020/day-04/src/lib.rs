@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::error;
@@ -44,6 +42,7 @@ impl FromStr for Passport {
                 fields.push(Field{name: String::from(name), value: String::from(value)});
             } else {
                 let e = format!("invalid input field format [{}]", field);
+                // FIXME use PassportError and into()
                 return Err(Box::new(io::Error::new(ErrorKind::InvalidInput, e)));
             };
         }

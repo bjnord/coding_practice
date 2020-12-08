@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_08::{Program, HaltType};
 use std::time::Instant;
 

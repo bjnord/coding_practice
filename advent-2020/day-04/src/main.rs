@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_04::Passport;
 use std::time::Instant;
 

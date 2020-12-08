@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_01::{Entry, ENTRY_SUM};
 use std::time::Instant;
 

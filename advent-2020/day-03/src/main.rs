@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_03::Forest;
 use std::time::Instant;
 

@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 #[macro_use] extern crate maplit;
 
 use std::collections::HashMap;

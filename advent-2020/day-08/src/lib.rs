@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use std::error;
 use std::fmt;
 use std::fs;

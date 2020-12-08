@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use std::io::{self, ErrorKind};
 use lazy_static::lazy_static;
 use regex::Regex;

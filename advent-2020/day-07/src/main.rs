@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_07::Rules;
 use std::time::Instant;
 

@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use std::error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};

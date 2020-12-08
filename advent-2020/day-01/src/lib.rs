@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use custom_error::custom_error;
 use itertools::Itertools;
 use std::error;

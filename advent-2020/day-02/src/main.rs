@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_02::Password;
 use std::error;
 use std::fs::File;

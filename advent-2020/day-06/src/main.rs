@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_06::Group;
 use std::time::Instant;
 

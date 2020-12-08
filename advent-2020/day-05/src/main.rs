@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use day_05::BoardingPass;
 use std::time::Instant;
 

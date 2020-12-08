@@ -1,5 +1,3 @@
-#![warn(clippy::pedantic)]
-
 use itertools::Itertools;
 use std::error;
 use std::fmt;
