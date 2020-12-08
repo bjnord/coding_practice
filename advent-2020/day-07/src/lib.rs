@@ -37,6 +37,10 @@ pub struct Rules {
 impl FromStr for Rules {
     type Err = Box<dyn error::Error>;
 
+    // complains about containe"r"_color and containe"d"_color
+    #[allow(clippy::similar_names)]
+    // complains about .or_insert() which is perfectly cromulent
+    #[allow(clippy::or_fun_call)]
     fn from_str(input: &str) -> Result<Self> {
         lazy_static! {
             // light red bags contain 1 bright white bag, 2 muted yellow bags.
