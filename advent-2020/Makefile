@@ -1,4 +1,4 @@
-DIRS = day-01 day-02 day-03 day-04 day-05 day-06 day-07
+DIRS = day-01 day-02 day-03 day-04 day-05 day-06 day-07 day-08
 
 .PHONY: debug release test clippy doc clean
 
