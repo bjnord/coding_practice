@@ -113,13 +113,7 @@ impl Program {
                     pc += 1;
                 },
                 "jmp" => {
-                    if inst.arg.is_negative() {
-                        // #[allow(clippy::cast_sign_loss)]
-                        pc -= inst.arg.wrapping_abs() as usize;
-                    } else {
-                        // #[allow(clippy::cast_sign_loss)]
-                        pc += inst.arg as usize;
-                    }
+                    pc = Program::incr_pc(pc, inst.arg);
                 },
                 _ => {  // including "nop"
                     pc += 1;
@@ -138,6 +132,16 @@ impl Program {
             "nop" => "jmp",
             _ => opcode,
         }
+    }
+
+    #[allow(clippy::cast_sign_loss)]
+    fn incr_pc(mut pc: usize, arg: i32) -> usize {
+        if arg.is_negative() {
+            pc -= arg.wrapping_abs() as usize;
+        } else {
+            pc += arg as usize;
+        }
+        pc
     }
 
     /// Find PC to flip such that the program ends. Returns the accumulator
