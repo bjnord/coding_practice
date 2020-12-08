@@ -97,9 +97,9 @@ impl Program {
     pub fn run_until_halt(&self, flip_pc: usize) -> HaltType {
         let mut acc: i32 = 0;
         let mut pc: usize = 0;
-        let mut seen = [false; 1024];
         let program_len = self.instructions.len();
-        while !seen[pc] && pc < program_len {
+        let mut seen = vec![false; program_len];
+        while pc < program_len && !seen[pc] {
             let inst = &self.instructions[pc];
             seen[pc] = true;
             let opcode = if pc == flip_pc {
@@ -121,8 +121,8 @@ impl Program {
             }
         }
         match pc {
-            pc if seen[pc] => HaltType::Looped { acc },
-            _ => HaltType::Ended { acc },
+            pc if pc >= program_len => HaltType::Ended { acc },
+            _ => HaltType::Looped { acc },
         }
     }
 
