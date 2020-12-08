@@ -1,6 +1,6 @@
 #![warn(clippy::pedantic)]
 
-use day_08::Program;
+use day_08::{Program, HaltType};
 use std::time::Instant;
 
 fn main() {
@@ -13,7 +13,10 @@ fn part1() {
     let start = Instant::now();
     let program = Program::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    let acc = program.run_until_dup();
+    let acc = match program.run_until_halt() {
+        HaltType::Looped { acc } => acc,
+        _ => panic!("program did not loop"),
+    };
     let run_time = start.elapsed() - gen_time;
     println!("Day 8 - Part 1 : {} <=> 2058 expected", acc);
     println!("    generator: {:?}", gen_time);

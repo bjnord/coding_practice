@@ -30,6 +30,11 @@ pub struct Program {
     instructions: Vec<Instruction>,
 }
 
+pub enum HaltType {
+    Ended,
+    Looped {acc: i32},
+}
+
 impl FromStr for Program {
     type Err = Box<dyn error::Error>;
 
@@ -59,21 +64,34 @@ impl Program {
         s.parse()
     }
 
-    /// Run program until the same PC is seen again. Returns the accumulator
-    /// value at that point.
+    /// Run program until it loops (the same PC is seen again) or ends
+    /// (PC goes beyond the program). Returns the accumulator value
+    /// for the former case.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use day_08::Program;
+    /// # use day_08::{Program, HaltType};
     /// let program = Program::read_from_file("input/example1.txt").unwrap();
-    /// assert_eq!(5, program.run_until_dup());
+    /// let acc = match program.run_until_halt() {
+    ///     HaltType::Looped { acc } => acc,
+    ///     _ => panic!("program did not loop"),
+    /// };
+    /// assert_eq!(5, acc);
+    ///
+    /// let program = Program::read_from_file("input/example2.txt").unwrap();
+    /// let ended = match program.run_until_halt() {
+    ///     HaltType::Ended => true,
+    ///     _ => false,
+    /// };
+    /// assert_eq!(true, ended);
     /// ```
-    pub fn run_until_dup(&self) -> i32 {
+    pub fn run_until_halt(&self) -> HaltType {
         let mut acc: i32 = 0;
         let mut pc: usize = 0;
         let mut seen = [false; 1024];
-        while !seen[pc] {
+        let program_len = self.instructions.len();
+        while !seen[pc] && pc < program_len {
             let inst = &self.instructions[pc];
             seen[pc] = true;
             match &inst.opcode[..] {
@@ -93,7 +111,10 @@ impl Program {
                 },
             }
         }
-        acc
+        match pc {
+            pc if seen[pc] => HaltType::Looped { acc },
+            _ => HaltType::Ended,
+        }
     }
 }
 
