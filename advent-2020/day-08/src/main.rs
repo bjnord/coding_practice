@@ -13,7 +13,7 @@ fn part1() {
     let start = Instant::now();
     let program = Program::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    let acc = match program.run_until_halt() {
+    let acc = match program.run_until_halt(usize::MAX) {
         HaltType::Looped { acc } => acc,
         _ => panic!("program did not loop"),
     };

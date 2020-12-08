@@ -68,25 +68,32 @@ impl Program {
     /// (PC goes beyond the program). Returns the accumulator value
     /// for the former case.
     ///
+    /// The `flip_pc` argument causes the instruction at the given PC
+    /// to be flipped from `nop` to `jmp` or from `jmp` to `nop`. Use
+    /// `usize::MAX` if no flip is desired.
+    ///
     /// # Examples
     ///
     /// ```
     /// # use day_08::{Program, HaltType};
     /// let program = Program::read_from_file("input/example1.txt").unwrap();
-    /// let acc = match program.run_until_halt() {
+    /// let acc = match program.run_until_halt(usize::MAX) {
     ///     HaltType::Looped { acc } => acc,
     ///     _ => panic!("program did not loop"),
     /// };
     /// assert_eq!(5, acc);
+    /// ```
     ///
-    /// let program = Program::read_from_file("input/example2.txt").unwrap();
-    /// let ended = match program.run_until_halt() {
+    /// ```
+    /// # use day_08::{Program, HaltType};
+    /// let program = Program::read_from_file("input/example1.txt").unwrap();
+    /// let ended = match program.run_until_halt(7) {
     ///     HaltType::Ended => true,
     ///     _ => false,
     /// };
     /// assert_eq!(true, ended);
     /// ```
-    pub fn run_until_halt(&self) -> HaltType {
+    pub fn run_until_halt(&self, flip_pc: usize) -> HaltType {
         let mut acc: i32 = 0;
         let mut pc: usize = 0;
         let mut seen = [false; 1024];
@@ -94,7 +101,12 @@ impl Program {
         while !seen[pc] && pc < program_len {
             let inst = &self.instructions[pc];
             seen[pc] = true;
-            match &inst.opcode[..] {
+            let opcode = if pc == flip_pc {
+                Program::flipped_opcode(&inst.opcode[..])
+            } else {
+                &inst.opcode[..]
+            };
+            match opcode {
                 "acc" => {
                     acc += inst.arg;
                     pc += 1;
@@ -114,6 +126,14 @@ impl Program {
         match pc {
             pc if seen[pc] => HaltType::Looped { acc },
             _ => HaltType::Ended,
+        }
+    }
+
+    fn flipped_opcode(opcode: &str) -> &str {
+        match opcode {
+            "jmp" => "nop",
+            "nop" => "jmp",
+            _ => opcode,
         }
     }
 }
