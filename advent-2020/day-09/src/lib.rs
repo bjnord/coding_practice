@@ -46,7 +46,8 @@ impl Entry {
         s.lines().map(str::parse).collect()
     }
 
-    /// Find two entries from `entries` whose sum is `expected`.
+    /// Are there two (non-contiguous) entries from `entries` whose sum is
+    /// `expected`?
     #[must_use]
     pub fn has_sum(entries: &[Entry], expected: Entry) -> bool {
         for combo in entries.iter().map(Entry::value).combinations(2) {
@@ -55,6 +56,24 @@ impl Entry {
             }
         }
         false
+    }
+
+    /// Find a contiguous set of at least two `entries` whose sum is
+    /// `expected`. Return the sum of the smallest and largest values in
+    /// these entries.
+    #[must_use]
+    pub fn find_sum(entries: &[Entry], expected: &Entry) -> Option<u64> {
+        for n in 2..100 {
+            let mut values: Vec<u64> = vec![0u64; n];
+            for value in entries.iter().map(Entry::value) {
+                values = values[1..].to_vec();
+                values.push(value);
+                if values.iter().sum::<u64>() == expected.value() {
+                    return Some(values.iter().min().unwrap() + values.iter().max().unwrap());
+                }
+            }
+        }
+        None
     }
 }
 
