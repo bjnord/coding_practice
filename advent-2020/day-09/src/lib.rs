@@ -28,6 +28,11 @@ impl FromStr for Entry {
 }
 
 impl Entry {
+    /// Construct XMAS entry from value.
+    pub fn from_value(value: u64) -> Entry {
+        Entry { value }
+    }
+
     /// Return XMAS entry value.
     #[must_use]
     pub fn value(&self) -> u64 {
@@ -61,6 +66,15 @@ impl Entry {
     /// Find a contiguous set of at least two `entries` whose sum is
     /// `expected`. Return the sum of the smallest and largest values in
     /// these entries.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_09::Entry;
+    /// let entries = Entry::read_from_file("input/example2.txt").unwrap();
+    /// let sum = Entry::find_sum(&entries, &Entry::from_value(127)).unwrap();
+    /// assert_eq!(62, sum);
+    /// ```
     #[must_use]
     pub fn find_sum(entries: &[Entry], expected: &Entry) -> Option<u64> {
         for n in 2..100 {
@@ -85,6 +99,17 @@ impl XmasList {
     }
 
     /// Return XMAS entries currently in window.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_09::{Entry, XmasList};
+    /// let mut xlist = XmasList::build(2);
+    /// xlist.push(Entry::from_value(4));
+    /// xlist.push(Entry::from_value(9));
+    /// xlist.push(Entry::from_value(5));
+    /// assert!([9, 5].iter().zip(xlist.window_entries()).all(|(a, b)| *a == b.value()));
+    /// ```
     #[must_use]
     pub fn window_entries(&self) -> Vec<Entry> {
         self.window.iter().copied().collect()
@@ -105,7 +130,12 @@ impl XmasList {
     ///
     /// Examples
     ///
-    /// TODO example1.txt doctest here
+    /// ```
+    /// # use day_09::{Entry, XmasList};
+    /// let entries = Entry::read_from_file("input/example1.txt").unwrap();
+    /// let entry = XmasList::find_first_nonsum(&entries, 25);
+    /// assert_eq!(65, entry.unwrap().value());
+    /// ```
     #[must_use]
     pub fn find_first_nonsum(entries: &[Entry], size: usize) -> Option<Entry> {
         let mut xlist = Self::build(size);
@@ -143,11 +173,11 @@ mod tests {
         assert!(entries.is_err());
     }
 
-//    #[test]
-//    fn test_read_from_file_bad_file() {
-//        let entries = Entry::read_from_file("input/bad1.txt");
-//        assert!(entries.is_err());
-//    }
+    #[test]
+    fn test_read_from_file_bad_file() {
+        let entries = Entry::read_from_file("input/bad1.txt");
+        assert!(entries.is_err());
+    }
 
     #[test]
     fn test_has_sum() {
@@ -157,19 +187,21 @@ mod tests {
         assert_eq!(false, Entry::has_sum(&entries, Entry { value: 65 }));
     }
 
-//    #[test]
-//    fn test_no_solution_found() {
-//        let entries: Vec<Entry> = vec![1, 2, 3, 4, 5]
-//            .into_iter()
-//            .map(|value| Entry { value })
-//            .collect();
-//        if let Err(e) = Entry::find_solution(&entries, 2, ENTRY_SUM) {
-//            let x = format!("no solution found for {}", ENTRY_SUM);
-//            assert_eq!(x, e.to_string());
-//        } else {
-//            panic!("test did not fail");
-//        }
-//    }
+    #[test]
+    fn test_has_sum_none() {
+        let entries: Vec<Entry> = vec![1, 2, 3, 4, 5]
+            .into_iter()
+            .map(|value| Entry { value })
+            .collect();
+        if Entry::has_sum(&entries, Entry { value: 2001 }) {
+            panic!("test did not fail");
+        }
+    }
 
-    // TODO example2.txt test here
+    #[test]
+    fn test_find_first_nonsum_2() {
+        let entries = Entry::read_from_file("input/example2.txt").unwrap();
+        let entry = XmasList::find_first_nonsum(&entries, 5);
+        assert_eq!(127, entry.unwrap().value());
+    }
 }
