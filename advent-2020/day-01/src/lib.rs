@@ -41,7 +41,7 @@ impl Entry {
     /// # Errors
     ///
     /// Returns `Err` if the input file cannot be opened, or if a line is
-    /// found with an invalid boarding pass format.
+    /// found with an invalid integer format.
     pub fn read_from_file(path: &str) -> Result<Vec<Entry>> {
         let s: String = fs::read_to_string(path)?;
         s.lines().map(str::parse).collect()
