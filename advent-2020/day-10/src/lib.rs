@@ -67,6 +67,15 @@ impl AdapterSet {
         Ok(Self { adapters, builtin_adapter })
     }
 
+    pub fn joltages(&self) -> Vec<i32> {
+        let mut values: Vec<i32> = self.adapters
+            .iter()
+            .map(Adapter::joltage)
+            .collect();
+        values.push(self.builtin_adapter.joltage());
+        values
+    }
+
     /// Count adapter usage. Returns the count of adapters with a 1-jolt
     /// and 3-jolt difference, respectively, when ALL adapters are
     /// connected.
@@ -82,14 +91,10 @@ impl AdapterSet {
     #[must_use]
     pub fn adapter_usage(&self) -> (usize, usize)
     {
-        let mut values: Vec<i32> = self.adapters
-            .iter()
-            .map(Adapter::joltage)
-            .collect();
-        values.push(self.builtin_adapter.joltage());
-        values.sort();
+        let mut joltages = self.joltages();
+        joltages.sort();
         let mut acc: i32 = 0;
-        values.into_iter().fold((0, 0), |(one, three), j| {
+        joltages.into_iter().fold((0, 0), |(one, three), j| {
             match j {
                 j if (j - acc) == 1 => { acc += 1; (one + 1, three) },
                 j if (j - acc) == 3 => { acc += 3; (one, three + 1) },
