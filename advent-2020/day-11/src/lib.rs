@@ -5,14 +5,14 @@ use std::str::FromStr;
 
 type Result<SeatLayout> = result::Result<SeatLayout, Box<dyn error::Error>>;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Seat {
     Floor,
     Empty,
     Occupied,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SeatLayout {
     grid: Vec<Seat>,
     height: usize,
@@ -120,6 +120,17 @@ impl SeatLayout {
         }
         s.parse().unwrap()
     }
+
+    /// Do rounds of seat filling, until the seat layout stabilizes.
+    pub fn fill_seats_until_stable(&self) -> SeatLayout {
+        let mut prev_layout = self.fill_seats();
+        let mut next_layout = prev_layout.fill_seats();
+        while next_layout != prev_layout {
+            prev_layout = next_layout.clone();
+            next_layout = prev_layout.fill_seats();
+        }
+        prev_layout.clone()
+    }
 }
 
 #[cfg(test)]
@@ -160,6 +171,18 @@ mod tests {
     }
 
     #[test]
+    fn test_layout_equality() {
+        let layout1 = SeatLayout::read_from_file("input/example1.txt")
+            .unwrap();
+        let layout_r2 = layout1.fill_seats();
+        assert_ne!(layout1, layout_r2);
+        let layout3 = SeatLayout::read_from_file("input/example3.txt")
+            .unwrap();
+        let layout_r3 = layout_r2.fill_seats();
+        assert_eq!(layout3, layout_r3);
+    }
+
+    #[test]
     fn test_occupied_seats() {
         let layout = SeatLayout::read_from_file("input/example1.txt")
             .unwrap();
@@ -197,6 +220,16 @@ mod tests {
         let before_seats = layout.occupied_seats();
         let next_layout = layout.fill_seats();
         assert_eq!(before_seats, next_layout.occupied_seats());
+    }
+
+    #[test]
+    fn test_fill_seats_until_stable() {
+        let layout = SeatLayout::read_from_file("input/example1.txt")
+            .unwrap();
+        let layout_rs = layout.fill_seats_until_stable();
+        let layout_s = SeatLayout::read_from_file("input/example1s.txt")
+            .unwrap();
+        assert_eq!(layout_s, layout_rs);
     }
 
     #[test]
