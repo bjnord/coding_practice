@@ -66,6 +66,24 @@ impl SeatLayout {
     pub fn seat_at(&self, y: usize, x: usize) -> Seat {
         self.grid[y * self.width + x]
     }
+
+    /// Return count of occupied seats adjacent to (y, x).
+    pub fn occupied_seats_at(&self, y: usize, x: usize) -> usize {
+        let mut seats: Vec<Seat> = Vec::new();
+        if y > 0 {
+            if x > 0 { seats.push(self.seat_at(y-1, x-1)); }
+            seats.push(self.seat_at(y-1, x));
+            if x < self.width-1 { seats.push(self.seat_at(y-1, x+1)); }
+        }
+        if x > 0 { seats.push(self.seat_at(y, x-1)); }
+        if x < self.width-1 { seats.push(self.seat_at(y, x+1)); }
+        if y < self.height-1 {
+            if x > 0 { seats.push(self.seat_at(y+1, x-1)); }
+            seats.push(self.seat_at(y+1, x));
+            if x < self.width-1 { seats.push(self.seat_at(y+1, x+1)); }
+        }
+        seats.iter().filter(|&s| *s == Seat::Occupied).count()
+    }
 }
 
 #[cfg(test)]
@@ -103,6 +121,17 @@ mod tests {
         let layout = SeatLayout::read_from_file("input/exampleT.txt")
             .unwrap();
         let _seat = layout.seat_at(1, 3);
+    }
+
+    #[test]
+    fn test_occupied_seats_at() {
+        let layout = SeatLayout::read_from_file("input/example1s.txt")
+            .unwrap();
+        assert_eq!(1, layout.occupied_seats_at(0, 0));
+        assert_eq!(2, layout.occupied_seats_at(4, 0));
+        assert_eq!(4, layout.occupied_seats_at(2, 1));
+        assert_eq!(0, layout.occupied_seats_at(9, 6));
+        assert_eq!(1, layout.occupied_seats_at(9, 9));
     }
 
     #[test]
