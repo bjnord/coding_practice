@@ -7,6 +7,7 @@ type Result<SeatLayout> = result::Result<SeatLayout, Box<dyn error::Error>>;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Seat {
+    Void,
     Floor,
     Empty,
     Occupied,
@@ -15,8 +16,8 @@ pub enum Seat {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SeatLayout {
     grid: Vec<Seat>,
-    height: usize,
-    width: usize,
+    height: i32,
+    width: i32,
 }
 
 impl Seat {
@@ -38,13 +39,15 @@ impl Seat {
 impl FromStr for SeatLayout {
     type Err = Box<dyn error::Error>;
 
+    #[allow(clippy::cast_possible_truncation)]
+    #[allow(clippy::cast_possible_wrap)]
     fn from_str(input: &str) -> Result<Self> {
-        let width = input.lines().next().unwrap().len();
+        let width = input.lines().next().unwrap().len() as i32;
         let grid: Vec<Seat> = input
             .lines()
             .flat_map(|line| line.chars().map(Seat::from_char))
             .collect();
-        let height = grid.len() / width;
+        let height = (grid.len() as i32) / width;
         Ok(Self { grid, height, width })
     }
 }
@@ -63,8 +66,19 @@ impl SeatLayout {
     }
 
     /// Return `Seat` at (y, x).
-    pub fn seat_at(&self, y: usize, x: usize) -> Seat {
-        self.grid[y * self.width + x]
+    pub fn seat_at(&self, y: i32, x: i32) -> Seat {
+        match (y, x) {
+            (y, _) if y < 0 || y >= self.height => Seat::Void,
+            (_, x) if x < 0 || x >= self.width => Seat::Void,
+            _ => {
+                self.grid[self.grid_index(y, x)]
+            },
+        }
+    }
+
+    #[allow(clippy::cast_sign_loss)]
+    fn grid_index(&self, y: i32, x: i32) -> usize {
+        (y * self.width + x) as usize
     }
 
     /// Return count of occupied seats.
@@ -73,19 +87,14 @@ impl SeatLayout {
     }
 
     /// Return count of occupied seats adjacent to (y, x).
-    pub fn occupied_seats_at(&self, y: usize, x: usize) -> usize {
+    pub fn occupied_seats_at(&self, y: i32, x: i32) -> usize {
         let mut seats: Vec<Seat> = Vec::new();
-        if y > 0 {
-            if x > 0 { seats.push(self.seat_at(y-1, x-1)); }
-            seats.push(self.seat_at(y-1, x));
-            if x < self.width-1 { seats.push(self.seat_at(y-1, x+1)); }
-        }
-        if x > 0 { seats.push(self.seat_at(y, x-1)); }
-        if x < self.width-1 { seats.push(self.seat_at(y, x+1)); }
-        if y < self.height-1 {
-            if x > 0 { seats.push(self.seat_at(y+1, x-1)); }
-            seats.push(self.seat_at(y+1, x));
-            if x < self.width-1 { seats.push(self.seat_at(y+1, x+1)); }
+        for dy in -1..=1 {
+            for dx in -1..=1 {
+                if dy != 0 || dx != 0 {
+                    seats.push(self.seat_at(y + dy, x + dx));
+                }
+            }
         }
         seats.iter().filter(|&s| *s == Seat::Occupied).count()
     }
@@ -113,7 +122,10 @@ impl SeatLayout {
                         } else {
                             s += "#";
                         }
-                    }
+                    },
+                    Seat::Void => {
+                        panic!("(y, x) outside grid bounds")
+                    },
                 }
             }
             s += "\n";
@@ -155,19 +167,19 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    fn test_layout_indexing_bad_height() {
+    fn test_layout_indexing_void_y() {
         let layout = SeatLayout::read_from_file("input/exampleT.txt")
             .unwrap();
-        let _seat = layout.seat_at(2, 2);
+        assert_eq!(Seat::Void, layout.seat_at(-1, 2));
+        assert_eq!(Seat::Void, layout.seat_at(2, 2));
     }
 
     #[test]
-    #[should_panic]
-    fn test_layout_indexing_bad_width() {
+    fn test_layout_indexing_void_x() {
         let layout = SeatLayout::read_from_file("input/exampleT.txt")
             .unwrap();
-        let _seat = layout.seat_at(1, 3);
+        assert_eq!(Seat::Void, layout.seat_at(1, -1));
+        assert_eq!(Seat::Void, layout.seat_at(1, 3));
     }
 
     #[test]
