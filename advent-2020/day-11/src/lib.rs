@@ -61,6 +61,11 @@ impl SeatLayout {
         let s: String = fs::read_to_string(path)?;
         s.parse()
     }
+
+    /// Return `Seat` at (y, x).
+    pub fn seat_at(&self, y: usize, x: usize) -> Seat {
+        self.grid[y * self.width + x]
+    }
 }
 
 #[cfg(test)]
@@ -73,6 +78,31 @@ mod tests {
             .unwrap();
         assert_eq!(2, layout.height);
         assert_eq!(3, layout.width);
+    }
+
+    #[test]
+    fn test_layout_indexing() {
+        let layout = SeatLayout::read_from_file("input/exampleT.txt")
+            .unwrap();
+        assert_eq!(Seat::Floor, layout.seat_at(1, 2));
+        assert_eq!(Seat::Empty, layout.seat_at(0, 2));
+        assert_eq!(Seat::Occupied, layout.seat_at(0, 1));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_layout_indexing_bad_height() {
+        let layout = SeatLayout::read_from_file("input/exampleT.txt")
+            .unwrap();
+        let _seat = layout.seat_at(2, 2);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_layout_indexing_bad_width() {
+        let layout = SeatLayout::read_from_file("input/exampleT.txt")
+            .unwrap();
+        let _seat = layout.seat_at(1, 3);
     }
 
     #[test]
