@@ -66,6 +66,7 @@ impl SeatLayout {
     }
 
     /// Return `Seat` at (y, x).
+    #[must_use]
     pub fn seat_at(&self, y: i32, x: i32) -> Seat {
         match (y, x) {
             (y, _) if y < 0 || y >= self.height => Seat::Void,
@@ -82,11 +83,13 @@ impl SeatLayout {
     }
 
     /// Return count of occupied seats.
+    #[must_use]
     pub fn occupied_seats(&self) -> usize {
         self.grid.iter().filter(|&s| *s == Seat::Occupied).count()
     }
 
     /// Return count of occupied seats adjacent to (y, x).
+    #[must_use]
     pub fn occupied_seats_at(&self, y: i32, x: i32) -> usize {
         let mut seats: Vec<Seat> = Vec::new();
         for dy in -1..=1 {
@@ -101,6 +104,7 @@ impl SeatLayout {
 
     /// Do one round of seat filling.
     // TODO replace this hack string implementation with an enum one
+    #[must_use]
     pub fn fill_seats(&self) -> SeatLayout {
         let mut s = String::new();
         for y in 0..self.height {
@@ -134,6 +138,7 @@ impl SeatLayout {
     }
 
     /// Do rounds of seat filling, until the seat layout stabilizes.
+    #[must_use]
     pub fn fill_seats_until_stable(&self) -> SeatLayout {
         let mut prev_layout = self.fill_seats();
         let mut next_layout = prev_layout.fill_seats();
@@ -141,7 +146,7 @@ impl SeatLayout {
             prev_layout = next_layout.clone();
             next_layout = prev_layout.fill_seats();
         }
-        prev_layout.clone()
+        prev_layout
     }
 }
 
