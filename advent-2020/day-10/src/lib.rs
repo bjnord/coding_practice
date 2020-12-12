@@ -166,14 +166,14 @@ mod tests {
 
     #[test]
     fn test_read_from_file_no_file() {
-        let entries = Adapter::read_from_file("input/example99.txt");
-        assert!(entries.is_err());
+        let joltages = Adapter::read_from_file("input/example99.txt");
+        assert!(joltages.is_err());
     }
 
     #[test]
     fn test_read_from_file_bad_file() {
-        let entries = Adapter::read_from_file("input/bad1.txt");
-        assert!(entries.is_err());
+        let joltages = Adapter::read_from_file("input/bad1.txt");
+        assert!(joltages.is_err());
     }
 
     #[test]
