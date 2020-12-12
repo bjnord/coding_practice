@@ -67,12 +67,14 @@ impl AdapterSet {
         Ok(Self { adapters, builtin_adapter })
     }
 
+    #[must_use]
     pub fn joltages(&self) -> Vec<i32> {
         let mut values: Vec<i32> = self.adapters
             .iter()
             .map(Adapter::joltage)
             .collect();
         values.push(self.builtin_adapter.joltage());
+        values.sort();
         values
     }
 
@@ -91,8 +93,7 @@ impl AdapterSet {
     #[must_use]
     pub fn adapter_usage(&self) -> (usize, usize)
     {
-        let mut joltages = self.joltages();
-        joltages.sort();
+        let joltages = self.joltages();
         let mut acc: i32 = 0;
         joltages.into_iter().fold((0, 0), |(one, three), j| {
             match j {
@@ -101,6 +102,50 @@ impl AdapterSet {
                 _ => (one, three),
             }
         })
+    }
+
+    /// Count adapter arrangements. Returns the number of ways the adapters
+    /// can be connected correctly (without necessarily using them all).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_10::AdapterSet;
+    /// let adapter_set = AdapterSet::read_from_file("input/example1.txt")
+    ///     .unwrap();
+    /// assert_eq!(8, adapter_set.adapter_arrangements());
+    /// ```
+    #[must_use]
+    pub fn adapter_arrangements(&self) -> u64 {
+        let joltages = self.joltages();
+        let mut start = 0_i32;
+        let mut end = 0_i32;
+        joltages.iter().fold(1_u64, |mut choices, &next| {
+            let gap = next - end;
+            if gap > 3 {
+                let s = format!("found adapter greater than +3 start={} end={} next={} gap={}", start, end, next, gap);
+                panic!(s);
+            }
+            if gap > 1 {
+                choices *= AdapterSet::adapter_choices(start, end);
+                start = next;
+            }
+            end = next;
+            choices
+        })
+    }
+
+    #[allow(clippy::cast_sign_loss)]
+    fn adapter_choices(start: i32, end: i32) -> u64 {
+        if end < start {
+            panic!("end < start");
+        }
+        let gap = (end - start) as usize;
+        let choices: Vec<u64> = vec![1, 1, 2, 4, 7, 11];
+        if gap >= choices.len() {
+            panic!("gap {} not supported", gap);
+        }
+        choices[gap]
     }
 }
 
@@ -142,5 +187,29 @@ mod tests {
         let adapter_set = AdapterSet::read_from_file("input/example2.txt")
             .unwrap();
         assert_eq!((22, 10), adapter_set.adapter_usage());
+    }
+
+    #[test]
+    fn test_adapter_arrangements_2() {
+        let adapter_set = AdapterSet::read_from_file("input/example2.txt")
+            .unwrap();
+        assert_eq!(19208, adapter_set.adapter_arrangements());
+    }
+
+    #[test]
+    fn test_adapter_choices() {
+        assert_eq!(1, AdapterSet::adapter_choices(0, 0));    // gap=0
+        assert_eq!(1, AdapterSet::adapter_choices(0, 1));    // gap=1
+        assert_eq!(2, AdapterSet::adapter_choices(10, 12));  // gap=2
+        assert_eq!(4, AdapterSet::adapter_choices(4, 7));    // gap=3
+        assert_eq!(7, AdapterSet::adapter_choices(45, 49));  // gap=4
+        // following isn't in the example:
+        assert_eq!(11, AdapterSet::adapter_choices(44, 49)); // gap=5
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_adapter_choices_end_start() {
+        AdapterSet::adapter_choices(1, 0);
     }
 }
