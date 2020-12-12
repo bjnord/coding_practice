@@ -272,6 +272,18 @@ mod tests {
         let layout_s = SeatLayout::read_from_file("input/example1s.txt")
             .unwrap();
         assert_eq!(layout_s, layout_rs);
+        assert_eq!(37, layout_rs.occupied_seats());
+    }
+
+    #[test]
+    fn test_fill_seats_tolerant_until_stable() {
+        let layout = SeatLayout::read_from_file("input/example1.txt")
+            .unwrap();
+        let layout_rs = layout.fill_seats_until_stable(FillRules::Tolerant);
+        let layout_s = SeatLayout::read_from_file("input/example1s-tol.txt")
+            .unwrap();
+        assert_eq!(layout_s, layout_rs);
+        assert_eq!(26, layout_rs.occupied_seats());
     }
 
     #[test]
