@@ -15,7 +15,7 @@ pub enum Seat {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SeatLayout {
-    grid: Vec<Seat>,
+    seats: Vec<Seat>,
     height: i32,
     width: i32,
 }
@@ -43,12 +43,12 @@ impl FromStr for SeatLayout {
     #[allow(clippy::cast_possible_wrap)]
     fn from_str(input: &str) -> Result<Self> {
         let width = input.lines().next().unwrap().len() as i32;
-        let grid: Vec<Seat> = input
+        let seats: Vec<Seat> = input
             .lines()
             .flat_map(|line| line.chars().map(Seat::from_char))
             .collect();
-        let height = (grid.len() as i32) / width;
-        Ok(Self { grid, height, width })
+        let height = (seats.len() as i32) / width;
+        Ok(Self { seats, height, width })
     }
 }
 
@@ -72,20 +72,20 @@ impl SeatLayout {
             (y, _) if y < 0 || y >= self.height => Seat::Void,
             (_, x) if x < 0 || x >= self.width => Seat::Void,
             _ => {
-                self.grid[self.grid_index(y, x)]
+                self.seats[self.seats_index(y, x)]
             },
         }
     }
 
     #[allow(clippy::cast_sign_loss)]
-    fn grid_index(&self, y: i32, x: i32) -> usize {
+    fn seats_index(&self, y: i32, x: i32) -> usize {
         (y * self.width + x) as usize
     }
 
     /// Return count of occupied seats.
     #[must_use]
     pub fn occupied_seats(&self) -> usize {
-        self.grid.iter().filter(|&s| *s == Seat::Occupied).count()
+        self.seats.iter().filter(|&s| *s == Seat::Occupied).count()
     }
 
     /// Return count of occupied seats adjacent to (y, x).
