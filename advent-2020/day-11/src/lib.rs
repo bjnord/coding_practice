@@ -133,32 +133,32 @@ impl SeatLayout {
         let mut s = String::new();
         for y in 0..self.height {
             for x in 0..self.width {
-                match self.seat_at(y, x) {
-                    Seat::Floor => {
-                        s += ".";
-                    },
-                    Seat::Empty => {
-                        if self.visible_occupied_seats_at(y, x, r) == 0 {
-                            s += "#";
-                        } else {
-                            s += "L";
-                        }
-                    },
-                    Seat::Occupied => {
-                        if self.visible_occupied_seats_at(y, x, r) >= occ_limit {
-                            s += "L";
-                        } else {
-                            s += "#";
-                        }
-                    },
-                    Seat::Void => {
-                        panic!("(y, x) outside grid bounds")
-                    },
-                }
+                s += self.new_seat_at(y, x, occ_limit, r);
             }
             s += "\n";
         }
         s.parse().unwrap()
+    }
+
+    fn new_seat_at(&self, y: i32, x: i32, occ_limit: usize, r: i32) -> &str {
+        match self.seat_at(y, x) {
+            Seat::Floor => { "." },
+            Seat::Empty => {
+                if self.visible_occupied_seats_at(y, x, r) == 0 {
+                    "#"
+                } else {
+                    "L"
+                }
+            },
+            Seat::Occupied => {
+                if self.visible_occupied_seats_at(y, x, r) >= occ_limit {
+                    "L"
+                } else {
+                    "#"
+                }
+            },
+            Seat::Void => { panic!("(y, x) outside grid bounds") },
+        }
     }
 
     /// Do rounds of seat filling, according to the specified `rules`,
