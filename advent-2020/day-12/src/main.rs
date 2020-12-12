@@ -12,9 +12,8 @@ fn part1() {
     let mut ferry = Ferry::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     ferry.follow_instructions();
-    let manhattan = ferry.manhattan();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 11 - Part 1 : {} <=> 1221 expected", manhattan);
+    println!("Day 11 - Part 1 : {} <=> 1221 expected", ferry.manhattan());
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -22,11 +21,11 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    //let layout = SeatLayout::read_from_file("input/input.txt").unwrap();
+    let mut ferry = Ferry::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    ferry.follow_actual_instructions();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 11 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 11 - Part 2 : {} <=> 59435 expected", ferry.manhattan());
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

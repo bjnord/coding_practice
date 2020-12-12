@@ -70,8 +70,8 @@ impl Instruction {
 
     /// Return (y, x) deltas for the given compass `dir`. The first value
     /// `y` is the north(-1)/south(+1) delta, the second value `x` is the
-    /// east(+1)/west(-1). The compass directions start with East=0 and go
-    /// clockwise.
+    /// east(+1)/west(-1) delta. The compass directions start with East=0
+    /// and go clockwise.
     ///
     /// Only 90-degree values (cardinal directions) are supported. `dir`
     /// may be negative or greater than 360; it is treated as modulo 360.
@@ -90,6 +90,32 @@ impl Instruction {
             90 => (1, 0),
             180 => (0, -1),
             270 => (-1, 0),
+            dir => panic!("unsupported direction {}", dir),
+        }
+    }
+
+    /// Return new (y, x) after rotating previous (y0, x0) by the given
+    /// compass `dir`. The first value `y0`/`y` is the north(-)/south(+)
+    /// axis, the second value `x0`/`x` is the east(+)/west(-) axis. The
+    /// compass directions start with East=0 and go clockwise.
+    ///
+    /// Only 90-degree values (cardinal directions) are supported. `dir`
+    /// may be negative or greater than 360; it is treated as modulo 360.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_12::Instruction;
+    /// let (y, x) = Instruction::rotate(-4, 10, 90);
+    /// assert_eq!((10, 4), (y, x));
+    /// ```
+    #[must_use]
+    pub fn rotate(y0: i32, x0: i32, dir: i32) -> (i32, i32) {
+        match dir.rem_euclid(360) {
+            0 => (y0, x0),
+            90 => (x0, -y0),
+            180 => (-y0, -x0),
+            270 => (-x0, y0),
             dir => panic!("unsupported direction {}", dir),
         }
     }
@@ -162,6 +188,34 @@ impl Ferry {
         self.x = x1;
         self.dir = dir1;
     }
+
+    /// Follow **actual** list of ferry instructions to move the boat.
+    #[allow(clippy::similar_names)]
+    pub fn follow_actual_instructions(&mut self) {
+        let (y1, x1, _way_y1, _way_x1) = self.instructions
+            .iter()
+            .fold((self.y, self.x, -1, 10), |(y, x, way_y, way_x), &inst| {
+                match inst.action() {
+                    ActionValue::Compass(move_dir, dist) => {
+                        let (dy, dx) = Instruction::compass_deltas(move_dir);
+                        (y, x, way_y + dy * dist, way_x + dx * dist)
+                    },
+                    ActionValue::Left(way_dir) => {
+                        let (new_y, new_x) = Instruction::rotate(way_y, way_x, -way_dir);
+                        (y, x, new_y, new_x)
+                    },
+                    ActionValue::Right(way_dir) => {
+                        let (new_y, new_x) = Instruction::rotate(way_y, way_x, way_dir);
+                        (y, x, new_y, new_x)
+                    },
+                    ActionValue::Forward(dist) => {
+                        (y + way_y * dist, x + way_x * dist, way_y, way_x)
+                    },
+                }
+            });
+        self.y = y1;
+        self.x = x1;
+    }
 }
 
 #[cfg(test)]
@@ -227,5 +281,14 @@ mod tests {
         assert_eq!(8, ferry.ns());
         assert_eq!(17, ferry.ew());
         assert_eq!(25, ferry.manhattan());
+    }
+
+    #[test]
+    fn test_follow_actual_instructions() {
+        let mut ferry = Ferry::read_from_file("input/example1.txt").unwrap();
+        ferry.follow_actual_instructions();
+        assert_eq!(72, ferry.ns());
+        assert_eq!(214, ferry.ew());
+        assert_eq!(286, ferry.manhattan());
     }
 }
