@@ -3,6 +3,7 @@
 ## See Also
 
 - [Rust Language Cheat Sheet](https://cheats.rs/)
+- [Idiomatic Rust](https://github.com/mre/idiomatic-rust)
 
 ## Terms
 
@@ -171,6 +172,15 @@ A [global array of strings](https://stackoverflow.com/a/32383866/291754) looks l
 const BROWSERS: &'static [&'static str] = &["firefox", "chrome"];
 ```
 
+You can't use `const` with `Vec`, but you can do either:
+
+- `const v: [i32; 5] = [1, 2, 3, 4, 5];`
+- `static NUMBERS: &'static [i32] = &[1, 2, 3, 4, 5];`
+
+Or use the `lazy_static!` macro (see above) and the code will be compiled in for efficiency.
+
+Note also that you can't do heap allocations of constants yet.
+
 ## Importing
 
 Convention with `use` is to import one level above for _functions_ and call them with the prefix:
@@ -334,6 +344,10 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 
 1. Rust provides `.min()` and `.max()` for an iterator; note that it returns `Option<&T>` for a vector, which means the result has to be unwrapped and dereferenced: `*values_vector.iter().min().unwrap()`
 1. Rust also provides `.min_by()` and `.max_by()` which take a comparison function, useful for complex objects.
+
+### Other Helpful Iteration Methods
+
+1. `try_fold()` calls a function that returns `Option`, and iterates until it sees a `None`.
 
 ### Ranges
 
