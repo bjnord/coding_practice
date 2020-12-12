@@ -68,9 +68,9 @@ impl Instruction {
         self.action
     }
 
-    /// Return (y, x) deltas for the given compass `dir`. The first value
-    /// `y` is the north(-1)/south(+1) delta, the second value `x` is the
-    /// east(+1)/west(-1) delta. The compass directions start with East=0
+    /// Return (y, x) factors for the given compass `dir`. The first value
+    /// `y` is the north(-1)/south(+1) factor, the second value `x` is the
+    /// east(+1)/west(-1) factor. The compass directions start with East=0
     /// and go clockwise.
     ///
     /// Only 90-degree values (cardinal directions) are supported. `dir`
@@ -80,11 +80,11 @@ impl Instruction {
     ///
     /// ```
     /// # use day_12::Instruction;
-    /// let (dy, dx) = Instruction::compass_deltas(90);
+    /// let (dy, dx) = Instruction::compass_factors(90);
     /// assert_eq!((1, 0), (dy, dx));
     /// ```
     #[must_use]
-    pub fn compass_deltas(dir: i32) -> (i32, i32) {
+    pub fn compass_factors(dir: i32) -> (i32, i32) {
         match dir.rem_euclid(360) {
             0 => (0, 1),
             90 => (1, 0),
@@ -169,7 +169,7 @@ impl Ferry {
             .fold((self.y, self.x, self.dir), |(y, x, dir), &inst| {
                 match inst.action() {
                     ActionValue::Compass(move_dir, dist) => {
-                        let (dy, dx) = Instruction::compass_deltas(move_dir);
+                        let (dy, dx) = Instruction::compass_factors(move_dir);
                         (y + dy * dist, x + dx * dist, dir)
                     },
                     ActionValue::Left(ddir) => {
@@ -179,7 +179,7 @@ impl Ferry {
                         (y, x, dir + ddir)
                     },
                     ActionValue::Forward(dist) => {
-                        let (dy, dx) = Instruction::compass_deltas(dir);
+                        let (dy, dx) = Instruction::compass_factors(dir);
                         (y + dy * dist, x + dx * dist, dir)
                     },
                 }
@@ -197,7 +197,7 @@ impl Ferry {
             .fold((self.y, self.x, -1, 10), |(y, x, way_y, way_x), &inst| {
                 match inst.action() {
                     ActionValue::Compass(move_dir, dist) => {
-                        let (dy, dx) = Instruction::compass_deltas(move_dir);
+                        let (dy, dx) = Instruction::compass_factors(move_dir);
                         (y, x, way_y + dy * dist, way_x + dx * dist)
                     },
                     ActionValue::Left(way_dir) => {
@@ -263,15 +263,15 @@ mod tests {
     }
 
     #[test]
-    fn test_compass_deltas() {
-        assert_eq!((0, -1), Instruction::compass_deltas(180));
-        assert_eq!((-1, 0), Instruction::compass_deltas(-90));
+    fn test_compass_factors() {
+        assert_eq!((0, -1), Instruction::compass_factors(180));
+        assert_eq!((-1, 0), Instruction::compass_factors(-90));
     }
 
     #[test]
     #[should_panic]
-    fn test_compass_deltas_bad() {
-        let (_dy, _dx) = Instruction::compass_deltas(45);
+    fn test_compass_factors_bad() {
+        let (_dy, _dx) = Instruction::compass_factors(45);
     }
 
     #[test]
