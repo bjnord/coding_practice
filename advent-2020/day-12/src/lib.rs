@@ -71,6 +71,16 @@ impl Instruction {
         self.action
     }
 
+    pub fn compass_deltas(dir: i32) -> (i32, i32) {
+        match dir.rem_euclid(360) {
+            0 => (0, 1),
+            90 => (1, 0),
+            180 => (0, -1),
+            270 => (-1, 0),
+            dir => panic!("unsupported direction {}", dir),
+        }
+    }
+
     /// Read instructions from `path`.
     ///
     /// # Errors
@@ -138,5 +148,18 @@ mod tests {
             "W77".parse::<Instruction>().unwrap().action());
         assert_eq!(ActionValue::Left(180),
             "L180".parse::<Instruction>().unwrap().action());
+    }
+
+    #[test]
+    fn test_compass_deltas() {
+        assert_eq!((1, 0), Instruction::compass_deltas(90));
+        assert_eq!((0, -1), Instruction::compass_deltas(180));
+        assert_eq!((-1, 0), Instruction::compass_deltas(-90));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_compass_deltas_bad() {
+        let (_dy, _dx) = Instruction::compass_deltas(45);
     }
 }
