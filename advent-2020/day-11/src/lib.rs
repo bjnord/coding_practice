@@ -123,38 +123,36 @@ impl SeatLayout {
     }
 
     /// Do one round of seat filling, according to the specified `rules`.
-    // TODO replace this hack string implementation with an enum one
     #[must_use]
     pub fn fill_seats(&self, rules: FillRules) -> SeatLayout {
         let (occ_limit, r) = match rules {
             FillRules::Stringent => (4, 1),
             FillRules::Tolerant => (5, i32::MAX),
         };
-        let mut s = String::new();
+        let mut seats = Vec::<Seat>::new();
         for y in 0..self.height {
             for x in 0..self.width {
-                s += self.new_seat_at(y, x, occ_limit, r);
+                seats.push(self.new_seat_at(y, x, occ_limit, r));
             }
-            s += "\n";
         }
-        s.parse().unwrap()
+        SeatLayout { seats, height: self.height, width: self.width }
     }
 
-    fn new_seat_at(&self, y: i32, x: i32, occ_limit: usize, r: i32) -> &str {
+    fn new_seat_at(&self, y: i32, x: i32, occ_limit: usize, r: i32) -> Seat {
         match self.seat_at(y, x) {
-            Seat::Floor => { "." },
+            Seat::Floor => { Seat::Floor },
             Seat::Empty => {
                 if self.visible_occupied_seats_at(y, x, r) == 0 {
-                    "#"
+                    Seat::Occupied
                 } else {
-                    "L"
+                    Seat::Empty
                 }
             },
             Seat::Occupied => {
                 if self.visible_occupied_seats_at(y, x, r) >= occ_limit {
-                    "L"
+                    Seat::Empty
                 } else {
-                    "#"
+                    Seat::Occupied
                 }
             },
             Seat::Void => { panic!("(y, x) outside grid bounds") },
