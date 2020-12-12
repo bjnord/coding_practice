@@ -1,4 +1,5 @@
 use std::error;
+use std::fmt;
 use std::fs;
 use std::result;
 use std::str::FromStr;
@@ -24,6 +25,24 @@ pub struct SeatLayout {
 pub enum FillRules {
     Stringent,
     Tolerant,
+}
+
+impl fmt::Display for SeatLayout {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut s = String::new();
+        for y in 0..self.height {
+            for x in 0..self.width {
+                s += match self.seat_at(y, x) {
+                    Seat::Floor => ".",
+                    Seat::Empty => "L",
+                    Seat::Occupied => "#",
+                    Seat::Void => panic!("unexpected Void in Display"),
+                };
+            }
+            s += "\n";
+        }
+        write!(f, "{}", s)
+    }
 }
 
 impl Seat {
