@@ -20,10 +20,7 @@ impl error::Error for InstructionError {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ActionValue {
-    North(i32),
-    South(i32),
-    East(i32),
-    West(i32),
+    Compass(i32, i32),
     Left(i32),
     Right(i32),
     Forward(i32),
@@ -48,10 +45,10 @@ impl FromStr for Instruction {
     fn from_str(line: &str) -> Result<Self> {
         let (action_char, value) = scan_fmt!(line, "{[NSEWLRF]}{d}", char, i32)?;
         let action = match action_char {
-            'N' => ActionValue::North(value),
-            'S' => ActionValue::South(value),
-            'E' => ActionValue::East(value),
-            'W' => ActionValue::West(value),
+            'N' => ActionValue::Compass(270, value),
+            'S' => ActionValue::Compass(90, value),
+            'E' => ActionValue::Compass(0, value),
+            'W' => ActionValue::Compass(180, value),
             'L' => ActionValue::Left(value),
             'R' => ActionValue::Right(value),
             'F' => ActionValue::Forward(value),
@@ -65,12 +62,28 @@ impl FromStr for Instruction {
 }
 
 impl Instruction {
-    /// Return instruction joltage value.
+    /// Return instruction action.
     #[must_use]
     pub fn action(&self) -> ActionValue {
         self.action
     }
 
+    /// Return (y, x) deltas for the given compass `dir`. The first value
+    /// `y` is the north(-1)/south(+1) delta, the second value `x` is the
+    /// east(+1)/west(-1). The compass directions start with East=0 and go
+    /// clockwise.
+    ///
+    /// Only 90-degree values (cardinal directions) are supported. `dir`
+    /// may be negative or greater than 360; it is treated as modulo 360.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_12::Instruction;
+    /// let (dy, dx) = Instruction::compass_deltas(90);
+    /// assert_eq!((1, 0), (dy, dx));
+    /// ```
+    #[must_use]
     pub fn compass_deltas(dir: i32) -> (i32, i32) {
         match dir.rem_euclid(360) {
             0 => (0, 1),
@@ -94,6 +107,24 @@ impl Instruction {
 }
 
 impl Ferry {
+    /// Return ferry north(-)/south(+) position.
+    #[must_use]
+    pub fn ns(&self) -> i32 {
+        self.y
+    }
+
+    /// Return ferry east(+)/west(-) position.
+    #[must_use]
+    pub fn ew(&self) -> i32 {
+        self.x
+    }
+
+    /// Return ferry Manhattan distance.
+    #[must_use]
+    pub fn manhattan(&self) -> i32 {
+        self.x.abs() + self.y.abs()
+    }
+
     /// Construct by reading instructions from path.
     ///
     /// # Errors
@@ -103,6 +134,33 @@ impl Ferry {
     pub fn read_from_file(path: &str) -> Result<Ferry> {
         let instructions = Instruction::read_from_file(path)?;
         Ok(Self { instructions, y: 0, x: 0, dir: 0 })
+    }
+
+    /// Follow list of ferry instructions to move the boat.
+    pub fn follow_instructions(&mut self) {
+        let (y1, x1, dir1) = self.instructions
+            .iter()
+            .fold((self.y, self.x, self.dir), |(y, x, dir), &inst| {
+                match inst.action() {
+                    ActionValue::Compass(move_dir, dist) => {
+                        let (dy, dx) = Instruction::compass_deltas(move_dir);
+                        (y + dy * dist, x + dx * dist, dir)
+                    },
+                    ActionValue::Left(ddir) => {
+                        (y, x, dir - ddir)
+                    },
+                    ActionValue::Right(ddir) => {
+                        (y, x, dir + ddir)
+                    },
+                    ActionValue::Forward(dist) => {
+                        let (dy, dx) = Instruction::compass_deltas(dir);
+                        (y + dy * dist, x + dx * dist, dir)
+                    },
+                }
+            });
+        self.y = y1;
+        self.x = x1;
+        self.dir = dir1;
     }
 }
 
@@ -119,7 +177,7 @@ mod tests {
             .collect();
         assert_eq!(vec![
             ActionValue::Forward(10),
-            ActionValue::North(3),
+            ActionValue::Compass(270, 3),
             ActionValue::Forward(7),
             ActionValue::Right(90),
             ActionValue::Forward(11),
@@ -140,11 +198,11 @@ mod tests {
 
     #[test]
     fn test_parse_instruction() {
-        assert_eq!(ActionValue::South(40),
+        assert_eq!(ActionValue::Compass(90, 40),
             "S40".parse::<Instruction>().unwrap().action());
-        assert_eq!(ActionValue::East(5),
+        assert_eq!(ActionValue::Compass(0, 5),
             "E5".parse::<Instruction>().unwrap().action());
-        assert_eq!(ActionValue::West(77),
+        assert_eq!(ActionValue::Compass(180, 77),
             "W77".parse::<Instruction>().unwrap().action());
         assert_eq!(ActionValue::Left(180),
             "L180".parse::<Instruction>().unwrap().action());
@@ -152,7 +210,6 @@ mod tests {
 
     #[test]
     fn test_compass_deltas() {
-        assert_eq!((1, 0), Instruction::compass_deltas(90));
         assert_eq!((0, -1), Instruction::compass_deltas(180));
         assert_eq!((-1, 0), Instruction::compass_deltas(-90));
     }
@@ -161,5 +218,14 @@ mod tests {
     #[should_panic]
     fn test_compass_deltas_bad() {
         let (_dy, _dx) = Instruction::compass_deltas(45);
+    }
+
+    #[test]
+    fn test_follow_instructions() {
+        let mut ferry = Ferry::read_from_file("input/example1.txt").unwrap();
+        ferry.follow_instructions();
+        assert_eq!(8, ferry.ns());
+        assert_eq!(17, ferry.ew());
+        assert_eq!(25, ferry.manhattan());
     }
 }

@@ -1,4 +1,4 @@
-//use day_12::{FillRules, SeatLayout};
+use day_12::Ferry;
 use std::time::Instant;
 
 fn main() {
@@ -9,11 +9,12 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    //let layout = SeatLayout::read_from_file("input/input.txt").unwrap();
+    let mut ferry = Ferry::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    ferry.follow_instructions();
+    let manhattan = ferry.manhattan();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 11 - Part 1 : {} <=> _ expected", 0);
+    println!("Day 11 - Part 1 : {} <=> 1221 expected", manhattan);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
