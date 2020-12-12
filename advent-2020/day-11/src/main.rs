@@ -1,4 +1,4 @@
-use day_11::SeatLayout;
+use day_11::{FillRules, SeatLayout};
 use std::time::Instant;
 
 fn main() {
@@ -11,7 +11,7 @@ fn part1() {
     let start = Instant::now();
     let layout = SeatLayout::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    let stable_layout = layout.fill_seats_until_stable();
+    let stable_layout = layout.fill_seats_until_stable(FillRules::Stringent);
     let run_time = start.elapsed() - gen_time;
     println!("Day 11 - Part 1 : {} <=> 2263 expected", stable_layout.occupied_seats());
     println!("    generator: {:?}", gen_time);

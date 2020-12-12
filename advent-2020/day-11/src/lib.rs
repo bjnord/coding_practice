@@ -20,6 +20,12 @@ pub struct SeatLayout {
     width: i32,
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum FillRules {
+    Stringent,
+    Tolerant,
+}
+
 impl Seat {
     /// Construct seat from input character.
     #[must_use]
@@ -116,10 +122,14 @@ impl SeatLayout {
         n_occ_seats
     }
 
-    /// Do one round of seat filling.
+    /// Do one round of seat filling, according to the specified `rules`.
     // TODO replace this hack string implementation with an enum one
     #[must_use]
-    pub fn fill_seats(&self) -> SeatLayout {
+    pub fn fill_seats(&self, rules: FillRules) -> SeatLayout {
+        let (occ_limit, r) = match rules {
+            FillRules::Stringent => (4, 1),
+            FillRules::Tolerant => (5, i32::MAX),
+        };
         let mut s = String::new();
         for y in 0..self.height {
             for x in 0..self.width {
@@ -128,14 +138,14 @@ impl SeatLayout {
                         s += ".";
                     },
                     Seat::Empty => {
-                        if self.visible_occupied_seats_at(y, x, 1) == 0 {
+                        if self.visible_occupied_seats_at(y, x, r) == 0 {
                             s += "#";
                         } else {
                             s += "L";
                         }
                     },
                     Seat::Occupied => {
-                        if self.visible_occupied_seats_at(y, x, 1) >= 4 {
+                        if self.visible_occupied_seats_at(y, x, r) >= occ_limit {
                             s += "L";
                         } else {
                             s += "#";
@@ -151,14 +161,15 @@ impl SeatLayout {
         s.parse().unwrap()
     }
 
-    /// Do rounds of seat filling, until the seat layout stabilizes.
+    /// Do rounds of seat filling, according to the specified `rules`,
+    /// until the seat layout stabilizes.
     #[must_use]
-    pub fn fill_seats_until_stable(&self) -> SeatLayout {
-        let mut prev_layout = self.fill_seats();
-        let mut next_layout = prev_layout.fill_seats();
+    pub fn fill_seats_until_stable(&self, rules: FillRules) -> SeatLayout {
+        let mut prev_layout = self.fill_seats(rules);
+        let mut next_layout = prev_layout.fill_seats(rules);
         while next_layout != prev_layout {
             prev_layout = next_layout.clone();
-            next_layout = prev_layout.fill_seats();
+            next_layout = prev_layout.fill_seats(rules);
         }
         prev_layout
     }
@@ -205,11 +216,11 @@ mod tests {
     fn test_layout_equality() {
         let layout1 = SeatLayout::read_from_file("input/example1.txt")
             .unwrap();
-        let layout_r2 = layout1.fill_seats();
+        let layout_r2 = layout1.fill_seats(FillRules::Stringent);
         assert_ne!(layout1, layout_r2);
         let layout3 = SeatLayout::read_from_file("input/example3.txt")
             .unwrap();
-        let layout_r3 = layout_r2.fill_seats();
+        let layout_r3 = layout_r2.fill_seats(FillRules::Stringent);
         assert_eq!(layout3, layout_r3);
     }
 
@@ -235,29 +246,29 @@ mod tests {
     }
 
     #[test]
-    fn test_fill_seats() {
+    fn test_fill_seats_stringent() {
         let layout = SeatLayout::read_from_file("input/example1.txt")
             .unwrap();
-        let layout2 = layout.fill_seats();
+        let layout2 = layout.fill_seats(FillRules::Stringent);
         assert_eq!(71, layout2.occupied_seats());
-        let layout3 = layout2.fill_seats();
+        let layout3 = layout2.fill_seats(FillRules::Stringent);
         assert_eq!(20, layout3.occupied_seats());
     }
 
     #[test]
-    fn test_fill_seats_stable() {
+    fn test_fill_seats_stringent_stable() {
         let layout = SeatLayout::read_from_file("input/example1s.txt")
             .unwrap();
         let before_seats = layout.occupied_seats();
-        let next_layout = layout.fill_seats();
+        let next_layout = layout.fill_seats(FillRules::Stringent);
         assert_eq!(before_seats, next_layout.occupied_seats());
     }
 
     #[test]
-    fn test_fill_seats_until_stable() {
+    fn test_fill_seats_stringent_until_stable() {
         let layout = SeatLayout::read_from_file("input/example1.txt")
             .unwrap();
-        let layout_rs = layout.fill_seats_until_stable();
+        let layout_rs = layout.fill_seats_until_stable(FillRules::Stringent);
         let layout_s = SeatLayout::read_from_file("input/example1s.txt")
             .unwrap();
         assert_eq!(layout_s, layout_rs);
