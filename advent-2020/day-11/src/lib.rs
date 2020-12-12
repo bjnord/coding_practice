@@ -45,7 +45,7 @@ impl FromStr for SeatLayout {
         let width = input.lines().next().unwrap().len() as i32;
         let seats: Vec<Seat> = input
             .lines()
-            .flat_map(|line| line.chars().map(Seat::from_char))
+            .flat_map(|line| line.trim().chars().map(Seat::from_char))
             .collect();
         let height = (seats.len() as i32) / width;
         Ok(Self { seats, height, width })
@@ -154,18 +154,20 @@ impl SeatLayout {
 mod tests {
     use super::*;
 
+    const TINY_LAYOUT: &'static str = "\
+        .#L
+        .L.";
+
     #[test]
     fn test_read_from_file() {
-        let layout = SeatLayout::read_from_file("input/exampleT.txt")
-            .unwrap();
+        let layout: SeatLayout = TINY_LAYOUT.parse().unwrap();
         assert_eq!(2, layout.height);
         assert_eq!(3, layout.width);
     }
 
     #[test]
     fn test_layout_indexing() {
-        let layout = SeatLayout::read_from_file("input/exampleT.txt")
-            .unwrap();
+        let layout: SeatLayout = TINY_LAYOUT.parse().unwrap();
         assert_eq!(Seat::Floor, layout.seat_at(1, 2));
         assert_eq!(Seat::Empty, layout.seat_at(0, 2));
         assert_eq!(Seat::Occupied, layout.seat_at(0, 1));
@@ -173,16 +175,14 @@ mod tests {
 
     #[test]
     fn test_layout_indexing_void_y() {
-        let layout = SeatLayout::read_from_file("input/exampleT.txt")
-            .unwrap();
+        let layout: SeatLayout = TINY_LAYOUT.parse().unwrap();
         assert_eq!(Seat::Void, layout.seat_at(-1, 2));
         assert_eq!(Seat::Void, layout.seat_at(2, 2));
     }
 
     #[test]
     fn test_layout_indexing_void_x() {
-        let layout = SeatLayout::read_from_file("input/exampleT.txt")
-            .unwrap();
+        let layout: SeatLayout = TINY_LAYOUT.parse().unwrap();
         assert_eq!(Seat::Void, layout.seat_at(1, -1));
         assert_eq!(Seat::Void, layout.seat_at(1, 3));
     }
