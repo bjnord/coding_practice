@@ -11,7 +11,7 @@ fn part1() {
     let start = Instant::now();
     let mut ferry = Ferry::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    ferry.follow_instructions();
+    ferry.follow_instructions(0);
     let run_time = start.elapsed() - gen_time;
     println!("Day 11 - Part 1 : {} <=> 1221 expected", ferry.manhattan());
     println!("    generator: {:?}", gen_time);
@@ -23,7 +23,7 @@ fn part2() {
     let start = Instant::now();
     let mut ferry = Ferry::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    ferry.follow_actual_instructions();
+    ferry.follow_actual_instructions(-1, 10);
     let run_time = start.elapsed() - gen_time;
     println!("Day 11 - Part 2 : {} <=> 59435 expected", ferry.manhattan());
     println!("    generator: {:?}", gen_time);

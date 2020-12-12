@@ -36,7 +36,6 @@ pub struct Ferry {
     instructions: Vec<Instruction>,
     y: i32,
     x: i32,
-    dir: i32,
 }
 
 impl FromStr for Instruction {
@@ -159,24 +158,26 @@ impl Ferry {
     /// found with an invalid instruction format.
     pub fn read_from_file(path: &str) -> Result<Ferry> {
         let instructions = Instruction::read_from_file(path)?;
-        Ok(Self { instructions, y: 0, x: 0, dir: 0 })
+        Ok(Self { instructions, y: 0, x: 0 })
     }
 
-    /// Follow list of ferry instructions to move the boat.
-    pub fn follow_instructions(&mut self) {
+    /// Follow list of ferry instructions to move the ship, starting with
+    /// the ship facing `dir`. Returns the direction the ship is facing at
+    /// the end.
+    pub fn follow_instructions(&mut self, dir: i32) -> i32 {
         let (y1, x1, dir1) = self.instructions
             .iter()
-            .fold((self.y, self.x, self.dir), |(y, x, dir), &inst| {
+            .fold((self.y, self.x, dir), |(y, x, dir), &inst| {
                 match inst.action() {
                     ActionValue::Compass(move_dir, dist) => {
                         let (dy, dx) = Instruction::compass_factors(move_dir);
                         (y + dy * dist, x + dx * dist, dir)
                     },
-                    ActionValue::Left(ddir) => {
-                        (y, x, dir - ddir)
+                    ActionValue::Left(rot) => {
+                        (y, x, dir - rot)
                     },
-                    ActionValue::Right(ddir) => {
-                        (y, x, dir + ddir)
+                    ActionValue::Right(rot) => {
+                        (y, x, dir + rot)
                     },
                     ActionValue::Forward(dist) => {
                         let (dy, dx) = Instruction::compass_factors(dir);
@@ -186,35 +187,38 @@ impl Ferry {
             });
         self.y = y1;
         self.x = x1;
-        self.dir = dir1;
+        dir1
     }
 
-    /// Follow **actual** list of ferry instructions to move the boat.
+    /// Follow **actual** list of ferry instructions to move the ship, with
+    /// the waypoint starting at (`w_y`, `w_x`). Returns the (y, x)
+    /// position of the waypoint at the end.
     #[allow(clippy::similar_names)]
-    pub fn follow_actual_instructions(&mut self) {
-        let (y1, x1, _way_y1, _way_x1) = self.instructions
+    pub fn follow_actual_instructions(&mut self, w_y: i32, w_x: i32) -> (i32, i32) {
+        let (y1, x1, w_y1, w_x1) = self.instructions
             .iter()
-            .fold((self.y, self.x, -1, 10), |(y, x, way_y, way_x), &inst| {
+            .fold((self.y, self.x, w_y, w_x), |(y, x, w_y, w_x), &inst| {
                 match inst.action() {
                     ActionValue::Compass(move_dir, dist) => {
                         let (dy, dx) = Instruction::compass_factors(move_dir);
-                        (y, x, way_y + dy * dist, way_x + dx * dist)
+                        (y, x, w_y + dy * dist, w_x + dx * dist)
                     },
-                    ActionValue::Left(way_dir) => {
-                        let (new_y, new_x) = Instruction::rotate(way_y, way_x, -way_dir);
-                        (y, x, new_y, new_x)
+                    ActionValue::Left(w_rot) => {
+                        let (new_w_y, new_w_x) = Instruction::rotate(w_y, w_x, -w_rot);
+                        (y, x, new_w_y, new_w_x)
                     },
-                    ActionValue::Right(way_dir) => {
-                        let (new_y, new_x) = Instruction::rotate(way_y, way_x, way_dir);
-                        (y, x, new_y, new_x)
+                    ActionValue::Right(w_rot) => {
+                        let (new_w_y, new_w_x) = Instruction::rotate(w_y, w_x, w_rot);
+                        (y, x, new_w_y, new_w_x)
                     },
                     ActionValue::Forward(dist) => {
-                        (y + way_y * dist, x + way_x * dist, way_y, way_x)
+                        (y + w_y * dist, x + w_x * dist, w_y, w_x)
                     },
                 }
             });
         self.y = y1;
         self.x = x1;
+        (w_y1, w_x1)
     }
 }
 
@@ -291,7 +295,8 @@ mod tests {
     #[test]
     fn test_follow_instructions() {
         let mut ferry = Ferry::read_from_file("input/example1.txt").unwrap();
-        ferry.follow_instructions();
+        let new_dir = ferry.follow_instructions(0);
+        assert_eq!(90, new_dir);
         assert_eq!(8, ferry.ns());
         assert_eq!(17, ferry.ew());
         assert_eq!(25, ferry.manhattan());
@@ -300,7 +305,8 @@ mod tests {
     #[test]
     fn test_follow_actual_instructions() {
         let mut ferry = Ferry::read_from_file("input/example1.txt").unwrap();
-        ferry.follow_actual_instructions();
+        let (new_w_y, new_w_x) = ferry.follow_actual_instructions(-1, 10);
+        assert_eq!((10, 4), (new_w_y, new_w_x));
         assert_eq!(72, ferry.ns());
         assert_eq!(214, ferry.ew());
         assert_eq!(286, ferry.manhattan());
