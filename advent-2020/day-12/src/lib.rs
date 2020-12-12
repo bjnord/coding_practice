@@ -264,6 +264,7 @@ mod tests {
 
     #[test]
     fn test_compass_factors() {
+        assert_eq!((0, 1), Instruction::compass_factors(0));
         assert_eq!((0, -1), Instruction::compass_factors(180));
         assert_eq!((-1, 0), Instruction::compass_factors(-90));
     }
@@ -272,6 +273,19 @@ mod tests {
     #[should_panic]
     fn test_compass_factors_bad() {
         let (_dy, _dx) = Instruction::compass_factors(45);
+    }
+
+    #[test]
+    fn test_rotate() {
+        assert_eq!((-4, 10), Instruction::rotate(-4, 10, 0));
+        assert_eq!((4, -10), Instruction::rotate(-4, 10, 180));
+        assert_eq!((-10, -4), Instruction::rotate(-4, 10, -90));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_rotate_bad() {
+        let (_new_y, _new_x) = Instruction::rotate(-4, 10, 110);
     }
 
     #[test]
