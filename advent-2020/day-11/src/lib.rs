@@ -163,13 +163,13 @@ impl SeatLayout {
     /// until the seat layout stabilizes.
     #[must_use]
     pub fn fill_seats_until_stable(&self, rules: FillRules) -> SeatLayout {
-        let mut prev_layout = self.fill_seats(rules);
-        let mut next_layout = prev_layout.fill_seats(rules);
-        while next_layout != prev_layout {
-            prev_layout = next_layout.clone();
-            next_layout = prev_layout.fill_seats(rules);
+        let mut prev_layout = self.clone();
+        let mut layout = prev_layout.fill_seats(rules);
+        while layout != prev_layout {
+            prev_layout = layout;
+            layout = prev_layout.fill_seats(rules);
         }
-        prev_layout
+        layout
     }
 }
 
