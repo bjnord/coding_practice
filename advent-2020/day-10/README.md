@@ -192,3 +192,17 @@ arrangements.
 
 **What is the total number of distinct ways you can arrange the adapters
 to connect the charging outlet to your device?**
+
+Your puzzle answer was `3100448333024`.
+
+### Part Two Design
+
+> **Spoilers ahead!**
+
+As noted in Part One: When the adapters are sorted, they will all be either +1 or +3 jolts.
+
+I looked at example #1 for a while this morning, and then realized that the +3 jolt gaps effectively break the adapter chain into segments, where only one choice is possible between segments. This is what will contain the combinatorial explosion.
+
+I arrived at an algorithm that passed example #1 but not #2. Once you have a stretch of 3 or more +1 adapters, not all combinations of leaving adapters out are valid. The number you can leave out isn't even constant; it depends on where in the stretch they are. I wonder if there even is a formula that would yield "number of choices for adapters between n and m, with no gap greater than +3".
+
+I decided to just do paper and pencil for +1 adapter stretches up to 4 (which covers example #2), and I did one more for a stretch of 5. Imagine my surprise when that was enough to yield the part 2 solution… apparently there aren't any stretches longer than that in the puzzle.

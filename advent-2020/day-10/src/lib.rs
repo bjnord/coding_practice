@@ -141,6 +141,7 @@ impl AdapterSet {
             panic!("end < start");
         }
         let gap = (end - start) as usize;
+        // these values were calculated by hand; see `README.md`
         let choices: Vec<u64> = vec![1, 1, 2, 4, 7, 11];
         if gap >= choices.len() {
             panic!("gap {} not supported", gap);
@@ -198,12 +199,14 @@ mod tests {
 
     #[test]
     fn test_adapter_choices() {
-        assert_eq!(1, AdapterSet::adapter_choices(0, 0));    // gap=0
+        // these are in example #1:
         assert_eq!(1, AdapterSet::adapter_choices(0, 1));    // gap=1
         assert_eq!(2, AdapterSet::adapter_choices(10, 12));  // gap=2
         assert_eq!(4, AdapterSet::adapter_choices(4, 7));    // gap=3
+        // this is in example #2:
         assert_eq!(7, AdapterSet::adapter_choices(45, 49));  // gap=4
-        // following isn't in the example:
+        // these aren't in the examples:
+        assert_eq!(1, AdapterSet::adapter_choices(0, 0));    // gap=0
         assert_eq!(11, AdapterSet::adapter_choices(44, 49)); // gap=5
     }
 
