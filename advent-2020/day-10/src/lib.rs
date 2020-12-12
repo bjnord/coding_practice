@@ -7,7 +7,7 @@ type Result<Adapter> = result::Result<Adapter, Box<dyn error::Error>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Adapter {
-    joltage: i32,
+    joltage: u32,
 }
 
 #[derive(Debug)]
@@ -20,7 +20,7 @@ impl FromStr for Adapter {
     type Err = Box<dyn error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
-        let joltage: i32 = line.parse()?;
+        let joltage: u32 = line.parse()?;
         Ok(Self { joltage })
     }
 }
@@ -28,14 +28,14 @@ impl FromStr for Adapter {
 impl Adapter {
     /// Construct adapter from joltage value.
     #[must_use]
-    pub fn from_joltage(joltage: i32) -> Adapter {
+    pub fn from_joltage(joltage: u32) -> Adapter {
         Adapter { joltage }
     }
 
     /// Return adapter joltage value.
     #[must_use]
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    pub fn joltage(&self) -> i32 {
+    pub fn joltage(&self) -> u32 {
         self.joltage
     }
 
@@ -68,8 +68,8 @@ impl AdapterSet {
     }
 
     #[must_use]
-    pub fn joltages(&self) -> Vec<i32> {
-        let mut values: Vec<i32> = self.adapters
+    pub fn joltages(&self) -> Vec<u32> {
+        let mut values: Vec<u32> = self.adapters
             .iter()
             .map(Adapter::joltage)
             .collect();
@@ -94,7 +94,7 @@ impl AdapterSet {
     pub fn adapter_usage(&self) -> (usize, usize)
     {
         let joltages = self.joltages();
-        let mut acc: i32 = 0;
+        let mut acc: u32 = 0;
         joltages.into_iter().fold((0, 0), |(one, three), j| {
             match j {
                 j if (j - acc) == 1 => { acc += 1; (one + 1, three) },
@@ -118,8 +118,8 @@ impl AdapterSet {
     #[must_use]
     pub fn adapter_arrangements(&self) -> u64 {
         let joltages = self.joltages();
-        let mut start = 0_i32;
-        let mut end = 0_i32;
+        let mut start = 0_u32;
+        let mut end = 0_u32;
         joltages.iter().fold(1_u64, |mut choices, &next| {
             let gap = next - end;
             if gap > 3 {
@@ -136,7 +136,7 @@ impl AdapterSet {
     }
 
     #[allow(clippy::cast_sign_loss)]
-    fn adapter_choices(start: i32, end: i32) -> u64 {
+    fn adapter_choices(start: u32, end: u32) -> u64 {
         if end < start {
             panic!("end < start");
         }
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_read_from_file() {
-        let joltages: Vec<i32> = Adapter::read_from_file("input/example0.txt")
+        let joltages: Vec<u32> = Adapter::read_from_file("input/example0.txt")
             .unwrap()
             .iter()
             .map(Adapter::joltage)
