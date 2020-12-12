@@ -102,6 +102,27 @@ impl SeatLayout {
         seats.iter().filter(|&s| *s == Seat::Occupied).count()
     }
 
+    /// Return count of occupied seats visible from (y, x).
+    #[must_use]
+    pub fn visible_occupied_seats_at(&self, y: i32, x: i32) -> usize {
+        let mut seats: Vec<Seat> = Vec::new();
+        for dy in -1..=1 {
+            for dx in -1..=1 {
+                if dy == 0 && dx == 0 {
+                    continue;
+                }
+                for i in 1..1000 {
+                    let seat = self.seat_at(y + dy * i, x + dx * i);
+                    if (seat != Seat::Floor) {
+                        seats.push(seat);
+                        break;
+                    }
+                }
+            }
+        }
+        seats.iter().filter(|&s| *s == Seat::Occupied).count()
+    }
+
     /// Do one round of seat filling.
     // TODO replace this hack string implementation with an enum one
     #[must_use]
@@ -272,5 +293,31 @@ mod tests {
     #[should_panic]
     fn test_seat_from_bad_char() {
         let _char = Seat::from_char('?');
+    }
+
+    #[test]
+    fn test_visible_occupied_seats() {
+        let layout = SeatLayout::read_from_file("input/vexample1.txt")
+            .unwrap();
+        assert_eq!(8, layout.visible_occupied_seats_at(4, 3));
+    }
+
+    const VIS_ROW_LAYOUT: &'static str = "\
+        .............
+        .L.L.#.#.#.#.
+        .............";
+
+    #[test]
+    fn test_visible_occupied_seats_row() {
+        let layout: SeatLayout = VIS_ROW_LAYOUT.parse().unwrap();
+        assert_eq!(0, layout.visible_occupied_seats_at(1, 1));
+        assert_eq!(1, layout.visible_occupied_seats_at(1, 3));
+    }
+
+    #[test]
+    fn test_visible_occupied_seats_3() {
+        let layout = SeatLayout::read_from_file("input/vexample3.txt")
+            .unwrap();
+        assert_eq!(0, layout.visible_occupied_seats_at(3, 3));
     }
 }
