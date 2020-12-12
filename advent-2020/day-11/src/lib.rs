@@ -91,21 +91,25 @@ impl SeatLayout {
     /// Return count of occupied seats adjacent to (y, x).
     #[must_use]
     pub fn occupied_seats_at(&self, y: i32, x: i32) -> usize {
-        let mut seats: Vec<Seat> = Vec::new();
+        let mut n_occ_seats: usize = 0;
         for dy in -1..=1 {
             for dx in -1..=1 {
-                if dy != 0 || dx != 0 {
-                    seats.push(self.seat_at(y + dy, x + dx));
+                if dy == 0 && dx == 0 {
+                    continue;
+                }
+                let seat = self.seat_at(y + dy, x + dx);
+                if seat == Seat::Occupied {
+                    n_occ_seats += 1;
                 }
             }
         }
-        seats.iter().filter(|&s| *s == Seat::Occupied).count()
+        n_occ_seats
     }
 
     /// Return count of occupied seats visible from (y, x).
     #[must_use]
     pub fn visible_occupied_seats_at(&self, y: i32, x: i32) -> usize {
-        let mut seats: Vec<Seat> = Vec::new();
+        let mut n_occ_seats: usize = 0;
         for dy in -1..=1 {
             for dx in -1..=1 {
                 if dy == 0 && dx == 0 {
@@ -113,14 +117,16 @@ impl SeatLayout {
                 }
                 for i in 1..1000 {
                     let seat = self.seat_at(y + dy * i, x + dx * i);
-                    if (seat != Seat::Floor) {
-                        seats.push(seat);
+                    if seat == Seat::Occupied {
+                        n_occ_seats += 1;
+                    }
+                    if seat != Seat::Floor {
                         break;
                     }
                 }
             }
         }
-        seats.iter().filter(|&s| *s == Seat::Occupied).count()
+        n_occ_seats
     }
 
     /// Do one round of seat filling.
