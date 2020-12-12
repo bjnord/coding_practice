@@ -88,34 +88,21 @@ impl SeatLayout {
         self.seats.iter().filter(|&s| *s == Seat::Occupied).count()
     }
 
-    /// Return count of occupied seats adjacent to (y, x).
+    /// Return count of occupied seats visible from `(y, x)` with radius
+    /// `r`. Using `r=1` returns only occupied seats immediately adjacent
+    /// to `(y, x)`.
     #[must_use]
-    pub fn occupied_seats_at(&self, y: i32, x: i32) -> usize {
-        let mut n_occ_seats: usize = 0;
-        for dy in -1..=1 {
-            for dx in -1..=1 {
-                if dy == 0 && dx == 0 {
-                    continue;
-                }
-                let seat = self.seat_at(y + dy, x + dx);
-                if seat == Seat::Occupied {
-                    n_occ_seats += 1;
-                }
-            }
+    pub fn visible_occupied_seats_at(&self, y: i32, x: i32, r: i32) -> usize {
+        if r < 1 {
+            panic!("radius must be greater than 0");
         }
-        n_occ_seats
-    }
-
-    /// Return count of occupied seats visible from (y, x).
-    #[must_use]
-    pub fn visible_occupied_seats_at(&self, y: i32, x: i32) -> usize {
         let mut n_occ_seats: usize = 0;
         for dy in -1..=1 {
             for dx in -1..=1 {
                 if dy == 0 && dx == 0 {
                     continue;
                 }
-                for i in 1..1000 {
+                for i in 1..=r {
                     let seat = self.seat_at(y + dy * i, x + dx * i);
                     if seat == Seat::Occupied {
                         n_occ_seats += 1;
@@ -141,14 +128,14 @@ impl SeatLayout {
                         s += ".";
                     },
                     Seat::Empty => {
-                        if self.occupied_seats_at(y, x) == 0 {
+                        if self.visible_occupied_seats_at(y, x, 1) == 0 {
                             s += "#";
                         } else {
                             s += "L";
                         }
                     },
                     Seat::Occupied => {
-                        if self.occupied_seats_at(y, x) >= 4 {
+                        if self.visible_occupied_seats_at(y, x, 1) >= 4 {
                             s += "L";
                         } else {
                             s += "#";
@@ -237,14 +224,14 @@ mod tests {
     }
 
     #[test]
-    fn test_occupied_seats_at() {
+    fn test_visible_occupied_seats_at_adjacent() {
         let layout = SeatLayout::read_from_file("input/example1s.txt")
             .unwrap();
-        assert_eq!(1, layout.occupied_seats_at(0, 0));
-        assert_eq!(2, layout.occupied_seats_at(4, 0));
-        assert_eq!(4, layout.occupied_seats_at(2, 1));
-        assert_eq!(0, layout.occupied_seats_at(9, 6));
-        assert_eq!(1, layout.occupied_seats_at(9, 9));
+        assert_eq!(1, layout.visible_occupied_seats_at(0, 0, 1));
+        assert_eq!(2, layout.visible_occupied_seats_at(4, 0, 1));
+        assert_eq!(4, layout.visible_occupied_seats_at(2, 1, 1));
+        assert_eq!(0, layout.visible_occupied_seats_at(9, 6, 1));
+        assert_eq!(1, layout.visible_occupied_seats_at(9, 9, 1));
     }
 
     #[test]
@@ -302,10 +289,10 @@ mod tests {
     }
 
     #[test]
-    fn test_visible_occupied_seats() {
+    fn test_visible_occupied_seats_at() {
         let layout = SeatLayout::read_from_file("input/vexample1.txt")
             .unwrap();
-        assert_eq!(8, layout.visible_occupied_seats_at(4, 3));
+        assert_eq!(8, layout.visible_occupied_seats_at(4, 3, i32::MAX));
     }
 
     const VIS_ROW_LAYOUT: &'static str = "\
@@ -314,16 +301,16 @@ mod tests {
         .............";
 
     #[test]
-    fn test_visible_occupied_seats_row() {
+    fn test_visible_occupied_seats_at_2() {
         let layout: SeatLayout = VIS_ROW_LAYOUT.parse().unwrap();
-        assert_eq!(0, layout.visible_occupied_seats_at(1, 1));
-        assert_eq!(1, layout.visible_occupied_seats_at(1, 3));
+        assert_eq!(0, layout.visible_occupied_seats_at(1, 1, i32::MAX));
+        assert_eq!(1, layout.visible_occupied_seats_at(1, 3, i32::MAX));
     }
 
     #[test]
-    fn test_visible_occupied_seats_3() {
+    fn test_visible_occupied_seats_at_3() {
         let layout = SeatLayout::read_from_file("input/vexample3.txt")
             .unwrap();
-        assert_eq!(0, layout.visible_occupied_seats_at(3, 3));
+        assert_eq!(0, layout.visible_occupied_seats_at(3, 3, i32::MAX));
     }
 }
