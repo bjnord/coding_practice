@@ -32,12 +32,14 @@ pub struct BusSchedule {
 
 impl Bus {
     /// Is referenced `bus` in service?
+    #[must_use]
     pub fn in_service(bus: &&Bus) -> bool {
         bus.in_service
     }
 
     /// Construct from ID string and position. Non-numeric IDs indicate an
     /// out-of-service bus.
+    #[must_use]
     pub fn from_id_pos(id: &str, pos: u32) -> Self {
         let (id, in_service): (u32, bool) = match id.parse() {
             Ok(id) => (id, true),
@@ -99,6 +101,7 @@ impl BusSchedule {
     /// let schedule = BusSchedule::read_from_file("input/example1.txt").unwrap();
     /// assert_eq!((59, 5), schedule.next_bus());
     /// ```
+    #[must_use]
     pub fn next_bus(&self) -> (u32, u32) {
         let maxx = self.busses
             .iter()
@@ -112,6 +115,27 @@ impl BusSchedule {
     fn wait_time(earliest_depart: u32, bus_id: u32) -> (u32, u32) {
         let next_depart = ((earliest_depart / bus_id) + 1) * bus_id;
         (bus_id, next_depart - earliest_depart)
+    }
+
+    /// Find the earliest time at which the busses leave one after the
+    /// other, 1 second apart.
+    #[must_use]
+    pub fn earliest_staggered_time(&self) -> u64 {
+        let cyc: u64 = self.busses.iter().nth(0).unwrap().id as u64;
+        for i in 1_u64..u64::MAX {
+            let t: u64 = cyc * i;
+            let all_ok = self.busses
+                .iter()
+                .filter(Bus::in_service)
+                .all(|bus| {
+                    let rem = (t + u64::from(bus.pos)).rem_euclid(u64::from(bus.id));
+                    rem == 0
+                });
+            if all_ok {
+                return t;
+            }
+        }
+        u64::MAX
     }
 }
 
@@ -144,5 +168,41 @@ mod tests {
     fn test_read_from_file_bad_format() {
         let schedule = BusSchedule::read_from_file("input/bad1.txt");
         assert!(schedule.is_err());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time() {
+        let schedule: BusSchedule = "0\n7,13,x,x,59,x,31,19\n".parse().unwrap();
+        assert_eq!(1068781, schedule.earliest_staggered_time());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time_2() {
+        let schedule: BusSchedule = "0\n17,x,13,19\n".parse().unwrap();
+        assert_eq!(3417, schedule.earliest_staggered_time());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time_3() {
+        let schedule: BusSchedule = "0\n67,7,59,61\n".parse().unwrap();
+        assert_eq!(754018, schedule.earliest_staggered_time());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time_4() {
+        let schedule: BusSchedule = "0\n67,x,7,59,61\n".parse().unwrap();
+        assert_eq!(779210, schedule.earliest_staggered_time());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time_5() {
+        let schedule: BusSchedule = "0\n67,7,x,59,61\n".parse().unwrap();
+        assert_eq!(1261476, schedule.earliest_staggered_time());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time_6() {
+        let schedule: BusSchedule = "0\n1789,37,47,1889\n".parse().unwrap();
+        assert_eq!(1202161486, schedule.earliest_staggered_time());
     }
 }
