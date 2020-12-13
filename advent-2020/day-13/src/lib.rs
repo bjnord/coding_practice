@@ -21,7 +21,7 @@ impl error::Error for BusScheduleError {}
 pub struct Bus {
     pub in_service: bool,
     pub id: u32,
-    pub pos: u32,
+    pub pos: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +41,7 @@ impl Bus {
     /// Construct from ID string and position. Non-numeric IDs indicate an
     /// out-of-service bus.
     #[must_use]
-    pub fn from_id_pos(id: &str, pos: u32) -> Self {
+    pub fn from_id_pos(id: &str, pos: usize) -> Self {
         let (id, in_service): (u32, bool) = match id.parse() {
             Ok(id) => (id, true),
             Err(_) => (0, false),
@@ -59,7 +59,7 @@ impl FromStr for BusSchedule {
         let busses: Vec<Bus> = fields[1]
             .split(',')
             .enumerate()
-            .map(|(pos, id)| Bus::from_id_pos(id, pos as u32))
+            .map(|(pos, id)| Bus::from_id_pos(id, pos))
             .collect();
         Ok(Self { earliest_depart, busses })
     }
@@ -129,7 +129,7 @@ impl BusSchedule {
                 .iter()
                 .filter(Bus::in_service)
                 .all(|bus| {
-                    let rem = (t + u64::from(bus.pos)).rem_euclid(u64::from(bus.id));
+                    let rem = (t + bus.pos as u64).rem_euclid(u64::from(bus.id));
                     rem == 0
                 });
             if all_ok {
