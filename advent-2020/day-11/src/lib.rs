@@ -105,6 +105,7 @@ impl SeatLayout {
         s.parse()
     }
 
+    #[must_use]
     pub fn iter(&self, rules: FillRules) -> SeatLayoutIter {
         SeatLayoutIter {
             layout: self.clone(),
