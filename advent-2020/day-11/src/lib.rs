@@ -77,6 +77,21 @@ impl FromStr for SeatLayout {
     }
 }
 
+pub struct SeatLayoutIter {
+    layout: SeatLayout,
+    rules: FillRules,
+}
+
+impl Iterator for SeatLayoutIter {
+    type Item = SeatLayout;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let prev_layout = self.layout.clone();
+        self.layout = prev_layout.fill_seats(self.rules);
+        if self.layout == prev_layout { None } else { Some(self.layout.clone()) }
+    }
+}
+
 impl SeatLayout {
     /// Construct by reading layout from path. The file should have one
     /// integer per line.
@@ -88,6 +103,13 @@ impl SeatLayout {
     pub fn read_from_file(path: &str) -> Result<SeatLayout> {
         let s: String = fs::read_to_string(path)?;
         s.parse()
+    }
+
+    pub fn iter(&self, rules: FillRules) -> SeatLayoutIter {
+        SeatLayoutIter {
+            layout: self.clone(),
+            rules,
+        }
     }
 
     /// Return `Seat` at (y, x).
