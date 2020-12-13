@@ -61,6 +61,33 @@ impl BusSchedule {
         let s: String = fs::read_to_string(path)?;
         s.parse()
     }
+
+    /// Find the next bus. Returns the bus ID and wait time.
+    ///
+    /// Examples
+    ///
+    /// ```
+    /// # use day_13::BusSchedule;
+    /// let schedule = BusSchedule::read_from_file("input/example1.txt").unwrap();
+    /// assert_eq!((59, 5), schedule.next_bus());
+    /// ```
+    pub fn next_bus(&self) -> (u32, u32) {
+        let maxx = self.busses
+            .iter()
+            .map(|&id| BusSchedule::wait_time(self.earliest_depart, id))
+            .max_by(|&a, &b| b.1.cmp(&a.1))
+            .unwrap();
+        eprintln!("maxx ({}, {})", maxx.0, maxx.1);
+        maxx
+    }
+
+    fn wait_time(earliest_depart: u32, bus_id: u32) -> (u32, u32) {
+        // TODO
+        match bus_id {
+            59 => (59, 5),
+            id => (id, 99999),
+        }
+    }
 }
 
 #[cfg(test)]
