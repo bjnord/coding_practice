@@ -33,6 +33,7 @@ pub struct BusSchedule {
 impl Bus {
     /// Is referenced `bus` in service?
     #[must_use]
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn in_service(bus: &&Bus) -> bool {
         bus.in_service
     }
@@ -53,7 +54,7 @@ impl FromStr for BusSchedule {
     type Err = Box<dyn error::Error>;
 
     fn from_str(block: &str) -> Result<Self> {
-        let fields: Vec<&str> = block.trim().split("\n").take(2).collect();
+        let fields: Vec<&str> = block.trim().split('\n').take(2).collect();
         let earliest_depart: u32 = fields[0].parse()?;
         let busses: Vec<Bus> = fields[1]
             .split(',')
@@ -121,7 +122,7 @@ impl BusSchedule {
     /// other, 1 second apart.
     #[must_use]
     pub fn earliest_staggered_time(&self) -> u64 {
-        let cyc: u64 = self.busses.iter().nth(0).unwrap().id as u64;
+        let cyc = u64::from(self.busses.get(0).unwrap().id);
         for i in 1_u64..u64::MAX {
             let t: u64 = cyc * i;
             let all_ok = self.busses
