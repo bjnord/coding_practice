@@ -27,24 +27,6 @@ pub enum FillRules {
     Tolerant,
 }
 
-impl fmt::Display for SeatLayout {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut s = String::new();
-        for y in 0..self.height {
-            for x in 0..self.width {
-                s += match self.seat_at(y, x) {
-                    Seat::Floor => ".",
-                    Seat::Empty => "L",
-                    Seat::Occupied => "#",
-                    Seat::Void => panic!("unexpected Void in Display"),
-                };
-            }
-            s += "\n";
-        }
-        write!(f, "{}", s)
-    }
-}
-
 impl Seat {
     /// Construct seat from input character.
     #[must_use]
@@ -74,6 +56,24 @@ impl FromStr for SeatLayout {
             .collect();
         let height = (seats.len() as i32) / width;
         Ok(Self { seats, height, width })
+    }
+}
+
+impl fmt::Display for SeatLayout {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut s = String::new();
+        for y in 0..self.height {
+            for x in 0..self.width {
+                s += match self.seat_at(y, x) {
+                    Seat::Floor => ".",
+                    Seat::Empty => "L",
+                    Seat::Occupied => "#",
+                    Seat::Void => panic!("unexpected Void in Display"),
+                };
+            }
+            s += "\n";
+        }
+        write!(f, "{}", s)
     }
 }
 
