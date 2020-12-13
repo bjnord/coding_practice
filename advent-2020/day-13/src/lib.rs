@@ -17,10 +17,34 @@ impl fmt::Display for BusScheduleError {
 
 impl error::Error for BusScheduleError {}
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Bus {
+    pub in_service: bool,
+    pub id: u32,
+    pub pos: u32,
+}
+
 #[derive(Debug, Clone)]
 pub struct BusSchedule {
     earliest_depart: u32,
-    busses: Vec<u32>,
+    busses: Vec<Bus>,
+}
+
+impl Bus {
+    /// Is referenced `bus` in service?
+    pub fn in_service(bus: &&Bus) -> bool {
+        bus.in_service
+    }
+
+    /// Construct from ID string and position. Non-numeric IDs indicate an
+    /// out-of-service bus.
+    pub fn from_id_pos(id: &str, pos: u32) -> Self {
+        let (id, in_service): (u32, bool) = match id.parse() {
+            Ok(id) => (id, true),
+            Err(_) => (0, false),
+        };
+        Self { in_service, id, pos }
+    }
 }
 
 impl FromStr for BusSchedule {
@@ -29,10 +53,10 @@ impl FromStr for BusSchedule {
     fn from_str(block: &str) -> Result<Self> {
         let fields: Vec<&str> = block.trim().split("\n").take(2).collect();
         let earliest_depart: u32 = fields[0].parse()?;
-        let busses: Vec<u32> = fields[1]
+        let busses: Vec<Bus> = fields[1]
             .split(',')
-            .filter(|&id| id != "x")
-            .map(|id| id.parse().unwrap())
+            .enumerate()
+            .map(|(pos, id)| Bus::from_id_pos(id, pos as u32))
             .collect();
         Ok(Self { earliest_depart, busses })
     }
@@ -47,7 +71,7 @@ impl BusSchedule {
 
     /// Return list of busses.
     #[must_use]
-    pub fn busses(&self) -> Vec<u32> {
+    pub fn busses(&self) -> Vec<Bus> {
         self.busses.clone()
     }
 
@@ -62,7 +86,7 @@ impl BusSchedule {
         s.parse()
     }
 
-    /// Find the next bus. Returns the bus ID and wait time.
+    /// Find the next departing bus. Returns the bus ID and wait time.
     ///
     /// Examples
     ///
@@ -74,7 +98,8 @@ impl BusSchedule {
     pub fn next_bus(&self) -> (u32, u32) {
         let maxx = self.busses
             .iter()
-            .map(|&id| BusSchedule::wait_time(self.earliest_depart, id))
+            .filter(Bus::in_service)
+            .map(|bus| BusSchedule::wait_time(self.earliest_depart, bus.id))
             .max_by(|&a, &b| b.1.cmp(&a.1))
             .unwrap();
         eprintln!("maxx ({}, {})", maxx.0, maxx.1);
@@ -95,7 +120,18 @@ mod tests {
     fn test_read_from_file() {
         let schedule = BusSchedule::read_from_file("input/example1.txt").unwrap();
         assert_eq!(939, schedule.earliest_depart());
-        assert_eq!(vec![7, 13, 59, 31, 19], schedule.busses());
+        assert_eq!(vec![
+                Bus { in_service: true,  id: 7,  pos: 0 },
+                Bus { in_service: true,  id: 13, pos: 1 },
+                Bus { in_service: false, id: 0,  pos: 2 },
+                Bus { in_service: false, id: 0,  pos: 3 },
+                Bus { in_service: true,  id: 59, pos: 4 },
+                Bus { in_service: false, id: 0,  pos: 5 },
+                Bus { in_service: true,  id: 31, pos: 6 },
+                Bus { in_service: true,  id: 19, pos: 7 },
+            ],
+            schedule.busses()
+        );
     }
 
     #[test]
