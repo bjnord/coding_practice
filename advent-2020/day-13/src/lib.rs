@@ -69,10 +69,14 @@ impl BusSchedule {
         self.earliest_depart
     }
 
-    /// Return list of busses.
+    /// Return list of in-service busses.
     #[must_use]
-    pub fn busses(&self) -> Vec<Bus> {
-        self.busses.clone()
+    pub fn in_service_busses(&self) -> Vec<Bus> {
+        self.busses
+            .iter()
+            .filter(Bus::in_service)
+            .copied()
+            .collect()
     }
 
     /// Read bus schedule from file.
@@ -123,14 +127,11 @@ mod tests {
         assert_eq!(vec![
                 Bus { in_service: true,  id: 7,  pos: 0 },
                 Bus { in_service: true,  id: 13, pos: 1 },
-                Bus { in_service: false, id: 0,  pos: 2 },
-                Bus { in_service: false, id: 0,  pos: 3 },
                 Bus { in_service: true,  id: 59, pos: 4 },
-                Bus { in_service: false, id: 0,  pos: 5 },
                 Bus { in_service: true,  id: 31, pos: 6 },
                 Bus { in_service: true,  id: 19, pos: 7 },
             ],
-            schedule.busses()
+            schedule.in_service_busses()
         );
     }
 
