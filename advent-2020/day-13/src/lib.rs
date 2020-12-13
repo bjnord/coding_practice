@@ -106,7 +106,6 @@ impl BusSchedule {
             .map(|bus| BusSchedule::wait_time(self.earliest_depart, bus.id))
             .max_by(|&a, &b| b.1.cmp(&a.1))
             .unwrap();
-        eprintln!("maxx ({}, {})", maxx.0, maxx.1);
         maxx
     }
 
