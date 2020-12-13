@@ -122,21 +122,50 @@ impl BusSchedule {
     /// other, 1 second apart.
     #[must_use]
     pub fn earliest_staggered_time(&self) -> u64 {
-        let cyc = u64::from(self.busses.get(0).unwrap().id);
-        for i in 1_u64..u64::MAX {
-            let t: u64 = cyc * i;
-            let all_ok = self.busses
-                .iter()
-                .filter(Bus::in_service)
-                .all(|bus| {
-                    let rem = (t + bus.pos as u64).rem_euclid(u64::from(bus.id));
-                    rem == 0
-                });
-            if all_ok {
-                return t;
+        let mut i = self.busses.iter().filter(Bus::in_service);
+        let first = i.next().unwrap();
+        //let mut this_modu: u64;
+        //let mut this_rem: u64;
+        let mut next_modu = u64::from(first.id);
+        let mut next_rem = first.pos as u64;
+        let mut next_mult = next_modu;
+        let mut next_add = next_rem;
+        for bus in i {
+            //eprintln!("nextmod{} nextrem{} bus = {:?}", next_modu, next_rem, bus);
+            //this_modu = next_modu;
+            //this_rem = next_rem;
+            next_modu = u64::from(bus.id);
+            next_rem = bus.pos as u64;
+            let sol_rem = BusSchedule::solve_congruence(next_mult, next_add, next_rem, next_modu);
+            //println!("loop       j={} mod={}", sol_rem, next_modu);
+            let tuple = BusSchedule::substitute_congruence(next_modu, sol_rem, next_mult, next_add);
+            next_mult = tuple.0;
+            next_add = tuple.1;
+            //println!("           this=(m{}, r{}) next=(m{}, a{})", this_modu, this_rem, next_mult, next_add);
+        }
+        //println!("solution   m{} - r{} = {}", next_mult, next_add, next_mult - next_add);
+        next_mult - next_add
+    }
+
+    /// Find reverse-modulo of congruence. See
+    /// [this page](https://brilliant.org/wiki/chinese-remainder-theorem/).
+    #[must_use]
+    pub fn solve_congruence(mult: u64, add: u64, rem: u64, modu: u64) -> u64 {
+        for j in 0..u64::MAX {
+            if (mult * j + add).rem_euclid(modu) == rem {
+                return j;
             }
         }
         u64::MAX
+    }
+
+    /// Substitute one congruence into another. See
+    /// [this page](https://brilliant.org/wiki/chinese-remainder-theorem/).
+    #[must_use]
+    pub fn substitute_congruence(mult_inner: u64, add_inner: u64, mult: u64, add: u64) -> (u64, u64) {
+        let new_mult = mult * mult_inner;
+        let new_add = mult * add_inner + add;
+        (new_mult, new_add)
     }
 }
 
