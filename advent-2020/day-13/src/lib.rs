@@ -82,11 +82,8 @@ impl BusSchedule {
     }
 
     fn wait_time(earliest_depart: u32, bus_id: u32) -> (u32, u32) {
-        // TODO
-        match bus_id {
-            59 => (59, 5),
-            id => (id, 99999),
-        }
+        let next_depart = ((earliest_depart / bus_id) + 1) * bus_id;
+        (bus_id, next_depart - earliest_depart)
     }
 }
 
