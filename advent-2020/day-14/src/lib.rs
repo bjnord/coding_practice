@@ -133,6 +133,19 @@ impl Memory {
     fn new() -> Memory {
         Memory { cells: HashMap::new() }
     }
+
+    /// Write `value` to `address` cell in memory.
+    fn write(&mut self, address: u64, value: u64) {
+        self.cells.insert(address, value);
+    }
+
+    /// Return sum of all cells in memory.
+    #[must_use]
+    fn sum(&self) -> u64 {
+        self.cells
+            .values()
+            .sum()
+    }
 }
 
 #[cfg(test)]
@@ -178,5 +191,14 @@ mod tests {
     fn test_parse_instruction_bad_mem_value() {
         let instruction = "mem[8] = X11".parse::<Instruction>();
         assert!(instruction.is_err());
+    }
+
+    #[test]
+    fn test_memory() {
+        let mut memory = Memory::new();
+        memory.write(6, 1);
+        memory.write(2, 2);
+        memory.write(9, 6);
+        assert_eq!(9u64, memory.sum());
     }
 }
