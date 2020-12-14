@@ -5,66 +5,66 @@ use std::fs;
 use std::result;
 use std::str::FromStr;
 
-type Result<Instruction> = result::Result<Instruction, Box<dyn error::Error>>;
+type Result<InstructionV1> = result::Result<InstructionV1, Box<dyn error::Error>>;
 
 #[derive(Debug, Clone)]
-struct InstructionError(String);
+struct InstructionV1Error(String);
 
-impl fmt::Display for InstructionError {
+impl fmt::Display for InstructionV1Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Instruction error: {}", self.0)
+        write!(f, "InstructionV1 error: {}", self.0)
     }
 }
 
-impl error::Error for InstructionError {}
+impl error::Error for InstructionV1Error {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum InstructionValue {
+pub enum InstructionV1Value {
     Mask { or: u64, and: u64 },
     Mem { address: u64, value: u64 },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Instruction {
-    instruction: InstructionValue,
+pub struct InstructionV1 {
+    instruction: InstructionV1Value,
 }
 
 #[derive(Debug)]
-pub struct Program {
-    instructions: Vec<Instruction>,
+pub struct ProgramV1 {
+    instructions: Vec<InstructionV1>,
     memory: Memory,
     or_mask: u64,
     and_mask: u64,
 }
 
-impl FromStr for Instruction {
+impl FromStr for InstructionV1 {
     type Err = Box<dyn error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let instruction = match &line[0..3] {
             "mas" => {
                 let bitmap = scan_fmt!(line, "mask = {}", String)?;
-                let (or, and) = Instruction::parse_mask(&bitmap)?;
-                InstructionValue::Mask { or, and }
+                let (or, and) = InstructionV1::parse_mask(&bitmap)?;
+                InstructionV1Value::Mask { or, and }
             },
             "mem" => {
                 let (address, value) = scan_fmt!(line, "mem[{d}] = {d}", u64, u64)?;
-                InstructionValue::Mem { address, value }
+                InstructionV1Value::Mem { address, value }
             },
             _ => {
                 let e = format!("invalid instruction [{}]", line);
-                return Err(InstructionError(e).into());
+                return Err(InstructionV1Error(e).into());
             }
         };
-        Ok(Instruction { instruction })
+        Ok(InstructionV1 { instruction })
     }
 }
 
-impl Instruction {
+impl InstructionV1 {
     /// Return instruction value.
     #[cfg(test)]
     #[must_use]
-    fn instruction(&self) -> InstructionValue {
+    fn instruction(&self) -> InstructionV1Value {
         self.instruction
     }
 
@@ -74,7 +74,7 @@ impl Instruction {
     ///
     /// Returns `Err` if the input file cannot be opened, or if a line is
     /// found with an invalid instruction format.
-    pub fn read_from_file(path: &str) -> Result<Vec<Instruction>> {
+    pub fn read_from_file(path: &str) -> Result<Vec<InstructionV1>> {
         let s: String = fs::read_to_string(path)?;
         s.lines().map(str::parse).collect()
     }
@@ -88,8 +88,8 @@ impl Instruction {
     /// # Examples
     ///
     /// ```
-    /// # use crate::program_v1::Instruction;
-    /// let (or, and) = Instruction::parse_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXX0X1X1X0X").unwrap();
+    /// # use crate::program_v1::InstructionV1;
+    /// let (or, and) = InstructionV1::parse_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXX0X1X1X0X").unwrap();
     /// assert_eq!(or, 0x000000028);
     /// assert_eq!(and, 0xfffffff7d);
     /// ```
@@ -102,14 +102,14 @@ impl Instruction {
     }
 }
 
-impl Program {
+impl ProgramV1 {
     /// Return instruction values.
     #[cfg(test)]
     #[must_use]
-    fn instruction_values(&self) -> Vec<InstructionValue> {
+    fn instruction_values(&self) -> Vec<InstructionV1Value> {
         self.instructions
             .iter()
-            .map(Instruction::instruction)
+            .map(InstructionV1::instruction)
             .collect()
     }
 
@@ -131,8 +131,8 @@ impl Program {
     ///
     /// Returns `Err` if the input file cannot be opened, or if a line is
     /// found with an invalid instruction format.
-    pub fn read_from_file(path: &str) -> Result<Program> {
-        let instructions = Instruction::read_from_file(path)?;
+    pub fn read_from_file(path: &str) -> Result<ProgramV1> {
+        let instructions = InstructionV1::read_from_file(path)?;
         Ok(Self { instructions, memory: Memory::new(), or_mask: 0, and_mask: 0 })
     }
 
@@ -140,11 +140,11 @@ impl Program {
     pub fn run(&mut self) {
         for inst in &self.instructions {
             match inst.instruction {
-                InstructionValue::Mask { or, and } => {
+                InstructionV1Value::Mask { or, and } => {
                     self.or_mask = or;
                     self.and_mask = and;
                 },
-                InstructionValue::Mem { address, value } => {
+                InstructionV1Value::Mem { address, value } => {
                     self.memory.write(address, self.masked_value(value));
                 },
             }
@@ -158,48 +158,48 @@ mod tests {
 
     #[test]
     fn test_read_from_file() {
-        let program: Program = Program::read_from_file("input/example1.txt").unwrap();
+        let program: ProgramV1 = ProgramV1::read_from_file("input/example1.txt").unwrap();
         assert_eq!(vec![
-            InstructionValue::Mask { or: 0x000000040, and: 0xffffffffd },
-            InstructionValue::Mem { address: 8, value: 11 },
-            InstructionValue::Mem { address: 7, value: 101 },
-            InstructionValue::Mem { address: 8, value: 0 },
+            InstructionV1Value::Mask { or: 0x000000040, and: 0xffffffffd },
+            InstructionV1Value::Mem { address: 8, value: 11 },
+            InstructionV1Value::Mem { address: 7, value: 101 },
+            InstructionV1Value::Mem { address: 8, value: 0 },
         ], program.instruction_values());
     }
 
     #[test]
     fn test_read_from_file_no_file() {
-        let instructions = Instruction::read_from_file("input/example99.txt");
+        let instructions = InstructionV1::read_from_file("input/example99.txt");
         assert!(instructions.is_err());
     }
 
     #[test]
     fn test_read_from_file_bad_file() {
-        let instructions = Instruction::read_from_file("input/bad1.txt");
+        let instructions = InstructionV1::read_from_file("input/bad1.txt");
         assert!(instructions.is_err());
     }
 
     #[test]
     fn test_parse_instruction_bad_mask() {
-        let instruction = "mask = XXXXYXXXXXXXYXXXXXXXYXXXXXXXYXXXX0X1".parse::<Instruction>();
+        let instruction = "mask = XXXXYXXXXXXXYXXXXXXXYXXXXXXXYXXXX0X1".parse::<InstructionV1>();
         assert!(instruction.is_err());
     }
 
     #[test]
     fn test_parse_instruction_bad_mem_address() {
-        let instruction = "mem[Y8] = 11".parse::<Instruction>();
+        let instruction = "mem[Y8] = 11".parse::<InstructionV1>();
         assert!(instruction.is_err());
     }
 
     #[test]
     fn test_parse_instruction_bad_mem_value() {
-        let instruction = "mem[8] = X11".parse::<Instruction>();
+        let instruction = "mem[8] = X11".parse::<InstructionV1>();
         assert!(instruction.is_err());
     }
 
     #[test]
     fn test_program_run() {
-        let mut program: Program = Program::read_from_file("input/example1.txt").unwrap();
+        let mut program: ProgramV1 = ProgramV1::read_from_file("input/example1.txt").unwrap();
         program.run();
         eprintln!("program = {:#?}", program);
         assert_eq!(165u64, program.memory_sum());
