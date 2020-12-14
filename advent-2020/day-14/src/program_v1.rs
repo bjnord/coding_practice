@@ -1,4 +1,4 @@
-use crate::memory::Memory;
+use super::memory::Memory;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -61,14 +61,13 @@ impl FromStr for InstructionV1 {
 }
 
 impl InstructionV1 {
-    /// Return instruction value.
     #[cfg(test)]
     #[must_use]
     fn instruction(&self) -> InstructionV1Value {
         self.instruction
     }
 
-    /// Read instructions from `path`.
+    /// Read list of instructions from file at `path`.
     ///
     /// # Errors
     ///
@@ -88,10 +87,10 @@ impl InstructionV1 {
     /// # Examples
     ///
     /// ```
-    /// # use crate::program_v1::InstructionV1;
+    /// # use day_14::program_v1::InstructionV1;
     /// let (or, and) = InstructionV1::parse_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXX0X1X1X0X").unwrap();
-    /// assert_eq!(or, 0x000000028);
-    /// assert_eq!(and, 0xfffffff7d);
+    /// assert_eq!(0x000000028, or);
+    /// assert_eq!(0xfffffff7d, and);
     /// ```
     pub fn parse_mask(bitmap: &str) -> Result<(u64, u64)> {
         let or_bitmap = str::replace(bitmap, "X", "0");
@@ -103,7 +102,6 @@ impl InstructionV1 {
 }
 
 impl ProgramV1 {
-    /// Return instruction values.
     #[cfg(test)]
     #[must_use]
     fn instruction_values(&self) -> Vec<InstructionV1Value> {
@@ -119,13 +117,13 @@ impl ProgramV1 {
         (value & self.and_mask) | self.or_mask
     }
 
-    /// Return sum of all memory cells.
+    /// Return sum of all memory cell values.
     #[must_use]
     pub fn memory_sum(&self) -> u64 {
         self.memory.sum()
     }
 
-    /// Construct by reading instructions from path.
+    /// Construct by reading instructions from file at `path`.
     ///
     /// # Errors
     ///

@@ -61,14 +61,13 @@ impl FromStr for InstructionV2 {
 }
 
 impl InstructionV2 {
-    /// Return instruction value.
     #[cfg(test)]
     #[must_use]
     fn instruction(&self) -> InstructionV2Value {
         self.instruction.clone()
     }
 
-    /// Read instructions from file at `path`.
+    /// Read list of instructions from file at `path`.
     ///
     /// # Errors
     ///
@@ -79,7 +78,7 @@ impl InstructionV2 {
         s.lines().map(str::parse).collect()
     }
 
-    /// Read instructions from `input` string.
+    /// Read list of instructions from `input` string.
     ///
     /// # Errors
     ///
@@ -94,6 +93,15 @@ impl InstructionV2 {
     /// # Errors
     ///
     /// Returns `Err` if the bitmask string is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_14::program_v2::InstructionV2;
+    /// let (or, float) = InstructionV2::parse_mask("00000000000000000000000000X1011X100X").unwrap();
+    /// assert_eq!(0x000000168, or);
+    /// assert_eq!(vec![9, 4, 0], float);
+    /// ```
     pub fn parse_mask(bitmap: &str) -> Result<(u64, Vec<usize>)> {
         let or_bitmap = str::replace(bitmap, "X", "0");
         let or_mask = u64::from_str_radix(&or_bitmap, 2)?;
@@ -106,7 +114,6 @@ impl InstructionV2 {
 }
 
 impl ProgramV2 {
-    /// Return instruction values.
     #[cfg(test)]
     #[must_use]
     fn instruction_values(&self) -> Vec<InstructionV2Value> {
@@ -145,7 +152,7 @@ impl ProgramV2 {
         addresses
     }
 
-    /// Return sum of all memory cells.
+    /// Return sum of all memory cell values.
     #[must_use]
     pub fn memory_sum(&self) -> u64 {
         self.memory.sum()
@@ -234,13 +241,6 @@ mod tests {
     fn test_parse_instruction_bad_mem_value() {
         let instruction = "mem[8] = X11".parse::<InstructionV2>();
         assert!(instruction.is_err());
-    }
-
-    #[test]
-    fn test_parse_mask() {
-        let (or, float) = InstructionV2::parse_mask("00000000000000000000000000X1011X100X").unwrap();
-        assert_eq!(or, 0x000000168);
-        assert_eq!(vec![9, 4, 0], float);
     }
 
     #[test]

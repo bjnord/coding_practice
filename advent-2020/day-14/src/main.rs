@@ -1,11 +1,5 @@
-#[macro_use] extern crate scan_fmt;
-
-mod memory;
-mod program_v1;
-mod program_v2;
-
-use crate::program_v1::ProgramV1;
-use crate::program_v2::ProgramV2;
+use day_14::program_v1::ProgramV1;
+use day_14::program_v2::ProgramV2;
 use std::time::Instant;
 
 fn main() {
