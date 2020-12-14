@@ -117,6 +117,18 @@ impl Program {
             .collect()
     }
 
+    /// Return `value` with OR and AND masks applied.
+    #[must_use]
+    pub fn masked_value(&self, value: u64) -> u64 {
+        (value & self.and_mask) | self.or_mask
+    }
+
+    /// Return sum of all memory cells.
+    #[must_use]
+    pub fn memory_sum(&self) -> u64 {
+        self.memory.sum()
+    }
+
     /// Construct by reading instructions from path.
     ///
     /// # Errors
@@ -126,6 +138,21 @@ impl Program {
     pub fn read_from_file(path: &str) -> Result<Program> {
         let instructions = Instruction::read_from_file(path)?;
         Ok(Self { instructions, memory: Memory::new(), or_mask: 0, and_mask: 0 })
+    }
+
+    /// Run program.
+    pub fn run(&mut self) {
+        for inst in &self.instructions {
+            match inst.instruction {
+                InstructionValue::Mask { or, and } => {
+                    self.or_mask = or;
+                    self.and_mask = and;
+                },
+                InstructionValue::Mem { address, value } => {
+                    self.memory.write(address, self.masked_value(value));
+                },
+            }
+        }
     }
 }
 
@@ -200,5 +227,13 @@ mod tests {
         memory.write(2, 2);
         memory.write(9, 6);
         assert_eq!(9u64, memory.sum());
+    }
+
+    #[test]
+    fn test_program_run() {
+        let mut program: Program = Program::read_from_file("input/example1.txt").unwrap();
+        program.run();
+        eprintln!("program = {:#?}", program);
+        assert_eq!(165u64, program.memory_sum());
     }
 }
