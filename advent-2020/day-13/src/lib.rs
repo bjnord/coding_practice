@@ -122,7 +122,9 @@ impl BusSchedule {
     /// other, 1 second apart.
     #[must_use]
     pub fn earliest_staggered_time(&self) -> u64 {
-        let mut i = self.busses.iter().filter(Bus::in_service);
+        let mut busses = self.in_service_busses();
+        busses.sort_by(|a, b| b.id.cmp(&a.id));
+        let mut i = busses.iter();
         let first = i.next().unwrap();
         //let mut this_modu: u64;
         //let mut this_rem: u64;
@@ -131,17 +133,22 @@ impl BusSchedule {
         let mut next_mult = next_modu;
         let mut next_add = next_rem;
         for bus in i {
-            //eprintln!("nextmod{} nextrem{} bus = {:?}", next_modu, next_rem, bus);
+            //eprintln!("bus = {:?}", next_modu, next_rem, bus);
             //this_modu = next_modu;
             //this_rem = next_rem;
             next_modu = u64::from(bus.id);
             next_rem = bus.pos as u64;
             let sol_rem = BusSchedule::solve_congruence(next_mult, next_add, next_rem, next_modu);
-            //println!("loop       j={} mod={}", sol_rem, next_modu);
+            //println!("    this=(m{}, r{}) next=(m{}, r{}) acc(mul{}, add{}) sol={}", this_modu, this_rem, next_modu, next_rem, next_mult, next_add, sol_rem);
+
+            //let stuple = egcd(next_mult as i64, next_add as i64);
+            //let some = something(stuple.1, next_modu as i64);
+            //let selse = something_else(stuple.1, next_modu as i64);
+
             let tuple = BusSchedule::substitute_congruence(next_modu, sol_rem, next_mult, next_add);
             next_mult = tuple.0;
             next_add = tuple.1;
-            //println!("           this=(m{}, r{}) next=(m{}, a{})", this_modu, this_rem, next_mult, next_add);
+            //println!("        next_acc(mul{}, add{}) egcd(gcd={} x={} y={}) some={}/{}", next_mult, next_add, stuple.0, stuple.1, stuple.2, some, selse);
         }
         //println!("solution   m{} - r{} = {}", next_mult, next_add, next_mult - next_add);
         next_mult - next_add
@@ -167,6 +174,51 @@ impl BusSchedule {
         let new_add = mult * add_inner + add;
         (new_mult, new_add)
     }
+}
+
+// see <https://brilliant.org/wiki/extended-euclidean-algorithm/>
+//
+// def egcd(a, b):
+//     x,y, u,v = 0,1, 1,0
+//     while a != 0:
+//         q, r = b//a, b%a
+//         m, n = x-u*q, y-v*q
+//         b,a, x,y, u,v = a,r, u,v, m,n
+//     gcd = b
+//     return gcd, x, y
+pub fn egcd(a0: i64, b0: i64) -> (i64, i64, i64) {
+    let mut a = a0;
+    let mut b = b0;
+    let mut x = 0_i64;
+    let mut y = 1_i64;
+    let mut u = 1_i64;
+    let mut v = 0_i64;
+    while a != 0 {
+        let q = b / a;
+        let r = b.rem_euclid(a);
+        let m = x - u * q;
+        let n = y - v * q;
+        b = a;
+        a = r;
+        x = u;
+        y = v;
+        u = m;
+        v = n;
+    }
+    let gcd = b;
+    (gcd, x, y)
+}
+
+pub fn something(x: i64, m: i64) -> i64 {
+    (m - x).rem_euclid(m)
+}
+
+// see <https://cp-algorithms.com/algebra/module-inverse.html>
+pub fn something_else(x: i64, m: i64) -> i64 {
+    // "The resulting x from the extended Euclidean algorithm may be negative,
+    // so x % m might also be negative, and we first have to add m to make it
+    // positive."
+    ((m - x).rem_euclid(m) + m).rem_euclid(m)
 }
 
 #[cfg(test)]
@@ -234,5 +286,11 @@ mod tests {
     fn test_earliest_staggered_time_6() {
         let schedule: BusSchedule = "0\n1789,37,47,1889\n".parse().unwrap();
         assert_eq!(1202161486, schedule.earliest_staggered_time());
+    }
+
+    #[test]
+    fn test_earliest_staggered_time_briliant() {
+        let schedule: BusSchedule = "0\nx,3,x,x,5,x,7\n".parse().unwrap();
+        assert_eq!(71, schedule.earliest_staggered_time());
     }
 }

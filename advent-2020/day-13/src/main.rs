@@ -1,8 +1,9 @@
-use day_13::BusSchedule;
+use day_13::{BusSchedule, egcd, something};
 use std::time::Instant;
 
 fn main() {
     part1();
+    solve_via_egcd();
     part2();
 }
 
@@ -84,4 +85,29 @@ fn solve_brilliant_2() {
     let schedule: BusSchedule = "0\nx,3,x,x,5,x,7\n".parse().unwrap();
     let answer = schedule.earliest_staggered_time();
     println!("solution   {}", answer);
+}
+
+fn solve_via_egcd() {
+    let mut tuple = egcd(1432, 123211);
+    println!("x={} y={} gcd={}", tuple.1, tuple.2, tuple.0);
+    println!("expect x=-22973 y=267");
+    println!();
+
+    tuple = egcd(7, 6);
+    let mut some = something(tuple.1, 5);
+    println!("x={} y={} gcd={} some={}", tuple.1, tuple.2, tuple.0, some);
+    println!("expect gcd=1 some={}", BusSchedule::solve_congruence(7, 6, 4, 5));
+    println!();
+
+    tuple = egcd(35, 34);
+    some = something(tuple.1, 1);
+    println!("x={} y={} gcd={} some={}", tuple.1, tuple.2, tuple.0, some);
+    println!("expect gcd=1 some={}", BusSchedule::solve_congruence(35, 34, 1, 3));
+    println!();
+
+    tuple = egcd(105, 34);
+    some = something(tuple.1, 1);
+    println!("x={} y={} gcd={} some={}", tuple.1, tuple.2, tuple.0, some);
+    println!("expect gcd=1 some={}", BusSchedule::solve_congruence(105, 34, 1, 3));
+    println!();
 }
