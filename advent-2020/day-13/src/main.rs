@@ -25,7 +25,7 @@ fn part2() {
     let gen_time = start.elapsed();
     let answer = schedule.earliest_staggered_time();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> _ expected", answer);
+    println!("Day 1 - Part 2 : {} <=> 783685719679632 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

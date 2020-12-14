@@ -158,6 +158,8 @@ timestamp will be larger than `100000000000000`!
 **What is the earliest timestamp such that all of the listed bus IDs
 depart at offsets matching their positions in the list?**
 
+Your puzzle answer was `783685719679632`.
+
 ### Part Two Design
 
 I noticed that all the bus IDs in the examples and my puzzle input are prime. I was able to create a brute-force solver that works for all the examples (but as expected is too slow for the puzzle input). I fiddled around a bit with cycles offset by N, but I quickly realized this was a math thing that I wasn't going to figure out on my own.
@@ -166,6 +168,6 @@ I looked at Reddit just enough to see that the [Chinese Remainder Theorem](https
 
 The article also mentions ["Euclid's extended algorithm"](https://brilliant.org/wiki/extended-euclidean-algorithm/) which is apparently a way to work backwards, a sort of reverse-modulo. I found [this page on Modular Inverse](https://cp-algorithms.com/algebra/module-inverse.html) which shows how EGCD can solve `ax + my = egcd(a, m) = 1` which looks like exactly what I needed. But after a few more hours, I couldn't get it to work (see commit `fd684f9` in all its ugliness).
 
-At that point I gave up and grabbed the [Rust CRT/EGCD implementation at Rosetta Code](https://rosettacode.org/wiki/Chinese_remainder_theorem#Rust). It looks close to what I was doing, except theirs actually works. It took less than 5 minutes to implement. I guess I'll give myself partial credit for being "close".
+At that point I gave up and grabbed the [Rust CRT/EGCD implementation at Rosetta Code](https://rosettacode.org/wiki/Chinese_remainder_theorem#Rust). It looks close to what I was doing, except theirs actually works. It took less than 5 minutes to implement, and completes the puzzle input in 3.5 microseconds. I guess I'll give myself partial credit for being "close".
 
 I love Advent of Code, but the one aspect that's been consistently not-fun is the frustration of spending hours trying and failing to code my own implementation of mathematical puzzles with known algorithms. I wish I was better at math.
