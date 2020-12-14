@@ -1,5 +1,4 @@
-#[macro_use] extern crate scan_fmt;
-use std::collections::HashMap;
+use crate::memory::Memory;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -28,11 +27,6 @@ pub enum InstructionValue {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Instruction {
     instruction: InstructionValue,
-}
-
-#[derive(Debug)]
-struct Memory {
-    cells: HashMap<u64, u64>,
 }
 
 #[derive(Debug)]
@@ -68,8 +62,9 @@ impl FromStr for Instruction {
 
 impl Instruction {
     /// Return instruction value.
+    #[cfg(test)]
     #[must_use]
-    pub fn instruction(&self) -> InstructionValue {
+    fn instruction(&self) -> InstructionValue {
         self.instruction
     }
 
@@ -93,7 +88,7 @@ impl Instruction {
     /// # Examples
     ///
     /// ```
-    /// # use day_14::Instruction;
+    /// # use crate::program_v1::Instruction;
     /// let (or, and) = Instruction::parse_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXX0X1X1X0X").unwrap();
     /// assert_eq!(or, 0x000000028);
     /// assert_eq!(and, 0xfffffff7d);
@@ -109,8 +104,9 @@ impl Instruction {
 
 impl Program {
     /// Return instruction values.
+    #[cfg(test)]
     #[must_use]
-    pub fn instruction_values(&self) -> Vec<InstructionValue> {
+    fn instruction_values(&self) -> Vec<InstructionValue> {
         self.instructions
             .iter()
             .map(Instruction::instruction)
@@ -153,25 +149,6 @@ impl Program {
                 },
             }
         }
-    }
-}
-
-impl Memory {
-    fn new() -> Memory {
-        Memory { cells: HashMap::new() }
-    }
-
-    /// Write `value` to `address` cell in memory.
-    fn write(&mut self, address: u64, value: u64) {
-        self.cells.insert(address, value);
-    }
-
-    /// Return sum of all cells in memory.
-    #[must_use]
-    fn sum(&self) -> u64 {
-        self.cells
-            .values()
-            .sum()
     }
 }
 
@@ -218,15 +195,6 @@ mod tests {
     fn test_parse_instruction_bad_mem_value() {
         let instruction = "mem[8] = X11".parse::<Instruction>();
         assert!(instruction.is_err());
-    }
-
-    #[test]
-    fn test_memory() {
-        let mut memory = Memory::new();
-        memory.write(6, 1);
-        memory.write(2, 2);
-        memory.write(9, 6);
-        assert_eq!(9u64, memory.sum());
     }
 
     #[test]

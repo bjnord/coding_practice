@@ -1,4 +1,9 @@
-use day_14::Program;
+#[macro_use] extern crate scan_fmt;
+
+mod memory;
+mod program_v1;
+
+use crate::program_v1::Program;
 use std::time::Instant;
 
 fn main() {
