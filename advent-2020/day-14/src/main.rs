@@ -2,8 +2,10 @@
 
 mod memory;
 mod program_v1;
+mod program_v2;
 
 use crate::program_v1::ProgramV1;
+use crate::program_v2::ProgramV2;
 use std::time::Instant;
 
 fn main() {
@@ -27,11 +29,12 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    //let program = ProgramV2::read_from_file("input/input.txt").unwrap();
+    let mut program = ProgramV2::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    program.run();
+    let sum = program.memory_sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 1 - Part 2 : {} <=> _ expected", sum);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
