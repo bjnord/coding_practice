@@ -119,13 +119,30 @@ impl ProgramV2 {
     /// Return all combinations of `address` with OR and float masks applied.
     #[must_use]
     pub fn masked_addresses(&self, address: u64) -> Vec<u64> {
-        let _addr = address | self.or_mask;
-        // TODO
-        match address {
-            42 => vec![26, 27, 58, 59],
-            26 => vec![16, 17, 18, 19, 24, 25, 26, 27],
-            _ => vec![],
+        let addr = address | self.or_mask;
+        let mut addresses: Vec<u64> = Vec::new();
+        // there will be 2^N combinations of N `float_mask` bits
+        // (combinations indexed as `ci`):
+        for ci in 0u64..2u64.pow(self.float_mask.len() as u32) {
+            let masked_addr = self.float_mask
+                .iter()
+                .enumerate()
+                // do the N `float_mask` bit flips for this combination
+                // (mask bit N indexed as `mn`):
+                .fold(addr, |addr, (mn, bit)| {
+                    // e.g. `float_mask` `bit==9` yields `bitmask=0x200`:
+                    let bitmask: u64 = 2u64.pow(*bit as u32);
+                    // check whether bit x/N is clear/set in this **combo**,
+                    // then clear/set corresponding mask bit in **address**:
+                    if (ci & 2u64.pow(mn as u32)) == 0 {
+                        addr & !bitmask
+                    } else {
+                        addr | bitmask
+                    }
+                });
+            addresses.push(masked_addr)
         }
+        addresses
     }
 
     /// Return sum of all memory cells.
@@ -237,13 +254,13 @@ mod tests {
     fn test_masked_addresses() {
         let mut program = ProgramV2::from_input("mask = 000000000000000000000000000000X1001X").unwrap();
         program.run();
-        assert_eq!(vec![26, 27, 58, 59], program.masked_addresses(42));
+        assert_eq!(vec![26, 58, 27, 59], program.masked_addresses(42));
     }
 
     #[test]
     fn test_masked_addresses_2() {
         let mut program = ProgramV2::from_input("mask = 00000000000000000000000000000000X0XX").unwrap();
         program.run();
-        assert_eq!(vec![16, 17, 18, 19, 24, 25, 26, 27], program.masked_addresses(26));
+        assert_eq!(vec![16, 24, 18, 26, 17, 25, 19, 27], program.masked_addresses(26));
     }
 }
