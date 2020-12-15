@@ -2,21 +2,24 @@ pub struct Game { }
 
 impl Game {
     /// Return `n`th number spoken, given initial `numbers`.
-    pub fn play(numbers: &[u32], n_turns: u32) -> u32 {
+    //
+    // Vec<u32> is significantly faster than Vec<usize>, so we live with
+    // the ugly "as" casts
+    pub fn play(numbers: &[u32], n_turns: usize) -> u32 {
         // spoken numbers always < number of turns, so this works:
-        let mut spoken_turn: Vec<u32> = vec![0; n_turns as usize];
+        let mut spoken_turn: Vec<u32> = vec![0; n_turns];
         for (t, &seed) in numbers.iter().enumerate() {
             spoken_turn[seed as usize] = (t + 1) as u32;
         }
-        let start_t: u32 = (numbers.len() + 1) as u32;
+        let start_t: usize = numbers.len() + 1;
         let mut last_spoken: u32 = *numbers.last().unwrap();
-        let mut last_spoken_turn: u32 = 0;
+        let mut last_spoken_turn: usize = 0;
         for turn in start_t..=n_turns {
             last_spoken = if last_spoken_turn == 0 { 0 } else {
-                (turn - 1) - last_spoken_turn  // "age"
+                ((turn - 1) - last_spoken_turn) as u32  // "age"
             };
-            last_spoken_turn = spoken_turn[last_spoken as usize];
-            spoken_turn[last_spoken as usize] = turn;
+            last_spoken_turn = spoken_turn[last_spoken as usize] as usize;
+            spoken_turn[last_spoken as usize] = turn as u32;
         }
         last_spoken
     }
