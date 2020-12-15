@@ -1,13 +1,13 @@
-use std::collections::HashMap;
+pub const MAX_SPOKEN: usize = 30_000_000;
 
 pub struct Game { }
 
 impl Game {
     /// Return `n`th number spoken, given initial `numbers`.
     pub fn play(numbers: &[u32], n_turns: u32) -> u32 {
-        let mut spoken_turn: HashMap::<u32, u32> = HashMap::new();
+        let mut spoken_turn: Vec<u32> = vec![0; MAX_SPOKEN];
         for (t, &seed) in numbers.iter().enumerate() {
-            spoken_turn.insert(seed, (t + 1) as u32);
+            spoken_turn[seed as usize] = (t + 1) as u32;
         }
         let start_t: u32 = (numbers.len() + 1) as u32;
         let mut last_spoken: u32 = *numbers.last().unwrap();
@@ -22,11 +22,11 @@ impl Game {
                     0
                 },
             };
-            last_spoken_turn = match spoken_turn.get(&last_spoken) {
-                Some(tr) => Some(*tr),
-                None => None,
+            last_spoken_turn = match spoken_turn[last_spoken as usize] {
+                0 => None,
+                number => Some(number),
             };
-            spoken_turn.insert(last_spoken, turn);
+            spoken_turn[last_spoken as usize] = turn;
         }
         last_spoken
     }
