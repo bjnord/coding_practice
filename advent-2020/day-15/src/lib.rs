@@ -10,21 +10,12 @@ impl Game {
         }
         let start_t: u32 = (numbers.len() + 1) as u32;
         let mut last_spoken: u32 = *numbers.last().unwrap();
-        let mut last_spoken_turn: Option<u32> = None;
+        let mut last_spoken_turn: u32 = 0;
         for turn in start_t..=n_turns {
-            last_spoken = match last_spoken_turn {
-                Some(t) => {
-                    let age = (turn - 1) - t;
-                    age
-                },
-                None => {
-                    0
-                },
+            last_spoken = if last_spoken_turn == 0 { 0 } else {
+                (turn - 1) - last_spoken_turn  // "age"
             };
-            last_spoken_turn = match spoken_turn[last_spoken as usize] {
-                0 => None,
-                number => Some(number),
-            };
+            last_spoken_turn = spoken_turn[last_spoken as usize];
             spoken_turn[last_spoken as usize] = turn;
         }
         last_spoken
