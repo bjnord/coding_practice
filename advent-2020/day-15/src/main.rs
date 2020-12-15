@@ -1,4 +1,4 @@
-use day_15::{Game, MAX_SPOKEN};
+use day_15::Game;
 use std::fs;
 use std::time::Instant;
 
@@ -32,7 +32,7 @@ fn part2() {
         .map(|n| n.parse().unwrap())
         .collect();
     let gen_time = start.elapsed();
-    let solution = Game::play(&numbers, MAX_SPOKEN as u32);
+    let solution = Game::play(&numbers, 30_000_000);
     let run_time = start.elapsed() - gen_time;
     println!("Day 1 - Part 2 : {} <=> 62714 expected", solution);
     println!("    generator: {:?}", gen_time);

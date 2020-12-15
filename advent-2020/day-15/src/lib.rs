@@ -1,11 +1,10 @@
-pub const MAX_SPOKEN: usize = 30_000_000;
-
 pub struct Game { }
 
 impl Game {
     /// Return `n`th number spoken, given initial `numbers`.
     pub fn play(numbers: &[u32], n_turns: u32) -> u32 {
-        let mut spoken_turn: Vec<u32> = vec![0; MAX_SPOKEN];
+        // spoken numbers always < number of turns, so this works:
+        let mut spoken_turn: Vec<u32> = vec![0; n_turns as usize];
         for (t, &seed) in numbers.iter().enumerate() {
             spoken_turn[seed as usize] = (t + 1) as u32;
         }
