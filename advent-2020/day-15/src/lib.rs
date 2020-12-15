@@ -5,6 +5,8 @@ impl Game {
     //
     // Vec<u32> is significantly faster than Vec<usize>, so we live with
     // the ugly "as" casts
+    #[allow(clippy::cast_possible_truncation)]
+    #[must_use]
     pub fn play(numbers: &[u32], n_turns: usize) -> u32 {
         // spoken numbers always < number of turns, so this works:
         let mut spoken_turn: Vec<u32> = vec![0; n_turns];
