@@ -36,6 +36,7 @@ impl error::Error for RuleError {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rule {
+    name: String,
     ranges: Vec<RuleRange>,
 }
 
@@ -44,19 +45,18 @@ impl FromStr for Rule {
 
     fn from_str(line: &str) -> Result<Self> {
         let tokens: Vec<&str> = line.split(": ").collect();
-        let value = match tokens.get(1) {
-            Some(v) => v,
-            None => {
-                let e = format!("invalid rule [{}]", line);
-                return Err(RuleError(e).into());
-            },
-        };
+        if tokens.len() != 2 {
+            let e = format!("invalid rule [{}]", line);
+            return Err(RuleError(e).into());
+        }
+        let name = String::from(tokens[0]);
+        let value = tokens[1];
         let ranges_result: Result<Vec<RuleRange>> = value.split(" or ")
             .map(Rule::parse_range)
             .collect();
         match ranges_result {
             Err(e) => Err(e),
-            Ok(ranges) => Ok(Self { ranges }),
+            Ok(ranges) => Ok(Self { name, ranges }),
         }
     }
 }
@@ -166,6 +166,7 @@ impl Ticket {
 #[derive(Debug)]
 pub struct Puzzle {
     rules: Vec<Rule>,
+    your_ticket: Ticket,
     nearby_tickets: Vec<Ticket>,
 }
 
@@ -207,8 +208,14 @@ impl Puzzle {
             let e = format!("'nearby tickets:' divider not found");
             return Err(PuzzleError(e).into());
         }
+        let your_tickets = Ticket::from_input(sections[0])?;
+        if your_tickets.len() != 1 {
+            let e = format!("found {} tickets in 'your ticket:' section", your_tickets.len());
+            return Err(PuzzleError(e).into());
+        }
+        let your_ticket = your_tickets.into_iter().next().unwrap();
         let nearby_tickets = Ticket::from_input(sections[1])?;
-        Ok(Self { rules, nearby_tickets })
+        Ok(Self { rules, your_ticket, nearby_tickets })
     }
 
     /// Return nearby tickets with valid values.
@@ -237,7 +244,7 @@ mod tests {
         let puzzle = Puzzle::read_from_file("input/example1.txt").unwrap();
         assert_eq!(3, puzzle.rules.len());
         assert_eq!(vec![RuleRange { start: 13, end: 40 }, RuleRange { start: 45, end: 50 }],
-            puzzle.rules[2].ranges());
+            puzzle.rules[2].ranges);
         assert_eq!(4, puzzle.nearby_tickets.len());
         assert_eq!(vec![38, 6, 12], puzzle.nearby_tickets[3].values());
     }
@@ -261,6 +268,12 @@ mod tests {
     }
 
     #[test]
+    fn test_read_from_file_bad_file_3() {
+        let puzzle = Puzzle::read_from_file("input/bad3.txt");
+        assert!(puzzle.is_err());
+    }
+
+    #[test]
     fn test_valid_nearby_tickets() {
         let puzzle = Puzzle::read_from_file("input/example1.txt").unwrap();
         let tickets = puzzle.valid_nearby_tickets();
@@ -275,7 +288,13 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_rule() {
+    fn test_parse_rule_name() {
+        assert_eq!("cummerbund",
+            "cummerbund: 38-40 or 42-44".parse::<Rule>().unwrap().name);
+    }
+
+    #[test]
+    fn test_parse_rule_ranges() {
         assert_eq!(vec![RuleRange { start: 1, end: 3 }, RuleRange { start: 5, end: 7 }],
             "class: 1-3 or 5-7".parse::<Rule>().unwrap().ranges());
         assert_eq!(vec![RuleRange { start: 6, end: 11 }, RuleRange { start: 33, end: 44 }],
@@ -287,6 +306,7 @@ mod tests {
     #[test]
     fn test_parse_rule_bad() {
         assert!("class:".parse::<Rule>().is_err());
+        assert!("class: 1-3: 5-7".parse::<Rule>().is_err());
     }
 
     #[test]
