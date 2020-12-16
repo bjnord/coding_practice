@@ -11,9 +11,9 @@ fn part1() {
     let start = Instant::now();
     let puzzle = Puzzle::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    let errors = puzzle.scanning_error_rate();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> _ expected", 0);
+    println!("Day 1 - Part 1 : {} <=> 28884 expected", errors);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

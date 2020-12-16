@@ -95,6 +95,13 @@ impl Rule {
     pub fn from_input(input: &str) -> Result<Vec<Rule>> {
         input.lines().map(str::parse).collect()
     }
+
+    /// Is `value` found in any of this rule's ranges?
+    pub fn allows(&self, value: u32) -> bool {
+        self.ranges
+            .iter()
+            .any(|range| value >= range.start && value <= range.end )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -128,6 +135,32 @@ impl Ticket {
     pub fn from_input(input: &str) -> Result<Vec<Ticket>> {
         input.lines().map(str::parse).collect()
     }
+
+    /// Does this ticket have all valid values, according to the given
+    /// `rules`?
+    pub fn is_valid(&self, rules: &Vec<Rule>) -> bool {
+        self.values
+            .iter()
+            .all(|&value|
+                rules
+                    .iter()
+                    .any(|rule| rule.allows(value))
+            )
+    }
+
+    /// Return sum of all invalid values of this ticket, according to the
+    /// given `rules`.
+    pub fn invalid_value_sum(&self, rules: &Vec<Rule>) -> u32 {
+        self.values
+            .iter()
+            .map(|&value|
+                match rules.iter().any(|rule| rule.allows(value)) {
+                    true => 0,
+                    false => value,
+                }
+            )
+            .sum()
+    }
 }
 
 #[derive(Debug)]
@@ -135,6 +168,17 @@ pub struct Puzzle {
     rules: Vec<Rule>,
     nearby_tickets: Vec<Ticket>,
 }
+
+#[derive(Debug, Clone)]
+struct PuzzleError(String);
+
+impl fmt::Display for PuzzleError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Puzzle error: {}", self.0)
+    }
+}
+
+impl error::Error for PuzzleError {}
 
 impl Puzzle {
     /// Return list of nearby tickets.
@@ -153,10 +197,34 @@ impl Puzzle {
     pub fn read_from_file(path: &str) -> Result<Puzzle> {
         let s: String = fs::read_to_string(path)?;
         let sections: Vec<&str> = s.split("\n\nyour ticket:\n").collect();
+        if sections.len() < 2 {
+            let e = format!("'your ticket:' divider not found");
+            return Err(PuzzleError(e).into());
+        }
         let rules = Rule::from_input(sections[0])?;
-        let subsections: Vec<&str> = sections[1].split("\n\nnearby tickets:\n").collect();
-        let nearby_tickets = Ticket::from_input(subsections[1])?;
+        let sections: Vec<&str> = sections[1].split("\n\nnearby tickets:\n").collect();
+        if sections.len() < 2 {
+            let e = format!("'nearby tickets:' divider not found");
+            return Err(PuzzleError(e).into());
+        }
+        let nearby_tickets = Ticket::from_input(sections[1])?;
         Ok(Self { rules, nearby_tickets })
+    }
+
+    /// Return nearby tickets with valid values.
+    pub fn valid_nearby_tickets(&self) -> Vec<&Ticket> {
+        self.nearby_tickets
+            .iter()
+            .filter(|ticket| ticket.is_valid(&self.rules))
+            .collect()
+    }
+
+    /// Return "scanning error rate" for **invalid** nearby tickets.
+    pub fn scanning_error_rate(&self) -> u32 {
+        self.nearby_tickets
+            .iter()
+            .map(|ticket| ticket.invalid_value_sum(&self.rules))
+            .sum()
     }
 }
 
@@ -184,6 +252,26 @@ mod tests {
     fn test_read_from_file_bad_file() {
         let puzzle = Puzzle::read_from_file("input/bad1.txt");
         assert!(puzzle.is_err());
+    }
+
+    #[test]
+    fn test_read_from_file_bad_file_2() {
+        let puzzle = Puzzle::read_from_file("input/bad2.txt");
+        assert!(puzzle.is_err());
+    }
+
+    #[test]
+    fn test_valid_nearby_tickets() {
+        let puzzle = Puzzle::read_from_file("input/example1.txt").unwrap();
+        let tickets = puzzle.valid_nearby_tickets();
+        assert_eq!(1, tickets.len());
+        assert_eq!(vec![7, 3, 47], tickets[0].values());
+    }
+
+    #[test]
+    fn test_scanning_error_rate() {
+        let puzzle = Puzzle::read_from_file("input/example1.txt").unwrap();
+        assert_eq!(71, puzzle.scanning_error_rate());
     }
 
     #[test]
