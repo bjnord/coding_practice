@@ -46,9 +46,10 @@ pub struct InfiniteGrid {
 
 impl fmt::Display for InfiniteGrid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let z_off = self.edge / 2;
         let mut s = String::new();
         for z in 0..self.edge {
-            let label = format!("z={}\n", z);
+            let label = format!("z={}\n", z - z_off);
             s += &label;
             for y in 0..self.edge {
                 for x in 0..self.edge {
@@ -85,25 +86,24 @@ impl InfiniteGrid {
     /// # Errors
     ///
     /// Returns `Err` if the input file cannot be opened.
-    pub fn read_from_file(path: &str, margin: i32) -> Result<InfiniteGrid> {
+    pub fn read_from_file(path: &str) -> Result<InfiniteGrid> {
         let s: String = fs::read_to_string(path)?;
-        InfiniteGrid::from_input(&s, margin)
+        InfiniteGrid::from_input(&s)
     }
 
     /// Construct by reading grid from `input` string.
-    pub fn from_input(input: &str, margin: i32) -> Result<InfiniteGrid> {
-        let line_len = input.lines().next().unwrap().len() as i32;
-        let edge = line_len + margin * 2;
+    pub fn from_input(input: &str) -> Result<InfiniteGrid> {
+        let edge = input.lines().next().unwrap().len() as i32;
         let cubes_2d: Vec<ConwayCube> = input
             .lines()
             .flat_map(|line| line.trim().chars().map(ConwayCube::from_char))
             .collect();
         let mut cubes: Vec<ConwayCube> = vec![ConwayCube::Void; (edge * edge * edge) as usize];
-        let z = line_len / 2;
-        for y in 0..line_len {
-            for x in 0..line_len {
-                let from_i = (y * line_len + x) as usize;
-                let to_i = Position::index(edge, z + margin, y + margin, x + margin);
+        let z = edge / 2;
+        for y in 0..edge {
+            for x in 0..edge {
+                let from_i = (y * edge + x) as usize;
+                let to_i = Position::index(edge, z, y, x);
                 cubes[to_i] = cubes_2d[from_i];
             }
         }
@@ -155,18 +155,22 @@ impl InfiniteGrid {
         n_active
     }
 
-    /// Do one round of cube life.
+    /// Do one round of cube life. Returns a new grid which is one unit
+    /// bigger in all directions (its edge increases by 2 in all
+    /// dimensions).
     #[must_use]
     pub fn cube_round(&self) -> InfiniteGrid {
-        let mut cubes = Vec::<ConwayCube>::new();
-        for z in 0..self.edge {
-            for y in 0..self.edge {
-                for x in 0..self.edge {
-                    cubes.push(self.new_cube_at(z, y, x));
+        let edge = self.edge + 2;
+        let mut cubes: Vec<ConwayCube> = vec![ConwayCube::Void; (edge * edge * edge) as usize];
+        for z in 0..edge {
+            for y in 0..edge {
+                for x in 0..edge {
+                    let to_i = Position::index(edge, z, y, x);
+                    cubes[to_i] = self.new_cube_at(z - 1, y - 1, x - 1);
                 }
             }
         }
-        InfiniteGrid { cubes, edge: self.edge }
+        InfiniteGrid { cubes, edge }
     }
 
     fn new_cube_at(&self, z: i32, y: i32, x: i32) -> ConwayCube {
@@ -198,36 +202,37 @@ mod tests {
 
     #[test]
     fn test_from_input() {
-        let grid = InfiniteGrid::from_input(TINY_LAYOUT, 1).unwrap();
-        assert_eq!(5, grid.edge);
+        let grid = InfiniteGrid::from_input(TINY_LAYOUT).unwrap();
+        assert_eq!(3, grid.edge);
         assert_eq!(5, grid.active_cubes());
     }
 
     #[test]
     fn test_grid_indexing() {
-        let grid = InfiniteGrid::from_input(TINY_LAYOUT, 1).unwrap();
-        assert_eq!(ConwayCube::Active, grid.cube_at(2, 1, 2));
-        assert_eq!(ConwayCube::Inactive, grid.cube_at(2, 2, 1));
+        let grid = InfiniteGrid::from_input(TINY_LAYOUT).unwrap();
+        assert_eq!(ConwayCube::Active, grid.cube_at(1, 0, 1));
+        assert_eq!(ConwayCube::Inactive, grid.cube_at(1, 1, 0));
+        assert_eq!(ConwayCube::Void, grid.cube_at(0, 1, 0));
     }
 
     #[test]
     fn test_grid_indexing_void_z() {
-        let grid = InfiniteGrid::from_input(TINY_LAYOUT, 1).unwrap();
-        assert_eq!(ConwayCube::Void, grid.cube_at(-1, 1, 2));
-        assert_eq!(ConwayCube::Void, grid.cube_at(1, 2, 1));
+        let grid = InfiniteGrid::from_input(TINY_LAYOUT).unwrap();
+        assert_eq!(ConwayCube::Void, grid.cube_at(-1, 0, 1));
+        assert_eq!(ConwayCube::Void, grid.cube_at(3, 1, 0));
     }
 
     #[test]
     fn test_grid_indexing_void_y() {
-        let grid = InfiniteGrid::from_input(TINY_LAYOUT, 1).unwrap();
-        assert_eq!(ConwayCube::Void, grid.cube_at(2, -1, 2));
-        assert_eq!(ConwayCube::Void, grid.cube_at(2, 0, 1));
+        let grid = InfiniteGrid::from_input(TINY_LAYOUT).unwrap();
+        assert_eq!(ConwayCube::Void, grid.cube_at(1, -1, 1));
+        assert_eq!(ConwayCube::Void, grid.cube_at(1, 3, 0));
     }
 
     #[test]
     fn test_grid_indexing_void_x() {
-        let grid = InfiniteGrid::from_input(TINY_LAYOUT, 1).unwrap();
-        assert_eq!(ConwayCube::Void, grid.cube_at(2, 1, -1));
-        assert_eq!(ConwayCube::Void, grid.cube_at(2, 2, 0));
+        let grid = InfiniteGrid::from_input(TINY_LAYOUT).unwrap();
+        assert_eq!(ConwayCube::Void, grid.cube_at(1, 0, -1));
+        assert_eq!(ConwayCube::Void, grid.cube_at(1, 1, 3));
     }
 }
