@@ -64,6 +64,7 @@ impl Ticket {
 
 #[cfg(test)]
 mod tests {
+    use crate::rule::Rule;
     use super::*;
 
     #[test]
@@ -71,5 +72,23 @@ mod tests {
         let ticket = Ticket::from_input("59,101,191,149,167,197,199,137,163,131\n").unwrap();
         assert_eq!(1, ticket.len());
         assert_eq!(10, ticket[0].values().len());
+    }
+
+    #[test]
+    fn test_is_valid() {
+        let rules = Rule::from_input("class: 1-2 or 4-19\nrow: 1-5 or 8-19\nseat: 1-13 or 16-19\n").unwrap();
+        let tickets = Ticket::from_input("3,6,7,14,15\n3,6,7,20,15\n3,0,7,14,15\n").unwrap();
+        assert_eq!(true, tickets[0].is_valid(&rules));
+        assert_eq!(false, tickets[1].is_valid(&rules));
+        assert_eq!(false, tickets[2].is_valid(&rules));
+    }
+
+    #[test]
+    fn test_invalid_value_sum() {
+        let rules = Rule::from_input("class: 1-2 or 4-19\nrow: 1-5 or 8-19\nseat: 1-13 or 16-19\n").unwrap();
+        let tickets = Ticket::from_input("3,6,7,14,15\n3,6,7,20,15\n3,0,7,14,15\n").unwrap();
+        assert_eq!(0, tickets[0].invalid_value_sum(&rules));
+        assert_eq!(20, tickets[1].invalid_value_sum(&rules));
+        assert_eq!(0, tickets[2].invalid_value_sum(&rules));
     }
 }

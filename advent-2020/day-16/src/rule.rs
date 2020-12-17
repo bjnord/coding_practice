@@ -119,4 +119,18 @@ mod tests {
     fn test_parse_rule_range_bad() {
         assert!("1-".parse::<RuleRange>().is_err());
     }
+
+    #[test]
+    fn test_allows() {
+        let rule: Rule = "class: 1-3 or 5-7".parse().unwrap();
+        assert_eq!(false, rule.allows(0));
+        assert_eq!(true, rule.allows(1));
+        assert_eq!(true, rule.allows(2));
+        assert_eq!(true, rule.allows(3));
+        assert_eq!(false, rule.allows(4));
+        assert_eq!(true, rule.allows(5));
+        assert_eq!(true, rule.allows(6));
+        assert_eq!(true, rule.allows(7));
+        assert_eq!(false, rule.allows(8));
+    }
 }
