@@ -9,14 +9,19 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let grid = InfiniteGrid::read_from_file("input/example1.txt", 1).unwrap();
-    println!("InfiniteGrid============[round {}]", 0);
-    print!("{}", grid);
-    println!("========================");
+    let n_rounds = 6;
+    let mut grid = InfiniteGrid::read_from_file("input/input.txt", n_rounds).unwrap();
     let gen_time = start.elapsed();
-    //...
+    let mut n_active: usize = 0;
+    for i in 0..=n_rounds {
+        if i == n_rounds {
+            n_active = grid.active_cubes();
+        } else {
+            grid = grid.cube_round();
+        }
+    }
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> _ expected", 0);
+    println!("Day 1 - Part 1 : {} <=> 317 expected", n_active);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

@@ -11,12 +11,6 @@ pub enum ConwayCube {
     Active,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct InfiniteGrid {
-    cubes: Vec<ConwayCube>,
-    edge: i32,
-}
-
 impl ConwayCube {
     /// Construct cube from input character.
     #[must_use]
@@ -30,6 +24,12 @@ impl ConwayCube {
             }
         }
     }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct InfiniteGrid {
+    cubes: Vec<ConwayCube>,
+    edge: i32,
 }
 
 impl fmt::Display for InfiniteGrid {
@@ -50,6 +50,20 @@ impl fmt::Display for InfiniteGrid {
             }
         }
         write!(f, "{}", s)
+    }
+}
+
+pub struct InfiniteGridIter {
+    layout: InfiniteGrid,
+}
+
+impl Iterator for InfiniteGridIter {
+    type Item = InfiniteGrid;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let prev_layout = self.layout.clone();
+        self.layout = prev_layout.cube_round();
+        if self.layout == prev_layout { None } else { Some(self.layout.clone()) }
     }
 }
 
@@ -87,6 +101,13 @@ impl InfiniteGrid {
         Ok(Self { cubes, edge })
     }
 
+    #[must_use]
+    pub fn iter(&self) -> InfiniteGridIter {
+        InfiniteGridIter {
+            layout: self.clone(),
+        }
+    }
+
     /// Return `ConwayCube` at (z, y, x).
     #[must_use]
     pub fn cube_at(&self, z: i32, y: i32, x: i32) -> ConwayCube {
@@ -110,6 +131,59 @@ impl InfiniteGrid {
     pub fn active_cubes(&self) -> usize {
         self.cubes.iter().filter(|&c| *c == ConwayCube::Active).count()
     }
+
+    /// Return count of active neighbor cubes of `(y, x)`.
+    #[must_use]
+    pub fn active_neighbors_at(&self, z: i32, y: i32, x: i32) -> usize {
+        let mut n_active: usize = 0;
+        for dz in -1..=1 {
+            for dy in -1..=1 {
+                for dx in -1..=1 {
+                    if dz == 0 && dy == 0 && dx == 0 {
+                        continue;
+                    }
+                    if self.cube_at(z + dz, y + dy, x + dx) == ConwayCube::Active {
+                        n_active += 1;
+                    }
+                }
+            }
+        }
+        n_active
+    }
+
+    /// Do one round of cube life.
+    #[must_use]
+    pub fn cube_round(&self) -> InfiniteGrid {
+        let mut cubes = Vec::<ConwayCube>::new();
+        for z in 0..self.edge {
+            for y in 0..self.edge {
+                for x in 0..self.edge {
+                    cubes.push(self.new_cube_at(z, y, x));
+                }
+            }
+        }
+        InfiniteGrid { cubes, edge: self.edge }
+    }
+
+    fn new_cube_at(&self, z: i32, y: i32, x: i32) -> ConwayCube {
+        match self.cube_at(z, y, x) {
+            ConwayCube::Active => {
+                let n = self.active_neighbors_at(z, y, x);
+                if n == 2 || n == 3 {
+                    ConwayCube::Active
+                } else {
+                    ConwayCube::Inactive
+                }
+            },
+            _ => {
+                if self.active_neighbors_at(z, y, x) == 3 {
+                    ConwayCube::Active
+                } else {
+                    ConwayCube::Inactive
+                }
+            },
+        }
+    }
 }
 
 #[cfg(test)]
@@ -122,6 +196,7 @@ mod tests {
     fn test_from_input() {
         let grid = InfiniteGrid::from_input(TINY_LAYOUT, 1).unwrap();
         assert_eq!(5, grid.edge);
+        assert_eq!(5, grid.active_cubes());
     }
 
     #[test]
