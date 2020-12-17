@@ -4,6 +4,18 @@ use std::result;
 
 type Result<T> = result::Result<T, Box<dyn std::error::Error>>;
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct Position {
+    coords: Vec<i32>,
+}
+
+impl Position {
+    #[allow(clippy::cast_sign_loss)]
+    fn index(edge: i32, z: i32, y: i32, x: i32) -> usize {
+        ((z * edge + y) * edge + x) as usize
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ConwayCube {
     Void,
@@ -116,14 +128,9 @@ impl InfiniteGrid {
             (_, y, _) if y < 0 || y >= self.edge => ConwayCube::Void,
             (_, _, x) if x < 0 || x >= self.edge => ConwayCube::Void,
             _ => {
-                self.cubes[self.cubes_index(z, y, x)]
+                self.cubes[Position::index(self.edge, z, y, x)]
             },
         }
-    }
-
-    #[allow(clippy::cast_sign_loss)]
-    fn cubes_index(&self, z: i32, y: i32, x: i32) -> usize {
-        ((z * self.edge + y) * self.edge + x) as usize
     }
 
     /// Return count of active cubes.
