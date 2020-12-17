@@ -96,23 +96,13 @@ impl Puzzle {
                 if identified.contains_key(&i) {
                     continue;
                 }
-                // FIXME change self.rules.iter() to unidentified.[...]
-                //       and then can skip the "is_unid" check
-                let candidates: Vec<&Rule> = self.rules
-                    .iter()
-                    .filter(|rule| {
-                        let is_unid = unidentified.contains_key(&String::from(rule.name()));
-                        match is_unid {
-                            true => {
-                                self.valid_nearby_tickets()
-                                    .iter()
-                                    .all(|ticket| rule.allows(ticket.values()[i]))
-                            },
-                            false => {
-                                false
-                            },
-                        }
+                let candidates: Vec<&Rule> = unidentified.values()
+                    .filter(|&rule| {
+                        self.valid_nearby_tickets()
+                            .iter()
+                            .all(|ticket| rule.allows(ticket.values()[i]))
                     })
+                    .cloned()
                     .collect();
                 match candidates.len() {
                     0 => panic!("no rule candidates for column {}", i),
