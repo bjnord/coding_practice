@@ -39,21 +39,17 @@ pub struct Rule {
 impl FromStr for Rule {
     type Err = Box<dyn error::Error>;
 
+    // class: 1-3 or 5-7
     fn from_str(line: &str) -> Result<Self> {
-        let tokens: Vec<&str> = line.split(": ").collect();
-        if tokens.len() != 2 {
-            let e = format!("invalid rule [{}]", line);
-            return Err(RuleError(e).into());
-        }
-        let name = String::from(tokens[0]);
-        let value = tokens[1];
-        let ranges_result: Result<Vec<RuleRange>> = value.split(" or ")
+        let mut i = line.split(": ");
+        let name = i.next().unwrap();
+        let ranges = i.next().ok_or_else(||
+            Box::new(RuleError("rule ranges not found".to_string()))
+        )?;
+        let ranges: Vec<RuleRange> = ranges.split(" or ")
             .map(str::parse)
-            .collect();
-        match ranges_result {
-            Err(e) => Err(e),
-            Ok(ranges) => Ok(Self { name, ranges }),
-        }
+            .collect::<Result<Vec<RuleRange>>>()?;
+        Ok(Self { name: String::from(name), ranges })
     }
 }
 
@@ -109,8 +105,8 @@ mod tests {
 
     #[test]
     fn test_parse_rule_bad() {
-        assert!("class:".parse::<Rule>().is_err());
-        assert!("class: 1-3: 5-7".parse::<Rule>().is_err());
+        assert!("class".parse::<Rule>().is_err());
+        assert!("class: 1-".parse::<Rule>().is_err());
     }
 
     #[test]
