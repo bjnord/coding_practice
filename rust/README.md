@@ -103,9 +103,11 @@ fn my_read_file(file: &str) -> Result<String, io::Error> {
 }
 ```
 
+If you're iterating over a collection _e.g._ with `.map()`, the closure can return a `Result<T, E>` and the `.collect()` will "roll up" the error and turn that into a `Result<Vec<T>, E>`. See the "Fail the entire operation with `collect()`" section of [this page](https://doc.rust-lang.org/rust-by-example/error/iter_result.html), which also has other options for handling errors when iterating.
+
 #### Simplifying Result With a Custom Type and Error
 
-[This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<T, ...>` with just `Result<T>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit.
+[This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<T, ...>` with just `Result<T>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit. If the error you want to propagate isn't already boxed, you can return `Err(Box::new(e))` to "box the error" (where `e` is a specific error like `io::Error` or a custom error type).
 
 It also shows how to create a custom error (they call it `EmptyVec`), and how to define traits for it, such that a custom boxed error is easy to create when needed.
 
@@ -263,7 +265,7 @@ Once this trait is defined, and generates its own errors (bad format, etc.), it 
             s.lines().map(str::parse).collect()
         }
 
-Rust knows it's returning a vector of `MyStruct`, so it can push that type inwards to the `parse()` call to know what it needs. Collecting `Error` to the returned `Result` is described by the "Fail the entire operation with collect()" section of [this page](https://doc.rust-lang.org/rust-by-example/error/iter_result.html), which also has other options for handling errors when iterating.
+Rust knows it's returning a vector of `MyStruct`, so it can push that type inwards to the `parse()` call to know what it needs. Collecting `Error` to the returned `Result` is described by the "Fail the entire operation with `collect()`" section of [this page](https://doc.rust-lang.org/rust-by-example/error/iter_result.html), which also has other options for handling errors when iterating.
 
 ## Strings
 
