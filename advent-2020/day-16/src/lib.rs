@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::collections::BTreeMap;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -170,6 +171,12 @@ pub struct Puzzle {
     nearby_tickets: Vec<Ticket>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct TicketField {
+    pub name: String,
+    pub value: u32,
+}
+
 #[derive(Debug, Clone)]
 struct PuzzleError(String);
 
@@ -232,6 +239,56 @@ impl Puzzle {
             .iter()
             .map(|ticket| ticket.invalid_value_sum(&self.rules))
             .sum()
+    }
+
+    /// Return fields (name/value pairs) from "your ticket".
+    pub fn your_ticket_fields(&self) -> Vec<TicketField> {
+        let n_fields = self.rules.len();
+        let mut unidentified: BTreeMap<String, &Rule> = BTreeMap::new();
+        for rule in self.rules.iter() {
+            unidentified.insert(String::from(&rule.name), rule);
+        }
+        let mut identified: BTreeMap<usize, &Rule> = BTreeMap::new();
+        while !unidentified.is_empty() {
+            for i in 0..n_fields {
+                if identified.contains_key(&i) {
+                    continue;
+                }
+                // FIXME change self.rules.iter() to unidentified.[...]
+                //       and then can skip the "is_unid" check
+                let candidates: Vec<&Rule> = self.rules
+                    .iter()
+                    .filter(|rule| {
+                        let is_unid = unidentified.contains_key(&String::from(&rule.name));
+                        match is_unid {
+                            true => {
+                                self.valid_nearby_tickets()
+                                    .iter()
+                                    .all(|ticket| rule.allows(ticket.values[i]))
+                            },
+                            false => {
+                                false
+                            },
+                        }
+                    })
+                    .collect();
+                match candidates.len() {
+                    0 => panic!("no rule candidates for column {}", i),
+                    1 => {
+                        let rule = candidates[0];
+                        identified.insert(i, &rule);
+                        unidentified.remove(&String::from(&rule.name));
+                    },
+                    _ => { },
+                }
+            }
+        }
+        identified.keys()
+            .map(|k| TicketField {
+                name: String::from(&identified[k].name),
+                value: self.your_ticket.values[*k],
+            })
+            .collect()
     }
 }
 
@@ -319,5 +376,15 @@ mod tests {
     fn test_parse_range_bad() {
         assert!(Rule::parse_range("1").is_err());
         assert!(Rule::parse_range("1-3-5").is_err());
+    }
+
+    #[test]
+    fn test_your_ticket_fields() {
+        let puzzle = Puzzle::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(vec![
+                TicketField { name: String::from("row"), value: 11 },
+                TicketField { name: String::from("class"), value: 12 },
+                TicketField { name: String::from("seat"), value: 13 },
+            ], puzzle.your_ticket_fields());
     }
 }
