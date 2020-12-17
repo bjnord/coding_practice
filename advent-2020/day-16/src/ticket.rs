@@ -1,8 +1,7 @@
 use crate::rule::Rule;
-use std::error;
 use std::str::FromStr;
 
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ticket {
@@ -10,7 +9,7 @@ pub struct Ticket {
 }
 
 impl FromStr for Ticket {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let s_values: Vec<&str> = line.split(',').collect();

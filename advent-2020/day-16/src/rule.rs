@@ -1,8 +1,7 @@
-use std::error;
 use std::fmt;
 use std::str::FromStr;
 
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RuleRange {
@@ -11,7 +10,7 @@ pub struct RuleRange {
 }
 
 impl FromStr for RuleRange {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(range: &str) -> Result<Self> {
         let (start, end) = scan_fmt!(range, "{d}-{d}", u32, u32)?;
@@ -28,7 +27,7 @@ impl fmt::Display for RuleError {
     }
 }
 
-impl error::Error for RuleError {}
+impl std::error::Error for RuleError {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rule {
@@ -37,7 +36,7 @@ pub struct Rule {
 }
 
 impl FromStr for Rule {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     // class: 1-3 or 5-7
     fn from_str(line: &str) -> Result<Self> {

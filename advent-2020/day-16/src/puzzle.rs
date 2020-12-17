@@ -1,11 +1,10 @@
 use crate::rule::Rule;
 use crate::ticket::Ticket;
 use std::collections::BTreeMap;
-use std::error;
 use std::fmt;
 use std::fs;
 
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug)]
 pub struct Puzzle {
@@ -29,7 +28,7 @@ impl fmt::Display for PuzzleError {
     }
 }
 
-impl error::Error for PuzzleError {}
+impl std::error::Error for PuzzleError {}
 
 impl Puzzle {
     /// Return list of nearby tickets.
