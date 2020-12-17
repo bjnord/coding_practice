@@ -11,9 +11,12 @@ pub struct Ticket {
 impl FromStr for Ticket {
     type Err = Box<dyn std::error::Error>;
 
+    // FIXME for some reason this collect() won't roll up a ParseIntError
+    //       from parse() into a Box; had to short-circuit with unwrap()
     fn from_str(line: &str) -> Result<Self> {
-        let s_values: Vec<&str> = line.split(',').collect();
-        let values: Vec<u32> = s_values.iter().map(|v| v.parse().unwrap()).collect();
+        let values: Vec<u32> = line.split(',')
+            .map(|v| v.parse().unwrap())
+            .collect();
         Ok(Self { values })
     }
 }
