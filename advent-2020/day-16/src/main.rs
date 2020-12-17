@@ -1,4 +1,4 @@
-use day_16::Puzzle;
+use day_16::puzzle::Puzzle;
 use std::time::Instant;
 
 fn main() {
