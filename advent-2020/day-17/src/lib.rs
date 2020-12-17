@@ -103,10 +103,7 @@ impl InfiniteGrid {
         for y in 0..line_len {
             for x in 0..line_len {
                 let from_i = (y * line_len + x) as usize;
-                let to_z = z + margin;
-                let to_y = y + margin;
-                let to_x = x + margin;
-                let to_i = ((to_z * edge + to_y) * edge + to_x) as usize;
+                let to_i = Position::index(edge, z + margin, y + margin, x + margin);
                 cubes[to_i] = cubes_2d[from_i];
             }
         }
