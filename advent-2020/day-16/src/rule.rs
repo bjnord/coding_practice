@@ -1,20 +1,8 @@
-use itertools::Itertools;
 use std::error;
 use std::fmt;
 use std::str::FromStr;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
-#[derive(Debug, Clone)]
-struct RuleRangeError(String);
-
-impl fmt::Display for RuleRangeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Rule range error: {}", self.0)
-    }
-}
-
-impl error::Error for RuleRangeError {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RuleRange {
@@ -26,20 +14,8 @@ impl FromStr for RuleRange {
     type Err = Box<dyn error::Error>;
 
     fn from_str(range: &str) -> Result<Self> {
-        let range_bounds: Vec<u32> = range.split('-')
-            .map(|ns| ns.parse::<u32>().unwrap())
-            .collect();
-        if range_bounds.len() != 2 {
-            let e = format!("invalid range [{}]", range);
-            return Err(RuleRangeError(e).into());
-        }
-        match range_bounds.iter().next_tuple() {
-            Some((&start, &end)) => Ok(RuleRange { start, end }),
-            _ => {
-                let e = format!("invalid range [{}]", range);
-                return Err(RuleRangeError(e).into());
-            },
-        }
+        let (start, end) = scan_fmt!(range, "{d}-{d}", u32, u32)?;
+        Ok(RuleRange { start, end })
     }
 }
 
@@ -145,7 +121,6 @@ mod tests {
 
     #[test]
     fn test_parse_rule_range_bad() {
-        assert!("1".parse::<RuleRange>().is_err());
-        assert!("1-3-5".parse::<RuleRange>().is_err());
+        assert!("1-".parse::<RuleRange>().is_err());
     }
 }
