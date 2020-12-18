@@ -16,10 +16,11 @@ impl fmt::Display for EquationError {
 
 impl std::error::Error for EquationError {}
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Term {
     Number(i32),
     Operator(char),
+    Subterm(Equation),
 }
 
 impl FromStr for Term {
@@ -27,10 +28,13 @@ impl FromStr for Term {
 
     fn from_str(token: &str) -> Result<Self> {
         let ch = token.chars().next().ok_or("empty term")?;
-        let term = if ch.is_digit(10) {
-            Term::Number(token.parse::<i32>()?)
-        } else {
-            Term::Operator(ch)
+        let term = match ch {
+            d if d.is_digit(10) => Term::Number(token.parse::<i32>()?),
+            '('                 => {
+                let eq = &token[1..token.len()-1];
+                Term::Subterm(eq.parse::<Equation>()?)
+            },
+            _                   => Term::Operator(ch),
         };
         Ok(term)
     }
@@ -40,7 +44,11 @@ impl fmt::Display for Term {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Term::Number(n) => write!(f, "{}", n),
-            Term::Operator(ch) => write!(f, "{}", ch),
+            Term::Operator(op) => write!(f, "{}", op),
+            Term::Subterm(eq) => {
+                let s = format!("({})", eq);
+                write!(f, "{}", s)
+            },
         }
     }
 }
@@ -140,9 +148,13 @@ impl Equation {
         let mut buf_n = None;
         let mut buf_op = None;
         for term in &self.terms {
+            let buf_op_copy = match buf_op {
+                Some(Term::Operator(op)) => Some(Term::Operator(op)),
+                _ => None,
+            };
             match term {
                 Term::Number(n) => {
-                    buf_n = match (buf_n, buf_op) {
+                    buf_n = match (buf_n, buf_op_copy) {
                         (Some(Term::Number(n0)), Some(Term::Operator(op))) => {
                             buf_op = None;
                             match op {
@@ -175,6 +187,9 @@ impl Equation {
                         },
                         None => Some(Term::Operator(*op)),
                     }
+                },
+                Term::Subterm(_eq) => {
+                    panic!("not implemented")  // FIXME
                 },
             }
         }
@@ -232,6 +247,39 @@ mod tests {
     fn test_parse_equation_double_space() {
         let result = "1  + 2".parse::<Equation>();
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_equation_subterm() {
+        let term = "(2 + 3)".parse::<Term>().unwrap();
+        let equation = match term {
+            Term::Subterm(e) => e,
+            _ => panic!("not a subterm"),
+        };
+        assert_eq!(3, equation.terms().len());
+        assert_eq!(equation.terms()[0], Term::Number(2));
+        assert_eq!(equation.terms()[1], Term::Operator('+'));
+        assert_eq!(equation.terms()[2], Term::Number(3));
+    }
+
+    #[test]
+    fn test_parse_equation_subterm_two_level() {
+        let term = "((2 + 3) * 5)".parse::<Term>().unwrap();
+        let equation = match term {
+            Term::Subterm(e) => e,
+            _ => panic!("not a subterm"),
+        };
+        assert_eq!(3, equation.terms().len());
+        assert_eq!(equation.terms()[1], Term::Operator('*'));
+        assert_eq!(equation.terms()[2], Term::Number(5));
+        let subeq = match &equation.terms()[0] {
+            Term::Subterm(eq) => eq,
+            _ => panic!("expected subequation not found"),
+        };
+        assert_eq!(3, subeq.terms().len());
+        assert_eq!(subeq.terms()[0], Term::Number(2));
+        assert_eq!(subeq.terms()[1], Term::Operator('+'));
+        assert_eq!(subeq.terms()[2], Term::Number(3));
     }
 
     #[test]
