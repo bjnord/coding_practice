@@ -18,7 +18,7 @@ impl std::error::Error for EquationError {}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Term {
-    Number(i32),
+    Number(i64),
     Operator(char),
     Subterm(Equation),
 }
@@ -29,7 +29,7 @@ impl FromStr for Term {
     fn from_str(token: &str) -> Result<Self> {
         let ch = token.chars().next().ok_or("empty term")?;
         let term = match ch {
-            d if d.is_digit(10) => Term::Number(token.parse::<i32>()?),
+            d if d.is_digit(10) => Term::Number(token.parse::<i64>()?),
             '('                 => {
                 let eq = &token[1..token.len()-1];
                 Term::Subterm(eq.parse::<Equation>()?)
@@ -144,7 +144,7 @@ impl Equation {
     /// # Errors
     ///
     /// Returns `Err` if the equation terms do not form a valid equation.
-    pub fn solve(&self) -> Result<i32> {
+    pub fn solve(&self) -> Result<i64> {
         let mut buf_n = None;
         let mut buf_op = None;
         for term in &self.terms {
@@ -156,7 +156,7 @@ impl Equation {
             // FIXME this is an even worse hack:
             let term_copy: Term = match term {
                 Term::Subterm(eq) => {
-                    let n: i32 = eq.solve()?;
+                    let n: i64 = eq.solve()?;
                     Term::Number(n)
                 },
                 _ => Term::Number(0),  // pseudo-null
