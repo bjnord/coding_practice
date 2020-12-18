@@ -148,11 +148,25 @@ impl Equation {
         let mut buf_n = None;
         let mut buf_op = None;
         for term in &self.terms {
-            let buf_op_copy = match buf_op {
+            // FIXME this is a hack:
+            let buf_op_copy: Option<Term> = match buf_op {
                 Some(Term::Operator(op)) => Some(Term::Operator(op)),
                 _ => None,
             };
-            match term {
+            // FIXME this is an even worse hack:
+            let term_copy: Term = match term {
+                Term::Subterm(eq) => {
+                    let n: i32 = eq.solve()?;
+                    Term::Number(n)
+                },
+                _ => Term::Number(0),  // pseudo-null
+            };
+            let term1 = if let Term::Subterm(_) = term {
+                &term_copy
+            } else {
+                term
+            };
+            match term1 {
                 Term::Number(n) => {
                     buf_n = match (buf_n, buf_op_copy) {
                         (Some(Term::Number(n0)), Some(Term::Operator(op))) => {
@@ -188,9 +202,7 @@ impl Equation {
                         None => Some(Term::Operator(*op)),
                     }
                 },
-                Term::Subterm(_eq) => {
-                    panic!("not implemented")  // FIXME
-                },
+                Term::Subterm(_eq) => panic!("should not happen"),
             }
         }
         match buf_op {
@@ -218,11 +230,6 @@ mod tests {
 
     // 1 + 2 * 3 + 4 * 5 + 6 becomes 71.
 
-    // 2 * 3 + (4 * 5) becomes 26.
-    // 5 + (8 * 3 + 9 + 3 * 4 * 3) becomes 437.
-    // 5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4)) becomes 12240.
-    // ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2 becomes 13632.
-
     #[test]
     fn test_parse_equations_simple() {
         let equations = Equation::read_from_file("input/example1.txt").unwrap();
@@ -235,6 +242,31 @@ mod tests {
         let equations = Equation::read_from_file("input/example1.txt").unwrap();
         assert_eq!(1, equations.len());
         assert_eq!(71, equations[0].solve().unwrap());
+    }
+
+    // 2 * 3 + (4 * 5) becomes 26.
+    // 5 + (8 * 3 + 9 + 3 * 4 * 3) becomes 437.
+    // 5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4)) becomes 12240.
+    // ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2 becomes 13632.
+
+    #[test]
+    fn test_parse_equations_with_subterms() {
+        let equations = Equation::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(4, equations.len());
+        assert_eq!(5, equations[0].terms().len());
+        assert_eq!(3, equations[1].terms().len());
+        assert_eq!(5, equations[2].terms().len());
+        assert_eq!(7, equations[3].terms().len());
+    }
+
+    #[test]
+    fn test_solve_equations_with_subterms() {
+        let equations = Equation::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(4, equations.len());
+        assert_eq!(26, equations[0].solve().unwrap());
+        assert_eq!(437, equations[1].solve().unwrap());
+        assert_eq!(12240, equations[2].solve().unwrap());
+        assert_eq!(13632, equations[3].solve().unwrap());
     }
 
     #[test]
@@ -291,6 +323,12 @@ mod tests {
     #[test]
     fn test_solve_equation_missing_operator() {
         let result = "1 + 2 3".parse::<Equation>().unwrap().solve();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_solve_equation_missing_operator_subterm() {
+        let result = "1 + 2 (3 + 5)".parse::<Equation>().unwrap().solve();
         assert!(result.is_err());
     }
 
