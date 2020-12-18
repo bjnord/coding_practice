@@ -45,6 +45,37 @@ impl fmt::Display for Term {
     }
 }
 
+impl Term {
+    /// Combine tokens to form subterms.
+    pub fn combine_subterms(tokens: &Vec<&str>) -> Vec<String> {
+        let mut ctokens: Vec<String> = vec![];
+        let mut subterm = String::new();
+        let mut pcount = 0_usize;
+        for token in tokens {
+            let lp = token.matches("(").count();
+            let rp = token.matches(")").count();
+            if lp == 0 && rp == 0 && pcount == 0 {
+                ctokens.push(token.to_string());
+                continue;
+            }
+            if rp > pcount + lp {
+                // FIXME `combine_subterms()` should return a `Result`
+                panic!("rp={} exceeds pcount={} lp={}", rp, pcount, lp);
+            }
+            if !subterm.is_empty() {
+                subterm += " ";
+            }
+            subterm += token;
+            pcount = pcount + lp - rp;
+            if pcount == 0 {
+                ctokens.push(subterm);
+                subterm = String::new();
+            }
+        }
+        ctokens
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Equation {
     terms: Vec<Term>,
@@ -54,8 +85,11 @@ impl FromStr for Equation {
     type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
-        let terms: Result<Vec<Term>> = line
-            .split(' ')
+        let tokens = line.split(' ').collect();
+        let ctokens = Term::combine_subterms(&tokens);
+        let terms: Result<Vec<Term>> = ctokens
+            .iter()
+            .map(|s| &s[..])
             .map(str::parse)
             .collect();
         match terms {
@@ -228,5 +262,38 @@ mod tests {
     fn test_solve_equation_trailing_operator() {
         let result = "1 *".parse::<Equation>().unwrap().solve();
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_combine_subterms_simple() {
+        let tokens = vec!["1", "*", "2", "+", "3", "*", "4"];
+        let ctokens = Term::combine_subterms(&tokens);
+        let actual: Vec<&str> = ctokens.iter().map(|s| &s[..]).collect();
+        assert_eq!(tokens, actual);
+    }
+
+    #[test]
+    fn test_combine_subterms_one_level() {
+        let tokens = vec!["1", "*", "(2", "+", "3)", "*", "4"];
+        let expected = vec!["1", "*", "(2 + 3)", "*", "4"];
+        let ctokens = Term::combine_subterms(&tokens);
+        let actual: Vec<&str> = ctokens.iter().map(|s| &s[..]).collect();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_combine_subterms_two_levels_front() {
+        let tokens = vec!["1", "*", "((2", "+", "3)", "*", "5)", "*", "4"];
+        let expected = vec!["1", "*", "((2 + 3) * 5)", "*", "4"];
+        let ctokens = Term::combine_subterms(&tokens);
+        let actual: Vec<&str> = ctokens.iter().map(|s| &s[..]).collect();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_combine_subterms_extra_rparens() {
+        let tokens = vec!["1", "*", "(2", "+", "3))"];
+        Term::combine_subterms(&tokens);
     }
 }
