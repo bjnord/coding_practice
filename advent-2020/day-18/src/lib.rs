@@ -145,82 +145,49 @@ impl Equation {
     ///
     /// Returns `Err` if the equation terms do not form a valid equation.
     pub fn solve(&self) -> Result<i64> {
-        let mut buf_n = None;
-        let mut buf_op = None;
+        let mut buffer: Vec<Term> = vec![];
         for term in &self.terms {
-            // FIXME this is a hack:
-            let buf_op_copy: Option<Term> = match buf_op {
-                Some(Term::Operator(op)) => Some(Term::Operator(op)),
-                _ => None,
-            };
-            // FIXME this is an even worse hack:
-            let term_copy: Term = match term {
+            buffer.push(match term {
+                Term::Number(n) => Term::Number(*n),
+                Term::Operator(op) => Term::Operator(*op),
                 Term::Subterm(eq) => {
                     let n: i64 = eq.solve()?;
                     Term::Number(n)
                 },
-                _ => Term::Number(0),  // pseudo-null
-            };
-            let term1 = if let Term::Subterm(_) = term {
-                &term_copy
-            } else {
-                term
-            };
-            match term1 {
-                Term::Number(n) => {
-                    buf_n = match (buf_n, buf_op_copy) {
-                        (Some(Term::Number(n0)), Some(Term::Operator(op))) => {
-                            buf_op = None;
-                            match op {
-                                '+' => Some(Term::Number(n + n0)),
-                                '*' => Some(Term::Number(n * n0)),
-                                _ => {
-                                    let e = format!("invalid operator '{}'", op);
-                                    return Err(EquationError(e).into());
-                                },
-                            }
-                        },
-                        (Some(Term::Number(_)), None) => {
-                            let e = format!("missing operator before '{}'", n);
-                            return Err(EquationError(e).into());
-                        },
-                        (None, Some(Term::Operator(op))) => {
-                            let e = format!("missing first number '{} {}'", op, n);
-                            return Err(EquationError(e).into());
-                        },
-                        (None, None) => Some(Term::Number(*n)),
-                        // e.g. operator stored in buf_n, number stored in buf_op:
-                        (_, _) => panic!("buffer implementation error 1"),
-                    }
-                },
-                Term::Operator(op) => {
-                    buf_op = match buf_op {
-                        Some(op0) => {
-                            let e = format!("double operator '{} {}'", op0, op);
-                            return Err(EquationError(e).into());
-                        },
-                        None => Some(Term::Operator(*op)),
-                    }
-                },
-                Term::Subterm(_eq) => panic!("should not happen"),
+            });
+            if buffer.len() == 3 {
+                buffer = Equation::combine_3(buffer)?;
             }
         }
-        match buf_op {
-            Some(Term::Operator(op0)) => {
-                let e = format!("trailing operator '{}'", op0);
-                Err(EquationError(e).into())
-            },
-            None => {
-                match buf_n {
-                    Some(Term::Number(n)) => Ok(n),
-                    None => panic!("no final n"),
-                    // e.g. operator stored in buf_n:
-                    _ => panic!("buffer implementation error 2"),
+        if buffer.len() > 1 {
+            let e = format!("{} leftover term(s)", buffer.len() - 1);
+            return Err(EquationError(e).into());
+        }
+        if let Term::Number(n) = buffer[0] {
+            Ok(n)
+        } else {
+            Err(EquationError("final term is not a Number".to_string()).into())
+        }
+    }
+
+    fn combine_3(terms: Vec<Term>) -> Result<Vec<Term>> {
+        let combined_term = match &terms[0..3] {
+            [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => {
+                match op {
+                    '+' => Term::Number(n1 + n2),
+                    '*' => Term::Number(n1 * n2),
+                    _ => {
+                        let e = format!("invalid operator '{}'", op);
+                        return Err(EquationError(e).into());
+                    },
                 }
             },
-            // e.g. number stored in buf_op:
-            _ => panic!("buffer implementation error 3"),
-        }
+            _ => {
+                let e = format!("invalid expression '{} {} {}'", terms[0], terms[1], terms[2]);
+                return Err(EquationError(e).into());
+            },
+        };
+        Ok(vec![combined_term])
     }
 }
 
@@ -335,6 +302,12 @@ mod tests {
     #[test]
     fn test_solve_equation_double_operator() {
         let result = "1 * + 2".parse::<Equation>().unwrap().solve();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_solve_equation_lone_operator() {
+        let result = "+".parse::<Equation>().unwrap().solve();
         assert!(result.is_err());
     }
 
