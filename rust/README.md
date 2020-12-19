@@ -105,6 +105,35 @@ fn my_read_file(file: &str) -> Result<String, io::Error> {
 
 If you're iterating over a collection _e.g._ with `.map()`, the closure can return a `Result<T, E>` and the `.collect()` will "roll up" the error and turn that into a `Result<Vec<T>, E>`. See the "Fail the entire operation with `collect()`" section of [this page](https://doc.rust-lang.org/rust-by-example/error/iter_result.html), which also has other options for handling errors when iterating.
 
+If you supply a parsing function that returns `Result<T, E>`, the resulting rollup code can ba a tidy one line:
+
+```
+fn parse_branches(branches: &str) -> Result<Vec<Vec<usize>>> {
+    branches.split(" | ").map(Rule::parse_sequence).collect()
+}
+```
+
+However, note when parsing integers from strings, the code needs a bit of type hinting; `ParseIntError` isn't an `err::Error` so it has to be explicitly boxed with `.into()`. See [this page](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) on boxing errors for details.
+
+```
+fn parse_sequence(sequence: &str) -> Result<Vec<usize>> {
+    sequence.split(' ')
+        .map(|rn| rn.parse::<usize>().map_err(|e| e.into()))
+        .collect()
+}
+```
+
+If the result needs to be unwrapped with propagation (using `?`), then `.collect()` needs a hint too:
+
+```
+fn from_str(line: &str) -> Result<Self> {
+    let values: Vec<u32> = line.split(',')
+        .map(|v| v.parse::<u32>().map_err(|e| e.into()))
+        .collect::<Result<Vec<u32>>>()?;
+    Ok(Self { values })
+}
+```
+
 #### Simplifying Result With a Custom Type and Error
 
 [This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<T, ...>` with just `Result<T>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit. If the error you want to propagate isn't already boxed, you can return `Err(Box::new(e))` to "box the error" (where `e` is a specific error like `io::Error` or a custom error type).

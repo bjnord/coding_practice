@@ -67,18 +67,13 @@ impl Rule {
     }
 
     fn parse_branches(branches: &str) -> Result<Vec<Vec<usize>>> {
-        branches.split(" | ")
-            .map(|seq| Rule::parse_sequence(seq))
-            .collect()
+        branches.split(" | ").map(Rule::parse_sequence).collect()
     }
 
-    // FIXME for some reason this collect() won't roll up a ParseIntError
-    //       from parse() into a Box; had to short-circuit with unwrap()
     fn parse_sequence(sequence: &str) -> Result<Vec<usize>> {
-        let rule_nos: Vec<usize> = sequence.split(' ')
-            .map(|rn| rn.parse().unwrap())
-            .collect();
-        Ok(rule_nos)
+        sequence.split(' ')
+            .map(|rn| rn.parse::<usize>().map_err(|e| e.into()))
+            .collect()
     }
 }
 
@@ -243,10 +238,9 @@ mod tests {
     }
 
     #[test]
-    // see from_input() FIXME above
-    #[should_panic]
     fn test_read_from_file_bad_sequence() {
-        let _result = Ruleset::read_from_file("input/bad1.txt", false);
+        let result = Ruleset::read_from_file("input/bad1.txt", false);
+        assert!(result.is_err());
     }
 
     #[test]

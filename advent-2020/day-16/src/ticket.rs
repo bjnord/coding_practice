@@ -11,12 +11,10 @@ pub struct Ticket {
 impl FromStr for Ticket {
     type Err = Box<dyn std::error::Error>;
 
-    // FIXME for some reason this collect() won't roll up a ParseIntError
-    //       from parse() into a Box; had to short-circuit with unwrap()
     fn from_str(line: &str) -> Result<Self> {
         let values: Vec<u32> = line.split(',')
-            .map(|v| v.parse().unwrap())
-            .collect();
+            .map(|v| v.parse::<u32>().map_err(|e| e.into()))
+            .collect::<Result<Vec<u32>>>()?;
         Ok(Self { values })
     }
 }
@@ -92,5 +90,11 @@ mod tests {
         assert_eq!(0, tickets[0].invalid_value_sum(&rules));
         assert_eq!(20, tickets[1].invalid_value_sum(&rules));
         assert_eq!(0, tickets[2].invalid_value_sum(&rules));
+    }
+
+    #[test]
+    fn test_invalid_ticket_integer() {
+        let result = Ticket::from_input("3,6,x7,14,15\n");
+        assert!(result.is_err());
     }
 }
