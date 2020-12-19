@@ -256,8 +256,6 @@ impl Equation {
 mod tests {
     use super::*;
 
-    // 1 + 2 * 3 + 4 * 5 + 6 becomes 71.
-
     #[test]
     fn test_parse_equations_simple() {
         let equations = Equation::read_from_file("input/example1.txt").unwrap();
@@ -272,45 +270,37 @@ mod tests {
         assert_eq!(71, equations[0].solve().unwrap());
     }
 
-    // 2 * 3 + (4 * 5) becomes 26.
-    // 5 + (8 * 3 + 9 + 3 * 4 * 3) becomes 437.
-    // 5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4)) becomes 12240.
-    // ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2 becomes 13632.
-
     #[test]
     fn test_parse_equations_with_subterms() {
         let equations = Equation::read_from_file("input/example2.txt").unwrap();
-        assert_eq!(4, equations.len());
+        assert_eq!(5, equations.len());
         assert_eq!(5, equations[0].terms().len());
-        assert_eq!(3, equations[1].terms().len());
-        assert_eq!(5, equations[2].terms().len());
-        assert_eq!(7, equations[3].terms().len());
+        assert_eq!(5, equations[1].terms().len());
+        assert_eq!(3, equations[2].terms().len());
+        assert_eq!(5, equations[3].terms().len());
+        assert_eq!(7, equations[4].terms().len());
     }
 
     #[test]
     fn test_solve_equations_with_subterms() {
         let equations = Equation::read_from_file("input/example2.txt").unwrap();
-        assert_eq!(4, equations.len());
-        assert_eq!(26, equations[0].solve().unwrap());
-        assert_eq!(437, equations[1].solve().unwrap());
-        assert_eq!(12240, equations[2].solve().unwrap());
-        assert_eq!(13632, equations[3].solve().unwrap());
+        assert_eq!(5, equations.len());
+        assert_eq!(51, equations[0].solve().unwrap());
+        assert_eq!(26, equations[1].solve().unwrap());
+        assert_eq!(437, equations[2].solve().unwrap());
+        assert_eq!(12240, equations[3].solve().unwrap());
+        assert_eq!(13632, equations[4].solve().unwrap());
     }
-
-    // 1 + (2 * 3) + (4 * (5 + 6)) still becomes 51.
-    // 2 * 3 + (4 * 5) becomes 46.
-    // 5 + (8 * 3 + 9 + 3 * 4 * 3) becomes 1445.
-    // 5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4)) becomes 669060.
-    // ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2 becomes 23340.
 
     #[test]
     fn test_solve_advanced_equations_with_subterms() {
         let equations = Equation::read_from_file("input/example2.txt").unwrap();
-        assert_eq!(4, equations.len());
-        assert_eq!(46, equations[0].solve_advanced_math().unwrap());
-        assert_eq!(1445, equations[1].solve_advanced_math().unwrap());
-        assert_eq!(669060, equations[2].solve_advanced_math().unwrap());
-        assert_eq!(23340, equations[3].solve_advanced_math().unwrap());
+        assert_eq!(5, equations.len());
+        assert_eq!(51, equations[0].solve_advanced_math().unwrap());
+        assert_eq!(46, equations[1].solve_advanced_math().unwrap());
+        assert_eq!(1445, equations[2].solve_advanced_math().unwrap());
+        assert_eq!(669060, equations[3].solve_advanced_math().unwrap());
+        assert_eq!(23340, equations[4].solve_advanced_math().unwrap());
     }
 
     #[test]
