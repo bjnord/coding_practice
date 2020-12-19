@@ -139,7 +139,62 @@ impl Equation {
         s.lines().map(str::parse).collect()
     }
 
-    /// Solve equation.
+    /// Solve equation with `+` having higher precedence than `*`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the equation terms do not form a valid equation.
+    pub fn solve_advanced_math(&self) -> Result<i64> {
+        let mut terms: Vec<Term> = Equation::reduce_subterms_advanced_math(&self.terms)?;
+        // reduce all the N + M, leaving only multiply operators
+        while terms.len() >= 3 {
+            let add_pos = terms
+                .iter()
+                .position(|t| {
+                    if let Term::Operator(op) = t {
+                        *op == '+'
+                    } else {
+                        false
+                    }
+                });
+            if let Some(i) = add_pos {
+                terms.splice(i-1..i+2, Equation::combine_3_terms_at(&terms, i-1)?);
+            } else {
+                break;
+            }
+        }
+        // solve the remaining terms (all multiply operators)
+        while terms.len() >= 3 {
+            terms.splice(..3, Equation::combine_3_terms_at(&terms, 0)?);
+        }
+        if terms.len() > 1 {
+            let e = format!("{} leftover term(s)", terms.len() - 1);
+            return Err(EquationError(e).into());
+        }
+        if let Term::Number(n) = terms[0] {
+            Ok(n)
+        } else {
+            Err(EquationError("final term is not a Number".to_string()).into())
+        }
+    }
+
+    fn reduce_subterms_advanced_math(terms: &Vec<Term>) -> Result<Vec<Term>> {
+        terms
+            .iter()
+            .map(|term| {
+                match term {
+                    Term::Number(n) => Ok(Term::Number(*n)),
+                    Term::Operator(op) => Ok(Term::Operator(*op)),
+                    Term::Subterm(eq) => {
+                        let n: i64 = eq.solve_advanced_math()?;
+                        Ok(Term::Number(n))
+                    },
+                }
+            })
+            .collect()
+    }
+
+    /// Solve equation left-to-right (without precedence).
     ///
     /// # Errors
     ///
@@ -147,7 +202,7 @@ impl Equation {
     pub fn solve(&self) -> Result<i64> {
         let mut terms: Vec<Term> = Equation::reduce_subterms(&self.terms)?;
         while terms.len() >= 3 {
-            terms.splice(..3, Equation::combine_first_3_terms(&terms)?);
+            terms.splice(..3, Equation::combine_3_terms_at(&terms, 0)?);
         }
         if terms.len() > 1 {
             let e = format!("{} leftover term(s)", terms.len() - 1);
@@ -176,8 +231,8 @@ impl Equation {
             .collect()
     }
 
-    fn combine_first_3_terms(terms: &Vec<Term>) -> Result<Vec<Term>> {
-        let combined_term = match &terms[0..3] {
+    fn combine_3_terms_at(terms: &Vec<Term>, i: usize) -> Result<Vec<Term>> {
+        let combined_term = match &terms[i..i+3] {
             [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => {
                 match op {
                     '+' => Term::Number(n1 + n2),
@@ -240,6 +295,22 @@ mod tests {
         assert_eq!(437, equations[1].solve().unwrap());
         assert_eq!(12240, equations[2].solve().unwrap());
         assert_eq!(13632, equations[3].solve().unwrap());
+    }
+
+    // 1 + (2 * 3) + (4 * (5 + 6)) still becomes 51.
+    // 2 * 3 + (4 * 5) becomes 46.
+    // 5 + (8 * 3 + 9 + 3 * 4 * 3) becomes 1445.
+    // 5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4)) becomes 669060.
+    // ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2 becomes 23340.
+
+    #[test]
+    fn test_solve_advanced_equations_with_subterms() {
+        let equations = Equation::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(4, equations.len());
+        assert_eq!(46, equations[0].solve_advanced_math().unwrap());
+        assert_eq!(1445, equations[1].solve_advanced_math().unwrap());
+        assert_eq!(669060, equations[2].solve_advanced_math().unwrap());
+        assert_eq!(23340, equations[3].solve_advanced_math().unwrap());
     }
 
     #[test]
