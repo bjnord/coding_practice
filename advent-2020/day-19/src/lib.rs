@@ -16,14 +16,13 @@ impl fmt::Display for RulesetError {
 
 impl std::error::Error for RulesetError {}
 
-// TODO RF: combine Sequence and Branch to Branch(Vec<Vec<usize>>)
-//      (Sequence just has one branch; Branch has two in our puzzle input)
+// TODO RF: replace Sequence with Branches(Vec<Vec<usize>>) of length 1
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Rule {
     None,
     Literal(char),
     Sequence(Vec<usize>),
-    Branch(Vec<usize>, Vec<usize>),
+    Branches(Vec<Vec<usize>>),
 }
 
 impl fmt::Display for Rule {
@@ -32,7 +31,13 @@ impl fmt::Display for Rule {
             Rule::None => write!(f, "_0_"),
             Rule::Literal(ch) => write!(f, "\"{}\"", ch),
             Rule::Sequence(s) => write!(f, "{:?}", s),
-            Rule::Branch(s1, s2) => write!(f, "{:?} | {:?}", s1, s2),
+            Rule::Branches(bb) => {
+                let ss: Vec<String> = bb
+                    .iter()
+                    .map(|b| format!("{:?}", b))
+                    .collect();
+                write!(f, "{}", ss.join(" | "))
+            },
         }
     }
 }
@@ -60,17 +65,17 @@ impl Rule {
             }
             if tokens[1].contains("|") {
                 let seqs: Vec<&str> = tokens[1].split(" | ").collect();
-                rules[n] = Rule::Branch(Rule::parse_seq(seqs[0])?,
-                    Rule::parse_seq(seqs[1])?);
+                rules[n] = Rule::Branches(vec![
+                    Rule::parse_seq(seqs[0])?,
+                    Rule::parse_seq(seqs[1])?,
+                ]);
                 continue;
             }
             rules[n] = Rule::Sequence(Rule::parse_seq(tokens[1])?);
         }
         if part2 {
-            // 8: 42 | 42 8
-            // 11: 42 31 | 42 11 31
-            rules[8] = Rule::Branch(vec![42], vec![42, 8]);
-            rules[11] = Rule::Branch(vec![42, 31], vec![42, 11, 31]);
+            rules[8] = Rule::Branches(vec![vec![42], vec![42, 8]]);
+            rules[11] = Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]);
         }
         Ok((max_n + 1, rules))
     }
@@ -163,12 +168,12 @@ impl Ruleset {
                 }
             },
             Rule::Sequence(seq) => self.match_seq(message, seq),
-            Rule::Branch(seq1, seq2) => {
+            Rule::Branches(seqs) => {
                 let mut remainders = vec![];
-                if let Some(rems) = self.match_seq(message, seq1) {
+                if let Some(rems) = self.match_seq(message, &seqs[0]) {
                     remainders.extend(rems);
                 }
-                if let Some(rems) = self.match_seq(message, seq2) {
+                if let Some(rems) = self.match_seq(message, &seqs[1]) {
                     remainders.extend(rems);
                 }
                 // FIXME uniqify
@@ -217,7 +222,7 @@ mod tests {
         assert_eq!(6, ruleset.n_rules);
         assert_eq!(5, ruleset.messages.len());
         assert_eq!(Rule::Sequence(vec![4, 1, 5]), ruleset.rules[0]);
-        assert_eq!(Rule::Branch(vec![4, 5], vec![5, 4]), ruleset.rules[3]);
+        assert_eq!(Rule::Branches(vec![vec![4, 5], vec![5, 4]]), ruleset.rules[3]);
         assert_eq!(Rule::Literal('b'), ruleset.rules[5]);
     }
 
@@ -233,8 +238,8 @@ mod tests {
     fn test_read_from_file_3_part2_rules() {
         let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
         assert_eq!(43, ruleset.n_rules);
-        assert_eq!(Rule::Branch(vec![42], vec![42, 8]), ruleset.rules[8]);
-        assert_eq!(Rule::Branch(vec![42, 31], vec![42, 11, 31]), ruleset.rules[11]);
+        assert_eq!(Rule::Branches(vec![vec![42], vec![42, 8]]), ruleset.rules[8]);
+        assert_eq!(Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]), ruleset.rules[11]);
     }
 
     #[test]
