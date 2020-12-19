@@ -31,11 +31,19 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    //let entries = Entry::read_from_file("input/input.txt", 4).unwrap();
+    let grid = InfiniteGrid::read_from_file("input/input.txt", 4).unwrap();
     let gen_time = start.elapsed();
-    //...
+    dump_round(0, &grid);  // initial state
+    let mut n_active: usize = 0;
+    for (i, g) in grid.iter().enumerate() {
+        dump_round(i + 1, &g);
+        if i + 1 >= N_ROUNDS {
+            n_active = g.active_cubes();
+            break;
+        }
+    }
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 1 - Part 2 : {} <=> 1692 expected", n_active);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

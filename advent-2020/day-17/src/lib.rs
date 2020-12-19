@@ -305,4 +305,20 @@ mod tests {
         }
         assert_eq!(112, n_active);
     }
+
+    #[test]
+    fn test_6_rounds_4d() {
+        // the full N_ROUNDS takes a while so:
+        let n_rounds = 1;  // = N_ROUNDS;
+        let grid = InfiniteGrid::from_input(TINY_LAYOUT, 4).unwrap();
+        let mut n_active: usize = 0;
+        for (i, g) in grid.iter().enumerate() {
+            if i >= n_rounds - 1 {
+                n_active = g.active_cubes();
+                break;
+            }
+        }
+        let expect = if n_rounds == 1 { 3*4 + 5 + 3*4 } else { 848 };
+        assert_eq!(expect, n_active);
+    }
 }
