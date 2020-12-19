@@ -39,12 +39,13 @@ impl fmt::Display for Rule {
 }
 
 impl Rule {
-    /// Read rules from `input` (list of lines).
+    /// Read rules from `input` (list of lines). If `part2` flag is set,
+    /// rules 8 and 11 are altered as specified in the puzzle description.
     ///
     /// # Errors
     ///
     /// Returns `Err` if a line is found with an invalid rule format.
-    pub fn from_input(input: &str) -> Result<(usize, Vec<Rule>)> {
+    pub fn from_input(input: &str, part2: bool) -> Result<(usize, Vec<Rule>)> {
         let mut max_n: usize = 0;
         let mut rules: Vec<Rule> = vec![Rule::None; MAX_RULES];
         for line in input.lines() {
@@ -65,6 +66,12 @@ impl Rule {
                 continue;
             }
             rules[n] = Rule::Sequence(Rule::parse_seq(tokens[1])?);
+        }
+        if part2 {
+            // 8: 42 | 42 8
+            // 11: 42 31 | 42 11 31
+            rules[8] = Rule::Branch(vec![42], vec![42, 8]);
+            rules[11] = Rule::Branch(vec![42, 31], vec![42, 11, 31]);
         }
         Ok((max_n + 1, rules))
     }
@@ -202,20 +209,22 @@ impl fmt::Display for Ruleset {
 }
 
 impl Ruleset {
-    /// Construct by reading rules and messages from file at `path`.
+    /// Construct by reading rules and messages from file at `path`. If
+    /// `part2` flag is set, rules 8 and 11 are altered as specified in
+    /// the puzzle description.
     ///
     /// # Errors
     ///
     /// Returns `Err` if the input file cannot be opened, or if the file
     /// has an invalid format.
-    pub fn read_from_file(path: &str) -> Result<Ruleset> {
+    pub fn read_from_file(path: &str, part2: bool) -> Result<Ruleset> {
         let s: String = fs::read_to_string(path)?;
         let sections: Vec<&str> = s.split("\n\n").collect();
         if sections.len() < 2 {
             let e = format!("expected two sections separated by blank line");
             return Err(RulesetError(e).into());
         }
-        let (n_rules, rules) = Rule::from_input(sections[0])?;
+        let (n_rules, rules) = Rule::from_input(sections[0], part2)?;
         let messages = sections[1].lines().map(|s| s.to_string()).collect();
         let root_node = MatchNode::from_rule(&rules[0], &rules);
         Ok(Self { rules, n_rules, root_node, messages })
@@ -237,7 +246,7 @@ mod tests {
 
     #[test]
     fn test_read_from_file_1() {
-        let ruleset = Ruleset::read_from_file("input/example1.txt").unwrap();
+        let ruleset = Ruleset::read_from_file("input/example1.txt", false).unwrap();
         assert_eq!(4, ruleset.n_rules);
         assert_eq!(4, ruleset.messages.len());
 //        eprintln!("example1 = {}", ruleset);
@@ -247,7 +256,7 @@ mod tests {
 
     #[test]
     fn test_read_from_file_2() {
-        let ruleset = Ruleset::read_from_file("input/example2.txt").unwrap();
+        let ruleset = Ruleset::read_from_file("input/example2.txt", false).unwrap();
         assert_eq!(6, ruleset.n_rules);
         assert_eq!(5, ruleset.messages.len());
         assert_eq!(Rule::Sequence(vec![4, 1, 5]), ruleset.rules[0]);
@@ -256,8 +265,24 @@ mod tests {
     }
 
     #[test]
+    fn test_read_from_file_3_part1_rules() {
+        let ruleset = Ruleset::read_from_file("input/example3.txt", false).unwrap();
+        assert_eq!(43, ruleset.n_rules);
+        assert_eq!(Rule::Sequence(vec![42]), ruleset.rules[8]);
+        assert_eq!(Rule::Sequence(vec![42, 31]), ruleset.rules[11]);
+    }
+
+//    #[test]
+//    fn test_read_from_file_3_part2_rules() {
+//        let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
+//        assert_eq!(43, ruleset.n_rules);
+//        assert_eq!(Rule::Branch(vec![42], vec![42, 8]), ruleset.rules[8]);
+//        assert_eq!(Rule::Branch(vec![42, 31], vec![42, 11, 31]), ruleset.rules[11]);
+//    }
+
+    #[test]
     fn test_read_from_file_no_file() {
-        let ruleset = Ruleset::read_from_file("input/example99.txt");
+        let ruleset = Ruleset::read_from_file("input/example99.txt", false);
         assert!(ruleset.is_err());
     }
 
@@ -265,30 +290,30 @@ mod tests {
     // see from_input() FIXME above
     #[should_panic]
     fn test_read_from_file_bad_sequence() {
-        let _result = Ruleset::read_from_file("input/bad1.txt");
+        let _result = Ruleset::read_from_file("input/bad1.txt", false);
     }
 
     #[test]
     fn test_read_from_file_no_sections() {
-        let result = Ruleset::read_from_file("input/bad2.txt");
+        let result = Ruleset::read_from_file("input/bad2.txt", false);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_match_count_1() {
-        let ruleset = Ruleset::read_from_file("input/example1.txt").unwrap();
+        let ruleset = Ruleset::read_from_file("input/example1.txt", false).unwrap();
         assert_eq!(2, ruleset.match_count());
     }
 
     #[test]
     fn test_match_count_2() {
-        let ruleset = Ruleset::read_from_file("input/example2.txt").unwrap();
+        let ruleset = Ruleset::read_from_file("input/example2.txt", false).unwrap();
         assert_eq!(2, ruleset.match_count());
     }
 
     #[test]
-    fn test_match_count_3_no_alter() {
-        let ruleset = Ruleset::read_from_file("input/example3.txt").unwrap();
+    fn test_match_count_3_part1_rules() {
+        let ruleset = Ruleset::read_from_file("input/example3.txt", false).unwrap();
         assert_eq!(3, ruleset.match_count());
     }
 }

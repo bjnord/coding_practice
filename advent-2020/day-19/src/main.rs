@@ -9,7 +9,7 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let ruleset = Ruleset::read_from_file("input/input.txt").unwrap();
+    let ruleset = Ruleset::read_from_file("input/input.txt", false).unwrap();
     let gen_time = start.elapsed();
     let answer = ruleset.match_count();
     let run_time = start.elapsed() - gen_time;
@@ -21,7 +21,7 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    //let entries = Entry::read_from_file("input/input.txt").unwrap();
+    let _ruleset = Ruleset::read_from_file("input/input.txt", true).unwrap();
     let gen_time = start.elapsed();
     //...
     let run_time = start.elapsed() - gen_time;
