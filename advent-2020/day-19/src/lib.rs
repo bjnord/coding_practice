@@ -150,40 +150,41 @@ impl Ruleset {
     }
 
     // Returns the remainders after matching a rule, or `None`.
+    //
+    // Due to branching, each rule match can return **multiple** remainders.
     fn match_rule<'a>(&self, rule_n: usize, message: &'a str) -> Option<Vec<&'a str>> {
         match &self.rules[rule_n] {
             Rule::None => panic!("no rule found"),
             Rule::Literal(ch) => {
-                let first = message.chars().nth(0);
-                if first.is_some() && first.unwrap() == *ch {
-                    Some(vec![&message[1..]])
-                } else {
-                    None
+                match message.chars().nth(0) {
+                    Some(ch0) if ch0 == *ch => Some(vec![&message[1..]]),
+                    _ => None,
                 }
             },
             Rule::Branches(seqs) => {
-                let mut remainders = vec![];
-                for seq in seqs {
-                    if let Some(rems) = self.match_sequence(message, &seq) {
-                        remainders.extend(rems);
-                    }
-                }
+                let remainders: Vec<&'a str> = seqs.iter()
+                    .filter_map(|seq| self.match_sequence(message, &seq))
+                    .flatten()
+                    .collect();
                 if remainders.is_empty() { None } else { Some(remainders) }
             },
         }
     }
 
-    // Returns the remainders after matching one or more rules in a
-    // sequence, or `None`.
+    // Returns the remainders after matching the rules in a sequence, or
+    // `None`.
+    //
+    // Due to branching, each rule match can return **multiple** remainders,
+    // **each** of which needs to be tested against the next rule in the
+    // sequence. So we replace `remainders` at each step; if a rule returns
+    // no remainders, the sequence cannot be matched and we return `None`.
     fn match_sequence<'a>(&self, message: &'a str, seq: &Vec<usize>) -> Option<Vec<&'a str>> {
         let mut remainders = vec![&message[..]];
         for rule_n in seq {
-            let mut new_remainders = vec![];
-            for rem in remainders {
-                if let Some(rems) = self.match_rule(*rule_n, rem) {
-                    new_remainders.extend(rems);
-                }
-            }
+            let new_remainders: Vec<&'a str> = remainders.iter()
+                .filter_map(|rem| self.match_rule(*rule_n, rem))
+                .flatten()
+                .collect();
             if new_remainders.is_empty() {
                 return None;
             }
