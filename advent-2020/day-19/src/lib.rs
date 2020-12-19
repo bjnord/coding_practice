@@ -168,7 +168,6 @@ impl Ruleset {
                         remainders.extend(rems);
                     }
                 }
-                // FIXME uniqify
                 if remainders.is_empty() { None } else { Some(remainders) }
             },
         }
