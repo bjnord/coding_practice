@@ -153,6 +153,18 @@ match fn(...) {
 let x = fn(...).unwrap();
 ```
 
+## Matching
+
+The [`matches!()` macro](https://doc.rust-lang.org/std/macro.matches.html) "Returns whether the given expression matches any of the given patterns" so you can do things like:
+
+```
+let foo = 'f';
+assert!(matches!(foo, 'A'..='Z' | 'a'..='z'));
+
+let bar = Some(4);
+assert!(matches!(bar, Some(x) if x > 2));
+```
+
 ## Regular Expressions
 
 To avoid (re)compiling the regex at runtime, best practices is to use the `lazy_static` macro (see [Avoid compiling the same regex in a loop](https://docs.rs/regex/1.3.9/regex/#example-avoid-compiling-the-same-regex-in-a-loop)):
@@ -314,6 +326,10 @@ let n = number.parse::<i32>().unwrap();
 ```
 
 The [scan\_fmt](https://docs.rs/scan_fmt/) crate provides `scanf()`-like functionality that combines tokenizing and type conversion.
+
+### Useful Functions
+
+- `.starts_with(pat)` where `pat` can be a `&str`, `char`, slice, or "closure that determines if a character matches"
 
 ## Vectors
 
