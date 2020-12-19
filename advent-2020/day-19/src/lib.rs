@@ -155,8 +155,8 @@ impl Ruleset {
         match &self.rules[rule_n] {
             Rule::None => panic!("no rule found"),
             Rule::Literal(ch) => {
-                let m_ch = message.chars().nth(0).unwrap();
-                if m_ch == *ch {
+                let first = message.chars().nth(0);
+                if first.is_some() && first.unwrap() == *ch {
                     //eprintln!("rule={} depth={} m[{}] Literal({}) *matched* rem[{}]", rule_n, depth, message, ch, &message[1..]);
                     Some(vec![&message[1..]])
                 } else {
@@ -234,13 +234,13 @@ mod tests {
         assert_eq!(Rule::Sequence(vec![42, 31]), ruleset.rules[11]);
     }
 
-//    #[test]
-//    fn test_read_from_file_3_part2_rules() {
-//        let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
-//        assert_eq!(43, ruleset.n_rules);
-//        assert_eq!(Rule::Branch(vec![42], vec![42, 8]), ruleset.rules[8]);
-//        assert_eq!(Rule::Branch(vec![42, 31], vec![42, 11, 31]), ruleset.rules[11]);
-//    }
+    #[test]
+    fn test_read_from_file_3_part2_rules() {
+        let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
+        assert_eq!(43, ruleset.n_rules);
+        assert_eq!(Rule::Branch(vec![42], vec![42, 8]), ruleset.rules[8]);
+        assert_eq!(Rule::Branch(vec![42, 31], vec![42, 11, 31]), ruleset.rules[11]);
+    }
 
     #[test]
     fn test_read_from_file_no_file() {
@@ -277,5 +277,11 @@ mod tests {
     fn test_match_count_3_part1_rules() {
         let ruleset = Ruleset::read_from_file("input/example3.txt", false).unwrap();
         assert_eq!(3, ruleset.match_count());
+    }
+
+    #[test]
+    fn test_match_count_3_part2_rules() {
+        let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
+        assert_eq!(12, ruleset.match_count());
     }
 }
