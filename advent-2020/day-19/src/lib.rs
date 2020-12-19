@@ -16,6 +16,9 @@ impl fmt::Display for RulesetError {
 
 impl std::error::Error for RulesetError {}
 
+// TODO RF: combine Sequence and Branch to Branch(Vec<Vec<usize>>)
+//      (Sequence just has one branch; Branch has two in our puzzle input)
+//      and replace MatchNode left and right with "branches" Vec
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Rule {
     None,
@@ -77,9 +80,107 @@ impl Rule {
 }
 
 #[derive(Debug)]
+pub struct MatchNode {
+    rule: Rule,
+    left: Vec<MatchNode>,
+    right: Vec<MatchNode>,
+}
+
+impl MatchNode {
+    pub fn from_rule(rule: &Rule, rules: &Vec<Rule>) -> MatchNode {
+        match rule {
+            Rule::None => panic!("no rule found"),
+            Rule::Literal(_) => {
+                MatchNode { rule: rule.clone(), left: vec![], right: vec![] }
+            },
+            Rule::Sequence(seq) => {
+                let left = seq.iter()
+                    .map(|n| MatchNode::from_rule(&rules[*n], rules))
+                    .collect();
+                MatchNode { rule: rule.clone(), left, right: vec![] }
+            },
+            Rule::Branch(seq_l, seq_r) => {
+                let left = seq_l.iter()
+                    .map(|n| MatchNode::from_rule(&rules[*n], rules))
+                    .collect();
+                let right = seq_r.iter()
+                    .map(|n| MatchNode::from_rule(&rules[*n], rules))
+                    .collect();
+                MatchNode { rule: rule.clone(), left, right }
+            },
+        }
+    }
+
+    /// Does the given `message` match the rules?
+    #[must_use]
+    pub fn matches(&self, message: &str) -> bool {
+        match self.match_next(0, message) {
+            Some(remainders) => {
+                remainders.iter().any(|&r| r == "")
+            },
+            None => false,
+        }
+    }
+
+    // Returns the remainders after matching one or more rule chains, or `None`.
+    fn match_next<'a>(&self, depth: usize, message: &'a str) -> Option<Vec<&'a str>> {
+        match &self.rule {
+            Rule::None => panic!("no rule found"),
+            Rule::Literal(ch) => {
+                let m_ch = message.chars().nth(0).unwrap();
+                if m_ch == *ch {
+                    //eprintln!("depth={} m[{}] Literal({}) *matched* rem[{}]", depth, message, ch, &message[1..]);
+                    Some(vec![&message[1..]])
+                } else {
+                    //eprintln!("depth={} m[{}] Literal({}) not matched", depth, message, ch);
+                    None
+                }
+            },
+            Rule::Sequence(_seq) => MatchNode::match_seq(depth, message, &self.left),
+            Rule::Branch(_seq1, _seq2) => {
+               let mut remainders = vec![];
+               if let Some(rems) = MatchNode::match_seq(depth, message, &self.left) {
+                   remainders.extend(rems);
+               }
+               if let Some(rems) = MatchNode::match_seq(depth, message, &self.right) {
+                   remainders.extend(rems);
+               }
+               // FIXME uniqify
+                if remainders.is_empty() {
+                    return None;
+                }
+                Some(remainders)
+            },
+        }
+    }
+
+    // Returns the remainders after matching one or more nodes, or `None`.
+    fn match_seq<'a>(depth: usize, message: &'a str, seq: &Vec<MatchNode>) -> Option<Vec<&'a str>> {
+        let mut remainders = vec![&message[..]];
+        for node in seq {
+            let mut new_remainders = vec![];
+            for rem in remainders {
+                if let Some(rems) = node.match_next(depth + 1, rem) {
+                    //eprintln!("depth={} rem[{}] Sequence *matched* rems[{:?}]", depth, rem, rems);
+                    new_remainders.extend(rems);
+                } else {
+                    //eprintln!("depth={} rem[{}] Sequence not matched", depth, rem);
+                }
+            }
+            if new_remainders.is_empty() {
+                return None;
+            }
+            remainders = new_remainders;
+        }
+        Some(remainders)
+    }
+}
+
+#[derive(Debug)]
 pub struct Ruleset {
     rules: Vec<Rule>,
     n_rules: usize,
+    root_node: MatchNode,
     messages: Vec<String>,
 }
 
@@ -116,7 +217,17 @@ impl Ruleset {
         }
         let (n_rules, rules) = Rule::from_input(sections[0])?;
         let messages = sections[1].lines().map(|s| s.to_string()).collect();
-        Ok(Self { rules, n_rules, messages })
+        let root_node = MatchNode::from_rule(&rules[0], &rules);
+        Ok(Self { rules, n_rules, root_node, messages })
+    }
+
+    /// How many messages match the rules?
+    #[must_use]
+    pub fn match_count(&self) -> usize {
+        self.messages
+            .iter()
+            .filter(|m| self.root_node.matches(m))
+            .count()
     }
 }
 
@@ -125,7 +236,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_read_from_file() {
+    fn test_read_from_file_1() {
+        let ruleset = Ruleset::read_from_file("input/example1.txt").unwrap();
+        assert_eq!(4, ruleset.n_rules);
+        assert_eq!(4, ruleset.messages.len());
+//        eprintln!("example1 = {}", ruleset);
+//        eprintln!("example1 match tree = {:#?}", ruleset.root_node);
+//        assert_eq!(false, true);
+    }
+
+    #[test]
+    fn test_read_from_file_2() {
         let ruleset = Ruleset::read_from_file("input/example2.txt").unwrap();
         assert_eq!(6, ruleset.n_rules);
         assert_eq!(5, ruleset.messages.len());
@@ -151,5 +272,17 @@ mod tests {
     fn test_read_from_file_no_sections() {
         let result = Ruleset::read_from_file("input/bad2.txt");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_match_count_1() {
+        let ruleset = Ruleset::read_from_file("input/example1.txt").unwrap();
+        assert_eq!(2, ruleset.match_count());
+    }
+
+    #[test]
+    fn test_match_count_2() {
+        let ruleset = Ruleset::read_from_file("input/example2.txt").unwrap();
+        assert_eq!(2, ruleset.match_count());
     }
 }
