@@ -55,8 +55,14 @@ impl fmt::Display for Term {
 
 impl Term {
     /// Combine tokens to form subterms.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the list of terms is invalid (_e.g._ too many
+    /// right parenthese)
+    #[allow(clippy::ptr_arg)]  // &[&str] doesn't work here
     pub fn combine_subterm_tokens(tokens: &Vec<&str>) -> Result<Vec<String>> {
-        let mut ctokens: Vec<String> = vec![];
+        let mut combined_tokens: Vec<String> = vec![];
         let mut subterm = String::new();
         let mut p_count = 0_usize;
         for token in tokens {
@@ -66,16 +72,16 @@ impl Term {
             }
             subterm += token;
             if p_count == 0 {
-                ctokens.push(subterm);
+                combined_tokens.push(subterm);
                 subterm = String::new();
             }
         }
-        Ok(ctokens)
+        Ok(combined_tokens)
     }
 
     fn adjusted_paren_count(p_count: usize, token: &str) -> Result<usize> {
-        let lp = token.matches("(").count();
-        let rp = token.matches(")").count();
+        let lp = token.matches('(').count();
+        let rp = token.matches(')').count();
         if rp > p_count + lp {
             let e = format!("right-parens={} exceeds paren-count={} + left-parens={}", rp, p_count, lp);
             return Err(EquationError(e).into());
@@ -94,8 +100,8 @@ impl FromStr for Equation {
 
     fn from_str(line: &str) -> Result<Self> {
         let tokens = line.split(' ').collect();
-        let ctokens = Term::combine_subterm_tokens(&tokens)?;
-        let terms: Result<Vec<Term>> = ctokens
+        let combined_tokens = Term::combine_subterm_tokens(&tokens)?;
+        let terms: Result<Vec<Term>> = combined_tokens
             .iter()
             .map(|s| &s[..])
             .map(str::parse)
@@ -185,7 +191,7 @@ impl Equation {
     // Solve all subterms in this list of terms (parenthesized subterms are
     // always highest-precedence). Returns a new list of terms, containing
     // only numbers and operators.
-    fn solve_subterms<F>(terms: &Vec<Term>, solver: F) -> Result<Vec<Term>>
+    fn solve_subterms<F>(terms: &[Term], solver: F) -> Result<Vec<Term>>
         where F: Fn(&Equation) -> Result<i64>
     {
         terms.iter()
@@ -203,7 +209,8 @@ impl Equation {
     // Return a new term list, which replaces the three `terms` at `i`
     // (number, operator, number) with the solution to that operation
     // (a number term).
-    fn combine_3_terms_at(terms: &Vec<Term>, i: usize) -> Result<Vec<Term>> {
+    #[allow(clippy::single_match_else)]  // too big for one line here
+    fn combine_3_terms_at(terms: &[Term], i: usize) -> Result<Vec<Term>> {
         let combined_term = match &terms[i..i+3] {
             [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => {
                 match op {
@@ -224,7 +231,7 @@ impl Equation {
     }
 
     // Convert lone remaining term to concrete integer.
-    fn answer(terms: &Vec<Term>) -> Result<i64> {
+    fn answer(terms: &[Term]) -> Result<i64> {
         if terms.len() > 1 {
             let e = format!("{} leftover term(s)", terms.len() - 1);
             return Err(EquationError(e).into());
@@ -378,8 +385,8 @@ mod tests {
     #[test]
     fn test_combine_subterm_tokens_simple() {
         let tokens = vec!["1", "*", "2", "+", "3", "*", "4"];
-        let ctokens = Term::combine_subterm_tokens(&tokens).unwrap();
-        let actual: Vec<&str> = ctokens.iter().map(|s| &s[..]).collect();
+        let combined_tokens = Term::combine_subterm_tokens(&tokens).unwrap();
+        let actual: Vec<&str> = combined_tokens.iter().map(|s| &s[..]).collect();
         assert_eq!(tokens, actual);
     }
 
@@ -387,8 +394,8 @@ mod tests {
     fn test_combine_subterm_tokens_one_level() {
         let tokens = vec!["1", "*", "(2", "+", "3)", "*", "4"];
         let expected = vec!["1", "*", "(2 + 3)", "*", "4"];
-        let ctokens = Term::combine_subterm_tokens(&tokens).unwrap();
-        let actual: Vec<&str> = ctokens.iter().map(|s| &s[..]).collect();
+        let combined_tokens = Term::combine_subterm_tokens(&tokens).unwrap();
+        let actual: Vec<&str> = combined_tokens.iter().map(|s| &s[..]).collect();
         assert_eq!(expected, actual);
     }
 
@@ -396,8 +403,8 @@ mod tests {
     fn test_combine_subterm_tokens_two_levels_front() {
         let tokens = vec!["1", "*", "((2", "+", "3)", "*", "5)", "*", "4"];
         let expected = vec!["1", "*", "((2 + 3) * 5)", "*", "4"];
-        let ctokens = Term::combine_subterm_tokens(&tokens).unwrap();
-        let actual: Vec<&str> = ctokens.iter().map(|s| &s[..]).collect();
+        let combined_tokens = Term::combine_subterm_tokens(&tokens).unwrap();
+        let actual: Vec<&str> = combined_tokens.iter().map(|s| &s[..]).collect();
         assert_eq!(expected, actual);
     }
 
