@@ -16,12 +16,10 @@ impl fmt::Display for RulesetError {
 
 impl std::error::Error for RulesetError {}
 
-// TODO RF: replace Sequence with Branches(Vec<Vec<usize>>) of length 1
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Rule {
     None,
     Literal(char),
-    Sequence(Vec<usize>),
     Branches(Vec<Vec<usize>>),
 }
 
@@ -30,7 +28,6 @@ impl fmt::Display for Rule {
         match self {
             Rule::None => write!(f, "_0_"),
             Rule::Literal(ch) => write!(f, "\"{}\"", ch),
-            Rule::Sequence(s) => write!(f, "{:?}", s),
             Rule::Branches(bb) => {
                 let ss: Vec<String> = bb
                     .iter()
@@ -61,17 +58,9 @@ impl Rule {
             if tokens[1].contains("\"") {
                 let ch = tokens[1].chars().nth(1).unwrap();
                 rules[n] = Rule::Literal(ch);
-                continue;
+            } else {
+                rules[n] = Rule::Branches(Rule::parse_branches(tokens[1])?);
             }
-            if tokens[1].contains("|") {
-                let seqs: Vec<&str> = tokens[1].split(" | ").collect();
-                rules[n] = Rule::Branches(vec![
-                    Rule::parse_seq(seqs[0])?,
-                    Rule::parse_seq(seqs[1])?,
-                ]);
-                continue;
-            }
-            rules[n] = Rule::Sequence(Rule::parse_seq(tokens[1])?);
         }
         if part2 {
             rules[8] = Rule::Branches(vec![vec![42], vec![42, 8]]);
@@ -80,11 +69,17 @@ impl Rule {
         Ok((max_n + 1, rules))
     }
 
+    fn parse_branches(branches: &str) -> Result<Vec<Vec<usize>>> {
+        branches.split(" | ")
+            .map(|seq| Rule::parse_sequence(seq))
+            .collect()
+    }
+
     // FIXME for some reason this collect() won't roll up a ParseIntError
     //       from parse() into a Box; had to short-circuit with unwrap()
-    fn parse_seq(seq: &str) -> Result<Vec<usize>> {
-        let rule_nos: Vec<usize> = seq.split(' ')
-            .map(|s| s.parse().unwrap())
+    fn parse_sequence(sequence: &str) -> Result<Vec<usize>> {
+        let rule_nos: Vec<usize> = sequence.split(' ')
+            .map(|rn| rn.parse().unwrap())
             .collect();
         Ok(rule_nos)
     }
@@ -167,27 +162,22 @@ impl Ruleset {
                     None
                 }
             },
-            Rule::Sequence(seq) => self.match_seq(message, seq),
             Rule::Branches(seqs) => {
                 let mut remainders = vec![];
-                if let Some(rems) = self.match_seq(message, &seqs[0]) {
-                    remainders.extend(rems);
-                }
-                if let Some(rems) = self.match_seq(message, &seqs[1]) {
-                    remainders.extend(rems);
+                for seq in seqs {
+                    if let Some(rems) = self.match_sequence(message, &seq) {
+                        remainders.extend(rems);
+                    }
                 }
                 // FIXME uniqify
-                if remainders.is_empty() {
-                    return None;
-                }
-                Some(remainders)
+                if remainders.is_empty() { None } else { Some(remainders) }
             },
         }
     }
 
     // Returns the remainders after matching one or more rules in a
     // sequence, or `None`.
-    fn match_seq<'a>(&self, message: &'a str, seq: &Vec<usize>) -> Option<Vec<&'a str>> {
+    fn match_sequence<'a>(&self, message: &'a str, seq: &Vec<usize>) -> Option<Vec<&'a str>> {
         let mut remainders = vec![&message[..]];
         for rule_n in seq {
             let mut new_remainders = vec![];
@@ -221,7 +211,7 @@ mod tests {
         let ruleset = Ruleset::read_from_file("input/example2.txt", false).unwrap();
         assert_eq!(6, ruleset.n_rules);
         assert_eq!(5, ruleset.messages.len());
-        assert_eq!(Rule::Sequence(vec![4, 1, 5]), ruleset.rules[0]);
+        assert_eq!(Rule::Branches(vec![vec![4, 1, 5]]), ruleset.rules[0]);
         assert_eq!(Rule::Branches(vec![vec![4, 5], vec![5, 4]]), ruleset.rules[3]);
         assert_eq!(Rule::Literal('b'), ruleset.rules[5]);
     }
@@ -230,8 +220,8 @@ mod tests {
     fn test_read_from_file_3_part1_rules() {
         let ruleset = Ruleset::read_from_file("input/example3.txt", false).unwrap();
         assert_eq!(43, ruleset.n_rules);
-        assert_eq!(Rule::Sequence(vec![42]), ruleset.rules[8]);
-        assert_eq!(Rule::Sequence(vec![42, 31]), ruleset.rules[11]);
+        assert_eq!(Rule::Branches(vec![vec![42]]), ruleset.rules[8]);
+        assert_eq!(Rule::Branches(vec![vec![42, 31]]), ruleset.rules[11]);
     }
 
     #[test]
