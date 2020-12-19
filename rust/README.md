@@ -61,6 +61,13 @@ error[E0308]: mismatched types
 
 The `impl` of a `struct` can use `Self` to refer to its own name; this keeps it DRY if you decide to rename it later.
 
+### Traits
+
+See [this helful answer](https://stackoverflow.com/a/31013156/291754) on the difference between `Copy` and `Clone`:
+
+- `Copy` is for things with a size known at compile-time, and which can be accurately duplicated using `memcpy`. Generally you can only use this for structures with primitive types like `i32`.
+- `Clone` allows the implementer to do arbitrarily complicated operations to create a new `T` that's a functional duplicate (within the context of this app). It could be shallow or deep.
+
 ## Error Handling
 
 MEME: Don't just mindlessly short-circuit error handling in the interest of implementation speed. Think carefully about whether a panic is acceptable, or if the error might happen in production and needs to be handled.
@@ -91,6 +98,20 @@ let r = fn(...).expect("Custom failure text");
 let r = fn(...).unwrap_or(value);
 let r = fn(...).unwrap_or_else(|error| {...});
 ```
+
+#### Simplifying `Result` With a Type
+
+[This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<..., ...>` with just `Result<...>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit.
+
+Putting this at the top of each file (exactly as shown, using `T` generically) allows all functions to declare the return as simply `Result<Foo>`:
+
+```
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+```
+
+If the error you want to propagate isn't already boxed, you can return `Err(Box::new(e))` or (cleaner) `e.into()` to "box the error" (where `e` is a specific error like `io::Error` or a custom error type).
+
+Standardizing this makes it easier to propagate errors up from multiple calls (see next section).
 
 #### Propagating Results
 
@@ -133,12 +154,6 @@ fn from_str(line: &str) -> Result<Self> {
     Ok(Self { values })
 }
 ```
-
-#### Simplifying Result With a Custom Type and Error
-
-[This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<T, ...>` with just `Result<T>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit. If the error you want to propagate isn't already boxed, you can return `Err(Box::new(e))` to "box the error" (where `e` is a specific error like `io::Error` or a custom error type).
-
-It also shows how to create a custom error (they call it `EmptyVec`), and how to define traits for it, such that a custom boxed error is easy to create when needed.
 
 #### Custom Errors
 
@@ -290,10 +305,10 @@ let s: String = fs::read_to_string("filename.txt").unwrap();
 
 The `str::parse()` function uses the `FromStr` trait to do its work; as long as Rust can infer the type wanted, it calls the appropriate `FromStr`. An example is:
 
-        type Result<MyStruct> = result::Result<MyStruct, Box<dyn error::Error>>;
+        type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
         impl FromStr for MyStruct {
-            type Err = Box<dyn error::Error>;
+            type Err = Box<dyn std::error::Error>;
             fn from_str(line: &str) -> Result<Self> {
                 // ...
             }
@@ -356,7 +371,7 @@ let n = number.parse::<i32>().unwrap();
 
 The [scan\_fmt](https://docs.rs/scan_fmt/) crate provides `scanf()`-like functionality that combines tokenizing and type conversion.
 
-### Useful Functions
+### Useful String Functions
 
 - `.starts_with(pat)` where `pat` can be a `&str`, `char`, slice, or "closure that determines if a character matches"
 
@@ -419,7 +434,12 @@ The [itertools](https://crates.io/crates/itertools) crate has a lot of extra fun
 - `.tuple_permutations()` and `.tuple_combinations()` which return vectors rather than iterators
 - `.tuple_windows(n)` which returns an iterator that produces tuples of n; _e.g._ with _2_ it will return `(1st_el, 2nd_el)`, then `(2nd_el, 3rd_el)`, etc. (this is similar to `Vec` `.windows(n)` which produces a new vector)
 - `.unique()` to filter out duplicates (`Vec` has `.dedup()` but that's an in-place mutation)
+- [`.multi_cartesian_product()`](https://docs.rs/itertools/0.6.0/itertools/macro.iproduct.html) can be used to replicate an iterator across multiple dimensions (for something like a 2D or 3D matrix); there is also an `iproduct!` macro
 
 ## Testing
 
-Rust's test system will soon be able to perform [benchmarking measurements](https://doc.rust-lang.org/unstable-book/library-features/test.html) for testing performance. As of Dec 2020 (Rust v1.46.0) this is currently an "unstable" feature.
+1. Unit tests suppress `stdout`/`stderr` for any test that passes; you can use something like `assert!(false);` in a test to force it to fail and see any debugging output.
+
+1. Use the `#[cfg(test)]` directive to mark functions that are only used for tests; this gets rid of "unused function" warnings when running the app. These functions will not appear in auto-generated documentation, so use `//` not `///` to document them.
+
+1. Rust's test system will soon be able to perform [benchmarking measurements](https://doc.rust-lang.org/unstable-book/library-features/test.html) for testing performance. As of Dec 2020 (Rust v1.46.0) this is currently an "unstable" feature.
