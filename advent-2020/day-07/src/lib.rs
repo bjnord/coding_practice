@@ -1,13 +1,11 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<Rules> = result::Result<Rules, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct RuleError(String);
@@ -18,7 +16,7 @@ impl fmt::Display for RuleError {
     }
 }
 
-impl error::Error for RuleError {}
+impl std::error::Error for RuleError {}
 
 #[derive(Debug)]
 pub struct Rule {
@@ -33,7 +31,7 @@ pub struct Rules {
 }
 
 impl FromStr for Rules {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     // complains about containe"r"_color and containe"d"_color
     #[allow(clippy::similar_names)]

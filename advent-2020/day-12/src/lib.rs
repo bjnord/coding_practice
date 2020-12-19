@@ -1,11 +1,9 @@
 #[macro_use] extern crate scan_fmt;
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<Instruction> = result::Result<Instruction, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct InstructionError(String);
@@ -16,7 +14,7 @@ impl fmt::Display for InstructionError {
     }
 }
 
-impl error::Error for InstructionError {}
+impl std::error::Error for InstructionError {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ActionValue {
@@ -39,7 +37,7 @@ pub struct Ferry {
 }
 
 impl FromStr for Instruction {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let (action_char, value) = scan_fmt!(line, "{[NSEWLRF]}{d}", char, i32)?;

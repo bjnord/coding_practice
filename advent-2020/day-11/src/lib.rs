@@ -1,10 +1,8 @@
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<SeatLayout> = result::Result<SeatLayout, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Seat {
@@ -44,7 +42,7 @@ impl Seat {
 }
 
 impl FromStr for SeatLayout {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     #[allow(clippy::cast_possible_truncation)]
     #[allow(clippy::cast_possible_wrap)]

@@ -1,10 +1,8 @@
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<Program> = result::Result<Program, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct InstructionError(String);
@@ -15,7 +13,7 @@ impl fmt::Display for InstructionError {
     }
 }
 
-impl error::Error for InstructionError {}
+impl std::error::Error for InstructionError {}
 
 #[derive(Debug)]
 pub struct Instruction {
@@ -34,7 +32,7 @@ pub enum HaltType {
 }
 
 impl FromStr for Program {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(input: &str) -> Result<Self> {
         let instructions = input

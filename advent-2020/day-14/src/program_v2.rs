@@ -1,11 +1,9 @@
 use crate::memory::Memory;
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<InstructionV2> = result::Result<InstructionV2, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct InstructionV2Error(String);
@@ -16,7 +14,7 @@ impl fmt::Display for InstructionV2Error {
     }
 }
 
-impl error::Error for InstructionV2Error {}
+impl std::error::Error for InstructionV2Error {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InstructionV2Value {
@@ -38,7 +36,7 @@ pub struct ProgramV2 {
 }
 
 impl FromStr for InstructionV2 {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let instruction = match &line[0..3] {

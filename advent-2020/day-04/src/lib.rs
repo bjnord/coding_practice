@@ -1,13 +1,11 @@
 use itertools::Itertools;
 use std::collections::HashSet;
-use std::error;
 use std::fmt;
 use std::fs;
 use std::io::{self, ErrorKind};
-use std::result;
 use std::str::FromStr;
 
-type Result<Passport> = result::Result<Passport, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct PassportError(String);
@@ -18,7 +16,7 @@ impl fmt::Display for PassportError {
     }
 }
 
-impl error::Error for PassportError {}
+impl std::error::Error for PassportError {}
 
 #[derive(Debug, Clone)]
 pub struct Field {
@@ -32,7 +30,7 @@ pub struct Passport {
 }
 
 impl FromStr for Passport {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(block: &str) -> Result<Self> {
         let line = block.replace("\n", " ");

@@ -1,13 +1,11 @@
 use custom_error::custom_error;
 use itertools::Itertools;
-use std::error;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
 pub const ENTRY_SUM: i32 = 2020;
 
-type Result<Entry> = result::Result<Entry, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 custom_error!{#[derive(PartialEq)]
     pub SolutionError
@@ -20,7 +18,7 @@ pub struct Entry {
 }
 
 impl FromStr for Entry {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let amount: i32 = line.parse()?;

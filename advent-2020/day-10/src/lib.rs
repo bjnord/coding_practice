@@ -1,9 +1,7 @@
-use std::error;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<Adapter> = result::Result<Adapter, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Adapter {
@@ -17,7 +15,7 @@ pub struct AdapterSet {
 }
 
 impl FromStr for Adapter {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let joltage: u32 = line.parse()?;

@@ -1,11 +1,9 @@
 use itertools::Itertools;
 use std::collections::VecDeque;
-use std::error;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<Entry> = result::Result<Entry, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Entry {
@@ -19,7 +17,7 @@ pub struct XmasList {
 }
 
 impl FromStr for Entry {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(line: &str) -> Result<Self> {
         let value: u64 = line.parse()?;

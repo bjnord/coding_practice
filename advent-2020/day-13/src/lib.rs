@@ -1,13 +1,11 @@
 mod rosetta;
 
 use rosetta::chinese_remainder;
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<BusSchedule> = result::Result<BusSchedule, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct BusScheduleError(String);
@@ -18,7 +16,7 @@ impl fmt::Display for BusScheduleError {
     }
 }
 
-impl error::Error for BusScheduleError {}
+impl std::error::Error for BusScheduleError {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Bus {
@@ -54,7 +52,7 @@ impl Bus {
 }
 
 impl FromStr for BusSchedule {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(block: &str) -> Result<Self> {
         let fields: Vec<&str> = block.trim().split('\n').take(2).collect();

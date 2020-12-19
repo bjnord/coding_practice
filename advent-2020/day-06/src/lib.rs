@@ -1,12 +1,10 @@
 #[macro_use] extern crate maplit;
 
 use std::collections::HashMap;
-use std::error;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<Group> = result::Result<Group, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug)]
 pub struct Group {
@@ -15,7 +13,7 @@ pub struct Group {
 }
 
 impl FromStr for Group {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     /// # Examples
     ///

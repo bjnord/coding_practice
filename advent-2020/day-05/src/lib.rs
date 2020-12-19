@@ -1,11 +1,9 @@
 use itertools::Itertools;
-use std::error;
 use std::fmt;
 use std::fs;
-use std::result;
 use std::str::FromStr;
 
-type Result<BoardingPass> = result::Result<BoardingPass, Box<dyn error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone)]
 struct BoardingPassError(String);
@@ -16,7 +14,7 @@ impl fmt::Display for BoardingPassError {
     }
 }
 
-impl error::Error for BoardingPassError {}
+impl std::error::Error for BoardingPassError {}
 
 #[derive(Debug, Clone)]
 pub struct BoardingPass {
@@ -25,7 +23,7 @@ pub struct BoardingPass {
 }
 
 impl FromStr for BoardingPass {
-    type Err = Box<dyn error::Error>;
+    type Err = Box<dyn std::error::Error>;
 
     /// # Examples
     ///
