@@ -145,32 +145,38 @@ impl Equation {
     ///
     /// Returns `Err` if the equation terms do not form a valid equation.
     pub fn solve(&self) -> Result<i64> {
-        let mut buffer: Vec<Term> = vec![];
-        for term in &self.terms {
-            buffer.push(match term {
-                Term::Number(n) => Term::Number(*n),
-                Term::Operator(op) => Term::Operator(*op),
-                Term::Subterm(eq) => {
-                    let n: i64 = eq.solve()?;
-                    Term::Number(n)
-                },
-            });
-            if buffer.len() == 3 {
-                buffer = Equation::combine_3(buffer)?;
-            }
+        let mut terms: Vec<Term> = Equation::reduce_subterms(&self.terms)?;
+        while terms.len() >= 3 {
+            terms.splice(..3, Equation::combine_first_3_terms(&terms)?);
         }
-        if buffer.len() > 1 {
-            let e = format!("{} leftover term(s)", buffer.len() - 1);
+        if terms.len() > 1 {
+            let e = format!("{} leftover term(s)", terms.len() - 1);
             return Err(EquationError(e).into());
         }
-        if let Term::Number(n) = buffer[0] {
+        if let Term::Number(n) = terms[0] {
             Ok(n)
         } else {
             Err(EquationError("final term is not a Number".to_string()).into())
         }
     }
 
-    fn combine_3(terms: Vec<Term>) -> Result<Vec<Term>> {
+    fn reduce_subterms(terms: &Vec<Term>) -> Result<Vec<Term>> {
+        terms
+            .iter()
+            .map(|term| {
+                match term {
+                    Term::Number(n) => Ok(Term::Number(*n)),
+                    Term::Operator(op) => Ok(Term::Operator(*op)),
+                    Term::Subterm(eq) => {
+                        let n: i64 = eq.solve()?;
+                        Ok(Term::Number(n))
+                    },
+                }
+            })
+            .collect()
+    }
+
+    fn combine_first_3_terms(terms: &Vec<Term>) -> Result<Vec<Term>> {
         let combined_term = match &terms[0..3] {
             [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => {
                 match op {
