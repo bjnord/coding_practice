@@ -145,92 +145,64 @@ impl Equation {
     ///
     /// Returns `Err` if the equation terms do not form a valid equation.
     pub fn solve_advanced_math(&self) -> Result<i64> {
-        let mut terms: Vec<Term> = Equation::reduce_subterms_advanced_math(&self.terms)?;
-        // reduce all the N + M, leaving only multiply operators
+        let solver = |eq: &Equation| eq.solve_advanced_math();
+        let mut terms: Vec<Term> = Equation::solve_subterms(&self.terms, solver)?;
+        // solve all the N + M, leaving only multiply operators
         while terms.len() >= 3 {
             let add_pos = terms
                 .iter()
-                .position(|t| {
-                    if let Term::Operator(op) = t {
-                        *op == '+'
-                    } else {
-                        false
-                    }
+                .position(|t| match t {
+                    Term::Operator(op) => *op == '+',
+                    _ => false,
                 });
             if let Some(i) = add_pos {
                 terms.splice(i-1..i+2, Equation::combine_3_terms_at(&terms, i-1)?);
             } else {
-                break;
+                break;  // no more add operators
             }
         }
         // solve the remaining terms (all multiply operators)
         while terms.len() >= 3 {
             terms.splice(..3, Equation::combine_3_terms_at(&terms, 0)?);
         }
-        if terms.len() > 1 {
-            let e = format!("{} leftover term(s)", terms.len() - 1);
-            return Err(EquationError(e).into());
-        }
-        if let Term::Number(n) = terms[0] {
-            Ok(n)
-        } else {
-            Err(EquationError("final term is not a Number".to_string()).into())
-        }
+        Equation::answer(&terms)
     }
 
-    fn reduce_subterms_advanced_math(terms: &Vec<Term>) -> Result<Vec<Term>> {
-        terms
-            .iter()
-            .map(|term| {
-                match term {
-                    Term::Number(n) => Ok(Term::Number(*n)),
-                    Term::Operator(op) => Ok(Term::Operator(*op)),
-                    Term::Subterm(eq) => {
-                        let n: i64 = eq.solve_advanced_math()?;
-                        Ok(Term::Number(n))
-                    },
-                }
-            })
-            .collect()
-    }
-
-    /// Solve equation left-to-right (without precedence).
+    /// Solve equation left-to-right (with equal precedence of `+` and `*`).
     ///
     /// # Errors
     ///
     /// Returns `Err` if the equation terms do not form a valid equation.
     pub fn solve(&self) -> Result<i64> {
-        let mut terms: Vec<Term> = Equation::reduce_subterms(&self.terms)?;
+        let solver = |eq: &Equation| eq.solve();
+        let mut terms: Vec<Term> = Equation::solve_subterms(&self.terms, solver)?;
         while terms.len() >= 3 {
             terms.splice(..3, Equation::combine_3_terms_at(&terms, 0)?);
         }
-        if terms.len() > 1 {
-            let e = format!("{} leftover term(s)", terms.len() - 1);
-            return Err(EquationError(e).into());
-        }
-        if let Term::Number(n) = terms[0] {
-            Ok(n)
-        } else {
-            Err(EquationError("final term is not a Number".to_string()).into())
-        }
+        Equation::answer(&terms)
     }
 
-    fn reduce_subterms(terms: &Vec<Term>) -> Result<Vec<Term>> {
-        terms
-            .iter()
-            .map(|term| {
-                match term {
-                    Term::Number(n) => Ok(Term::Number(*n)),
-                    Term::Operator(op) => Ok(Term::Operator(*op)),
-                    Term::Subterm(eq) => {
-                        let n: i64 = eq.solve()?;
-                        Ok(Term::Number(n))
-                    },
-                }
+    // Solve all subterms in this list of terms (parenthesized subterms are
+    // always highest-precedence). Returns a new list of terms, containing
+    // only numbers and operators.
+    fn solve_subterms<F>(terms: &Vec<Term>, solver: F) -> Result<Vec<Term>>
+        where F: Fn(&Equation) -> Result<i64>
+    {
+        terms.iter()
+            .map(|term| match term {
+                Term::Number(n) => Ok(Term::Number(*n)),
+                Term::Operator(op) => Ok(Term::Operator(*op)),
+                Term::Subterm(eq) => {
+                    let n: i64 = solver(&eq)?;
+                    Ok(Term::Number(n))
+                },
             })
             .collect()
     }
 
+    // Return a new term list, which replaces the three `terms` at `i`
+    // (number, operator, number) with the solution to that operation
+    // (a number term).
     fn combine_3_terms_at(terms: &Vec<Term>, i: usize) -> Result<Vec<Term>> {
         let combined_term = match &terms[i..i+3] {
             [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => {
@@ -249,6 +221,19 @@ impl Equation {
             },
         };
         Ok(vec![combined_term])
+    }
+
+    // Convert lone remaining term to concrete integer.
+    fn answer(terms: &Vec<Term>) -> Result<i64> {
+        if terms.len() > 1 {
+            let e = format!("{} leftover term(s)", terms.len() - 1);
+            return Err(EquationError(e).into());
+        }
+        if let Term::Number(n) = terms[0] {
+            Ok(n)
+        } else {
+            Err(EquationError("final term is not a Number".to_string()).into())
+        }
     }
 }
 
