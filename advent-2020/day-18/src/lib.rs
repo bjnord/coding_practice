@@ -101,15 +101,12 @@ impl FromStr for Equation {
     fn from_str(line: &str) -> Result<Self> {
         let tokens = line.split(' ').collect();
         let combined_tokens = Term::combine_subterm_tokens(&tokens)?;
-        let terms: Result<Vec<Term>> = combined_tokens
+        let terms: Vec<Term> = combined_tokens
             .iter()
             .map(|s| &s[..])
             .map(str::parse)
-            .collect();
-        match terms {
-            Err(e) => Err(e),
-            Ok(t) => Ok(Self { terms: t }),
-        }
+            .collect::<Result<Vec<Term>>>()?;
+        Ok(Self { terms })
     }
 }
 
