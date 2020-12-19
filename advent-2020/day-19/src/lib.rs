@@ -1,5 +1,6 @@
 use std::fmt;
 use std::fs;
+use std::string;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -52,7 +53,7 @@ impl Rule {
         for line in input.lines() {
             let tokens: Vec<&str> = line.split(": ").collect();
             let n: usize = tokens[0].parse()?;
-            if tokens[1].starts_with("\"") {
+            if tokens[1].starts_with('"') {
                 let ch = tokens[1].chars().nth(1).unwrap();
                 rules[n] = Rule::Literal(ch);
             } else {
@@ -92,7 +93,7 @@ impl fmt::Display for Ruleset {
             }
         }
         s += "\n";
-        for message in self.messages.iter() {
+        for message in &self.messages {
             s += &format!("{}\n", message);
         }
         write!(f, "{}", s)
@@ -121,11 +122,13 @@ impl Ruleset {
         let s: String = fs::read_to_string(path)?;
         let sections: Vec<&str> = s.split("\n\n").collect();
         if sections.len() < 2 {
-            let e = format!("expected two sections separated by blank line");
+            let e = String::from("expected two sections separated by blank line");
             return Err(RulesetError(e).into());
         }
         let rules = Rule::from_input(sections[0], part2)?;
-        let messages = sections[1].lines().map(|s| s.to_string()).collect();
+        let messages = sections[1].lines()
+            .map(string::ToString::to_string)
+            .collect();
         Ok(Self { rules, messages })
     }
 
@@ -156,7 +159,7 @@ impl Ruleset {
         match &self.rules[rule_n] {
             Rule::None => panic!("no rule found"),
             Rule::Literal(ch) => {
-                match message.chars().nth(0) {
+                match message.chars().next() {
                     Some(ch0) if ch0 == *ch => Some(vec![&message[1..]]),
                     _ => None,
                 }
@@ -178,7 +181,7 @@ impl Ruleset {
     // **each** of which needs to be tested against the next rule in the
     // sequence. So we replace `remainders` at each step; if a rule returns
     // no remainders, the sequence cannot be matched and we return `None`.
-    fn match_sequence<'a>(&self, message: &'a str, seq: &Vec<usize>) -> Option<Vec<&'a str>> {
+    fn match_sequence<'a>(&self, message: &'a str, seq: &[usize]) -> Option<Vec<&'a str>> {
         let mut remainders = vec![&message[..]];
         for rule_n in seq {
             let new_remainders: Vec<&'a str> = remainders.iter()
