@@ -285,4 +285,10 @@ mod tests {
         let ruleset = Ruleset::read_from_file("input/example2.txt").unwrap();
         assert_eq!(2, ruleset.match_count());
     }
+
+    #[test]
+    fn test_match_count_3_no_alter() {
+        let ruleset = Ruleset::read_from_file("input/example3.txt").unwrap();
+        assert_eq!(3, ruleset.match_count());
+    }
 }
