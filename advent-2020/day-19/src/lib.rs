@@ -142,7 +142,7 @@ impl Ruleset {
     /// Does the given `message` match the rules?
     #[must_use]
     pub fn matches(&self, message: &str) -> bool {
-        match self.match_rule(0, 0, message) {
+        match self.match_rule(0, message) {
             Some(remainders) => {
                 remainders.iter().any(|&r| r == "")
             },
@@ -151,26 +151,24 @@ impl Ruleset {
     }
 
     // Returns the remainders after matching a rule, or `None`.
-    fn match_rule<'a>(&self, depth: usize, rule_n: usize, message: &'a str) -> Option<Vec<&'a str>> {
+    fn match_rule<'a>(&self, rule_n: usize, message: &'a str) -> Option<Vec<&'a str>> {
         match &self.rules[rule_n] {
             Rule::None => panic!("no rule found"),
             Rule::Literal(ch) => {
                 let first = message.chars().nth(0);
                 if first.is_some() && first.unwrap() == *ch {
-                    //eprintln!("rule={} depth={} m[{}] Literal({}) *matched* rem[{}]", rule_n, depth, message, ch, &message[1..]);
                     Some(vec![&message[1..]])
                 } else {
-                    //eprintln!("rule={} depth={} m[{}] Literal({}) not matched", rule_n, depth, message, ch);
                     None
                 }
             },
-            Rule::Sequence(seq) => self.match_seq(depth, message, seq),
+            Rule::Sequence(seq) => self.match_seq(message, seq),
             Rule::Branch(seq1, seq2) => {
                 let mut remainders = vec![];
-                if let Some(rems) = self.match_seq(depth, message, seq1) {
+                if let Some(rems) = self.match_seq(message, seq1) {
                     remainders.extend(rems);
                 }
-                if let Some(rems) = self.match_seq(depth, message, seq2) {
+                if let Some(rems) = self.match_seq(message, seq2) {
                     remainders.extend(rems);
                 }
                 // FIXME uniqify
@@ -184,16 +182,13 @@ impl Ruleset {
 
     // Returns the remainders after matching one or more rules in a
     // sequence, or `None`.
-    fn match_seq<'a>(&self, depth: usize, message: &'a str, seq: &Vec<usize>) -> Option<Vec<&'a str>> {
+    fn match_seq<'a>(&self, message: &'a str, seq: &Vec<usize>) -> Option<Vec<&'a str>> {
         let mut remainders = vec![&message[..]];
         for rule_n in seq {
             let mut new_remainders = vec![];
             for rem in remainders {
-                if let Some(rems) = self.match_rule(depth + 1, *rule_n, rem) {
-                    //eprintln!("rule={} depth={} rem[{}] Sequence *matched* rems[{:?}]", rule_n, depth, rem, rems);
+                if let Some(rems) = self.match_rule(*rule_n, rem) {
                     new_remainders.extend(rems);
-                } else {
-                    //eprintln!("rule={} depth={} rem[{}] Sequence not matched", rule_n, depth, rem);
                 }
             }
             if new_remainders.is_empty() {
