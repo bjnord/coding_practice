@@ -46,16 +46,13 @@ impl Rule {
     /// # Errors
     ///
     /// Returns `Err` if a line is found with an invalid rule format.
-    pub fn from_input(input: &str, part2: bool) -> Result<(usize, Vec<Rule>)> {
-        let mut max_n: usize = 0;
+    pub fn from_input(input: &str, part2: bool) -> Result<Vec<Rule>> {
+        // rules is a sparse array, so we preallocate with empty slots
         let mut rules: Vec<Rule> = vec![Rule::None; MAX_RULES];
         for line in input.lines() {
             let tokens: Vec<&str> = line.split(": ").collect();
             let n: usize = tokens[0].parse()?;
-            if n > max_n {
-                max_n = n;
-            }
-            if tokens[1].contains("\"") {
+            if tokens[1].starts_with("\"") {
                 let ch = tokens[1].chars().nth(1).unwrap();
                 rules[n] = Rule::Literal(ch);
             } else {
@@ -66,7 +63,7 @@ impl Rule {
             rules[8] = Rule::Branches(vec![vec![42], vec![42, 8]]);
             rules[11] = Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]);
         }
-        Ok((max_n + 1, rules))
+        Ok(rules)
     }
 
     fn parse_branches(branches: &str) -> Result<Vec<Vec<usize>>> {
@@ -88,7 +85,6 @@ impl Rule {
 #[derive(Debug)]
 pub struct Ruleset {
     rules: Vec<Rule>,
-    n_rules: usize,
     messages: Vec<String>,
 }
 
@@ -96,10 +92,9 @@ impl fmt::Display for Ruleset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
         for (i, rule) in self.rules.iter().enumerate() {
-            if i >= self.n_rules {
-                break;
+            if let Rule::None = rule { } else {
+                s += &format!("{}: {}\n", i, rule);
             }
-            s += &format!("{}: {}\n", i, rule);
         }
         s += "\n";
         for message in self.messages.iter() {
@@ -110,6 +105,15 @@ impl fmt::Display for Ruleset {
 }
 
 impl Ruleset {
+    /// Returns number of rules.
+    #[cfg(test)]
+    #[must_use]
+    pub fn n_rules(&self) -> usize {
+        self.rules.iter().fold(0, |count, r| {
+            if let Rule::None = r { count } else { count + 1 }
+        })
+    }
+
     /// Construct by reading rules and messages from file at `path`. If
     /// `part2` flag is set, rules 8 and 11 are altered as specified in
     /// the puzzle description.
@@ -125,9 +129,9 @@ impl Ruleset {
             let e = format!("expected two sections separated by blank line");
             return Err(RulesetError(e).into());
         }
-        let (n_rules, rules) = Rule::from_input(sections[0], part2)?;
+        let rules = Rule::from_input(sections[0], part2)?;
         let messages = sections[1].lines().map(|s| s.to_string()).collect();
-        Ok(Self { rules, n_rules, messages })
+        Ok(Self { rules, messages })
     }
 
     /// How many messages match the rules?
@@ -202,14 +206,14 @@ mod tests {
     #[test]
     fn test_read_from_file_1() {
         let ruleset = Ruleset::read_from_file("input/example1.txt", false).unwrap();
-        assert_eq!(4, ruleset.n_rules);
+        assert_eq!(4, ruleset.n_rules());
         assert_eq!(4, ruleset.messages.len());
     }
 
     #[test]
     fn test_read_from_file_2() {
         let ruleset = Ruleset::read_from_file("input/example2.txt", false).unwrap();
-        assert_eq!(6, ruleset.n_rules);
+        assert_eq!(6, ruleset.n_rules());
         assert_eq!(5, ruleset.messages.len());
         assert_eq!(Rule::Branches(vec![vec![4, 1, 5]]), ruleset.rules[0]);
         assert_eq!(Rule::Branches(vec![vec![4, 5], vec![5, 4]]), ruleset.rules[3]);
@@ -219,7 +223,7 @@ mod tests {
     #[test]
     fn test_read_from_file_3_part1_rules() {
         let ruleset = Ruleset::read_from_file("input/example3.txt", false).unwrap();
-        assert_eq!(43, ruleset.n_rules);
+        assert_eq!(31, ruleset.n_rules());
         assert_eq!(Rule::Branches(vec![vec![42]]), ruleset.rules[8]);
         assert_eq!(Rule::Branches(vec![vec![42, 31]]), ruleset.rules[11]);
     }
@@ -227,7 +231,7 @@ mod tests {
     #[test]
     fn test_read_from_file_3_part2_rules() {
         let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
-        assert_eq!(43, ruleset.n_rules);
+        assert_eq!(31, ruleset.n_rules());
         assert_eq!(Rule::Branches(vec![vec![42], vec![42, 8]]), ruleset.rules[8]);
         assert_eq!(Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]), ruleset.rules[11]);
     }
