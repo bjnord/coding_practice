@@ -315,6 +315,17 @@ let n = number.parse::<i32>().unwrap();
 
 The [scan\_fmt](https://docs.rs/scan_fmt/) crate provides `scanf()`-like functionality that combines tokenizing and type conversion.
 
+## Vectors
+
+1. Rust always uses the `usize` type for indexing, so calls like `my_string.len()` return `usize`, and vectors expect to be indexed by a `usize`, etc.
+1. One trick when needing to subtract from a `usize` is to use the `.wrapping_sub(i)` function:
+
+```
+    let i: usize = 0;
+    // this returns `None` since 0 - 1 = usize::MAX
+    let el = v[i.wrapping_sub(1)].get();
+```
+
 ## Using Iterators
 
 1. MEME: Length of a vector is `vec.len()` (think math), count of items in iterator is `iter.count()` (and it walks the iterator to do so; think counting people as they slowly walk by).
