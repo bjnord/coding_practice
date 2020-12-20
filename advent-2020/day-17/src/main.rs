@@ -48,6 +48,7 @@ fn part2() {
     println!("    runner: {:?}", run_time);
 }
 
+#[allow(clippy::absurd_extreme_comparisons)]
 fn dump_round(i: usize, grid: &InfiniteGrid) {
     if DUMP_N_ROUNDS > 0 && i <= DUMP_N_ROUNDS {
         println!("== ROUND {} EDGE {} ==", i, grid.edge());
