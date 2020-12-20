@@ -61,11 +61,9 @@ pub struct Border {
     tile_id: u32,
     orientation: Orientation,
     kind: BorderKind,
+    edge: usize,
     pattern: u32,
 }
-
-// FIXME breaks our ability to support multiple tile sizes
-const FIXED_WIDTH: usize = 10;
 
 impl fmt::Display for Border {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -75,7 +73,9 @@ impl fmt::Display for Border {
             BorderKind::Bottom => "Bottom",
             BorderKind::Left => "Left",
         };
-        let display = format!("Tile {} - {} - {} {}", self.tile_id, self.orientation, kind, Border::pattern_string(self.pattern, FIXED_WIDTH));
+        let display = format!("Tile {} - {} - {} {}",
+            self.tile_id, self.orientation, kind,
+            Border::pattern_string(self.pattern, self.edge));
         write!(f, "{}", display)
     }
 }
@@ -235,10 +235,10 @@ impl Tile {
                 flip_patterns[3] = Tile::invert(patterns[1], self.height);
             },
         }
-        let top = Border { tile_id: self.id, orientation, kind: BorderKind::Top, pattern: flip_patterns[0] };
-        let right = Border { tile_id: self.id, orientation, kind: BorderKind::Right, pattern: flip_patterns[1] };
-        let bottom = Border { tile_id: self.id, orientation, kind: BorderKind::Bottom, pattern: flip_patterns[2] };
-        let left = Border { tile_id: self.id, orientation, kind: BorderKind::Left, pattern: flip_patterns[3] };
+        let top = Border { tile_id: self.id, orientation, kind: BorderKind::Top, edge: self.width, pattern: flip_patterns[0] };
+        let right = Border { tile_id: self.id, orientation, kind: BorderKind::Right, edge: self.height, pattern: flip_patterns[1] };
+        let bottom = Border { tile_id: self.id, orientation, kind: BorderKind::Bottom, edge: self.width, pattern: flip_patterns[2] };
+        let left = Border { tile_id: self.id, orientation, kind: BorderKind::Left, edge: self.height, pattern: flip_patterns[3] };
         vec![top, right, bottom, left]
     }
 
@@ -366,7 +366,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -377,7 +377,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -388,7 +388,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0_FLIPY, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -399,7 +399,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90_FLIPY, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -411,7 +411,7 @@ mod tests {
 //        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
 //        let actual: Vec<String> = tile.borders_of(Tile::ORI_FLIPY_ROT90, &tile.naturals())
 //            .iter()
-//            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+//            .map(|border| Border::pattern_string(border.pattern, border.edge))
 //            .collect();
 //        assert_eq!(expect, actual);
 //    }
@@ -422,7 +422,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0_FLIPX, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -433,7 +433,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90_FLIPX, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -445,7 +445,7 @@ mod tests {
 //        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
 //        let actual: Vec<String> = tile.borders_of(Tile::ORI_FLIPX_ROT90, &tile.naturals())
 //            .iter()
-//            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+//            .map(|border| Border::pattern_string(border.pattern, border.edge))
 //            .collect();
 //        assert_eq!(expect, actual);
 //    }
@@ -456,7 +456,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0_FLIPXY, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -467,7 +467,7 @@ mod tests {
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
         let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90_FLIPXY, &tile.naturals())
             .iter()
-            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+            .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
         assert_eq!(expect, actual);
     }
@@ -479,7 +479,7 @@ mod tests {
 //        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
 //        let actual: Vec<String> = tile.borders_of(Tile::ORI_FLIPXY_ROT90, &tile.naturals())
 //            .iter()
-//            .map(|border| Border::pattern_string(border.pattern, FIXED_WIDTH))
+//            .map(|border| Border::pattern_string(border.pattern, border.edge))
 //            .collect();
 //        assert_eq!(expect, actual);
 //    }
