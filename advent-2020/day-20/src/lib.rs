@@ -35,20 +35,14 @@ pub struct Orientation {
     rotate: bool,  // 90 degrees
     flip_y: bool,
     flip_x: bool,
-    rotate_first: bool,
 }
 
 impl fmt::Display for Orientation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut ss: Vec<&str> = vec![];
-        if self.rotate_first {
-            if self.rotate { ss.push("Rot90") } else { ss.push("Rot0") }
-        }
+        if self.rotate { ss.push("Rot90") } else { ss.push("Rot0") }
         if self.flip_y { ss.push("FlipY") }
         if self.flip_x { ss.push("FlipX") }
-        if !self.rotate_first {
-            if self.rotate { ss.push("Rot90") } else { ss.push("Rot0") }
-        }
         let label = ss.join(" ");
         write!(f, "{}", label)
     }
@@ -170,21 +164,20 @@ impl Tile {
     }
 
     // all the possible tile orientations
-    // set `rotate_first: true` when not rotating, for display purposes
-    const ORI_ROT0: Orientation = Orientation { rotate: false, flip_y: false, flip_x: false, rotate_first: true };
-    const ORI_ROT90: Orientation = Orientation { rotate: true, flip_y: false, flip_x: false, rotate_first: true };
-    const ORI_ROT0_FLIPY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: false, rotate_first: true };
-    const ORI_ROT90_FLIPY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: false, rotate_first: true };
+    const ORI_ROT0: Orientation = Orientation { rotate: false, flip_y: false, flip_x: false };
+    const ORI_ROT90: Orientation = Orientation { rotate: true, flip_y: false, flip_x: false };
+    const ORI_ROT0_FLIPY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: false };
+    const ORI_ROT90_FLIPY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: false };
     // ORI_FLIPY_ROT90 is the same as ORI_ROT90_FLIPX
-    //const ORI_FLIPY_ROT90: Orientation = Orientation { rotate: true, flip_y: true, flip_x: false, rotate_first: false };
-    const ORI_ROT0_FLIPX: Orientation = Orientation { rotate: false, flip_y: false, flip_x: true, rotate_first: true };
-    const ORI_ROT90_FLIPX: Orientation = Orientation { rotate: true, flip_y: false, flip_x: true, rotate_first: true };
+    //const ORI_FLIPY_ROT90: Orientation = Orientation { rotate: true, flip_y: true, flip_x: false };
+    const ORI_ROT0_FLIPX: Orientation = Orientation { rotate: false, flip_y: false, flip_x: true };
+    const ORI_ROT90_FLIPX: Orientation = Orientation { rotate: true, flip_y: false, flip_x: true };
     // ORI_FLIPX_ROT90 is the same as ORI_ROT90_FLIPY
-    //const ORI_FLIPX_ROT90: Orientation = Orientation { rotate: true, flip_y: false, flip_x: true, rotate_first: false };
-    const ORI_ROT0_FLIPXY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: true, rotate_first: true };
-    const ORI_ROT90_FLIPXY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true, rotate_first: true };
+    //const ORI_FLIPX_ROT90: Orientation = Orientation { rotate: true, flip_y: false, flip_x: true };
+    const ORI_ROT0_FLIPXY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: true };
+    const ORI_ROT90_FLIPXY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true };
     // ORI_FLIPXY_ROT90 is the same as ORI_ROT90_FLIPXY
-    //const ORI_FLIPXY_ROT90: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true, rotate_first: false };
+    //const ORI_FLIPXY_ROT90: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true };
 
     /// Return borders from all possible orienations of this tile.
     pub fn borders(&self) -> Vec<Border> {
@@ -201,13 +194,16 @@ impl Tile {
                 .map(|border| Border::pattern_string(border.pattern, self.width))
                 .collect();
             eprintln!("{:?}", patterns_s);
+            for border in borders {
+                eprintln!("{:?}", border);
+            }
         }
         vec![]
     }
 
     fn borders_of(&self, orientation: Orientation, naturals: &Vec<u32>) -> Vec<Border> {
         let mut patterns: Vec<u32> = naturals.iter().copied().collect();
-        if orientation.rotate_first && orientation.rotate {
+        if orientation.rotate {
             patterns = vec![
                 Tile::invert(patterns[3], self.width),
                 patterns[0],
@@ -238,14 +234,6 @@ impl Tile {
                 flip_patterns[2] = Tile::invert(patterns[0], self.width);
                 flip_patterns[3] = Tile::invert(patterns[1], self.height);
             },
-        }
-        if !orientation.rotate_first && orientation.rotate {
-            flip_patterns = vec![
-                Tile::invert(flip_patterns[3], self.width),
-                flip_patterns[0],
-                Tile::invert(flip_patterns[1], self.width),
-                flip_patterns[2],
-            ];
         }
         let top = Border { tile_id: self.id, orientation, kind: BorderKind::Top, pattern: flip_patterns[0] };
         let right = Border { tile_id: self.id, orientation, kind: BorderKind::Right, pattern: flip_patterns[1] };
