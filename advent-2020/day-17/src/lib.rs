@@ -1,11 +1,10 @@
 use itertools::Itertools;
 use std::fmt;
 use std::fs;
-use std::result;
 
 pub const N_ROUNDS: usize = 6;
 
-type Result<T> = result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Position {

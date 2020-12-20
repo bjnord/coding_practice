@@ -1,9 +1,8 @@
 use crate::equation::{Equation, EquationError};
 use std::fmt;
-use std::result;
 use std::str::FromStr;
 
-type Result<T> = result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Term {
