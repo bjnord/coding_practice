@@ -99,6 +99,15 @@ let r = fn(...).unwrap_or(value);
 let r = fn(...).unwrap_or_else(|error| {...});
 ```
 
+`Result` has lots of other methods like `or_else()`, `and_then()`, etc. that let you transform the result to fit the needed context. Another helpful one is that `result.map(...)` can be used to transform the `Ok()` case leaving the `Err()` intact. This comes in handy at the end of `FromStr` and other struct constructor functions:
+
+```
+widgets.iter()
+    ...
+    .collect::<Result<Vec<Gadget>>>()
+    .map(|gadgets| Self { gadgets })
+```
+
 #### Simplifying `Result` With a Type
 
 [This article](https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html) shows how to add a type, such that you can replace `Result<..., ...>` with just `Result<...>` everywhere in your code. When the error portion of `Result` is `Box<dyn error::Error>` that cleans things up quite a bit.
