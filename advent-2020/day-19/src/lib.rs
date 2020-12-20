@@ -41,14 +41,32 @@ impl fmt::Display for Rule {
 }
 
 impl Rule {
-    fn parse_rule(line: &str) -> Result<(usize, Rule)> {
+    const SEPARATOR_ERROR: &'static str = "no ':' separator found in rule";
+    const LITERAL_ERROR: &'static str = "missing literal after quote in rule";
+
+    /// Parses rule from a string. Returns a tuple with the rule number
+    /// and rule type (enumeration).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_19::Rule;
+    /// let (n, rule) = Rule::from_line("0: 1 2").unwrap();
+    /// assert_eq!(0, n);
+    /// assert_eq!(rule, Rule::Branches(vec![vec![1, 2]]));
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the rule has an invalid format.
+    pub fn from_line(line: &str) -> Result<(usize, Rule)> {
         let tokens: Vec<&str> = line.split(": ").collect();
         let n: usize = tokens[0].parse()?;
         let content = tokens.get(1)
-            .ok_or(RulesetError(String::from("no : separator found in rule")))?;
+            .ok_or_else(|| RulesetError(String::from(Rule::SEPARATOR_ERROR)))?;
         if content.starts_with('"') {
             let ch = content.chars().nth(1)
-                .ok_or(RulesetError(String::from("missing literal after quote in rule")))?;
+                .ok_or_else(|| RulesetError(String::from(Rule::LITERAL_ERROR)))?;
             Ok((n, Rule::Literal(ch)))
         } else {
             Ok((n, Rule::Branches(Rule::parse_branches(content)?)))
@@ -89,6 +107,8 @@ impl fmt::Display for Ruleset {
 }
 
 impl Ruleset {
+    const SECTION_ERROR: &'static str = "expected two sections separated by blank line";
+
     /// Returns number of rules.
     #[cfg(test)]
     #[must_use]
@@ -110,8 +130,7 @@ impl Ruleset {
         let s: String = fs::read_to_string(path)?;
         let sections: Vec<&str> = s.split("\n\n").collect();
         if sections.len() < 2 {
-            let e = String::from("expected two sections separated by blank line");
-            return Err(RulesetError(e).into());
+            return Err(RulesetError(String::from(Ruleset::SECTION_ERROR)).into());
         }
         let rules = Ruleset::rules_from_input(sections[0], part2)?;
         let messages = sections[1].lines()
@@ -120,17 +139,13 @@ impl Ruleset {
         Ok(Self { rules, messages })
     }
 
-    /// Read rules from `input` (list of lines). If `part2` flag is set,
-    /// rules 8 and 11 are altered as specified in the puzzle description.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` if a line is found with an invalid rule format.
-    pub fn rules_from_input(input: &str, part2: bool) -> Result<Vec<Rule>> {
+    // Read rules from `input` (list of lines). If `part2` flag is set,
+    // rules 8 and 11 are altered as specified in the puzzle description.
+    fn rules_from_input(input: &str, part2: bool) -> Result<Vec<Rule>> {
         // `rules` is a sparse array, so we preallocate with empty slots
         let mut rules: Vec<Rule> = vec![Rule::None; MAX_RULES];
         for line in input.lines() {
-            let (n, rule) = Rule::parse_rule(line)?;
+            let (n, rule) = Rule::from_line(line)?;
             rules[n] = rule;
         }
         if part2 {
@@ -244,20 +259,26 @@ mod tests {
 
     #[test]
     fn test_read_from_file_no_file() {
-        let ruleset = Ruleset::read_from_file("input/example99.txt", false);
-        assert!(ruleset.is_err());
+        match Ruleset::read_from_file("input/example99.txt", false) {
+            Err(e) => assert!(e.to_string().contains("No such file")),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_read_from_file_bad_sequence() {
-        let result = Ruleset::read_from_file("input/bad1.txt", false);
-        assert!(result.is_err());
+        match Ruleset::read_from_file("input/bad1.txt", false) {
+            Err(e) => assert!(e.to_string().contains("invalid digit")),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_read_from_file_no_sections() {
-        let result = Ruleset::read_from_file("input/bad2.txt", false);
-        assert!(result.is_err());
+        match Ruleset::read_from_file("input/bad2.txt", false) {
+            Err(e) => assert!(e.to_string().contains(Ruleset::SECTION_ERROR)),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 
     #[test]
@@ -285,14 +306,18 @@ mod tests {
     }
 
     #[test]
-    fn test_rules_from_input_no_colon() {
-        let result = Ruleset::rules_from_input("0", false);
-        assert!(result.is_err());
+    fn test_rule_from_line_no_colon() {
+        match Rule::from_line("0") {
+            Err(e) => assert!(e.to_string().contains(Rule::SEPARATOR_ERROR)),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 
     #[test]
-    fn test_rules_from_input_bad_literal() {
-        let result = Ruleset::rules_from_input("1: \"", false);
-        assert!(result.is_err());
+    fn test_rule_from_line_missing_literal() {
+        match Rule::from_line("1: \"") {
+            Err(e) => assert!(e.to_string().contains(Rule::LITERAL_ERROR)),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 }
