@@ -13,6 +13,7 @@ custom_error!{#[derive(PartialEq)]
     GridNotFound = "tile grid not found",
     InvalidLine{line: String} = "invalid tile grid line [{line}]",
     InvalidPixel{pixel: char} = "invalid pixel character {pixel}",
+    NotSquare = "tile is not square",
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -96,8 +97,7 @@ impl Border {
 pub struct Tile {
     id: u32,
     pixels: Vec<Pixel>,
-    height: usize,
-    width: usize,
+    edge: usize,
 }
 
 impl FromStr for Tile {
@@ -110,7 +110,7 @@ impl FromStr for Tile {
         if tile != "Tile" {
             return Err(TileError::InvalidLine { line: label.to_string() }.into());
         }
-        let width = i.next()
+        let edge = i.next()
             .ok_or_else(|| TileError::GridNotFound)?
             .len();
         let pixels: Vec<Pixel> = input
@@ -118,8 +118,11 @@ impl FromStr for Tile {
             .skip(1)
             .flat_map(|line| line.trim().chars().map(Pixel::from_char))
             .collect::<Result<Vec<Pixel>>>()?;
-        let height = pixels.len() / width;
-        Ok(Self { id, pixels, height, width })
+        let height = pixels.len() / edge;
+        if height != edge {
+            return Err(TileError::NotSquare.into());
+        }
+        Ok(Self { id, pixels, edge })
     }
 }
 
@@ -128,8 +131,8 @@ impl fmt::Display for Tile {
         let mut s = String::new();
         let label = format!("Tile {}:\n", self.id);
         s += &label;
-        for y in 0..self.height {
-            for x in 0..self.width {
+        for y in 0..self.edge {
+            for x in 0..self.edge {
                 s += match self.pixel_at(y, x) {
                     false => ".",
                     true => "#",
@@ -160,7 +163,7 @@ impl Tile {
     }
 
     fn pixels_index(&self, y: usize, x: usize) -> usize {
-        y * self.width + x
+        y * self.edge + x
     }
 
     // all the possible tile orientations
@@ -198,9 +201,9 @@ impl Tile {
         let mut patterns: Vec<u32> = naturals.iter().copied().collect();
         if orientation.rotate {
             patterns = vec![
-                Tile::invert(patterns[3], self.width),
+                Tile::invert(patterns[3], self.edge),
                 patterns[0],
-                Tile::invert(patterns[1], self.width),
+                Tile::invert(patterns[1], self.edge),
                 patterns[2],
             ];
         }
@@ -211,27 +214,27 @@ impl Tile {
             },
             (true, false) => {
                 flip_patterns[0] = patterns[2];
-                flip_patterns[1] = Tile::invert(patterns[1], self.height);
+                flip_patterns[1] = Tile::invert(patterns[1], self.edge);
                 flip_patterns[2] = patterns[0];
-                flip_patterns[3] = Tile::invert(patterns[3], self.height);
+                flip_patterns[3] = Tile::invert(patterns[3], self.edge);
             },
             (false, true) => {
-                flip_patterns[0] = Tile::invert(patterns[0], self.width);
+                flip_patterns[0] = Tile::invert(patterns[0], self.edge);
                 flip_patterns[1] = patterns[3];
-                flip_patterns[2] = Tile::invert(patterns[2], self.width);
+                flip_patterns[2] = Tile::invert(patterns[2], self.edge);
                 flip_patterns[3] = patterns[1];
             },
             (true, true) => {
-                flip_patterns[0] = Tile::invert(patterns[2], self.width);
-                flip_patterns[1] = Tile::invert(patterns[3], self.height);
-                flip_patterns[2] = Tile::invert(patterns[0], self.width);
-                flip_patterns[3] = Tile::invert(patterns[1], self.height);
+                flip_patterns[0] = Tile::invert(patterns[2], self.edge);
+                flip_patterns[1] = Tile::invert(patterns[3], self.edge);
+                flip_patterns[2] = Tile::invert(patterns[0], self.edge);
+                flip_patterns[3] = Tile::invert(patterns[1], self.edge);
             },
         }
-        let top = Border { tile_id: self.id, orientation, kind: BorderKind::Top, edge: self.width, pattern: flip_patterns[0] };
-        let right = Border { tile_id: self.id, orientation, kind: BorderKind::Right, edge: self.height, pattern: flip_patterns[1] };
-        let bottom = Border { tile_id: self.id, orientation, kind: BorderKind::Bottom, edge: self.width, pattern: flip_patterns[2] };
-        let left = Border { tile_id: self.id, orientation, kind: BorderKind::Left, edge: self.height, pattern: flip_patterns[3] };
+        let top = Border { tile_id: self.id, orientation, kind: BorderKind::Top, edge: self.edge, pattern: flip_patterns[0] };
+        let right = Border { tile_id: self.id, orientation, kind: BorderKind::Right, edge: self.edge, pattern: flip_patterns[1] };
+        let bottom = Border { tile_id: self.id, orientation, kind: BorderKind::Bottom, edge: self.edge, pattern: flip_patterns[2] };
+        let left = Border { tile_id: self.id, orientation, kind: BorderKind::Left, edge: self.edge, pattern: flip_patterns[3] };
         vec![top, right, bottom, left]
     }
 
@@ -240,26 +243,26 @@ impl Tile {
         let mut pattern: u32;
         // top
         pattern = 0;
-        for i in 0..self.width {
-            if self.pixel_at(0, i) { pattern |= Tile::bit_at_pos(i, self.width) }
+        for i in 0..self.edge {
+            if self.pixel_at(0, i) { pattern |= Tile::bit_at_pos(i, self.edge) }
         }
         naturals.push(pattern);
         // right
         pattern = 0;
-        for i in 0..self.height {
-            if self.pixel_at(i, self.width - 1) { pattern |= Tile::bit_at_pos(i, self.height) }
+        for i in 0..self.edge {
+            if self.pixel_at(i, self.edge - 1) { pattern |= Tile::bit_at_pos(i, self.edge) }
         }
         naturals.push(pattern);
         // bottom
         pattern = 0;
-        for i in 0..self.width {
-            if self.pixel_at(self.height - 1, i) { pattern |= Tile::bit_at_pos(i, self.width) }
+        for i in 0..self.edge {
+            if self.pixel_at(self.edge - 1, i) { pattern |= Tile::bit_at_pos(i, self.edge) }
         }
         naturals.push(pattern);
         // left
         pattern = 0;
-        for i in 0..self.height {
-            if self.pixel_at(i, 0) { pattern |= Tile::bit_at_pos(i, self.height) }
+        for i in 0..self.edge {
+            if self.pixel_at(i, 0) { pattern |= Tile::bit_at_pos(i, self.edge) }
         }
         naturals.push(pattern);
         naturals
@@ -295,8 +298,7 @@ mod tests {
     fn test_parse_tile() {
         let tile: Tile = TINY_TILE.parse().unwrap();
         assert_eq!(113, tile.id);
-        assert_eq!(3, tile.height);
-        assert_eq!(3, tile.width);
+        assert_eq!(3, tile.edge);
     }
 
     #[test]
@@ -319,7 +321,7 @@ mod tests {
 
     #[test]
     fn test_read_from_file_no_grid() {
-        if let Err(e) = Tile::read_from_file("input/bad1.txt") {
+        if let Err(_e) = Tile::read_from_file("input/bad1.txt") {
             //assert_eq!(TileError::GridNotFound, *e);
             assert!(true);  // FIXME
         } else {
@@ -329,8 +331,18 @@ mod tests {
 
     #[test]
     fn test_read_from_file_invalid_line() {
-        if let Err(e) = Tile::read_from_file("input/bad2.txt") {
+        if let Err(_e) = Tile::read_from_file("input/bad2.txt") {
             //assert_eq!(TileError::InvalidLine { line: "Spile 12:" }, *e);
+            assert!(true);  // FIXME
+        } else {
+            panic!("test did not fail");
+        }
+    }
+
+    #[test]
+    fn test_read_from_file_not_square() {
+        if let Err(_e) = Tile::read_from_file("input/bad3.txt") {
+            //assert_eq!(TileError::NotSquare, *e);
             assert!(true);  // FIXME
         } else {
             panic!("test did not fail");
@@ -345,7 +357,7 @@ mod tests {
 
     #[test]
     fn test_pixel_from_char_invalid() {
-        if let Err(e) = Pixel::from_char('?') {
+        if let Err(_e) = Pixel::from_char('?') {
             //assert_eq!(TileError::InvalidPixel { pixel: '?' }, *e);
             assert!(true);  // FIXME
         } else {
