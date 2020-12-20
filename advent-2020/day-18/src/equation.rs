@@ -1,4 +1,6 @@
 use crate::term::Term;
+#[cfg(test)]
+use crate::term::TERM_EMPTY_ERROR;
 use std::fmt;
 use std::fs;
 use std::str::FromStr;
@@ -49,6 +51,17 @@ impl fmt::Display for Equation {
         write!(f, "{}", s)
     }
 }
+
+macro_rules! INVALID_EXPR_ERROR {
+    () => { "invalid expression '{} {} {}'" };
+}
+macro_rules! INVALID_OP_ERROR {
+    () => { "invalid operator '{}'" };
+}
+macro_rules! LEFTOVER_TERM_ERROR {
+    () => { "{} leftover term(s)" };
+}
+pub const FINAL_TERM_ERROR: &str = "final term is not a Number";
 
 impl Equation {
     /// Return list of equation terms.
@@ -140,13 +153,13 @@ impl Equation {
                 '+' => Term::Number(n1 + n2),
                 '*' => Term::Number(n1 * n2),
                 _ => {
-                    let e = format!("invalid operator '{}'", op);
+                    let e = format!(INVALID_OP_ERROR!(), op);
                     return Err(EquationError(e).into());
                 },
             },
             _ => {
                 let e = format!(
-                    "invalid expression '{} {} {}'",
+                    INVALID_EXPR_ERROR!(),
                     terms[0], terms[1], terms[2]
                 );
                 return Err(EquationError(e).into());
@@ -158,13 +171,13 @@ impl Equation {
     // Convert lone remaining term to concrete integer.
     fn answer(terms: &[Term]) -> Result<i64> {
         if terms.len() > 1 {
-            let e = format!("{} leftover term(s)", terms.len() - 1);
+            let e = format!(LEFTOVER_TERM_ERROR!(), terms.len() - 1);
             return Err(EquationError(e).into());
         }
         if let Term::Number(n) = terms[0] {
             Ok(n)
         } else {
-            Err(EquationError("final term is not a Number".to_string()).into())
+            Err(EquationError(FINAL_TERM_ERROR.to_string()).into())
         }
     }
 }
@@ -172,6 +185,14 @@ impl Equation {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_read_from_file_no_file() {
+        match Equation::read_from_file("input/example99.txt") {
+            Err(e) => assert!(e.to_string().contains("No such file")),
+            Ok(_) => panic!("test did not fail"),
+        }
+    }
 
     #[test]
     fn test_parse_equations_simple() {
@@ -222,55 +243,87 @@ mod tests {
 
     #[test]
     fn test_parse_equation_bad_term() {
-        let result = "1 + 2x".parse::<Equation>();
-        assert!(result.is_err());
+        match "1 + 2x".parse::<Equation>() {
+            Err(e) => assert!(e.to_string().contains("invalid digit")),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_parse_equation_double_space() {
-        let result = "1  + 2".parse::<Equation>();
-        assert!(result.is_err());
+        let expect_err = format!("Equation error: {}", TERM_EMPTY_ERROR);
+        match "1  + 2".parse::<Equation>() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_invalid_operator() {
-        let result = "1 + 2 / 3".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let suberr = format!(INVALID_OP_ERROR!(), "/");
+        let expect_err = format!("Equation error: {}", suberr);
+        match "1 + 2 / 3".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_missing_operator() {
-        let result = "1 + 2 3".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let suberr = format!(LEFTOVER_TERM_ERROR!(), 1);
+        let expect_err = format!("Equation error: {}", suberr);
+        match "1 + 2 3".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_missing_operator_subterm() {
-        let result = "1 + 2 (3 + 5)".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let suberr = format!(LEFTOVER_TERM_ERROR!(), 1);
+        let expect_err = format!("Equation error: {}", suberr);
+        match "1 + 2 (3 + 5)".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_double_operator() {
-        let result = "1 * + 2".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let suberr = format!(INVALID_EXPR_ERROR!(), "1", "*", "+");
+        let expect_err = format!("Equation error: {}", suberr);
+        match "1 * + 2".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_lone_operator() {
-        let result = "+".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let expect_err = format!("Equation error: {}", FINAL_TERM_ERROR);
+        match "+".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_missing_first_number() {
-        let result = "+ 2".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let suberr = format!(LEFTOVER_TERM_ERROR!(), 1);
+        let expect_err = format!("Equation error: {}", suberr);
+        match "+ 2".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 
     #[test]
     fn test_solve_equation_trailing_operator() {
-        let result = "1 *".parse::<Equation>().unwrap().solve();
-        assert!(result.is_err());
+        let suberr = format!(LEFTOVER_TERM_ERROR!(), 1);
+        let expect_err = format!("Equation error: {}", suberr);
+        match "1 *".parse::<Equation>().unwrap().solve() {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_) => panic!("test did not fail"),
+        }
     }
 }

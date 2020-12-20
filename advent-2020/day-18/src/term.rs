@@ -49,7 +49,7 @@ macro_rules! TERM_PAREN_ERROR {
         "right-parens={} exceeds paren-count={} + left-parens={}"
     };
 }
-const TERM_EMPTY_ERROR: &str = "empty term";
+pub const TERM_EMPTY_ERROR: &str = "empty term";
 
 impl Term {
     /// Combine tokens to form subterms.
@@ -173,8 +173,9 @@ mod tests {
 
     #[test]
     fn test_parse_term_empty() {
+        let expect_err = format!("Equation error: {}", TERM_EMPTY_ERROR);
         match "".parse::<Term>() {
-            Err(e) => assert!(e.to_string().ends_with(TERM_EMPTY_ERROR)),
+            Err(e) => assert_eq!(e.to_string(), expect_err),
             Ok(_) => panic!("test did not fail"),
         }
     }
