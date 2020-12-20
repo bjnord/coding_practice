@@ -41,26 +41,6 @@ impl fmt::Display for Rule {
 }
 
 impl Rule {
-    /// Read rules from `input` (list of lines). If `part2` flag is set,
-    /// rules 8 and 11 are altered as specified in the puzzle description.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` if a line is found with an invalid rule format.
-    pub fn from_input(input: &str, part2: bool) -> Result<Vec<Rule>> {
-        // `rules` is a sparse array, so we preallocate with empty slots
-        let mut rules: Vec<Rule> = vec![Rule::None; MAX_RULES];
-        for line in input.lines() {
-            let (n, rule) = Rule::parse_rule(line)?;
-            rules[n] = rule;
-        }
-        if part2 {
-            rules[8] = Rule::Branches(vec![vec![42], vec![42, 8]]);
-            rules[11] = Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]);
-        }
-        Ok(rules)
-    }
-
     fn parse_rule(line: &str) -> Result<(usize, Rule)> {
         let tokens: Vec<&str> = line.split(": ").collect();
         let n: usize = tokens[0].parse()?;
@@ -133,11 +113,31 @@ impl Ruleset {
             let e = String::from("expected two sections separated by blank line");
             return Err(RulesetError(e).into());
         }
-        let rules = Rule::from_input(sections[0], part2)?;
+        let rules = Ruleset::rules_from_input(sections[0], part2)?;
         let messages = sections[1].lines()
             .map(string::ToString::to_string)
             .collect();
         Ok(Self { rules, messages })
+    }
+
+    /// Read rules from `input` (list of lines). If `part2` flag is set,
+    /// rules 8 and 11 are altered as specified in the puzzle description.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if a line is found with an invalid rule format.
+    pub fn rules_from_input(input: &str, part2: bool) -> Result<Vec<Rule>> {
+        // `rules` is a sparse array, so we preallocate with empty slots
+        let mut rules: Vec<Rule> = vec![Rule::None; MAX_RULES];
+        for line in input.lines() {
+            let (n, rule) = Rule::parse_rule(line)?;
+            rules[n] = rule;
+        }
+        if part2 {
+            rules[8] = Rule::Branches(vec![vec![42], vec![42, 8]]);
+            rules[11] = Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]);
+        }
+        Ok(rules)
     }
 
     /// How many messages match the rules?
@@ -285,14 +285,14 @@ mod tests {
     }
 
     #[test]
-    fn test_rule_from_input_no_colon() {
-        let result = Rule::from_input("0", false);
+    fn test_rules_from_input_no_colon() {
+        let result = Ruleset::rules_from_input("0", false);
         assert!(result.is_err());
     }
 
     #[test]
-    fn test_rule_from_input_bad_literal() {
-        let result = Rule::from_input("1: \"", false);
+    fn test_rules_from_input_bad_literal() {
+        let result = Ruleset::rules_from_input("1: \"", false);
         assert!(result.is_err());
     }
 }
