@@ -15,7 +15,8 @@ impl FromStr for Term {
     type Err = Box<dyn std::error::Error>;
 
     fn from_str(token: &str) -> Result<Self> {
-        let ch = token.chars().next().ok_or("empty term")?;
+        let ch = token.chars().next()
+            .ok_or_else(|| EquationError(String::from(TERM_EMPTY_ERROR)))?;
         let term = match ch {
             d if d.is_digit(10) => Term::Number(token.parse::<i64>()?),
             '('                 => {
@@ -41,7 +42,13 @@ impl fmt::Display for Term {
     }
 }
 
+macro_rules! TERM_PAREN_ERROR { () => {
+        "right-parens={} exceeds paren-count={} + left-parens={}"
+    }; }
+const TERM_EMPTY_ERROR: &'static str = "empty term";
+
 impl Term {
+
     /// Combine tokens to form subterms.
     ///
     /// # Examples
@@ -80,7 +87,7 @@ impl Term {
         let lp = token.matches('(').count();
         let rp = token.matches(')').count();
         if rp > p_count + lp {
-            let e = format!("right-parens={} exceeds paren-count={} + left-parens={}", rp, p_count, lp);
+            let e = format!(TERM_PAREN_ERROR!(), rp, p_count, lp);
             return Err(EquationError(e).into());
         }
         Ok(p_count + lp - rp)
@@ -153,7 +160,19 @@ mod tests {
     #[test]
     fn test_combine_subterm_tokens_extra_rparens() {
         let tokens = vec!["1", "*", "(2", "+", "3))"];
-        let result = Term::combine_subterm_tokens(&tokens);
-        assert!(result.is_err());
+        let suberr = format!(TERM_PAREN_ERROR!(), 2, 1, 0);
+        let expect_err = format!("Equation error: {}", suberr);
+        match Term::combine_subterm_tokens(&tokens) {
+            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Ok(_)  => panic!("test did not fail"),
+        }
+    }
+
+    #[test]
+    fn test_parse_term_empty() {
+        match "".parse::<Term>() {
+            Err(e) => assert!(e.to_string().ends_with(TERM_EMPTY_ERROR)),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 }
