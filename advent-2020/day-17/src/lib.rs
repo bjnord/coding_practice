@@ -115,7 +115,8 @@ impl InfiniteGrid {
     ///
     /// # Errors
     ///
-    /// Returns `Err` if the input file cannot be opened.
+    /// Returns `Err` if the input file cannot be opened, or if line is
+    /// found with invalid format.
     pub fn read_from_file(path: &str, dim: usize) -> Result<InfiniteGrid> {
         let s: String = fs::read_to_string(path)?;
         InfiniteGrid::from_input(&s, dim)
@@ -123,6 +124,10 @@ impl InfiniteGrid {
 
     /// Construct `InfiniteGrid` of dimension `dim`  by reading initial grid
     /// plane from `input` string.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if a line is found with invalid format.
     pub fn from_input(input: &str, dim: usize) -> Result<InfiniteGrid> {
         let edge = input.lines().next().unwrap().len() as i32;
         let half_edge = edge / 2;
