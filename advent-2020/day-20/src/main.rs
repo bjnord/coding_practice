@@ -9,7 +9,11 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let _tiles = Tile::read_from_file("input/input.txt").unwrap();
+    let tiles = Tile::read_from_file("input/example1.txt").unwrap();  // FIXME input.txt
+    println!("{}", tiles[7]);
+    for border in tiles[7].borders() {
+        println!("{}", border);
+    }
     let gen_time = start.elapsed();
     //...
     let run_time = start.elapsed() - gen_time;
