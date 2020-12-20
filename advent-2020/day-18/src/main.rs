@@ -1,4 +1,4 @@
-use day_18::Equation;
+use day_18::equation::Equation;
 use std::time::Instant;
 
 fn main() {
