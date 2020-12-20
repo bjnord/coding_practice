@@ -187,18 +187,11 @@ impl Tile {
             Tile::ORI_ROT0_FLIPY, Tile::ORI_ROT90_FLIPY, Tile::ORI_ROT0_FLIPX,
             Tile::ORI_ROT90_FLIPX, Tile::ORI_ROT0_FLIPXY, Tile::ORI_ROT90_FLIPXY,
         ];
-        for orientation in orientations {
-            let borders = self.borders_of(orientation, &naturals);
-            let patterns_s: Vec<String> = borders
-                .iter()
-                .map(|border| Border::pattern_string(border.pattern, self.width))
-                .collect();
-            eprintln!("{:?}", patterns_s);
-            for border in borders {
-                eprintln!("{:?}", border);
-            }
-        }
-        vec![]
+        orientations
+            .iter()
+            .map(|&ori| self.borders_of(ori, &naturals))
+            .flatten()
+            .collect::<Vec<Border>>()
     }
 
     fn borders_of(&self, orientation: Orientation, naturals: &Vec<u32>) -> Vec<Border> {
