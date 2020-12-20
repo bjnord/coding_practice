@@ -45,10 +45,19 @@ impl fmt::Display for Term {
 impl Term {
     /// Combine tokens to form subterms.
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_18::term::Term;
+    /// let tokens: Vec<&str> = vec!["((2", "+", "3)", "*", "5)", "*", "(7", "+", "11)"];
+    /// let combined_tokens = Term::combine_subterm_tokens(&tokens).unwrap();
+    /// assert_eq!(vec!["((2 + 3) * 5)", "*", "(7 + 11)"], combined_tokens);
+    /// ```
+    ///
     /// # Errors
     ///
     /// Returns `Err` if the list of terms is invalid (_e.g._ too many
-    /// right parenthese)
+    /// right parentheses).
     #[allow(clippy::ptr_arg)]  // &[&str] doesn't work here
     pub fn combine_subterm_tokens(tokens: &Vec<&str>) -> Result<Vec<String>> {
         let mut combined_tokens: Vec<String> = vec![];
