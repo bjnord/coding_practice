@@ -129,11 +129,10 @@ impl Ruleset {
     pub fn read_from_file(path: &str, part2: bool) -> Result<Ruleset> {
         let s: String = fs::read_to_string(path)?;
         let sections: Vec<&str> = s.split("\n\n").collect();
-        if sections.len() < 2 {
-            return Err(RulesetError(String::from(Ruleset::SECTION_ERROR)).into());
-        }
         let rules = Ruleset::rules_from_input(sections[0], part2)?;
-        let messages = sections[1].lines()
+        let messages = sections.get(1)
+            .ok_or_else(|| RulesetError(String::from(Ruleset::SECTION_ERROR)))?
+            .lines()
             .map(string::ToString::to_string)
             .collect();
         Ok(Self { rules, messages })
