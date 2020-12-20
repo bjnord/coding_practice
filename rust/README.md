@@ -422,10 +422,11 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 1. `.fold()` returns the final value. `.map()` and `.filter()` seem to return some kind of proxy object; calling `.collect()` on the proxy yields a vector.
 1. Therefore transforming vector `x` into vector `y` looks like: `x.into_iter().map(|v| ...).collect()`.
 
-### Min, Max
+### Min, Max, Count
 
 1. Rust provides `.min()` and `.max()` for an iterator; note that it returns `Option<&T>` for a vector, which means the result has to be unwrapped and dereferenced: `*values_vector.iter().min().unwrap()`
 1. Rust also provides `.min_by()` and `.max_by()` which take a comparison function, useful for complex objects.
+1. You can count matching elements using `things.iter().filter(|t| ...).count()` — but if speed is important, people say that `.fold()` is about 2x faster for this case.
 
 ### Other Helpful Iteration Methods
 
