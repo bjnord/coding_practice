@@ -48,23 +48,31 @@ impl Rule {
     ///
     /// Returns `Err` if a line is found with an invalid rule format.
     pub fn from_input(input: &str, part2: bool) -> Result<Vec<Rule>> {
-        // rules is a sparse array, so we preallocate with empty slots
+        // `rules` is a sparse array, so we preallocate with empty slots
         let mut rules: Vec<Rule> = vec![Rule::None; MAX_RULES];
         for line in input.lines() {
-            let tokens: Vec<&str> = line.split(": ").collect();
-            let n: usize = tokens[0].parse()?;
-            if tokens[1].starts_with('"') {
-                let ch = tokens[1].chars().nth(1).unwrap();
-                rules[n] = Rule::Literal(ch);
-            } else {
-                rules[n] = Rule::Branches(Rule::parse_branches(tokens[1])?);
-            }
+            let (n, rule) = Rule::parse_rule(line)?;
+            rules[n] = rule;
         }
         if part2 {
             rules[8] = Rule::Branches(vec![vec![42], vec![42, 8]]);
             rules[11] = Rule::Branches(vec![vec![42, 31], vec![42, 11, 31]]);
         }
         Ok(rules)
+    }
+
+    fn parse_rule(line: &str) -> Result<(usize, Rule)> {
+        let tokens: Vec<&str> = line.split(": ").collect();
+        let n: usize = tokens[0].parse()?;
+        let content = tokens.get(1)
+            .ok_or(RulesetError(String::from("no : separator found in rule")))?;
+        if content.starts_with('"') {
+            let ch = content.chars().nth(1)
+                .ok_or(RulesetError(String::from("missing literal after quote in rule")))?;
+            Ok((n, Rule::Literal(ch)))
+        } else {
+            Ok((n, Rule::Branches(Rule::parse_branches(content)?)))
+        }
     }
 
     fn parse_branches(branches: &str) -> Result<Vec<Vec<usize>>> {
@@ -274,5 +282,17 @@ mod tests {
     fn test_match_count_3_part2_rules() {
         let ruleset = Ruleset::read_from_file("input/example3.txt", true).unwrap();
         assert_eq!(12, ruleset.match_count());
+    }
+
+    #[test]
+    fn test_rule_from_input_no_colon() {
+        let result = Rule::from_input("0", false);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_rule_from_input_bad_literal() {
+        let result = Rule::from_input("1: \"", false);
+        assert!(result.is_err());
     }
 }
