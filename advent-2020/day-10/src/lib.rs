@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fs;
 use std::str::FromStr;
 
@@ -133,12 +134,11 @@ impl AdapterSet {
         })
     }
 
-    #[allow(clippy::cast_sign_loss)]
     fn adapter_choices(start: u32, end: u32) -> u64 {
         if end < start {
             panic!("end < start");
         }
-        let gap = (end - start) as usize;
+        let gap = usize::try_from(end - start).unwrap();
         // these values were calculated by hand; see `README.md`
         let choices: Vec<u64> = vec![1, 1, 2, 4, 7, 11];
         if gap >= choices.len() {

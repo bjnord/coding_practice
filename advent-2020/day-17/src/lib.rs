@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::convert::TryFrom;
 use std::fmt;
 use std::fs;
 
@@ -13,14 +14,13 @@ pub struct Position {
 
 impl Position {
     /// Return linear index of position, given `edge` length of grid.
-    #[allow(clippy::cast_sign_loss)]
     #[must_use]
     pub fn index_for(&self, edge: i32) -> usize {
         let mut i = 0_i32;
         for c in &self.coords {
             i = i * edge + c;
         }
-        i as usize
+        usize::try_from(i).unwrap()
     }
 
     #[must_use]
@@ -129,7 +129,7 @@ impl InfiniteGrid {
     ///
     /// Returns `Err` if a line is found with invalid format.
     pub fn from_input(input: &str, dim: usize) -> Result<InfiniteGrid> {
-        let edge = input.lines().next().unwrap().len() as i32;
+        let edge = i32::try_from(input.lines().next().unwrap().len()).unwrap();
         let half_edge = edge / 2;
         // parse and store initial 2D grid plane:
         let cubes_2d: Vec<ConwayCube> = input
@@ -142,7 +142,7 @@ impl InfiniteGrid {
         let mut cubes: Vec<ConwayCube> = vec![ConwayCube::Void; max_i];
         for y in 0..edge {
             for x in 0..edge {
-                let from_i = (y * edge + x) as usize;
+                let from_i = usize::try_from(y * edge + x).unwrap();
                 let mut dims = vec![half_edge; dim];
                 dims[dim-1] = x;
                 dims[dim-2] = y;
@@ -159,7 +159,7 @@ impl InfiniteGrid {
         for _i in 0..dim {
             s *= edge;
         }
-        s as usize
+        usize::try_from(s).unwrap()
     }
 
     #[must_use]

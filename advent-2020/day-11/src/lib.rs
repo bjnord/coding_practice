@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fmt;
 use std::fs;
 use std::str::FromStr;
@@ -44,15 +45,13 @@ impl Seat {
 impl FromStr for SeatLayout {
     type Err = Box<dyn std::error::Error>;
 
-    #[allow(clippy::cast_possible_truncation)]
-    #[allow(clippy::cast_possible_wrap)]
     fn from_str(input: &str) -> Result<Self> {
-        let width = input.lines().next().unwrap().len() as i32;
+        let width = i32::try_from(input.lines().next().unwrap().len()).unwrap();
         let seats: Vec<Seat> = input
             .lines()
             .flat_map(|line| line.trim().chars().map(Seat::from_char))
             .collect();
-        let height = (seats.len() as i32) / width;
+        let height = i32::try_from(seats.len()).unwrap() / width;
         Ok(Self { seats, height, width })
     }
 }
@@ -123,9 +122,8 @@ impl SeatLayout {
         }
     }
 
-    #[allow(clippy::cast_sign_loss)]
     fn seats_index(&self, y: i32, x: i32) -> usize {
-        (y * self.width + x) as usize
+        usize::try_from(y * self.width + x).unwrap()
     }
 
     /// Return count of occupied seats.

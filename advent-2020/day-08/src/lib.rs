@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fmt;
 use std::fs;
 use std::str::FromStr;
@@ -130,12 +131,11 @@ impl Program {
         }
     }
 
-    #[allow(clippy::cast_sign_loss)]
     fn incr_pc(mut pc: usize, arg: i32) -> usize {
         if arg.is_negative() {
-            pc -= arg.wrapping_abs() as usize;
+            pc -= usize::try_from(arg.wrapping_abs()).unwrap();
         } else {
-            pc += arg as usize;
+            pc += usize::try_from(arg).unwrap();
         }
         pc
     }

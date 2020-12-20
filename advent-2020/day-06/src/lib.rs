@@ -1,6 +1,7 @@
 #[macro_use] extern crate maplit;
 
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::fs;
 use std::str::FromStr;
 
@@ -57,9 +58,8 @@ impl Group {
     /// assert_eq!(6, group.any_answers());
     /// ```
     #[must_use]
-    #[allow(clippy::cast_possible_truncation)]
     pub fn any_answers(&self) -> u32 {
-        self.answers.len() as u32
+        u32::try_from(self.answers.len()).unwrap()
     }
 
     /// Return count of questions to which ALL people in the group answered
@@ -73,9 +73,8 @@ impl Group {
     /// assert_eq!(2, group.all_answers());
     /// ```
     #[must_use]
-    #[allow(clippy::cast_possible_truncation)]
     pub fn all_answers(&self) -> u32 {
-        self.answers
+        let count = self.answers
             .keys()
             .filter(|k|
                 match self.answers.get(k) {
@@ -83,7 +82,8 @@ impl Group {
                     None => false,
                 }
             )
-            .count() as u32
+            .count();
+        u32::try_from(count).unwrap()
     }
 
     /// Read groups from a file.
