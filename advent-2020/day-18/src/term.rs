@@ -15,15 +15,17 @@ impl FromStr for Term {
     type Err = Box<dyn std::error::Error>;
 
     fn from_str(token: &str) -> Result<Self> {
-        let ch = token.chars().next()
+        let ch = token
+            .chars()
+            .next()
             .ok_or_else(|| EquationError(String::from(TERM_EMPTY_ERROR)))?;
         let term = match ch {
             d if d.is_digit(10) => Term::Number(token.parse::<i64>()?),
-            '('                 => {
+            '(' => {
                 let eq = &token[1..token.len()-1];
                 Term::Subterm(eq.parse::<Equation>()?)
             },
-            _                   => Term::Operator(ch),
+            _ => Term::Operator(ch),
         };
         Ok(term)
     }
@@ -42,13 +44,14 @@ impl fmt::Display for Term {
     }
 }
 
-macro_rules! TERM_PAREN_ERROR { () => {
+macro_rules! TERM_PAREN_ERROR {
+    () => {
         "right-parens={} exceeds paren-count={} + left-parens={}"
-    }; }
-const TERM_EMPTY_ERROR: &'static str = "empty term";
+    };
+}
+const TERM_EMPTY_ERROR: &str = "empty term";
 
 impl Term {
-
     /// Combine tokens to form subterms.
     ///
     /// # Examples
@@ -164,7 +167,7 @@ mod tests {
         let expect_err = format!("Equation error: {}", suberr);
         match Term::combine_subterm_tokens(&tokens) {
             Err(e) => assert_eq!(e.to_string(), expect_err),
-            Ok(_)  => panic!("test did not fail"),
+            Ok(_) => panic!("test did not fail"),
         }
     }
 
@@ -172,7 +175,7 @@ mod tests {
     fn test_parse_term_empty() {
         match "".parse::<Term>() {
             Err(e) => assert!(e.to_string().ends_with(TERM_EMPTY_ERROR)),
-            Ok(_)  => panic!("test did not fail"),
+            Ok(_) => panic!("test did not fail"),
         }
     }
 }

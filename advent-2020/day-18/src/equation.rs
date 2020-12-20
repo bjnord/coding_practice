@@ -79,14 +79,12 @@ impl Equation {
         let mut terms: Vec<Term> = Equation::solve_subterms(&self.terms, solver)?;
         // solve all the N + M, leaving only multiply operators
         while terms.len() >= 3 {
-            let add_pos = terms
-                .iter()
-                .position(|t| match t {
-                    Term::Operator(op) => *op == '+',
-                    _ => false,
-                });
+            let add_pos = terms.iter().position(|t| match t {
+                Term::Operator(op) => *op == '+',
+                _ => false,
+            });
             if let Some(i) = add_pos {
-                terms.splice(i-1..i+2, Equation::combine_3_terms_at(&terms, i-1)?);
+                terms.splice(i-1..i+2, Equation::combine_3_terms_at(&terms, i - 1)?);
             } else {
                 break;  // no more add operators
             }
@@ -116,9 +114,11 @@ impl Equation {
     // always highest-precedence). Returns a new list of terms, containing
     // only numbers and operators.
     fn solve_subterms<F>(terms: &[Term], solver: F) -> Result<Vec<Term>>
-        where F: Fn(&Equation) -> Result<i64>
+    where
+        F: Fn(&Equation) -> Result<i64>,
     {
-        terms.iter()
+        terms
+            .iter()
             .map(|term| match term {
                 Term::Number(n) => Ok(Term::Number(*n)),
                 Term::Operator(op) => Ok(Term::Operator(*op)),
@@ -136,18 +136,19 @@ impl Equation {
     #[allow(clippy::single_match_else)]  // too big for one line here
     fn combine_3_terms_at(terms: &[Term], i: usize) -> Result<Vec<Term>> {
         let combined_term = match &terms[i..i+3] {
-            [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => {
-                match op {
-                    '+' => Term::Number(n1 + n2),
-                    '*' => Term::Number(n1 * n2),
-                    _ => {
-                        let e = format!("invalid operator '{}'", op);
-                        return Err(EquationError(e).into());
-                    },
-                }
+            [Term::Number(n1), Term::Operator(op), Term::Number(n2)] => match op {
+                '+' => Term::Number(n1 + n2),
+                '*' => Term::Number(n1 * n2),
+                _ => {
+                    let e = format!("invalid operator '{}'", op);
+                    return Err(EquationError(e).into());
+                },
             },
             _ => {
-                let e = format!("invalid expression '{} {} {}'", terms[0], terms[1], terms[2]);
+                let e = format!(
+                    "invalid expression '{} {} {}'",
+                    terms[0], terms[1], terms[2]
+                );
                 return Err(EquationError(e).into());
             },
         };

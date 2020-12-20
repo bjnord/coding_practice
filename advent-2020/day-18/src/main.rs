@@ -11,10 +11,7 @@ fn part1() {
     let start = Instant::now();
     let equations = Equation::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    let answer: i64 = equations
-        .iter()
-        .map(|eq| eq.solve().unwrap())
-        .sum();
+    let answer: i64 = equations.iter().map(|eq| eq.solve().unwrap()).sum();
     let run_time = start.elapsed() - gen_time;
     println!("Day 1 - Part 1 : {} <=> 6923486965641 expected", answer);
     println!("    generator: {:?}", gen_time);
