@@ -212,16 +212,10 @@ impl Tile {
     const ORI_ROT90: Orientation = Orientation { rotate: true, flip_y: false, flip_x: false };
     const ORI_ROT0_FLIPY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: false };
     const ORI_ROT90_FLIPY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: false };
-    // ORI_FLIPY_ROT90 is the same as ORI_ROT90_FLIPX
-    //const ORI_FLIPY_ROT90: Orientation = Orientation { rotate: true, flip_y: true, flip_x: false };
     const ORI_ROT0_FLIPX: Orientation = Orientation { rotate: false, flip_y: false, flip_x: true };
     const ORI_ROT90_FLIPX: Orientation = Orientation { rotate: true, flip_y: false, flip_x: true };
-    // ORI_FLIPX_ROT90 is the same as ORI_ROT90_FLIPY
-    //const ORI_FLIPX_ROT90: Orientation = Orientation { rotate: true, flip_y: false, flip_x: true };
     const ORI_ROT0_FLIPXY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: true };
     const ORI_ROT90_FLIPXY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true };
-    // ORI_FLIPXY_ROT90 is the same as ORI_ROT90_FLIPXY
-    //const ORI_FLIPXY_ROT90: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true };
 
     /// Return borders from all possible orientations of this tile.
     pub fn borders(&self) -> Vec<Border> {
@@ -449,18 +443,6 @@ mod tests {
         assert_eq!(expect, actual);
     }
 
-    // ORI_ROT90_FLIPX is the same as ORI_FLIPY_ROT90
-//    #[test]
-//    fn test_tile_borders_flipy_rot90() {
-//        let expect = vec![".#....####", "#.##...##.", "#..#......", "...#.#.#.#"];
-//        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-//        let actual: Vec<String> = tile.borders_for(Tile::ORI_FLIPY_ROT90)
-//            .iter()
-//            .map(|border| Border::pattern_string(border.pattern, border.edge))
-//            .collect();
-//        assert_eq!(expect, actual);
-//    }
-
     #[test]
     fn test_tile_borders_rot0_flipx() {
         let expect = vec!["#.#.#.#...", ".#....####", ".##...##.#", "#..#......"];
@@ -483,18 +465,6 @@ mod tests {
         assert_eq!(expect, actual);
     }
 
-    // ORI_FLIPX_ROT90 is the same as ORI_ROT90_FLIPY
-//    #[test]
-//    fn test_tile_borders_flipx_rot90() {
-//        let expect = vec!["......#..#", "#.#.#.#...", "####....#.", ".##...##.#"];
-//        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-//        let actual: Vec<String> = tile.borders_for(Tile::ORI_FLIPX_ROT90)
-//            .iter()
-//            .map(|border| Border::pattern_string(border.pattern, border.edge))
-//            .collect();
-//        assert_eq!(expect, actual);
-//    }
-
     #[test]
     fn test_tile_borders_rot0_flipxy() {
         let expect = vec![".##...##.#", "####....#.", "#.#.#.#...", "......#..#"];
@@ -516,18 +486,6 @@ mod tests {
             .collect();
         assert_eq!(expect, actual);
     }
-
-    // ORI_FLIPXY_ROT90 is the same as ORI_ROT90_FLIPXY
-//    #[test]
-//    fn test_tile_borders_flipxy_rot90() {
-//        let expect = vec!["#..#......", ".##...##.#", ".#....####", "#.#.#.#..."];
-//        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-//        let actual: Vec<String> = tile.borders_for(Tile::ORI_FLIPXY_ROT90)
-//            .iter()
-//            .map(|border| Border::pattern_string(border.pattern, border.edge))
-//            .collect();
-//        assert_eq!(expect, actual);
-//    }
 
     #[test]
     fn test_solve_example1() {
