@@ -167,7 +167,7 @@ impl Tile {
         s.trim().split("\n\n").map(str::parse).collect()
     }
 
-    /// Return `Pixel` at (y, x).
+    /// Return pixel at (y, x).
     #[must_use]
     pub fn pixel_at(&self, y: usize, x: usize) -> bool {
         self.pixels[self.pixels_index(y, x)].0
@@ -175,6 +175,28 @@ impl Tile {
 
     fn pixels_index(&self, y: usize, x: usize) -> usize {
         y * self.edge + x
+    }
+
+    /// Return pixel at (y, x) for the given `orientation`.
+    #[must_use]
+    pub fn oriented_pixel_at(&self, orientation: Orientation, y: usize, x: usize) -> bool {
+        self.pixels[self.oriented_pixels_index(orientation, y, x)].0
+    }
+
+    fn oriented_pixels_index(&self, orientation: Orientation, y: usize, x: usize) -> usize {
+        let mut yt: usize = match orientation.flip_y {
+            true => self.edge - 1 - y,
+            false => y,
+        };
+        let mut xt: usize = match orientation.flip_x {
+            true => self.edge - 1 - x,
+            false => x,
+        };
+        if orientation.rotate {
+            yt = self.edge - 1 - x;
+            xt = y;
+        }
+        yt * self.edge + xt
     }
 
     // all the possible tile orientations
@@ -202,7 +224,7 @@ impl Tile {
         ];
         orientations
             .iter()
-            .map(|&ori| self.borders_for_orientation(ori))
+            .map(|&ori| self.oriented_borders(ori))
             .flatten()
             .collect::<Vec<Border>>()
     }
@@ -277,6 +299,47 @@ impl Tile {
 
     fn bit_at(&self, y: usize, x: usize, i: usize) -> u32 {
         if self.pixel_at(y, x) {
+            let pos: u32 = u32::try_from(self.edge - 1 - i).unwrap();
+            u32::try_from(2_i32.pow(pos)).unwrap()
+        } else {
+            0
+        }
+    }
+
+    /// Return borders from provided `orientation` of this tile.
+    pub fn oriented_borders(&self, orientation: Orientation) -> Vec<Border> {
+        Border::kinds()
+            .iter()
+            .map(|&kind| Border {
+                tile_id: self.id,
+                orientation,
+                kind,
+                edge: self.edge,
+                pattern: self.oriented_pattern_for(orientation, kind),
+            })
+            .collect()
+    }
+
+    /// Return border pattern for the given tile edge (`kind`) and `orientation`.
+    pub fn oriented_pattern_for(&self, orientation: Orientation, kind: BorderKind) -> u32 {
+        let mut pattern: u32 = 0;
+        for i in 0..self.edge {
+            pattern |= match kind {
+                BorderKind::Top =>
+                    self.oriented_bit_at(orientation, 0, i, i),
+                BorderKind::Right =>
+                    self.oriented_bit_at(orientation, i, self.edge - 1, i),
+                BorderKind::Bottom =>
+                    self.oriented_bit_at(orientation, self.edge - 1, i, i),
+                BorderKind::Left =>
+                    self.oriented_bit_at(orientation, i, 0, i),
+            }
+        }
+        pattern
+    }
+
+    fn oriented_bit_at(&self, orientation: Orientation, y: usize, x: usize, i: usize) -> u32 {
+        if self.oriented_pixel_at(orientation, y, x) {
             let pos: u32 = u32::try_from(self.edge - 1 - i).unwrap();
             u32::try_from(2_i32.pow(pos)).unwrap()
         } else {
