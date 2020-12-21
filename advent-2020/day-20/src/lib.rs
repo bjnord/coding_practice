@@ -461,6 +461,55 @@ impl Tile {
     fn edge_key(border: &Border) -> String {
         format!("{}:{:?}", border.tile_id, border.kind)
     }
+
+    /// Find product of the four corner tiles
+    pub fn neosolve(tiles: &Vec<Tile>) -> u64 {
+        let borders: Vec<Border> = tiles
+            .iter()
+            .map(|tile| tile.borders())
+            .flatten()
+            .collect();
+        //eprintln!("#borders = {}", borders.len());
+        //for kind in Border::kinds() {
+        //    let answer = Tile::corner_product(tiles, &borders, kind);
+        //    eprintln!("answer ({:?}) = {}", kind, answer);
+        //}
+        // all 4 give the same answer, so just pick any one:
+        Tile::corner_product(tiles, &borders, BorderKind::Top)
+    }
+
+    // Well this is embarrassing. While exploring possible ways to solve part
+    // 1, I noticed a pattern in the following output, which just happened to
+    // pinpoint the four corners. It works for my puzzle input and I have no
+    // idea how. :D
+    fn corner_product(tiles: &Vec<Tile>, borders: &Vec<Border>, kind: BorderKind) -> u64 {
+        let mut corner_product: u64 = 1;
+        let kind_borders: Vec<&Border> = borders
+            .iter()
+            .filter(|bord| bord.kind == kind)
+            .collect();
+        //eprintln!("#kind_borders ({:?}) = {}", kind, kind_borders.len());
+        for tile in tiles {
+            let mut kind_pattern_count: HashMap<u32, usize> = HashMap::new();
+            for bord in kind_borders.iter() {
+                if bord.tile_id != tile.id {
+                    *kind_pattern_count.entry(bord.pattern).or_insert(0) += 1;
+                }
+            }
+            //eprintln!("not ID {} kind_pattern_count ({:?}) = {:?}", tile.id, kind, kind_pattern_count);
+            let opp_kind = Border::opposite_kind(kind);
+            let opp_kind_patterns: Vec<u32> = tile.borders()
+                .iter()
+                .filter(|bord| bord.kind == opp_kind && !kind_pattern_count.contains_key(&bord.pattern))
+                .map(|bord| bord.pattern)
+                .collect();
+            //eprintln!("ID {} #opp_kind_patterns ({:?}) = {}", tile.id, opp_kind, opp_kind_patterns.len());
+            if opp_kind_patterns.len() == 4 {
+                corner_product *= tile.id as u64;
+            }
+        }
+        corner_product
+    }
 }
 
 #[cfg(test)]
@@ -667,6 +716,6 @@ mod tests {
     #[test]
     fn test_solve_example1() {
         let tiles = Tile::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(20899048083289, Tile::solve(&tiles));
+        assert_eq!(20899048083289, Tile::neosolve(&tiles));
     }
 }
