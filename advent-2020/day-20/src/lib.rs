@@ -272,28 +272,30 @@ impl Tile {
         }
     }
 
-    /// Find product of the four corner tiles
+    /// Return product of the four corner tiles.
     pub fn neosolve(tiles: &Vec<Tile>) -> u64 {
-        let borders: Vec<Border> = tiles
+        let borders = Tile::all_borders(&tiles);
+        //eprintln!("#borders = {}", borders.len());
+        Tile::corner_tile_ids(tiles, &borders, BorderKind::Top)
+            .iter()
+            .map(|id| u64::try_from(*id).unwrap())
+            .product()
+    }
+
+    fn all_borders(tiles: &Vec<Tile>) -> Vec<Border> {
+        tiles
             .iter()
             .map(|tile| tile.borders())
             .flatten()
-            .collect();
-        //eprintln!("#borders = {}", borders.len());
-        //for kind in Border::kinds() {
-        //    let answer = Tile::corner_product(tiles, &borders, kind);
-        //    eprintln!("answer ({:?}) = {}", kind, answer);
-        //}
-        // all 4 give the same answer, so just pick any one:
-        Tile::corner_product(tiles, &borders, BorderKind::Top)
+            .collect()
     }
 
     // Well this is embarrassing. While exploring possible ways to solve part
     // 1, I noticed a pattern in the following output, which just happened to
     // pinpoint the four corners. It works for my puzzle input and I have no
     // idea how. :D
-    fn corner_product(tiles: &Vec<Tile>, borders: &Vec<Border>, kind: BorderKind) -> u64 {
-        let mut corner_product: u64 = 1;
+    fn corner_tile_ids(tiles: &Vec<Tile>, borders: &Vec<Border>, kind: BorderKind) -> Vec<u32> {
+        let mut corner_tile_ids: Vec<u32> = vec![];
         let kind_borders: Vec<&Border> = borders
             .iter()
             .filter(|bord| bord.kind == kind)
@@ -315,10 +317,11 @@ impl Tile {
                 .collect();
             //eprintln!("ID {} #opp_kind_patterns ({:?}) = {}", tile.id, opp_kind, opp_kind_patterns.len());
             if opp_kind_patterns.len() == 4 {
-                corner_product *= tile.id as u64;
+                corner_tile_ids.push(tile.id);
             }
         }
-        corner_product
+        //eprintln!("corner_tile_ids = {:?}", corner_tile_ids);
+        corner_tile_ids
     }
 }
 
