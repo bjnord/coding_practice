@@ -144,7 +144,7 @@ impl fmt::Display for Tile {
         s += &label;
         for y in 0..self.edge {
             for x in 0..self.edge {
-                s += match self.pixel_at(y, x) {
+                s += match self.pixel_at(Tile::ORI_ROT0, y, x) {
                     false => ".",
                     true => "#",
                 };
@@ -167,34 +167,32 @@ impl Tile {
         s.trim().split("\n\n").map(str::parse).collect()
     }
 
-    /// Return pixel at (y, x).
-    #[must_use]
-    pub fn pixel_at(&self, y: usize, x: usize) -> bool {
-        self.pixels[self.pixels_index(y, x)].0
-    }
-
-    fn pixels_index(&self, y: usize, x: usize) -> usize {
-        y * self.edge + x
-    }
-
     /// Return pixel at (y, x) for the given `orientation`.
     #[must_use]
-    pub fn oriented_pixel_at(&self, orientation: Orientation, y: usize, x: usize) -> bool {
-        self.pixels[self.oriented_pixels_index(orientation, y, x)].0
+    pub fn pixel_at(&self, orientation: Orientation, y: usize, x: usize) -> bool {
+        self.pixels[self.pixels_index(orientation, y, x)].0
     }
 
-    fn oriented_pixels_index(&self, orientation: Orientation, y: usize, x: usize) -> usize {
-        let mut yt: usize = match orientation.flip_y {
-            true => self.edge - 1 - y,
-            false => y,
-        };
-        let mut xt: usize = match orientation.flip_x {
-            true => self.edge - 1 - x,
-            false => x,
-        };
+    fn pixels_index(&self, orientation: Orientation, y: usize, x: usize) -> usize {
+        let mut yt: usize = y;
+        let mut xt: usize = x;
         if orientation.rotate {
             yt = self.edge - 1 - x;
             xt = y;
+        }
+        if orientation.flip_y {
+            if orientation.rotate {
+                xt = self.edge - 1 - xt;
+            } else {
+                yt = self.edge - 1 - yt;
+            }
+        }
+        if orientation.flip_x {
+            if orientation.rotate {
+                yt = self.edge - 1 - yt;
+            } else {
+                xt = self.edge - 1 - xt;
+            }
         }
         yt * self.edge + xt
     }
@@ -224,90 +222,13 @@ impl Tile {
         ];
         orientations
             .iter()
-            .map(|&ori| self.oriented_borders(ori))
+            .map(|&ori| self.borders_for(ori))
             .flatten()
             .collect::<Vec<Border>>()
     }
 
     /// Return borders from provided `orientation` of this tile.
-    pub fn borders_for_orientation(&self, orientation: Orientation) -> Vec<Border> {
-        let naturals = self.naturals();
-        self.borders_of(orientation, &naturals)
-    }
-
-    fn borders_of(&self, orientation: Orientation, naturals: &Vec<u32>) -> Vec<Border> {
-        let mut patterns: Vec<u32> = naturals.iter().copied().collect();
-        if orientation.rotate {
-            patterns = vec![
-                Tile::invert(patterns[3], self.edge),
-                patterns[0],
-                Tile::invert(patterns[1], self.edge),
-                patterns[2],
-            ];
-        }
-        let mut flip_patterns: Vec<u32> = vec![0; 4];
-        match (orientation.flip_y, orientation.flip_x) {
-            (false, false) => {
-                flip_patterns = patterns.iter().copied().collect();
-            },
-            (true, false) => {
-                flip_patterns[0] = patterns[2];
-                flip_patterns[1] = Tile::invert(patterns[1], self.edge);
-                flip_patterns[2] = patterns[0];
-                flip_patterns[3] = Tile::invert(patterns[3], self.edge);
-            },
-            (false, true) => {
-                flip_patterns[0] = Tile::invert(patterns[0], self.edge);
-                flip_patterns[1] = patterns[3];
-                flip_patterns[2] = Tile::invert(patterns[2], self.edge);
-                flip_patterns[3] = patterns[1];
-            },
-            (true, true) => {
-                flip_patterns[0] = Tile::invert(patterns[2], self.edge);
-                flip_patterns[1] = Tile::invert(patterns[3], self.edge);
-                flip_patterns[2] = Tile::invert(patterns[0], self.edge);
-                flip_patterns[3] = Tile::invert(patterns[1], self.edge);
-            },
-        }
-        let top = Border { tile_id: self.id, orientation, kind: BorderKind::Top, edge: self.edge, pattern: flip_patterns[0] };
-        let right = Border { tile_id: self.id, orientation, kind: BorderKind::Right, edge: self.edge, pattern: flip_patterns[1] };
-        let bottom = Border { tile_id: self.id, orientation, kind: BorderKind::Bottom, edge: self.edge, pattern: flip_patterns[2] };
-        let left = Border { tile_id: self.id, orientation, kind: BorderKind::Left, edge: self.edge, pattern: flip_patterns[3] };
-        vec![top, right, bottom, left]
-    }
-
-    fn naturals(&self) -> Vec<u32> {
-        Border::kinds()
-            .iter()
-            .map(|&kind| self.pattern_for(kind))
-            .collect()
-    }
-
-    /// Return border pattern for the given tile edge (`kind`).
-    pub fn pattern_for(&self, kind: BorderKind) -> u32 {
-        let mut pattern: u32 = 0;
-        for i in 0..self.edge {
-            match kind {
-                BorderKind::Top => pattern |= self.bit_at(0, i, i),
-                BorderKind::Right => pattern |= self.bit_at(i, self.edge - 1, i),
-                BorderKind::Bottom => pattern |= self.bit_at(self.edge - 1, i, i),
-                BorderKind::Left => pattern |= self.bit_at(i, 0, i),
-            }
-        }
-        pattern
-    }
-
-    fn bit_at(&self, y: usize, x: usize, i: usize) -> u32 {
-        if self.pixel_at(y, x) {
-            let pos: u32 = u32::try_from(self.edge - 1 - i).unwrap();
-            u32::try_from(2_i32.pow(pos)).unwrap()
-        } else {
-            0
-        }
-    }
-
-    /// Return borders from provided `orientation` of this tile.
-    pub fn oriented_borders(&self, orientation: Orientation) -> Vec<Border> {
+    pub fn borders_for(&self, orientation: Orientation) -> Vec<Border> {
         Border::kinds()
             .iter()
             .map(|&kind| Border {
@@ -315,50 +236,36 @@ impl Tile {
                 orientation,
                 kind,
                 edge: self.edge,
-                pattern: self.oriented_pattern_for(orientation, kind),
+                pattern: self.pattern_for(orientation, kind),
             })
             .collect()
     }
 
     /// Return border pattern for the given tile edge (`kind`) and `orientation`.
-    pub fn oriented_pattern_for(&self, orientation: Orientation, kind: BorderKind) -> u32 {
+    pub fn pattern_for(&self, orientation: Orientation, kind: BorderKind) -> u32 {
         let mut pattern: u32 = 0;
         for i in 0..self.edge {
             pattern |= match kind {
                 BorderKind::Top =>
-                    self.oriented_bit_at(orientation, 0, i, i),
+                    self.bit_at(orientation, 0, i, i),
                 BorderKind::Right =>
-                    self.oriented_bit_at(orientation, i, self.edge - 1, i),
+                    self.bit_at(orientation, i, self.edge - 1, i),
                 BorderKind::Bottom =>
-                    self.oriented_bit_at(orientation, self.edge - 1, i, i),
+                    self.bit_at(orientation, self.edge - 1, i, i),
                 BorderKind::Left =>
-                    self.oriented_bit_at(orientation, i, 0, i),
+                    self.bit_at(orientation, i, 0, i),
             }
         }
         pattern
     }
 
-    fn oriented_bit_at(&self, orientation: Orientation, y: usize, x: usize, i: usize) -> u32 {
-        if self.oriented_pixel_at(orientation, y, x) {
+    fn bit_at(&self, orientation: Orientation, y: usize, x: usize, i: usize) -> u32 {
+        if self.pixel_at(orientation, y, x) {
             let pos: u32 = u32::try_from(self.edge - 1 - i).unwrap();
             u32::try_from(2_i32.pow(pos)).unwrap()
         } else {
             0
         }
-    }
-
-    fn invert(pattern: u32, edge: usize) -> u32 {
-        let mut inv_pattern: u32 = 0;
-        for i in 0..edge {
-            let pos = u32::try_from(edge - 1 - i).unwrap();
-            let inv_pos = u32::try_from(i).unwrap();
-            let bit = u32::try_from(2_i32.pow(pos)).unwrap();
-            let inv_bit = u32::try_from(2_i32.pow(inv_pos)).unwrap();
-            if pattern & bit != 0 {
-                inv_pattern |= inv_bit;
-            }
-        }
-        inv_pattern
     }
 
     /// Find tile orientations and positions such that edges line up.
@@ -384,7 +291,7 @@ impl Tile {
                     .iter()
                     .map(|tile| {
                         if orientation.contains_key(&tile.id) {
-                            tile.borders_for_orientation(orientation[&tile.id])
+                            tile.borders_for(orientation[&tile.id])
                         } else {
                             tile.borders()
                         }
@@ -571,11 +478,11 @@ mod tests {
     #[test]
     fn test_tile_indexing() {
         let tile: Tile = TINY_TILE.parse().unwrap();
-        assert_eq!(true, tile.pixel_at(0, 2));
-        assert_eq!(true, tile.pixel_at(1, 0));
-        assert_eq!(false, tile.pixel_at(1, 1));
-        assert_eq!(false, tile.pixel_at(2, 0));
-        assert_eq!(false, tile.pixel_at(0, 1));
+        assert_eq!(true, tile.pixel_at(Tile::ORI_ROT0, 0, 2));
+        assert_eq!(true, tile.pixel_at(Tile::ORI_ROT0, 1, 0));
+        assert_eq!(false, tile.pixel_at(Tile::ORI_ROT0, 1, 1));
+        assert_eq!(false, tile.pixel_at(Tile::ORI_ROT0, 2, 0));
+        assert_eq!(false, tile.pixel_at(Tile::ORI_ROT0, 0, 1));
     }
 
     #[test]
@@ -636,7 +543,7 @@ mod tests {
     fn test_tile_borders_rot0() {
         let expect = vec!["...#.#.#.#", "#..#......", "#.##...##.", ".#....####"];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT0)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -647,7 +554,7 @@ mod tests {
     fn test_tile_borders_rot90() {
         let expect = vec!["####....#.", "...#.#.#.#", "......#..#", "#.##...##."];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT90)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -658,7 +565,7 @@ mod tests {
     fn test_tile_borders_rot0_flipy() {
         let expect = vec!["#.##...##.", "......#..#", "...#.#.#.#", "####....#."];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0_FLIPY, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT0_FLIPY)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -669,7 +576,7 @@ mod tests {
     fn test_tile_borders_rot90_flipy() {
         let expect = vec!["......#..#", "#.#.#.#...", "####....#.", ".##...##.#"];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90_FLIPY, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT90_FLIPY)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -681,7 +588,7 @@ mod tests {
 //    fn test_tile_borders_flipy_rot90() {
 //        let expect = vec![".#....####", "#.##...##.", "#..#......", "...#.#.#.#"];
 //        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-//        let actual: Vec<String> = tile.borders_of(Tile::ORI_FLIPY_ROT90, &tile.naturals())
+//        let actual: Vec<String> = tile.borders_for(Tile::ORI_FLIPY_ROT90)
 //            .iter()
 //            .map(|border| Border::pattern_string(border.pattern, border.edge))
 //            .collect();
@@ -692,7 +599,7 @@ mod tests {
     fn test_tile_borders_rot0_flipx() {
         let expect = vec!["#.#.#.#...", ".#....####", ".##...##.#", "#..#......"];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0_FLIPX, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT0_FLIPX)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -703,7 +610,7 @@ mod tests {
     fn test_tile_borders_rot90_flipx() {
         let expect = vec![".#....####", "#.##...##.", "#..#......", "...#.#.#.#"];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90_FLIPX, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT90_FLIPX)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -715,7 +622,7 @@ mod tests {
 //    fn test_tile_borders_flipx_rot90() {
 //        let expect = vec!["......#..#", "#.#.#.#...", "####....#.", ".##...##.#"];
 //        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-//        let actual: Vec<String> = tile.borders_of(Tile::ORI_FLIPX_ROT90, &tile.naturals())
+//        let actual: Vec<String> = tile.borders_for(Tile::ORI_FLIPX_ROT90)
 //            .iter()
 //            .map(|border| Border::pattern_string(border.pattern, border.edge))
 //            .collect();
@@ -726,7 +633,7 @@ mod tests {
     fn test_tile_borders_rot0_flipxy() {
         let expect = vec![".##...##.#", "####....#.", "#.#.#.#...", "......#..#"];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT0_FLIPXY, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT0_FLIPXY)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -737,7 +644,7 @@ mod tests {
     fn test_tile_borders_rot90_flipxy() {
         let expect = vec!["#..#......", ".##...##.#", ".#....####", "#.#.#.#..."];
         let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-        let actual: Vec<String> = tile.borders_of(Tile::ORI_ROT90_FLIPXY, &tile.naturals())
+        let actual: Vec<String> = tile.borders_for(Tile::ORI_ROT90_FLIPXY)
             .iter()
             .map(|border| Border::pattern_string(border.pattern, border.edge))
             .collect();
@@ -749,7 +656,7 @@ mod tests {
 //    fn test_tile_borders_flipxy_rot90() {
 //        let expect = vec!["#..#......", ".##...##.#", ".#....####", "#.#.#.#..."];
 //        let tile = &Tile::read_from_file("input/example1.txt").unwrap()[7];
-//        let actual: Vec<String> = tile.borders_of(Tile::ORI_FLIPXY_ROT90, &tile.naturals())
+//        let actual: Vec<String> = tile.borders_for(Tile::ORI_FLIPXY_ROT90)
 //            .iter()
 //            .map(|border| Border::pattern_string(border.pattern, border.edge))
 //            .collect();
