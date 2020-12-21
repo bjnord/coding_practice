@@ -7,6 +7,8 @@ use std::fmt;
 use std::fs;
 use std::str::FromStr;
 
+pub mod image;
+
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 custom_error!{#[derive(PartialEq)]
@@ -322,6 +324,48 @@ impl Tile {
         }
         //eprintln!("corner_tile_ids = {:?}", corner_tile_ids);
         corner_tile_ids
+    }
+
+    /// Return NxN matrix of Top Borders, describing the proper orientation
+    /// of the given `tiles` so their inner edges align.
+    pub fn aligned_borders(tiles: &Vec<Tile>) -> Vec<Vec<Border>> {
+        let borders = Tile::all_borders(&tiles);
+        // FIXME this obviously only works for input/example1.txt
+        // --------------------------------------------------------------------
+        let t1951 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 1951 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+            .unwrap();
+        let t2311 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 2311 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+            .unwrap();
+        let t3079 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 3079 && bord.orientation == Tile::ORI_ROT0)
+            .unwrap();
+        let row1 = vec![t1951, t2311, t3079];
+        // --------------------------------------------------------------------
+        let t2729 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 2729 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+            .unwrap();
+        let t1427 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 1427 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+            .unwrap();
+        let t2473 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 2473 && bord.orientation == Tile::ORI_ROT90_FLIPY)
+            .unwrap();
+        let row2 = vec![t2729, t1427, t2473];
+        // --------------------------------------------------------------------
+        let t2971 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 2971 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+            .unwrap();
+        let t1489 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 1489 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+            .unwrap();
+        let t1171 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
+            bord.tile_id == 1171 && bord.orientation == Tile::ORI_ROT0_FLIPX)
+            .unwrap();
+        let row3 = vec![t2971, t1489, t1171];
+        // --------------------------------------------------------------------
+        vec![row1, row2, row3]
     }
 }
 
