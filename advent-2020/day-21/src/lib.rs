@@ -176,14 +176,14 @@ impl FoodList {
         while !allergens.is_empty() {
             let mut discovery = false;
             // 1. "When you come to a fork in the road, take it."
-            let loners: Vec<(String, String)> = self.foods
+            let loners: Vec<(&String, &String)> = self.foods
                 .iter()
                 .filter_map(|food| FoodList::lone_allergen_ingredient(food, &a_ingredients))
                 .collect();
             if loners.len() > 0 {
                 for loner in loners {
-                    allergens.remove(&loner.1);
-                    a_ingredients.push(loner);
+                    allergens.remove(loner.1);
+                    a_ingredients.push((loner.0.to_string(), loner.1.to_string()));
                 }
                 discovery = true;
             }
@@ -220,30 +220,38 @@ impl FoodList {
         a_ingredients
     }
 
-    fn lone_allergen_ingredient(food: &Food, a_ingredients: &Vec<(String, String)>) -> Option<(String, String)> {
-        let unknown_a: Vec<&String> = food.allergens
+    fn lone_allergen_ingredient<'a>(food: &'a Food, a_ingredients: &Vec<(String, String)>) -> Option<(&'a String, &'a String)> {
+        let unknown_a = FoodList::unknown_allergens(food, a_ingredients);
+        if unknown_a.len() != 1 {
+            return None;
+        }
+        let unknown_i = FoodList::unknown_ingredients(food, a_ingredients);
+        if unknown_i.len() != 1 {
+            return None;
+        }
+        Some((unknown_i[0], unknown_a[0]))
+    }
+
+    fn unknown_allergens<'a>(food: &'a Food, a_ingredients: &Vec<(String, String)>) -> Vec<&'a String> {
+        food.allergens
             .iter()
             .filter(|&all|
                 !a_ingredients
                     .iter()
                     .any(|pair| pair.1 == *all)
             )
-            .collect();
-        if unknown_a.len() != 1 {
-            return None;
-        }
-        let unknown_i: Vec<&String> = food.ingredients
+            .collect()
+    }
+
+    fn unknown_ingredients<'a>(food: &'a Food, a_ingredients: &Vec<(String, String)>) -> Vec<&'a String> {
+        food.ingredients
             .iter()
             .filter(|&ing|
                 !a_ingredients
                     .iter()
                     .any(|pair| pair.0 == *ing)
             )
-            .collect();
-        if unknown_i.len() != 1 {
-            return None;
-        }
-        Some((unknown_i[0].to_string(), unknown_a[0].to_string()))
+            .collect()
     }
 
     /// Return list of ingredients common to all foods containing `allergen`.
@@ -257,12 +265,9 @@ impl FoodList {
         if a_foods.is_empty() {
             return vec![];
         }
-        let c_ingredients: Vec<&String> = a_foods[0].ingredients
+        a_foods[0].ingredients
             .iter()
             .filter(|ing| a_foods.iter().all(|food| food.contains_ingredient(ing)))
-            .collect();
-        c_ingredients
-            .iter()
             .map(|ing| (ing.to_string(), allergen.to_string()))
             .collect()
     }
