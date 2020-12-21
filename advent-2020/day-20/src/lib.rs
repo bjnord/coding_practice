@@ -93,6 +93,16 @@ impl Border {
         ]
     }
 
+    /// Return the opposite of the given border `kind`.
+    pub fn opposite_kind(kind: BorderKind) -> BorderKind {
+        match kind {
+            BorderKind::Top => BorderKind::Bottom,
+            BorderKind::Right => BorderKind::Left,
+            BorderKind::Bottom => BorderKind::Top,
+            BorderKind::Left => BorderKind::Right,
+        }
+    }
+
     pub fn pattern_string(pattern: u32, edge: usize) -> String {
         (0..edge)
             .map(|i| {
@@ -352,7 +362,7 @@ impl Tile {
                     first_used_border = Some(*first);
                 }
                 //eprintln!("1ST {}", first);
-                let second_kind = Tile::opposite_kind(first.kind);
+                let second_kind = Border::opposite_kind(first.kind);
                 let mut second_borders: Vec<&Border> = borders
                     .iter()
                     .filter(|bord|
@@ -446,15 +456,6 @@ impl Tile {
         // --------------------------------------
         eprintln!("*** ANSWER {} ***", corners);
         corners
-    }
-
-    fn opposite_kind(kind: BorderKind) -> BorderKind {
-        match kind {
-            BorderKind::Top => BorderKind::Bottom,
-            BorderKind::Right => BorderKind::Left,
-            BorderKind::Bottom => BorderKind::Top,
-            BorderKind::Left => BorderKind::Right,
-        }
     }
 
     fn edge_key(border: &Border) -> String {
