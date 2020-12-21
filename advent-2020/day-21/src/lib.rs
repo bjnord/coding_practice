@@ -155,6 +155,17 @@ impl FoodList {
             .count()
     }
 
+    /// Return the "canonical dangerous ingredient list" string.
+    pub fn dangerous_ingredients(&self) -> String {
+        let mut ka_ingredients: Vec<(String, String)> = self.known_allergen_ingredients();
+        ka_ingredients.sort_by(|a, b| a.1.cmp(&b.1));
+        ka_ingredients
+            .iter()
+            .map(|pair| pair.0.to_string())
+            .collect::<Vec<String>>()
+            .join(",")
+    }
+
     /// Return list of ingredients with known allergens. Each item in the
     /// list is an (ingredient, allergen) tuple.
     #[must_use]
@@ -319,6 +330,12 @@ mod tests {
         let mut actual = food_list.known_allergen_ingredients();
         actual.sort_by(|a, b| a.1.cmp(&b.1));
         assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_dangerous_ingredients() {
+        let food_list = FoodList::read_from_file("input/example1.txt").unwrap();
+        assert_eq!("mxmxvkd,sqjhc,fvjkl", food_list.dangerous_ingredients());
     }
 
     #[test]

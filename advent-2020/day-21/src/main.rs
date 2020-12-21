@@ -21,11 +21,25 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    //let entries = Entry::read_from_file("input/input.txt").unwrap();
+    let food_list = FoodList::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    let dangerous = food_list.dangerous_ingredients();
+    let act = dangerous_hash(&dangerous);
+    let exp = dangerous_hash("hkflr,ctmcqjf,bfrq,srxphcm,snmxl,zvx,bd,mqvk");
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 1 - Part 2 : {} <=> {} expected", act, exp);
+    println!("    answer: {}", dangerous);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
+}
+
+fn dangerous_hash(ingredients: &str) -> String {
+    ingredients
+        .split(',')
+        .map(|ing| format!("{}{}",
+                ing.chars().nth(0).unwrap().to_uppercase(),
+                ing.chars().nth(1).unwrap())
+        )
+        .collect::<Vec<String>>()
+        .join("")
 }
