@@ -83,6 +83,16 @@ impl fmt::Display for Border {
 }
 
 impl Border {
+    /// Return the four border kinds.
+    pub fn kinds() -> Vec<BorderKind> {
+        vec![
+            BorderKind::Top,
+            BorderKind::Right,
+            BorderKind::Bottom,
+            BorderKind::Left,
+        ]
+    }
+
     pub fn pattern_string(pattern: u32, edge: usize) -> String {
         (0..edge)
             .map(|i| {
@@ -185,7 +195,6 @@ impl Tile {
 
     /// Return borders from all possible orientations of this tile.
     pub fn borders(&self) -> Vec<Border> {
-        let naturals = self.naturals();
         let orientations: Vec<Orientation> = vec![
             Tile::ORI_ROT0, Tile::ORI_ROT90,
             Tile::ORI_ROT0_FLIPY, Tile::ORI_ROT90_FLIPY, Tile::ORI_ROT0_FLIPX,
@@ -193,7 +202,7 @@ impl Tile {
         ];
         orientations
             .iter()
-            .map(|&ori| self.borders_of(ori, &naturals))
+            .map(|&ori| self.borders_for_orientation(ori))
             .flatten()
             .collect::<Vec<Border>>()
     }
@@ -245,39 +254,34 @@ impl Tile {
         vec![top, right, bottom, left]
     }
 
-    pub fn naturals(&self) -> Vec<u32> {
-        let mut naturals: Vec<u32> = vec![];
-        let mut pattern: u32;
-        // top
-        pattern = 0;
-        for i in 0..self.edge {
-            if self.pixel_at(0, i) { pattern |= Tile::bit_at_pos(i, self.edge) }
-        }
-        naturals.push(pattern);
-        // right
-        pattern = 0;
-        for i in 0..self.edge {
-            if self.pixel_at(i, self.edge - 1) { pattern |= Tile::bit_at_pos(i, self.edge) }
-        }
-        naturals.push(pattern);
-        // bottom
-        pattern = 0;
-        for i in 0..self.edge {
-            if self.pixel_at(self.edge - 1, i) { pattern |= Tile::bit_at_pos(i, self.edge) }
-        }
-        naturals.push(pattern);
-        // left
-        pattern = 0;
-        for i in 0..self.edge {
-            if self.pixel_at(i, 0) { pattern |= Tile::bit_at_pos(i, self.edge) }
-        }
-        naturals.push(pattern);
-        naturals
+    fn naturals(&self) -> Vec<u32> {
+        Border::kinds()
+            .iter()
+            .map(|&kind| self.pattern_for(kind))
+            .collect()
     }
 
-    fn bit_at_pos(i: usize, edge: usize) -> u32 {
-        let pos: u32 = u32::try_from(edge - 1 - i).unwrap();
-        u32::try_from(2_i32.pow(pos)).unwrap()
+    /// Return border pattern for the given tile edge (`kind`).
+    pub fn pattern_for(&self, kind: BorderKind) -> u32 {
+        let mut pattern: u32 = 0;
+        for i in 0..self.edge {
+            match kind {
+                BorderKind::Top => pattern |= self.bit_at(0, i, i),
+                BorderKind::Right => pattern |= self.bit_at(i, self.edge - 1, i),
+                BorderKind::Bottom => pattern |= self.bit_at(self.edge - 1, i, i),
+                BorderKind::Left => pattern |= self.bit_at(i, 0, i),
+            }
+        }
+        pattern
+    }
+
+    fn bit_at(&self, y: usize, x: usize, i: usize) -> u32 {
+        if self.pixel_at(y, x) {
+            let pos: u32 = u32::try_from(self.edge - 1 - i).unwrap();
+            u32::try_from(2_i32.pow(pos)).unwrap()
+        } else {
+            0
+        }
     }
 
     fn invert(pattern: u32, edge: usize) -> u32 {
