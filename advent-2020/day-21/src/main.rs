@@ -9,11 +9,11 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let _food_list = FoodList::read_from_file("input/input.txt").unwrap();
+    let food_list = FoodList::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    let count = food_list.non_allergen_ingredient_count();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> _ expected", 0);
+    println!("Day 1 - Part 1 : {} <=> 2542 expected", count);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
