@@ -136,7 +136,11 @@ impl Game {
                 println!("Player 1 plays: {}", p1[0].0);
                 println!("Player 2 plays: {}", p2[0].0);
             }
-            self.decide_round_winner(p1[0], p2[0]);
+            if self.game > 0 {
+                self.decide_round_winner_recursively(round, p1[0], p2[0]);
+            } else {
+                self.decide_round_winner(round, p1[0], p2[0]);
+            }
             if self.decks[1].is_empty() {
                 game_winner = 1;
                 break;
@@ -155,22 +159,32 @@ impl Game {
         game_winner
     }
 
-    fn decide_round_winner(&mut self, p1_card: Card, p2_card: Card) {
-        if p1_card.0 > p2_card.0 {
-            if self.output {
-                println!("Player 1 wins the round!");
-                println!();
+    fn decide_round_winner(&mut self, round: u32, p1_card: Card, p2_card: Card) {
+        let winner = if p1_card.0 > p2_card.0 { 1 } else { 2 };
+        self.finish_round(round, winner, p1_card, p2_card);
+    }
+
+    fn finish_round(&mut self, round: u32, winner: usize, p1_card: Card, p2_card: Card) {
+        if self.output {
+            if self.game == 0 {
+                println!("Player {} wins the round!", winner);
+            } else {
+                println!("Player {} wins round {} of game {}!", winner, round, self.game);
             }
+            println!();
+        }
+        if winner == 1 {
             self.decks[0].cards.push(p1_card);
             self.decks[0].cards.push(p2_card);
         } else {
-            if self.output {
-                println!("Player 2 wins the round!");
-                println!();
-            }
             self.decks[1].cards.push(p2_card);
             self.decks[1].cards.push(p1_card);
         }
+    }
+
+    fn decide_round_winner_recursively(&mut self, round: u32, p1_card: Card, p2_card: Card) {
+        // TODO recurse here if conditions are met
+        self.decide_round_winner(round, p1_card, p2_card);
     }
 
     /// Returns score of the given `player`.
