@@ -77,12 +77,12 @@ impl Deck {
             .join(", ")
     }
 
-    /// Are there no cards in the deck?
+    /// Is the deck empty?
     pub fn is_empty(&self) -> bool {
         self.cards.is_empty()
     }
 
-    /// Return score.
+    /// Return score of cards in the deck.
     pub fn score(&self) -> u32 {
         let n_cards = self.cards.len();
         self.cards
@@ -111,12 +111,13 @@ pub struct Game {
 }
 
 impl Game {
-    /// Construct from game number and decks.
+    /// Construct from game number and decks. If `output` is true, `play()`
+    /// will produce output on stdout as the game progresses.
     pub fn from_decks(game: usize, decks: Vec<Deck>, output: bool) -> Game {
         Game { game, decks, output }
     }
 
-    /// Play rounds.
+    /// Play the game. Returns the winning player number.
     pub fn play(&mut self) -> usize {
         let mut winner = 0_usize;
         for round in 1..u32::MAX {
@@ -169,14 +170,14 @@ impl Game {
         winner
     }
 
-    /// Return score of the given `player`.
+    /// Returns score of the given `player`.
     pub fn score(&self, player: usize) -> u32 {
         self.decks[player - 1].score()
     }
 
-    /// Return score of the given `player`.
+    // Returns cards in the given `player`'s deck.
     #[cfg(test)]
-    pub fn cards(&self, player: usize) -> &Vec<Card> {
+    fn cards(&self, player: usize) -> &Vec<Card> {
         &self.decks[player - 1].cards
     }
 }
