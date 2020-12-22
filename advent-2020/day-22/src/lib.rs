@@ -183,8 +183,15 @@ impl Game {
                 game_winner = 2;
                 break;
             }
+            if self.output {
+                println!();
+            }
         }
         if self.output && self.game < 2 {
+            if self.game == 1 {
+                println!("The winner of game 1 is player {}!", game_winner);
+            }
+            println!();
             println!();
             println!("== Post-game results ==");
             println!("Player 1's deck: {}", self.decks[0].to_string());
@@ -205,7 +212,6 @@ impl Game {
             } else {
                 println!("Player {} wins round {} of game {}!", winner, round, self.game);
             }
-            println!();
         }
         if winner == 1 {
             self.decks[0].cards.push(p1_card);
