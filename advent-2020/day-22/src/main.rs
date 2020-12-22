@@ -9,11 +9,11 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let mut decks = Deck::read_from_file("input/input.txt").unwrap();
+    let decks = Deck::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    let winner = Game::play(&mut decks, false);
-    let score = decks[winner - 1].score();
-    println!("winner = {}", winner);
+    let mut game = Game::from_decks(0, decks, false);
+    let winner = game.play();
+    let score = game.score(winner);
     let run_time = start.elapsed() - gen_time;
     println!("Day 1 - Part 1 : {} <=> 32413 expected", score);
     println!("    generator: {:?}", gen_time);

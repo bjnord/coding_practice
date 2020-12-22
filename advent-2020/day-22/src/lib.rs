@@ -104,55 +104,80 @@ impl Deck {
     }
 }
 
-pub struct Game { }
+pub struct Game {
+    game: usize,
+    decks: Vec<Deck>,
+    output: bool,
+}
 
 impl Game {
-    pub fn play(decks: &mut Vec<Deck>, output: bool) -> usize {
+    /// Construct from game number and decks.
+    pub fn from_decks(game: usize, decks: Vec<Deck>, output: bool) -> Game {
+        Game { game, decks, output }
+    }
+
+    /// Play rounds.
+    pub fn play(&mut self) -> usize {
         let mut winner = 0_usize;
         for round in 1..u32::MAX {
-            if output {
-                println!("-- Round {} --", round);
-                println!("Player 1's deck: {}", decks[0].to_string());
-                println!("Player 2's deck: {}", decks[1].to_string());
+            if self.output {
+                if self.game > 0 {
+                    println!("-- Round {} (Game {}) --", round, self.game);
+                } else {
+                    println!("-- Round {} --", round);
+                }
+                println!("Player 1's deck: {}", self.decks[0].to_string());
+                println!("Player 2's deck: {}", self.decks[1].to_string());
             }
-            let p1: Vec<Card> = decks[0].cards.drain(..1).collect();
-            let p2: Vec<Card> = decks[1].cards.drain(..1).collect();
-            if output {
+            let p1: Vec<Card> = self.decks[0].cards.drain(..1).collect();
+            let p2: Vec<Card> = self.decks[1].cards.drain(..1).collect();
+            if self.output {
                 println!("Player 1 plays: {}", p1[0].0);
                 println!("Player 2 plays: {}", p2[0].0);
             }
             if p1[0].0 > p2[0].0 {
-                if output {
+                if self.output {
                     println!("Player 1 wins the round!");
                     println!();
                 }
-                decks[0].cards.push(p1[0]);
-                decks[0].cards.push(p2[0]);
-                if decks[1].is_empty() {
+                self.decks[0].cards.push(p1[0]);
+                self.decks[0].cards.push(p2[0]);
+                if self.decks[1].is_empty() {
                     winner = 1;
                     break;
                 }
             } else {
-                if output {
+                if self.output {
                     println!("Player 2 wins the round!");
                     println!();
                 }
-                decks[1].cards.push(p2[0]);
-                decks[1].cards.push(p1[0]);
-                if decks[0].is_empty() {
+                self.decks[1].cards.push(p2[0]);
+                self.decks[1].cards.push(p1[0]);
+                if self.decks[0].is_empty() {
                     winner = 2;
                     break;
                 }
                 continue;
             }
         }
-        if output {
+        if self.output {
             println!();
             println!("== Post-game results ==");
-            println!("Player 1's deck: {}", decks[0].to_string());
-            println!("Player 2's deck: {}", decks[1].to_string());
+            println!("Player 1's deck: {}", self.decks[0].to_string());
+            println!("Player 2's deck: {}", self.decks[1].to_string());
         }
         winner
+    }
+
+    /// Return score of the given `player`.
+    pub fn score(&self, player: usize) -> u32 {
+        self.decks[player - 1].score()
+    }
+
+    /// Return score of the given `player`.
+    #[cfg(test)]
+    pub fn cards(&self, player: usize) -> &Vec<Card> {
+        &self.decks[player - 1].cards
     }
 }
 
@@ -208,11 +233,17 @@ mod tests {
 
     #[test]
     fn test_play() {
-        let mut decks = Deck::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(2, Game::play(&mut decks, true));
+        let decks = Deck::read_from_file("input/example1.txt").unwrap();
+        let mut game = Game::from_decks(0, decks, true);
+        let exp_winner = 2;
+        assert_eq!(exp_winner, game.play());
+        assert_eq!(306, game.score(2));
+        let exp_winner_cards: Vec<Card> = game.cards(exp_winner)
+            .iter()
+            .map(|&c| Card(c.0))
+            .collect();
         assert_eq!(vec![Card(3), Card(2), Card(10), Card(6), Card(8),
-            Card(5), Card(9), Card(4), Card(7), Card(1)], decks[1].cards);
-        assert_eq!(306, decks[1].score());
-        assert!(decks[0].is_empty());
+            Card(5), Card(9), Card(4), Card(7), Card(1)], exp_winner_cards);
+        assert!(game.cards(3 - exp_winner).is_empty());
     }
 }
