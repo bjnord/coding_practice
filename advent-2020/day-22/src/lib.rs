@@ -1,4 +1,5 @@
 #[macro_use] extern crate scan_fmt;
+use std::collections::HashSet;
 
 use custom_error::custom_error;
 use std::convert::TryFrom;
@@ -122,13 +123,15 @@ pub struct Game {
     game: usize,
     decks: Vec<Deck>,
     output: bool,
+    seen: HashSet<u64>,
 }
 
 impl Game {
     /// Construct from game number and decks. If `output` is true, `play()`
     /// will produce output on stdout as the game progresses.
     pub fn from_decks(game: usize, decks: Vec<Deck>, output: bool) -> Game {
-        Game { game, decks, output }
+        let seen: HashSet<u64> = HashSet::new();
+        Game { game, decks, seen, output }
     }
 
     /// Play the game. Returns the winning player number.
@@ -147,6 +150,19 @@ impl Game {
                 }
                 println!("Player 1's deck: {}", self.decks[0].to_string());
                 println!("Player 2's deck: {}", self.decks[1].to_string());
+            }
+            // "Before either player deals a card, if there was a previous
+            // round in this game that had exactly the same cards in the
+            // same order in the same players' decks, the game instantly
+            // ends in a win for player 1. Previous rounds from other games
+            // are not considered. (This prevents infinite games of
+            // Recursive Combat, which everyone agrees is a bad idea.)"
+            let game_hash = self.hash();
+            if self.seen.contains(&game_hash) {
+                game_winner = 1;
+                break;
+            } else {
+                self.seen.insert(game_hash);
             }
             let p1: Vec<Card> = self.decks[0].cards.drain(..1).collect();
             let p2: Vec<Card> = self.decks[1].cards.drain(..1).collect();
@@ -233,6 +249,21 @@ impl Game {
     fn cards(&self, player: usize) -> &Vec<Card> {
         &self.decks[player - 1].cards
     }
+
+    // Returns hash of the decks' state.
+    fn hash(&self) -> u64 {
+        let mut hash = 1_u64;
+        hash = self.decks[0].cards
+            .iter()
+            .enumerate()
+            .fold(hash, |acc, (i, card)| acc.wrapping_mul(card.0 as u64).wrapping_add(i as u64 + 1));
+        hash = hash.wrapping_mul(1202).wrapping_add(81518);
+        hash = self.decks[1].cards
+            .iter()
+            .enumerate()
+            .fold(hash, |acc, (i, card)| acc.wrapping_mul(card.0 as u64).wrapping_add(i as u64 + 1));
+        hash
+    }
 }
 
 #[cfg(test)]
@@ -301,6 +332,17 @@ mod tests {
     }
 
     #[test]
+    fn test_game_hash() {
+        let decks = vec![
+            Deck { player: 1, cards: vec![Card(2), Card(3), Card(5)] },
+            Deck { player: 2, cards: vec![Card(7), Card(11)] },
+        ];
+        let game = Game::from_decks(0, decks, false);
+        // see also `bin/hash.sh`
+        assert_eq!(11645031, game.hash());
+    }
+
+    #[test]
     fn test_play() {
         let decks = Deck::read_from_file("input/example1.txt").unwrap();
         let mut game = Game::from_decks(0, decks, true);
@@ -330,5 +372,13 @@ mod tests {
         assert_eq!(vec![Card(7), Card(5), Card(6), Card(2), Card(4),
             Card(1), Card(10), Card(8), Card(9), Card(3)], exp_winner_cards);
         assert!(game.cards(3 - exp_winner).is_empty());
+    }
+
+    #[test]
+    fn test_play_recursive_loop() {
+        let decks = Deck::read_from_file("input/example2.txt").unwrap();
+        let mut game = Game::from_decks(1, decks, true);
+        let exp_winner = 1;
+        assert_eq!(exp_winner, game.play());
     }
 }
