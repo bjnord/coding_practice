@@ -119,7 +119,7 @@ impl Game {
 
     /// Play the game. Returns the winning player number.
     pub fn play(&mut self) -> usize {
-        let mut winner = 0_usize;
+        let mut game_winner = 0_usize;
         for round in 1..u32::MAX {
             if self.output {
                 if self.game > 0 {
@@ -136,29 +136,14 @@ impl Game {
                 println!("Player 1 plays: {}", p1[0].0);
                 println!("Player 2 plays: {}", p2[0].0);
             }
-            if p1[0].0 > p2[0].0 {
-                if self.output {
-                    println!("Player 1 wins the round!");
-                    println!();
-                }
-                self.decks[0].cards.push(p1[0]);
-                self.decks[0].cards.push(p2[0]);
-                if self.decks[1].is_empty() {
-                    winner = 1;
-                    break;
-                }
-            } else {
-                if self.output {
-                    println!("Player 2 wins the round!");
-                    println!();
-                }
-                self.decks[1].cards.push(p2[0]);
-                self.decks[1].cards.push(p1[0]);
-                if self.decks[0].is_empty() {
-                    winner = 2;
-                    break;
-                }
-                continue;
+            self.decide_round_winner(p1[0], p2[0]);
+            if self.decks[1].is_empty() {
+                game_winner = 1;
+                break;
+            }
+            if self.decks[0].is_empty() {
+                game_winner = 2;
+                break;
             }
         }
         if self.output {
@@ -167,7 +152,25 @@ impl Game {
             println!("Player 1's deck: {}", self.decks[0].to_string());
             println!("Player 2's deck: {}", self.decks[1].to_string());
         }
-        winner
+        game_winner
+    }
+
+    fn decide_round_winner(&mut self, p1_card: Card, p2_card: Card) {
+        if p1_card.0 > p2_card.0 {
+            if self.output {
+                println!("Player 1 wins the round!");
+                println!();
+            }
+            self.decks[0].cards.push(p1_card);
+            self.decks[0].cards.push(p2_card);
+        } else {
+            if self.output {
+                println!("Player 2 wins the round!");
+                println!();
+            }
+            self.decks[1].cards.push(p2_card);
+            self.decks[1].cards.push(p1_card);
+        }
     }
 
     /// Returns score of the given `player`.
