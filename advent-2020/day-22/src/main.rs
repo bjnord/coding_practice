@@ -12,8 +12,8 @@ fn part1() {
     let decks = Deck::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     let mut game = Game::from_decks(0, decks, false);
-    let winner = game.play();
-    let score = game.score(winner);
+    game.play();
+    let score = game.winner().1;
     let run_time = start.elapsed() - gen_time;
     println!("Day 1 - Part 1 : {} <=> 32413 expected", score);
     println!("    generator: {:?}", gen_time);
@@ -26,8 +26,8 @@ fn part2() {
     let decks = Deck::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     let mut game = Game::from_decks(1, decks, false);
-    let winner = game.play();
-    let score = game.score(winner);
+    game.play();
+    let score = game.winner().1;
     let run_time = start.elapsed() - gen_time;
     println!("Day 1 - Part 2 : {} <=> 31596 expected", score);
     println!("    generator: {:?}", gen_time);

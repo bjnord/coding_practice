@@ -124,6 +124,7 @@ pub struct Game {
     decks: Vec<Deck>,
     output: bool,
     seen: HashSet<u64>,
+    winner: usize,
 }
 
 impl Game {
@@ -131,12 +132,11 @@ impl Game {
     /// will produce output on stdout as the game progresses.
     pub fn from_decks(game: usize, decks: Vec<Deck>, output: bool) -> Game {
         let seen: HashSet<u64> = HashSet::new();
-        Game { game, decks, seen, output }
+        Game { game, decks, seen, output, winner: 0 }
     }
 
     /// Play the game. Returns the winning player number.
     pub fn play(&mut self) -> usize {
-        let mut game_winner = 0_usize;
         if self.output && self.game > 0 {
             println!("=== Game {} ===", self.game);
             println!();
@@ -159,7 +159,7 @@ impl Game {
             // Recursive Combat, which everyone agrees is a bad idea.)"
             let game_hash = self.hash();
             if self.seen.contains(&game_hash) {
-                game_winner = 1;
+                self.winner = 1;
                 break;
             } else {
                 self.seen.insert(game_hash);
@@ -176,11 +176,11 @@ impl Game {
                 self.decide_round_winner(round, p1[0], p2[0]);
             }
             if self.decks[1].is_empty() {
-                game_winner = 1;
+                self.winner = 1;
                 break;
             }
             if self.decks[0].is_empty() {
-                game_winner = 2;
+                self.winner = 2;
                 break;
             }
             if self.output {
@@ -189,7 +189,7 @@ impl Game {
         }
         if self.output && self.game < 2 {
             if self.game == 1 {
-                println!("The winner of game 1 is player {}!", game_winner);
+                println!("The winner of game 1 is player {}!", self.winner);
             }
             println!();
             println!();
@@ -197,7 +197,7 @@ impl Game {
             println!("Player 1's deck: {}", self.decks[0].to_string());
             println!("Player 2's deck: {}", self.decks[1].to_string());
         }
-        game_winner
+        self.winner
     }
 
     fn decide_round_winner(&mut self, round: u32, p1_card: Card, p2_card: Card) {
@@ -245,9 +245,9 @@ impl Game {
         }
     }
 
-    /// Returns score of the given `player`.
-    pub fn score(&self, player: usize) -> u32 {
-        self.decks[player - 1].score()
+    /// Returns player number and deck score of the game winner, as a tuple.
+    pub fn winner(&self) -> (usize, u32) {
+        (self.winner, self.decks[self.winner - 1].score())
     }
 
     // Returns cards in the given `player`'s deck.
@@ -352,9 +352,10 @@ mod tests {
     fn test_play() {
         let decks = Deck::read_from_file("input/example1.txt").unwrap();
         let mut game = Game::from_decks(0, decks, true);
+//        assert_eq!(1, game.play());
+        game.play();
         let exp_winner = 2;
-        assert_eq!(exp_winner, game.play());
-        assert_eq!(306, game.score(2));
+        assert_eq!((exp_winner, 306), game.winner());
         let exp_winner_cards: Vec<Card> = game.cards(exp_winner)
             .iter()
             .map(|&c| Card(c.0))
@@ -368,9 +369,10 @@ mod tests {
     fn test_play_recursive() {
         let decks = Deck::read_from_file("input/example1.txt").unwrap();
         let mut game = Game::from_decks(1, decks, true);
+//        assert_eq!(_, game.play());
+        game.play();
         let exp_winner = 2;
-        assert_eq!(exp_winner, game.play());
-        assert_eq!(291, game.score(2));
+        assert_eq!((exp_winner, 291), game.winner());
         let exp_winner_cards: Vec<Card> = game.cards(exp_winner)
             .iter()
             .map(|&c| Card(c.0))
@@ -384,7 +386,9 @@ mod tests {
     fn test_play_recursive_loop() {
         let decks = Deck::read_from_file("input/example2.txt").unwrap();
         let mut game = Game::from_decks(1, decks, true);
+//        assert_eq!(_, game.play());
+        game.play();
         let exp_winner = 1;
-        assert_eq!(exp_winner, game.play());
+        assert_eq!(exp_winner, game.winner().0);
     }
 }
