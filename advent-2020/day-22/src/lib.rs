@@ -2,6 +2,7 @@
 use std::collections::HashSet;
 
 use custom_error::custom_error;
+use std::cmp;
 use std::convert::TryFrom;
 use std::fmt;
 use std::fs;
@@ -125,6 +126,7 @@ pub struct Game {
     output: bool,
     seen: HashSet<u64>,
     winner: usize,
+    n_games: usize,
 }
 
 impl Game {
@@ -132,11 +134,12 @@ impl Game {
     /// will produce output on stdout as the game progresses.
     pub fn from_decks(game: usize, decks: Vec<Deck>, output: bool) -> Game {
         let seen: HashSet<u64> = HashSet::new();
-        Game { game, decks, seen, output, winner: 0 }
+        Game { game, decks, seen, output, winner: 0, n_games: 0 }
     }
 
-    /// Play the game. Returns the winning player number.
-    pub fn play(&mut self) -> usize {
+    /// Play the game. Returns the winning player number, and the recursive
+    /// games played count, as a tuple.
+    pub fn play(&mut self) -> (usize, usize) {
         if self.output && self.game > 0 {
             println!("=== Game {} ===", self.game);
             println!();
@@ -197,7 +200,7 @@ impl Game {
             println!("Player 1's deck: {}", self.decks[0].to_string());
             println!("Player 2's deck: {}", self.decks[1].to_string());
         }
-        self.winner
+        (self.winner, cmp::max(self.n_games, self.game))
     }
 
     fn decide_round_winner(&mut self, round: u32, p1_card: Card, p2_card: Card) {
@@ -232,13 +235,17 @@ impl Game {
                 self.decks[0].cloned_n(p1_card.0),
                 self.decks[1].cloned_n(p2_card.0),
             ];
-            let mut game = Game::from_decks(self.game + 1, new_decks, self.output);
-            let winner = game.play();
+            if self.game > self.n_games {
+                self.n_games = self.game;
+            }
+            let mut game = Game::from_decks(self.n_games + 1, new_decks, self.output);
+            let (winner, new_n_games) = game.play();
             if self.output {
-                println!("The winner of game {} is player {}!", self.game + 1, winner);
+                println!("The winner of game {} is player {}!", self.n_games + 1, winner);
                 println!();
                 println!("...anyway, back to game {}.", self.game);
             }
+            self.n_games = new_n_games;
             self.finish_round(round, winner, p1_card, p2_card);
         } else {
             self.decide_round_winner(round, p1_card, p2_card);
@@ -352,9 +359,8 @@ mod tests {
     fn test_play() {
         let decks = Deck::read_from_file("input/example1.txt").unwrap();
         let mut game = Game::from_decks(0, decks, true);
-//        assert_eq!(1, game.play());
-        game.play();
         let exp_winner = 2;
+        assert_eq!((exp_winner, 0), game.play());
         assert_eq!((exp_winner, 306), game.winner());
         let exp_winner_cards: Vec<Card> = game.cards(exp_winner)
             .iter()
@@ -369,9 +375,8 @@ mod tests {
     fn test_play_recursive() {
         let decks = Deck::read_from_file("input/example1.txt").unwrap();
         let mut game = Game::from_decks(1, decks, true);
-//        assert_eq!(_, game.play());
-        game.play();
         let exp_winner = 2;
+        assert_eq!((exp_winner, 5), game.play());
         assert_eq!((exp_winner, 291), game.winner());
         let exp_winner_cards: Vec<Card> = game.cards(exp_winner)
             .iter()
@@ -386,9 +391,7 @@ mod tests {
     fn test_play_recursive_loop() {
         let decks = Deck::read_from_file("input/example2.txt").unwrap();
         let mut game = Game::from_decks(1, decks, true);
-//        assert_eq!(_, game.play());
         game.play();
-        let exp_winner = 1;
-        assert_eq!(exp_winner, game.winner().0);
+        assert_eq!(1, game.winner().0);
     }
 }
