@@ -43,21 +43,59 @@ impl fmt::Display for Circle {
 }
 
 impl Circle {
-    /// Pick up three cups clockwise from current position.
+    /// Do one move round.
+    pub fn do_move(&mut self) {
+        let picked = self.pick_up();
+        let dest_pos = self.find_dest(self.pos);
+        self.put_down(dest_pos, picked);
+        self.pos = Circle::pos_add_1(self.pos, self.len);
+    }
+
+    fn pos_add_1(pos: usize, len: usize) -> usize {
+        (pos + 1).rem_euclid(len)
+    }
+
+    /// Pick up three cups clockwise from current position. Return the cups
+    /// picked up.
     pub fn pick_up(&mut self) -> Vec<u8> {
+        // take all 3 from middle or end
         if self.len - self.pos > 3 {
             return self.cups.splice(self.pos+1..self.pos+4, vec![]).collect();
         }
+        // take all 3 from beginning
         if self.len - self.pos == 1 {
             self.pos -= 3;
             return self.cups.splice(..3, vec![]).collect();
         }
+        // split: take some from end, some from beginning
         let begin_count = 3 - (self.len - self.pos - 1);
         let mut u: Vec<u8> = self.cups.splice(self.pos+1.., vec![]).collect();
         let v: Vec<u8> = self.cups.splice(..begin_count, vec![]).collect();
         u.extend(v);
         self.pos -= begin_count;
         u
+    }
+
+    /// Return destination *position* from given (current) `pos`.
+    pub fn find_dest(&self, pos: usize) -> usize {
+        let cur_cup = self.cups[pos];
+        let mut dest_cup = cur_cup;
+        loop {
+            dest_cup = Circle::cup_sub_1(dest_cup, self.len);
+            if let Some(dest_pos) = self.cups.iter().position(|cup| *cup == dest_cup) {
+                return dest_pos;
+            }
+        }
+    }
+
+    /// Put down `cups` clockwise from the given `pos`.
+    pub fn put_down(&mut self, pos: usize, cups: Vec<u8>) {
+        self.cups.splice(pos+1..pos+1, cups);
+    }
+
+    fn cup_sub_1(n: u8, len: usize) -> u8 {
+        let len8 = u8::try_from(len).unwrap();
+        ((n + len8) - 1).rem_euclid(len8)
     }
 }
 
@@ -99,5 +137,39 @@ mod tests {
         assert_eq!(vec![7, 3, 8], circle.pick_up());
         assert_eq!(vec![9, 1, 2, 5, 4, 6], circle.cups);
         assert_eq!(5, circle.pos);
+    }
+
+    // pick up: 8, 9, 1
+    // left in circle: (3) 2  5  4  6  7
+
+    #[test]
+    fn test_find_dest() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.pick_up();
+        assert_eq!(1, circle.find_dest(0));  // cup (3) -> dest cup 2
+    }
+
+    #[test]
+    fn test_find_dest_wrap() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.pick_up();
+        assert_eq!(5, circle.find_dest(1));  // cup (2) -> dest cup 7
+    }
+
+    #[test]
+    fn test_put_down() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        let picked = circle.pick_up();
+        assert_eq!(1, circle.find_dest(0));
+        circle.put_down(1, picked);
+        assert_eq!(vec![3, 2, 8, 9, 1, 5, 4, 6, 7], circle.cups);
+    }
+
+    #[test]
+    fn test_do_move() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.do_move();
+        assert_eq!(vec![3, 2, 8, 9, 1, 5, 4, 6, 7], circle.cups);
+        assert_eq!(1, circle.pos);
     }
 }
