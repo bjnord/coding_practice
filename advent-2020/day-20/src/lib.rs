@@ -15,7 +15,7 @@ custom_error!{#[derive(PartialEq)]
     pub TileError
     GridNotFound = "tile grid not found",
     InvalidLine{line: String} = "invalid tile grid line [{line}]",
-    InvalidPixel{pixel: char} = "invalid pixel character {pixel}",
+    InvalidPixel{pixel: char} = "invalid pixel character '{pixel}'",
     NotSquare = "tile is not square",
 }
 
@@ -402,31 +402,25 @@ mod tests {
 
     #[test]
     fn test_read_from_file_no_grid() {
-        if let Err(_e) = Tile::read_from_file("input/bad1.txt") {
-            //assert_eq!(TileError::GridNotFound, *e);
-            assert!(true);  // FIXME
-        } else {
-            panic!("test did not fail");
+        match Tile::read_from_file("input/bad1.txt") {
+            Err(e) => assert_eq!("tile grid not found", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
         }
     }
 
     #[test]
     fn test_read_from_file_invalid_line() {
-        if let Err(_e) = Tile::read_from_file("input/bad2.txt") {
-            //assert_eq!(TileError::InvalidLine { line: "Spile 12:" }, *e);
-            assert!(true);  // FIXME
-        } else {
-            panic!("test did not fail");
+        match Tile::read_from_file("input/bad2.txt") {
+            Err(e) => assert_eq!("invalid tile grid line [Spile 12:]", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
         }
     }
 
     #[test]
     fn test_read_from_file_not_square() {
-        if let Err(_e) = Tile::read_from_file("input/bad3.txt") {
-            //assert_eq!(TileError::NotSquare, *e);
-            assert!(true);  // FIXME
-        } else {
-            panic!("test did not fail");
+        match Tile::read_from_file("input/bad3.txt") {
+            Err(e) => assert_eq!("tile is not square", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
         }
     }
 
@@ -438,11 +432,9 @@ mod tests {
 
     #[test]
     fn test_pixel_from_char_invalid() {
-        if let Err(_e) = Pixel::from_char('?') {
-            //assert_eq!(TileError::InvalidPixel { pixel: '?' }, *e);
-            assert!(true);  // FIXME
-        } else {
-            panic!("test did not fail");
+        match Pixel::from_char('?') {
+            Err(e) => assert_eq!("invalid pixel character '?'", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
         }
     }
 
