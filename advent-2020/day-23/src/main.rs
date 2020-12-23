@@ -1,4 +1,4 @@
-//use day_23::{Entry, ENTRY_SUM};
+use day_23::Circle;
 use std::time::Instant;
 
 fn main() {
@@ -6,14 +6,18 @@ fn main() {
     part2();
 }
 
+const INPUT: &str = "872495136";
+
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    //let entries = Entry::read_from_file("input/input.txt").unwrap();
+    let mut circle: Circle = INPUT.parse().unwrap();
     let gen_time = start.elapsed();
-    //...
+    for _ in 0..100 {
+        circle.do_move(false);
+    }
     let run_time = start.elapsed() - gen_time;
-    println!("Day 23 - Part 1 : {} <=> _ expected", 0);
+    println!("Day 23 - Part 1 : {} <=> 27865934 expected", circle.state());
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
