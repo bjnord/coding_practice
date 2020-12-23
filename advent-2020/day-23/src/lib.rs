@@ -27,8 +27,7 @@ impl FromStr for Circle {
 
 impl fmt::Display for Circle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut s = String::new();
-        s += self.cups
+        let s: String = self.cups
             .iter()
             .enumerate()
             .map(|(i, cup)| if i == self.pos {
@@ -43,6 +42,25 @@ impl fmt::Display for Circle {
     }
 }
 
+impl Circle {
+    /// Pick up three cups clockwise from current position.
+    pub fn pick_up(&mut self) -> Vec<u8> {
+        if self.len - self.pos > 3 {
+            return self.cups.splice(self.pos+1..self.pos+4, vec![]).collect();
+        }
+        if self.len - self.pos == 1 {
+            self.pos -= 3;
+            return self.cups.splice(..3, vec![]).collect();
+        }
+        let begin_count = 3 - (self.len - self.pos - 1);
+        let mut u: Vec<u8> = self.cups.splice(self.pos+1.., vec![]).collect();
+        let v: Vec<u8> = self.cups.splice(..begin_count, vec![]).collect();
+        u.extend(v);
+        self.pos -= begin_count;
+        u
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,9 +70,34 @@ mod tests {
     #[test]
     fn test_from_input() {
         let circle: Circle = EXAMPLE1.parse().unwrap();
-        eprintln!("circle = [{}]", circle);
         assert_eq!(0, circle.pos);
         assert_eq!(9, circle.len);
         assert_eq!(vec![3, 8, 9, 1, 2, 5, 4, 6, 7], circle.cups);
+    }
+
+    #[test]
+    fn test_pick_up() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        assert_eq!(vec![8, 9, 1], circle.pick_up());
+        assert_eq!(vec![3, 2, 5, 4, 6, 7], circle.cups);
+        assert_eq!(0, circle.pos);
+    }
+
+    #[test]
+    fn test_pick_up_wrap_all_at_front() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.pos = 8;
+        assert_eq!(vec![3, 8, 9], circle.pick_up());
+        assert_eq!(vec![1, 2, 5, 4, 6, 7], circle.cups);
+        assert_eq!(5, circle.pos);
+    }
+
+    #[test]
+    fn test_pick_up_wrap_split() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.pos = 7;
+        assert_eq!(vec![7, 3, 8], circle.pick_up());
+        assert_eq!(vec![9, 1, 2, 5, 4, 6], circle.cups);
+        assert_eq!(5, circle.pos);
     }
 }
