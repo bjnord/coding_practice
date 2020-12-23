@@ -7,9 +7,8 @@ slowly appear over the horizon, you are interrupted by the child sitting
 next to you. They're curious if you could help them with their math
 homework.
 
-Unfortunately, it seems like this "math" [follows different
-rules](https://www.youtube.com/watch?v=3QtRK7Y2pPU&t=15) than you
-remember.
+Unfortunately, it seems like this "math" [follows different rules](https://www.youtube.com/watch?v=3QtRK7Y2pPU&t=15)
+than you remember.
 
 The homework (your puzzle input) consists of a series of expressions
 that consist of addition (`+`), multiplication (`*`), and parentheses

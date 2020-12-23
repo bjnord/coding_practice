@@ -114,8 +114,7 @@ by the new versions of rules `8` and `11`.
 
 (Remember, **you only need to handle the rules you have**; building a
 solution that could handle any hypothetical combination of rules would
-be [significantly more
-difficult](https://en.wikipedia.org/wiki/Formal_grammar).)
+be [significantly more difficult](https://en.wikipedia.org/wiki/Formal_grammar).)
 
 For example:
 

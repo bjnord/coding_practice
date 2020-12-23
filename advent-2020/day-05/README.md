@@ -11,8 +11,7 @@ You write a quick program to use your phone's camera to scan all of the
 nearby boarding passes (your puzzle input); perhaps you can find your
 seat through process of elimination.
 
-Instead of [zones or
-groups](https://www.youtube.com/watch?v=oAHbLRjF0vo), this airline uses
+Instead of [zones or groups](https://www.youtube.com/watch?v=oAHbLRjF0vo), this airline uses
 **binary space partitioning** to seat people. A seat might be specified
 like `FBFBBFFRLR`, where `F` means "front", `B` means "back", `L` means
 "left", and `R` means "right".
