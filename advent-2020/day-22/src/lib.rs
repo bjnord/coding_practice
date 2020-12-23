@@ -303,21 +303,17 @@ mod tests {
 
     #[test]
     fn test_read_from_file_invalid_line() {
-        if let Err(e) = Deck::read_from_file("input/bad1.txt") {
-            //assert_eq!(DeckError::InvalidLine { line: "Slayer 2:" }, *e);
-            assert!(e.to_string().contains("invalid card line"));  // FIXME
-        } else {
-            panic!("test did not fail");
+        match Deck::read_from_file("input/bad1.txt") {
+            Err(e) => assert_eq!("invalid card line [Slayer 2:]", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
         }
     }
 
     #[test]
     fn test_read_from_file_no_cards() {
-        if let Err(e) = Deck::read_from_file("input/bad2.txt") {
-            //assert_eq!(DeckError::NoCards, *e);
-            assert!(e.to_string().contains("deck has no cards"));  // FIXME
-        } else {
-            panic!("test did not fail");
+        match Deck::read_from_file("input/bad2.txt") {
+            Err(e) => assert_eq!("deck has no cards", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
         }
     }
 

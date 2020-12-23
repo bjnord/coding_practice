@@ -284,6 +284,22 @@ mod tests {
     }
 
     #[test]
+    fn test_read_from_file_no_file() {
+        match FoodList::read_from_file("input/example99.txt") {
+            Err(e) => assert!(e.to_string().contains("No such file")),
+            Ok(_)  => panic!("test did not fail"),
+        }
+    }
+
+    #[test]
+    fn test_read_from_file_invalid_line() {
+        match FoodList::read_from_file("input/bad1.txt") {
+            Err(e) => assert_eq!("invalid food line [trh fvjkl sbzzf mxmxvkd (doesn't contain dairy)]", e.to_string()),
+            Ok(_)  => panic!("test did not fail"),
+        }
+    }
+
+    #[test]
     fn test_all_allergens() {
         let food_list = FoodList::read_from_file("input/example1.txt").unwrap();
         assert_eq!(vec!["dairy", "fish"], food_list.foods[0].allergens());
