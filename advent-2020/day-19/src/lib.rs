@@ -1,3 +1,4 @@
+use custom_error::custom_error;
 use std::fmt;
 use std::fs;
 use std::string;
@@ -6,16 +7,12 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 const MAX_RULES: usize = 200;
 
-#[derive(Debug, Clone)]
-struct RulesetError(String);
-
-impl fmt::Display for RulesetError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Ruleset error: {}", self.0)
-    }
+custom_error!{#[derive(PartialEq)]
+    pub RulesetError
+    Literal = "missing literal after quote in rule",
+    Section = "expected two sections separated by blank line",
+    Separator = "no ':' separator found in rule",
 }
-
-impl std::error::Error for RulesetError {}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Rule {
@@ -41,9 +38,6 @@ impl fmt::Display for Rule {
 }
 
 impl Rule {
-    const SEPARATOR_ERROR: &'static str = "no ':' separator found in rule";
-    const LITERAL_ERROR: &'static str = "missing literal after quote in rule";
-
     /// Parses rule from a string. Returns a tuple with the rule number
     /// and rule type (enumeration).
     ///
@@ -63,10 +57,10 @@ impl Rule {
         let tokens: Vec<&str> = line.split(": ").collect();
         let n: usize = tokens[0].parse()?;
         let content = tokens.get(1)
-            .ok_or_else(|| RulesetError(String::from(Rule::SEPARATOR_ERROR)))?;
+            .ok_or_else(|| RulesetError::Separator)?;
         if content.starts_with('"') {
             let ch = content.chars().nth(1)
-                .ok_or_else(|| RulesetError(String::from(Rule::LITERAL_ERROR)))?;
+                .ok_or_else(|| RulesetError::Literal)?;
             Ok((n, Rule::Literal(ch)))
         } else {
             Ok((n, Rule::Branches(Rule::parse_branches(content)?)))
@@ -107,8 +101,6 @@ impl fmt::Display for Ruleset {
 }
 
 impl Ruleset {
-    const SECTION_ERROR: &'static str = "expected two sections separated by blank line";
-
     /// Returns number of rules.
     #[cfg(test)]
     #[must_use]
@@ -131,7 +123,7 @@ impl Ruleset {
         let sections: Vec<&str> = s.split("\n\n").collect();
         let rules = Ruleset::rules_from_input(sections[0], part2)?;
         let messages = sections.get(1)
-            .ok_or_else(|| RulesetError(String::from(Ruleset::SECTION_ERROR)))?
+            .ok_or_else(|| RulesetError::Section)?
             .lines()
             .map(string::ToString::to_string)
             .collect();
@@ -275,7 +267,7 @@ mod tests {
     #[test]
     fn test_read_from_file_no_sections() {
         match Ruleset::read_from_file("input/bad2.txt", false) {
-            Err(e) => assert!(e.to_string().contains(Ruleset::SECTION_ERROR)),
+            Err(e) => assert_eq!("expected two sections separated by blank line", e.to_string()),
             Ok(_)  => panic!("test did not fail"),
         }
     }
@@ -307,7 +299,7 @@ mod tests {
     #[test]
     fn test_rule_from_line_no_colon() {
         match Rule::from_line("0") {
-            Err(e) => assert!(e.to_string().contains(Rule::SEPARATOR_ERROR)),
+            Err(e) => assert_eq!("no ':' separator found in rule", e.to_string()),
             Ok(_)  => panic!("test did not fail"),
         }
     }
@@ -315,7 +307,7 @@ mod tests {
     #[test]
     fn test_rule_from_line_missing_literal() {
         match Rule::from_line("1: \"") {
-            Err(e) => assert!(e.to_string().contains(Rule::LITERAL_ERROR)),
+            Err(e) => assert_eq!("missing literal after quote in rule", e.to_string()),
             Ok(_)  => panic!("test did not fail"),
         }
     }

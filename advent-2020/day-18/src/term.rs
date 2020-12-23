@@ -18,7 +18,7 @@ impl FromStr for Term {
         let ch = token
             .chars()
             .next()
-            .ok_or_else(|| EquationError(String::from(TERM_EMPTY_ERROR)))?;
+            .ok_or_else(|| EquationError::EmptyTerm)?;
         let term = match ch {
             d if d.is_digit(10) => Term::Number(token.parse::<i64>()?),
             '(' => {
@@ -43,13 +43,6 @@ impl fmt::Display for Term {
         }
     }
 }
-
-macro_rules! TERM_PAREN_ERROR {
-    () => {
-        "right-parens={} exceeds paren-count={} + left-parens={}"
-    };
-}
-pub const TERM_EMPTY_ERROR: &str = "empty term";
 
 impl Term {
     /// Combine tokens to form subterms.
@@ -86,14 +79,13 @@ impl Term {
         Ok(combined_tokens)
     }
 
-    fn adjusted_paren_count(p_count: usize, token: &str) -> Result<usize> {
+    fn adjusted_paren_count(count: usize, token: &str) -> Result<usize> {
         let lp = token.matches('(').count();
         let rp = token.matches(')').count();
-        if rp > p_count + lp {
-            let e = format!(TERM_PAREN_ERROR!(), rp, p_count, lp);
-            return Err(EquationError(e).into());
+        if rp > count + lp {
+            return Err(EquationError::Parentheses { lp, count, rp }.into());
         }
-        Ok(p_count + lp - rp)
+        Ok(count + lp - rp)
     }
 }
 
@@ -163,19 +155,16 @@ mod tests {
     #[test]
     fn test_combine_subterm_tokens_extra_rparens() {
         let tokens = vec!["1", "*", "(2", "+", "3))"];
-        let suberr = format!(TERM_PAREN_ERROR!(), 2, 1, 0);
-        let expect_err = format!("Equation error: {}", suberr);
         match Term::combine_subterm_tokens(&tokens) {
-            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Err(e) => assert_eq!("right-parens=2 exceeds paren-count=1 + left-parens=0", e.to_string()),
             Ok(_) => panic!("test did not fail"),
         }
     }
 
     #[test]
     fn test_parse_term_empty() {
-        let expect_err = format!("Equation error: {}", TERM_EMPTY_ERROR);
         match "".parse::<Term>() {
-            Err(e) => assert_eq!(e.to_string(), expect_err),
+            Err(e) => assert_eq!("empty term", e.to_string()),
             Ok(_) => panic!("test did not fail"),
         }
     }
