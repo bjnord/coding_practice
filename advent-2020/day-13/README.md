@@ -162,6 +162,8 @@ Your puzzle answer was `783685719679632`.
 
 ### Part Two Design
 
+> **Spoilers ahead!**
+
 I noticed that all the bus IDs in the examples and my puzzle input are prime. I was able to create a brute-force solver that works for all the examples (but as expected is too slow for the puzzle input). I fiddled around a bit with cycles offset by N, but I quickly realized this was a math thing that I wasn't going to figure out on my own.
 
 I looked at Reddit just enough to see that the [Chinese Remainder Theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) is the algorithm of the day. (And it only works for prime numbers.) The best explanation of this theorem I've found is [this page at the Brilliant wiki](https://brilliant.org/wiki/chinese-remainder-theorem/). I did pencil-and-paper on the "Solving Systems of Congruences" section on that page, and then was able to create code for that method that passes all the tests (see commit `4c16988`). But it has a weakness; finding a solution for the modulo equation is done brute-force, which means it's also too slow for the puzzle input.
