@@ -11,6 +11,7 @@ pub struct Circle {
     len: usize,
     cups: Vec<u8>,
     move_n: usize,
+    pos_shift: usize,
 }
 
 impl FromStr for Circle {
@@ -22,7 +23,7 @@ impl FromStr for Circle {
             .map(Circle::cup_from)
             .collect::<Result<Vec<u8>>>()?;
         let len = cups.len();
-        Ok(Self { cups, pos: 0, len, move_n: 0 })
+        Ok(Self { cups, pos: 0, len, move_n: 0, pos_shift: 0 })
     }
 }
 
@@ -44,11 +45,6 @@ impl fmt::Display for Circle {
 }
 
 impl Circle {
-    fn cup_from(ch: char) -> Result<u8> {
-        let cup: u32 = ch.to_digit(10).ok_or("not a digit")?;
-        Ok(u8::try_from(cup).unwrap())
-    }
-
     /// Do one move round.
     pub fn do_move(&mut self, output: bool) {
         self.move_n += 1;
@@ -56,10 +52,8 @@ impl Circle {
             println!("-- move {} --", self.move_n);
             println!("cups: {}", self);
         }
-        let old_pos = self.pos;
         let picked = self.pick_up();
-        let pos_shift = old_pos - self.pos;
-        let dest_pos = self.find_dest(self.pos);
+        let dest_cup = self.destination();
         if output {
             let pick_up: String = picked
                 .iter()
@@ -67,17 +61,23 @@ impl Circle {
                 .collect::<Vec<String>>()
                 .join(", ");
             println!("pick up: {}", pick_up);
-            println!("destination: {}", self.dest_cup());
+            println!("destination: {}", dest_cup);
             println!();
         }
-        self.put_down(dest_pos, picked, pos_shift);
-        let mut new_pos = Circle::pos_add_1(self.pos, self.len);
-        for _ in 0..pos_shift {
+        self.put_down(dest_cup, picked);
+        self.increment_pos(1);
+    }
+
+    // Move the current position `shift` to the right (add).
+    fn increment_pos(&mut self, shift: usize) {
+        let mut new_pos = self.pos;
+        for _ in 0..shift {
             new_pos = Circle::pos_add_1(new_pos, self.len);
         }
         self.pos = new_pos;
     }
 
+    // Calculate wrapping add-1 for position `pos`.
     fn pos_add_1(pos: usize, len: usize) -> usize {
         (pos + 1).rem_euclid(len)
     }
@@ -87,55 +87,67 @@ impl Circle {
     pub fn pick_up(&mut self) -> Vec<u8> {
         // take all 3 from middle or end
         if self.len - self.pos > 3 {
+            self.pos_shift = 0;
             return self.cups.splice(self.pos+1..self.pos+4, vec![]).collect();
         }
         // take all 3 from beginning
         if self.len - self.pos == 1 {
-            self.pos -= 3;
+            self.pos_shift = 3;
+            self.pos -= self.pos_shift;
             return self.cups.splice(..3, vec![]).collect();
         }
         // split: take some from end, some from beginning
-        let begin_count = 3 - (self.len - self.pos - 1);
+        self.pos_shift = 3 - (self.len - self.pos - 1);
         let mut u: Vec<u8> = self.cups.splice(self.pos+1.., vec![]).collect();
-        let v: Vec<u8> = self.cups.splice(..begin_count, vec![]).collect();
+        let v: Vec<u8> = self.cups.splice(..self.pos_shift, vec![]).collect();
         u.extend(v);
-        self.pos -= begin_count;
+        self.pos -= self.pos_shift;
         u
     }
 
-    /// Return destination *cup* from current position.
+    /// Return destination cup from current position.
     #[must_use]
-    pub fn dest_cup(&self) -> u8 {
+    pub fn destination(&self) -> u8 {
         self.cups[self.find_dest(self.pos)]
     }
 
-    /// Return destination *position* from given (current) `pos`.
+    // Return destination *position* from given (current) `pos`.
     #[must_use]
-    pub fn find_dest(&self, pos: usize) -> usize {
+    fn find_dest(&self, pos: usize) -> usize {
         let cur_cup = self.cups[pos];
         let mut dest_cup = cur_cup;
         loop {
             dest_cup = Circle::cup_sub_1(dest_cup, self.len);
-            if let Some(dest_pos) = self.cups.iter().position(|cup| *cup == dest_cup) {
+            if let Some(dest_pos) = self.find_cup(dest_cup) {
                 return dest_pos;
             }
         }
     }
 
-    /// Put down `cups` clockwise from the given `pos`.
-    #[allow(clippy::range_plus_one)]
-    pub fn put_down(&mut self, pos: usize, cups: Vec<u8>, pos_shift: usize) {
-        self.cups.splice(pos+1..pos+1, cups);
-        if pos < self.pos {
-            let rot: Vec<u8> = self.cups.splice(..3-pos_shift, vec![]).collect();
-            self.cups.extend(rot);
-        }
-    }
-
+    // Calculate wrapping subtract-1 for cup `n`.
     fn cup_sub_1(n: u8, len: usize) -> u8 {
         let len8 = u8::try_from(len).unwrap();
         let nm1 = ((n + len8) - 1).rem_euclid(len8);
         if nm1 == 0 { len8 } else { nm1 }
+    }
+
+    // Return position of provided `cup`.
+    #[must_use]
+    fn find_cup(&self, cup: u8) -> Option<usize> {
+        self.cups.iter().position(|c| *c == cup)
+    }
+
+    /// Put down `cups` clockwise to the right of the given destination `cup`.
+    #[allow(clippy::range_plus_one)]
+    pub fn put_down(&mut self, cup: u8, cups: Vec<u8>) {
+        let pos = self.find_cup(cup).unwrap();
+        self.cups.splice(pos+1..pos+1, cups);
+        if pos < self.pos {
+            let rot: Vec<u8> = self.cups.splice(..3-self.pos_shift, vec![]).collect();
+            self.cups.extend(rot);
+            self.increment_pos(self.pos_shift);
+            self.pos_shift = 0;
+        }
     }
 
     /// Return circle state string: Cups clockwise from cup 1 and excluding
@@ -157,6 +169,13 @@ impl Circle {
         }
     }
 
+    // Convert cup character into cup number.
+    fn cup_from(ch: char) -> Result<u8> {
+        let cup: u32 = ch.to_digit(10).ok_or("not a digit")?;
+        Ok(u8::try_from(cup).unwrap())
+    }
+
+    // Convert cup number into cup character.
     #[allow(clippy::trivially_copy_pass_by_ref)]
     fn cup_char(cup: &u8) -> char {
         (cup + b'0') as char
@@ -238,8 +257,8 @@ mod tests {
     fn test_put_down() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
         let picked = circle.pick_up();
-        assert_eq!(1, circle.find_dest(0));
-        circle.put_down(1, picked, 0);
+        assert_eq!(2, circle.destination());
+        circle.put_down(2, picked);
         assert_eq!(vec![3, 2, 8, 9, 1, 5, 4, 6, 7], circle.cups);
     }
 
