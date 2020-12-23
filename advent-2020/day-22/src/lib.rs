@@ -21,7 +21,7 @@ pub struct Card(u32);
 
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}\n", self.0)
+        writeln!(f, "{}", self.0)
     }
 }
 
@@ -62,7 +62,7 @@ impl fmt::Display for Deck {
         let mut s = String::new();
         let label = format!("Player {}:\n", self.player);
         s += &label;
-        for card in self.cards.iter() {
+        for card in &self.cards {
             s += &format!("{}\n", card);
         }
         write!(f, "{}", s)
@@ -71,7 +71,8 @@ impl fmt::Display for Deck {
 
 impl Deck {
     /// Return formatted list of cards in the deck.
-    pub fn to_string(&self) -> String {
+    #[must_use]
+    pub fn as_string(&self) -> String {
         self.cards
             .iter()
             .map(|c| c.0.to_string())
@@ -80,16 +81,19 @@ impl Deck {
     }
 
     /// Is the deck empty?
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.cards.is_empty()
     }
 
     /// Does the deck have at least `n` cards?
+    #[must_use]
     pub fn has_at_least(&self, n: u32) -> bool {
         self.cards.len() >= usize::try_from(n).unwrap()
     }
 
     /// Return score of cards in the deck.
+    #[must_use]
     pub fn score(&self) -> u32 {
         let n_cards = self.cards.len();
         self.cards
@@ -100,6 +104,7 @@ impl Deck {
     }
 
     /// Return clone of the deck with copies of the first `n` cards.
+    #[must_use]
     pub fn cloned_n(&self, n: u32) -> Deck {
         let nz = usize::try_from(n).unwrap();
         if self.cards.len() < nz {
@@ -132,6 +137,7 @@ pub struct Game {
 impl Game {
     /// Construct from game number and decks. If `output` is true, `play()`
     /// will produce output on stdout as the game progresses.
+    #[must_use]
     pub fn from_decks(game: usize, decks: Vec<Deck>, output: bool) -> Game {
         let seen: HashSet<u64> = HashSet::new();
         Game { game, decks, seen, output, winner: 0, n_games: 0 }
@@ -151,8 +157,8 @@ impl Game {
                 } else {
                     println!("-- Round {} --", round);
                 }
-                println!("Player 1's deck: {}", self.decks[0].to_string());
-                println!("Player 2's deck: {}", self.decks[1].to_string());
+                println!("Player 1's deck: {}", self.decks[0].as_string());
+                println!("Player 2's deck: {}", self.decks[1].as_string());
             }
             // "Before either player deals a card, if there was a previous
             // round in this game that had exactly the same cards in the
@@ -197,8 +203,8 @@ impl Game {
             println!();
             println!();
             println!("== Post-game results ==");
-            println!("Player 1's deck: {}", self.decks[0].to_string());
-            println!("Player 2's deck: {}", self.decks[1].to_string());
+            println!("Player 1's deck: {}", self.decks[0].as_string());
+            println!("Player 2's deck: {}", self.decks[1].as_string());
         }
         (self.winner, cmp::max(self.n_games, self.game))
     }
@@ -253,6 +259,7 @@ impl Game {
     }
 
     /// Returns player number and deck score of the game winner, as a tuple.
+    #[must_use]
     pub fn winner(&self) -> (usize, u32) {
         (self.winner, self.decks[self.winner - 1].score())
     }
@@ -269,12 +276,12 @@ impl Game {
         hash = self.decks[0].cards
             .iter()
             .enumerate()
-            .fold(hash, |acc, (i, card)| acc.wrapping_mul(card.0 as u64).wrapping_add(i as u64 + 1));
+            .fold(hash, |acc, (i, card)| acc.wrapping_mul(u64::try_from(card.0).unwrap()).wrapping_add(u64::try_from(i).unwrap() + 1));
         hash = hash.wrapping_mul(1202).wrapping_add(81518);
         hash = self.decks[1].cards
             .iter()
             .enumerate()
-            .fold(hash, |acc, (i, card)| acc.wrapping_mul(card.0 as u64).wrapping_add(i as u64 + 1));
+            .fold(hash, |acc, (i, card)| acc.wrapping_mul(u64::try_from(card.0).unwrap()).wrapping_add(u64::try_from(i).unwrap() + 1));
         hash
     }
 }
@@ -290,7 +297,7 @@ mod tests {
         assert_eq!(1, decks[0].player);
         assert_eq!(vec![Card(9), Card(2), Card(6), Card(3), Card(1)], decks[0].cards);
         assert_eq!(2, decks[1].player);
-        assert_eq!("5, 8, 4, 7, 10", decks[1].to_string());
+        assert_eq!("5, 8, 4, 7, 10", decks[1].as_string());
     }
 
     #[test]
