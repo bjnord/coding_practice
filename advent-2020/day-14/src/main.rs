@@ -15,7 +15,7 @@ fn part1() {
     program.run();
     let sum = program.memory_sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 6317049172545 expected", sum);
+    println!("Day 14 - Part 1 : {} <=> 6317049172545 expected", sum);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -28,7 +28,7 @@ fn part2() {
     program.run();
     let sum = program.memory_sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 3434009980379 expected", sum);
+    println!("Day 14 - Part 2 : {} <=> 3434009980379 expected", sum);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

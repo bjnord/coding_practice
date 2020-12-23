@@ -13,7 +13,7 @@ fn part1() {
     let gen_time = start.elapsed();
     let count = food_list.non_allergen_ingredient_count();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 2542 expected", count);
+    println!("Day 21 - Part 1 : {} <=> 2542 expected", count);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -27,7 +27,7 @@ fn part2() {
     let act = dangerous_hash(&dangerous);
     let exp = dangerous_hash("hkflr,ctmcqjf,bfrq,srxphcm,snmxl,zvx,bd,mqvk");
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> {} expected", act, exp);
+    println!("Day 21 - Part 2 : {} <=> {} expected", act, exp);
     println!("    answer: {}", dangerous);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);

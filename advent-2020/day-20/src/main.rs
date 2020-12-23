@@ -14,7 +14,7 @@ fn part1() {
     let gen_time = start.elapsed();
     let answer = Tile::neosolve(&tiles);
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 11788777383197 expected", answer);
+    println!("Day 20 - Part 1 : {} <=> 11788777383197 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -28,7 +28,7 @@ fn part2() {
     eprintln!("{}", image);
     image.find_sea_monsters();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 20 - Part 2 : {} <=> _ expected", 0);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

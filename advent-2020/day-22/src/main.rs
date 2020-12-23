@@ -15,7 +15,7 @@ fn part1() {
     game.play();
     let score = game.winner().1;
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 32413 expected", score);
+    println!("Day 22 - Part 1 : {} <=> 32413 expected", score);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -29,7 +29,7 @@ fn part2() {
     game.play();
     let score = game.winner().1;
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 31596 expected", score);
+    println!("Day 22 - Part 2 : {} <=> 31596 expected", score);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

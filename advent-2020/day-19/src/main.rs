@@ -13,7 +13,7 @@ fn part1() {
     let gen_time = start.elapsed();
     let answer = ruleset.match_count();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 198 expected", answer);
+    println!("Day 19 - Part 1 : {} <=> 198 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -25,7 +25,7 @@ fn part2() {
     let gen_time = start.elapsed();
     let answer = ruleset.match_count();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 372 expected", answer);
+    println!("Day 19 - Part 2 : {} <=> 372 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

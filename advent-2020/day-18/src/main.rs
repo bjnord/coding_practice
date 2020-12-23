@@ -13,7 +13,7 @@ fn part1() {
     let gen_time = start.elapsed();
     let answer: i64 = equations.iter().map(|eq| eq.solve().unwrap()).sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 6923486965641 expected", answer);
+    println!("Day 18 - Part 1 : {} <=> 6923486965641 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -28,7 +28,7 @@ fn part2() {
         .map(|eq| eq.solve_advanced_math().unwrap())
         .sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 70722650566361 expected", answer);
+    println!("Day 18 - Part 2 : {} <=> 70722650566361 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

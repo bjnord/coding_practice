@@ -18,7 +18,7 @@ fn part1() {
     let gen_time = start.elapsed();
     let solution = Game::play(&numbers, 2020);
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 1009 expected", solution);
+    println!("Day 15 - Part 1 : {} <=> 1009 expected", solution);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -34,7 +34,7 @@ fn part2() {
     let gen_time = start.elapsed();
     let solution = Game::play(&numbers, 30_000_000);
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 62714 expected", solution);
+    println!("Day 15 - Part 2 : {} <=> 62714 expected", solution);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

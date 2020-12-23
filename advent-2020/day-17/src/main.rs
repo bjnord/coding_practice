@@ -23,7 +23,7 @@ fn part1() {
         }
     }
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 317 expected", n_active);
+    println!("Day 17 - Part 1 : {} <=> 317 expected", n_active);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -43,7 +43,7 @@ fn part2() {
         }
     }
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 1692 expected", n_active);
+    println!("Day 17 - Part 2 : {} <=> 1692 expected", n_active);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

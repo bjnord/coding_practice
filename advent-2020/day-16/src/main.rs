@@ -13,7 +13,7 @@ fn part1() {
     let gen_time = start.elapsed();
     let errors = puzzle.scanning_error_rate();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 28884 expected", errors);
+    println!("Day 16 - Part 1 : {} <=> 28884 expected", errors);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -29,7 +29,7 @@ fn part2() {
         .map(|f| f.value as u64)
         .product();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 2 : {} <=> 1001849322119 expected", departure_product);
+    println!("Day 16 - Part 2 : {} <=> 1001849322119 expected", departure_product);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
