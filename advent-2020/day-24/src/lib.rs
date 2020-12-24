@@ -162,7 +162,7 @@ impl Tile {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Floor {
-    tiles: Vec<Tile>,
+    initial_tiles: Vec<Tile>,
     colors: HashMap<i64, TileColor>,
 }
 
@@ -182,10 +182,10 @@ impl fmt::Display for Floor {
                 // we want a bi-symmetrical "hex slice"
                 if y == -dy && x == -dx { continue; }
                 if y == dy && x == dx { continue; }
-                let key = Pos::key(y, x);
-                let color_s = match self.colors[&key] {
-                    TileColor::Black => "  ####  ",
-                    TileColor::White => "  ....  ",
+                let color_s = match self.color_at(Pos { y, x }) {
+                    Some(TileColor::Black) => "  ####  ",
+                    Some(TileColor::White) => "  ....  ",
+                    None                   => "        ",
                 };
                 s += &color_s;
             }
@@ -213,21 +213,44 @@ impl Floor {
     ///
     /// Returns `Err` if a line has an invalid format.
     pub fn from_input(lines: &str) -> Result<Floor> {
-        let tiles: Vec<Tile> = lines
+        let initial_tiles: Vec<Tile> = lines
             .trim()
             .split('\n')
             .map(str::parse)
             .collect::<Result<Vec<Tile>>>()?;
         let colors: HashMap<i64, TileColor> = HashMap::new();
-        Ok(Self { tiles, colors })
+        Ok(Self { initial_tiles, colors })
     }
 
-    /// Flip tiles by following tile directions.
+    /// Flip tiles found by following tile directions.
     pub fn set_initial_tiles(&mut self) {
         self.fill();
-        for tile in &self.tiles {
-            let key = Pos::key(tile.pos.y, tile.pos.x);
-            self.colors.entry(key).or_insert(TileColor::White);  // FIXME with fill, now redundant?
+        let poses: Vec<Pos> = self.initial_tiles
+            .iter()
+            .map(|tile| tile.pos)
+            .collect();
+        for pos in poses {
+            self.flip_tile_at(pos);
+        }
+    }
+
+    /// Return color of the tile at `pos`, or `None` if the position is
+    /// outside the current floor bounds.
+    #[must_use]
+    pub fn color_at(&self, pos: Pos) -> Option<TileColor> {
+        let key = Pos::key(pos.y, pos.x);
+        if let Some(&color) = self.colors.get(&key) {
+            Some(color)
+        } else {
+            None
+        }
+    }
+
+    /// Flip the tile at `pos`. Does nothing if the position is outside the
+    /// current floor bounds.
+    fn flip_tile_at(&mut self, pos: Pos) {
+        let key = Pos::key(pos.y, pos.x);
+        if self.colors.contains_key(&key) {
             self.colors.insert(key, TileColor::opposite(self.colors[&key]));
         }
     }
@@ -251,6 +274,7 @@ impl Floor {
     }
 
     /// How many tiles are black?
+    #[must_use]
     pub fn n_black(&self) -> usize {
         self.colors
             .values()
@@ -263,7 +287,7 @@ impl Floor {
     /// tile directions.
     #[must_use]
     pub fn dimensions(&self) -> (usize, usize) {
-        self.tiles
+        self.initial_tiles
             .iter()
             .fold((0, 0), |(y, x), tile| {
                 let tile_max = tile.max_yx();
@@ -385,11 +409,11 @@ mod tests {
     #[test]
     fn test_read_from_file() {
         let floor = Floor::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(20, floor.tiles.len());
+        assert_eq!(20, floor.initial_tiles.len());
         assert_eq!(vec![
             Pos::SE, Pos::SE, Pos::NW, Pos::NE, Pos::NE,
             Pos::NE, Pos::W, Pos::SE, Pos::E, Pos::SW,
-        ], &floor.tiles[0].dirs[0..10]);
+        ], &floor.initial_tiles[0].dirs[0..10]);
     }
 
     #[test]
@@ -465,4 +489,24 @@ mod tests {
 //        eprintln!("MOVE 1\n\n{}\n", floor);
 //        assert_eq!(4, floor.n_black());
 //    }
+
+    #[test]
+    fn test_color_at() {
+        let lines = "esenee\nesew\nnwwswee\n".to_string();
+        let mut floor = Floor::from_input(&lines).unwrap();
+        assert_eq!((1, 3), floor.dimensions());
+        floor.set_initial_tiles();
+        //
+        assert_eq!(Some(TileColor::Black), floor.color_at(Pos { y: 0, x: 0 }));
+        assert_eq!(Some(TileColor::Black), floor.color_at(Pos { y: 1, x: 0 }));
+        assert_eq!(Some(TileColor::Black), floor.color_at(Pos { y: 0, x: 3 }));
+        assert_eq!(3, floor.n_black());
+        //
+        assert_eq!(Some(TileColor::White), floor.color_at(Pos { y: -1, x: -2 }));
+        assert_eq!(Some(TileColor::White), floor.color_at(Pos { y: 0, x: -3 }));
+        assert_eq!(Some(TileColor::White), floor.color_at(Pos { y: 1, x: 2 }));
+        //
+        assert_eq!(None, floor.color_at(Pos { y: -1, x: -3 }));
+        assert_eq!(None, floor.color_at(Pos { y: 1, x: 3 }));
+    }
 }
