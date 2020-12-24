@@ -9,11 +9,11 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let floor = Floor::read_from_file("input/input.txt").unwrap();
+    let mut floor = Floor::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    floor.flip_tiles();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 24 - Part 1 : {} <=> _ expected", 0);
+    println!("Day 24 - Part 1 : {} <=> 459 expected", floor.n_black());
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

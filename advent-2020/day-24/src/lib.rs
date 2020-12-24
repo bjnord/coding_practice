@@ -1,5 +1,6 @@
 use custom_error::custom_error;
-use std::collections::HashSet;
+use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::fmt;
 use std::fs;
 use std::str::FromStr;
@@ -48,10 +49,35 @@ impl Pos {
     const NE: Self = Self { x: 1, y: -1 };
 
     #[must_use]
+    fn key(&self) -> i64 {
+        let factor: i32 = 32_768;  // 2^15
+        let offset: i32 = 1_073_741_824;  // 2^30
+        if self.y.abs() > factor || self.x.abs() > factor {
+            panic!("y={} x={} too large", self.y, self.x);
+        }
+        i64::try_from(offset + self.y * factor).unwrap() *
+            i64::try_from(offset + self.x).unwrap()
+    }
+
+    /// Return sum of a list of position deltas.
+    #[must_use]
     pub fn sum(poses: &Vec<Self>) -> Self {
         poses.iter().fold(Self { y: 0, x: 0 }, |acc, pos| {
             Self { y: acc.y + pos.y, x: acc.x + pos.x }
         })
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum TileColor {
+    White,
+    Black,
+}
+
+impl TileColor {
+    /// Return the opposite tile color.
+    pub fn opposite(color: Self) -> Self {
+        match color { Self::White => Self::Black, Self::Black => Self::White }
     }
 }
 
@@ -107,6 +133,7 @@ impl FromStr for Tile {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Floor {
     tiles: Vec<Tile>,
+    colors: HashMap<i64, TileColor>,
 }
 
 impl fmt::Display for Floor {
@@ -133,7 +160,25 @@ impl Floor {
             .split("\n")
             .map(str::parse)
             .collect::<Result<Vec<Tile>>>()?;
-        Ok(Self { tiles })
+        let colors: HashMap<i64, TileColor> = HashMap::new();
+        Ok(Self { tiles, colors })
+    }
+
+    /// Flip tiles by following tile directions.
+    pub fn flip_tiles(&mut self) {
+        for tile in &self.tiles {
+            let key = tile.pos.key();
+            self.colors.entry(key).or_insert(TileColor::White);
+            self.colors.insert(key, TileColor::opposite(self.colors[&key]));
+        }
+    }
+
+    /// How many tiles are black?
+    pub fn n_black(&self) -> usize {
+        self.colors
+            .values()
+            .filter(|&c| *c == TileColor::Black)
+            .count()
     }
 }
 
@@ -203,5 +248,12 @@ mod tests {
             Pos::SE, Pos::SE, Pos::NW, Pos::NE, Pos::NE,
             Pos::NE, Pos::W, Pos::SE, Pos::E, Pos::SW,
         ], &floor.tiles[0].dirs[0..10]);
+    }
+
+    #[test]
+    fn test_n_black() {
+        let mut floor = Floor::read_from_file("input/example1.txt").unwrap();
+        floor.flip_tiles();
+        assert_eq!(10, floor.n_black());
     }
 }
