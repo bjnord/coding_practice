@@ -5,13 +5,18 @@ use std::string::ToString;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
+// we store two values for "current position"
+// - `Circle.disp_pos` is shown to the user as part of `Display` "(3)"
+//   - it's incremented each `do_moves()` loop -- always moves forward 1
+// - `Circle.pos` is *not* shown to the user; it's *absolute*
+//   - it's used as a direct index: `Circle.cups[pos]` -> "current cup"
+//   - it will shift in both directions as cups are taken/put back
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Circle {
-    pos: usize,
-    len: usize,
     cups: Vec<u8>,
-    move_n: usize,
-    pos_shift: usize,
+    len: usize,
+    pos: usize,
+    disp_pos: usize,
 }
 
 impl FromStr for Circle {
@@ -23,112 +28,122 @@ impl FromStr for Circle {
             .map(Circle::cup_from)
             .collect::<Result<Vec<u8>>>()?;
         let len = cups.len();
-        Ok(Self { cups, pos: 0, len, move_n: 0, pos_shift: 0 })
+        Ok(Self { cups, len, pos: 0, disp_pos: 0 })
     }
 }
 
 impl fmt::Display for Circle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s: String = self.cups
-            .iter()
-            .enumerate()
-            .map(|(i, cup)| if i == self.pos {
-                format!("({})", cup)
-             } else {
-                format!("{} ", cup)
-             })
-             .collect::<Vec<String>>()
-             .join(" ")
-             .replace(" (", "(");
-        write!(f, "{}", s)
+        let rot = Circle::pos_sub_wrap(self.pos, self.disp_pos, self.len);
+        let s: String = self.cups_string(&self.cups[rot..], 0);
+        let s1: String = self.cups_string(&self.cups[..rot], self.len - rot);
+        write!(f, "{}{}", s, s1)
     }
 }
 
 impl Circle {
-    /// Do one move round.
-    pub fn do_move(&mut self, output: bool) {
-        self.move_n += 1;
-        if output {
-            println!("-- move {} --", self.move_n);
-            println!("cups: {}", self);
-        }
-        let picked = self.pick_up();
-        let dest_cup = self.destination();
-        if output {
-            let pick_up: String = picked
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<String>>()
-                .join(", ");
-            println!("pick up: {}", pick_up);
-            println!("destination: {}", dest_cup);
-            println!();
-        }
-        self.put_down(dest_cup, picked);
-        self.increment_pos(1);
+    #[must_use]
+    fn cups_string(&self, cups: &[u8], rot: usize) -> String {
+        cups
+            .iter()
+            .enumerate()
+            .map(|(i, cup)| if i + rot == self.disp_pos {
+                format!("({})", cup)
+             } else {
+                format!(" {} ", cup)
+             })
+             .collect::<Vec<String>>()
+             .join("")
     }
 
-    // Move the current position `shift` to the right (add).
-    fn increment_pos(&mut self, shift: usize) {
-        let mut new_pos = self.pos;
-        for _ in 0..shift {
-            new_pos = Circle::pos_add_1(new_pos, self.len);
-        }
-        self.pos = new_pos;
+    fn rotate_left(&mut self, n: usize) {
+        self.cups.rotate_left(n);
+        self.pos = Circle::pos_sub_wrap(self.pos, n, self.len);
     }
 
-    // Calculate wrapping add-1 for position `pos`.
-    fn pos_add_1(pos: usize, len: usize) -> usize {
-        (pos + 1).rem_euclid(len)
+    /// Do `count` move rounds.
+    pub fn do_moves(&mut self, count: usize, output: bool) {
+        // We do the `if output` checks to minimize what this loop has to do
+        // in the non-debugging case.
+        for move_n in 1..=count {
+            let start_cups: Option<String> = if output { Some(format!("{}", self)) } else { None };
+            let picked = self.pick_up();
+            let picked_cups: Option<String> = if output {
+                Some(picked
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<String>>()
+                    .join(", ")
+                )
+            } else {
+                None
+            };
+            let dest_cup = self.put_down(picked);
+            if output {
+                println!("-- move {} --", move_n);
+                println!("cups: {}", start_cups.unwrap());
+                println!("pick up: {}", picked_cups.unwrap());
+                println!("destination: {}", dest_cup);
+                println!();
+            }
+            self.pos = Circle::pos_add_wrap(self.pos, 1, self.len);
+            self.disp_pos = Circle::pos_add_wrap(self.disp_pos, 1, self.len);
+        }
+    }
+
+    // Calculate adding `+n` to `pos`, wrapping on modulus `len`.
+    fn pos_add_wrap(pos: usize, n: usize, len: usize) -> usize {
+        // FIXME PERFORMANCE use compare/add not rem_euclid()
+        (pos + n).rem_euclid(len)
+    }
+
+    // Calculate subtracting `-n` from `pos`, wrapping on modulus `len`.
+    fn pos_sub_wrap(pos: usize, n: usize, len: usize) -> usize {
+        // FIXME PERFORMANCE use compare/subtract not rem_euclid()
+        ((pos + len) - n).rem_euclid(len)
     }
 
     /// Pick up three cups clockwise from current position. Return the cups
     /// picked up.
     pub fn pick_up(&mut self) -> Vec<u8> {
-        // take all 3 from middle or end
-        if self.len - self.pos > 3 {
-            self.pos_shift = 0;
-            return self.cups.splice(self.pos+1..self.pos+4, vec![]).collect();
+        // how many cups are to the right of the current (absolute) pos?
+        let to_right = self.len - self.pos;
+        if to_right <= 3 {
+            // rotate just enough to put the three at the end
+            self.rotate_left(4 - to_right);
         }
-        // take all 3 from beginning
-        if self.len - self.pos == 1 {
-            self.pos_shift = 3;
-            self.pos -= self.pos_shift;
-            return self.cups.splice(..3, vec![]).collect();
-        }
-        // split: take some from end, some from beginning
-        self.pos_shift = 3 - (self.len - self.pos - 1);
-        let mut u: Vec<u8> = self.cups.splice(self.pos+1.., vec![]).collect();
-        let v: Vec<u8> = self.cups.splice(..self.pos_shift, vec![]).collect();
-        u.extend(v);
-        self.pos -= self.pos_shift;
-        u
+        // now the three cups to be picked up are to the right of self.pos,
+        // so self.pos will not need to be adjusted
+        self.cups.splice(self.pos+1..self.pos+4, vec![]).collect()
     }
 
     /// Return destination cup from current position.
     #[must_use]
     pub fn destination(&self) -> u8 {
-        self.cups[self.find_dest(self.pos)]
+        self.cups[self.find_dest_pos()]
     }
 
-    // Return destination *position* from given (current) `pos`.
+    // Return position of "destination" cup (which is found according to the
+    // game rules).
     #[must_use]
-    fn find_dest(&self, pos: usize) -> usize {
-        let cur_cup = self.cups[pos];
+    fn find_dest_pos(&self) -> usize {
+        let cur_cup = self.cups[self.pos];
         let mut dest_cup = cur_cup;
+        // FIXME PERFORMANCE check picked cups first; then won't have to loop
         loop {
-            dest_cup = Circle::cup_sub_1(dest_cup, self.len);
+            dest_cup = Circle::cup_sub_wrap(dest_cup, 1, self.len);
             if let Some(dest_pos) = self.find_cup(dest_cup) {
                 return dest_pos;
             }
         }
     }
 
-    // Calculate wrapping subtract-1 for cup `n`.
-    fn cup_sub_1(n: u8, len: usize) -> u8 {
+    // Calculate subtracting `-n` from `cup`, wrapping on modulus `len`.
+    fn cup_sub_wrap(cup: u8, n: u8, len: usize) -> u8 {
         let len8 = u8::try_from(len).unwrap();
-        let nm1 = ((n + len8) - 1).rem_euclid(len8);
-        if nm1 == 0 { len8 } else { nm1 }
+        // FIXME PERFORMANCE use compare/subtract not rem_euclid()
+        let c1 = ((cup + len8) - n).rem_euclid(len8);
+        if c1 == 0 { len8 } else { c1 }
     }
 
     // Return position of provided `cup`.
@@ -137,17 +152,20 @@ impl Circle {
         self.cups.iter().position(|c| *c == cup)
     }
 
-    /// Put down `cups` clockwise to the right of the given destination `cup`.
+    /// Put down `cups` clockwise to the right of the "destination" cup
+    /// (which is found according to the game rules). Returns the
+    /// "destination" cup.
     #[allow(clippy::range_plus_one)]
-    pub fn put_down(&mut self, cup: u8, cups: Vec<u8>) {
-        let pos = self.find_cup(cup).unwrap();
-        self.cups.splice(pos+1..pos+1, cups);
-        if pos < self.pos {
-            let rot: Vec<u8> = self.cups.splice(..3-self.pos_shift, vec![]).collect();
-            self.cups.extend(rot);
-            self.increment_pos(self.pos_shift);
-            self.pos_shift = 0;
+    pub fn put_down(&mut self, cups: Vec<u8>) -> u8 {
+        let dest_pos = self.find_dest_pos();
+        let dest_cup = self.cups[dest_pos];
+        let debug_cup = cups[0];
+        self.cups.splice(dest_pos+1..dest_pos+1, cups);
+        // if the three cups were inserted before self.pos, adjust it
+        if dest_pos <= self.pos {
+            self.pos += 3;
         }
+        dest_cup
     }
 
     /// Return circle state string: Cups clockwise from cup 1 and excluding
@@ -191,9 +209,18 @@ mod tests {
     #[test]
     fn test_from_input() {
         let circle: Circle = EXAMPLE1.parse().unwrap();
-        assert_eq!(0, circle.pos);
         assert_eq!(9, circle.len);
+        assert_eq!(0, circle.pos);
+        assert_eq!(0, circle.disp_pos);
         assert_eq!(vec![3, 8, 9, 1, 2, 5, 4, 6, 7], circle.cups);
+    }
+
+    #[test]
+    fn test_formatting() {
+        let circle: Circle = EXAMPLE1.parse().unwrap();
+        let cups = format!("{}", circle);
+        assert_eq!("(3) 8  9  1  2  5  4  6  7 ", cups);
+        assert_eq!("25467389", circle.state());
     }
 
     #[test]
@@ -202,6 +229,7 @@ mod tests {
         assert_eq!(vec![8, 9, 1], circle.pick_up());
         assert_eq!(vec![3, 2, 5, 4, 6, 7], circle.cups);
         assert_eq!(0, circle.pos);
+        assert_eq!(0, circle.disp_pos);
     }
 
     #[test]
@@ -222,35 +250,36 @@ mod tests {
         assert_eq!(5, circle.pos);
     }
 
+    // cups: (3) 8  9  1  2  5  4  6  7 
     // pick up: 8, 9, 1
     // left in circle: (3) 2  5  4  6  7
     //
     #[test]
-    fn test_find_dest() {
+    fn test_find_dest_pos() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
         circle.pick_up();
-        assert_eq!(1, circle.find_dest(0));  // cup (3) -> dest cup 2
+        assert_eq!(1, circle.find_dest_pos());  // cup (3) -> dest cup 2
     }
+
+    // cups:  3  8  9  1  2  5  4  6 (7)
+    // pick up: 3, 8, 9
+    // left in circle:  1  2  5  4  6 (7)
     //
     #[test]
-    fn test_find_dest_wrap_cup() {
+    fn test_find_dest_pos_wrap_pos() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.pos = 8;
         circle.pick_up();
-        assert_eq!(5, circle.find_dest(1));  // cup (2) -> dest cup 7
+        assert_eq!(4, circle.find_dest_pos());  // cup (7) -> dest cup 6
     }
 
     #[test]
-    fn test_do_find_dest_wrap_pos() {
+    fn test_find_dest_pos_wrap_cup() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
-        for _ in 0..5 {
-            circle.do_move(true);
-        }
-        assert_eq!(vec![9, 2, 5, 8, 4, 1, 3, 6, 7], circle.cups);
-        assert_eq!(5, circle.pos);
+        circle.do_moves(1, true);
+        assert_eq!(" 3 (2) 8  9  1  5  4  6  7 ".to_string(), format!("{}", circle));
         let picked = circle.pick_up();
-        assert_eq!(vec![3, 6, 7], picked);
-        assert_eq!(5, circle.pos);
-        assert_eq!(0, circle.find_dest(5));  // cup (1) -> dest cup 9
+        assert_eq!(5, circle.find_dest_pos());  // cup (2) -> dest cup 7
     }
 
     #[test]
@@ -258,57 +287,43 @@ mod tests {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
         let picked = circle.pick_up();
         assert_eq!(2, circle.destination());
-        circle.put_down(2, picked);
+        circle.put_down(picked);
         assert_eq!(vec![3, 2, 8, 9, 1, 5, 4, 6, 7], circle.cups);
     }
 
     #[test]
-    fn test_do_move() {
+    fn test_do_moves() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
-        circle.do_move(true);
-        assert_eq!(vec![3, 2, 8, 9, 1, 5, 4, 6, 7], circle.cups);
-        assert_eq!(1, circle.pos);
+        circle.do_moves(2, true);
+        assert_eq!(" 3  2 (5) 4  6  7  8  9  1 ".to_string(), format!("{}", circle));
     }
 
     #[test]
-    fn test_do_move_rotate() {
+    fn test_do_moves_rotate() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
-        for _ in 0..3 {
-            circle.do_move(true);
-        }
-        assert_eq!(vec![7, 2, 5, 8, 9, 1, 3, 4, 6], circle.cups);
-        assert_eq!(3, circle.pos);
+        circle.do_moves(3, true);
+        assert_eq!(" 7  2  5 (8) 9  1  3  4  6 ".to_string(), format!("{}", circle));
     }
 
     #[test]
-    fn test_do_move_put_down_at_end() {
+    fn test_do_moves_put_down_at_end() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
-        for _ in 0..6 {
-            circle.do_move(true);
-        }
-        assert_eq!(vec![7, 2, 5, 8, 4, 1, 9, 3, 6], circle.cups);
-        assert_eq!(6, circle.pos);
+        circle.do_moves(6, true);
+        assert_eq!(" 7  2  5  8  4  1 (9) 3  6 ".to_string(), format!("{}", circle));
     }
 
     #[test]
-    fn test_do_move_rotate_extra() {
+    fn test_do_moves_rotate_extra() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
-        for _ in 0..7 {
-            circle.do_move(true);
-        }
-        // 8  3  6  7  4  1  9 (2) 5
-        assert_eq!(vec![8, 3, 6, 7, 4, 1, 9, 2, 5], circle.cups);
-        assert_eq!(7, circle.pos);
+        circle.do_moves(7, true);
+        assert_eq!(" 8  3  6  7  4  1  9 (2) 5 ".to_string(), format!("{}", circle));
     }
 
     #[test]
-    fn test_do_move_final() {
+    fn test_do_moves_final() {
         let mut circle: Circle = EXAMPLE1.parse().unwrap();
-        for _ in 0..10 {
-            circle.do_move(true);
-        }
-        assert_eq!(vec![5, 8, 3, 7, 4, 1, 9, 2, 6], circle.cups);
-        assert_eq!(1, circle.pos);
+        circle.do_moves(10, true);
+        assert_eq!(" 5 (8) 3  7  4  1  9  2  6 ".to_string(), format!("{}", circle));
         assert_eq!("92658374", circle.state());
     }
 
@@ -323,5 +338,53 @@ mod tests {
     #[test]
     fn test_cup_from_non_digit() {
         assert_eq!(7_u8, Circle::cup_from('7').unwrap());
+    }
+
+    #[test]
+    fn test_rotate_left_1() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        let old_cups = format!("{}", circle);
+        let old_state = circle.state();
+        circle.rotate_left(1);
+        assert_eq!(old_cups, format!("{}", circle));
+        assert_eq!(old_state, circle.state());
+    }
+
+    #[test]
+    fn test_rotate_left_8() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        let old_cups = format!("{}", circle);
+        let old_state = circle.state();
+        circle.rotate_left(2);
+        assert_eq!(old_cups, format!("{}", circle));
+        assert_eq!(old_state, circle.state());
+    }
+
+    #[test]
+    fn test_pos_add_wrap() {
+        assert_eq!(3_usize, Circle::pos_add_wrap(2, 1, 5));
+        assert_eq!(4_usize, Circle::pos_add_wrap(3, 1, 5));
+        assert_eq!(4_usize, Circle::pos_add_wrap(0, 4, 5));
+        assert_eq!(0_usize, Circle::pos_add_wrap(4, 1, 5));
+        assert_eq!(0_usize, Circle::pos_add_wrap(0, 5, 5));
+        assert_eq!(1_usize, Circle::pos_add_wrap(5, 1, 5));
+    }
+
+    #[test]
+    fn test_pos_sub_wrap() {
+        assert_eq!(1_usize, Circle::pos_sub_wrap(2, 1, 5));
+        assert_eq!(0_usize, Circle::pos_sub_wrap(1, 1, 5));
+        assert_eq!(4_usize, Circle::pos_sub_wrap(0, 1, 5));
+        assert_eq!(4_usize, Circle::pos_sub_wrap(5, 1, 5));
+        assert_eq!(2_usize, Circle::pos_sub_wrap(2, 5, 5));
+    }
+
+    #[test]
+    fn test_cup_sub_wrap() {
+        assert_eq!(1_u8, Circle::cup_sub_wrap(2, 1, 9));
+        assert_eq!(9_u8, Circle::cup_sub_wrap(1, 1, 9));
+        assert_eq!(8_u8, Circle::cup_sub_wrap(1, 2, 9));
+        assert_eq!(8_u8, Circle::cup_sub_wrap(9, 1, 9));
+        assert_eq!(3_u8, Circle::cup_sub_wrap(3, 9, 9));
     }
 }

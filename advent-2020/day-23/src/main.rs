@@ -13,9 +13,7 @@ fn part1() {
     let start = Instant::now();
     let mut circle: Circle = INPUT.parse().unwrap();
     let gen_time = start.elapsed();
-    for _ in 0..100 {
-        circle.do_move(false);
-    }
+    circle.do_moves(100, false);
     let run_time = start.elapsed() - gen_time;
     println!("Day 23 - Part 1 : {} <=> 27865934 expected", circle.state());
     println!("    generator: {:?}", gen_time);
