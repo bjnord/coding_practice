@@ -13,7 +13,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 //   - it will shift in both directions as cups are taken/put back
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Circle {
-    cups: Vec<u8>,
+    cups: Vec<u32>,
     len: usize,
     pos: usize,
     disp_pos: usize,
@@ -23,10 +23,10 @@ impl FromStr for Circle {
     type Err = Box<dyn std::error::Error>;
 
     fn from_str(input: &str) -> Result<Self> {
-        let cups: Vec<u8> = input
+        let cups: Vec<u32> = input
             .chars()
             .map(Circle::cup_from)
-            .collect::<Result<Vec<u8>>>()?;
+            .collect::<Result<Vec<u32>>>()?;
         let len = cups.len();
         Ok(Self { cups, len, pos: 0, disp_pos: 0 })
     }
@@ -43,7 +43,7 @@ impl fmt::Display for Circle {
 
 impl Circle {
     #[must_use]
-    fn cups_string(&self, cups: &[u8], rot: usize) -> String {
+    fn cups_string(&self, cups: &[u32], rot: usize) -> String {
         cups
             .iter()
             .enumerate()
@@ -63,6 +63,9 @@ impl Circle {
 
     /// Do `count` move rounds.
     pub fn do_moves(&mut self, count: usize, output: bool) {
+        if output && self.len > 9 {
+            panic!("output only works for part 1");
+        }
         // We do the `if output` checks to minimize what this loop has to do
         // in the non-debugging case.
         for move_n in 1..=count {
@@ -105,7 +108,7 @@ impl Circle {
 
     /// Pick up three cups clockwise from current position. Return the cups
     /// picked up.
-    pub fn pick_up(&mut self) -> Vec<u8> {
+    pub fn pick_up(&mut self) -> Vec<u32> {
         // how many cups are to the right of the current (absolute) pos?
         let to_right = self.len - self.pos;
         if to_right <= 3 {
@@ -119,7 +122,7 @@ impl Circle {
 
     /// Return destination cup from current position.
     #[must_use]
-    pub fn destination(&self) -> u8 {
+    pub fn destination(&self) -> u32 {
         self.cups[self.find_dest_pos()]
     }
 
@@ -139,8 +142,8 @@ impl Circle {
     }
 
     // Calculate subtracting `-n` from `cup`, wrapping on modulus `len`.
-    fn cup_sub_wrap(cup: u8, n: u8, len: usize) -> u8 {
-        let len8 = u8::try_from(len).unwrap();
+    fn cup_sub_wrap(cup: u32, n: u32, len: usize) -> u32 {
+        let len8 = u32::try_from(len).unwrap();
         // FIXME PERFORMANCE use compare/subtract not rem_euclid()
         let c1 = ((cup + len8) - n).rem_euclid(len8);
         if c1 == 0 { len8 } else { c1 }
@@ -148,7 +151,7 @@ impl Circle {
 
     // Return position of provided `cup`.
     #[must_use]
-    fn find_cup(&self, cup: u8) -> Option<usize> {
+    fn find_cup(&self, cup: u32) -> Option<usize> {
         self.cups.iter().position(|c| *c == cup)
     }
 
@@ -156,10 +159,9 @@ impl Circle {
     /// (which is found according to the game rules). Returns the
     /// "destination" cup.
     #[allow(clippy::range_plus_one)]
-    pub fn put_down(&mut self, cups: Vec<u8>) -> u8 {
+    pub fn put_down(&mut self, cups: Vec<u32>) -> u32 {
         let dest_pos = self.find_dest_pos();
         let dest_cup = self.cups[dest_pos];
-        let debug_cup = cups[0];
         self.cups.splice(dest_pos+1..dest_pos+1, cups);
         // if the three cups were inserted before self.pos, adjust it
         if dest_pos <= self.pos {
@@ -172,6 +174,9 @@ impl Circle {
     /// cup 1.
     #[must_use]
     pub fn state(&self) -> String {
+        if self.len > 9 {
+            panic!("state() only works for part 1");
+        }
         if let Some(pos1) = self.cups.iter().position(|cup| *cup == 1) {
             let back: String = self.cups[pos1+1..]
                 .iter()
@@ -188,15 +193,15 @@ impl Circle {
     }
 
     // Convert cup character into cup number.
-    fn cup_from(ch: char) -> Result<u8> {
+    fn cup_from(ch: char) -> Result<u32> {
         let cup: u32 = ch.to_digit(10).ok_or("not a digit")?;
-        Ok(u8::try_from(cup).unwrap())
+        Ok(u32::try_from(cup).unwrap())
     }
 
     // Convert cup number into cup character.
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    fn cup_char(cup: &u8) -> char {
-        (cup + b'0') as char
+    fn cup_char(cup: &u32) -> char {
+        ((*cup as u8) + b'0') as char
     }
 }
 
@@ -329,15 +334,15 @@ mod tests {
 
     #[test]
     fn test_cup_from() {
-        match Circle::cup_from('-') {
-            Err(e) => assert!(e.to_string().contains("not a digit")),
-            Ok(_)  => panic!("test did not fail"),
-        }
+        assert_eq!(7_u32, Circle::cup_from('7').unwrap());
     }
 
     #[test]
     fn test_cup_from_non_digit() {
-        assert_eq!(7_u8, Circle::cup_from('7').unwrap());
+        match Circle::cup_from('-') {
+            Err(e) => assert!(e.to_string().contains("not a digit")),
+            Ok(_)  => panic!("test did not fail"),
+        }
     }
 
     #[test]
@@ -381,10 +386,10 @@ mod tests {
 
     #[test]
     fn test_cup_sub_wrap() {
-        assert_eq!(1_u8, Circle::cup_sub_wrap(2, 1, 9));
-        assert_eq!(9_u8, Circle::cup_sub_wrap(1, 1, 9));
-        assert_eq!(8_u8, Circle::cup_sub_wrap(1, 2, 9));
-        assert_eq!(8_u8, Circle::cup_sub_wrap(9, 1, 9));
-        assert_eq!(3_u8, Circle::cup_sub_wrap(3, 9, 9));
+        assert_eq!(1_u32, Circle::cup_sub_wrap(2, 1, 9));
+        assert_eq!(9_u32, Circle::cup_sub_wrap(1, 1, 9));
+        assert_eq!(8_u32, Circle::cup_sub_wrap(1, 2, 9));
+        assert_eq!(8_u32, Circle::cup_sub_wrap(9, 1, 9));
+        assert_eq!(3_u32, Circle::cup_sub_wrap(3, 9, 9));
     }
 }
