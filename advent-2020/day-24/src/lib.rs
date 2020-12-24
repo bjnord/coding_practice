@@ -246,8 +246,8 @@ impl Floor {
         }
     }
 
-    /// Flip the tile at `pos`. Does nothing if the position is outside the
-    /// current floor bounds.
+    // Flip the tile at `pos`. Does nothing if the position is outside the
+    // current floor bounds.
     fn flip_tile_at(&mut self, pos: Pos) {
         let key = Pos::key(pos.y, pos.x);
         if self.colors.contains_key(&key) {
@@ -255,8 +255,8 @@ impl Floor {
         }
     }
 
-    /// Fill floor with white tiles, up to its calculated dimensions
-    /// (based on all tile directions).
+    // Fill floor with white tiles, up to its calculated dimensions
+    // (based on all tile directions).
     fn fill(&mut self) {
         let dim = self.dimensions();
         let dy = i32::try_from(dim.0).unwrap();
