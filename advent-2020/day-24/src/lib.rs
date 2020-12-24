@@ -49,6 +49,11 @@ impl Pos {
     const SW: Self = Self { x: -1, y: 1 };
     const NE: Self = Self { x: 1, y: -1 };
 
+    /// Construct from (y, x) coordinates.
+    pub fn new(y: i32, x: i32) -> Self {
+        Self { y, x }
+    }
+
     #[must_use]
     fn key(&self) -> i64 {
         let factor: i32 = 32_768;  // 2^15
@@ -145,13 +150,13 @@ impl Tile {
     // following any of the tile directions.
     #[must_use]
     fn max_yx(&self) -> (usize, usize) {
-        let zero = Pos { y: 0, x: 0 };
+        let zero = Pos::new(0, 0);
         let min_max_pos: Vec<Pos> = self.dirs
             .iter()
             .fold(vec![zero, zero, zero], |acc, pos| {
-                let pos: Pos = Pos::sum(&[acc[2], *pos]);
-                let min: Pos = Pos { y: cmp::min(acc[0].y, pos.y), x: cmp::min(acc[0].x, pos.x) };
-                let max: Pos = Pos { y: cmp::max(acc[1].y, pos.y), x: cmp::max(acc[1].x, pos.x) };
+                let pos = Pos::sum(&[acc[2], *pos]);
+                let min = Pos::new(cmp::min(acc[0].y, pos.y), cmp::min(acc[0].x, pos.x));
+                let max = Pos::new(cmp::max(acc[1].y, pos.y), cmp::max(acc[1].x, pos.x));
                 vec![min, max, pos]
             });
         let y = cmp::max(min_max_pos[0].y.abs(), min_max_pos[1].y);
@@ -182,7 +187,7 @@ impl fmt::Display for Floor {
                 // we want a bi-symmetrical "hex slice"
                 if y == -dy && x == -dx { continue; }
                 if y == dy && x == dx { continue; }
-                let color_s = match self.color_at(Pos { y, x }) {
+                let color_s = match self.color_at(Pos::new(y, x)) {
                     Some(TileColor::Black) => "  ####  ",
                     Some(TileColor::White) => "  ....  ",
                     None                   => "        ",
@@ -267,7 +272,7 @@ impl Floor {
                 // we want a bi-symmetrical "hex slice"
                 if y == -dy && x == -dx { continue; }
                 if y == dy && x == dx { continue; }
-                let pos = Pos { y, x };
+                let pos = Pos::new(y, x);
                 self.colors.insert(pos.key(), TileColor::White);
             }
         }
@@ -308,7 +313,7 @@ impl Floor {
 //                // we only want our 6 hexagonal neighbors
 //                if y == -dim_y && x == -dim_x { continue; }
 //                if y == dim_y && x == dim_x { continue; }
-//                let pos = Pos { y, x };
+//                let pos = Pos::new(y, x);
 //                let key = pos.key();
 //                //eprintln!("...trying K{} for ({}, {})", key, pos.y, pos.x);
 //                let color = self.colors[&key];
@@ -336,7 +341,7 @@ impl Floor {
 //                // we only want our 6 hexagonal neighbors
 //                if dy == -1 && dx == -1 { continue; }
 //                if dy == 1 && dx == 1 { continue; }
-//                let dpos = Pos { y + dy, x + dx };
+//                let dpos = Pos::new(y + dy, x + dx);
 //                if let Some(color) = self.colors.get(&dpos) {
 //                    neighbors.push(*color);
 //                }
@@ -356,7 +361,7 @@ mod tests {
     #[test]
     fn test_parse_dir() {
         let dir: Pos = "sw".parse().unwrap();
-        assert_eq!(Pos { y: 1, x: -1 }, dir);
+        assert_eq!(Pos::new(1, -1), dir);
     }
 
     #[test]
@@ -371,7 +376,7 @@ mod tests {
     fn test_parse_tile() {
         let tile: Tile = "esenee".parse().unwrap();
         assert_eq!(vec![Pos::E, Pos::SE, Pos::NE, Pos::E], tile.dirs);
-        assert_eq!(Pos { y: 0, x: 3 }, Pos::sum(&tile.dirs));
+        assert_eq!(Pos::new(0, 3), Pos::sum(&tile.dirs));
         assert_eq!((1, 3), tile.max_yx());
     }
 
@@ -379,7 +384,7 @@ mod tests {
     fn test_parse_tile_2() {
         let tile: Tile = "esew".parse().unwrap();
         assert_eq!(vec![Pos::E, Pos::SE, Pos::W], tile.dirs);
-        assert_eq!(Pos { y: 1, x: 0 }, Pos::sum(&tile.dirs));
+        assert_eq!(Pos::new(1, 0), Pos::sum(&tile.dirs));
         assert_eq!((1, 1), tile.max_yx());
     }
 
@@ -387,7 +392,7 @@ mod tests {
     fn test_parse_tile_3() {
         let tile: Tile = "nwwswee".parse().unwrap();
         assert_eq!(vec![Pos::NW, Pos::W, Pos::SW, Pos::E, Pos::E], tile.dirs);
-        assert_eq!(Pos { y: 0, x: 0 }, Pos::sum(&tile.dirs));
+        assert_eq!(Pos::new(0, 0), Pos::sum(&tile.dirs));
         assert_eq!((1, 2), tile.max_yx());  // -1, -2
     }
 
@@ -498,16 +503,16 @@ mod tests {
         assert_eq!((1, 3), floor.dimensions());
         floor.set_initial_tiles();
         //
-        assert_eq!(Some(TileColor::Black), floor.color_at(Pos { y: 0, x: 0 }));
-        assert_eq!(Some(TileColor::Black), floor.color_at(Pos { y: 1, x: 0 }));
-        assert_eq!(Some(TileColor::Black), floor.color_at(Pos { y: 0, x: 3 }));
+        assert_eq!(Some(TileColor::Black), floor.color_at(Pos::new(0, 0)));
+        assert_eq!(Some(TileColor::Black), floor.color_at(Pos::new(1, 0)));
+        assert_eq!(Some(TileColor::Black), floor.color_at(Pos::new(0, 3)));
         assert_eq!(3, floor.n_black());
         //
-        assert_eq!(Some(TileColor::White), floor.color_at(Pos { y: -1, x: -2 }));
-        assert_eq!(Some(TileColor::White), floor.color_at(Pos { y: 0, x: -3 }));
-        assert_eq!(Some(TileColor::White), floor.color_at(Pos { y: 1, x: 2 }));
+        assert_eq!(Some(TileColor::White), floor.color_at(Pos::new(-1, -2)));
+        assert_eq!(Some(TileColor::White), floor.color_at(Pos::new(0, -3)));
+        assert_eq!(Some(TileColor::White), floor.color_at(Pos::new(1, 2)));
         //
-        assert_eq!(None, floor.color_at(Pos { y: -1, x: -3 }));
-        assert_eq!(None, floor.color_at(Pos { y: 1, x: 3 }));
+        assert_eq!(None, floor.color_at(Pos::new(-1, -3)));
+        assert_eq!(None, floor.color_at(Pos::new(1, 3)));
     }
 }
