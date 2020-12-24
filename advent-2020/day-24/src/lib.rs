@@ -1,4 +1,5 @@
 use custom_error::custom_error;
+use std::cmp;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fmt;
@@ -61,9 +62,18 @@ impl Pos {
 
     /// Return sum of a list of position deltas.
     #[must_use]
-    pub fn sum(poses: &Vec<Self>) -> Self {
+    pub fn sum(poses: &[Self]) -> Self {
         poses.iter().fold(Self { y: 0, x: 0 }, |acc, pos| {
             Self { y: acc.y + pos.y, x: acc.x + pos.x }
+        })
+    }
+
+    /// Return maximum of a list of position deltas. (The two dimensions are
+    /// compared independently.)
+    #[must_use]
+    pub fn max(poses: &[Self]) -> Self {
+        poses.iter().fold(Self { y: 0, x: 0 }, |acc, pos| {
+            Self { y: cmp::max(acc.y, pos.y), x: cmp::max(acc.x, pos.x) }
         })
     }
 }
@@ -130,6 +140,26 @@ impl FromStr for Tile {
     }
 }
 
+impl Tile {
+    // Returns the maximum absolute-value (y, x) tile coordinates seen when
+    // following any of the tile directions.
+    #[must_use]
+    fn max_yx(&self) -> (usize, usize) {
+        let zero = Pos { y: 0, x: 0 };
+        let min_max_pos: Vec<Pos> = self.dirs
+            .iter()
+            .fold(vec![zero, zero, zero], |acc, pos| {
+                let pos: Pos = Pos::sum(&[acc[2], *pos]);
+                let min: Pos = Pos { y: cmp::min(acc[0].y, pos.y), x: cmp::min(acc[0].x, pos.x) };
+                let max: Pos = Pos { y: cmp::max(acc[1].y, pos.y), x: cmp::max(acc[1].x, pos.x) };
+                vec![min, max, pos]
+            });
+        let y = cmp::max(min_max_pos[0].y.abs(), min_max_pos[1].y);
+        let x = cmp::max(min_max_pos[0].x.abs(), min_max_pos[1].x);
+        (usize::try_from(y).unwrap(), usize::try_from(x).unwrap())
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Floor {
     tiles: Vec<Tile>,
@@ -155,9 +185,18 @@ impl Floor {
     /// has an invalid format.
     pub fn read_from_file(path: &str) -> Result<Floor> {
         let s: String = fs::read_to_string(path)?;
-        let tiles: Vec<Tile> = s
+        Floor::from_input(&s)
+    }
+
+    /// Construct by reading tiles from input `lines`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if a line has an invalid format.
+    pub fn from_input(lines: &str) -> Result<Floor> {
+        let tiles: Vec<Tile> = lines
             .trim()
-            .split("\n")
+            .split('\n')
             .map(str::parse)
             .collect::<Result<Vec<Tile>>>()?;
         let colors: HashMap<i64, TileColor> = HashMap::new();
@@ -165,11 +204,30 @@ impl Floor {
     }
 
     /// Flip tiles by following tile directions.
-    pub fn flip_tiles(&mut self) {
+    pub fn set_initial_tiles(&mut self) {
+        self.fill();
         for tile in &self.tiles {
             let key = tile.pos.key();
             self.colors.entry(key).or_insert(TileColor::White);
             self.colors.insert(key, TileColor::opposite(self.colors[&key]));
+        }
+    }
+
+    /// Fill floor with white tiles, up to its calculated dimensions
+    /// (based on all tile directions).
+    fn fill(&mut self) {
+        let dim = self.dimensions();
+        let dy = i32::try_from(dim.0).unwrap();
+        let dx = i32::try_from(dim.1).unwrap();
+        for y in -dy..=dy {
+            for x in -dx..=dx {
+                // without these two lines you get a parallelogram;
+                // we want a bi-symmetrical "hex slice"
+                if y == -dy && x == -dx { continue; }
+                if y == dy && x == dx { continue; }
+                let pos = Pos { y, x };
+                self.colors.insert(pos.key(), TileColor::White);
+            }
         }
     }
 
@@ -179,6 +237,19 @@ impl Floor {
             .values()
             .filter(|&c| *c == TileColor::Black)
             .count()
+    }
+
+    /// Returns the (y, x) floor dimensions, defined by the maximum
+    /// absolute-value y and x coordinates seen when following any of the
+    /// tile directions.
+    #[must_use]
+    pub fn dimensions(&self) -> (usize, usize) {
+        self.tiles
+            .iter()
+            .fold((0, 0), |(y, x), tile| {
+                let tile_max = tile.max_yx();
+                (cmp::max(y, tile_max.0), cmp::max(x, tile_max.1))
+            })
     }
 }
 
@@ -208,6 +279,7 @@ mod tests {
         let tile: Tile = "esenee".parse().unwrap();
         assert_eq!(vec![Pos::E, Pos::SE, Pos::NE, Pos::E], tile.dirs);
         assert_eq!(Pos { y: 0, x: 3 }, Pos::sum(&tile.dirs));
+        assert_eq!((1, 3), tile.max_yx());
     }
 
     #[test]
@@ -215,6 +287,7 @@ mod tests {
         let tile: Tile = "esew".parse().unwrap();
         assert_eq!(vec![Pos::E, Pos::SE, Pos::W], tile.dirs);
         assert_eq!(Pos { y: 1, x: 0 }, Pos::sum(&tile.dirs));
+        assert_eq!((1, 1), tile.max_yx());
     }
 
     #[test]
@@ -222,6 +295,7 @@ mod tests {
         let tile: Tile = "nwwswee".parse().unwrap();
         assert_eq!(vec![Pos::NW, Pos::W, Pos::SW, Pos::E, Pos::E], tile.dirs);
         assert_eq!(Pos { y: 0, x: 0 }, Pos::sum(&tile.dirs));
+        assert_eq!((1, 2), tile.max_yx());  // -1, -2
     }
 
     #[test]
@@ -253,7 +327,22 @@ mod tests {
     #[test]
     fn test_n_black() {
         let mut floor = Floor::read_from_file("input/example1.txt").unwrap();
-        floor.flip_tiles();
+        floor.set_initial_tiles();
         assert_eq!(10, floor.n_black());
+    }
+
+    #[test]
+    fn test_floor_dimensions() {
+        let floor = Floor::read_from_file("input/example1.txt").unwrap();
+        assert_eq!((6, 5), floor.dimensions());
+    }
+
+    #[test]
+    fn test_floor_fill() {
+        let lines = "esenee\nesew\nnwwswee\n".to_string();
+        let mut floor = Floor::from_input(&lines).unwrap();
+        assert_eq!((1, 3), floor.dimensions());
+        floor.fill();
+        assert_eq!(19, floor.colors.len());
     }
 }
