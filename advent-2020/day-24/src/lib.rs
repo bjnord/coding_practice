@@ -46,11 +46,19 @@ impl Pos {
     const NW: Self = Self { x: 0, y: -1 };
     const SW: Self = Self { x: -1, y: 1 };
     const NE: Self = Self { x: 1, y: -1 };
+
+    #[must_use]
+    pub fn sum(poses: &Vec<Self>) -> Self {
+        poses.iter().fold(Self { y: 0, x: 0 }, |acc, pos| {
+            Self { y: acc.y + pos.y, x: acc.x + pos.x }
+        })
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Tile {
     dirs: Vec<Pos>,
+    pos: Pos,
 }
 
 impl fmt::Display for Tile {
@@ -91,7 +99,8 @@ impl FromStr for Tile {
         if dirs.is_empty() {
             return Err(FlipListError::Empty.into());
         }
-        Ok(Self { dirs })
+        let pos = Pos::sum(&dirs);
+        Ok(Self { dirs, pos })
     }
 }
 
@@ -153,6 +162,21 @@ mod tests {
     fn test_parse_tile() {
         let tile: Tile = "esenee".parse().unwrap();
         assert_eq!(vec![Pos::E, Pos::SE, Pos::NE, Pos::E], tile.dirs);
+        assert_eq!(Pos { y: 0, x: 3 }, Pos::sum(&tile.dirs));
+    }
+
+    #[test]
+    fn test_parse_tile_2() {
+        let tile: Tile = "esew".parse().unwrap();
+        assert_eq!(vec![Pos::E, Pos::SE, Pos::W], tile.dirs);
+        assert_eq!(Pos { y: 1, x: 0 }, Pos::sum(&tile.dirs));
+    }
+
+    #[test]
+    fn test_parse_tile_3() {
+        let tile: Tile = "nwwswee".parse().unwrap();
+        assert_eq!(vec![Pos::NW, Pos::W, Pos::SW, Pos::E, Pos::E], tile.dirs);
+        assert_eq!(Pos { y: 0, x: 0 }, Pos::sum(&tile.dirs));
     }
 
     #[test]
