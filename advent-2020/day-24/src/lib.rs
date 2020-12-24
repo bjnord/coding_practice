@@ -50,14 +50,14 @@ impl Pos {
     const NE: Self = Self { x: 1, y: -1 };
 
     #[must_use]
-    fn key(&self) -> i64 {
+    fn key(y: i32, x: i32) -> i64 {
         let factor: i32 = 32_768;  // 2^15
         let offset: i32 = 1_073_741_824;  // 2^30
-        if self.y.abs() > factor || self.x.abs() > factor {
-            panic!("y={} x={} too large", self.y, self.x);
+        if y.abs() > factor || x.abs() > factor {
+            panic!("y={} x={} too large", y, x);
         }
-        i64::try_from(offset + self.y * factor).unwrap() *
-            i64::try_from(offset + self.x).unwrap()
+        i64::try_from(offset + y * factor).unwrap() *
+            i64::try_from(offset + x).unwrap()
     }
 
     /// Return sum of a list of position deltas.
@@ -169,8 +169,27 @@ pub struct Floor {
 impl fmt::Display for Floor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        for tile in &self.tiles {
-            s += &format!("{}\n", tile);
+        let dim = self.dimensions();
+        // FIXME merge with duplicate code in fill() - make an iterator
+        let dy = i32::try_from(dim.0).unwrap();
+        let dx = i32::try_from(dim.1).unwrap();
+        for y in -dy..=dy {
+            for _ in 0..=dy.abs() {
+                s += "    ";
+            }
+            for x in -dx..=dx {
+                // without these two lines you get a parallelogram;
+                // we want a bi-symmetrical "hex slice"
+                if y == -dy && x == -dx { continue; }
+                if y == dy && x == dx { continue; }
+                let key = Pos::key(y, x);
+                let color_s = match self.colors[&key] {
+                    TileColor::Black => "  ####  ",
+                    TileColor::White => "  ....  ",
+                };
+                s += &color_s;
+            }
+            s += "\n\n";
         }
         write!(f, "{}", s)
     }
@@ -207,8 +226,8 @@ impl Floor {
     pub fn set_initial_tiles(&mut self) {
         self.fill();
         for tile in &self.tiles {
-            let key = tile.pos.key();
-            self.colors.entry(key).or_insert(TileColor::White);
+            let key = Pos::key(tile.pos.y, tile.pos.x);
+            self.colors.entry(key).or_insert(TileColor::White);  // FIXME with fill, now redundant?
             self.colors.insert(key, TileColor::opposite(self.colors[&key]));
         }
     }
@@ -226,7 +245,7 @@ impl Floor {
                 if y == -dy && x == -dx { continue; }
                 if y == dy && x == dx { continue; }
                 let pos = Pos { y, x };
-                self.colors.insert(pos.key(), TileColor::White);
+                self.colors.insert(Pos::key(pos.y, pos.x), TileColor::White);
             }
         }
     }
@@ -251,6 +270,55 @@ impl Floor {
                 (cmp::max(y, tile_max.0), cmp::max(x, tile_max.1))
             })
     }
+
+//    /// Do one round of tile-flipping, according to the puzzle description.
+//    pub fn flip_tiles(&mut self, dim: (usize, usize)) {
+//        let mut flip_keys: Vec<i64> = vec![];
+//        // FIXME merge with duplicate code in fill() - make an iterator
+//        let dim_y = i32::try_from(dim.0).unwrap();
+//        let dim_x = i32::try_from(dim.1).unwrap();
+//        for y in -dim_y..=dim_y {
+//            for x in -dim_x..=dim_x {
+//                if y == 0 && x == 0 { continue; }
+//                // without these two lines you get a parallelogram;
+//                // we only want our 6 hexagonal neighbors
+//                if y == -dim_y && x == -dim_x { continue; }
+//                if y == dim_y && x == dim_x { continue; }
+//                let pos = Pos { y, x };
+//                let key = Pos::key(pos.y, pos.x);
+//                //eprintln!("...trying K{} for ({}, {})", key, pos.y, pos.x);
+//                let color = self.colors[&key];
+//                let n_black = self.n_neighbor_black(pos);
+//                //eprintln!("{:?} at ({}, {}) (K{}) found {} black neighbors", color, y, x, key, n_black);
+//                match (color, n_black) {
+//                    (TileColor::Black, n) if n == 0 || n > 2 => flip_keys.push(key),
+//                    (TileColor::White, n) if n == 2          => flip_keys.push(key),
+//                    _                                        => { },
+//                }
+//            }
+//        }
+//        for key in flip_keys {
+//            //eprintln!("flip K{}", key);
+//            self.colors.insert(key, TileColor::opposite(self.colors[&key]));
+//        }
+//    }
+//
+//    fn n_neighbor_black(&self, pos: Pos) -> usize {
+//        let mut neighbors: Vec<TileColor> = vec![];
+//        for dy in -1..=1 {
+//            for dx in -1..=1 {
+//                if dy == 0 && dx == 0 { continue; }
+//                // without these two lines you get a parallelogram;
+//                // we only want our 6 hexagonal neighbors
+//                if dy == -1 && dx == -1 { continue; }
+//                if dy == 1 && dx == 1 { continue; }
+//                if let Some(color) = self.colors.get(&Pos::key(pos.y + dy, pos.x + dx)) {
+//                    neighbors.push(*color);
+//                }
+//            }
+//        }
+//        neighbors.iter().filter(|&c| *c == TileColor::Black).count()
+//    }
 }
 
 #[cfg(test)]
@@ -345,4 +413,56 @@ mod tests {
         floor.fill();
         assert_eq!(19, floor.colors.len());
     }
+
+    // Day 1: 15
+    // Day 2: 12
+    // Day 3: 25
+    // Day 4: 14
+    // Day 5: 23
+    // Day 6: 28
+    // Day 7: 41
+    // Day 8: 37
+    // Day 9: 49
+    // Day 10: 37
+    //
+    // Day 20: 132
+    // Day 30: 259
+    // Day 40: 406
+    // Day 50: 566
+    // Day 60: 788
+    // Day 70: 1106
+    // Day 80: 1373
+    // Day 90: 1844
+    // Day 100: 2208
+    //
+//    #[test]
+//    fn test_flip_tiles() {
+//        let mut floor = Floor::read_from_file("input/example1.txt").unwrap();
+//        floor.set_initial_tiles();
+//        assert_eq!(10, floor.n_black());
+//        let dim = floor.dimensions();
+//        for _ in 1..=1 {
+//            floor.flip_tiles(dim);
+//        }
+//        eprintln!("Day 1\n\n{}\n", floor);
+//        assert_eq!(15, floor.n_black());
+//        for _ in 2..=2 {
+//            floor.flip_tiles(dim);
+//        }
+//        eprintln!("Day 2\n\n{}\n", floor);
+//        assert_eq!(12, floor.n_black());
+//    }
+//
+//    #[test]
+//    fn test_flip_tiles_small() {
+//        let lines = "esenee\nesew\nnwwswee\n".to_string();
+//        let mut floor = Floor::from_input(&lines).unwrap();
+//        floor.set_initial_tiles();
+//        eprintln!("INITIAL\n\n{}\n", floor);
+//        assert_eq!(3, floor.n_black());
+//        let dim = floor.dimensions();
+//        floor.flip_tiles(dim);
+//        eprintln!("MOVE 1\n\n{}\n", floor);
+//        assert_eq!(4, floor.n_black());
+//    }
 }
