@@ -50,14 +50,14 @@ impl Pos {
     const NE: Self = Self { x: 1, y: -1 };
 
     #[must_use]
-    fn key(y: i32, x: i32) -> i64 {
+    fn key(&self) -> i64 {
         let factor: i32 = 32_768;  // 2^15
         let offset: i32 = 1_073_741_824;  // 2^30
-        if y.abs() > factor || x.abs() > factor {
-            panic!("y={} x={} too large", y, x);
+        if self.y.abs() > factor || self.x.abs() > factor {
+            panic!("y={} x={} too large", self.y, self.x);
         }
-        i64::try_from(offset + y * factor).unwrap() *
-            i64::try_from(offset + x).unwrap()
+        i64::try_from(offset + self.y * factor).unwrap() *
+            i64::try_from(offset + self.x).unwrap()
     }
 
     /// Return sum of a list of position deltas.
@@ -238,7 +238,7 @@ impl Floor {
     /// outside the current floor bounds.
     #[must_use]
     pub fn color_at(&self, pos: Pos) -> Option<TileColor> {
-        let key = Pos::key(pos.y, pos.x);
+        let key = pos.key();
         if let Some(&color) = self.colors.get(&key) {
             Some(color)
         } else {
@@ -249,7 +249,7 @@ impl Floor {
     // Flip the tile at `pos`. Does nothing if the position is outside the
     // current floor bounds.
     fn flip_tile_at(&mut self, pos: Pos) {
-        let key = Pos::key(pos.y, pos.x);
+        let key = pos.key();
         if self.colors.contains_key(&key) {
             self.colors.insert(key, TileColor::opposite(self.colors[&key]));
         }
@@ -268,7 +268,7 @@ impl Floor {
                 if y == -dy && x == -dx { continue; }
                 if y == dy && x == dx { continue; }
                 let pos = Pos { y, x };
-                self.colors.insert(Pos::key(pos.y, pos.x), TileColor::White);
+                self.colors.insert(pos.key(), TileColor::White);
             }
         }
     }
@@ -309,7 +309,7 @@ impl Floor {
 //                if y == -dim_y && x == -dim_x { continue; }
 //                if y == dim_y && x == dim_x { continue; }
 //                let pos = Pos { y, x };
-//                let key = Pos::key(pos.y, pos.x);
+//                let key = pos.key();
 //                //eprintln!("...trying K{} for ({}, {})", key, pos.y, pos.x);
 //                let color = self.colors[&key];
 //                let n_black = self.n_neighbor_black(pos);
@@ -336,7 +336,8 @@ impl Floor {
 //                // we only want our 6 hexagonal neighbors
 //                if dy == -1 && dx == -1 { continue; }
 //                if dy == 1 && dx == 1 { continue; }
-//                if let Some(color) = self.colors.get(&Pos::key(pos.y + dy, pos.x + dx)) {
+//                let dpos = Pos { y + dy, x + dx };
+//                if let Some(color) = self.colors.get(&dpos) {
 //                    neighbors.push(*color);
 //                }
 //            }
