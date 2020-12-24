@@ -2,6 +2,7 @@ use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;
+use std::time::Instant;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -42,6 +43,23 @@ impl fmt::Display for Circle {
 }
 
 impl Circle {
+    /// Expand the circle to size `new_len`, filling in sequential numbers
+    /// clockwise.
+    pub fn expand_to(&mut self, new_len: usize) {
+        let mut new_cups: Vec<u32> = Vec::with_capacity(new_len);
+        new_cups.extend(&self.cups);
+        new_cups.extend(&(self.len+1..=new_len).map(|i| u32::try_from(i).unwrap()).collect::<Vec<u32>>());
+        self.cups = new_cups;
+        self.len = new_len;
+    }
+
+    /// Return the three cups clockwise to the right of the "1" cup.
+    pub fn pick_up_after_1(&mut self) -> Vec<u32> {
+        let cup_pos = self.find_cup(1);
+        self.pos = cup_pos.unwrap();
+        self.pick_up()
+    }
+
     #[must_use]
     fn cups_string(&self, cups: &[u32], rot: usize) -> String {
         cups
@@ -68,6 +86,10 @@ impl Circle {
         }
         // We do the `if output` checks to minimize what this loop has to do
         // in the non-debugging case.
+        //
+        // DEBUG PERFORMANCE
+        let start = Instant::now();
+        let mut squawk: usize = 0x10;
         for move_n in 1..=count {
             let start_cups: Option<String> = if output { Some(format!("{}", self)) } else { None };
             let picked = self.pick_up();
@@ -91,6 +113,13 @@ impl Circle {
             }
             self.pos = Circle::pos_add_wrap(self.pos, 1, self.len);
             self.disp_pos = Circle::pos_add_wrap(self.disp_pos, 1, self.len);
+            //
+            // DEBUG PERFORMANCE
+            if move_n == squawk {
+                let move_time = start.elapsed();
+                eprintln!("{}/{} moves in {:?}", move_n, count, move_time);
+                squawk *= 2;
+            }
         }
     }
 
@@ -392,4 +421,34 @@ mod tests {
         assert_eq!(8_u32, Circle::cup_sub_wrap(9, 1, 9));
         assert_eq!(3_u32, Circle::cup_sub_wrap(3, 9, 9));
     }
+
+    #[test]
+    fn test_expand_to() {
+        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+        circle.expand_to(30);
+        assert_eq!(30, circle.len);
+        assert_eq!(0, circle.pos);
+        assert_eq!(0, circle.disp_pos);
+        assert_eq!(vec![
+            3, 8, 9, 1, 2, 5, 4, 6, 7, 10,
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+        ], circle.cups);
+    }
+
+//  [this isn't practical as a test (which = debug mode)]
+//
+//    #[test]
+//    fn test_part_2_example() {
+//        let mut circle: Circle = EXAMPLE1.parse().unwrap();
+//        let size = 1_000_000_usize;
+//        let moves = 10_000_000_usize;
+//        circle.expand_to(size);
+//        circle.do_moves(moves, false);
+//        let picked: Vec<u32> = circle.pick_up_after_1();
+//        assert_eq!(934001, picked[0]);
+//        assert_eq!(159792, picked[1]);
+//        let answer: u64 = (picked[0] as u64) * (picked[1] as u64);
+//        assert_eq!(149245887792, answer);
+//    }
 }
