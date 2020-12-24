@@ -7,7 +7,7 @@ use std::str::FromStr;
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 custom_error!{#[derive(PartialEq)]
-    pub FlipListError
+    pub FloorError
     InvalidChar{ch: char} = "invalid tile character '{ch}'",
     InvalidDir{dir: String} = "invalid tile direction '{dir}'",
     Empty = "tile is empty",
@@ -34,7 +34,7 @@ impl FromStr for Pos {
             "nw" => Ok(Self::NW),
             "sw" => Ok(Self::SW),
             "ne" => Ok(Self::NE),
-            _ => return Err(FlipListError::InvalidDir { dir: dir.to_string() }.into()),
+            _ => return Err(FloorError::InvalidDir { dir: dir.to_string() }.into()),
         }
     }
 }
@@ -78,7 +78,7 @@ impl FromStr for Tile {
                 'n' | 's' => {
                     if let Some(ch0) = ns {
                         let dir = format!("{}{}", ch0, ch);
-                        return Err(FlipListError::InvalidDir { dir }.into());
+                        return Err(FloorError::InvalidDir { dir }.into());
                     } else {
                         ns = Some(ch);
                     }
@@ -93,11 +93,11 @@ impl FromStr for Tile {
                     let dir: Pos = dir.parse()?;
                     dirs.push(dir);
                 },
-                _ => return Err(FlipListError::InvalidChar { ch }.into()),
+                _ => return Err(FloorError::InvalidChar { ch }.into()),
             }
         }
         if dirs.is_empty() {
-            return Err(FlipListError::Empty.into());
+            return Err(FloorError::Empty.into());
         }
         let pos = Pos::sum(&dirs);
         Ok(Self { dirs, pos })
@@ -105,11 +105,11 @@ impl FromStr for Tile {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct FlipList {
+pub struct Floor {
     tiles: Vec<Tile>,
 }
 
-impl fmt::Display for FlipList {
+impl fmt::Display for Floor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
         for tile in &self.tiles {
@@ -119,14 +119,14 @@ impl fmt::Display for FlipList {
     }
 }
 
-impl FlipList {
+impl Floor {
     /// Construct by reading tiles from file at `path`.
     ///
     /// # Errors
     ///
     /// Returns `Err` if the input file cannot be opened, or if the file
     /// has an invalid format.
-    pub fn read_from_file(path: &str) -> Result<FlipList> {
+    pub fn read_from_file(path: &str) -> Result<Floor> {
         let s: String = fs::read_to_string(path)?;
         let tiles: Vec<Tile> = s
             .trim()
@@ -197,11 +197,11 @@ mod tests {
 
     #[test]
     fn test_read_from_file() {
-        let flip_list = FlipList::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(20, flip_list.tiles.len());
+        let floor = Floor::read_from_file("input/example1.txt").unwrap();
+        assert_eq!(20, floor.tiles.len());
         assert_eq!(vec![
             Pos::SE, Pos::SE, Pos::NW, Pos::NE, Pos::NE,
             Pos::NE, Pos::W, Pos::SE, Pos::E, Pos::SW,
-        ], &flip_list.tiles[0].dirs[0..10]);
+        ], &floor.tiles[0].dirs[0..10]);
     }
 }

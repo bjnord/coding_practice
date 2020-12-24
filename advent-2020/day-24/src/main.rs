@@ -1,4 +1,4 @@
-use day_24::FlipList;
+use day_24::Floor;
 use std::time::Instant;
 
 fn main() {
@@ -9,7 +9,7 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let flip_list = FlipList::read_from_file("input/input.txt").unwrap();
+    let floor = Floor::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     //...
     let run_time = start.elapsed() - gen_time;
