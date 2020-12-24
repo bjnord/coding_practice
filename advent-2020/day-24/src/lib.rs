@@ -65,6 +65,23 @@ impl Pos {
             i64::try_from(offset + self.x).unwrap()
     }
 
+    /// Should this position be clipped for the given `dim`?
+    //
+    // A full set of `(-y..=y, -x..=x)` positions produces a parallelogram,
+    // which is usually not what we want. By clipping off two corners we get
+    // a hexagon.
+    #[must_use]
+    pub fn clip(&self, dim: usize) -> bool {
+        let idim = i32::try_from(dim).unwrap();
+        if self.y < 0 && self.x < 0 && self.y + self.x < -idim {
+            return true;
+        }
+        if self.y > 0 && self.x > 0 && self.y + self.x > idim {
+            return true;
+        }
+        false
+    }
+
     /// Return sum of a list of position deltas.
     #[must_use]
     pub fn sum(poses: &[Self]) -> Self {
@@ -282,12 +299,10 @@ impl Floor {
         let dx = dy;
         for y in -dy..=dy {
             for x in -dx..=dx {
-                // without these two lines you get a parallelogram;
-                // we want a bi-symmetrical "hex slice"
-                if y == -dy && x == -dx { continue; }
-                if y == dy && x == dx { continue; }
                 let pos = Pos::new(y, x);
-                self.colors.insert(pos.key(), TileColor::White);
+                if !pos.clip(self.dim) {
+                    self.colors.insert(pos.key(), TileColor::White);
+                }
             }
         }
     }
@@ -510,10 +525,30 @@ mod tests {
         assert_eq!(Some(TileColor::White), floor.color_at(Pos::new(1, 2)));
         assert_eq!(Some(TileColor::White), floor.color_at(Pos::new(3, 0)));
         //
-        // FIXME more paralellogram trimming needed
         assert_eq!(None, floor.color_at(Pos::new(-3, -1)));
         assert_eq!(None, floor.color_at(Pos::new(-1, -3)));
         assert_eq!(None, floor.color_at(Pos::new(1, 3)));
         assert_eq!(None, floor.color_at(Pos::new(3, 1)));
+    }
+
+    #[test]
+    fn test_pos_clip() {
+        assert_eq!(false, Pos::new(-3, 0).clip(3));
+        assert_eq!(false, Pos::new(-3, 3).clip(3));
+        assert_eq!(false, Pos::new(-1, -2).clip(3));
+        assert_eq!(false, Pos::new(0, -3).clip(3));
+        assert_eq!(false, Pos::new(0, 0).clip(3));
+        assert_eq!(false, Pos::new(0, 3).clip(3));
+        assert_eq!(false, Pos::new(1, 0).clip(3));
+        assert_eq!(false, Pos::new(1, 2).clip(3));
+        assert_eq!(false, Pos::new(3, -3).clip(3));
+        assert_eq!(false, Pos::new(3, 0).clip(3));
+        //
+        assert_eq!(true, Pos::new(-3, -1).clip(3));
+        assert_eq!(true, Pos::new(-2, -2).clip(3));
+        assert_eq!(true, Pos::new(-1, -3).clip(3));
+        assert_eq!(true, Pos::new(1, 3).clip(3));
+        assert_eq!(true, Pos::new(2, 2).clip(3));
+        assert_eq!(true, Pos::new(3, 1).clip(3));
     }
 }
