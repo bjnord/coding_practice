@@ -168,6 +168,7 @@ impl Tile {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Floor {
+    dim: usize,
     initial_tiles: Vec<Tile>,
     colors: HashMap<i64, TileColor>,
 }
@@ -175,9 +176,8 @@ pub struct Floor {
 impl fmt::Display for Floor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        let dim = self.dimension();
         // FIXME merge with duplicate code in fill() - make an iterator
-        let dy = i32::try_from(dim).unwrap();
+        let dy = i32::try_from(self.dim).unwrap();
         let dx = dy;
         for y in -dy..=dy {
             for _ in 0..=dy.abs() {
@@ -224,8 +224,22 @@ impl Floor {
             .split('\n')
             .map(str::parse)
             .collect::<Result<Vec<Tile>>>()?;
+        let dim = Floor::dimension(&initial_tiles);
         let colors: HashMap<i64, TileColor> = HashMap::new();
-        Ok(Self { initial_tiles, colors })
+        Ok(Self { dim, initial_tiles, colors })
+    }
+
+    // Returns the floor dimension (size), defined by the maximum
+    // absolute-value y or x coordinate seen when following any of the
+    // tile directions.
+    #[must_use]
+    fn dimension(initial_tiles: &[Tile]) -> usize {
+        initial_tiles
+            .iter()
+            .fold(0, |d, tile| {
+                let tile_maxes = tile.max_yx();
+                cmp::max(cmp::max(d, tile_maxes.0), tile_maxes.1)
+            })
     }
 
     /// Flip tiles found by following tile directions.
@@ -264,8 +278,7 @@ impl Floor {
     // Fill floor with white tiles, up to its calculated dimensions
     // (based on all tile directions).
     fn fill(&mut self) {
-        let dim = self.dimension();
-        let dy = i32::try_from(dim).unwrap();
+        let dy = i32::try_from(self.dim).unwrap();
         let dx = dy;
         for y in -dy..=dy {
             for x in -dx..=dx {
@@ -288,24 +301,11 @@ impl Floor {
             .count()
     }
 
-    /// Returns the floor dimension (size), defined by the maximum
-    /// absolute-value y or x coordinate seen when following any of the
-    /// tile directions.
-    #[must_use]
-    pub fn dimension(&self) -> usize {
-        self.initial_tiles
-            .iter()
-            .fold(0, |d, tile| {
-                let tile_maxes = tile.max_yx();
-                cmp::max(cmp::max(d, tile_maxes.0), tile_maxes.1)
-            })
-    }
-
 //    /// Do one round of tile-flipping, according to the puzzle description.
-//    pub fn flip_tiles(&mut self, dim: usize) {
+//    pub fn flip_tiles(&mut self) {
 //        let mut flip_keys: Vec<i64> = vec![];
 //        // FIXME merge with duplicate code in fill() - make an iterator
-//        let dim_y = i32::try_from(dim).unwrap();
+//        let dim_y = i32::try_from(self.dim).unwrap();
 //        let dim_x = dim_y;
 //        for y in -dim_y..=dim_y {
 //            for x in -dim_x..=dim_x {
@@ -416,6 +416,7 @@ mod tests {
     #[test]
     fn test_read_from_file() {
         let floor = Floor::read_from_file("input/example1.txt").unwrap();
+        assert_eq!(6, floor.dim);
         assert_eq!(20, floor.initial_tiles.len());
         assert_eq!(vec![
             Pos::SE, Pos::SE, Pos::NW, Pos::NE, Pos::NE,
@@ -431,16 +432,10 @@ mod tests {
     }
 
     #[test]
-    fn test_floor_dimension() {
-        let floor = Floor::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(6, floor.dimension());
-    }
-
-    #[test]
     fn test_floor_fill() {
         let lines = "esenee\nesew\nnwwswee\n".to_string();
         let mut floor = Floor::from_input(&lines).unwrap();
-        assert_eq!(3, floor.dimension());
+        assert_eq!(3, floor.dim);
         floor.fill();
         assert_eq!(4*2 + 5*2 + 6*2 + 7, floor.colors.len());
     }
@@ -471,14 +466,13 @@ mod tests {
 //        let mut floor = Floor::read_from_file("input/example1.txt").unwrap();
 //        floor.set_initial_tiles();
 //        assert_eq!(10, floor.n_black());
-//        let dim = floor.dimension();
 //        for _ in 1..=1 {
-//            floor.flip_tiles(dim);
+//            floor.flip_tiles();
 //        }
 //        eprintln!("Day 1\n\n{}\n", floor);
 //        assert_eq!(15, floor.n_black());
 //        for _ in 2..=2 {
-//            floor.flip_tiles(dim);
+//            floor.flip_tiles();
 //        }
 //        eprintln!("Day 2\n\n{}\n", floor);
 //        assert_eq!(12, floor.n_black());
@@ -491,8 +485,7 @@ mod tests {
 //        floor.set_initial_tiles();
 //        eprintln!("INITIAL\n\n{}\n", floor);
 //        assert_eq!(3, floor.n_black());
-//        let dim = floor.dimension();
-//        floor.flip_tiles(dim);
+//        floor.flip_tiles();
 //        eprintln!("MOVE 1\n\n{}\n", floor);
 //        assert_eq!(4, floor.n_black());
 //    }
@@ -501,7 +494,7 @@ mod tests {
     fn test_color_at() {
         let lines = "esenee\nesew\nnwwswee\n".to_string();
         let mut floor = Floor::from_input(&lines).unwrap();
-        assert_eq!(3, floor.dimension());
+        assert_eq!(3, floor.dim);
         floor.set_initial_tiles();
         eprintln!("INITIAL\n{}\n", floor);
         //
