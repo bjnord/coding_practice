@@ -197,18 +197,16 @@ impl fmt::Display for Floor {
         let dy = i32::try_from(self.dim).unwrap();
         let dx = dy;
         for y in -dy..=dy {
-            for _ in 0..=dy.abs() {
-                s += "    ";
+            for _ in 0..y.abs() {
+                s += "  ";
             }
             for x in -dx..=dx {
-                // without these two lines you get a parallelogram;
-                // we want a bi-symmetrical "hex slice"
-                if y == -dy && x == -dx { continue; }
-                if y == dy && x == dx { continue; }
-                let color_s = match self.color_at(Pos::new(y, x)) {
-                    Some(TileColor::Black) => "  ####  ",
-                    Some(TileColor::White) => "  ....  ",
-                    None                   => "        ",
+                let pos = Pos::new(y, x);
+                if pos.clip(self.dim) { continue; }
+                let color_s = match self.color_at(pos) {
+                    Some(TileColor::Black) => " ## ",
+                    Some(TileColor::White) => " .. ",
+                    None                   => "    ",
                 };
                 s += &color_s;
             }
@@ -511,7 +509,6 @@ mod tests {
         let mut floor = Floor::from_input(&lines).unwrap();
         assert_eq!(3, floor.dim);
         floor.set_initial_tiles();
-        eprintln!("INITIAL\n{}\n", floor);
         //
         assert_eq!(Some(TileColor::Black), floor.color_at(Pos::new(0, 0)));
         assert_eq!(Some(TileColor::Black), floor.color_at(Pos::new(1, 0)));
