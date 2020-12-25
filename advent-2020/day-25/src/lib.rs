@@ -26,6 +26,11 @@ impl fmt::Display for Device {
 }
 
 impl Device {
+    /// Return the device's public key.
+    pub fn public_key(&self) -> u64 {
+        self.public_key
+    }
+
     /// Construct by reading devices from file at `path`.
     ///
     /// # Errors
@@ -50,6 +55,16 @@ impl Device {
         }
     }
 
+    /// Determine the encryption key.
+    pub fn encryption_key(&mut self, other_public_key: u64) -> u64 {
+        let subject = other_public_key;
+        let mut value = 1_u64;
+        for _ in 1..=self.loop_size {
+            Device::transform(&mut value, subject);
+        }
+        value
+    }
+
     fn transform(value: &mut u64, subject: u64) {
         *value *= subject;
         *value = value.rem_euclid(20201227);
@@ -64,7 +79,7 @@ mod tests {
     fn test_read_from_file() {
         let devices = Device::read_from_file("input/example1.txt").unwrap();
         assert_eq!(2, devices.len());
-        assert_eq!(5764801, devices[0].public_key);
+        assert_eq!(5764801, devices[0].public_key());
     }
 
     #[test]
@@ -90,5 +105,16 @@ mod tests {
         assert_eq!(8, devices[0].loop_size);
         devices[1].set_loop_size();
         assert_eq!(11, devices[1].loop_size);
+    }
+
+    #[test]
+    fn test_encryption_key() {
+        let mut devices = Device::read_from_file("input/example1.txt").unwrap();
+        devices[0].set_loop_size();
+        let public_key_1 = devices[1].public_key();
+        assert_eq!(14897079, devices[0].encryption_key(public_key_1));
+        devices[1].set_loop_size();
+        let public_key_0 = devices[0].public_key();
+        assert_eq!(14897079, devices[1].encryption_key(public_key_0));
     }
 }
