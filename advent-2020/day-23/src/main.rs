@@ -26,11 +26,13 @@ fn part2() {
     let mut circle: Circle = INPUT.parse().unwrap();
     circle.expand_to(1_000_000);
     let gen_time = start.elapsed();
-    circle.do_moves(10_000_000, false);
-    let picked: Vec<u32> = circle.pick_up_after_1();
-    let answer: u64 = (picked[0] as u64) * (picked[1] as u64);
+    // TOO SLOW
+    //circle.do_moves(10_000_000, false);
+    //let picked: Vec<u32> = circle.pick_up_after_1();
+    //let answer: u64 = (picked[0] as u64) * (picked[1] as u64);
+    let answer: u64 = 0;
     let run_time = start.elapsed() - gen_time;
-    println!("Day 23 - Part 2 : {} <=> _ expected", answer);
+    println!("Day 23 - Part 2 : {} <=> 170836011000 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
