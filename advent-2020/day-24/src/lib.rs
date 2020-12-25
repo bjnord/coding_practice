@@ -98,6 +98,35 @@ impl Pos {
             Self { y: cmp::max(acc.y, pos.y), x: cmp::max(acc.x, pos.x) }
         })
     }
+
+    fn increment(&mut self, idim: i32) {
+        self.x += 1;
+        if self.x > idim {
+            self.x = -idim;
+            self.y += 1;
+        }
+    }
+}
+
+struct PosIter {
+    dim: usize,
+    pos: Pos,
+}
+
+impl Iterator for PosIter {
+    type Item = Pos;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let idim = i32::try_from(self.dim).unwrap();
+        // first skip past clipped tiles
+        while self.pos.y <= idim && self.pos.clip(self.dim) {
+            self.pos.increment(idim);
+        }
+        // then find next tile
+        let ret_pos = if self.pos.y > idim { None } else { Some(self.pos) };
+        self.pos.increment(idim);
+        ret_pos
+    }
 }
 
 struct NonClipPosIter {
@@ -111,11 +140,7 @@ impl Iterator for NonClipPosIter {
     fn next(&mut self) -> Option<Self::Item> {
         let idim = i32::try_from(self.dim).unwrap();
         let ret_pos = if self.pos.y > idim { None } else { Some(self.pos) };
-        self.pos.x += 1;
-        if self.pos.x > idim {
-            self.pos.x = -idim;
-            self.pos.y += 1;
-        }
+        self.pos.increment(idim);
         ret_pos
     }
 }
@@ -277,6 +302,17 @@ impl Floor {
             })
     }
 
+    /// Return iterator which returns all positions for a hex of the given
+    /// `dim`.
+    #[must_use]
+    fn iter(&self, dim: usize) -> PosIter {
+        let idim = i32::try_from(dim).unwrap();
+        PosIter {
+            dim,
+            pos: Pos::new(-idim, -idim),
+        }
+    }
+
     // Return non-clipping iterator which returns all positions for a hex
     // parallelogram of the given `dim`.
     #[must_use]
@@ -324,15 +360,8 @@ impl Floor {
     // Fill floor with white tiles, up to its calculated dimensions
     // (based on all tile directions).
     fn fill(&mut self) {
-        let dy = i32::try_from(self.dim).unwrap();
-        let dx = dy;
-        for y in -dy..=dy {
-            for x in -dx..=dx {
-                let pos = Pos::new(y, x);
-                if !pos.clip(self.dim) {
-                    self.colors.insert(pos.key(), TileColor::White);
-                }
-            }
+        for pos in self.iter(self.dim) {
+            self.colors.insert(pos.key(), TileColor::White);
         }
     }
 
