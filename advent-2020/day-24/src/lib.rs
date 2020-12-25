@@ -392,6 +392,17 @@ impl Floor {
             .count()
     }
 
+    /// Expand floor with white tiles, increasing its dimension by one.
+    fn expand(&mut self) {
+        self.dim += 1;
+        self.idim += 1;
+        for pos in self.iter() {
+            if pos.border(self.idim) {
+                self.colors.insert(pos.key(), TileColor::White);
+            }
+        }
+    }
+
 //    /// Do one round of tile-flipping, according to the puzzle description.
 //    pub fn flip_tiles(&mut self) {
 //        let mut flip_keys: Vec<i64> = vec![];
@@ -705,5 +716,21 @@ mod tests {
         assert_eq!(None, i.next());
         assert_eq!(None, i.next());
         assert_eq!(None, i.next());
+    }
+
+    #[test]
+    fn test_expand() {
+        let lines = "esenee\nesew\nnwwswee\n".to_string();
+        let mut floor = Floor::from_input(&lines).unwrap();
+        floor.set_initial_tiles();
+        assert_eq!(3, floor.idim);
+        assert_eq!(3, floor.dim);
+        assert_eq!(3, floor.n_black());
+        assert_eq!(4*2 + 5*2 + 6*2 + 7, floor.colors.len());
+        floor.expand();
+        assert_eq!(4, floor.idim);
+        assert_eq!(4, floor.dim);
+        assert_eq!(3, floor.n_black());
+        assert_eq!(5*2 + 6*2 + 7*2 + 8*2 + 9, floor.colors.len());
     }
 }
