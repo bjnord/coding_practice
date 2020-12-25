@@ -9,12 +9,13 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    let devices = Device::read_from_file("input/input.txt").unwrap();
-    for device in devices {
-        eprintln!("{}", device);
-    }
+    let mut devices = Device::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
-    //...
+    for (i, device) in devices.iter_mut().enumerate() {
+        let label = if i == 0 { "Card" } else { "Door" };
+        device.set_loop_size();
+        eprintln!("{}:\n{}", label, device);
+    }
     let run_time = start.elapsed() - gen_time;
     println!("Day 25 - Part 1 : {} <=> _ expected", 0);
     println!("    generator: {:?}", gen_time);

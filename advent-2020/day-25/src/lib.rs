@@ -7,6 +7,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Device {
     public_key: u64,
+    loop_size: usize,
 }
 
 impl FromStr for Device {
@@ -14,13 +15,13 @@ impl FromStr for Device {
 
     fn from_str(input: &str) -> Result<Self> {
         let public_key: u64 = input.parse()?;
-        Ok(Self { public_key })
+        Ok(Self { public_key, loop_size: 0 })
     }
 }
 
 impl fmt::Display for Device {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Public Key {}", self.public_key)
+        write!(f, "Public Key {}\nLoop Size {}", self.public_key, self.loop_size)
     }
 }
 
@@ -34,6 +35,20 @@ impl Device {
     pub fn read_from_file(path: &str) -> Result<Vec<Device>> {
         let s: String = fs::read_to_string(path)?;
         s.lines().map(str::parse).collect()
+    }
+
+    /// Determine the device's loop size.
+    pub fn set_loop_size(&mut self) {
+        let subject = 7_u64;
+        let mut value = 1_u64;
+        for loop_size in 1..usize::MAX {
+            value *= subject;
+            value = value.rem_euclid(20201227);
+            if value == self.public_key {
+                self.loop_size = loop_size;
+                break;
+            }
+        }
     }
 }
 
@@ -62,5 +77,14 @@ mod tests {
             Err(e) => assert!(e.to_string().contains("invalid digit")),
             Ok(_)  => panic!("test did not fail"),
         }
+    }
+
+    #[test]
+    fn test_set_loop_size() {
+        let mut devices = Device::read_from_file("input/example1.txt").unwrap();
+        devices[0].set_loop_size();
+        assert_eq!(8, devices[0].loop_size);
+        devices[1].set_loop_size();
+        assert_eq!(11, devices[1].loop_size);
     }
 }
