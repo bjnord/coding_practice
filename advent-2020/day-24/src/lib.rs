@@ -106,6 +106,10 @@ impl Pos {
             self.y += 1;
         }
     }
+
+    fn overflow(&mut self, idim: i32) -> bool {
+        self.y > idim
+    }
 }
 
 struct PosIter {
@@ -118,11 +122,11 @@ impl Iterator for PosIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         // first skip past clipped tiles
-        while self.pos.y <= self.idim && self.pos.clip(self.idim) {
+        while !self.pos.overflow(self.idim) && self.pos.clip(self.idim) {
             self.pos.increment(self.idim);
         }
         // then find next tile
-        let ret_pos = if self.pos.y > self.idim { None } else { Some(self.pos) };
+        let ret_pos = if self.pos.overflow(self.idim) { None } else { Some(self.pos) };
         self.pos.increment(self.idim);
         ret_pos
     }
@@ -137,7 +141,7 @@ impl Iterator for NonClipPosIter {
     type Item = Pos;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let ret_pos = if self.pos.y > self.idim { None } else { Some(self.pos) };
+        let ret_pos = if self.pos.overflow(self.idim) { None } else { Some(self.pos) };
         self.pos.increment(self.idim);
         ret_pos
     }
