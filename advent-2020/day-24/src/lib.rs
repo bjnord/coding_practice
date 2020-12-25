@@ -100,6 +100,26 @@ impl Pos {
     }
 }
 
+struct NonClipPosIter {
+    dim: usize,
+    pos: Pos,
+}
+
+impl Iterator for NonClipPosIter {
+    type Item = Pos;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let idim = i32::try_from(self.dim).unwrap();
+        let ret_pos = if self.pos.y > idim { None } else { Some(self.pos) };
+        self.pos.x += 1;
+        if self.pos.x > idim {
+            self.pos.x = -idim;
+            self.pos.y += 1;
+        }
+        ret_pos
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum TileColor {
     White,
@@ -193,16 +213,14 @@ pub struct Floor {
 impl fmt::Display for Floor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        // FIXME merge with duplicate code in fill() - make an iterator
-        let dy = i32::try_from(self.dim).unwrap();
-        let dx = dy;
-        for y in -dy..=dy {
-            for _ in 0..y.abs() {
-                s += "  ";
+        let idim = i32::try_from(self.dim).unwrap();
+        for pos in self.nonclip_iter(self.dim) {
+            if pos.x == -idim {
+                for _ in 0..pos.y.abs() {
+                    s += "  ";
+                }
             }
-            for x in -dx..=dx {
-                let pos = Pos::new(y, x);
-                if pos.clip(self.dim) { continue; }
+            if !pos.clip(self.dim) {
                 let color_s = match self.color_at(pos) {
                     Some(TileColor::Black) => " ## ",
                     Some(TileColor::White) => " .. ",
@@ -210,7 +228,9 @@ impl fmt::Display for Floor {
                 };
                 s += &color_s;
             }
-            s += "\n\n";
+            if pos.x == idim {
+                s += "\n\n";
+            }
         }
         write!(f, "{}", s)
     }
@@ -255,6 +275,17 @@ impl Floor {
                 let tile_maxes = tile.max_yx();
                 cmp::max(cmp::max(d, tile_maxes.0), tile_maxes.1)
             })
+    }
+
+    // Return non-clipping iterator which returns all positions for a hex
+    // parallelogram of the given `dim`.
+    #[must_use]
+    fn nonclip_iter(&self, dim: usize) -> NonClipPosIter {
+        let idim = i32::try_from(dim).unwrap();
+        NonClipPosIter {
+            dim,
+            pos: Pos::new(-idim, -idim),
+        }
     }
 
     /// Flip tiles found by following tile directions.
@@ -547,5 +578,26 @@ mod tests {
         assert_eq!(true, Pos::new(1, 3).clip(3));
         assert_eq!(true, Pos::new(2, 2).clip(3));
         assert_eq!(true, Pos::new(3, 1).clip(3));
+    }
+
+    #[test]
+    fn test_non_clip_pos_iter() {
+        let lines = "esew\n".to_string();
+        let floor = Floor::from_input(&lines).unwrap();
+        assert_eq!(1, floor.dim);
+        let mut i: NonClipPosIter = floor.nonclip_iter(floor.dim);
+        assert_eq!(Some(Pos::new(-1, -1)), i.next());
+        assert_eq!(Some(Pos::new(-1, 0)), i.next());
+        assert_eq!(Some(Pos::new(-1, 1)), i.next());
+        assert_eq!(Some(Pos::new(0, -1)), i.next());
+        assert_eq!(Some(Pos::new(0, 0)), i.next());
+        assert_eq!(Some(Pos::new(0, 1)), i.next());
+        assert_eq!(Some(Pos::new(1, -1)), i.next());
+        assert_eq!(Some(Pos::new(1, 0)), i.next());
+        assert_eq!(Some(Pos::new(1, 1)), i.next());
+        assert_eq!(None, i.next());
+        assert_eq!(None, i.next());
+        assert_eq!(None, i.next());
+        assert_eq!(None, i.next());
     }
 }
