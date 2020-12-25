@@ -65,14 +65,13 @@ impl Pos {
             i64::try_from(offset + self.x).unwrap()
     }
 
-    /// Should this position be clipped for the given `dim`?
+    /// Should this position be clipped (given floor dimension `idim`)?
     //
     // A full set of `(-y..=y, -x..=x)` positions produces a parallelogram,
     // which is usually not what we want. By clipping off two corners we get
     // a hexagon.
     #[must_use]
-    pub fn clip(&self, dim: usize) -> bool {
-        let idim = i32::try_from(dim).unwrap();
+    pub fn clip(&self, idim: i32) -> bool {
         if self.y < 0 && self.x < 0 && self.y + self.x < -idim {
             return true;
         }
@@ -99,6 +98,7 @@ impl Pos {
         })
     }
 
+    // Row-first increment (used by iterators).
     fn increment(&mut self, idim: i32) {
         self.x += 1;
         if self.x > idim {
@@ -109,7 +109,7 @@ impl Pos {
 }
 
 struct PosIter {
-    dim: usize,
+    idim: i32,
     pos: Pos,
 }
 
@@ -117,20 +117,19 @@ impl Iterator for PosIter {
     type Item = Pos;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let idim = i32::try_from(self.dim).unwrap();
         // first skip past clipped tiles
-        while self.pos.y <= idim && self.pos.clip(self.dim) {
-            self.pos.increment(idim);
+        while self.pos.y <= self.idim && self.pos.clip(self.idim) {
+            self.pos.increment(self.idim);
         }
         // then find next tile
-        let ret_pos = if self.pos.y > idim { None } else { Some(self.pos) };
-        self.pos.increment(idim);
+        let ret_pos = if self.pos.y > self.idim { None } else { Some(self.pos) };
+        self.pos.increment(self.idim);
         ret_pos
     }
 }
 
 struct NonClipPosIter {
-    dim: usize,
+    idim: i32,
     pos: Pos,
 }
 
@@ -138,9 +137,8 @@ impl Iterator for NonClipPosIter {
     type Item = Pos;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let idim = i32::try_from(self.dim).unwrap();
-        let ret_pos = if self.pos.y > idim { None } else { Some(self.pos) };
-        self.pos.increment(idim);
+        let ret_pos = if self.pos.y > self.idim { None } else { Some(self.pos) };
+        self.pos.increment(self.idim);
         ret_pos
     }
 }
@@ -231,6 +229,7 @@ impl Tile {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Floor {
     dim: usize,
+    idim: i32,
     initial_tiles: Vec<Tile>,
     colors: HashMap<i64, TileColor>,
 }
@@ -238,14 +237,13 @@ pub struct Floor {
 impl fmt::Display for Floor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        let idim = i32::try_from(self.dim).unwrap();
         for pos in self.nonclip_iter(self.dim) {
-            if pos.x == -idim {
+            if pos.x == -self.idim {
                 for _ in 0..pos.y.abs() {
                     s += "  ";
                 }
             }
-            if !pos.clip(self.dim) {
+            if !pos.clip(self.idim) {
                 let color_s = match self.color_at(pos) {
                     Some(TileColor::Black) => " ## ",
                     Some(TileColor::White) => " .. ",
@@ -253,7 +251,7 @@ impl fmt::Display for Floor {
                 };
                 s += &color_s;
             }
-            if pos.x == idim {
+            if pos.x == self.idim {
                 s += "\n\n";
             }
         }
@@ -285,8 +283,9 @@ impl Floor {
             .map(str::parse)
             .collect::<Result<Vec<Tile>>>()?;
         let dim = Floor::dimension(&initial_tiles);
+        let idim = i32::try_from(dim).unwrap();
         let colors: HashMap<i64, TileColor> = HashMap::new();
-        Ok(Self { dim, initial_tiles, colors })
+        Ok(Self { dim, idim, initial_tiles, colors })
     }
 
     // Returns the floor dimension (size), defined by the maximum
@@ -308,7 +307,7 @@ impl Floor {
     fn iter(&self, dim: usize) -> PosIter {
         let idim = i32::try_from(dim).unwrap();
         PosIter {
-            dim,
+            idim,
             pos: Pos::new(-idim, -idim),
         }
     }
@@ -319,7 +318,7 @@ impl Floor {
     fn nonclip_iter(&self, dim: usize) -> NonClipPosIter {
         let idim = i32::try_from(dim).unwrap();
         NonClipPosIter {
-            dim,
+            idim,
             pos: Pos::new(-idim, -idim),
         }
     }
