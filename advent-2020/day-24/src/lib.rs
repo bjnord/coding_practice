@@ -282,6 +282,11 @@ impl fmt::Display for Floor {
 }
 
 impl Floor {
+    /// Return current floor dimension.
+    pub fn dimension(&self) -> usize {
+        self.dim
+    }
+
     /// Construct by reading tiles from file at `path`.
     ///
     /// # Errors
@@ -304,7 +309,7 @@ impl Floor {
             .split('\n')
             .map(str::parse)
             .collect::<Result<Vec<Tile>>>()?;
-        let dim = Floor::dimension(&initial_tiles);
+        let dim = Floor::calc_dimension(&initial_tiles);
         let idim = i32::try_from(dim).unwrap();
         let colors: HashMap<i64, TileColor> = HashMap::new();
         Ok(Self { dim, idim, initial_tiles, colors })
@@ -314,7 +319,7 @@ impl Floor {
     // absolute-value y or x coordinate seen when following any of the
     // tile directions.
     #[must_use]
-    fn dimension(initial_tiles: &[Tile]) -> usize {
+    fn calc_dimension(initial_tiles: &[Tile]) -> usize {
         initial_tiles
             .iter()
             .fold(0, |d, tile| {
@@ -403,55 +408,46 @@ impl Floor {
         }
     }
 
-//    /// Do one round of tile-flipping, according to the puzzle description.
-//    pub fn flip_tiles(&mut self) {
-//        let mut flip_keys: Vec<i64> = vec![];
-//        // FIXME merge with duplicate code in fill() - make an iterator
-//        let dim_y = i32::try_from(self.dim).unwrap();
-//        let dim_x = dim_y;
-//        for y in -dim_y..=dim_y {
-//            for x in -dim_x..=dim_x {
-//                if y == 0 && x == 0 { continue; }
-//                // without these two lines you get a parallelogram;
-//                // we only want our 6 hexagonal neighbors
-//                if y == -dim_y && x == -dim_x { continue; }
-//                if y == dim_y && x == dim_x { continue; }
-//                let pos = Pos::new(y, x);
-//                let key = pos.key();
-//                //eprintln!("...trying K{} for ({}, {})", key, pos.y, pos.x);
-//                let color = self.colors[&key];
-//                let n_black = self.n_neighbor_black(pos);
-//                //eprintln!("{:?} at ({}, {}) (K{}) found {} black neighbors", color, y, x, key, n_black);
-//                match (color, n_black) {
-//                    (TileColor::Black, n) if n == 0 || n > 2 => flip_keys.push(key),
-//                    (TileColor::White, n) if n == 2          => flip_keys.push(key),
-//                    _                                        => { },
-//                }
-//            }
-//        }
-//        for key in flip_keys {
-//            //eprintln!("flip K{}", key);
-//            self.colors.insert(key, TileColor::opposite(self.colors[&key]));
-//        }
-//    }
-//
-//    fn n_neighbor_black(&self, pos: Pos) -> usize {
-//        let mut neighbors: Vec<TileColor> = vec![];
-//        for dy in -1..=1 {
-//            for dx in -1..=1 {
-//                if dy == 0 && dx == 0 { continue; }
-//                // without these two lines you get a parallelogram;
-//                // we only want our 6 hexagonal neighbors
-//                if dy == -1 && dx == -1 { continue; }
-//                if dy == 1 && dx == 1 { continue; }
-//                let dpos = Pos::new(y + dy, x + dx);
-//                if let Some(color) = self.colors.get(&dpos) {
-//                    neighbors.push(*color);
-//                }
-//            }
-//        }
-//        neighbors.iter().filter(|&c| *c == TileColor::Black).count()
-//    }
+    /// Do one round of tile-flipping, according to the puzzle description.
+    /// This expands the dimension of the floor by one.
+    pub fn flip_tiles(&mut self) {
+        self.expand();
+        let mut flip_keys: Vec<i64> = vec![];
+        for pos in self.iter() {
+            let key = pos.key();
+            //eprintln!("...trying K{} for ({}, {})", key, pos.y, pos.x);
+            let color = self.colors[&key];
+            let n_black = self.n_neighbor_black(pos);
+            //eprintln!("{:?} at ({}, {}) (K{}) found {} black neighbors", color, y, x, key, n_black);
+            match (color, n_black) {
+                (TileColor::Black, n) if n == 0 || n > 2 => flip_keys.push(key),
+                (TileColor::White, n) if n == 2          => flip_keys.push(key),
+                _                                        => { },
+            }
+        }
+        for key in flip_keys {
+            //eprintln!("flip K{}", key);
+            self.colors.insert(key, TileColor::opposite(self.colors[&key]));
+        }
+    }
+
+    fn n_neighbor_black(&self, pos: Pos) -> usize {
+        let mut neighbors: Vec<TileColor> = vec![];
+        for dy in -1..=1 {
+            for dx in -1..=1 {
+                if dy == 0 && dx == 0 { continue; }
+                // without these two lines you get a parallelogram;
+                // we only want our 6 hexagonal neighbors
+                if dy == -1 && dx == -1 { continue; }
+                if dy == 1 && dx == 1 { continue; }
+                let dpos = Pos::new(pos.y + dy, pos.x + dx);
+                if let Some(color) = self.color_at(dpos) {
+                    neighbors.push(color);
+                }
+            }
+        }
+        neighbors.iter().filter(|&c| *c == TileColor::Black).count()
+    }
 }
 
 #[cfg(test)]
@@ -518,7 +514,7 @@ mod tests {
     #[test]
     fn test_read_from_file() {
         let floor = Floor::read_from_file("input/example1.txt").unwrap();
-        assert_eq!(6, floor.dim);
+        assert_eq!(6, floor.dimension());
         assert_eq!(20, floor.initial_tiles.len());
         assert_eq!(vec![
             Pos::SE, Pos::SE, Pos::NW, Pos::NE, Pos::NE,
@@ -537,7 +533,7 @@ mod tests {
     fn test_floor_fill() {
         let lines = "esenee\nesew\nnwwswee\n".to_string();
         let mut floor = Floor::from_input(&lines).unwrap();
-        assert_eq!(3, floor.dim);
+        assert_eq!(3, floor.dimension());
         floor.fill();
         assert_eq!(4*2 + 5*2 + 6*2 + 7, floor.colors.len());
     }
@@ -563,40 +559,63 @@ mod tests {
     // Day 90: 1844
     // Day 100: 2208
     //
-//    #[test]
-//    fn test_flip_tiles() {
-//        let mut floor = Floor::read_from_file("input/example1.txt").unwrap();
-//        floor.set_initial_tiles();
-//        assert_eq!(10, floor.n_black());
-//        for _ in 1..=1 {
+    #[test]
+    fn test_flip_tiles() {
+        let mut floor = Floor::read_from_file("input/example1.txt").unwrap();
+        floor.set_initial_tiles();
+        assert_eq!(10, floor.n_black());
+        for _ in 1..=1 {
+            floor.flip_tiles();
+        }
+        eprintln!("Day 1\n\n{}\n", floor);
+        assert_eq!(15, floor.n_black());
+        for _ in 2..=3 {
+            floor.flip_tiles();
+        }
+        eprintln!("Day 3\n\n{}\n", floor);
+        assert_eq!(25, floor.n_black());
+        for _ in 4..=10 {
+            floor.flip_tiles();
+        }
+        eprintln!("Day 10\n\n{}\n", floor);
+        assert_eq!(37, floor.n_black());
+        for _ in 11..=30 {
+            floor.flip_tiles();
+        }
+        eprintln!("Day 30\n\n{}\n", floor);
+        assert_eq!(259, floor.n_black());
+
+// This is a bit slow:
+//        for _ in 31..=100 {
 //            floor.flip_tiles();
 //        }
-//        eprintln!("Day 1\n\n{}\n", floor);
-//        assert_eq!(15, floor.n_black());
-//        for _ in 2..=2 {
-//            floor.flip_tiles();
-//        }
-//        eprintln!("Day 2\n\n{}\n", floor);
-//        assert_eq!(12, floor.n_black());
-//    }
-//
-//    #[test]
-//    fn test_flip_tiles_small() {
-//        let lines = "esenee\nesew\nnwwswee\n".to_string();
-//        let mut floor = Floor::from_input(&lines).unwrap();
-//        floor.set_initial_tiles();
-//        eprintln!("INITIAL\n\n{}\n", floor);
-//        assert_eq!(3, floor.n_black());
-//        floor.flip_tiles();
-//        eprintln!("MOVE 1\n\n{}\n", floor);
-//        assert_eq!(4, floor.n_black());
-//    }
+//        eprintln!("Day 100\n\n{}\n", floor);
+//        assert_eq!(2208, floor.n_black());
+    }
+
+    #[test]
+    fn test_flip_tiles_small() {
+        let lines = "esenee\nesew\nnwwswee\n".to_string();
+        let mut floor = Floor::from_input(&lines).unwrap();
+        floor.set_initial_tiles();
+        eprintln!("INITIAL\n\n{}\n", floor);
+        assert_eq!(3, floor.dimension());
+        assert_eq!(3, floor.n_black());
+        floor.flip_tiles();
+        eprintln!("MOVE 1\n\n{}\n", floor);
+        assert_eq!(4, floor.dimension());
+        assert_eq!(4, floor.n_black());
+        floor.flip_tiles();
+        eprintln!("MOVE 2\n\n{}\n", floor);
+        assert_eq!(5, floor.dimension());
+        assert_eq!(6, floor.n_black());
+    }
 
     #[test]
     fn test_color_at() {
         let lines = "esenee\nesew\nnwwswee\n".to_string();
         let mut floor = Floor::from_input(&lines).unwrap();
-        assert_eq!(3, floor.dim);
+        assert_eq!(3, floor.dimension());
         floor.set_initial_tiles();
         //
         assert_eq!(Some(TileColor::Black), floor.color_at(Pos::new(0, 0)));
@@ -682,7 +701,7 @@ mod tests {
     fn test_non_clip_pos_iter() {
         let lines = "esew\n".to_string();
         let floor = Floor::from_input(&lines).unwrap();
-        assert_eq!(1, floor.dim);
+        assert_eq!(1, floor.dimension());
         let mut i: NonClipPosIter = floor.nonclip_iter();
         assert_eq!(Some(Pos::new(-1, -1)), i.next());
         assert_eq!(Some(Pos::new(-1, 0)), i.next());
@@ -703,7 +722,7 @@ mod tests {
     fn test_pos_iter() {
         let lines = "esew\n".to_string();
         let floor = Floor::from_input(&lines).unwrap();
-        assert_eq!(1, floor.dim);
+        assert_eq!(1, floor.dimension());
         let mut i: PosIter = floor.iter();
         assert_eq!(Some(Pos::new(-1, 0)), i.next());
         assert_eq!(Some(Pos::new(-1, 1)), i.next());
@@ -723,13 +742,11 @@ mod tests {
         let lines = "esenee\nesew\nnwwswee\n".to_string();
         let mut floor = Floor::from_input(&lines).unwrap();
         floor.set_initial_tiles();
-        assert_eq!(3, floor.idim);
-        assert_eq!(3, floor.dim);
+        assert_eq!(3, floor.dimension());
         assert_eq!(3, floor.n_black());
         assert_eq!(4*2 + 5*2 + 6*2 + 7, floor.colors.len());
         floor.expand();
-        assert_eq!(4, floor.idim);
-        assert_eq!(4, floor.dim);
+        assert_eq!(4, floor.dimension());
         assert_eq!(3, floor.n_black());
         assert_eq!(5*2 + 6*2 + 7*2 + 8*2 + 9, floor.colors.len());
     }

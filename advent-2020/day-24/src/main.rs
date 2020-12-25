@@ -25,9 +25,12 @@ fn part2() {
     let mut floor = Floor::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     floor.set_initial_tiles();
-    //...
+    for _ in 1..=100 {
+        floor.flip_tiles();
+    }
+    let answer = floor.n_black();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 24 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 24 - Part 2 : {} <=> 4150 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
