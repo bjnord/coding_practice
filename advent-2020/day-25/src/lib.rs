@@ -42,13 +42,17 @@ impl Device {
         let subject = 7_u64;
         let mut value = 1_u64;
         for loop_size in 1..usize::MAX {
-            value *= subject;
-            value = value.rem_euclid(20201227);
+            Device::transform(&mut value, subject);
             if value == self.public_key {
                 self.loop_size = loop_size;
                 break;
             }
         }
+    }
+
+    fn transform(value: &mut u64, subject: u64) {
+        *value *= subject;
+        *value = value.rem_euclid(20201227);
     }
 }
 
