@@ -259,7 +259,7 @@ pub struct Floor {
 impl fmt::Display for Floor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        for pos in self.nonclip_iter(self.dim) {
+        for pos in self.nonclip_iter() {
             if pos.x == -self.idim {
                 for _ in 0..pos.y.abs() {
                     s += "  ";
@@ -323,25 +323,22 @@ impl Floor {
             })
     }
 
-    /// Return iterator which returns all positions for a hex of the given
-    /// `dim`.
+    /// Return iterator for all positions of the floor hex.
     #[must_use]
-    fn iter(&self, dim: usize) -> PosIter {
-        let idim = i32::try_from(dim).unwrap();
+    fn iter(&self) -> PosIter {
         PosIter {
-            idim,
-            pos: Pos::new(-idim, -idim),
+            idim: self.idim,
+            pos: Pos::new(-self.idim, -self.idim),
         }
     }
 
-    // Return non-clipping iterator which returns all positions for a hex
-    // parallelogram of the given `dim`.
+    // Return non-clipping iterator for all positions of the full floor hex
+    // parallelogram.
     #[must_use]
-    fn nonclip_iter(&self, dim: usize) -> NonClipPosIter {
-        let idim = i32::try_from(dim).unwrap();
+    fn nonclip_iter(&self) -> NonClipPosIter {
         NonClipPosIter {
-            idim,
-            pos: Pos::new(-idim, -idim),
+            idim: self.idim,
+            pos: Pos::new(-self.idim, -self.idim),
         }
     }
 
@@ -381,7 +378,7 @@ impl Floor {
     // Fill floor with white tiles, up to its calculated dimensions
     // (based on all tile directions).
     fn fill(&mut self) {
-        for pos in self.iter(self.dim) {
+        for pos in self.iter() {
             self.colors.insert(pos.key(), TileColor::White);
         }
     }
@@ -675,7 +672,7 @@ mod tests {
         let lines = "esew\n".to_string();
         let floor = Floor::from_input(&lines).unwrap();
         assert_eq!(1, floor.dim);
-        let mut i: NonClipPosIter = floor.nonclip_iter(floor.dim);
+        let mut i: NonClipPosIter = floor.nonclip_iter();
         assert_eq!(Some(Pos::new(-1, -1)), i.next());
         assert_eq!(Some(Pos::new(-1, 0)), i.next());
         assert_eq!(Some(Pos::new(-1, 1)), i.next());
@@ -685,6 +682,25 @@ mod tests {
         assert_eq!(Some(Pos::new(1, -1)), i.next());
         assert_eq!(Some(Pos::new(1, 0)), i.next());
         assert_eq!(Some(Pos::new(1, 1)), i.next());
+        assert_eq!(None, i.next());
+        assert_eq!(None, i.next());
+        assert_eq!(None, i.next());
+        assert_eq!(None, i.next());
+    }
+
+    #[test]
+    fn test_pos_iter() {
+        let lines = "esew\n".to_string();
+        let floor = Floor::from_input(&lines).unwrap();
+        assert_eq!(1, floor.dim);
+        let mut i: PosIter = floor.iter();
+        assert_eq!(Some(Pos::new(-1, 0)), i.next());
+        assert_eq!(Some(Pos::new(-1, 1)), i.next());
+        assert_eq!(Some(Pos::new(0, -1)), i.next());
+        assert_eq!(Some(Pos::new(0, 0)), i.next());
+        assert_eq!(Some(Pos::new(0, 1)), i.next());
+        assert_eq!(Some(Pos::new(1, -1)), i.next());
+        assert_eq!(Some(Pos::new(1, 0)), i.next());
         assert_eq!(None, i.next());
         assert_eq!(None, i.next());
         assert_eq!(None, i.next());
