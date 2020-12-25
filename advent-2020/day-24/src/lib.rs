@@ -81,6 +81,24 @@ impl Pos {
         false
     }
 
+    /// Is this a border position (given floor dimension `idim`)?
+    #[must_use]
+    pub fn border(&self, idim: i32) -> bool {
+        // top row
+        if self.y == -idim && self.x >= 0 && self.x <= idim { return true; }
+        // top-left row
+        if self.y + self.x == -idim && self.y >= -idim && self.x >= -idim { return true; }
+        // top-right row
+        if self.x == idim && self.y >= -idim && self.y <= 0 { return true; }
+        // bottom-left row
+        if self.x == -idim && self.y >= 0 && self.y <= idim { return true; }
+        // bottom-right row
+        if self.y + self.x == idim && self.y <= idim && self.x <= idim { return true; }
+        // bottom row
+        if self.y == idim && self.x >= -idim && self.x <= 0 { return true; }
+        false
+    }
+
     /// Return sum of a list of position deltas.
     #[must_use]
     pub fn sum(poses: &[Self]) -> Self {
@@ -610,6 +628,46 @@ mod tests {
         assert_eq!(true, Pos::new(1, 3).clip(3));
         assert_eq!(true, Pos::new(2, 2).clip(3));
         assert_eq!(true, Pos::new(3, 1).clip(3));
+    }
+
+    #[test]
+    fn test_pos_border() {
+        assert_eq!(true, Pos::new(-3, 0).border(3));
+        assert_eq!(true, Pos::new(-3, 1).border(3));
+        assert_eq!(true, Pos::new(-3, 3).border(3));
+        assert_eq!(true, Pos::new(-2, -1).border(3));
+        assert_eq!(true, Pos::new(-2, 3).border(3));
+        assert_eq!(true, Pos::new(-1, -2).border(3));
+        assert_eq!(true, Pos::new(0, -3).border(3));
+        assert_eq!(true, Pos::new(0, 3).border(3));
+        assert_eq!(true, Pos::new(1, 2).border(3));
+        assert_eq!(true, Pos::new(2, -3).border(3));
+        assert_eq!(true, Pos::new(2, 1).border(3));
+        assert_eq!(true, Pos::new(3, -3).border(3));
+        assert_eq!(true, Pos::new(3, -1).border(3));
+        assert_eq!(true, Pos::new(3, 0).border(3));
+
+        // inside
+        assert_eq!(false, Pos::new(-2, 0).border(3));
+        assert_eq!(false, Pos::new(-2, 2).border(3));
+        assert_eq!(false, Pos::new(0, -2).border(3));
+        assert_eq!(false, Pos::new(0, 0).border(3));
+        assert_eq!(false, Pos::new(0, 1).border(3));
+        assert_eq!(false, Pos::new(1, 0).border(3));
+        assert_eq!(false, Pos::new(2, -2).border(3));
+        assert_eq!(false, Pos::new(2, 0).border(3));
+
+        // outside
+        assert_eq!(false, Pos::new(-4, 1).border(3));
+        assert_eq!(false, Pos::new(-3, -1).border(3));
+        assert_eq!(false, Pos::new(-3, 4).border(3));
+        assert_eq!(false, Pos::new(-1, -3).border(3));
+        assert_eq!(false, Pos::new(-1, 4).border(3));
+        assert_eq!(false, Pos::new(1, -4).border(3));
+        assert_eq!(false, Pos::new(1, 3).border(3));
+        assert_eq!(false, Pos::new(3, -4).border(3));
+        assert_eq!(false, Pos::new(3, 1).border(3));
+        assert_eq!(false, Pos::new(4, -1).border(3));
     }
 
     #[test]
