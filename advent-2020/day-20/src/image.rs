@@ -1,5 +1,5 @@
 use custom_error::custom_error;
-use crate::{Pixel, Tile};
+use crate::{Orientation, Pixel, Tile};
 use std::collections::HashMap;
 use std::fmt;
 use std::str::FromStr;
@@ -25,7 +25,7 @@ impl fmt::Display for Image {
         let mut s = String::new();
         for y in 0..self.edge {
             for x in 0..self.edge {
-                s += match self.pixel_at(y, x) {
+                s += match self.pixel_at(Tile::ORI_ROT0, y, x) {
                     false => ".",
                     true => "#",
                 };
@@ -86,13 +86,35 @@ impl Image {
 
     /// Return pixel at (y, x) for the given `orientation`.
     #[must_use]
-    pub fn pixel_at(&self, y: usize, x: usize) -> bool {
-        self.pixels[self.pixels_index(y, x)].0
+    pub fn pixel_at(&self, orientation: Orientation, y: usize, x: usize) -> bool {
+        self.pixels[self.pixels_index(orientation, y, x)].0
     }
 
-    fn pixels_index(&self, y: usize, x: usize) -> usize {
-        y * self.edge + x
+    fn pixels_index(&self, orientation: Orientation, y: usize, x: usize) -> usize {
+        let mut yt: usize = y;
+        let mut xt: usize = x;
+        if orientation.rotate {
+            yt = self.edge - 1 - x;
+            xt = y;
+        }
+        if orientation.flip_y {
+            if orientation.rotate {
+                xt = self.edge - 1 - xt;
+            } else {
+                yt = self.edge - 1 - yt;
+            }
+        }
+        if orientation.flip_x {
+            if orientation.rotate {
+                yt = self.edge - 1 - yt;
+            } else {
+                xt = self.edge - 1 - xt;
+            }
+        }
+        yt * self.edge + xt
     }
+
+    const MONSTER: &'static str = "__________________O_\nO____OO____OO____OOO\n_O__O__O__O__O__O___\n";
 
     /// Find sea monsters in image.
     pub fn find_sea_monsters(&self) {
@@ -166,11 +188,39 @@ impl ImagePattern {
     fn pixels_index(&self, y: usize, x: usize) -> usize {
         y * self.width + x
     }
+
+    /// Find pattern in the given `image` when in the given `orientation`.
+    /// Returns a list of (y, x) coordinates where the pattern was found.
+    pub fn find_in(&self, image: &Image, orientation: Orientation) -> Vec<(usize, usize)> {
+        let mut positions: Vec<(usize, usize)> = vec![];
+        for y in 0..image.edge-self.height+1 {
+            for x in 0..image.edge-self.width+1 {
+                if self.find_at(image, orientation, y, x) {
+                    positions.push((y, x));
+                }
+            }
+        }
+        positions
+    }
+
+    fn find_at(&self, image: &Image, orientation: Orientation, y: usize, x: usize) -> bool {
+        for py in 0..self.height {
+            for px in 0..self.width {
+                if self.pixel_at(py, px) && !image.pixel_at(orientation, y + py, x + px) {
+                    return false;
+                }
+            }
+        }
+        true
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const MONSTER_HEAD: &'static str = "__O_\n_OOO\nO___\n";
+    const SMALL_POND: &'static str = "Tile 1\n##..##.#..\n#.#.#.#.##\n.##..#.#.#\n.##.##..#.\n...#.##.#.\n.##.#.##.#\n.##.#.##.#\n#.#..##.#.\n.#.#..#.##\n.#.##...#.\n";
 
     #[test]
     fn test_image_from_tiles() {
@@ -182,7 +232,7 @@ mod tests {
 
     #[test]
     fn test_parse_image_pattern() {
-        let pattern: ImagePattern = "__O_\n_OOO\nO___\n".parse().unwrap();
+        let pattern: ImagePattern = MONSTER_HEAD.parse().unwrap();
         assert_eq!(4, pattern.width);
         assert_eq!(3, pattern.height);
         assert_eq!(false, pattern.pixel_at(0, 0));
@@ -206,5 +256,30 @@ mod tests {
             Err(e) => assert!(e.to_string().contains("invalid pixel character 'X'")),
             Ok(_)  => panic!("test did not fail"),
         }
+    }
+
+    #[test]
+    fn test_find_in_head_pond() {
+        let pattern: ImagePattern = MONSTER_HEAD.parse().unwrap();
+        let tile: Tile = SMALL_POND.parse().unwrap();
+        assert_eq!(10, tile.edge);
+        let tiles = vec![tile];
+        let image = Image::from_tiles(&tiles).unwrap();
+        assert_eq!(8, image.edge);
+        let positions = pattern.find_in(&image, Tile::ORI_ROT0);
+        assert_eq!(0, positions.len());
+        let positions = pattern.find_in(&image, Tile::ORI_ROT90_FLIPX);
+        assert_eq!(3, positions.len());
+    }
+
+    #[test]
+    fn test_find_in() {
+        let pattern: ImagePattern = Image::MONSTER.parse().unwrap();
+        let tiles = Tile::read_from_file("input/example1.txt").unwrap();
+        let image = Image::from_tiles(&tiles).unwrap();
+        let positions = pattern.find_in(&image, Tile::ORI_ROT0);
+        assert_eq!(0, positions.len());
+        let positions = pattern.find_in(&image, Tile::ORI_ROT90_FLIPX);
+        assert_eq!(2, positions.len());
     }
 }
