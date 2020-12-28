@@ -415,7 +415,7 @@ impl Tile {
     fn align_tile(edge: usize, snake_i: usize, prior_borders: &Vec<Border>, remain_borders: &Vec<Border>) -> Option<Vec<Border>> {
         let parent_border = prior_borders.last().unwrap();
         //eprintln!("--recursive-- snake_i={} remain_borders.len()={} parent_border={}", snake_i, remain_borders.len(), parent_border);
-        if snake_i >= 9 {
+        if snake_i >= edge * edge {
             //eprintln!("FOUND!");
             return Some(prior_borders.to_vec());
         }
