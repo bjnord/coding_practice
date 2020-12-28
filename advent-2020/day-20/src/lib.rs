@@ -329,6 +329,7 @@ impl Tile {
     /// Return NxN matrix of Top Borders, describing the proper orientation
     /// of the given `tiles` so their inner edges align.
     pub fn aligned_borders(tiles: &Vec<Tile>) -> Vec<Vec<Border>> {
+        ///////
         // this case is for testing:
         if tiles.len() == 1 {
             let border = Border {
@@ -340,43 +341,130 @@ impl Tile {
             };
             return vec![vec![border]];
         }
+        let edge = (tiles.len() as f64).sqrt() as usize;
+        if edge * edge != tiles.len() {
+            panic!("not square grid of tiles");
+        }
         let borders = Tile::all_borders(&tiles);
-        // FIXME this obviously only works for input/example1.txt
-        // --------------------------------------------------------------------
-        let t1951 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 1951 && bord.orientation == Tile::ORI_ROT0_FLIPY)
-            .unwrap();
-        let t2311 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 2311 && bord.orientation == Tile::ORI_ROT0_FLIPY)
-            .unwrap();
-        let t3079 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 3079 && bord.orientation == Tile::ORI_ROT0)
-            .unwrap();
-        let row1 = vec![t1951, t2311, t3079];
-        // --------------------------------------------------------------------
-        let t2729 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 2729 && bord.orientation == Tile::ORI_ROT0_FLIPY)
-            .unwrap();
-        let t1427 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 1427 && bord.orientation == Tile::ORI_ROT0_FLIPY)
-            .unwrap();
-        let t2473 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 2473 && bord.orientation == Tile::ORI_ROT90_FLIPY)
-            .unwrap();
-        let row2 = vec![t2729, t1427, t2473];
-        // --------------------------------------------------------------------
-        let t2971 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 2971 && bord.orientation == Tile::ORI_ROT0_FLIPY)
-            .unwrap();
-        let t1489 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 1489 && bord.orientation == Tile::ORI_ROT0_FLIPY)
-            .unwrap();
-        let t1171 = *borders.iter().find(|bord| bord.kind == BorderKind::Top &&
-            bord.tile_id == 1171 && bord.orientation == Tile::ORI_ROT0_FLIPX)
-            .unwrap();
-        let row3 = vec![t2971, t1489, t1171];
-        // --------------------------------------------------------------------
-        vec![row1, row2, row3]
+        //eprintln!("edge={} tiles.len()={} borders.len()={}", edge, tiles.len(), borders.len());
+        ///////
+        // any of the 4 corners should work in upper-left position; use 1st:
+        let corner_tile_id = Tile::corner_tile_ids(tiles, &borders, BorderKind::Top)[0];
+        ///////
+        // find Right borders of all 8 orientations of `corner_tile_id`, to
+        // have 1st child match against:
+        let corner_borders: Vec<Border> = borders
+            .iter()
+            .filter(|bord| bord.kind == BorderKind::Right && bord.tile_id == corner_tile_id)
+            .copied()
+            .collect();
+        //eprintln!("corner_tile_id={} corner_borders.len()={} (should be 8)", corner_tile_id, corner_borders.len());
+//        // FOR DEBUGGING: lock the first corner so input/example1.txt comes
+//        // out as the puzzle description has it
+//        corner_tile_id = 1951;
+//        corner_borders = vec![*borders
+//            .iter()
+//            .find(|bord| bord.kind == BorderKind::Right && bord.tile_id == 1951 && bord.orientation == Tile::ORI_ROT0_FLIPY)
+//            .unwrap()];
+//        //eprintln!("corner_tile_id=1951 corner_borders.len()={} (should be 1)", corner_borders.len());
+        ///////
+        // call recursive function to find correct 1st child border:
+        let remain_borders: Vec<Border> = borders
+            .iter()
+            .filter(|bord| bord.tile_id != corner_tile_id)
+            .copied()
+            .collect();
+        //eprintln!("remain_borders.len()={} (should be {}-32)", remain_borders.len(), borders.len());
+        let mut snaked_borders: Option<Vec<Border>> = None;
+        for corner_border in corner_borders {
+            let prior_borders = vec![corner_border];
+            let borders = Tile::align_tile(edge, 1, &prior_borders, &remain_borders);
+            if borders.is_some() {
+                snaked_borders = borders;
+                break;
+            }
+        }
+        if snaked_borders.is_none() {
+            panic!("SOLUTION NOT FOUND");
+        }
+        let snaked_borders: Vec<Border> = snaked_borders.unwrap();
+        //for (i, s_bord) in snaked_borders.iter().enumerate() {
+        //    eprintln!("{}: {}", i, s_bord);
+        //}
+        ///////
+        // "de-snake" the results by flipping odd rows:
+        let mut aligned_borders: Vec<Vec<Border>> = vec![];
+        for y in 0..edge {
+            aligned_borders.push(vec![]);
+            for x in 0..edge {
+                let odd = (y & 0x1) == 0x1;
+                let x1 = if odd { edge - 1 - x } else { x };
+                let i = y * edge + x1;
+                //eprintln!("desnake odd? {} from ({}, {}) i={} to ({}, {})", odd, y, x1, i, y, x);
+                aligned_borders[y].push(snaked_borders[i]);
+            }
+        }
+        //for (y, a_bord_row) in aligned_borders.iter().enumerate() {
+        //    for (x, a_bord) in a_bord_row.iter().enumerate() {
+        //        eprintln!("({}, {}): {}", y, x, a_bord);
+        //    }
+        //}
+        aligned_borders
+    }
+
+    fn align_tile(edge: usize, snake_i: usize, prior_borders: &Vec<Border>, remain_borders: &Vec<Border>) -> Option<Vec<Border>> {
+        let parent_border = prior_borders.last().unwrap();
+        //eprintln!("--recursive-- snake_i={} remain_borders.len()={} parent_border={}", snake_i, remain_borders.len(), parent_border);
+        if snake_i >= 9 {
+            //eprintln!("FOUND!");
+            return Some(prior_borders.to_vec());
+        }
+        ///////
+        // find tiles + orientations in which this tile lines up with parent:
+        let match_borders: Vec<Border> = remain_borders
+            .iter()
+            .filter(|bord| bord.kind == Border::opposite_kind(parent_border.kind) &&
+                bord.pattern == parent_border.pattern
+            )
+            .copied()
+            .collect();
+        //eprintln!("              match_borders.len()={} opp_parent_kind={:?}", match_borders.len(), Border::opposite_kind(parent_border.kind));
+        ///////
+        // compute border match kind for our place in the "snake":
+        // - match right-to-left across the top (even) row
+        // - match bottom-to-top for the last column
+        // - match left-to-right back across the 2nd (odd) row
+        // - match bottom-to-top for the first column, and repeat
+        let next_snake_i = snake_i + 1;
+        let y = next_snake_i / edge;
+        let x = next_snake_i.rem_euclid(edge);
+        let odd = (y & 0x1) == 0x1;
+        let child_kind = if x == 0 { BorderKind::Bottom } else { if odd { BorderKind::Left } else { BorderKind::Right } };
+        ///////
+        // call recursive function to find correct next child border:
+        let try_borders: Vec<Border> = remain_borders
+            .iter()
+            .filter(|bord| bord.kind == child_kind &&
+                match_borders.iter().find(|m_bord| bord.tile_id == m_bord.tile_id && bord.orientation == m_bord.orientation).is_some()
+            )
+            .copied()
+            .collect();
+        //eprintln!("              ({}, {}, {}) try_borders.len()={} child_kind={:?}", y, x, odd, try_borders.len(), child_kind);
+        let mut prior_borders = prior_borders.clone();
+        for try_border in try_borders {
+            prior_borders.push(try_border);
+            let remain_borders: Vec<Border> = remain_borders
+                .iter()
+                .filter(|bord| bord.tile_id != try_border.tile_id)
+                .copied()
+                .collect();
+            let borders = Tile::align_tile(edge, next_snake_i, &prior_borders, &remain_borders);
+            prior_borders.pop();
+            if borders.is_some() {
+                return borders;
+            }
+        }
+        None
     }
 }
 

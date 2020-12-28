@@ -278,8 +278,10 @@ mod tests {
         let tiles = Tile::read_from_file("input/example1.txt").unwrap();
         let image = Image::from_tiles(&tiles).unwrap();
         let positions = pattern.find_in(&image, Tile::ORI_ROT0);
-        assert_eq!(0, positions.len());
-        let positions = pattern.find_in(&image, Tile::ORI_ROT90_FLIPX);
+//        // FOR DEBUGGING: if first corner is locked (so input/example1.txt
+//        // comes out as the puzzle description has it), uncomment these:
+//        assert_eq!(0, positions.len());
+//        let positions = pattern.find_in(&image, Tile::ORI_ROT90_FLIPX);
         assert_eq!(2, positions.len());
     }
 }
