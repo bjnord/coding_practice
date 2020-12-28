@@ -33,6 +33,10 @@ If `perf` is installed, `cargo` can produce simple [flamegraphs](https://github.
     # produces flamegraph.svg:
     $ cargo flamegraph
 
+## Memory Usage
+
+Similarly see [this Reddit post](https://www.reddit.com/r/adventofcode/comments/k9btf6/2020_day_8_rust_visualising_memory_usage/) for measuring memory usage.
+
 ## Daily README
 
 I like having each day's `README.md` match the puzzle description. I use "View Source" to copy the two `<article>` elements (plus `<p>` elements with the solutions) and then do:
