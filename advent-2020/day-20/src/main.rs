@@ -25,9 +25,9 @@ fn part2() {
     let tiles = Tile::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     let image = Image::from_tiles(&tiles).unwrap();
-    let answer = image.find_sea_monsters();
+    let answer = image.sea_roughness();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 20 - Part 2 : {} <=> _ expected (37 is WRONG)", answer);
+    println!("Day 20 - Part 2 : {} <=> 2242 expected", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

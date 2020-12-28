@@ -114,14 +114,24 @@ impl Image {
         yt * self.edge + xt
     }
 
-    const MONSTER: &'static str = "__________________O_\nO____OO____OO____OOO\n_O__O__O__O__O__O___\n";
+    const MONSTER: &'static str = "\
+        __________________O_\n\
+        O____OO____OO____OOO\n\
+        _O__O__O__O__O__O___\n";
+    const MONSTER_PIXELS: usize = 15;
 
     /// Find sea monsters in image.
-    pub fn find_sea_monsters(&self) -> usize {
+    pub fn sea_roughness(&self) -> usize {
         let pattern: ImagePattern = Image::MONSTER.parse().unwrap();
         for orientation in Tile::all_orientations() {
             let count = pattern.find_in(&self, orientation).len();
-            if count > 0 { return count; }
+            if count > 0 {
+                let waves: usize = self.pixels
+                    .iter()
+                    .filter(|&pix| *pix == Pixel(true))
+                    .count();
+                return waves - count * Image::MONSTER_PIXELS;
+            }
         }
         0
     }
@@ -230,8 +240,21 @@ impl ImagePattern {
 mod tests {
     use super::*;
 
-    const MONSTER_HEAD: &'static str = "__O_\n_OOO\nO___\n";
-    const SMALL_POND: &'static str = "Tile 1\n##..##.#..\n#.#.#.#.##\n.##..#.#.#\n.##.##..#.\n...#.##.#.\n.##.#.##.#\n.##.#.##.#\n#.#..##.#.\n.#.#..#.##\n.#.##...#.\n";
+    const MONSTER_HEAD: &'static str = "\
+        __O_\n\
+        _OOO\n\
+        O___\n";
+    const SMALL_POND: &'static str = "Tile 1\n\
+        ##..##.#..\n
+        #.#.#.#.##\n
+        .##..#.#.#\n
+        .##.##..#.\n
+        ...#.##.#.\n
+        .##.#.##.#\n
+        .##.#.##.#\n
+        #.#..##.#.\n
+        .#.#..#.##\n
+        .#.##...#.\n";
     const CORNER_POND: &'static str = "Tile 1\n\
         ..........\n\
         ...#...#..\n\
@@ -341,9 +364,9 @@ mod tests {
     }
 
     #[test]
-    fn test_find_sea_monsters() {
+    fn test_sea_roughness() {
         let tiles = Tile::read_from_file("input/example1.txt").unwrap();
         let image = Image::from_tiles(&tiles).unwrap();
-        assert_eq!(2, image.find_sea_monsters());
+        assert_eq!(273, image.sea_roughness());
     }
 }
