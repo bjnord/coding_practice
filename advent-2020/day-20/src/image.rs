@@ -199,8 +199,8 @@ impl ImagePattern {
     /// Returns a list of (y, x) coordinates where the pattern was found.
     pub fn find_in(&self, image: &Image, orientation: Orientation) -> Vec<(usize, usize)> {
         let mut positions: Vec<(usize, usize)> = vec![];
-        for y in 0..image.edge-self.height+1 {
-            for x in 0..image.edge-self.width+1 {
+        for y in 0..image.edge {
+            for x in 0..image.edge {
                 if self.find_at(image, orientation, y, x) {
                     positions.push((y, x));
                 }
@@ -212,7 +212,12 @@ impl ImagePattern {
     fn find_at(&self, image: &Image, orientation: Orientation, y: usize, x: usize) -> bool {
         for py in 0..self.height {
             for px in 0..self.width {
-                if self.pixel_at(py, px) && !image.pixel_at(orientation, y + py, x + px) {
+                let y1 = y + py;
+                let x1 = x + px;
+                if y1 >= image.edge || x1 >= image.edge {
+                    return false;
+                }
+                if self.pixel_at(py, px) && !image.pixel_at(orientation, y1, x1) {
                     return false;
                 }
             }
@@ -227,6 +232,28 @@ mod tests {
 
     const MONSTER_HEAD: &'static str = "__O_\n_OOO\nO___\n";
     const SMALL_POND: &'static str = "Tile 1\n##..##.#..\n#.#.#.#.##\n.##..#.#.#\n.##.##..#.\n...#.##.#.\n.##.#.##.#\n.##.#.##.#\n#.#..##.#.\n.#.#..#.##\n.#.##...#.\n";
+    const CORNER_POND: &'static str = "Tile 1\n\
+        ..........\n\
+        ...#...#..\n\
+        ..###.###.\n\
+        .#...#....\n\
+        ..........\n\
+        ..........\n\
+        ...#...#..\n\
+        ..###.###.\n\
+        .#...#....\n\
+        ..........\n";
+    const OUTSIDE_POND: &'static str = "Tile 1\n\
+        ...#......\n\
+        ..###...#.\n\
+        .#.....###\n\
+        ......#...\n\
+        ..........\n\
+        ..........\n\
+        ..#.......\n\
+        .###...#..\n\
+        #.....###.\n\
+        .....#....\n";
 
     #[test]
     fn test_image_from_tiles() {
@@ -265,7 +292,7 @@ mod tests {
     }
 
     #[test]
-    fn test_find_in_head_pond() {
+    fn test_find_in_small_pond() {
         let pattern: ImagePattern = MONSTER_HEAD.parse().unwrap();
         let tile: Tile = SMALL_POND.parse().unwrap();
         assert_eq!(10, tile.edge);
@@ -276,6 +303,28 @@ mod tests {
         assert_eq!(0, positions.len());
         let positions = pattern.find_in(&image, Tile::ORI_ROT90_FLIPX);
         assert_eq!(3, positions.len());
+    }
+
+    #[test]
+    fn test_find_in_corner_pond() {
+        let pattern: ImagePattern = MONSTER_HEAD.parse().unwrap();
+        let tile: Tile = CORNER_POND.parse().unwrap();
+        assert_eq!(10, tile.edge);
+        let tiles = vec![tile];
+        let image = Image::from_tiles(&tiles).unwrap();
+        let positions = pattern.find_in(&image, Tile::ORI_ROT0);
+        assert_eq!(4, positions.len());
+    }
+
+    #[test]
+    fn test_find_in_outside_pond() {
+        let pattern: ImagePattern = MONSTER_HEAD.parse().unwrap();
+        let tile: Tile = OUTSIDE_POND.parse().unwrap();
+        assert_eq!(10, tile.edge);
+        let tiles = vec![tile];
+        let image = Image::from_tiles(&tiles).unwrap();
+        let positions = pattern.find_in(&image, Tile::ORI_ROT0);
+        assert_eq!(0, positions.len());
     }
 
     #[test]
