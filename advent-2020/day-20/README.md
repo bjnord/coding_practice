@@ -191,6 +191,16 @@ together the IDs of the four corner tiles?**
 
 Your puzzle answer was `11788777383197`.
 
+### Part One Design
+
+Every AoC year seems to have one death march, and this year it was Day 20 for me. I spent all day Sunday, December 20, 2020, hacking more and more grotesque functions, trying to get the answer so I'd have something to refactor against. See commit `410ed90` (`solve()` et al) for what that got me... about 350 lines of horror, most of a wasted day, and an inadequate base for part 2 to build on.
+
+The lessons here were:
+
+1. **Stop and think.** It's one thing to have the code be a little messy, and you can go back and refactor after you have the solution and some tests to refactor against. But when the code devolves into hundreds of lines of trash, it is telling you you're on the wrong track.
+1. **Break the problem into smaller chunks.** Big functions are always trying to do too much. Not only should you break them into smaller ones (with independent tests), but stop and think (again) about what the sub-problems are on the path to the solution. At some point, copying and pasting will waste your time rather than saving it.
+1. **Don't be afraid to abandon a path.** In the spirit of Kent Beck's "(T&C)|R" ("test and commit, or revert"), if a much better approach occurs to you partway through a heavy slog, don't surrender to the sunk cost fallacy. You'll probably be happier wiping it out and starting over now... given that you may have to do it anyway when the first approach is finished and doesn't work.
+
 ## Part Two
 
 Now, you're ready to **check the image for sea monsters**.
@@ -299,3 +309,9 @@ above example, the habitat's water roughness is **`273`**.
 **How many `#` are not part of a sea monster?**
 
 Your puzzle answer was `2242`.
+
+### Part Two Design
+
+I was so disgusted with part 1 that I actually moved on and created part 2 code that worked for the example, before returning to the part 1 tile alignment search code.
+
+...and then I put it all together and got the wrong answer for part 2. After a bit more wandering in the wilderness I re-read the puzzle description, and discovered the code was fine; I had forgotten what quantity part 2 was actually asking for.
