@@ -22,13 +22,12 @@ fn part1() {
 /// Output solution for part 2.
 fn part2() {
     let start = Instant::now();
-    let tiles = Tile::read_from_file("input/example1.txt").unwrap();  // FIXME input.txt
+    let tiles = Tile::read_from_file("input/input.txt").unwrap();
     let gen_time = start.elapsed();
     let image = Image::from_tiles(&tiles).unwrap();
-    eprintln!("{}", image);
-    image.find_sea_monsters();
+    let answer = image.find_sea_monsters();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 20 - Part 2 : {} <=> _ expected", 0);
+    println!("Day 20 - Part 2 : {} <=> _ expected (37 is WRONG)", answer);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }

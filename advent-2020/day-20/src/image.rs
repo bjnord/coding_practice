@@ -117,7 +117,13 @@ impl Image {
     const MONSTER: &'static str = "__________________O_\nO____OO____OO____OOO\n_O__O__O__O__O__O___\n";
 
     /// Find sea monsters in image.
-    pub fn find_sea_monsters(&self) {
+    pub fn find_sea_monsters(&self) -> usize {
+        let pattern: ImagePattern = Image::MONSTER.parse().unwrap();
+        for orientation in Tile::all_orientations() {
+            let count = pattern.find_in(&self, orientation).len();
+            if count > 0 { return count; }
+        }
+        0
     }
 }
 
@@ -283,5 +289,12 @@ mod tests {
 //        assert_eq!(0, positions.len());
 //        let positions = pattern.find_in(&image, Tile::ORI_ROT90_FLIPX);
         assert_eq!(2, positions.len());
+    }
+
+    #[test]
+    fn test_find_sea_monsters() {
+        let tiles = Tile::read_from_file("input/example1.txt").unwrap();
+        let image = Image::from_tiles(&tiles).unwrap();
+        assert_eq!(2, image.find_sea_monsters());
     }
 }

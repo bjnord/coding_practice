@@ -219,14 +219,17 @@ impl Tile {
     const ORI_ROT0_FLIPXY: Orientation = Orientation { rotate: false, flip_y: true, flip_x: true };
     const ORI_ROT90_FLIPXY: Orientation = Orientation { rotate: true, flip_y: true, flip_x: true };
 
-    /// Return borders from all possible orientations of this tile.
-    pub fn borders(&self) -> Vec<Border> {
-        let orientations: Vec<Orientation> = vec![
+    pub fn all_orientations() -> Vec<Orientation> {
+        vec![
             Tile::ORI_ROT0, Tile::ORI_ROT90,
             Tile::ORI_ROT0_FLIPY, Tile::ORI_ROT90_FLIPY, Tile::ORI_ROT0_FLIPX,
             Tile::ORI_ROT90_FLIPX, Tile::ORI_ROT0_FLIPXY, Tile::ORI_ROT90_FLIPXY,
-        ];
-        orientations
+        ]
+    }
+
+    /// Return borders from all possible orientations of this tile.
+    pub fn borders(&self) -> Vec<Border> {
+        Tile::all_orientations()
             .iter()
             .map(|&ori| self.borders_for(ori))
             .flatten()
