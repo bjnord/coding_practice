@@ -48,6 +48,7 @@ for (di = 0; di < NREG; di++) r[di] = 0;
  */
 label1:
 	r[1] = 0x000001;
+/** SLOW *********************************
 label2:
 	r[3] = 0x000001;
 label3:
@@ -56,7 +57,7 @@ label3:
 	if (r[4] == 1) goto label7;
 	goto label8;
 label7:
-	printf("prime factor R1 = %d (x%X)\n", r[1], r[1]);
+	printf("prime factor R1 = %d (x%06X)\n", r[1], r[1]);
 	r[0] = r[1] + r[0];
 label8:
 	r[3] = r[3] + 0x000001;
@@ -68,6 +69,11 @@ label12:
 	r[4] = (r[1] > r[5]) ? 1 : 0;
 	if (r[4] == 1) goto label16;
 	goto label2;
+*****************************************/
+
+/** FAST ********************************/
+	goto label36;
+/****************************************/
 
 /*
  * This is the exit; it jumps to address 256 (beyond the end) which halts.
@@ -92,7 +98,7 @@ label17:
 	r[5] = r[5] + r[4];
 	r[2] = 25; r[2] = r[2] + r[0]; goto skipper; /* JUMP to r[2] + r[0] + 1 */
 label26:
-	printf("initialized R5 to %d (x%X)\n", r[5], r[5]);
+	printf("initialized R5 to %d (x%06X)\n", r[5], r[5]);
 	goto label1;
 label27:
 	r[2] = 27; r[4] = r[2]; /* read r[2] */
@@ -102,12 +108,33 @@ label27:
 	r[4] = r[4] * 0x00000E;
 	r[2] = 32; r[4] = r[4] * r[2]; /* read r[2] */
 	r[5] = r[5] + r[4];
-	printf("initialized R5 to %d (x%X)\n", r[5], r[5]);
+	printf("initialized R5 to %d (x%06X)\n", r[5], r[5]);
 	r[0] = 0x000000;
 	goto label1;
 
+/** FAST ********************************/
+/* doesn't yield correct answer (10556089 is too low) */
 label36:
-	r[2] = 36; goto end; /* HALT (set bound reg) */
+	if (composite[r[1]]) {
+		goto labelX1;
+	}
+	if (r[5] % r[1] != 0x000000) {
+		goto labelX1;
+	}
+	printf("prime factor R1 = %d (x%06X)\n", r[1], r[1]);
+	r[0] = r[1] + r[0];
+labelX1:
+	r[1] = r[1] + 0x000001;
+	r[4] = (r[1] > r[5]) ? 1 : 0;
+	if (r[4] == 1) goto labelX2;
+	r[4] = (r[1] > N_SIEVE) ? 1 : 0;
+	if (r[4] == 1) goto labelX2;
+	goto label36;
+labelX2:
+	printf("prime factor R5 = %d (x%06X)\n", r[5], r[5]);
+	r[0] = r[5] + r[0];
+	goto label16;
+/****************************************/
 
 skipper:
 	if (r[2] == 25) {
