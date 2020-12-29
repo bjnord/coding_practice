@@ -1,10 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#define N_SIEVE 5000
+char composite[N_SIEVE+1];
+
+void sieve_of_eratosthenes() {
+	int r1 = 2;
+	int r4 = N_SIEVE;
+soeA:
+	if (composite[r1]) {
+		goto soeC;
+	}
+	int r3 = r1;
+soeB:
+	r3 = r3 + r1;
+	if (r3 > r4) {
+		goto soeC;
+	}
+	composite[r3] = 1;
+	goto soeB;
+soeC:
+	r1 = r1 + 1;
+	if (r1 > r4) {
+		goto soeD;
+	}
+	goto soeA;
+soeD:
+	printf("initialized composite table\n");
+}
+
 #define NREG 6
 void main(argc, argv) {
 unsigned int r[NREG], di;
 for (di = 0; di < NREG; di++) r[di] = 0;
 
+	sieve_of_eratosthenes();
 	if (argc > 1) {
 		r[0] = 1;  /* part 2 */
 	}
