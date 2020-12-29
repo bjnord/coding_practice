@@ -30,12 +30,12 @@ soeD:
 }
 
 #define NREG 6
-void main(argc, argv) {
+void main(int argc, char **argv) {
 unsigned int r[NREG], di;
 for (di = 0; di < NREG; di++) r[di] = 0;
 
 	sieve_of_eratosthenes();
-	if (argc > 1) {
+	if (argc > 1 && argv[1][0] == '2') {
 		r[0] = 1;  /* part 2 */
 	}
 
@@ -48,7 +48,17 @@ for (di = 0; di < NREG; di++) r[di] = 0;
  */
 label1:
 	r[1] = 0x000001;
-/** SLOW *********************************
+
+/** FAST ********************************/
+	if (argc > 2) {
+		printf("using FAST\n");
+		goto label36;
+	} else {
+		printf("using SLOW\n");
+	}
+/****************************************/
+
+/** SLOW ********************************/
 label2:
 	r[3] = 0x000001;
 label3:
@@ -69,10 +79,6 @@ label12:
 	r[4] = (r[1] > r[5]) ? 1 : 0;
 	if (r[4] == 1) goto label16;
 	goto label2;
-*****************************************/
-
-/** FAST ********************************/
-	goto label36;
 /****************************************/
 
 /*
