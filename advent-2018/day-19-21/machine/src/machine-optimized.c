@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -43,20 +44,17 @@ for (di = 0; di < NREG; di++) r[di] = 0;
 	goto label17;
 
 /*
- * This is the program; it accumulates into R0 the sum of all prime factors
- * of R5 (including 1 and R5).
+ * This is the program; it accumulates into R0 the sum of all factors that
+ * evenly divide R5 (including 1 and R5).
  */
 label1:
 	r[1] = 0x000001;
-
-/** FAST ********************************/
 	if (argc > 2) {
 		printf("using FAST\n");
 		goto label36;
 	} else {
 		printf("using SLOW\n");
 	}
-/****************************************/
 
 /** SLOW ********************************/
 label2:
@@ -67,7 +65,7 @@ label3:
 	if (r[4] == 1) goto label7;
 	goto label8;
 label7:
-	printf("prime factor R1 = %d (x%06X)\n", r[1], r[1]);
+	printf("factor R1 = %d (x%06X)\n", r[1], r[1]);
 	r[0] = r[1] + r[0];
 label8:
 	r[3] = r[3] + 0x000001;
@@ -119,23 +117,35 @@ label27:
 	goto label1;
 
 /** FAST ********************************/
+/* NOTE this only works for an r[5] that's a product of
+ * EXACTLY two or three primes. */
 /* doesn't yield correct answer (10556089 is too low) */
 label36:
+	r[3] = (int)sqrt(r[5]);
+	printf("int sqrt(%d) = %d\n", r[5], r[3]);
+labelX3:
 	if (composite[r[1]]) {
-		goto labelX1;
+		if ((r[1] != r[5]) && (r[5] % r[1] == 0x000000)) {
+			printf("compl factor R1 = %d (x%06X)\n", r[1], r[1]);
+			r[0] = r[1] + r[0];
+			r[4] = r[5] / r[1];
+			printf("prime factor R4 = %d (x%06X)\n", r[4], r[4]);
+			r[0] = r[4] + r[0];
+		}
+	} else if (r[5] % r[1] == 0x000000) {
+		printf("prime factor R1 = %d (x%06X)\n", r[1], r[1]);
+		r[0] = r[1] + r[0];
+		r[4] = r[5] / r[1];
+		if (r[4] != r[5]) {
+			printf("compl factor R4 = %d (x%06X)\n", r[4], r[4]);
+			r[0] = r[4] + r[0];
+		}
 	}
-	if (r[5] % r[1] != 0x000000) {
-		goto labelX1;
-	}
-	printf("prime factor R1 = %d (x%06X)\n", r[1], r[1]);
-	r[0] = r[1] + r[0];
 labelX1:
 	r[1] = r[1] + 0x000001;
-	r[4] = (r[1] > r[5]) ? 1 : 0;
+	r[4] = (r[1] > r[3]) ? 1 : 0;
 	if (r[4] == 1) goto labelX2;
-	r[4] = (r[1] > N_SIEVE) ? 1 : 0;
-	if (r[4] == 1) goto labelX2;
-	goto label36;
+	goto labelX3;
 labelX2:
 	printf("prime factor R5 = %d (x%06X)\n", r[5], r[5]);
 	r[0] = r[5] + r[0];
@@ -157,5 +167,6 @@ end:
 for (di = 0; di < NREG; di++)
 printf("R%d=x%06X ", di, r[di]);
 printf("\n");
+printf("part 2 answer is %d; expected 12690000 (0xC1A250)\n", r[0]);
 exit(0);
 }

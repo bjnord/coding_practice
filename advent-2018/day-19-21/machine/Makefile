@@ -1,4 +1,5 @@
 BIN19 = ./machine
+BIN19F = ./machine-optimized
 BIN21 = ./gadget
 FILES = config/config.exs lib/machine.ex lib/machine/input_parser.ex \
 	lib/machine/cpu.ex lib/machine/cli.ex lib/machine/register.ex \
@@ -12,8 +13,9 @@ test:
 .PHONY: run
 run: run19 run21
 
-run19: $(BIN19)
+run19: $(BIN19) $(BIN19F)
 	$(BIN19) --parts=1 input/input.txt
+	$(BIN19F) 2 -f
 
 run21: $(BIN21)
 	$(BIN21) --parts=12 input-day-21/input-fast.txt
@@ -37,6 +39,9 @@ veryclean:
 
 $(BIN19): $(FILES)
 	mix escript.build
+
+$(BIN19F): src/machine-optimized.c
+	cc -o $(BIN19F) src/machine-optimized.c -lm
 
 # apparently there's no built-in way to have more than one escript
 # per mix project, so we're forced to take drastic measures
