@@ -123,9 +123,9 @@ label27:
 label36:
 	r[3] = (int)sqrt(r[5]);
 	printf("int sqrt(%d) = %d\n", r[5], r[3]);
-labelX3:
+labelF:
 	if (composite[r[1]]) {
-		if ((r[1] != r[5]) && (r[5] % r[1] == 0x000000)) {
+		if (r[5] % r[1] == 0x000000) {
 			printf("compl factor R1 = %d (x%06X)\n", r[1], r[1]);
 			r[0] = r[1] + r[0];
 			r[4] = r[5] / r[1];
@@ -136,20 +136,13 @@ labelX3:
 		printf("prime factor R1 = %d (x%06X)\n", r[1], r[1]);
 		r[0] = r[1] + r[0];
 		r[4] = r[5] / r[1];
-		if (r[4] != r[5]) {
-			printf("compl factor R4 = %d (x%06X)\n", r[4], r[4]);
-			r[0] = r[4] + r[0];
-		}
+		printf("compl factor R4 = %d (x%06X)\n", r[4], r[4]);
+		r[0] = r[4] + r[0];
 	}
-labelX1:
 	r[1] = r[1] + 0x000001;
 	r[4] = (r[1] > r[3]) ? 1 : 0;
-	if (r[4] == 1) goto labelX2;
-	goto labelX3;
-labelX2:
-	printf("prime factor R5 = %d (x%06X)\n", r[5], r[5]);
-	r[0] = r[5] + r[0];
-	goto label16;
+	if (r[4] == 1) goto label16;
+	goto labelF;
 /****************************************/
 
 skipper:
@@ -167,6 +160,6 @@ end:
 for (di = 0; di < NREG; di++)
 printf("R%d=x%06X ", di, r[di]);
 printf("\n");
-printf("part 2 answer is %d; expected 12690000 (0xC1A250)\n", r[0]);
+printf("answer is %d\n", r[0]);
 exit(0);
 }
