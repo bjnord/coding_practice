@@ -14,4 +14,6 @@ The `synacor` directory holds my Ruby solution to the [Synacor Challenge](https:
 
 ## Exercises
 
+The `euler-rust` directory holds my Rust solutions to the [Project Euler](https://projecteuler.net/) problems.
+
 The `hogan-57` directory holds my implementations for the exercises in Brian P. Hogan's book [Exercises for Programmers](https://pragprog.com/titles/bhwb/exercises-for-programmers/). So far I've done these in Rust.
