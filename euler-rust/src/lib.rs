@@ -1,3 +1,4 @@
+pub mod math;
 pub mod primes;
 pub mod problem0001;
 pub mod problem0002;
