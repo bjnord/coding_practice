@@ -24,6 +24,7 @@ impl Problem0004 {
     }
 
     /// Is `n` a palindrome?
+    #[must_use]
     pub fn is_palindrome(n: u32) -> bool {
         let s: String = n.to_string();
         let t: String = s.chars().rev().collect();

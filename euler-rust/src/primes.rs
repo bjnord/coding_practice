@@ -45,6 +45,7 @@ impl Primes {
     }
 
     /// Return all prime numbers (within the initialized range).
+    #[must_use]
     pub fn all(&self) -> Vec<u32> {
         (1..=self.max)
             .filter(|&n| {
