@@ -9,7 +9,6 @@ custom_error!{#[derive(PartialEq)]
     pub PrimesError
     InvalidMaxValue = "invalid max value",
     ValueOutOfRange = "value out of range",
-    MaxValueTooSmall{n: u32} = "max value too small to factorize {n}",
 }
 
 pub struct Primes {
@@ -68,45 +67,6 @@ impl Primes {
         let n_us = usize::try_from(n).unwrap();
         Ok(self.is_prime[n_us])
     }
-
-    /// Return the prime factors of `n` (not including 1).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use euler_rust::primes::Primes;
-    /// let primes = Primes::new(120).unwrap();
-    /// let factors = primes.factorize(2260).unwrap();
-    /// assert_eq!(vec![2, 2, 5, 113], factors);
-    /// ```
-    pub fn factorize(&self, n: u32) -> Result<Vec<u32>> {
-        if n < 1 {
-            return Err(PrimesError::ValueOutOfRange.into());
-        }
-        let mut factors: Vec<u32> = vec![];
-        let mut n1 = n;
-        loop {
-            if n1 == 1 {
-                break;
-            }
-            for i in 2..=self.max {
-                let t = match self.test(i) {
-                    Err(_) => false,
-                    Ok(false) => false,
-                    Ok(true) => n1.rem_euclid(i) == 0,
-                };
-                if t {
-                    n1 = n1 / i;
-                    factors.push(i);
-                    break;
-                }
-                if i == self.max {
-                    return Err(PrimesError::MaxValueTooSmall{ n }.into());
-                }
-            }
-        }
-        Ok(factors)
-    }
 }
 
 #[cfg(test)]
@@ -147,22 +107,4 @@ mod tests {
     }
 
     // TODO test test() with n < 1 and n > max
-
-    #[test]
-    fn test_out_of_range_factorize() {
-        let primes = Primes::new(120).unwrap();
-        match primes.factorize(0) {
-            Err(e) => assert_eq!("value out of range", e.to_string()),
-            Ok(_) => panic!("test did not fail"),
-        }
-    }
-
-    #[test]
-    fn test_small_max_factorize() {
-        let primes = Primes::new(120).unwrap();
-        match primes.factorize(81518) {
-            Err(e) => assert_eq!("max value too small to factorize 81518", e.to_string()),
-            Ok(_) => panic!("test did not fail"),
-        }
-    }
 }
