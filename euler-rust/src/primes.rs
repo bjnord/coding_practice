@@ -101,7 +101,7 @@ impl Primes {
                     break;
                 }
                 if i == self.max {
-                    return Err(PrimesError::MaxValueTooSmall{ n: n }.into());
+                    return Err(PrimesError::MaxValueTooSmall{ n }.into());
                 }
             }
         }
