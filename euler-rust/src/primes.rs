@@ -16,6 +16,26 @@ pub struct Primes {
     is_prime: Vec<bool>,
 }
 
+pub struct PrimesIter<'a> {
+    primes: &'a Primes,
+    i: u32,
+}
+
+impl<'a> Iterator for PrimesIter<'a> {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.i += 1;
+        loop {
+            match self.primes.test(self.i) {
+                Err(_) => return None,
+                Ok(false) => self.i += 1,
+                Ok(true) => return Some(self.i),
+            }
+        }
+    }
+}
+
 impl Primes {
     /// Construct for the given `max` value. Uses the Sieve of Eratosthenes
     /// algorithm.
@@ -67,6 +87,10 @@ impl Primes {
         let n_us = usize::try_from(n).unwrap();
         Ok(self.is_prime[n_us])
     }
+
+    pub fn iter(&self) -> PrimesIter {
+        PrimesIter { primes: &self, i: 1 }
+    }
 }
 
 #[cfg(test)]
@@ -107,4 +131,24 @@ mod tests {
     }
 
     // TODO test test() with n < 1 and n > max
+
+    #[test]
+    fn test_iter() {
+        let primes = Primes::new(120).unwrap();
+        let mut iter = primes.iter();
+        assert_eq!(2, iter.next().unwrap());
+        assert_eq!(3, iter.next().unwrap());
+        assert_eq!(5, iter.next().unwrap());
+        assert_eq!(7, iter.next().unwrap());
+    }
+
+    #[test]
+    fn test_iter_none() {
+        let primes = Primes::new(6).unwrap();
+        let mut iter = primes.iter();
+        assert_eq!(2, iter.next().unwrap());
+        assert_eq!(3, iter.next().unwrap());
+        assert_eq!(5, iter.next().unwrap());
+        assert_eq!(true, iter.next().is_none());
+    }
 }
