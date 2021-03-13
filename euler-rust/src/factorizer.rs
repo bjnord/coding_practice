@@ -30,6 +30,7 @@ impl<'a> NaiveFactorizer<'a> {
     /// ```
     /// # use euler_rust::factorizer::NaiveFactorizer;
     /// # use euler_rust::primes::Primes;
+    /// # use maplit::hashmap;
     /// let primes = Primes::new(120).unwrap();
     /// let factorizer = NaiveFactorizer::new(&primes).unwrap();
     /// let factors = factorizer.factorize(2260).unwrap();
@@ -65,16 +66,6 @@ impl<'a> NaiveFactorizer<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    // FIXME this duplicates the doctest above, which for some reason
-    //       doesn't get run during `cargo test`
-    #[test]
-    fn test_factorize() {
-        let primes = Primes::new(120).unwrap();
-        let factorizer = NaiveFactorizer::new(&primes).unwrap();
-        let factors = factorizer.factorize(2260).unwrap();
-        assert_eq!(hashmap!{2 => 2, 5 => 1, 113 => 1}, factors);
-    }
 
     #[test]
     fn test_out_of_range_factorize() {
