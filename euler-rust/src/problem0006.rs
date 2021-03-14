@@ -7,12 +7,12 @@ impl Problem0006 {
     /// natural numbers, and the square of the sum.
     #[must_use]
     pub fn solve(n: u64) -> u64 {
-      let sum: u64 = (1..=n).sum();
-      let sq_sum: u64 = sum * sum;
-      let sum_sq: u64 = (1..=n)
-          .map(|n| n*n)
-          .sum();
-      sq_sum - sum_sq
+        let sum: u64 = (1..=n).sum();
+        let sq_sum: u64 = sum * sum;
+        let sum_sq: u64 = (1..=n)
+            .map(|n| n*n)
+            .sum();
+        sq_sum - sum_sq
     }
 
     #[must_use]
