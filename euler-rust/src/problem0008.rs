@@ -23,34 +23,29 @@ const BIG_NUMBER: &str = "73167176531330624919225119674426574742355349194934\
     05886116467109405077541002256983155200055935729725\
     71636269561882670428252483600823257530420752963450";
 
-#[derive(Debug, Clone)]
-struct SeqProduct {
-    seq: String,
-    product: u64,
-}
-
 impl Problem0008 {
-    /// Find the sequence of `n` digits in the big string with the biggest
+    /// Find the sequence of `n` digits in the big string with the greatest
     /// product.
     #[must_use]
     pub fn solve(n: usize) -> u64 {
-        let sp: SeqProduct = BIG_NUMBER.split('0')
+        // insight: any sequence with a 0 digit results in product=0
+        // so just look at sequences between 0 digit "separators"
+        BIG_NUMBER.split('0')
             .map(|seq| Self::max_product(seq, n))
-            .max_by(|a, b| a.product.cmp(&b.product))
-            .unwrap();
-        sp.product
+            .max()
+            .unwrap()
     }
 
-    fn max_product(seq: &str, n: usize) -> SeqProduct {
+    // Find the sub-sequence of `n` digits in the given `seq` with the
+    // greatest product.
+    fn max_product(seq: &str, n: usize) -> u64 {
         if seq.len() < n {
-            return SeqProduct { seq: String::from(""), product: 0 };
+            return 0;
         }
+        // find greatest product of all n-length sub-sequences
         (0..=(seq.len()-n))
-            .map(|i| {
-                let subseq = &seq[i..(i+n)];
-                SeqProduct { seq: String::from(subseq), product: Self::digit_product(subseq) }
-            })
-            .max_by(|a, b| a.product.cmp(&b.product))
+            .map(|i| Self::digit_product(&seq[i..(i+n)]))
+            .max()
             .unwrap()
     }
 
