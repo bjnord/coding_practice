@@ -7,7 +7,7 @@ pub struct Problem0007 { }
 impl Problem0007 {
     /// Find the `n`th prime number.
     #[must_use]
-    pub fn nth_prime(n: usize) -> u32 {
+    pub fn solve(n: usize) -> u32 {
         let primes = Primes::new(1_000_000).unwrap();
         let mut iter = primes.iter();
         let mut nth = 1;
@@ -19,7 +19,7 @@ impl Problem0007 {
 
     #[must_use]
     pub fn output() -> String {
-        format!("Problem 7 answer is {}", Self::nth_prime(10_001))
+        format!("Problem 7 answer is {}", Self::solve(10_001))
     }
 }
 
@@ -28,15 +28,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_nth_prime_example() {
-        let answer = Problem0007::nth_prime(6);
+    fn test_solve_example() {
+        let answer = Problem0007::solve(6);
         assert_eq!(13, answer);
     }
 
     #[test]
     #[ignore]
-    fn test_nth_prime_problem() {
-        let answer = Problem0007::nth_prime(10_001);
+    fn test_solve_problem() {
+        let answer = Problem0007::solve(10_001);
         assert_eq!(104743, answer);
     }
 }
