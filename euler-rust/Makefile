@@ -1,4 +1,4 @@
-.PHONY: debug release test clippy doc clean
+.PHONY: debug release test test-ignored clippy doc clean
 
 debug:
 	cargo run
@@ -8,6 +8,9 @@ release:
 
 test:
 	cargo test
+
+test-ignored:
+	cargo test -- --ignored
 
 clippy:
 	cargo clippy -- -Dclippy::pedantic

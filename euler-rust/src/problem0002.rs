@@ -35,6 +35,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test_solve_problem() {
         let answer = Problem0002::solve(4_000_000);
         assert_eq!(4613732, answer);

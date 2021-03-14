@@ -34,6 +34,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_nth_prime_problem() {
         let answer = Problem0007::nth_prime(10_001);
         assert_eq!(104743, answer);

@@ -29,6 +29,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_solve_problem() {
         let answer = Problem0001::solve(1000);
         assert_eq!(233168, answer);

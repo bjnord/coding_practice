@@ -62,6 +62,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_solve_problem() {
         let answer = Problem0004::solve(3);
         assert_eq!(906609, answer);
