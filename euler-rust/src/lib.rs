@@ -13,3 +13,4 @@ pub mod problem0007;
 pub mod problem0008;
 pub mod problem0009;
 pub mod problem0010;
+pub mod problem0011;
