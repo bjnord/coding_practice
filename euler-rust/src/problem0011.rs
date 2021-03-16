@@ -1,4 +1,4 @@
-/// Problem 11: [Largest product in a grid](https://projecteuler.net/problem=6)
+/// Problem 11: [Largest product in a grid](https://projecteuler.net/problem=11)
 
 use std::cmp;
 
