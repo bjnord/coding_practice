@@ -62,6 +62,16 @@ impl<'a> NaiveFactorizer<'a> {
         Ok(factors)
     }
 
+    /// Return the sum of the proper divisors of `n` that are less than `n`
+    /// (including 1).
+    pub fn proper_divisor_sum(&self, n: u32) -> u32 {
+        if n < 2 {
+            return 0;
+        }
+        let factors = self.factorize(n).unwrap();
+        Self::divisors(&factors).iter().filter(|d| **d < n).sum()
+    }
+
     // h/t: <https://mathschallenge.net/library/number/number_of_divisors>
     //      <https://www2.math.upenn.edu/~deturck/m170/wk2/numdivisors.html>
     pub fn n_divisors(factors: &HashMap<u32, usize>) -> usize {
@@ -120,6 +130,14 @@ mod tests {
             Err(e) => assert_eq!("value out of range", e.to_string()),
             Ok(_) => panic!("test did not fail"),
         }
+    }
+
+    #[test]
+    fn test_proper_divisor_sum() {
+        let primes = Primes::new(284).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        assert_eq!(284, factorizer.proper_divisor_sum(220));
+        assert_eq!(220, factorizer.proper_divisor_sum(284));
     }
 
     #[test]

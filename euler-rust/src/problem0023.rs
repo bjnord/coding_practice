@@ -47,24 +47,8 @@ impl Problem0023 {
     }
 
     fn is_abundant(factorizer: &NaiveFactorizer, n: u32) -> bool {
-        let dsum: u32 = Self::divisor_sum(factorizer, n);
+        let dsum: u32 = factorizer.proper_divisor_sum(n);
         dsum > n
-    }
-
-    // Return `d(n)`, the sum of the proper divisors of `n` that are less
-    // than `n` (including 1).
-    // FIXME this is copied from Problem0021; move both to NaiveFactorizer
-    fn divisor_sum(factorizer: &NaiveFactorizer, n: u32) -> u32 {
-        if n < 2 {
-            return 0;
-        }
-        let factors = factorizer.factorize(n).unwrap();
-        let divisors: Vec<u32> = NaiveFactorizer::divisors(&factors)
-            .iter()
-            .filter(|d| **d < n)
-            .copied()
-            .collect();
-        divisors.iter().sum()
     }
 
     #[must_use]
