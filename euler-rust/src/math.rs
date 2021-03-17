@@ -1,5 +1,7 @@
 /// General math functions
 
+use rug::{Assign, Integer};
+
 const MAX_52_BIT: u64 = 4_503_599_627_370_495;
 
 pub struct Math { }
@@ -25,6 +27,17 @@ impl Math {
     pub fn isqrt(n: u32) -> u32 {
         (n as f64).sqrt() as u32
     }
+
+    pub fn factorial(n: u32) -> Integer {
+        let mut fact = Integer::new();
+        fact.assign(1);
+        let mut n0 = n;
+        while n0 > 1 {
+            fact *= n0;
+            n0 -= 1;
+        }
+        fact
+    }
 }
 
 #[cfg(test)]
@@ -47,5 +60,10 @@ mod tests {
     fn test_max_n_isqrt() {
         let ns = Math::isqrt(std::u32::MAX);
         assert_eq!(65535, ns);
+    }
+
+    #[test]
+    fn test_factorial() {
+        assert_eq!(3628800, Math::factorial(10));
     }
 }
