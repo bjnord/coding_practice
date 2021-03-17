@@ -1,6 +1,7 @@
 #[macro_use] extern crate maplit;
 
 pub mod bcd;
+pub mod euler;
 pub mod math;
 pub mod factorizer;
 pub mod primes;
@@ -21,3 +22,4 @@ pub mod problem0014;
 pub mod problem0015;
 pub mod problem0016;
 pub mod problem0017;
+pub mod problem0018;
