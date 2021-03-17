@@ -1,4 +1,4 @@
-/// Problem 10: [10001st prime](https://projecteuler.net/problem=10)
+/// Problem 10: [Summation of primes](https://projecteuler.net/problem=10)
 
 use crate::primes::Primes;
 
