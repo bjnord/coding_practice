@@ -16,11 +16,7 @@ impl Problem0012 {
         for i in 2_usize..=std::usize::MAX {
             let tri = Math::nth_triangular(i);
             let factors = factorizer.factorize(tri).unwrap();
-            // h/t: <https://mathschallenge.net/library/number/number_of_divisors>
-            //      <https://www2.math.upenn.edu/~deturck/m170/wk2/numdivisors.html>
-            // TODO move this to NaiveFactorizer
-            let n_divisors: usize = factors.values().map(|f| f+1).product();
-            if n_divisors > n {
+            if NaiveFactorizer::n_divisors(&factors) > n {
                 return tri;
             }
         }

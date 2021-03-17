@@ -61,6 +61,12 @@ impl<'a> NaiveFactorizer<'a> {
         }
         Ok(factors)
     }
+
+    // h/t: <https://mathschallenge.net/library/number/number_of_divisors>
+    //      <https://www2.math.upenn.edu/~deturck/m170/wk2/numdivisors.html>
+    pub fn n_divisors(factors: &HashMap<u32, usize>) -> usize {
+        factors.values().map(|f| f+1).product()
+    }
 }
 
 #[cfg(test)]
@@ -85,5 +91,15 @@ mod tests {
             Err(e) => assert_eq!("value out of range", e.to_string()),
             Ok(_) => panic!("test did not fail"),
         }
+    }
+
+    #[test]
+    fn test_n_divisors() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        let mut factors = factorizer.factorize(21).unwrap();
+        assert_eq!(2*2, NaiveFactorizer::n_divisors(&factors));
+        factors = factorizer.factorize(2260).unwrap();
+        assert_eq!(3*2*2, NaiveFactorizer::n_divisors(&factors));
     }
 }
