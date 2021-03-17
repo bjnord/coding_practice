@@ -1,6 +1,7 @@
 /// General math functions
 
 use rug::{Assign, Integer};
+use std::convert::TryFrom;
 
 const MAX_52_BIT: u64 = 4_503_599_627_370_495;
 
@@ -38,6 +39,11 @@ impl Math {
         }
         fact
     }
+
+    pub fn nth_triangular(n: usize) -> u32 {
+        let tri = n * (n + 1) / 2;
+        u32::try_from(tri).unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -65,5 +71,12 @@ mod tests {
     #[test]
     fn test_factorial() {
         assert_eq!(3628800, Math::factorial(10));
+    }
+
+    #[test]
+    fn test_nth_triangular() {
+        assert_eq!(1, Math::nth_triangular(1));
+        assert_eq!(3, Math::nth_triangular(2));
+        assert_eq!(21, Math::nth_triangular(6));
     }
 }

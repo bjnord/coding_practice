@@ -1,8 +1,8 @@
 /// Problem 12: [Highly divisible triangular number](https://projecteuler.net/problem=12)
 
 use crate::factorizer::NaiveFactorizer;
+use crate::math::Math;
 use crate::primes::Primes;
-use std::convert::TryFrom;
 
 pub struct Problem0012 { }
 
@@ -14,7 +14,7 @@ impl Problem0012 {
         let primes = Primes::new(1_000_000).unwrap();
         let factorizer = NaiveFactorizer::new(&primes).unwrap();
         for i in 2_usize..=std::usize::MAX {
-            let tri = Self::nth_triangular(i);
+            let tri = Math::nth_triangular(i);
             let factors = factorizer.factorize(tri).unwrap();
             // h/t: <https://mathschallenge.net/library/number/number_of_divisors>
             //      <https://www2.math.upenn.edu/~deturck/m170/wk2/numdivisors.html>
@@ -25,12 +25,6 @@ impl Problem0012 {
             }
         }
         0
-    }
-
-    // TODO move this to math
-    fn nth_triangular(n: usize) -> u32 {
-        let tri = n * (n + 1) / 2;
-        u32::try_from(tri).unwrap()
     }
 
     #[must_use]
