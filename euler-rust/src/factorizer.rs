@@ -67,6 +67,35 @@ impl<'a> NaiveFactorizer<'a> {
     pub fn n_divisors(factors: &HashMap<u32, usize>) -> usize {
         factors.values().map(|f| f+1).product()
     }
+
+    // TODO RF clean this up -- perhaps itertools combinations?
+    pub fn divisors(factors: &HashMap<u32, usize>) -> Vec<u32> {
+        let mut f: Vec<u32> = Vec::new();
+        for (&n, &p) in factors.iter() {
+            for _i in 1..=p {
+                f.push(n);
+            }
+        }
+        f.sort();
+        let c = 2_u32.pow(f.len() as u32);
+        let mut div: Vec<u32> = Vec::new();
+        for m in 0..c {
+            let mut d = 1;
+            let mut i = 0;
+            let mut b = 0x1;
+            while b < c {
+                if m & b != 0x0 {
+                    d *= f[i];
+                }
+                i += 1;
+                b <<= 1;
+            }
+            div.push(d);
+        }
+        div.sort();
+        div.dedup();
+        div
+    }
 }
 
 #[cfg(test)]
@@ -101,5 +130,17 @@ mod tests {
         assert_eq!(2*2, NaiveFactorizer::n_divisors(&factors));
         factors = factorizer.factorize(2260).unwrap();
         assert_eq!(3*2*2, NaiveFactorizer::n_divisors(&factors));
+    }
+
+    #[test]
+    fn test_divisors() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        let mut factors = factorizer.factorize(21).unwrap();
+        assert_eq!(vec![1, 3, 7, 21], NaiveFactorizer::divisors(&factors));
+        factors = factorizer.factorize(12).unwrap();
+        assert_eq!(vec![1, 2, 3, 4, 6, 12], NaiveFactorizer::divisors(&factors));
+        factors = factorizer.factorize(2260).unwrap();
+        assert_eq!(vec![1, 2, 4, 5, 10, 20, 113, 226, 452, 565, 1130, 2260], NaiveFactorizer::divisors(&factors));
     }
 }
