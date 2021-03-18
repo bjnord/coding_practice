@@ -5,6 +5,23 @@ use std::convert::TryFrom;
 
 const MAX_52_BIT: u64 = 4_503_599_627_370_495;
 
+pub struct FibonacciIter {
+    f1: Integer,
+    f2: Integer,
+}
+
+impl Iterator for FibonacciIter {
+    type Item = Integer;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let f3 = Integer::from(&self.f1 + &self.f2);
+        self.f1.assign(&self.f2);
+        self.f2.assign(f3);
+        let f = Integer::from(&self.f1);
+        Some(f)
+    }
+}
+
 pub struct Math { }
 
 impl Math {
@@ -44,6 +61,12 @@ impl Math {
         let tri = n * (n + 1) / 2;
         u32::try_from(tri).unwrap()
     }
+
+    pub fn fibonacci() -> FibonacciIter {
+        let f1 = Integer::from(0);
+        let f2 = Integer::from(1);
+        FibonacciIter { f1, f2 }
+    }
 }
 
 #[cfg(test)]
@@ -78,5 +101,12 @@ mod tests {
         assert_eq!(1, Math::nth_triangular(1));
         assert_eq!(3, Math::nth_triangular(2));
         assert_eq!(21, Math::nth_triangular(6));
+    }
+
+    #[test]
+    fn test_fibonacci() {
+        let i = Math::fibonacci();
+        let act: Vec<u32> = i.take(7).map(|n| u32::try_from(n).unwrap()).collect();
+        assert_eq!(vec![1, 1, 2, 3, 5, 8, 13], act);
     }
 }

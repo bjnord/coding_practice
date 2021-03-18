@@ -1,5 +1,8 @@
 /// Problem 2: [Even Fibonacci numbers](https://projecteuler.net/problem=2)
 
+use crate::math::Math;
+use std::convert::TryFrom;
+
 pub struct Problem0002 { }
 
 impl Problem0002 {
@@ -7,13 +10,11 @@ impl Problem0002 {
     /// values do not exceed the given value.
     #[must_use]
     pub fn solve(limit: u32) -> u32 {
-        let mut a = 1;
-        let mut b = 2;
-        let mut sum = 2;
+        let mut sum = 0;
+        let mut fib = Math::fibonacci();
         loop {
-            let c = a + b;
-            a = b;
-            b = c;
+            let f = fib.next().unwrap();
+            let c: u32 = u32::try_from(f).unwrap();
             if c > limit {
                 break;
             }
