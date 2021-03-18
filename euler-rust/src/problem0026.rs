@@ -1,5 +1,6 @@
 /// Problem 26: [Reciprocal cycles](https://projecteuler.net/problem=26)
 
+use crate::math::Math;
 use rug::Float;
 
 pub struct Problem0026 { }
@@ -20,60 +21,17 @@ impl Problem0026 {
             let num = Float::with_val(prec, 1.0);
             let denom = Float::with_val(prec, d);
             let f = num / denom;
-            let (_sign, s, _exp) = f.to_sign_string_exp(10, None);
-            //eprintln!("for d={} s='{}' (width={})", d, s, s.len());
-            if s.len() <= max_cycle {
-                //eprintln!("  ...shorter than max_cycle={}", max_cycle);
+            let (_sign, _nonrep, rep, _exp) = Math::decimal_cycle(&f);
+            //eprintln!("for d={} rep='{}' (len={})", d, rep, rep.len());
+            if rep.len() <= max_cycle {
+                //eprintln!("  ...shorter than previous max_cycle={}", max_cycle);
                 continue;
             }
-            let cycle_s = Self::recurring_cycle(&s);
-            if cycle_s.len() <= max_cycle {
-                //eprintln!("  ...cycle_s='{}' shorter than max_cycle={}", cycle_s, max_cycle);
-                continue;
-            }
-            //eprintln!("  ...cycle_s='{}' longer than previous max_cycle={}", cycle_s, max_cycle);
-            max_cycle = cycle_s.len();
+            //eprintln!("  ...longer than previous max_cycle={}", max_cycle);
+            max_cycle = rep.len();
             max_d = d;
         }
         max_d
-    }
-
-    fn recurring_cycle(s: &str) -> String {
-        // the last N digits can be incorrect due to precision
-        const FUDGE: usize = 3;
-        for i in 0..s.len() {
-            let ich = s.chars().nth(i).unwrap();
-            for j in i+1..s.len() {
-                if s.chars().nth(j).unwrap() == ich {
-                    let mut width = j - i;
-                    if j + width > s.len() {
-                        //eprintln!("  ...OVERFLOW i={} ich='{}' vs j={} jstr='{}' width={}", i, ich, j, &s[j..], width);
-                        break;
-                    }
-                    let left = &s[i..j];
-                    let right = &s[j..j+width];
-                    if left == right {
-                        //eprintln!("  ...MATCH i={} ich='{}' vs j={} jstr='{}' width={} left='{}' right='{}'", i, ich, j, &s[j..], width, left, right);
-                        let mut k = j + width;
-                        while k + width < s.len() - FUDGE {
-                            let rpt = &s[k..k+width];
-                            if rpt != left {
-                                //eprintln!("    ...but MISMATCH i={} ich='{}' left='{}' vs k={} kstr='{}' rpt='{}'", i, ich, left, k, &s[k..], rpt);
-                                width = 0;
-                                break;
-                            }
-                            k += width;
-                        }
-                        if width == 0 {
-                            continue;  // from MISMATCH
-                        }
-                        //eprintln!("    ...and it repeats to end");
-                        return String::from(left);
-                    }
-                }
-            }
-        }
-        String::from("")
     }
 
     #[must_use]
