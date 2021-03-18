@@ -8,5 +8,6 @@ edition = "2018"
 
 [dependencies]
 custom_error = "1.8.0"
+itertools = "0.9"
 maplit = "1"
 rug = "1.11.0"

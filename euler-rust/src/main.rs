@@ -21,6 +21,7 @@ use euler_rust::problem0020::Problem0020;
 use euler_rust::problem0021::Problem0021;
 use euler_rust::problem0022::Problem0022;
 use euler_rust::problem0023::Problem0023;
+use euler_rust::problem0024::Problem0024;
 
 fn main() {
     println!("{}", Problem0001::output());
@@ -46,4 +47,5 @@ fn main() {
     println!("{}", Problem0021::output());
     println!("{}", Problem0022::output());
     println!("{}", Problem0023::output());
+    println!("{}", Problem0024::output());
 }
