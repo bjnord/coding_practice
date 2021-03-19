@@ -21,9 +21,13 @@ impl<'a> NaiveFactorizer<'a> {
         Ok(Self { tester })
     }
 
-    /// Return the prime factors of `n` (not including 1) as a hash:
-    /// - key is the prime factor
-    /// - value is the number of occurrences
+    /// Find the prime factors of `n` (not including 1).
+    ///
+    /// # Returns
+    ///
+    /// a HashMap in which:
+    /// - the key is the prime factor
+    /// - the value is the number of occurrences
     ///
     /// # Examples
     ///
@@ -62,8 +66,8 @@ impl<'a> NaiveFactorizer<'a> {
         Ok(factors)
     }
 
-    /// Return the sum of the proper divisors of `n` that are less than `n`
-    /// (including 1).
+    /// Return the sum of the _proper divisors_ of `n` (namely, the positive
+    /// divisors of `n` excluding itself but including 1).
     pub fn proper_divisor_sum(&self, n: u32) -> u32 {
         if n < 2 {
             return 0;

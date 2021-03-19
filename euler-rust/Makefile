@@ -16,7 +16,7 @@ clippy:
 	cargo clippy -- -Dclippy::pedantic
 
 doc:
-	cargo doc
+	cargo doc --no-deps
 
 clean:
 	-@rm -rf target
