@@ -24,16 +24,16 @@ impl Problem0027 {
         Self { primes }
     }
 
-    /// Find the product of the two coefficients `abs(a) < 1000` and
-    /// `abs(b) <= 1000`, for the quadratic expression `n^2 + an + b`
-    /// that produces the maximum number of primes for consecutive values
-    /// of `n`, starting with 0.
+    /// Find the product of the two coefficients `|a| < 1000` and
+    /// `|b| ≤ 1000`, for the quadratic expression `n² + an + b` that
+    /// produces the maximum number of primes for consecutive values of
+    /// `n`, starting with 0.
     ///
     /// For example:
-    /// - the quadratic with `a=1` and `b=41` produces primes when
-    ///   `0 <= n <= 39`, so the product is `41`
-    /// - the quadratic with `a=-79` and `b=1601` produces primes when
-    ///   `0 <= n <= 79`, so the product is `-126479`
+    /// - the quadratic with `a = 1` and `b = 41` produces primes when
+    ///   `0 ≤ n ≤ 39`, so the product is `41`
+    /// - the quadratic with `a = -79` and `b = 1601` produces primes when
+    ///   `0 ≤ n ≤ 79`, so the product is `-126479`
     #[must_use]
     pub fn solve(&self) -> i64 {
         let mut trials: Vec<Coefficients> = Vec::new();
