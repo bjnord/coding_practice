@@ -7,8 +7,8 @@ impl Problem0033 {
     /// four nontrivial "digit cancelable" fractions, when the product is
     /// expressed in lowest common terms.
     #[must_use]
-    pub fn solve() -> u32 {
-        let nt: Vec<(u32, u32)> = Self::nontrivials();
+    pub fn solve() -> i64 {
+        let nt: Vec<(i64, i64)> = Self::nontrivials();
         let n = nt[0].0 * nt[1].0 * nt[2].0 * nt[3].0;
         let d = nt[0].1 * nt[1].1 * nt[2].1 * nt[3].1;
         // Hey, look!
@@ -25,8 +25,8 @@ impl Problem0033 {
     ///
     /// (The four _exclude_ "trivial" examples in which the numerator and
     /// denominator are both a multiple of 10.)
-    pub fn nontrivials() -> Vec<(u32, u32)> {
-        let mut list: Vec<(u32, u32)> = Vec::new();
+    pub fn nontrivials() -> Vec<(i64, i64)> {
+        let mut list: Vec<(i64, i64)> = Vec::new();
         // `n/d` must be less than 1, so `10/11` is the smallest pair
         for d in 11..100 {
             for n in 10..d {
@@ -39,7 +39,7 @@ impl Problem0033 {
     }
 
     // Is `n/d` a nontrivial example of a "digit cancelable" fraction?
-    fn is_nontrivial(n: u32, d: u32) -> bool {
+    fn is_nontrivial(n: i64, d: i64) -> bool {
         if n < 10 || n > 99 || d < 10 || d > 99 {
             panic!("must be two-digit numbers");
         }
@@ -66,7 +66,7 @@ impl Problem0033 {
     }
 
     // Is `n/d` equal to `n0/d0`?
-    fn canceled_equals(n: u32, d: u32, n0: u32, d0: u32) -> bool {
+    fn canceled_equals(n: i64, d: i64, n0: i64, d0: i64) -> bool {
         let first = n as f64 / d as f64;
         let second = n0 as f64 / d0 as f64;
         (first - second).abs() < 0.000_000_000_001
