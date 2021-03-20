@@ -1,5 +1,7 @@
 /// Problem 33: [Digit cancelling fractions](https://projecteuler.net/problem=33)
 
+use crate::math::IntFraction;
+
 pub struct Problem0033 { }
 
 impl Problem0033 {
@@ -8,12 +10,12 @@ impl Problem0033 {
     /// expressed in lowest common terms.
     #[must_use]
     pub fn solve() -> i64 {
-        let nt: Vec<(i64, i64)> = Self::nontrivials();
-        let n = nt[0].0 * nt[1].0 * nt[2].0 * nt[3].0;
-        let d = nt[0].1 * nt[1].1 * nt[2].1 * nt[3].1;
+        let nontrivials: Vec<IntFraction> = Self::nontrivials();
+        let prod: IntFraction = nontrivials.iter()
+            .fold(IntFraction::new(1, 1), |acc, &int_f| acc.mult(int_f));
         // Hey, look!
-        if d.rem_euclid(n) == 0 {
-            return d/n
+        if prod.denom.rem_euclid(prod.num) == 0 {
+            return prod.denom / prod.num
         }
         panic!("we need a LCM function")
     }
@@ -25,13 +27,14 @@ impl Problem0033 {
     ///
     /// (The four _exclude_ "trivial" examples in which the numerator and
     /// denominator are both a multiple of 10.)
-    pub fn nontrivials() -> Vec<(i64, i64)> {
-        let mut list: Vec<(i64, i64)> = Vec::new();
+    pub fn nontrivials() -> Vec<IntFraction> {
+        let mut list: Vec<IntFraction> = Vec::new();
         // `n/d` must be less than 1, so `10/11` is the smallest pair
         for d in 11..100 {
             for n in 10..d {
-                if Self::is_nontrivial(n, d) {
-                    list.push((n, d));
+                let int_f = IntFraction::new(n, d);
+                if Self::is_nontrivial(int_f) {
+                    list.push(int_f);
                 }
             }
         }
@@ -39,37 +42,30 @@ impl Problem0033 {
     }
 
     // Is `n/d` a nontrivial example of a "digit cancelable" fraction?
-    fn is_nontrivial(n: i64, d: i64) -> bool {
-        if n < 10 || n > 99 || d < 10 || d > 99 {
+    fn is_nontrivial(int_f: IntFraction) -> bool {
+        if int_f.num < 10 || int_f.num > 99 || int_f.denom < 10 || int_f.denom > 99 {
             panic!("must be two-digit numbers");
         }
-        let n0 = n / 10;
-        let n1 = n.rem_euclid(10);
-        let d0 = d / 10;
-        let d1 = d.rem_euclid(10);
+        let n0 = int_f.num / 10;
+        let n1 = int_f.num.rem_euclid(10);
+        let d0 = int_f.denom / 10;
+        let d1 = int_f.denom.rem_euclid(10);
         if n1 == 0 && d1 == 0 {
             return false;  // trivial
         }
-        if n0 == d0 && Self::canceled_equals(n, d, n1, d1) {
+        if n0 == d0 && int_f.equals(IntFraction::new(n1, d1)) {
             return true;
         }
-        if n1 == d0 && Self::canceled_equals(n, d, n0, d1) {
+        if n1 == d0 && int_f.equals(IntFraction::new(n0, d1)) {
             return true;
         }
-        if n0 == d1 && Self::canceled_equals(n, d, n1, d0) {
+        if n0 == d1 && int_f.equals(IntFraction::new(n1, d0)) {
             return true;
         }
-        if n1 == d1 && Self::canceled_equals(n, d, n0, d0) {
+        if n1 == d1 && int_f.equals(IntFraction::new(n0, d0)) {
             return true;
         }
         false
-    }
-
-    // Is `n/d` equal to `n0/d0`?
-    fn canceled_equals(n: i64, d: i64, n0: i64, d0: i64) -> bool {
-        let first = n as f64 / d as f64;
-        let second = n0 as f64 / d0 as f64;
-        (first - second).abs() < 0.000_000_000_001
     }
 
     #[must_use]
@@ -91,18 +87,20 @@ mod tests {
 
     #[test]
     fn test_nontrivials() {
-        assert_eq!(vec![(16, 64), (26, 65), (19, 95), (49, 98)], Problem0033::nontrivials());
+        let exp: Vec<IntFraction> = vec![
+            IntFraction::new(16, 64),
+            IntFraction::new(26, 65),
+            IntFraction::new(19, 95),
+            IntFraction::new(49, 98),
+        ];
+        assert_eq!(exp, Problem0033::nontrivials());
     }
 
     #[test]
     fn test_is_nontrivial() {
-        assert_eq!(true, Problem0033::is_nontrivial(49, 98));
-        assert_eq!(false, Problem0033::is_nontrivial(30, 50));
-    }
-
-    #[test]
-    fn test_canceled_equals() {
-        assert_eq!(true, Problem0033::canceled_equals(49, 98, 4, 8));
-        assert_eq!(false, Problem0033::canceled_equals(47, 78, 4, 8));
+        let int_f_true = IntFraction::new(49, 98);
+        assert_eq!(true, Problem0033::is_nontrivial(int_f_true));
+        let int_f_false = IntFraction::new(30, 50);
+        assert_eq!(false, Problem0033::is_nontrivial(int_f_false));
     }
 }

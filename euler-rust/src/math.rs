@@ -3,8 +3,10 @@
 use rug::{Assign, Integer};
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use std::fmt;
 
 const MAX_52_BIT: u64 = 4_503_599_627_370_495;
+const MAX_52_BIT_I64: i64 = 4_503_599_627_370_495;
 
 pub struct FibonacciIter {
     f1: Integer,
@@ -20,6 +22,41 @@ impl Iterator for FibonacciIter {
         self.f2.assign(f3);
         let f = Integer::from(&self.f1);
         Some(f)
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub struct IntFraction {
+    pub num: i64,
+    pub denom: i64,
+}
+
+impl fmt::Display for IntFraction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}/{}", self.num, self.denom)
+    }
+}
+
+impl IntFraction {
+    pub fn new(num: i64, denom: i64) -> Self {
+        Self { num, denom }
+    }
+
+    pub fn mult(&self, int_f: Self) -> Self {
+        Self { num: self.num * int_f.num, denom: self.denom * int_f.denom }
+    }
+
+    // FIXME this should be done within the integer realm
+    pub fn equals(&self, int_f: Self) -> bool {
+        // f64 only has 52-bit mantissa
+        if self.num > MAX_52_BIT_I64 || self.denom > MAX_52_BIT_I64 {
+            panic!("self too large");
+        } else if int_f.num > MAX_52_BIT_I64 || int_f.denom > MAX_52_BIT_I64 {
+            panic!("arg too large");
+        }
+        let first = self.num as f64 / self.denom as f64;
+        let second = int_f.num as f64 / int_f.denom as f64;
+        (first - second).abs() < 0.000_000_000_001
     }
 }
 
@@ -182,5 +219,14 @@ mod tests {
         assert_eq!("3", nonrep);
         assert_eq!("1415929203539823008849557522123893805309734513274336283185840707964601769911504424778761061946902654867256637168", rep);
         assert_eq!(112, rep.len());
+    }
+
+    #[test]
+    fn test_intfraction_equals() {
+        let first_t = IntFraction::new(49, 98);
+        let first_f = IntFraction::new(47, 78);
+        let second = IntFraction::new(4, 8);
+        assert_eq!(true, first_t.equals(second));
+        assert_eq!(false, first_f.equals(second));
     }
 }
