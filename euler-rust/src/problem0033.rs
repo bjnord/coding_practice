@@ -1,6 +1,8 @@
 /// Problem 33: [Digit cancelling fractions](https://projecteuler.net/problem=33)
 
+use crate::factorizer::NaiveFactorizer;
 use crate::math::IntFraction;
+use crate::primes::Primes;
 
 pub struct Problem0033 { }
 
@@ -11,13 +13,12 @@ impl Problem0033 {
     #[must_use]
     pub fn solve() -> i64 {
         let nontrivials: Vec<IntFraction> = Self::nontrivials();
+        let primes = Primes::new(10_000).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
         let prod: IntFraction = nontrivials.iter()
-            .fold(IntFraction::new(1, 1), |acc, &int_f| acc.mult(int_f));
-        // Hey, look!
-        if prod.denom.rem_euclid(prod.num) == 0 {
-            return prod.denom / prod.num
-        }
-        panic!("we need a LCM function")
+            .fold(IntFraction::new(1, 1), |acc, &int_f| acc.mult(int_f))
+            .reduce(&factorizer);
+        prod.denom
     }
 
     /// Find the four fractions, less than one in value, and containing two
