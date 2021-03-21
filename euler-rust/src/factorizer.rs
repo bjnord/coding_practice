@@ -2,7 +2,9 @@
 
 use custom_error::custom_error;
 use crate::primes::Primes;
+use std::cmp;
 use std::collections::HashMap;
+use std::convert::TryFrom;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -64,6 +66,39 @@ impl<'a> NaiveFactorizer<'a> {
             }
         }
         Ok(factors)
+    }
+
+    /// Find the Greatest Common Factor (GCF) of two integers.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use euler_rust::factorizer::NaiveFactorizer;
+    /// # use euler_rust::primes::Primes;
+    /// # use maplit::hashmap;
+    /// let primes = Primes::new(120).unwrap();
+    /// let factorizer = NaiveFactorizer::new(&primes).unwrap();
+    /// let gcf = factorizer.gcf(12, 30).unwrap();
+    /// assert_eq!(6, gcf);
+    /// ```
+    pub fn gcf(&self, a: u32, b: u32) -> Result<u32> {
+        let af: HashMap<u32, usize> = self.factorize(a)?;
+        let bf: HashMap<u32, usize> = self.factorize(b)?;
+        let gcf: HashMap<u32, usize> = af.iter()
+            .map(|(f, exp)| (*f, Self::common_exp(exp, bf.get(f))))
+            .filter(|(_f, exp)| *exp > 0)
+            .collect();
+        Ok(Self::reduce_exp(&gcf))
+    }
+
+    fn common_exp(a: &usize, bopt: Option<&usize>) -> usize {
+        let b = if let Some(exp) = bopt { *exp } else { 0 };
+        cmp::min(*a, b)
+    }
+
+    fn reduce_exp(factors: &HashMap<u32, usize>) -> u32 {
+        factors.iter()
+            .fold(1_u32, |acc, (f, exp)| acc * f * u32::try_from(*exp).unwrap())
     }
 
     /// Return the sum of the _proper divisors_ of `n` (namely, the positive
@@ -164,5 +199,22 @@ mod tests {
         assert_eq!(vec![1, 2, 3, 4, 6, 12], NaiveFactorizer::divisors(&factors));
         factors = factorizer.factorize(2260).unwrap();
         assert_eq!(vec![1, 2, 4, 5, 10, 20, 113, 226, 452, 565, 1130, 2260], NaiveFactorizer::divisors(&factors));
+    }
+
+    #[test]
+    fn test_gcf() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        //     2^3 * 3 * 5  /  2^2 * 5 * 7
+        // 2^2 * 2 * 3 * 5  /  2^2 * 5 * 7
+        //           2 * 3  /  7
+        assert_eq!(20, factorizer.gcf(120, 140).unwrap());
+    }
+
+    #[test]
+    fn test_gcf_none() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        assert_eq!(1, factorizer.gcf(110, 21).unwrap());
     }
 }
