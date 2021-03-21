@@ -1,5 +1,6 @@
 /// General math functions
 
+use crate::factorizer::NaiveFactorizer;
 use rug::{Assign, Integer};
 use std::collections::HashMap;
 use std::convert::TryFrom;
@@ -44,6 +45,16 @@ impl IntFraction {
 
     pub fn mult(&self, int_f: Self) -> Self {
         Self { num: self.num * int_f.num, denom: self.denom * int_f.denom }
+    }
+
+    pub fn reduce(&self, factorizer: &NaiveFactorizer) -> Self {
+        if self.denom.rem_euclid(self.num) == 0 {
+            return Self { num: 1, denom: self.denom / self.num }
+        }
+        let num: u32 = u32::try_from(self.num.abs()).unwrap();
+        let denom: u32 = u32::try_from(self.denom.abs()).unwrap();
+        let gcf: i64 = factorizer.gcf(num, denom).unwrap() as i64;
+        return Self { num: self.num / gcf, denom: self.denom / gcf }
     }
 
     // FIXME this should be done within the integer realm
@@ -153,6 +164,7 @@ impl Math {
 
 #[cfg(test)]
 mod tests {
+    use crate::primes::Primes;
     use super::*;
 
     #[test]
@@ -219,6 +231,33 @@ mod tests {
         assert_eq!("3", nonrep);
         assert_eq!("1415929203539823008849557522123893805309734513274336283185840707964601769911504424778761061946902654867256637168", rep);
         assert_eq!(112, rep.len());
+    }
+
+    #[test]
+    fn test_intfraction_reduce_simple() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        let int_f = IntFraction::new(4, 8).reduce(&factorizer);
+        assert_eq!(IntFraction::new(1, 2), int_f);
+    }
+
+    #[test]
+    fn test_intfraction_reduce_gcf() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        //     2^3 * 3 * 5  /  2^2 * 5 * 7
+        // 2^2 * 2 * 3 * 5  /  2^2 * 5 * 7
+        //           2 * 3  /  7
+        let int_f = IntFraction::new(120, 140).reduce(&factorizer);
+        assert_eq!(IntFraction::new(6, 7), int_f);
+    }
+
+    #[test]
+    fn test_intfraction_reduce_cant() {
+        let primes = Primes::new(120).unwrap();
+        let factorizer = NaiveFactorizer::new(&primes).unwrap();
+        let int_f = IntFraction::new(15, 14).reduce(&factorizer);
+        assert_eq!(IntFraction::new(15, 14), int_f);
     }
 
     #[test]
