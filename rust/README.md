@@ -9,6 +9,13 @@
 
 - "turbofish" refers to the `::<>` type coercion syntax
 
+## Installing Rust
+
+The Rust book says "The [Rustup](https://rustup.rs/) tool has become the recommended way to install Rust" and this is how I did it for AoC 2020.
+- the [install page](https://www.rust-lang.org/tools/install) has a `curl` one-liner to install `rustup`
+- `rustup toolchain install stable` installs the `stable` "release channel"
+- `rustup show` shows what's currently installed
+
 ## Useful Crates
 
 - [itertools](https://docs.rs/itertools/) is the iterator super-charger (see more below)
