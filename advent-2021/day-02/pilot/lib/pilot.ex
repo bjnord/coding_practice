@@ -26,10 +26,17 @@ defmodule Pilot do
   def part1(input_file, opts \\ []) do
     {x, y} = input_file
              |> parse_input(opts)
-             |> Enum.reduce({0, 0}, fn ({dx, dy}, {x, y}) ->
-               {dx + x, dy + y}
-             end)
+             |> navigate_naïvely
     IO.inspect(x * y, label: "Part 1 answer is")
+  end
+
+  @doc """
+  Navigate using the (incorrect) part 1 method.
+  """
+  def navigate_naïvely(steps) do
+   Enum.reduce(steps, {0, 0}, fn ({dx, dy}, {x, y}) ->
+     {dx + x, dy + y}
+   end)
   end
 
   @doc """
