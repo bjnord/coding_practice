@@ -51,22 +51,40 @@ defmodule Pilot do
 
   @doc """
   Navigate using the (correct) part 2 method.
-
-  - `down X` increases your aim by X units.
-  - `up X` decreases your aim by X units.
-  - `forward X` does two things:
-    - It increases your horizontal position by X units.
-    - It increases your depth by your aim multiplied by X.
   """
   def navigate(steps) do
-    # FIXME extract reduce fn to defp, add tests (and properties?) for it
-    {x, y, _} = Enum.reduce(steps, {0, 0, 0}, fn ({dx, dy}, {x, y, aim}) ->
-                  if dy == 0 do
-                    {x + dx, y + aim * dx, aim}
-                  else
-                    {x, y, aim + dy}
-                  end
-                end)
+    {x, y, _} = Enum.reduce(steps, {0, 0, 0}, &Pilot.nav_step/2)
     {x, y}
+  end
+
+  @doc """
+  Do one navigation step. The first tuple is the step instruction, the second is the current position and aim.
+
+  Returns a tuple with the new position and aim.
+
+  ## Examples
+      iex> Pilot.nav_step({5, 0}, {0, 0, 0})
+      {5, 0, 0}
+      iex> Pilot.nav_step({0, 5}, {5, 0, 0})
+      {5, 0, 5}
+      iex> Pilot.nav_step({8, 0}, {5, 0, 5})
+      {13, 40, 5}
+      iex> Pilot.nav_step({0, -3}, {13, 40, 5})
+      {13, 40, 2}
+      iex> Pilot.nav_step({0, 8}, {13, 40, 2})
+      {13, 40, 10}
+      iex> Pilot.nav_step({2, 0}, {13, 40, 10})
+      {15, 60, 10}
+  """
+  def nav_step({dx, dy}, {x, y, aim}) when dy == 0 do
+    # `forward X` does two things:
+    # - It increases your horizontal position by X units.
+    # - It increases your depth by your aim multiplied by X.
+    {x + dx, y + aim * dx, aim}
+  end
+  def nav_step({dx, dy}, {x, y, aim}) when dx == 0 do
+    # `down X` increases your aim by X units.
+    # `up X` decreases your aim by X units.
+    {x, y, aim + dy}
   end
 end
