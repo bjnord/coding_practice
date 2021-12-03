@@ -41,9 +41,28 @@ defmodule Diagnostic do
       {0b100, 0b011}
   """
   def compute_power_rates(entries) do
-    # convert entries to tuple buckets
-    bucket_entries = entries
-                     |> Stream.map(&Diagnostic.bucketize_bits/1)
+    # convert entries to tuple buckets and sum them
+    entry_sum = entries
+                |> Stream.map(&Diagnostic.bucketize_bits/1)
+                |> Diagnostic.sum_bucket_entries()
+    # calculate gamma and epsilon rates from sum
+    gamma = gamma_rate(entry_sum)
+    epsilon = epsilon_rate(entry_sum)
+    {gamma, epsilon}
+  end
+
+  @doc """
+  Sum tuple bucket entries.
+
+  ## Examples
+      iex(1)> bucket_entries = [
+      ...(1)>   [{1, 0}, {1, 0}, {1, 0}, {0, 1}, {1, 0}],
+      ...(1)>   [{0, 1}, {0, 1}, {0, 1}, {0, 1}, {1, 0}],
+      ...(1)> ]
+      iex> Diagnostic.sum_bucket_entries(bucket_entries)
+      [{1, 1}, {1, 1}, {1, 1}, {0, 2}, {2, 0}]
+  """
+  def sum_bucket_entries(bucket_entries) do
     # do a look-ahead to find bit length of first entry
     [len | _tail] = bucket_entries
                     |> Stream.take(1)
@@ -51,12 +70,8 @@ defmodule Diagnostic do
     # construct an accumulator of the right length
     acc = bucket_acc(len)
     # sum the entries
-    entry_sum = bucket_entries
-                |> Enum.reduce(acc, &Diagnostic.add_bucket_entries/2)
-    # transform sum to gamma and epsilon rates
-    gamma = gamma_rate(entry_sum)
-    epsilon = epsilon_rate(entry_sum)
-    {gamma, epsilon}
+    bucket_entries
+    |> Enum.reduce(acc, &Diagnostic.add_bucket_entries/2)
   end
 
   @doc """
