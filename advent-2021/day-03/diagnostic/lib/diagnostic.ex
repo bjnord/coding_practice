@@ -41,19 +41,21 @@ defmodule Diagnostic do
       {0b100, 0b011}
   """
   def compute_power_rates(entries) do
+    # convert entries to tuple buckets
+    bucket_entries = entries
+                     |> Stream.map(&Diagnostic.bucketize_bits/1)
     # do a look-ahead to find bit length of first entry
-    [len | _tail] = entries
+    [len | _tail] = bucket_entries
                     |> Stream.take(1)
                     |> Enum.map(fn x -> Enum.count(x) end)
     # construct an accumulator of the right length
     acc = bucket_acc(len)
-    # convert entries to tuple buckets and sum them
-    bucket_sums = entries
-                  |> Stream.map(&Diagnostic.bucketize_bits/1)
-                  |> Enum.reduce(acc, &Diagnostic.add_bucket_entries/2)
-    # transform sums to gamma and epsilon rates
-    gamma = gamma_rate(bucket_sums)
-    epsilon = epsilon_rate(bucket_sums)
+    # sum the entries
+    entry_sum = bucket_entries
+                |> Enum.reduce(acc, &Diagnostic.add_bucket_entries/2)
+    # transform sum to gamma and epsilon rates
+    gamma = gamma_rate(entry_sum)
+    epsilon = epsilon_rate(entry_sum)
     {gamma, epsilon}
   end
 
