@@ -10,6 +10,8 @@ The `advent-2019` directory holds my JavaScript solutions to the [2019 Advent of
 
 The `advent-2020` directory holds my Rust solutions to the [2020 Advent of Code](https://adventofcode.com/2020/) challenge.
 
+The `advent-2021` directory holds my Elixir solutions to the [2021 Advent of Code](https://adventofcode.com/2021/) challenge.
+
 The `synacor` directory holds my Ruby solution to the [Synacor Challenge](https://challenge.synacor.com/).
 
 ## Exercises
