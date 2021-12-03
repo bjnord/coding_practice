@@ -36,36 +36,17 @@ defmodule Depth do
   Solve part 2.
   """
   def part2([filename]) do
-    depths = filename
-    |> File.read!
-    |> String.split("\n", trim: true)
-    |> Enum.map(&String.to_integer/1)
-    count_sliding_increases(depths)
+    File.stream!(filename)
+    |> Stream.map(&String.trim_trailing/1)
+    |> Stream.map(&String.to_integer/1)
+    |> sliding_windows_of(3)
+    |> count_increases
     |> IO.inspect(label: "Part 2 number of sliding-window increases is")
   end
 
-  @doc """
-  Count the number of 3-integer sums which are larger than the preceding 3-integer sum.
-
-  ## Examples
-      iex> Depth.count_sliding_increases([-5, -3, -8, 0, 1, 2, -1, 7, 0])
-      4
-      iex> Depth.count_sliding_increases([607, 618, 618, 617, 647, 716, 769, 792])
-      5
-  """
-  def count_sliding_increases(list) do
-    [a, b, c | tail] = list
-    count_sliding_increases(0, [a, b, c], tail)
-  end
-  def count_sliding_increases(n, _window, []), do: n
-  def count_sliding_increases(n, window, tail) do
-    a = Enum.sum(window)
-    # shift the window
-    [_ | keep] = window
-    [next | new_tail] = tail
-    new_window = keep ++ [next]
-    b = Enum.sum(new_window)
-    n = if b > a, do: n + 1, else: n
-    count_sliding_increases(n, new_window, new_tail)
+  defp sliding_windows_of(depths, n) do
+    depths
+    |> Stream.chunk_every(n, 1, :discard)
+    |> Stream.map(&Enum.sum/1)
   end
 end
