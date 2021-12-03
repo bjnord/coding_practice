@@ -12,14 +12,14 @@ situations like this. It's covered in Christmas lights (because of
 course it is), and it even has an experimental antenna that should be
 able to track the keys if you can boost its signal strength high enough;
 there's a little meter that indicates the antenna's signal strength by
-displaying 0-50 *stars*.
+displaying 0-50 **stars**.
 
 Your instincts tell you that in order to save Christmas, you'll need to
-get all *fifty stars* by December 25th.
+get all **fifty stars** by December 25th.
 
 Collect stars by solving puzzles. Two puzzles will be made available on
 each day in the Advent calendar; the second puzzle is unlocked when you
-complete the first. Each puzzle grants *one star*. Good luck!
+complete the first. Each puzzle grants **one star**. Good luck!
 
 As the submarine drops below the surface of the ocean, it automatically
 performs a sonar sweep of the nearby sea floor. On a small screen, the
@@ -50,7 +50,7 @@ increases, just so you know what you're dealing with - you never know if
 the keys will get carried into deeper water by an ocean current or a
 fish or something.
 
-To do this, count *the number of times a depth measurement increases*
+To do this, count **the number of times a depth measurement increases**
 from the previous measurement. (There is no measurement before the first
 measurement.) In the example above, the changes are as follows:
 
@@ -67,10 +67,10 @@ measurement.) In the example above, the changes are as follows:
 263 (increased)
 ```
 
-In this example, there are *`7`* measurements that are larger than the
+In this example, there are **`7`** measurements that are larger than the
 previous measurement.
 
-*How many measurements are larger than the previous measurement?*
+**How many measurements are larger than the previous measurement?**
 
 Your puzzle answer was `1215`.
 
@@ -79,7 +79,7 @@ Your puzzle answer was `1215`.
 Considering every single measurement isn't as useful as you expected:
 there's just too much noise in the data.
 
-Instead, consider sums of a *three-measurement sliding window*. Again
+Instead, consider sums of a **three-measurement sliding window**. Again
 considering the above example:
 
 ```
@@ -100,10 +100,10 @@ measurements in the first window are marked `A` (`199`, `200`, `208`);
 their sum is `199 + 200 + 208 = 607`. The second window is marked `B`
 (`200`, `208`, `210`); its sum is `618`. The sum of measurements in the
 second window is larger than the sum of the first, so this first
-comparison *increased*.
+comparison **increased**.
 
-Your goal now is to count *the number of times the sum of measurements
-in this sliding window increases* from the previous sum. So, compare `A`
+Your goal now is to count **the number of times the sum of measurements
+in this sliding window increases** from the previous sum. So, compare `A`
 with `B`, then compare `B` with `C`, then `C` with `D`, and so on. Stop
 when there aren't enough measurements left to create a new
 three-measurement sum.
@@ -122,10 +122,10 @@ G: 769 (increased)
 H: 792 (increased)
 ```
 
-In this example, there are *`5`* sums that are larger than the previous
+In this example, there are **`5`** sums that are larger than the previous
 sum.
 
-Consider sums of a three-measurement sliding window. *How many sums are
-larger than the previous sum?*
+Consider sums of a three-measurement sliding window. **How many sums are
+larger than the previous sum?**
 
 Your puzzle answer was `1150`.
