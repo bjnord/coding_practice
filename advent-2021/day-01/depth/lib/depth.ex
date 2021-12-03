@@ -7,16 +7,17 @@ defmodule Depth do
   Solve part 1.
   """
   def part1([filename]) do
-    depths = filename
-    |> File.read!
-    |> String.split("\n", trim: true)
-    |> Enum.map(&String.to_integer/1)
-    count_increases(depths)
+    File.stream!(filename)
+    |> Stream.map(&String.trim_trailing/1)
+    |> Stream.map(&String.to_integer/1)
+    |> count_increases
     |> IO.inspect(label: "Part 1 number of increases is")
   end
 
   @doc """
-  Count the number of integers which are larger than the preceding one.
+  Count the number of depth measurement increases.
+
+  Returns the number of increases.
 
   ## Examples
       iex> Depth.count_increases([-5, -3, -8, 0, 1, 2, -1, 7, 0])
@@ -24,12 +25,11 @@ defmodule Depth do
       iex> Depth.count_increases([199, 200, 208, 210, 200, 207, 240, 269, 260, 263])
       7
   """
-  def count_increases(list), do: count_increases(0, list)
-  def count_increases(n, [_]), do: n
-  def count_increases(n, [head | tail]) do
-    [middle | _] = tail
-    n = if middle > head, do: n + 1, else: n
-    count_increases(n, tail)
+  def count_increases(depths) do
+    # implementation by José Valim
+    depths
+    |> Stream.chunk_every(2, 1, :discard)
+    |> Enum.count(fn [left, right] -> right > left end)
   end
 
   @doc """

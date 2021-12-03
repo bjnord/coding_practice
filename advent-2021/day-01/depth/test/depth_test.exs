@@ -32,6 +32,21 @@ defmodule DepthTest do
     end
   end
 
+  property "any list has correct count of increases" do
+    forall list <- integer_list() do
+      Depth.count_increases(list) == alt_count_increases(list)
+    end
+  end
+
+  # implementation by Brent J. Nordquist
+  def alt_count_increases(list), do: alt_count_increases(0, list)
+  defp alt_count_increases(n, [_]), do: n
+  defp alt_count_increases(n, [head | tail]) do
+    [middle | _] = tail
+    n = if middle > head, do: n + 1, else: n
+    alt_count_increases(n, tail)
+  end
+
   def integer_list do
     non_empty(list(integer()))
   end
