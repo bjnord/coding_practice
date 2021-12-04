@@ -1,6 +1,7 @@
 defmodule BingoTest do
   use ExUnit.Case
   doctest Bingo
+  import TestHelper
 
   describe "puzzle example" do
     setup do
@@ -45,50 +46,40 @@ defmodule BingoTest do
     end
 
     test "board marker", fixture do
-      first_called = Enum.take(fixture.exp_balls, 5)
-      # FIXME run test for all boards, not just first
-      board = Enum.at(fixture.exp_boards, 0)
-      marked_board = first_called
-                     |> Enum.reduce(board, fn (called, board) ->
-                       Bingo.mark_board(board, called)
-                     end)
-      assert elem(marked_board, 1) == Enum.at(fixture.exp_marks, 0)
+      balls = Enum.take(fixture.exp_balls, 5)
+      act_marks = fixture.exp_boards
+                  |> Enum.map(fn board ->
+                    mark_board_for_balls(board, balls)
+                    |> elem(1)  # called_bits
+                  end)
+      assert act_marks == fixture.exp_marks
     end
 
     test "board marker scoring" do
       board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b0, nil}
       # 1. call two numbers in a column, plus one not on the card (hasn't won yet)
-      board = [7, 2, 10]
-              |> Enum.reduce(board, fn (called, board) -> Bingo.mark_board(board, called) end)
+      board = mark_board_for_balls(board, [7, 2, 10])
       assert board == {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100100, nil}
       # 2. call two more numbers, one of which completes the column (wins)
-      board = [3, 6]
-              |> Enum.reduce(board, fn (called, board) -> Bingo.mark_board(board, called) end)
+      board = mark_board_for_balls(board, [3, 6])
       assert board == {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b100101100, (4+9+5+1+8)*6}
       # 3. call another number on the card (should not change score)
-      board = [8]
-              |> Enum.reduce(board, fn (called, board) -> Bingo.mark_board(board, called) end)
+      board = mark_board_for_balls(board, [8])
       assert board == {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b101101100, (4+9+5+1+8)*6}
     end
 
     test "board win tester, just before winning number called", fixture do
-      first_called = Enum.take(fixture.exp_balls, 11)
+      balls = Enum.take(fixture.exp_balls, 11)
       board = Enum.at(fixture.exp_boards, 2)
-      marked_board = first_called
-                     |> Enum.reduce(board, fn (called, board) ->
-                       Bingo.mark_board(board, called)
-                     end)
-      assert Bingo.winning_board?(marked_board) == false
+              |> mark_board_for_balls(balls)
+      assert Bingo.winning_board?(board) == false
     end
 
     test "board win tester, after winning number called", fixture do
-      first_called = Enum.take(fixture.exp_balls, 12)
+      balls = Enum.take(fixture.exp_balls, 12)
       board = Enum.at(fixture.exp_boards, 2)
-      marked_board = first_called
-                     |> Enum.reduce(board, fn (called, board) ->
-                       Bingo.mark_board(board, called)
-                     end)
-      assert Bingo.winning_board?(marked_board) == true
+              |> mark_board_for_balls(balls)
+      assert Bingo.winning_board?(board) == true
     end
 
     test "first winning board finder", fixture do
