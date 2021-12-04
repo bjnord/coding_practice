@@ -28,7 +28,7 @@ defmodule Bingo do
                       |> parse_input(opts)
     boards
     |> find_first_winning_board(balls)
-    |> elem(3)  # score
+    |> elem(2)  # score
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -36,45 +36,45 @@ defmodule Bingo do
   Mark board with called number.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0, 0, nil}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b0, nil}
       iex> board = Bingo.mark_board(board, 7)
-      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100000, 7, nil}
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100000, nil}
       iex> board = Bingo.mark_board(board, 4)
-      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100001, 7+4, nil}
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100001, nil}
       iex> _board = Bingo.mark_board(board, 10)
-      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100001, 7+4, nil}
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100001, nil}
   """
-  def mark_board({squares, called_bits, called_sum, score}, called) do
+  def mark_board({squares, called_bits, score}, called) do
     marked_board =
       case Enum.find_index(squares, fn sq -> sq == called end) do
-        nil -> {squares, called_bits, called_sum, score}
-        i -> {squares, called_bits ||| Bitwise.bsl(1, i), called_sum + called, score}
+        nil -> {squares, called_bits, score}
+        i -> {squares, called_bits ||| Bitwise.bsl(1, i), score}
       end
     case {winning_board?(marked_board), score} do
       {true, nil} -> score_board(marked_board, called)
       {_, _} -> marked_board
     end
   end
-  defp score_board({squares, called_bits, called_sum, _score}, called) do
-    score = uncalled_sum({squares, called_bits, called_sum, nil}) * called
-    {squares, called_bits, called_sum, score}
+  defp score_board({squares, called_bits, _score}, called) do
+    score = uncalled_sum({squares, called_bits, nil}) * called
+    {squares, called_bits, score}
   end
 
   @doc """
   Determine if marked board wins.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011000001, 9+2+6, nil}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011000001, nil}
       iex> Bingo.winning_board?(board)
       false
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6), nil}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, nil}
       iex> Bingo.winning_board?(board)
       true
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b111000001, (4+9+2)+6, nil}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b111000001, nil}
       iex> Bingo.winning_board?(board)
       true
   """
-  def winning_board?({squares, called_bits, _called_sum, _score}) do
+  def winning_board?({squares, called_bits, _score}) do
     dim = Math.isqrt(Enum.count(squares))
     bit_grid = called_bits
                |> Integer.to_string(2)
@@ -107,7 +107,7 @@ defmodule Bingo do
       winning_board -> winning_board
     end
   end
-  def board_has_score?({_squares, _called_bits, _called_sum, score}) do
+  def board_has_score?({_squares, _called_bits, score}) do
     score != nil
   end
 
@@ -115,12 +115,17 @@ defmodule Bingo do
   Calculate sum of uncalled numbers on board.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6), nil}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b100100110, nil}  # called=9,2,7,6
       iex> Bingo.uncalled_sum(board)
       4+3+5+8+1
   """
-  def uncalled_sum({squares, _called_bits, called_sum, _score}) do
-    Enum.sum(squares) - called_sum
+  def uncalled_sum({squares, called_bits, _score}) do
+    squares
+    |> Enum.reduce({0, 0b1}, fn (ball, {sum, mask}) ->
+      called = if (called_bits &&& mask) == 0b0, do: ball, else: 0
+      {sum + called, mask * 2}
+    end)
+    |> elem(0)
   end
 
   @doc """
@@ -146,7 +151,7 @@ defmodule Bingo do
                       |> parse_input(opts)
     boards
     |> find_last_winning_board(balls)
-    |> elem(3)  # score
+    |> elem(2)  # score
     |> IO.inspect(label: "Part 2 answer is")
   end
 
@@ -162,7 +167,7 @@ defmodule Bingo do
       _ -> find_last_winning_board(next_boards, next_balls)
     end
   end
-  def board_doesnt_have_score?({_squares, _called_bits, _called_sum, score}) do
+  def board_doesnt_have_score?({_squares, _called_bits, score}) do
     score == nil
   end
   defp play_until_board_wins(board, balls) do
