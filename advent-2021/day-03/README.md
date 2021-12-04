@@ -140,3 +140,13 @@ generator rating and CO2 scrubber rating, then multiply them together.
 represent your answer in decimal, not binary.)
 
 Your puzzle answer was `4267809`.
+
+## Design Notes
+
+When I first read the problem statement, I thought, "This would be easy if
+I rotated the 2D bit list." I should have listened to that little voice;
+instead, I thought, "No, I should do it as-is so I can stream." I ended
+up with a hot mess of code for the first attempt.
+
+So I wiped it out and did a second, much cleaner implementation using
+transpose.
