@@ -32,6 +32,8 @@ defmodule Pilot do
 
   @doc """
   Navigate using the (incorrect) part 1 method.
+
+  Returns ending `{x, y}` position tuple
   """
   def navigate_naïvely(steps) do
    Enum.reduce(steps, {0, 0}, fn ({dx, dy}, {x, y}) ->
@@ -51,10 +53,13 @@ defmodule Pilot do
 
   @doc """
   Navigate using the (correct) part 2 method.
+
+  Returns ending `{x, y}` position tuple
   """
   def navigate(steps) do
-    {x, y, _} = Enum.reduce(steps, {0, 0, 0}, &Pilot.nav_step/2)
-    {x, y}
+    steps
+    |> Enum.reduce({0, 0, 0}, &Pilot.nav_step/2)
+    |> Tuple.delete_at(2)
   end
 
   @doc """
