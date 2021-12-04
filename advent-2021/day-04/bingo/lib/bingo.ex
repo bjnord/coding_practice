@@ -53,13 +53,13 @@ defmodule Bingo do
   Determine if marked board wins.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b110000100, 21}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011000001, 9+2+6}
       iex> Bingo.winning_board?(board)
       false
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b110100100, 24}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6)}
       iex> Bingo.winning_board?(board)
       true
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b111000100, 23}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b111000001, (4+9+2)+6}
       iex> Bingo.winning_board?(board)
       true
   """
@@ -67,6 +67,7 @@ defmodule Bingo do
     dim = Math.isqrt(Enum.count(squares))
     bit_grid = called_bits
                |> Integer.to_string(2)
+               |> String.pad_leading(dim * dim, "0")
                |> String.to_charlist
                |> Enum.map(fn b -> b &&& 1 end)
                |> Enum.chunk_every(dim)
