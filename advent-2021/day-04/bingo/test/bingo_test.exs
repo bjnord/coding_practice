@@ -100,5 +100,13 @@ defmodule BingoTest do
       assert elem(act_winning_board, 0) == elem(exp_winning_board, 0)
       assert elem(act_winning_board, 3) == 4512
     end
+
+    test "last winning board finder", fixture do
+      exp_winning_board = Enum.at(fixture.exp_boards, 1)
+      act_winning_board = fixture.exp_boards
+                          |> Bingo.find_last_winning_board(fixture.exp_balls)
+      assert elem(act_winning_board, 0) == elem(exp_winning_board, 0)
+      assert elem(act_winning_board, 3) == 1924
+    end
   end
 end

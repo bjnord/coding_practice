@@ -141,6 +141,35 @@ defmodule Bingo do
   Process input file and display part 2 solution.
   """
   def part2(input_file, opts \\ []) do
-    IO.puts("Part 2 answer is TODO")
+    {balls, boards} = input_file
+                      |> File.read!
+                      |> parse_input(opts)
+    boards
+    |> find_last_winning_board(balls)
+    |> elem(3)  # score
+    |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Play bingo, finding the last winning board.
+  """
+  def find_last_winning_board(boards, [ball | next_balls]) do
+    next_boards = boards
+                  |> Enum.map(fn board -> mark_board(board, ball) end)
+    case Enum.count(next_boards, &Bingo.board_doesnt_have_score?/1) do
+      1 -> Enum.find(next_boards, &Bingo.board_doesnt_have_score?/1)
+           |> play_until_board_wins(next_balls)
+      _ -> find_last_winning_board(next_boards, next_balls)
+    end
+  end
+  def board_doesnt_have_score?({_squares, _called_bits, _called_sum, score}) do
+    score == nil
+  end
+  defp play_until_board_wins(board, balls) do
+    balls
+    |> Enum.reduce_while(board, fn (ball, board) ->
+      board = mark_board(board, ball)
+      if board_has_score?(board), do: {:halt, board}, else: {:cont, board}
+    end)
   end
 end
