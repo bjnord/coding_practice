@@ -50,6 +50,8 @@ defmodule Bingo do
         nil -> {squares, called_bits, score}
         i -> {squares, called_bits ||| Bitwise.bsl(1, i), score}
       end
+    # the `true, nil` check is so we only set the score once, so
+    # subsequent markings will not affect the score at win time
     case {winning_board?(marked_board), score} do
       {true, nil} -> score_board(marked_board, called)
       {_, _} -> marked_board
