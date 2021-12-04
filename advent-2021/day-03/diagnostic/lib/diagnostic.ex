@@ -112,7 +112,41 @@ defmodule Diagnostic do
       {0b110, 0b010}
   """
   def compute_life_support_ratings(entries) do
-    {0, 0}  # TODO
+    {o2_rating(entries), co2_rating(entries)}
+  end
+
+  @doc """
+  Compute O₂ rating from diagnostic report entries.
+  """
+  def o2_rating(entries), do: o2_rating(entries, 0)
+  def o2_rating([entry], _), do: bits_to_integer(entry)
+  def o2_rating(entries, pos) do
+    # keep entries whose `pos`th bit has the most common value
+    filter_bit = transpose(entries)
+                 |> Enum.map(&Diagnostic.count_bits/1)
+                 |> Enum.map(&Diagnostic.most_common/1)
+                 |> Enum.at(pos)
+    filtered_entries = entries
+                       |> Enum.filter(fn entry -> Enum.at(entry, pos) == filter_bit end)
+    # continue to next `pos` (using tail recursion)
+    o2_rating(filtered_entries, pos + 1)
+  end
+
+  @doc """
+  Compute CO₂ rating from diagnostic report entries.
+  """
+  def co2_rating(entries), do: co2_rating(entries, 0)
+  def co2_rating([entry], _), do: bits_to_integer(entry)
+  def co2_rating(entries, pos) do
+    # keep entries whose `pos`th bit has the least common value
+    filter_bit = transpose(entries)
+                 |> Enum.map(&Diagnostic.count_bits/1)
+                 |> Enum.map(&Diagnostic.least_common/1)
+                 |> Enum.at(pos)
+    filtered_entries = entries
+                       |> Enum.filter(fn entry -> Enum.at(entry, pos) == filter_bit end)
+    # continue to next `pos` (using tail recursion)
+    co2_rating(filtered_entries, pos + 1)
   end
 
   @doc """
