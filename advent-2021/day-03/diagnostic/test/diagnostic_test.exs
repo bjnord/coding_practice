@@ -2,7 +2,7 @@ defmodule DiagnosticTest do
   use ExUnit.Case
   doctest Diagnostic
 
-  describe "example for part 1" do
+  describe "puzzle example" do
     setup do
       [
         entries: [
@@ -19,38 +19,17 @@ defmodule DiagnosticTest do
           [0, 0, 0, 1, 0],
           [0, 1, 0, 1, 0],
         ],
-        expected: {22, 9},
+        expected_part1: {22, 9},
+        expected_part2: {23, 10},
       ]
     end
 
-    test "gets expected sum", fixture do
-      assert Diagnostic.compute_power_rates(fixture.entries) == fixture.expected
-    end
-  end
-
-  describe "example for part 2" do
-    setup do
-      [
-        entries: [
-          [0, 0, 1, 0, 0],
-          [1, 1, 1, 1, 0],
-          [1, 0, 1, 1, 0],
-          [1, 0, 1, 1, 1],
-          [1, 0, 1, 0, 1],
-          [0, 1, 1, 1, 1],
-          [0, 0, 1, 1, 1],
-          [1, 1, 1, 0, 0],
-          [1, 0, 0, 0, 0],
-          [1, 1, 0, 0, 1],
-          [0, 0, 0, 1, 0],
-          [0, 1, 0, 1, 0],
-        ],
-        expected: {23, 10},
-      ]
+    test "gets expected part 1 rates", fixture do
+      assert Diagnostic.compute_power_rates(fixture.entries) == fixture.expected_part1
     end
 
-    test "gets expected sum", fixture do
-      assert Diagnostic.compute_life_support_ratings(fixture.entries) == fixture.expected
+    test "gets expected part 2 ratings", fixture do
+      assert Diagnostic.compute_life_support_ratings(fixture.entries) == fixture.expected_part2
     end
   end
 end

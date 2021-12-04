@@ -51,9 +51,7 @@ defmodule Diagnostic.CLI do
   @doc ~S"""
   Parse an input line containing a binary number.
 
-  ## Returns
-
-  List of integer bit values
+  Returns list of integer bit values
 
   ## Examples
       iex> Diagnostic.CLI.parse_line("00010\n")
