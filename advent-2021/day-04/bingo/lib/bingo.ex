@@ -4,7 +4,6 @@ defmodule Bingo do
   """
 
   import Bingo.CLI
-  import Math
   use Bitwise
 
   @doc """
@@ -26,8 +25,10 @@ defmodule Bingo do
   def part1(input_file, opts \\ []) do
     {balls, boards} = input_file
                       |> File.read!
-                      |> parse_input
-    IO.puts("Part 1 answer is TODO")
+                      |> parse_input(opts)
+    {winning_board, last_ball} = play(boards, balls)
+    uncalled_sum(winning_board) * last_ball
+    |> IO.inspect(label: "Part 1 answer is")
   end
 
   @doc """
@@ -39,7 +40,7 @@ defmodule Bingo do
       {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100000, 7}
       iex> board = Bingo.mark_board(board, 4)
       {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100001, 11}
-      iex> board = Bingo.mark_board(board, 10)
+      iex> _board = Bingo.mark_board(board, 10)
       {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100001, 11}
   """
   def mark_board({squares, called_bits, called_sum}, called) do
@@ -83,6 +84,32 @@ defmodule Bingo do
   def winning_row?(row) do
     row
     |> Enum.all?(fn bit -> bit == 1 end)
+  end
+
+  @doc """
+  Play bingo.
+
+  Returns `{winning_board, last_ball}`.
+  """
+  def play(boards, [ball | next_balls]) do
+    next_boards = boards
+                  |> Enum.map(fn board -> mark_board(board, ball) end)
+    case Enum.find(next_boards, &Bingo.winning_board?/1) do
+      nil -> play(next_boards, next_balls)
+      winning_board -> {winning_board, ball}
+    end
+  end
+
+  @doc """
+  Calculate sum of uncalled numbers on board.
+
+  ## Examples
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6)}
+      iex> Bingo.uncalled_sum(board)
+      4+3+5+8+1
+  """
+  def uncalled_sum({squares, _called_bits, called_sum}) do
+    Enum.sum(squares) - called_sum
   end
 
   @doc """

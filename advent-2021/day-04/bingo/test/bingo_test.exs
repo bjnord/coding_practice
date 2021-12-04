@@ -57,8 +57,6 @@ defmodule BingoTest do
       assert exp_called_sum == elem(marked_board, 2)
     end
 
-    # FIXME replace the next two with impending find_winning_board
-
     test "board win tester, just before winning number called", fixture do
       first_called = Enum.take(fixture.exp_balls, 11)
       board = Enum.at(fixture.exp_boards, 2)
@@ -77,6 +75,13 @@ defmodule BingoTest do
                        Bingo.mark_board(board, called)
                      end)
       assert Bingo.winning_board?(marked_board) == true
+    end
+
+    test "bingo player", fixture do
+      exp_winning_board = Enum.at(fixture.exp_boards, 2)
+      {act_winning_board, _} = fixture.exp_boards
+                               |> Bingo.play(fixture.exp_balls)
+      assert elem(act_winning_board, 0) == elem(exp_winning_board, 0)
     end
   end
 end
