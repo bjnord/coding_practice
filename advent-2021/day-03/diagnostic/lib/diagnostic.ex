@@ -35,14 +35,61 @@ defmodule Diagnostic do
 
   Returns `{gamma, epsilon}`
 
-  ## Example
+  ## Examples
       iex> entries = [[1, 0, 0], [1, 1, 0], [0, 0, 0]]
       iex> Diagnostic.compute_power_rates(entries)
       {0b100, 0b011}
   """
   def compute_power_rates(entries) do
-    {0, 0}  # TODO
+    x_entries = transpose(entries)
+    {gamma_rate(x_entries), epsilon_rate(x_entries)}
   end
+
+  @doc """
+  Compute gamma rate from transposed diagnostic report entries.
+  """
+  def gamma_rate(x_entries) do
+    x_entries
+    |> Enum.map(&Diagnostic.count_bits/1)
+    |> Enum.map(&Diagnostic.most_common/1)
+    |> bits_to_integer
+  end
+  def count_bits(bits) do
+    bits
+    |> Enum.reduce(0, fn (b, acc) -> acc + plus_minus(b) end)
+  end
+  def plus_minus(bit) when bit == 0, do: -1
+  def plus_minus(_bit), do: 1
+  def most_common(sum) when sum < 0, do: 0
+  def most_common(_sum), do: 1
+
+  @doc """
+  Render bit list as an integer.
+
+  ## Examples
+      iex> Diagnostic.bits_to_integer([0, 1])
+      1
+      iex> Diagnostic.bits_to_integer([1, 0])
+      2
+      iex> Diagnostic.bits_to_integer([1, 1, 0, 1, 0, 0, 0, 1])
+      209
+  """
+  def bits_to_integer(bits) do
+    bits
+    |> Enum.reduce(0, fn (b, acc) -> acc * 2 + b end)
+  end
+
+  @doc """
+  Compute epsilon rate from transposed diagnostic report entries.
+  """
+  def epsilon_rate(x_entries) do
+    x_entries
+    |> Enum.map(&Diagnostic.count_bits/1)
+    |> Enum.map(&Diagnostic.least_common/1)
+    |> bits_to_integer
+  end
+  def least_common(sum) when sum < 0, do: 1
+  def least_common(_sum), do: 0
 
   @doc """
   Process input file and display part 2 solution.
