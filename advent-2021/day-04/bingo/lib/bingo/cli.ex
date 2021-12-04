@@ -51,6 +51,7 @@ defmodule Bingo.CLI do
     boards = board_tok
              |> Enum.map(&String.to_integer/1)
              |> Enum.chunk_every(25)
+             |> Enum.map(fn squares -> {squares, 0, 0} end)
     {balls, boards}
   end
 end
