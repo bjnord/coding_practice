@@ -4,6 +4,7 @@ defmodule Bingo do
   """
 
   import Bingo.CLI
+  use Bitwise
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -26,6 +27,25 @@ defmodule Bingo do
                       |> File.read!
                       |> parse_input
     IO.puts("Part 1 answer is TODO")
+  end
+
+  @doc """
+  Mark board with called number.
+
+  ## Examples
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0, 0}
+      iex> board = Bingo.mark_board(board, 7)
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100000, 7}
+      iex> board = Bingo.mark_board(board, 4)
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100001, 11}
+      iex> board = Bingo.mark_board(board, 10)
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100001, 11}
+  """
+  def mark_board({squares, called_bits, called_sum}, called) do
+    case Enum.find_index(squares, fn sq -> sq == called end) do
+      nil -> {squares, called_bits, called_sum}
+      i -> {squares, called_bits ||| Bitwise.bsl(1, i), called_sum + called}
+    end
   end
 
   @doc """

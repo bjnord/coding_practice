@@ -32,11 +32,29 @@ defmodule BingoTest do
           {[3, 15, 0, 2, 22, 9, 18, 13, 17, 5, 19, 8, 7, 25, 23, 20, 11, 10, 24, 4, 14, 21, 16, 12, 6], 0, 0},
           {[14, 21, 17, 24, 4, 10, 16, 15, 9, 19, 18, 8, 23, 26, 20, 22, 11, 13, 6, 5, 2, 0, 12, 3, 7], 0, 0},
         ],
+        exp_marks: [
+          {0b0000010000100100100001000, 36},
+          {0b0000010010001001000100000, 36},
+          {0b1000010010000000100010000, 36},
+        ],
       ]
     end
 
     test "parser gets expected balls and boards", fixture do
       assert Bingo.CLI.parse_input(fixture.input) == {fixture.exp_balls, fixture.exp_boards}
+    end
+
+    test "board marker", fixture do
+      first_called = Enum.take(fixture.exp_balls, 5)
+      # FIXME run test for all boards, not just first
+      board = Enum.at(fixture.exp_boards, 0)
+      marked_board = first_called
+                     |> Enum.reduce(board, fn (called, board) ->
+                       Bingo.mark_board(board, called)
+                     end)
+      {exp_called_bits, exp_called_sum} = Enum.at(fixture.exp_marks, 0)
+      assert exp_called_bits == elem(marked_board, 1)
+      assert exp_called_sum == elem(marked_board, 2)
     end
   end
 end
