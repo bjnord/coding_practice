@@ -26,8 +26,9 @@ defmodule Bingo do
     {balls, boards} = input_file
                       |> File.read!
                       |> parse_input(opts)
-    {winning_board, last_ball} = play(boards, balls)
-    uncalled_sum(winning_board) * last_ball
+    boards
+    |> find_first_winning_board(balls)
+    |> elem(3)  # score
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -35,36 +36,45 @@ defmodule Bingo do
   Mark board with called number.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0, 0}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0, 0, nil}
       iex> board = Bingo.mark_board(board, 7)
-      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100000, 7}
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100000, 7, nil}
       iex> board = Bingo.mark_board(board, 4)
-      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100001, 11}
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100001, 7+4, nil}
       iex> _board = Bingo.mark_board(board, 10)
-      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b00100001, 11}
+      {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b000100001, 7+4, nil}
   """
-  def mark_board({squares, called_bits, called_sum}, called) do
-    case Enum.find_index(squares, fn sq -> sq == called end) do
-      nil -> {squares, called_bits, called_sum}
-      i -> {squares, called_bits ||| Bitwise.bsl(1, i), called_sum + called}
+  def mark_board({squares, called_bits, called_sum, score}, called) do
+    marked_board =
+      case Enum.find_index(squares, fn sq -> sq == called end) do
+        nil -> {squares, called_bits, called_sum, score}
+        i -> {squares, called_bits ||| Bitwise.bsl(1, i), called_sum + called, score}
+      end
+    case {winning_board?(marked_board), score} do
+      {true, nil} -> score_board(marked_board, called)
+      {_, _} -> marked_board
     end
+  end
+  defp score_board({squares, called_bits, called_sum, _score}, called) do
+    score = uncalled_sum({squares, called_bits, called_sum, nil}) * called
+    {squares, called_bits, called_sum, score}
   end
 
   @doc """
   Determine if marked board wins.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011000001, 9+2+6}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011000001, 9+2+6, nil}
       iex> Bingo.winning_board?(board)
       false
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6)}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6), nil}
       iex> Bingo.winning_board?(board)
       true
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b111000001, (4+9+2)+6}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b111000001, (4+9+2)+6, nil}
       iex> Bingo.winning_board?(board)
       true
   """
-  def winning_board?({squares, called_bits, _called_sum}) do
+  def winning_board?({squares, called_bits, _called_sum, _score}) do
     dim = Math.isqrt(Enum.count(squares))
     bit_grid = called_bits
                |> Integer.to_string(2)
@@ -87,28 +97,29 @@ defmodule Bingo do
   end
 
   @doc """
-  Play bingo.
-
-  Returns `{winning_board, last_ball}`.
+  Play bingo, finding the first winning board.
   """
-  def play(boards, [ball | next_balls]) do
+  def find_first_winning_board(boards, [ball | next_balls]) do
     next_boards = boards
                   |> Enum.map(fn board -> mark_board(board, ball) end)
-    case Enum.find(next_boards, &Bingo.winning_board?/1) do
-      nil -> play(next_boards, next_balls)
-      winning_board -> {winning_board, ball}
+    case Enum.find(next_boards, &Bingo.board_has_score?/1) do
+      nil -> find_first_winning_board(next_boards, next_balls)
+      winning_board -> winning_board
     end
+  end
+  def board_has_score?({_squares, _called_bits, _called_sum, score}) do
+    score != nil
   end
 
   @doc """
   Calculate sum of uncalled numbers on board.
 
   ## Examples
-      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6)}
+      iex> board = {[4, 9, 2, 3, 5, 7, 8, 1, 6], 0b011001001, 9+(2+7+6), nil}
       iex> Bingo.uncalled_sum(board)
       4+3+5+8+1
   """
-  def uncalled_sum({squares, _called_bits, called_sum}) do
+  def uncalled_sum({squares, _called_bits, called_sum, _score}) do
     Enum.sum(squares) - called_sum
   end
 
