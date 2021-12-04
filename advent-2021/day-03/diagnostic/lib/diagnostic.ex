@@ -125,12 +125,28 @@ defmodule Diagnostic do
   """
   def gamma_rate(sums) do
     Enum.map(sums, &Diagnostic.most_common/1)
-    |> String.Chars.to_string
-    |> Integer.parse(2)
-    |> elem(0)
+    |> tuples_to_int
   end
-  def most_common({zero, one}) when zero > one, do: ?0
-  def most_common({zero, one}) when one > zero, do: ?1
+  def most_common({zero, one}) when zero > one, do: bit_to_tuple(0)
+  def most_common({zero, one}) when one > zero, do: bit_to_tuple(1)
+
+  @doc """
+  Transform tuple buckets to integer.
+
+  ## Examples
+      iex> Diagnostic.gamma_rate([{1, 0}, {1, 0}, {1, 0}, {0, 1}, {1, 0}])
+      2
+      iex> Diagnostic.gamma_rate([{0, 1}, {0, 1}, {0, 1}, {0, 1}, {1, 0}])
+      30
+  """
+  def tuples_to_int(tuples) do
+    tuples
+    |> Enum.reduce(0, fn (t, acc) ->
+      acc * 2 + tuple_to_bit(t)
+    end)
+  end
+  defp tuple_to_bit(t) when t == {1, 0}, do: 0
+  defp tuple_to_bit(t) when t == {0, 1}, do: 1
 
   @doc """
   Compute epsilon rate from tuple bucket sums.
@@ -142,12 +158,10 @@ defmodule Diagnostic do
   """
   def epsilon_rate(sums) do
     Enum.map(sums, &Diagnostic.least_common/1)
-    |> String.Chars.to_string
-    |> Integer.parse(2)
-    |> elem(0)
+    |> tuples_to_int
   end
-  def least_common({zero, one}) when zero < one, do: ?0
-  def least_common({zero, one}) when one < zero, do: ?1
+  def least_common({zero, one}) when zero < one, do: bit_to_tuple(0)
+  def least_common({zero, one}) when one < zero, do: bit_to_tuple(1)
 
   @doc """
   Process input file and display part 2 solution.
