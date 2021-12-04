@@ -42,7 +42,7 @@ defmodule Bingo.CLI do
 
   Returns `{balls, boards}` where the former is a list, and the latter is a list of lists.
   """
-  def parse_input(input, opts \\ []) do
+  def parse_input(input, _opts \\ []) do
     [ball_tok | board_tok] = input
                              |> String.split
     balls = ball_tok
