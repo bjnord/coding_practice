@@ -128,7 +128,7 @@ defmodule Diagnostic do
     |> tuples_to_int
   end
   def most_common({zero, one}) when zero > one, do: bit_to_tuple(0)
-  def most_common({zero, one}) when one > zero, do: bit_to_tuple(1)
+  def most_common({zero, one}) when one >= zero, do: bit_to_tuple(1)
 
   @doc """
   Transform tuple buckets to integer.
@@ -160,16 +160,89 @@ defmodule Diagnostic do
     Enum.map(sums, &Diagnostic.least_common/1)
     |> tuples_to_int
   end
-  def least_common({zero, one}) when zero < one, do: bit_to_tuple(0)
+  def least_common({zero, one}) when zero <= one, do: bit_to_tuple(0)
   def least_common({zero, one}) when one < zero, do: bit_to_tuple(1)
 
   @doc """
   Process input file and display part 2 solution.
   """
   def part2(input_file, opts \\ []) do
-    {gam, eps} = input_file
-                 |> parse_input(opts)
-                 |> compute_power_rates
-    IO.inspect(gam * eps, label: "Part 2 answer is NOT")
+    {o2, co2} = input_file
+                |> parse_input(opts)
+                |> compute_life_support_ratings
+    IO.inspect(o2 * co2, label: "Part 2 answer is")
+  end
+
+  @doc """
+  Compute O₂ and CO₂ ratings from diagnostic report entries.
+
+  Returns `{o2, co2}`
+  """
+  def compute_life_support_ratings(entries) do
+    bucket_entries = entries
+                     |> Stream.map(&Diagnostic.bucketize_bits/1)
+    o2 = o2_rating(bucket_entries)
+    co2 = co2_rating(bucket_entries)
+    {o2, co2}
+  end
+
+  @doc """
+  Compute O₂ rating from tuple bucket entries.
+
+  ## Examples
+      iex> entries = [[1, 0, 0], [1, 1, 0], [0, 1, 0]]
+      iex> Enum.map(entries, &Diagnostic.bucketize_bits/1) |> Diagnostic.o2_rating
+      6
+  """
+  def o2_rating(bucket_entries), do: o2_rating(bucket_entries, 0)
+  def o2_rating(bucket_entries, bit) do
+    # sum tuple bucket entries, and find most common `bit`
+    filter_bit = bucket_entries
+                 |> Diagnostic.sum_bucket_entries()
+                 |> Enum.map(&Diagnostic.most_common/1)
+                 |> Enum.at(bit)
+    # filter tuple bucket entries and keep those matching
+    # most common `bit`
+    filtered = bucket_entries
+               |> Enum.filter(fn entry -> Enum.at(entry, bit) == filter_bit end)
+    # if more than one left, continue to next `bit` using
+    # tail recursion; otherwise, return the one as an
+    # integer
+    if Enum.count(filtered) == 1 do
+      Enum.at(filtered, 0)
+      |> tuples_to_int
+    else
+      o2_rating(filtered, bit + 1)
+    end
+  end
+
+  @doc """
+  Compute CO₂ rating from tuple bucket entries.
+
+  ## Examples
+      iex> entries = [[1, 0, 0], [1, 1, 0], [0, 1, 0]]
+      iex> Enum.map(entries, &Diagnostic.bucketize_bits/1) |> Diagnostic.co2_rating
+      2
+  """
+  def co2_rating(bucket_entries), do: co2_rating(bucket_entries, 0)
+  def co2_rating(bucket_entries, bit) do
+    # sum tuple bucket entries, and find least common `bit`
+    filter_bit = bucket_entries
+                 |> Diagnostic.sum_bucket_entries()
+                 |> Enum.map(&Diagnostic.least_common/1)
+                 |> Enum.at(bit)
+    # filter tuple bucket entries and keep those matching
+    # least common `bit`
+    filtered = bucket_entries
+               |> Enum.filter(fn entry -> Enum.at(entry, bit) == filter_bit end)
+    # if more than one left, continue to next `bit` using
+    # tail recursion; otherwise, return the one as an
+    # integer
+    if Enum.count(filtered) == 1 do
+      Enum.at(filtered, 0)
+      |> tuples_to_int
+    else
+      co2_rating(filtered, bit + 1)
+    end
   end
 end
