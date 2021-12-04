@@ -14,10 +14,8 @@ defmodule Pilot do
   """
   def main(argv) do
     {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1),
-      do: part1(input_file, opts)
-    if Enum.member?(opts[:parts], 2),
-      do: part2(input_file, opts)
+    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
   end
 
   @doc """
