@@ -12,6 +12,7 @@ defmodule Hydrothermal do
   import Hydrothermal.Parser
   import Submarine
   import Submarine.CLI
+  require Logger
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -115,5 +116,32 @@ defmodule Hydrothermal do
         end
       {grid, max(dim, max(x+1, y+1))}
     end)
+  end
+
+  @doc """
+  Render grid map to text.
+  """
+  def render_grid_map({grid, dim}) do
+    grid_map_points(dim)
+    |> Enum.reduce([], fn (pos, chars) ->
+      if Map.has_key?(grid, pos) do
+        [?0 + Map.get(grid, pos) | chars]
+      else
+        [?. | chars]
+      end
+    end)
+    |> Enum.reverse
+    |> Enum.chunk_every(dim)
+    |> Enum.map(fn chars -> to_string(chars) end)
+    |> Enum.join("\n")
+    |> (fn text -> "#{text}\n" end).()
+  end
+  defp grid_map_points(dim) do
+    for y <- 0..dim-1 do
+      for x <- 0..dim-1 do
+        {x, y}
+      end
+    end
+    |> List.flatten()
   end
 end

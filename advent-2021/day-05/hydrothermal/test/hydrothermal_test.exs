@@ -22,6 +22,18 @@ defmodule HydrothermalTest do
         exp_grid_sum: 53,
         exp_hv_intersections: 5,
         exp_intersections: 12,
+        exp_render: """
+        1.1....11.
+        .111...2..
+        ..2.1.111.
+        ...1.2.2..
+        .112313211
+        ...1.2....
+        ..1...1...
+        .1.....1..
+        1.......1.
+        222111....
+        """,
       ]
     end
 
@@ -30,6 +42,12 @@ defmodule HydrothermalTest do
       assert dim == fixture.exp_dimension
       assert Map.keys(grid) |> Enum.count() == fixture.exp_n_points
       assert Map.values(grid) |> Enum.sum() == fixture.exp_grid_sum
+    end
+
+    test "correct grid map rendering", fixture do
+      render = Hydrothermal.grid_map(fixture.vents)
+               |> Hydrothermal.render_grid_map()
+      assert render == fixture.exp_render
     end
 
     test "correct count of horiz/vert vent intersections", fixture do
