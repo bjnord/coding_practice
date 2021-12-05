@@ -17,19 +17,19 @@ defmodule HydrothermalTest do
           [{0, 0}, {8, 8}],
           [{5, 5}, {8, 2}],
         ],
-        exp_hv_overlaps: 5,
-        exp_overlaps: 12,
+        exp_hv_intersections: 5,
+        exp_intersections: 12,
       ]
     end
 
     test "correct count of horiz/vert vent intersections", fixture do
       hv_vents = fixture.vents
                  |> Enum.filter(&Hydrothermal.horiz_or_vert?/1)
-      assert Hydrothermal.vent_overlaps(hv_vents) == fixture.exp_hv_overlaps
+      assert Hydrothermal.vent_intersections(hv_vents) == fixture.exp_hv_intersections
     end
 
     test "correct count of all vent intersections", fixture do
-      assert Hydrothermal.vent_overlaps(fixture.vents) == fixture.exp_overlaps
+      assert Hydrothermal.vent_intersections(fixture.vents) == fixture.exp_intersections
     end
   end
 end
