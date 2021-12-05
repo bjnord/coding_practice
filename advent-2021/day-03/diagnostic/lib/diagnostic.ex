@@ -4,6 +4,7 @@ defmodule Diagnostic do
   """
 
   import Diagnostic.CLI
+  import Submarine
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -120,19 +121,5 @@ defmodule Diagnostic do
                        |> Enum.filter(fn entry -> Enum.at(entry, pos) == filter_bit end)
     # continue to next `pos` (using tail recursion)
     life_support_rating(filtered_entries, pos + 1, common_func)
-  end
-
-  @doc """
-  Transpose a two-dimensional array.
-
-  h/t [this StackOverflow answer](https://stackoverflow.com/a/23706084/291754)
-
-  ## Examples
-      iex> Diagnostic.transpose([[1, 2], [3, 4], [5, 6]])
-      [[1, 3, 5], [2, 4, 6]]
-  """
-  def transpose([[] | _]), do: []
-  def transpose(a) do
-      [Enum.map(a, &hd/1) | transpose(Enum.map(a, &tl/1))]
   end
 end
