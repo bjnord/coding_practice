@@ -1,7 +1,7 @@
 BIN = ./pilot
 FILES = mix.exs test/test_helper.exs \
 	lib/pilot.ex test/pilot_test.exs \
-	lib/pilot/cli.ex test/pilot/cli_test.exs
+	lib/pilot/parser.ex test/pilot/parser_test.exs
 
 .PHONY: run test clean
 

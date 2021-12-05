@@ -3,7 +3,8 @@ defmodule Pilot do
   Documentation for Pilot.
   """
 
-  import Pilot.CLI
+  import Pilot.Parser
+  import Submarine.CLI
 
   @doc """
   Parse arguments and call puzzle part methods.
