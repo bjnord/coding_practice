@@ -1,5 +1,6 @@
 FILES = mix.exs test/test_helper.exs \
-	lib/submarine.ex test/submarine_test.exs
+	lib/submarine.ex test/submarine_test.exs \
+	lib/submarine/cli.ex test/submarine/cli_test.exs
 
 .PHONY: test release clean
 

@@ -4,6 +4,7 @@ defmodule Depth.MixProject do
   def project do
     [
       app: :depth,
+      escript: escript_config(),
       version: "0.1.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
@@ -21,7 +22,14 @@ defmodule Depth.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:propcheck, "~> 1.4", only: [:test, :dev]},
+      {:propcheck, "~> 1.4", only: [:test]},
+      {:submarine, path: "../../submarine"},
+    ]
+  end
+
+  defp escript_config do
+    [
+      main_module: Depth
     ]
   end
 end

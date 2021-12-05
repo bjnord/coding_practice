@@ -3,15 +3,31 @@ defmodule Depth do
   Documentation for Depth.
   """
 
+  import Submarine.CLI
+
   @doc """
-  Solve part 1.
+  Parse arguments and call puzzle part methods.
+
+  ## Parameters
+
+  - argv: Command-line arguments
   """
-  def part1([filename]) do
-    File.stream!(filename)
+  def main(argv) do
+    {input_file, opts} = parse_args(argv)
+    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
+  end
+
+  @doc """
+  Process input file and display part 1 solution.
+  """
+  def part1(input_file, _opts \\ []) do
+    input_file
+    |> File.stream!
     |> Stream.map(&String.trim_trailing/1)
     |> Stream.map(&String.to_integer/1)
     |> count_increases
-    |> IO.inspect(label: "Part 1 number of increases is")
+    |> IO.inspect(label: "Part 1 answer is")
   end
 
   @doc """
@@ -33,15 +49,16 @@ defmodule Depth do
   end
 
   @doc """
-  Solve part 2.
+  Process input file and display part 2 solution.
   """
-  def part2([filename]) do
-    File.stream!(filename)
+  def part2(input_file, _opts \\ []) do
+    input_file
+    |> File.stream!
     |> Stream.map(&String.trim_trailing/1)
     |> Stream.map(&String.to_integer/1)
     |> sliding_windows_of(3)
     |> count_increases
-    |> IO.inspect(label: "Part 2 number of sliding-window increases is")
+    |> IO.inspect(label: "Part 2 answer is")
   end
 
   defp sliding_windows_of(depths, n) do
