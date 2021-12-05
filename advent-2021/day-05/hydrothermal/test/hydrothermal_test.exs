@@ -17,9 +17,19 @@ defmodule HydrothermalTest do
           [{0, 0}, {8, 8}],
           [{5, 5}, {8, 2}],
         ],
+        exp_dimension: 10,
+        exp_n_points: 39,
+        exp_grid_sum: 53,
         exp_hv_intersections: 5,
         exp_intersections: 12,
       ]
+    end
+
+    test "correct grid map", fixture do
+      {grid, dim} = Hydrothermal.grid_map(fixture.vents)
+      assert dim == fixture.exp_dimension
+      assert Map.keys(grid) |> Enum.count() == fixture.exp_n_points
+      assert Map.values(grid) |> Enum.sum() == fixture.exp_grid_sum
     end
 
     test "correct count of horiz/vert vent intersections", fixture do

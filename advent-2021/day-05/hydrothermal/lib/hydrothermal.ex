@@ -91,16 +91,29 @@ defmodule Hydrothermal do
   Find count of all vent intersection points.
   """
   def vent_intersections(vents) do
-    grid = vents
-           |> Enum.flat_map(&Hydrothermal.to_points/1)
-           |> Enum.reduce(Map.new(), fn (p, grid) ->
-             if Map.has_key?(grid, p) do
-               Map.replace!(grid, p, grid[p] + 1)
-             else
-               Map.put(grid, p, 1)
-             end
-           end)
+    {grid, _} = grid_map(vents)
     Map.keys(grid)
     |> Enum.count(fn k -> grid[k] > 1 end)
+  end
+
+  @doc """
+  Build square grid map with count of point occurrences.
+
+  Returns `{grid, dim}` where
+  - `grid` is a `Map`: keys are `{x, y}` tuples, values are integer counts
+  - `dim` is the dimension of the grid (_e.g._ `dim=10` has coordinates in `0..9`)
+  """
+  def grid_map(vents) do
+    vents
+    |> Enum.flat_map(&Hydrothermal.to_points/1)
+    |> Enum.reduce({Map.new(), 0}, fn ({x, y}, {grid, dim}) ->
+      grid =
+        if Map.has_key?(grid, {x, y}) do
+          Map.replace!(grid, {x, y}, grid[{x, y}] + 1)
+        else
+          Map.put(grid, {x, y}, 1)
+        end
+      {grid, max(dim, max(x+1, y+1))}
+    end)
   end
 end
