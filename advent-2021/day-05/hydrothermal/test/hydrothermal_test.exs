@@ -18,11 +18,16 @@ defmodule HydrothermalTest do
           [{5, 5}, {8, 2}],
         ],
         exp_hv_overlaps: 5,
+        exp_overlaps: 12,
       ]
     end
 
     test "correct count of horiz/vert vent intersections", fixture do
       assert Hydrothermal.horiz_or_vert_overlaps(fixture.vents) == fixture.exp_hv_overlaps
+    end
+
+    test "correct count of all vent intersections", fixture do
+      assert Hydrothermal.vent_overlaps(fixture.vents) == fixture.exp_overlaps
     end
   end
 end
