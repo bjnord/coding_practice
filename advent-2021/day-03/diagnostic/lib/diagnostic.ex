@@ -3,8 +3,9 @@ defmodule Diagnostic do
   Documentation for Diagnostic.
   """
 
-  import Diagnostic.CLI
+  import Diagnostic.Parser
   import Submarine
+  import Submarine.CLI
 
   @doc """
   Parse arguments and call puzzle part methods.
