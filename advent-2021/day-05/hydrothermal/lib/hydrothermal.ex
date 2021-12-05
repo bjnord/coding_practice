@@ -23,8 +23,17 @@ defmodule Hydrothermal do
   Process input file and display part 1 solution.
   """
   def part1(input_file, opts \\ []) do
-    grid = input_file
-           |> parse_input(opts)
+    input_file
+    |> parse_input(opts)
+    |> horiz_or_vert_overlaps()
+    |> IO.inspect(label: "Part 1 answer is")
+  end
+
+  @doc """
+  Find count of all horizontal or vertical vent intersection points.
+  """
+  def horiz_or_vert_overlaps(vents) do
+    grid = vents
            |> Enum.filter(&Hydrothermal.horiz_or_vert?/1)
            |> Enum.flat_map(&Hydrothermal.to_points/1)
            |> Enum.reduce(Map.new(), fn (p, grid) ->
@@ -36,7 +45,6 @@ defmodule Hydrothermal do
            end)
     Map.keys(grid)
     |> Enum.count(fn k -> grid[k] > 1 end)
-    |> IO.inspect(label: "Part 1 answer is")
   end
 
   @doc """
