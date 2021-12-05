@@ -33,9 +33,10 @@ defmodule Pilot.Parser do
   """
   def parse_line(line) do
     Regex.run(~r/^(\w+)\s+(\d+)/, line)
+    |> (fn [_, dir, mag] -> {dir, String.to_integer(mag)} end).()
     |> parse_step
   end
-  defp parse_step([_, dir, mag]) when dir == "forward", do: {String.to_integer(mag), 0}
-  defp parse_step([_, dir, mag]) when dir == "down", do: {0, String.to_integer(mag)}
-  defp parse_step([_, dir, mag]) when dir == "up", do: {0, -String.to_integer(mag)}
+  defp parse_step({dir, mag}) when dir == "forward", do: {mag, 0}
+  defp parse_step({dir, mag}) when dir == "down", do: {0, mag}
+  defp parse_step({dir, mag}) when dir == "up", do: {0, -mag}
 end
