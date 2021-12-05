@@ -4,6 +4,7 @@ defmodule Hydrothermal do
   """
 
   import Hydrothermal.Parser
+  import Submarine
   import Submarine.CLI
 
   @doc """
@@ -74,26 +75,17 @@ defmodule Hydrothermal do
       [{6, 1}, {5, 2}, {4, 3}, {3, 4}, {2, 5}]
   """
   def to_points([{x1, y1}, {x2, y2}]) do
-    cond do
-      x1 == x2 ->
-        y1..y2
-        |> Enum.map(fn y -> {x1, y} end)
-      y1 == y2 ->
-        x1..x2
-        |> Enum.map(fn x -> {x, y1} end)
-      abs(x1 - x2) == abs(y1 - y2) ->
-        dx = if x1 < x2, do: 1, else: -1
-        dy = if y1 < y2, do: 1, else: -1
-        1..1_000_000
-        |> Enum.reduce_while({[], {x1, y1}}, fn (_i, {points, {x, y}}) ->
-          if {x, y} == {x2, y2} do
-            {:halt, [{x, y} | points]}
-          else
-            {:cont, {[{x, y} | points], {x + dx, y + dy}}}
-          end
-        end)
-        |> Enum.reverse
-    end
+    dx = step_delta(x1, x2)
+    dy = step_delta(y1, y2)
+    1..1_000_000
+    |> Enum.reduce_while({[], {x1, y1}}, fn (_i, {points, {x, y}}) ->
+      if {x, y} == {x2, y2} do
+        {:halt, [{x, y} | points]}
+      else
+        {:cont, {[{x, y} | points], {x + dx, y + dy}}}
+      end
+    end)
+    |> Enum.reverse
   end
 
   @doc """
