@@ -13,7 +13,7 @@ test:
 	mix test
 
 clean:
-	rm -rf _build $(BIN)
+	rm -rf _build $(BIN) log/*.log
 
 $(BIN): $(FILES)
 	mix escript.build

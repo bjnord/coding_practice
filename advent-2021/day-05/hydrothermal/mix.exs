@@ -22,6 +22,7 @@ defmodule Hydrothermal.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:logger_file_backend, "~> 0.0.12"},
       {:submarine, path: "../../submarine"},
     ]
   end
