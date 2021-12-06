@@ -3,8 +3,9 @@ defmodule Bingo do
   Documentation for Bingo.
   """
 
-  import Bingo.CLI
+  import Bingo.Parser
   import Submarine
+  import Submarine.CLI
   use Bitwise
 
   @doc """

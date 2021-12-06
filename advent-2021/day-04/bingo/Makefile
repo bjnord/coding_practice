@@ -1,7 +1,7 @@
 BIN = ./bingo
 FILES = mix.exs test/test_helper.exs \
 	lib/bingo.ex test/bingo_test.exs \
-	lib/bingo/cli.ex test/bingo/cli_test.exs
+	lib/bingo/parser.ex test/bingo/parser_test.exs
 
 .PHONY: run test clean
 

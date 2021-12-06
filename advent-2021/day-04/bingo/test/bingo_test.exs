@@ -6,29 +6,8 @@ defmodule BingoTest do
   describe "puzzle example" do
     setup do
       [
-        input: """
-          7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
-  
-          22 13 17 11  0
-           8  2 23  4 24
-          21  9 14 16  7
-           6 10  3 18  5
-           1 12 20 15 19
-  
-           3 15  0  2 22
-           9 18 13 17  5
-          19  8  7 25 23
-          20 11 10 24  4
-          14 21 16 12  6
-  
-          14 21 17 24  4
-          10 16 15  9 19
-          18  8 23 26 20
-          22 11 13  6  5
-           2  0 12  3  7
-        """,
-        exp_balls: [7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24, 10, 16, 13, 6, 15, 25, 12, 22, 18, 20, 8, 19, 3, 26, 1], 
-        exp_boards: [
+        balls: [7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24, 10, 16, 13, 6, 15, 25, 12, 22, 18, 20, 8, 19, 3, 26, 1],
+        boards: [
           {[22, 13, 17, 11, 0, 8, 2, 23, 4, 24, 21, 9, 14, 16, 7, 6, 10, 3, 18, 5, 1, 12, 20, 15, 19], 0b0, nil},
           {[3, 15, 0, 2, 22, 9, 18, 13, 17, 5, 19, 8, 7, 25, 23, 20, 11, 10, 24, 4, 14, 21, 16, 12, 6], 0b0, nil},
           {[14, 21, 17, 24, 4, 10, 16, 15, 9, 19, 18, 8, 23, 26, 20, 22, 11, 13, 6, 5, 2, 0, 12, 3, 7], 0b0, nil},
@@ -41,13 +20,9 @@ defmodule BingoTest do
       ]
     end
 
-    test "parser gets expected balls and boards", fixture do
-      assert Bingo.CLI.parse_input(fixture.input) == {fixture.exp_balls, fixture.exp_boards}
-    end
-
     test "board marker", fixture do
-      balls = Enum.take(fixture.exp_balls, 5)
-      act_marks = fixture.exp_boards
+      balls = Enum.take(fixture.balls, 5)
+      act_marks = fixture.boards
                   |> Enum.map(fn board ->
                     mark_board_for_balls(board, balls)
                     |> elem(1)  # called_bits
@@ -69,31 +44,31 @@ defmodule BingoTest do
     end
 
     test "board win tester, just before winning number called", fixture do
-      balls = Enum.take(fixture.exp_balls, 11)
-      board = Enum.at(fixture.exp_boards, 2)
+      balls = Enum.take(fixture.balls, 11)
+      board = Enum.at(fixture.boards, 2)
               |> mark_board_for_balls(balls)
       assert Bingo.winning_board?(board) == false
     end
 
     test "board win tester, after winning number called", fixture do
-      balls = Enum.take(fixture.exp_balls, 12)
-      board = Enum.at(fixture.exp_boards, 2)
+      balls = Enum.take(fixture.balls, 12)
+      board = Enum.at(fixture.boards, 2)
               |> mark_board_for_balls(balls)
       assert Bingo.winning_board?(board) == true
     end
 
     test "first winning board finder", fixture do
-      exp_winning_board = Enum.at(fixture.exp_boards, 2)
-      act_winning_board = fixture.exp_boards
-                          |> Bingo.find_first_winning_board(fixture.exp_balls)
+      exp_winning_board = Enum.at(fixture.boards, 2)
+      act_winning_board = fixture.boards
+                          |> Bingo.find_first_winning_board(fixture.balls)
       assert elem(act_winning_board, 0) == elem(exp_winning_board, 0)
       assert elem(act_winning_board, 2) == 4512
     end
 
     test "last winning board finder", fixture do
-      exp_winning_board = Enum.at(fixture.exp_boards, 1)
-      act_winning_board = fixture.exp_boards
-                          |> Bingo.find_last_winning_board(fixture.exp_balls)
+      exp_winning_board = Enum.at(fixture.boards, 1)
+      act_winning_board = fixture.boards
+                          |> Bingo.find_last_winning_board(fixture.balls)
       assert elem(act_winning_board, 0) == elem(exp_winning_board, 0)
       assert elem(act_winning_board, 2) == 1924
     end
