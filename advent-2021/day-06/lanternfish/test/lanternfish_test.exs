@@ -20,12 +20,10 @@ defmodule LanternfishTest do
     test "generator produces expected buckets", fixture do
       assert Lanternfish.generate(fixture.buckets_0, 18) == fixture.buckets_18
       act_80_count = Lanternfish.generate(fixture.buckets_0, 80)
-                     |> Tuple.to_list()
-                     |> Enum.sum()
+                     |> Lanternfish.tuple_sum()
       assert act_80_count == fixture.buckets_80_count
       act_256_count = Lanternfish.generate(fixture.buckets_0, 256)
-                      |> Tuple.to_list()
-                      |> Enum.sum()
+                      |> Lanternfish.tuple_sum()
       assert act_256_count == fixture.buckets_256_count
     end
   end

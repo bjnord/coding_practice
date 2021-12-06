@@ -27,8 +27,7 @@ defmodule Lanternfish do
     |> parse_input(opts)
     |> to_buckets()
     |> generate(80)
-    |> Tuple.to_list()
-    |> Enum.sum()
+    |> tuple_sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -72,8 +71,17 @@ defmodule Lanternfish do
     |> parse_input(opts)
     |> to_buckets()
     |> generate(256)
+    |> tuple_sum()
+    |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Return sum of tuple values.
+  FIXME `Tuple.sum/1` is available in later versions of Elixir.
+  """
+  def tuple_sum(tuple) do
+    tuple
     |> Tuple.to_list()
     |> Enum.sum()
-    |> IO.inspect(label: "Part 2 answer is")
   end
 end
