@@ -25,8 +25,10 @@ defmodule Lanternfish do
   def part1(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
-    |> generate(80, opts)
-    |> Enum.count()
+    |> to_buckets()
+    |> generate(80)
+    |> Tuple.to_list()
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -47,44 +49,19 @@ defmodule Lanternfish do
   end
 
   @doc """
-  Simulate lanternfish generation with starting list `fish`.
-  (Each `fish` is an integer timer value which ticks down from 8 to 0.)
+  Simulate lanternfish generation.
 
-  Returns final list of `fish` after `days` days of generation.
+  Returns final `buckets` after `days` days of generation.
   """
-  def generate(fish, days, opts \\ []), do: generate(fish, days, 0, opts)
-  def generate(fish, days, day, opts) do
-    if opts[:verbose] && (day <= 18) do
-      IO.puts "#{label(day)}#{Enum.join(fish, ",")}"
-    end
-    if day < days do
-      {fish, gen_fish} =
-        fish
-        |> Enum.reduce({[], []}, fn (f, {fish, gen_fish}) ->
-          new_f = next_timer(f)
-          new_fish = [new_f | fish]
-          new_gen_fish = if f == 0, do: [8 | gen_fish], else: gen_fish
-          {new_fish, new_gen_fish}
-        end)
-      new_fish = gen_fish ++ fish
-                 |> Enum.reverse()
-      generate(new_fish, days, day + 1, opts)
-    else
-      fish
-    end
-  end
-  defp next_timer(f) do
-    case f do
-      0 -> 6
-      n -> n - 1
-    end
-  end
-  defp label(day) do
-    case day do
-      0 -> "Initial state: "
-      1 -> "After  1 day:  "
-      _ -> "After #{Integer.to_string(day) |> String.pad_leading(2)} days: "
-    end
+  def generate(buckets, days), do: generate(buckets, days, 0)
+  def generate(buckets, days, day) when day == days, do: buckets
+  def generate(buckets, days, day) do
+    gen_count = elem(buckets, 0)
+    buckets
+    |> Tuple.delete_at(0)
+    |> put_elem(6, elem(buckets, 7) + gen_count)
+    |> Tuple.append(gen_count)
+    |> generate(days, day + 1)
   end
 
   @doc """
@@ -93,8 +70,10 @@ defmodule Lanternfish do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
-    |> generate(256, opts)
-    |> Enum.count()
+    |> to_buckets()
+    |> generate(256)
+    |> Tuple.to_list()
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
