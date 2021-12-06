@@ -6,9 +6,14 @@ defmodule LanternfishTest do
     setup do
       [
         fish: [3, 4, 3, 1, 2],
+        buckets_0: {0, 1, 1, 2, 1, 0, 0, 0, 0},
         gen_fish_18: [6, 0, 6, 4, 5, 6, 0, 1, 1, 2, 6, 0, 1, 1, 1, 2, 2, 3, 3, 4, 6, 7, 8, 8, 8, 8],
         gen_count_80: 5934,
       ]
+    end
+
+    test "bucketizer", fixture do
+      assert Lanternfish.to_buckets(fixture.fish) == fixture.buckets_0
     end
 
     test "generator gets expected fish", fixture do

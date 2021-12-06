@@ -31,6 +31,22 @@ defmodule Lanternfish do
   end
 
   @doc """
+  Put `fish` into buckets by timer value.
+
+  Returns a tuple in which each element is a count of fish with that timer value.
+
+  ## Examples
+      iex> Lanternfish.to_buckets([8, 1, 5, 1, 8, 1, 2, 0, 2])
+      {1, 3, 2, 0, 0, 1, 0, 0, 2}
+  """
+  def to_buckets(fish) do
+    fish
+    |> Enum.reduce({0, 0, 0, 0, 0, 0, 0, 0, 0}, fn (fish, buckets) ->
+      put_elem(buckets, fish, elem(buckets, fish) + 1)
+    end)
+  end
+
+  @doc """
   Simulate lanternfish generation with starting list `fish`.
   (Each `fish` is an integer timer value which ticks down from 8 to 0.)
 
