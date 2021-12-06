@@ -23,6 +23,8 @@ defmodule Hydrothermal.MixProject do
   defp deps do
     [
       {:logger_file_backend, "~> 0.0.12"},
+      #{:math, "~> 0.7.0"},
+      #{:propcheck, "~> 1.4", only: [:test]},
       {:submarine, path: "../../submarine"},
     ]
   end
