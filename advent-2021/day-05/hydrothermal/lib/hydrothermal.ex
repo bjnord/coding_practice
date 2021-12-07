@@ -1,12 +1,6 @@
 defmodule Hydrothermal do
   @moduledoc ~S"""
   Documentation for Hydrothermal.
-
-  Terminology:
-  - an "intersection" is a single point where two vent vectors of **different angles** cross
-    - _e.g._ a horizontal vector crossing a vertical one
-  - an "overlap" is a set of points shared by two vent vectors of **the same angle**
-    - _e.g._ `2,2 -> 5,5` and `7,7 -> 4,4` overlap on `4,4` and `5,5`
   """
 
   import Hydrothermal.Parser
@@ -34,7 +28,7 @@ defmodule Hydrothermal do
     input_file
     |> parse_input(opts)
     |> Enum.filter(&Hydrothermal.horiz_or_vert?/1)
-    |> vent_intersections()
+    |> vent_overlaps()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -84,14 +78,14 @@ defmodule Hydrothermal do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
-    |> vent_intersections()
+    |> vent_overlaps()
     |> IO.inspect(label: "Part 2 answer is")
   end
 
   @doc """
-  Find count of all vent intersection points.
+  Find count of all vent overlap points.
   """
-  def vent_intersections(vents) do
+  def vent_overlaps(vents) do
     {grid, _} = grid_map(vents)
     Map.keys(grid)
     |> Enum.count(fn k -> grid[k] > 1 end)
