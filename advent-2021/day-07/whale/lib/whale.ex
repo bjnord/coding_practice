@@ -3,19 +3,6 @@ defmodule Whale do
   Documentation for Whale.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Whale.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
-
   import Whale.Parser
   import Submarine.CLI
 
@@ -38,7 +25,27 @@ defmodule Whale do
   def part1(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> find_cheapest_fuel()
     |> IO.inspect(label: "Part 1 answer is")
+  end
+
+  @doc """
+  Find cheapest fuel cost to align `crabs` to the same position.
+  """
+  def find_cheapest_fuel(crabs) do
+    min = Enum.min(crabs)
+    max = Enum.max(crabs)
+    min..max
+    |> Enum.map(fn p -> align_crabs_fuel(p, crabs) end)
+    |> Enum.min
+  end
+
+  @doc """
+  Determine fuel cost to align `crabs` to `pos`.
+  """
+  def align_crabs_fuel(pos, crabs) do
+    crabs
+    |> Enum.reduce(0, fn (cpos, fuel) -> fuel + abs(cpos - pos) end)
   end
 
   @doc """
