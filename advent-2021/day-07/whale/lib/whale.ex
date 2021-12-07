@@ -30,7 +30,7 @@ defmodule Whale do
   end
 
   @doc """
-  Find cheapest fuel cost to align `crabs` to the same position.
+  Find cheapest fuel cost to align `crabs` to the same position (simple calculation).
   """
   def find_cheapest_fuel(crabs) do
     min = Enum.min(crabs)
@@ -41,7 +41,7 @@ defmodule Whale do
   end
 
   @doc """
-  Determine fuel cost to align `crabs` to `pos`.
+  Determine fuel cost to align `crabs` to `pos` (simple calculation).
   """
   def align_crabs_fuel(pos, crabs) do
     crabs
@@ -54,6 +54,30 @@ defmodule Whale do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> find_cheapest_fuel_c()
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Find cheapest fuel cost to align `crabs` to the same position (complex calculation).
+  """
+  def find_cheapest_fuel_c(crabs) do
+    min = Enum.min(crabs)
+    max = Enum.max(crabs)
+    min..max
+    |> Enum.map(fn p -> align_crabs_fuel_c(p, crabs) end)
+    |> Enum.min
+  end
+
+  @doc """
+  Determine fuel cost to align `crabs` to `pos` (complex calculation).
+  """
+  def align_crabs_fuel_c(pos, crabs) do
+    crabs
+    |> Enum.reduce(0, fn (cpos, fuel) -> fuel + complex_cost(cpos, pos) end)
+  end
+  defp complex_cost(cpos, pos) do
+    dist = abs(cpos - pos)
+    div(dist * (dist + 1), 2)  # triangular number
   end
 end
