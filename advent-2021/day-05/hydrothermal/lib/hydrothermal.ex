@@ -108,13 +108,10 @@ defmodule Hydrothermal do
     vents
     |> Enum.flat_map(&Hydrothermal.to_points/1)
     |> Enum.reduce({Map.new(), 0}, fn ({x, y}, {grid, dim}) ->
-      grid =
-        if Map.has_key?(grid, {x, y}) do
-          Map.replace!(grid, {x, y}, grid[{x, y}] + 1)
-        else
-          Map.put(grid, {x, y}, 1)
-        end
-      {grid, max(dim, max(x+1, y+1))}
+      {
+        Map.update(grid, {x, y}, 1, fn c -> c + 1 end),
+        max(dim, max(x+1, y+1)),
+      }
     end)
   end
 
@@ -124,10 +121,9 @@ defmodule Hydrothermal do
   def render_grid_map({grid, dim}) do
     grid_map_points(dim)
     |> Enum.reduce([], fn (pos, chars) ->
-      if Map.has_key?(grid, pos) do
-        [?0 + Map.get(grid, pos) | chars]
-      else
-        [?. | chars]
+      case Map.get(grid, pos) do
+        nil -> [?. | chars]
+        count -> [?0 + count | chars]
       end
     end)
     |> Enum.reverse
