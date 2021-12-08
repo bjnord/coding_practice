@@ -38,7 +38,7 @@ defmodule Diagnostic.ParserTest do
 
     test "parser gets expected entries", fixture do
       act_entries = fixture.input
-                    |> Diagnostic.Parser.parse_input_string(fixture.input)
+                    |> Diagnostic.Parser.parse_input_string()
                     |> Enum.map(fn e -> e end)
       assert act_entries == fixture.exp_entries
     end

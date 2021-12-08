@@ -12,7 +12,7 @@ defmodule Whale.ParserTest do
 
     test "parser gets expected crab positions", fixture do
       act_positions = fixture.input
-                 |> Whale.Parser.parse_input_string(fixture.input)
+                 |> Whale.Parser.parse_input_string()
                  |> Enum.map(fn p -> p end)
       assert act_positions == fixture.exp_positions
     end

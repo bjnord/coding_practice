@@ -12,7 +12,7 @@ defmodule Lanternfish.ParserTest do
 
     test "parser gets expected fish", fixture do
       act_fish = fixture.input
-                 |> Lanternfish.Parser.parse_input_string(fixture.input)
+                 |> Lanternfish.Parser.parse_input_string()
                  |> Enum.map(fn f -> f end)
       assert act_fish == fixture.exp_fish
     end

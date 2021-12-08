@@ -34,7 +34,7 @@ defmodule Hydrothermal.ParserTest do
 
     test "parser gets expected vents", fixture do
       act_vents = fixture.input
-                  |> Hydrothermal.Parser.parse_input_string(fixture.input)
+                  |> Hydrothermal.Parser.parse_input_string()
                   |> Enum.map(fn v -> v end)
       assert act_vents == fixture.exp_vents
     end
