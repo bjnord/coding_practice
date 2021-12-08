@@ -134,4 +134,23 @@ defmodule Hydrothermal do
     end
     |> List.flatten()
   end
+
+  @doc """
+  Is the given point outside the grid dimensions?
+
+  ## Examples
+      iex> Hydrothermal.out_of_bounds?({0, 0}, 10)
+      false
+      iex> Hydrothermal.out_of_bounds?({10, 0}, 10)
+      true
+  """
+  def out_of_bounds?({x, y}, dim) do
+    cond do
+      x < 0 -> true
+      x >= dim -> true
+      y < 0 -> true
+      y >= dim -> true
+      true -> false
+    end
+  end
 end
