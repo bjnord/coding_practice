@@ -25,7 +25,25 @@ defmodule Segment do
   def part1(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> Enum.map(&Segment.count_unique/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
+  end
+
+  @doc """
+  Count number of unique output values (digits 1, 4, 7, 8).
+  """
+  def count_unique({_signal_patterns, output_values}) do
+    output_values
+    |> Enum.count(fn v ->
+      case String.length(v) do
+        2 -> true  # digit 1
+        3 -> true  # digit 7
+        4 -> true  # digit 4
+        7 -> true  # digit 8
+        _ -> false
+      end
+    end)
   end
 
   @doc """
