@@ -15,6 +15,15 @@ defmodule Segment.Parser do
   end
 
   @doc ~S"""
+  Parse input as a block string.
+  """
+  def parse_input_string(input, _opts \\ []) do
+    input
+    |> String.splitter("\n", trim: true)
+    |> Stream.map(&Segment.Parser.parse_line/1)
+  end
+
+  @doc ~S"""
   Parse an input line containing a note.
 
   Returns `{signal_patterns, output_values}` where both are a list of strings

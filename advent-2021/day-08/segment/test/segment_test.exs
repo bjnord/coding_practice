@@ -24,8 +24,7 @@ defmodule SegmentTest do
     test "output value counter gets expected unique count", fixture do
       act_unique =
         fixture.note_lines
-        |> String.split("\n", trim: true)
-        |> Enum.map(&Segment.Parser.parse_line/1)
+        |> Segment.Parser.parse_input_string()
         |> Enum.map(&Segment.count_unique/1)
         |> Enum.sum()
       assert act_unique == fixture.exp_unique
