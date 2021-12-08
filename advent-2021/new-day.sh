@@ -107,8 +107,8 @@ for c in config dev test prod; do
 	fi
 done
 if [ -z "`grep escript mix.exs`" ]; then
-	log "copying mix.exs from day-05/hydrothermal (for escript and deps)"
-	perl -pe "s/hydrothermal/$PROJECT/g; s/Hydrothermal/$MODULE/g;" "$ADVENTPATH/day-05/hydrothermal/mix.exs" >mix.exs
+	log "copying mix.exs from day-06/lanternfish (for escript and deps)"
+	perl -pe "s/lanternfish/$PROJECT/g; s/Lanternfish/$MODULE/g;" "$ADVENTPATH/day-06/lanternfish/mix.exs" >mix.exs
 fi
 if [ ! -d deps ]; then
 	log "getting dependencies"
