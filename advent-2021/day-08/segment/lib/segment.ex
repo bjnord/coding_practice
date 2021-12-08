@@ -52,6 +52,9 @@ defmodule Segment do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> Enum.map(&Segment.Decoder.digits_of_note/1)
+    |> Enum.map(&String.to_integer/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
