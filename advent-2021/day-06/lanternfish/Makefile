@@ -2,15 +2,21 @@ BIN = ./lanternfish
 FILES = mix.exs test/test_helper.exs \
 	lib/lanternfish.ex test/lanternfish_test.exs \
 	lib/lanternfish/parser.ex test/lanternfish/parser_test.exs
+VERBOSE = 0
 
-.PHONY: run test clean
+.PHONY: run test console clean
 
 run: $(BIN)
 	$(BIN) input/input.txt
 
 test:
-	@rm -f _build/propcheck.ctex
-	mix test
+	@if [ -f _build/propcheck.ctex ]; then \
+		MIX_ENV=test mix propcheck.clean; \
+	fi
+	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+
+console:
+	iex -S mix
 
 clean:
 	rm -rf _build $(BIN) log/*.log

@@ -1,6 +1,6 @@
 defmodule DepthTest do
   use ExUnit.Case
-  use PropCheck
+  use PropCheck, default_opts: [numtests: 100]
   doctest Depth
 
   property "a single-element list has 0 increases" do
