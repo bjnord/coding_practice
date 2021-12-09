@@ -35,8 +35,8 @@ defmodule Segment do
   """
   def count_unique({_signal_patterns, output_values}) do
     output_values
-    |> Enum.count(fn v ->
-      case String.length(v) do
+    |> Enum.count(fn ov ->
+      case length(ov) do
         2 -> true  # digit 1
         3 -> true  # digit 7
         4 -> true  # digit 4

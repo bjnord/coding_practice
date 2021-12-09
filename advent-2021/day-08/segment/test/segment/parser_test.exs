@@ -7,8 +7,8 @@ defmodule Segment.ParserTest do
       [
         input_line: "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf",
         exp_note: {
-          ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"],
-          ["cdfeb", "fcadb", "cdfeb", "cdbaf"],
+          ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab'],
+          ['cdfeb', 'fcadb', 'cdfeb', 'cdbaf'],
         },
       ]
     end

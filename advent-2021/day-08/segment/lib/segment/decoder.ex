@@ -8,15 +8,13 @@ defmodule Segment.Decoder do
   reveals the top segment.
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.top_from_17({ex, []})
       'd'
   """
   def top_from_17({signal_patterns, _output_values}) do
-    d1 = Enum.find(signal_patterns, fn p -> String.length(p) == 2 end)
-         |> String.to_charlist()
-    d7 = Enum.find(signal_patterns, fn p -> String.length(p) == 3 end)
-         |> String.to_charlist()
+    d1 = Enum.find(signal_patterns, fn p -> length(p) == 2 end)
+    d7 = Enum.find(signal_patterns, fn p -> length(p) == 3 end)
     d7 -- d1
   end
 
@@ -26,16 +24,14 @@ defmodule Segment.Decoder do
   2. digit 9 is the one that adds the bottom segment to it
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.bottom_and_9_from_4069({ex, []})
       {'c', 'cefabd'}
   """
   def bottom_and_9_from_4069({signal_patterns, output_values}) do
-    d4 = Enum.find(signal_patterns, fn p -> String.length(p) == 4 end)
-         |> String.to_charlist()
+    d4 = Enum.find(signal_patterns, fn p -> length(p) == 4 end)
     d4t = d4 ++ top_from_17({signal_patterns, output_values})
-    Enum.filter(signal_patterns, fn p -> String.length(p) == 6 end)
-    |> Enum.map(&String.to_charlist/1)
+    Enum.filter(signal_patterns, fn p -> length(p) == 6 end)
     |> Enum.map(fn d -> {d -- d4t, d} end)
     |> Enum.find(fn {seg, _d} -> Enum.count(seg) == 1 end)
   end
@@ -45,13 +41,12 @@ defmodule Segment.Decoder do
   reveals the lower-left segment.
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.lleft_from_89({ex, []})
       'g'
   """
   def lleft_from_89({signal_patterns, output_values}) do
-    d8 = Enum.find(signal_patterns, fn p -> String.length(p) == 7 end)
-         |> String.to_charlist()
+    d8 = Enum.find(signal_patterns, fn p -> length(p) == 7 end)
     {_, d9} = bottom_and_9_from_4069({signal_patterns, output_values})
     d8 -- d9
   end
@@ -62,18 +57,16 @@ defmodule Segment.Decoder do
   2. digit 0 is the one that adds the upper-left segment to it
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.uleft_and_0_from_7bll({ex, []})
       {'e', 'cagedb'}
   """
   def uleft_and_0_from_7bll({signal_patterns, output_values}) do
-    d7 = Enum.find(signal_patterns, fn p -> String.length(p) == 3 end)
-         |> String.to_charlist()
+    d7 = Enum.find(signal_patterns, fn p -> length(p) == 3 end)
     {bottom, _} = bottom_and_9_from_4069({signal_patterns, output_values})
     lleft = lleft_from_89({signal_patterns, output_values})
     d7bll = d7 ++ bottom ++ lleft
-    Enum.filter(signal_patterns, fn p -> String.length(p) == 6 end)
-    |> Enum.map(&String.to_charlist/1)
+    Enum.filter(signal_patterns, fn p -> length(p) == 6 end)
     |> Enum.map(fn d -> {d -- d7bll, d} end)
     |> Enum.find(fn {seg, _d} -> Enum.count(seg) == 1 end)
   end
@@ -83,13 +76,12 @@ defmodule Segment.Decoder do
   reveals the middle segment.
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.middle_from_80({ex, []})
       'f'
   """
   def middle_from_80({signal_patterns, output_values}) do
-    d8 = Enum.find(signal_patterns, fn p -> String.length(p) == 7 end)
-         |> String.to_charlist()
+    d8 = Enum.find(signal_patterns, fn p -> length(p) == 7 end)
     {_, d0} = uleft_and_0_from_7bll({signal_patterns, output_values})
     d8 -- d0
   end
@@ -99,18 +91,16 @@ defmodule Segment.Decoder do
   digit 3 (5 segments).
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.digit3_from_7({ex, []})
       'fbcad'
   """
   def digit3_from_7({signal_patterns, output_values}) do
-    d7 = Enum.find(signal_patterns, fn p -> String.length(p) == 3 end)
-         |> String.to_charlist()
+    d7 = Enum.find(signal_patterns, fn p -> length(p) == 3 end)
     middle = middle_from_80({signal_patterns, output_values})
     {bottom, _} = bottom_and_9_from_4069({signal_patterns, output_values})
     d3x = d7 ++ middle ++ bottom
-    Enum.filter(signal_patterns, fn p -> String.length(p) == 5 end)
-    |> Enum.map(&String.to_charlist/1)
+    Enum.filter(signal_patterns, fn p -> length(p) == 5 end)
     |> Enum.map(fn d -> {d -- d3x, d} end)
     |> Enum.find(fn {seg, _d} -> Enum.count(seg) == 0 end)
     |> elem(1)
@@ -120,15 +110,14 @@ defmodule Segment.Decoder do
   Find digit 6 (6 segments) given the known digits 0 9 (6 segments).
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.digit6_from_09({ex, []})
       'cdfgeb'
   """
   def digit6_from_09({signal_patterns, output_values}) do
     {_, d0} = uleft_and_0_from_7bll({signal_patterns, output_values})
     {_, d9} = bottom_and_9_from_4069({signal_patterns, output_values})
-    Enum.filter(signal_patterns, fn p -> String.length(p) == 6 end)
-    |> Enum.map(&String.to_charlist/1)
+    Enum.filter(signal_patterns, fn p -> length(p) == 6 end)
     |> Enum.find(fn d -> d != d0 && d != d9 end)
   end
 
@@ -137,7 +126,7 @@ defmodule Segment.Decoder do
   digit 5 (5 segments).
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.digit5_from_6({ex, []})
       'cdfbe'
   """
@@ -145,8 +134,7 @@ defmodule Segment.Decoder do
     d6 = digit6_from_09({signal_patterns, output_values})
     lleft = lleft_from_89({signal_patterns, output_values})
     d5x = d6 -- lleft
-    Enum.filter(signal_patterns, fn p -> String.length(p) == 5 end)
-    |> Enum.map(&String.to_charlist/1)
+    Enum.filter(signal_patterns, fn p -> length(p) == 5 end)
     |> Enum.map(fn d -> {d -- d5x, d} end)
     |> Enum.find(fn {seg, _d} -> Enum.count(seg) == 0 end)
     |> elem(1)
@@ -156,15 +144,14 @@ defmodule Segment.Decoder do
   Find digit 2 (5 segments) given the known digits 3 5 (5 segments).
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.digit2_from_35({ex, []})
       'gcdfa'
   """
   def digit2_from_35({signal_patterns, output_values}) do
     d3 = digit3_from_7({signal_patterns, output_values})
     d5 = digit5_from_6({signal_patterns, output_values})
-    Enum.filter(signal_patterns, fn p -> String.length(p) == 5 end)
-    |> Enum.map(&String.to_charlist/1)
+    Enum.filter(signal_patterns, fn p -> length(p) == 5 end)
     |> Enum.find(fn d -> d != d3 && d != d5 end)
   end
 
@@ -172,24 +159,20 @@ defmodule Segment.Decoder do
   Find signal patterns for the 10 digits (in order from 0..9).
 
   ## Examples
-      iex> ex = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
+      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
       iex> Segment.Decoder.digit_signal_patterns({ex, []})
       ['cagedb', 'ab', 'gcdfa', 'fbcad', 'eafb', 'cdfbe', 'cdfgeb', 'dab', 'acedgfb', 'cefabd']
   """
   def digit_signal_patterns({signal_patterns, output_values}) do
     {_, d0} = uleft_and_0_from_7bll({signal_patterns, output_values})
-    d1 = Enum.find(signal_patterns, fn p -> String.length(p) == 2 end)
-         |> String.to_charlist()
+    d1 = Enum.find(signal_patterns, fn p -> length(p) == 2 end)
     d2 = digit2_from_35({signal_patterns, output_values})
     d3 = digit3_from_7({signal_patterns, output_values})
-    d4 = Enum.find(signal_patterns, fn p -> String.length(p) == 4 end)
-         |> String.to_charlist()
+    d4 = Enum.find(signal_patterns, fn p -> length(p) == 4 end)
     d5 = digit5_from_6({signal_patterns, output_values})
     d6 = digit6_from_09({signal_patterns, output_values})
-    d7 = Enum.find(signal_patterns, fn p -> String.length(p) == 3 end)
-         |> String.to_charlist()
-    d8 = Enum.find(signal_patterns, fn p -> String.length(p) == 7 end)
-         |> String.to_charlist()
+    d7 = Enum.find(signal_patterns, fn p -> length(p) == 3 end)
+    d8 = Enum.find(signal_patterns, fn p -> length(p) == 7 end)
     {_, d9} = bottom_and_9_from_4069({signal_patterns, output_values})
     [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9]
   end
@@ -198,8 +181,8 @@ defmodule Segment.Decoder do
   Translate output values to digits.
 
   ## Examples
-      iex> sp = ["acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab"]
-      iex> ov = ["cdfeb", "fcadb", "cdfeb", "cdbaf"]
+      iex> sp = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ov = ['cdfeb', 'fcadb', 'cdfeb', 'cdbaf']
       iex> Segment.Decoder.digits_of_note({sp, ov})
       "5353"
   """
@@ -210,7 +193,6 @@ defmodule Segment.Decoder do
       |> Enum.with_index()
     sorted_outputs =
       output_values
-      |> Enum.map(&String.to_charlist/1)
       |> Enum.map(fn o -> Enum.sort(o) end)
     sorted_outputs
     |> Enum.map(fn o -> Enum.find(sorted_patterns, fn {p, _i} -> p == o end) end)
