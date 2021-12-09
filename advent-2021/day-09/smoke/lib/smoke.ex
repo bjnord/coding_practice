@@ -16,6 +16,7 @@ defmodule Smoke do
     :world
   end
 
+  import Smoke.FloorMap
   import Smoke.Parser
   import Submarine.CLI
 
@@ -38,6 +39,9 @@ defmodule Smoke do
   def part1(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> build_floor_map()
+    |> low_points()
+    |> risk_level_sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
