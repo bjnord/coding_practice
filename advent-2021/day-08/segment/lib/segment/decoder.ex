@@ -8,7 +8,7 @@ defmodule Segment.Decoder do
   reveals the top segment.
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.top_from_17({ex, []})
       'd'
   """
@@ -24,9 +24,9 @@ defmodule Segment.Decoder do
   2. digit 9 is the one that adds the bottom segment to it
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.bottom_and_9_from_4069({ex, []})
-      {'c', 'cefabd'}
+      {'c', 'abcdef'}
   """
   def bottom_and_9_from_4069({signal_patterns, output_values}) do
     d4 = Enum.find(signal_patterns, fn p -> length(p) == 4 end)
@@ -41,7 +41,7 @@ defmodule Segment.Decoder do
   reveals the lower-left segment.
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.lleft_from_89({ex, []})
       'g'
   """
@@ -57,9 +57,9 @@ defmodule Segment.Decoder do
   2. digit 0 is the one that adds the upper-left segment to it
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.uleft_and_0_from_7bll({ex, []})
-      {'e', 'cagedb'}
+      {'e', 'abcdeg'}
   """
   def uleft_and_0_from_7bll({signal_patterns, output_values}) do
     d7 = Enum.find(signal_patterns, fn p -> length(p) == 3 end)
@@ -76,7 +76,7 @@ defmodule Segment.Decoder do
   reveals the middle segment.
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.middle_from_80({ex, []})
       'f'
   """
@@ -91,9 +91,9 @@ defmodule Segment.Decoder do
   digit 3 (5 segments).
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.digit3_from_7({ex, []})
-      'fbcad'
+      'abcdf'
   """
   def digit3_from_7({signal_patterns, output_values}) do
     d7 = Enum.find(signal_patterns, fn p -> length(p) == 3 end)
@@ -110,9 +110,9 @@ defmodule Segment.Decoder do
   Find digit 6 (6 segments) given the known digits 0 9 (6 segments).
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.digit6_from_09({ex, []})
-      'cdfgeb'
+      'bcdefg'
   """
   def digit6_from_09({signal_patterns, output_values}) do
     {_, d0} = uleft_and_0_from_7bll({signal_patterns, output_values})
@@ -126,9 +126,9 @@ defmodule Segment.Decoder do
   digit 5 (5 segments).
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.digit5_from_6({ex, []})
-      'cdfbe'
+      'bcdef'
   """
   def digit5_from_6({signal_patterns, output_values}) do
     d6 = digit6_from_09({signal_patterns, output_values})
@@ -144,9 +144,9 @@ defmodule Segment.Decoder do
   Find digit 2 (5 segments) given the known digits 3 5 (5 segments).
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.digit2_from_35({ex, []})
-      'gcdfa'
+      'acdfg'
   """
   def digit2_from_35({signal_patterns, output_values}) do
     d3 = digit3_from_7({signal_patterns, output_values})
@@ -159,9 +159,9 @@ defmodule Segment.Decoder do
   Find signal patterns for the 10 digits (in order from 0..9).
 
   ## Examples
-      iex> ex = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
       iex> Segment.Decoder.digit_signal_patterns({ex, []})
-      ['cagedb', 'ab', 'gcdfa', 'fbcad', 'eafb', 'cdfbe', 'cdfgeb', 'dab', 'acedgfb', 'cefabd']
+      ['abcdeg', 'ab', 'acdfg', 'abcdf', 'abef', 'bcdef', 'bcdefg', 'abd', 'abcdefg', 'abcdef']
   """
   def digit_signal_patterns({signal_patterns, output_values}) do
     {_, d0} = uleft_and_0_from_7bll({signal_patterns, output_values})
@@ -181,21 +181,17 @@ defmodule Segment.Decoder do
   Translate output values to digits.
 
   ## Examples
-      iex> sp = ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab']
-      iex> ov = ['cdfeb', 'fcadb', 'cdfeb', 'cdbaf']
-      iex> Segment.Decoder.digits_of_note({sp, ov})
+      iex> ex = ['abcdefg', 'bcdef', 'acdfg', 'abcdf', 'abd', 'abcdef', 'bcdefg', 'abef', 'abcdeg', 'ab']
+      iex> ov = ['bcdef', 'abcdf', 'bcdef', 'abcdf']
+      iex> Segment.Decoder.digits_of_note({ex, ov})
       "5353"
   """
   def digits_of_note({signal_patterns, output_values}) do
-    sorted_patterns =
+    indexed_patterns =
       digit_signal_patterns({signal_patterns, output_values})
-      |> Enum.map(fn p -> Enum.sort(p) end)
       |> Enum.with_index()
-    sorted_outputs =
-      output_values
-      |> Enum.map(fn o -> Enum.sort(o) end)
-    sorted_outputs
-    |> Enum.map(fn o -> Enum.find(sorted_patterns, fn {p, _i} -> p == o end) end)
+    output_values
+    |> Enum.map(fn o -> Enum.find(indexed_patterns, fn {p, _i} -> p == o end) end)
     |> Enum.map(fn t -> elem(t, 1) end)
     |> Enum.map(fn n -> n + ?0 end)
     |> List.to_string()

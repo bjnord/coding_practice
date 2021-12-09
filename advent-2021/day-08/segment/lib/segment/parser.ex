@@ -34,6 +34,7 @@ defmodule Segment.Parser do
     |> String.split(" | ")
     |> Enum.map(&String.split/1)
     |> Enum.map(fn ss -> Enum.map(ss, &String.to_charlist/1) end)
+    |> Enum.map(fn ss -> Enum.map(ss, &Enum.sort/1) end)
     |> List.to_tuple()
   end
 end
