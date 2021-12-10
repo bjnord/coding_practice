@@ -45,4 +45,24 @@ defmodule Smoke.FloorMap do
     |> Enum.map(fn h -> h + 1 end)
     |> Enum.sum()
   end
+
+  @doc ~S"""
+  Find basin locations leading to `location`.
+
+  Returns `{map, basin_locations}` where the latter is a list of
+  `{x, y}` coordinates in the basin.
+  """
+  def basin_locations(map, location) do
+    map = Map.replace(map, location, 9)
+    neighbors(map, location)
+    |> Enum.reduce({map, [location]}, fn (neighbor, {map, basin_locations}) ->
+      case map[neighbor] do
+        9 ->
+          {map, basin_locations}
+        _ ->
+          {new_map, new_basin_locations} = basin_locations(map, neighbor)
+          {new_map, new_basin_locations ++ basin_locations}
+      end
+    end)
+  end
 end

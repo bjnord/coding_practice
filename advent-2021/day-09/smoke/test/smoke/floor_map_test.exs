@@ -31,6 +31,25 @@ defmodule Smoke.FloorMapTest do
           {{9, 0}, 0},
         ],
         exp_risk_level_sum: 15,
+        exp_basin_locations: %{
+          {1, 0} => [{0, 0}, {1, 0}, {0, 1}],
+          {2, 2} => [
+            {2, 1}, {3, 1}, {4, 1},
+            {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2},
+            {0, 3}, {1, 3}, {2, 3}, {3, 3}, {4, 3},
+            {1, 4},
+          ],
+          {9, 0} => [
+            {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0},
+            {6, 1}, {8, 1}, {9, 1},
+            {9, 2},
+          ],
+          {6, 4} => [
+            {7, 2},
+            {6, 3}, {7, 3}, {8, 3},
+            {5, 4}, {6, 4}, {7, 4}, {8, 4}, {9, 4},
+          ],
+        },
       ]
     end
 
@@ -48,6 +67,18 @@ defmodule Smoke.FloorMapTest do
 
     test "map produces expected risk level sum", fixture do
       assert fixture.exp_low_points |> Smoke.FloorMap.risk_level_sum() == fixture.exp_risk_level_sum
+    end
+
+    test "map produces expected basin locations", fixture do
+      Map.keys(fixture.exp_basin_locations)
+      |> Enum.each(fn k ->
+        act_basin_locations =
+          fixture.exp_map
+          |> Smoke.FloorMap.basin_locations(k)
+          |> elem(1)
+          |> Enum.sort()
+        assert act_basin_locations == Enum.sort(fixture.exp_basin_locations[k])
+      end)
     end
   end
 end
