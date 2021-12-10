@@ -65,4 +65,21 @@ defmodule Smoke.FloorMap do
       end
     end)
   end
+
+  @doc ~S"""
+  Find count of basin locations for the largest 3 basins in `map`.
+
+  Returns a list of basin location counts.
+  """
+  def largest_3_basin_counts(map) do
+    map
+    |> low_points()
+    |> Enum.map(fn low_point ->
+      basin_locations(map, elem(low_point, 0))
+      |> elem(1)
+      |> Enum.count()
+    end)
+    |> Enum.sort(&(&1 >= &2))
+    |> Enum.take(3)
+  end
 end

@@ -51,6 +51,9 @@ defmodule Smoke do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> build_floor_map()
+    |> largest_3_basin_counts()
+    |> Enum.reduce(1, fn (count, acc) -> acc * count end)
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

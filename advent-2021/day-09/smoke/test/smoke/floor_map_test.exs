@@ -50,6 +50,7 @@ defmodule Smoke.FloorMapTest do
             {5, 4}, {6, 4}, {7, 4}, {8, 4}, {9, 4},
           ],
         },
+        exp_largest_3_basin_counts: [14, 9, 9],
       ]
     end
 
@@ -79,6 +80,11 @@ defmodule Smoke.FloorMapTest do
           |> Enum.sort()
         assert act_basin_locations == Enum.sort(fixture.exp_basin_locations[k])
       end)
+    end
+
+    test "map produces location counts for the largest 3 basins", fixture do
+      act_counts = Smoke.FloorMap.largest_3_basin_counts(fixture.exp_map)
+      assert act_counts == fixture.exp_largest_3_basin_counts
     end
   end
 end
