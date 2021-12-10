@@ -65,11 +65,8 @@ defmodule SyntaxTest do
                    |> Enum.filter(fn {status, _chars} -> status == :incomplete end)
                    |> Enum.map(&Syntax.entry_completion/1)
                    |> Enum.map(&Syntax.entry_score/1)
-      act_score =
-        act_scores
-        |> Enum.sort()
-        |> (fn sorted_scores -> Enum.at(sorted_scores, div(length(sorted_scores), 2)) end).()
       assert act_scores == fixture.exp_incomplete_entry_scores
+      act_score = Syntax.middle_score(act_scores)
       assert act_score == fixture.exp_incomplete_entry_middle_score
     end
   end

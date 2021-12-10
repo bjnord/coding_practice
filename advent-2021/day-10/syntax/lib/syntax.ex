@@ -116,10 +116,12 @@ defmodule Syntax do
     |> Enum.filter(fn {status, _chars} -> status == :incomplete end)
     |> Enum.map(&Syntax.entry_completion/1)
     |> Enum.map(&Syntax.entry_score/1)
-    |> Enum.sort()
-    # FIXME RF extract to middle_score(scores)
-    |> (fn sorted_scores -> Enum.at(sorted_scores, div(length(sorted_scores), 2)) end).()
+    |> middle_score()
     |> IO.inspect(label: "Part 2 answer is")
+  end
+  def middle_score(scores) do
+    Enum.sort(scores)
+    |> (fn sorted_scores -> Enum.at(sorted_scores, div(length(sorted_scores), 2)) end).()
   end
 
   @doc """
