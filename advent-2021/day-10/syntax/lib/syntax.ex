@@ -81,6 +81,8 @@ defmodule Syntax do
   ## Examples
       iex> Syntax.entry_score({:corrupted, '})'})
       1197
+      iex> Syntax.entry_score({:completion, '])}>'})
+      294
   """
   def entry_score({:corrupted, [next | _rem_charlist]}) do
     case next do
@@ -90,6 +92,19 @@ defmodule Syntax do
       ?> -> 25137
     end
   end
+  def entry_score({:completion, closers}), do: completion_entry_score(closers, 0)
+  defp completion_entry_score([closer], score), do: 5*score + char_score(closer)
+  defp completion_entry_score([closer | rem_closers], score) do
+    completion_entry_score(rem_closers, 5*score + char_score(closer))
+  end
+  defp char_score(char) do
+    case char do
+      ?) -> 1
+      ?] -> 2
+      ?} -> 3
+      ?> -> 4
+    end
+  end
 
   @doc """
   Process input file and display part 2 solution.
@@ -97,6 +112,31 @@ defmodule Syntax do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
+    |> Enum.map(&Syntax.entry_status/1)
+    |> Enum.filter(fn {status, _chars} -> status == :incomplete end)
+    |> Enum.map(&Syntax.entry_completion/1)
+    |> Enum.map(&Syntax.entry_score/1)
+    |> Enum.sort()
+    # FIXME RF extract to middle_score(scores)
+    |> (fn sorted_scores -> Enum.at(sorted_scores, div(length(sorted_scores), 2)) end).()
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Find completion of incomplete navigation entry.
+
+  ## Examples
+      iex> Syntax.entry_completion({:incomplete, '(<'})
+      {:completion, ')>'}
+  """
+  def entry_completion({:incomplete, openers}), do: entry_completion(openers, [])
+  def entry_completion([], closers), do: {:completion, Enum.reverse(closers)}
+  def entry_completion([opener | rem_openers], closers) do
+    case opener do
+      ?( -> entry_completion(rem_openers, [?) | closers])
+      ?[ -> entry_completion(rem_openers, [?] | closers])
+      ?{ -> entry_completion(rem_openers, [?} | closers])
+      ?< -> entry_completion(rem_openers, [?> | closers])
+    end
   end
 end
