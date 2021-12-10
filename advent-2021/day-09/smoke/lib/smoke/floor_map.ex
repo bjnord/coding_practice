@@ -28,10 +28,12 @@ defmodule Smoke.FloorMap do
     |> Enum.map(fn k -> {k, map[k]} end)
   end
   def is_low_point?(map, {x, y}) do
+    neighbors(map, {x, y})
+    |> Enum.all?(fn k -> map[{x, y}] < map[k] end)
+  end
+  def neighbors(map, {x, y}) do
     [{x, y-1}, {x+1, y}, {x, y+1}, {x-1, y}]
-    |> Enum.all?(fn k ->
-      !Map.has_key?(map, k) || (map[{x, y}] < map[k])
-    end)
+    |> Enum.filter(fn k -> Map.has_key?(map, k) end)
   end
 
   @doc ~S"""
