@@ -196,7 +196,17 @@ defmodule Octopus.GridTest do
       end)
     end
 
-    # TODO test "stepper creates new grid matrix correctly", fixture
+    test "stepper creates new grid matrix correctly", fixture do
+      [fixture.input5, fixture.input10]
+      |> Enum.each(fn [step0 | steps] ->
+        steps
+        |> Enum.reduce(Octopus.Grid.new(step0), fn (step, grid) ->
+          grid = Octopus.Grid.increase_energy(grid)
+          assert grid.grid == step
+          grid
+        end)
+      end)
+    end
 
     test "stepper counts flashes correctly for 100 steps", fixture do
       [step0 | _] = fixture.input10
