@@ -185,6 +185,13 @@ defmodule Octopus.GridTest do
         exp_matrix10_flashes: 204,
         exp_matrix10_flashes_100_steps: 1656,
         exp_matrix10_synchronized_step: 195,
+        nonsquare: """
+        54831432
+        27458547
+        52645561
+        61413361
+        63573854
+        """,
       ]
     end
 
@@ -193,11 +200,12 @@ defmodule Octopus.GridTest do
       assert act_matrix == Enum.at(fixture.matrix10, 0)
     end
 
-    test "constructor gets correct dimension", fixture do
-      [{fixture.input5, 5}, {fixture.input10, 10}]
-      |> Enum.each(fn {input, exp_dim} ->
+    test "constructor gets correct dimensions", fixture do
+      [{fixture.input5, {5, 5}}, {fixture.input10, {10, 10}}, {fixture.nonsquare, {8, 5}}]
+      |> Enum.each(fn {input, {exp_dimx, exp_dimy}} ->
         grid = Octopus.Grid.new(input)
-        assert grid.dim == exp_dim
+        assert grid.dimx == exp_dimx
+        assert grid.dimy == exp_dimy
       end)
     end
 

@@ -3,20 +3,22 @@ defmodule Octopus.Grid do
   Grid structure for `Octopus`.
   """
 
-  defstruct dim: 0, grid: {}, flashes: 0
+  defstruct dimx: 0, dimy: 0, grid: {}, flashes: 0
 
   @doc ~S"""
   Construct a new grid from `input`.
 
   ## Examples
       iex> Octopus.Grid.new("01\n23\n")
-      %Octopus.Grid{dim: 2, grid: {{0, 1}, {2, 3}}, flashes: 0}
+      %Octopus.Grid{dimx: 2, dimy: 2, grid: {{0, 1}, {2, 3}}, flashes: 0}
   """
   def new(input) do
     grid = parse(input)
+    dimx = tuple_size(elem(grid, 0))
     %Octopus.Grid{
       grid: grid,
-      dim: tuple_size(grid),
+      dimx: dimx,
+      dimy: tuple_size(grid),
     }
   end
 
@@ -48,8 +50,8 @@ defmodule Octopus.Grid do
   @doc false
   # Returns a list of all `{x, y}` positions for the given `grid`.
   defp positions(grid) do
-    for y <- 0..grid.dim-1 do
-      for x <- 0..grid.dim-1 do
+    for y <- 0..grid.dimy-1 do
+      for x <- 0..grid.dimx-1 do
         {x, y}
       end
     end
@@ -58,8 +60,8 @@ defmodule Octopus.Grid do
 
   @doc false
   # Returns a list of all neighboring positions to `{x0, y0}`
-  # for a grid of the given `dim`.
-  defp neighbors({x0, y0}, dim) do
+  # for a grid of the given `{dimx, dimy}`.
+  defp neighbors({x0, y0}, {dimx, dimy}) do
     for dy <- -1..1 do
       for dx <- -1..1 do
         {x0 + dx, y0 + dy}
@@ -67,8 +69,8 @@ defmodule Octopus.Grid do
     end
     |> List.flatten()
     |> Enum.reject(fn {x, y} -> x == x0 && y == y0 end)
-    |> Enum.reject(fn {x, _y} -> x < 0 || x >= dim end)
-    |> Enum.reject(fn {_x, y} -> y < 0 || y >= dim end)
+    |> Enum.reject(fn {x, _y} -> x < 0 || x >= dimx end)
+    |> Enum.reject(fn {_x, y} -> y < 0 || y >= dimy end)
   end
 
   @doc false
@@ -109,7 +111,7 @@ defmodule Octopus.Grid do
   defp increase_neighbor_energy(grid, positions) do
     positions
     |> Enum.reduce(grid, fn (pos, grid) ->
-      {new_grid, flashed} = increase_energy_of_positions(grid, neighbors(pos, grid.dim))
+      {new_grid, flashed} = increase_energy_of_positions(grid, neighbors(pos, {grid.dimx, grid.dimy}))
       increase_neighbor_energy(%{new_grid | flashes: new_grid.flashes + Enum.count(flashed)}, flashed)
     end)
   end
@@ -169,6 +171,6 @@ defmodule Octopus.Grid do
       true
   """
   def synchronized?(grid) do
-    flashed_count(grid) == grid.dim * grid.dim
+    flashed_count(grid) == grid.dimx * grid.dimy
   end
 end
