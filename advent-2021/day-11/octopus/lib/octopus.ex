@@ -3,19 +3,6 @@ defmodule Octopus do
   Documentation for Octopus.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Octopus.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
-
   import Submarine.CLI
 
   @doc """
