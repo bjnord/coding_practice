@@ -48,13 +48,12 @@ defmodule Octopus do
     # cavern. What is the first step during which all octopuses flash?"
     1..1_000_000
     |> Enum.reduce_while(grid, fn (n, grid) ->
-      grid = Octopus.Grid.increase_energy(grid)
-      if Octopus.Grid.synchronized?(grid) do
-        {:halt, n}
-      else
-        {:cont, grid}
-      end
+      Octopus.Grid.increase_energy(grid)
+      |> halt_if_synchronized(n)
     end)
     |> IO.inspect(label: "Part 2 answer is")
+  end
+  defp halt_if_synchronized(grid, n) do
+    if Octopus.Grid.synchronized?(grid), do: {:halt, n}, else: {:cont, grid}
   end
 end
