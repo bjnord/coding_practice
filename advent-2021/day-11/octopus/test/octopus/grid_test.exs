@@ -192,6 +192,12 @@ defmodule Octopus.GridTest do
         61413361
         63573854
         """,
+        uneven_widths: """
+        548314
+        274585
+        52645
+        614133
+        """,
       ]
     end
 
@@ -207,6 +213,12 @@ defmodule Octopus.GridTest do
         assert grid.dimx == exp_dimx
         assert grid.dimy == exp_dimy
       end)
+    end
+
+    test "constructor exception for invalid input (uneven line widths)", fixture do
+      assert_raise MatchError, fn ->
+        Octopus.Grid.new(fixture.uneven_widths)
+      end
     end
 
     test "stepper counts flashes correctly", fixture do

@@ -14,12 +14,18 @@ defmodule Octopus.Grid do
   """
   def new(input) do
     grid = parse(input)
-    dimx = tuple_size(elem(grid, 0))
+    [dimx] = row_widths(grid)
     %Octopus.Grid{
       grid: grid,
       dimx: dimx,
       dimy: tuple_size(grid),
     }
+  end
+  defp row_widths(grid) do
+    grid
+    |> Tuple.to_list()
+    |> Enum.map(&tuple_size/1)
+    |> Enum.uniq()
   end
 
   @doc false
