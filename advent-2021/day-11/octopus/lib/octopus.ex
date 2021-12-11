@@ -36,8 +36,16 @@ defmodule Octopus do
   Process input file and display part 1 solution.
   """
   def part1(input_file, opts \\ []) do
-    input_file
-    |> parse_input(opts)
+    grid =
+      input_file
+      |> parse_input(opts)
+      |> Octopus.Grid.new()
+    grid =
+      1..100
+      |> Enum.reduce(grid, fn (_n, grid) ->
+        Octopus.Grid.increase_energy(grid)
+      end)
+    grid.flashes
     |> IO.inspect(label: "Part 1 answer is")
   end
 
