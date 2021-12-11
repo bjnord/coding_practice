@@ -22,6 +22,7 @@ defmodule Octopus.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:ex_doc, "~> 0.22.0", only: :dev, runtime: false},
       {:logger_file_backend, "~> 0.0.12"},
       #{:math, "~> 0.7.0"},
       #{:propcheck, "~> 1.4", only: [:test]},
