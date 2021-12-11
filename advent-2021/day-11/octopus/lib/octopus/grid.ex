@@ -22,10 +22,9 @@ defmodule Octopus.Grid do
     }
   end
   defp row_widths(grid) do
-    grid
-    |> Tuple.to_list()
-    |> Enum.map(&tuple_size/1)
-    |> Enum.uniq()
+    for row <- Tuple.to_list(grid),
+      uniq: true,
+      do: tuple_size(row)
   end
 
   @doc false
