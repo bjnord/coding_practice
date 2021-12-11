@@ -25,12 +25,14 @@ defmodule Octopus do
     grid =
       File.read!(input_file)
       |> Octopus.Grid.new()
-    grid =
-      1..100
-      |> Enum.reduce(grid, fn (_n, grid) ->
-        Octopus.Grid.increase_energy(grid)
-      end)
-    grid.flashes
+    # "Given the starting energy levels of the dumbo octopuses in your
+    # cavern, simulate 100 steps. How many total flashes are there after
+    # 100 steps?"
+    1..100
+    |> Enum.reduce(grid, fn (_n, grid) ->
+      Octopus.Grid.increase_energy(grid)
+    end)
+    |> Octopus.Grid.n_flashes()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -41,6 +43,9 @@ defmodule Octopus do
     grid =
       File.read!(input_file)
       |> Octopus.Grid.new()
+    # "If you can calculate the exact moments when the octopuses will
+    # all flash simultaneously, you should be able to navigate through the
+    # cavern. What is the first step during which all octopuses flash?"
     1..1_000_000
     |> Enum.reduce_while(grid, fn (n, grid) ->
       grid = Octopus.Grid.increase_energy(grid)

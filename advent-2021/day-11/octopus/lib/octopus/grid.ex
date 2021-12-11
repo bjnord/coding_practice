@@ -36,13 +36,18 @@ defmodule Octopus.Grid do
   end
 
   @doc ~S"""
-  Return a list of all `{x, y}` positions for the given `grid`.
+  Returns count of flashes seen on the given `grid`.
 
   ## Examples
-      iex> Octopus.Grid.new("01\n23\n") |> Octopus.Grid.positions()
-      [{0, 0}, {1, 0}, {0, 1}, {1, 1}]
+      iex> grid = Octopus.Grid.new("93\n39\n") |> Octopus.Grid.increase_energy()
+      iex> Octopus.Grid.n_flashes(grid)
+      2
   """
-  def positions(grid) do
+  def n_flashes(grid), do: grid.flashes
+
+  @doc false
+  # Returns a list of all `{x, y}` positions for the given `grid`.
+  defp positions(grid) do
     for y <- 0..grid.dim-1 do
       for x <- 0..grid.dim-1 do
         {x, y}
@@ -51,18 +56,10 @@ defmodule Octopus.Grid do
     |> List.flatten()
   end
 
-  @doc ~S"""
-  Return a list of all neighboring positions to `{x0, y0}`
-  for a grid of the given `dim`.
-
-  ## Examples
-      iex> Octopus.Grid.neighbors({1, 1}, 3)
-      [{0, 0}, {1, 0}, {2, 0}, {0, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}]
-
-      iex> Octopus.Grid.neighbors({2, 2}, 3)
-      [{1, 1}, {2, 1}, {1, 2}]
-  """
-  def neighbors({x0, y0}, dim) do
+  @doc false
+  # Returns a list of all neighboring positions to `{x0, y0}`
+  # for a grid of the given `dim`.
+  defp neighbors({x0, y0}, dim) do
     for dy <- -1..1 do
       for dx <- -1..1 do
         {x0 + dx, y0 + dy}
@@ -74,31 +71,20 @@ defmodule Octopus.Grid do
     |> Enum.reject(fn {_x, y} -> y < 0 || y >= dim end)
   end
 
-  @doc ~S"""
-  Reset energy level to 0 for any `grid` position that flashed
-  (_i.e._ is above 9).
-
-  ## Examples
-      iex> Octopus.Grid.new("9f\nf3\n") |> Octopus.Grid.reset_flashed_energy()
-      %Octopus.Grid{dim: 2, grid: {{9, 0}, {0, 3}}}
-  """
-  def reset_flashed_energy(grid) do
+  @doc false
+  # Reset energy level to 0 for any `grid` position that flashed
+  # (_i.e._ is above 9).
+  defp reset_flashed_energy(grid) do
     positions(grid)
     |> Enum.reduce(grid, fn (pos, grid) ->
       reset_energy_of_position(grid, pos)
     end)
   end
 
-  @doc ~S"""
-  Reset energy of the given `{x, y}` coordinate, if it's above 9.
-  Returns updated `grid`.
-
-  ## Examples
-      iex> grid = Octopus.Grid.new("01;\n345\n672\n")
-      iex> Octopus.Grid.reset_energy_of_position(grid, {2, 0})
-      %Octopus.Grid{grid: {{0, 1, 0}, {3, 4, 5}, {6, 7, 2}}, dim: 3}
-  """
-  def reset_energy_of_position(grid, {x, y}) do
+  @doc false
+  # Reset energy of the given `{x, y}` coordinate, if it's above 9.
+  # Returns updated `grid`.
+  defp reset_energy_of_position(grid, {x, y}) do
     row = elem(grid.grid, y)
     if elem(row, x) > 9 do
       new_row = put_elem(row, x, 0)
@@ -109,7 +95,9 @@ defmodule Octopus.Grid do
   end
 
   @doc ~S"""
-  Do one increase-energy step. Returns updated `grid`.
+  Do one increase-energy step.
+
+  Returns the updated `grid`.
   """
   def increase_energy(grid) do
     {new_grid, flashed} =
@@ -126,23 +114,13 @@ defmodule Octopus.Grid do
     end)
   end
 
-  @doc ~S"""
-  Increase energy of the given `positions` (a list of `{x, y}` coordinates).
-
-  Returns `{grid, flashed_positions}` where `grid` has been updated,
-  and `flashed_positions` is a list of the `{x, y}` coordinates of the
-  octopi which flashed.
-
-  ## Examples
-      iex> grid = Octopus.Grid.new("01\n23\n")
-      iex> Octopus.Grid.increase_energy_of_positions(grid, Octopus.Grid.positions(grid))
-      {%Octopus.Grid{grid: {{1, 2}, {3, 4}}, dim: 2}, []}
-
-      iex> grid = Octopus.Grid.new("01\n29\n")
-      iex> Octopus.Grid.increase_energy_of_positions(grid, Octopus.Grid.positions(grid))
-      {%Octopus.Grid{grid: {{1, 2}, {3, 10}}, dim: 2}, [{1, 1}]}
-  """
-  def increase_energy_of_positions(grid, positions) do
+  @doc false
+  # Increase energy of the given `positions` (a list of `{x, y}` coords).
+  #
+  # Returns `{grid, flashed_positions}` where `grid` has been updated,
+  # and `flashed_positions` is a list of the `{x, y}` coordinates of the
+  # octopi which flashed.
+  defp increase_energy_of_positions(grid, positions) do
     positions
     |> Enum.reduce({grid, []}, fn (pos, {grid, flashed}) ->
       {grid, new_energy} = increase_energy_of_position(grid, pos)
@@ -154,37 +132,21 @@ defmodule Octopus.Grid do
     end)
   end
 
-  @doc ~S"""
-  Increase energy of the given `{x, y}` coordinate.
-
-  Returns `{grid, new_energy}` where `grid` has been updated,
-  and `new_energy` is the new energy level at `{x, y}`.
-
-  ## Examples
-      iex> grid = Octopus.Grid.new("018\n345\n672\n")
-      iex> Octopus.Grid.increase_energy_of_position(grid, {2, 0})
-      {%Octopus.Grid{grid: {{0, 1, 9}, {3, 4, 5}, {6, 7, 2}}, dim: 3}, 9}
-  """
-  def increase_energy_of_position(grid, {x, y}) do
+  @doc false
+  # Increase energy of the given `{x, y}` coordinate.
+  #
+  # Returns `{grid, new_energy}` where `grid` has been updated,
+  # and `new_energy` is the new energy level at `{x, y}`.
+  defp increase_energy_of_position(grid, {x, y}) do
     row = elem(grid.grid, y)
     new_energy = elem(row, x) + 1
     new_row = put_elem(row, x, new_energy)
     {%{grid | grid: put_elem(grid.grid, y, new_row)}, new_energy}
   end
 
-  @doc ~S"""
-  Return count of how many octopi just flashed in the previous step.
-
-  ## Examples
-      iex> grid = Octopus.Grid.new("129\n456\n783\n")
-      iex> Octopus.Grid.flashed_count(grid)
-      0
-
-      iex> grid = Octopus.Grid.new("240\n578\n894\n")
-      iex> Octopus.Grid.flashed_count(grid)
-      1
-  """
-  def flashed_count(grid) do
+  @doc false
+  # Return count of how many octopi just flashed in the previous step.
+  defp flashed_count(grid) do
     grid.grid
     |> Tuple.to_list()
     |> Enum.reduce(0, fn (row, count) ->
