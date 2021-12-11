@@ -1,7 +1,7 @@
 BIN = ./octopus
 FILES = mix.exs test/test_helper.exs \
 	lib/octopus.ex test/octopus_test.exs \
-	lib/octopus/parser.ex test/octopus/parser_test.exs
+	lib/octopus/grid.ex test/octopus/grid_test.exs
 VERBOSE = 0
 
 .PHONY: run test console clean

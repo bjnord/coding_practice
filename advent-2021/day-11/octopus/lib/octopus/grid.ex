@@ -6,24 +6,40 @@ defmodule Octopus.Grid do
   defstruct dim: 0, grid: {}, flashes: 0
 
   @doc ~S"""
-  Construct a new grid from 2D input.
+  Construct a new grid from `input`.
 
   ## Examples
-      iex> Octopus.Grid.new({{0, 1}, {2, 3}})
+      iex> Octopus.Grid.new("01\n23\n")
       %Octopus.Grid{dim: 2, grid: {{0, 1}, {2, 3}}, flashes: 0}
   """
   def new(input) do
+    grid = parse(input)
     %Octopus.Grid{
-      grid: input,
-      dim: tuple_size(input),
+      grid: grid,
+      dim: tuple_size(grid),
     }
+  end
+
+  @doc false
+  def parse(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&parse_line/1)
+    |> List.to_tuple()
+  end
+  defp parse_line(line) do
+    line
+    |> String.trim_trailing()
+    |> String.to_charlist()
+    |> Enum.map(fn d -> d - ?0 end)
+    |> List.to_tuple()
   end
 
   @doc ~S"""
   Return a list of all `{x, y}` positions for the given `grid`.
 
   ## Examples
-      iex> Octopus.Grid.new({{0, 1}, {2, 3}}) |> Octopus.Grid.positions()
+      iex> Octopus.Grid.new("01\n23\n") |> Octopus.Grid.positions()
       [{0, 0}, {1, 0}, {0, 1}, {1, 1}]
   """
   def positions(grid) do
@@ -63,7 +79,7 @@ defmodule Octopus.Grid do
   (_i.e._ is above 9).
 
   ## Examples
-      iex> Octopus.Grid.new({{9, 10}, {13, 3}}) |> Octopus.Grid.reset_flashed_energy()
+      iex> Octopus.Grid.new("9f\nf3\n") |> Octopus.Grid.reset_flashed_energy()
       %Octopus.Grid{dim: 2, grid: {{9, 0}, {0, 3}}}
   """
   def reset_flashed_energy(grid) do
@@ -78,7 +94,7 @@ defmodule Octopus.Grid do
   Returns updated `grid`.
 
   ## Examples
-      iex> grid = Octopus.Grid.new({{0, 1, 18}, {3, 4, 5}, {6, 7, 2}})
+      iex> grid = Octopus.Grid.new("01;\n345\n672\n")
       iex> Octopus.Grid.reset_energy_of_position(grid, {2, 0})
       %Octopus.Grid{grid: {{0, 1, 0}, {3, 4, 5}, {6, 7, 2}}, dim: 3}
   """
@@ -118,11 +134,11 @@ defmodule Octopus.Grid do
   octopi which flashed.
 
   ## Examples
-      iex> grid = Octopus.Grid.new({{0, 1}, {2, 3}})
+      iex> grid = Octopus.Grid.new("01\n23\n")
       iex> Octopus.Grid.increase_energy_of_positions(grid, Octopus.Grid.positions(grid))
       {%Octopus.Grid{grid: {{1, 2}, {3, 4}}, dim: 2}, []}
 
-      iex> grid = Octopus.Grid.new({{0, 1}, {2, 9}})
+      iex> grid = Octopus.Grid.new("01\n29\n")
       iex> Octopus.Grid.increase_energy_of_positions(grid, Octopus.Grid.positions(grid))
       {%Octopus.Grid{grid: {{1, 2}, {3, 10}}, dim: 2}, [{1, 1}]}
   """
@@ -145,7 +161,7 @@ defmodule Octopus.Grid do
   and `new_energy` is the new energy level at `{x, y}`.
 
   ## Examples
-      iex> grid = Octopus.Grid.new({{0, 1, 8}, {3, 4, 5}, {6, 7, 2}})
+      iex> grid = Octopus.Grid.new("018\n345\n672\n")
       iex> Octopus.Grid.increase_energy_of_position(grid, {2, 0})
       {%Octopus.Grid{grid: {{0, 1, 9}, {3, 4, 5}, {6, 7, 2}}, dim: 3}, 9}
   """
@@ -160,11 +176,11 @@ defmodule Octopus.Grid do
   Return count of how many octopi just flashed in the previous step.
 
   ## Examples
-      iex> grid = Octopus.Grid.new({{1, 2, 9}, {4, 5, 6}, {7, 8, 3}})
+      iex> grid = Octopus.Grid.new("129\n456\n783\n")
       iex> Octopus.Grid.flashed_count(grid)
       0
 
-      iex> grid = Octopus.Grid.new({{2, 4, 0}, {5, 7, 8}, {8, 9, 4}})
+      iex> grid = Octopus.Grid.new("240\n578\n894\n")
       iex> Octopus.Grid.flashed_count(grid)
       1
   """
@@ -184,10 +200,10 @@ defmodule Octopus.Grid do
   Did all octopi just flash in the previous step?
 
   ## Examples
-      iex> Octopus.Grid.new({{0, 1}, {2, 3}}) |> Octopus.Grid.synchronized?()
+      iex> Octopus.Grid.new("01\n23\n") |> Octopus.Grid.synchronized?()
       false
 
-      iex> Octopus.Grid.new({{0, 0}, {0, 0}}) |> Octopus.Grid.synchronized?()
+      iex> Octopus.Grid.new("00\n00\n") |> Octopus.Grid.synchronized?()
       true
   """
   def synchronized?(grid) do

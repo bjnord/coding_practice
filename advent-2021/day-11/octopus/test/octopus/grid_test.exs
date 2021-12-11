@@ -5,7 +5,14 @@ defmodule Octopus.GridTest do
   describe "puzzle example" do
     setup do
       [
-        input5: [
+        input5: """
+        11111
+        19991
+        19191
+        19991
+        11111
+        """,
+        matrix5: [
           {
             {1, 1, 1, 1, 1},
             {1, 9, 9, 9, 1},
@@ -28,8 +35,20 @@ defmodule Octopus.GridTest do
             {4, 5, 6, 5, 4},
           },
         ],
-        exp_input5_flashes: 9,
-        input10: [
+        exp_matrix5_flashes: 9,
+        input10: """
+        5483143223
+        2745854711
+        5264556173
+        6141336146
+        6357385478
+        4167524645
+        2176841721
+        6882881134
+        4846848554
+        5283751526
+        """,
+        matrix10: [
           {
             {5, 4, 8, 3, 1, 4, 3, 2, 2, 3},
             {2, 7, 4, 5, 8, 5, 4, 7, 1, 1},
@@ -163,14 +182,19 @@ defmodule Octopus.GridTest do
             {0, 0, 3, 2, 2, 4, 0, 0, 0, 0},
           },
         ],
-        exp_input10_flashes: 204,
-        exp_input10_flashes_100_steps: 1656,
-        exp_input10_synchronized_step: 195,
+        exp_matrix10_flashes: 204,
+        exp_matrix10_flashes_100_steps: 1656,
+        exp_matrix10_synchronized_step: 195,
       ]
     end
 
+    test "parser gets expected entries", fixture do
+      act_matrix = Octopus.Grid.parse(fixture.input10)
+      assert act_matrix == Enum.at(fixture.matrix10, 0)
+    end
+
     test "constructor gets correct dimension", fixture do
-      [{List.first(fixture.input5), 5}, {List.first(fixture.input10), 10}]
+      [{fixture.input5, 5}, {fixture.input10, 10}]
       |> Enum.each(fn {input, exp_dim} ->
         grid = Octopus.Grid.new(input)
         assert grid.dim == exp_dim
@@ -179,13 +203,13 @@ defmodule Octopus.GridTest do
 
     test "stepper counts flashes correctly", fixture do
       [
-        {fixture.input5, fixture.exp_input5_flashes},
-        {fixture.input10, fixture.exp_input10_flashes},
+        {fixture.input5, fixture.matrix5, fixture.exp_matrix5_flashes},
+        {fixture.input10, fixture.matrix10, fixture.exp_matrix10_flashes},
       ]
-      |> Enum.each(fn {[step0 | steps], exp_total_flashes} ->
+      |> Enum.each(fn {input, [_step0 | steps], exp_total_flashes} ->
         grid =
           steps
-          |> Enum.reduce(Octopus.Grid.new(step0), fn (step, grid) ->
+          |> Enum.reduce(Octopus.Grid.new(input), fn (step, grid) ->
             exp_flashes = count_zeros(step)
             flashes0 = grid.flashes
             grid = Octopus.Grid.increase_energy(grid)
@@ -197,10 +221,13 @@ defmodule Octopus.GridTest do
     end
 
     test "stepper creates new grid matrix correctly", fixture do
-      [fixture.input5, fixture.input10]
-      |> Enum.each(fn [step0 | steps] ->
+      [
+        {fixture.input5, fixture.matrix5},
+        {fixture.input10, fixture.matrix10},
+      ]
+      |> Enum.each(fn {input, [_step0 | steps]} ->
         steps
-        |> Enum.reduce(Octopus.Grid.new(step0), fn (step, grid) ->
+        |> Enum.reduce(Octopus.Grid.new(input), fn (step, grid) ->
           grid = Octopus.Grid.increase_energy(grid)
           assert grid.grid == step
           grid
@@ -209,20 +236,18 @@ defmodule Octopus.GridTest do
     end
 
     test "stepper counts flashes correctly for 100 steps", fixture do
-      [step0 | _] = fixture.input10
       grid =
         1..100
-        |> Enum.reduce(Octopus.Grid.new(step0), fn (_n, grid) ->
+        |> Enum.reduce(Octopus.Grid.new(fixture.input10), fn (_n, grid) ->
           Octopus.Grid.increase_energy(grid)
         end)
-      assert grid.flashes == fixture.exp_input10_flashes_100_steps
+      assert grid.flashes == fixture.exp_matrix10_flashes_100_steps
     end
 
     test "stepper produces synchronicity correctly", fixture do
-      [step0 | _] = fixture.input10
       n_steps =
         1..1_000_000
-        |> Enum.reduce_while(Octopus.Grid.new(step0), fn (n, grid) ->
+        |> Enum.reduce_while(Octopus.Grid.new(fixture.input10), fn (n, grid) ->
           grid = Octopus.Grid.increase_energy(grid)
           if Octopus.Grid.synchronized?(grid) do
             {:halt, n}
@@ -230,7 +255,7 @@ defmodule Octopus.GridTest do
             {:cont, grid}
           end
         end)
-      assert n_steps == fixture.exp_input10_synchronized_step
+      assert n_steps == fixture.exp_matrix10_synchronized_step
     end
   end
 

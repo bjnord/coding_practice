@@ -16,7 +16,6 @@ defmodule Octopus do
     :world
   end
 
-  import Octopus.Parser
   import Submarine.CLI
 
   @doc """
@@ -28,17 +27,16 @@ defmodule Octopus do
   """
   def main(argv) do
     {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
+    if Enum.member?(opts[:parts], 1), do: part1(input_file)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file)
   end
 
   @doc """
   Process input file and display part 1 solution.
   """
-  def part1(input_file, opts \\ []) do
+  def part1(input_file) do
     grid =
-      input_file
-      |> parse_input(opts)
+      File.read!(input_file)
       |> Octopus.Grid.new()
     grid =
       1..100
@@ -52,10 +50,9 @@ defmodule Octopus do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file, opts \\ []) do
+  def part2(input_file) do
     grid =
-      input_file
-      |> parse_input(opts)
+      File.read!(input_file)
       |> Octopus.Grid.new()
     1..1_000_000
     |> Enum.reduce_while(grid, fn (n, grid) ->
