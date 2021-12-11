@@ -155,4 +155,42 @@ defmodule Octopus.Grid do
     new_row = put_elem(row, x, new_energy)
     {%{grid | grid: put_elem(grid.grid, y, new_row)}, new_energy}
   end
+
+  @doc ~S"""
+  Return count of how many octopi just flashed in the previous step.
+
+  ## Examples
+      iex> grid = Octopus.Grid.new({{1, 2, 9}, {4, 5, 6}, {7, 8, 3}})
+      iex> Octopus.Grid.flashed_count(grid)
+      0
+
+      iex> grid = Octopus.Grid.new({{2, 4, 0}, {5, 7, 8}, {8, 9, 4}})
+      iex> Octopus.Grid.flashed_count(grid)
+      1
+  """
+  def flashed_count(grid) do
+    grid.grid
+    |> Tuple.to_list()
+    |> Enum.reduce(0, fn (row, count) ->
+      zeros =
+        row
+        |> Tuple.to_list()
+        |> Enum.count(fn col -> col == 0 end)
+      count + zeros
+    end)
+  end
+
+  @doc ~S"""
+  Did all octopi just flash in the previous step?
+
+  ## Examples
+      iex> Octopus.Grid.new({{0, 1}, {2, 3}}) |> Octopus.Grid.synchronized?()
+      false
+
+      iex> Octopus.Grid.new({{0, 0}, {0, 0}}) |> Octopus.Grid.synchronized?()
+      true
+  """
+  def synchronized?(grid) do
+    flashed_count(grid) == grid.dim * grid.dim
+  end
 end

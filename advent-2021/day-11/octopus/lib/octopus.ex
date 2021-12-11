@@ -53,8 +53,19 @@ defmodule Octopus do
   Process input file and display part 2 solution.
   """
   def part2(input_file, opts \\ []) do
-    input_file
-    |> parse_input(opts)
+    grid =
+      input_file
+      |> parse_input(opts)
+      |> Octopus.Grid.new()
+    1..1_000_000
+    |> Enum.reduce_while(grid, fn (n, grid) ->
+      grid = Octopus.Grid.increase_energy(grid)
+      if Octopus.Grid.synchronized?(grid) do
+        {:halt, n}
+      else
+        {:cont, grid}
+      end
+    end)
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

@@ -165,6 +165,7 @@ defmodule Octopus.GridTest do
         ],
         exp_input10_flashes: 204,
         exp_input10_flashes_100_steps: 1656,
+        exp_input10_synchronized_step: 195,
       ]
     end
 
@@ -205,6 +206,21 @@ defmodule Octopus.GridTest do
           Octopus.Grid.increase_energy(grid)
         end)
       assert grid.flashes == fixture.exp_input10_flashes_100_steps
+    end
+
+    test "stepper produces synchronicity correctly", fixture do
+      [step0 | _] = fixture.input10
+      n_steps =
+        1..1_000_000
+        |> Enum.reduce_while(Octopus.Grid.new(step0), fn (n, grid) ->
+          grid = Octopus.Grid.increase_energy(grid)
+          if Octopus.Grid.synchronized?(grid) do
+            {:halt, n}
+          else
+            {:cont, grid}
+          end
+        end)
+      assert n_steps == fixture.exp_input10_synchronized_step
     end
   end
 
