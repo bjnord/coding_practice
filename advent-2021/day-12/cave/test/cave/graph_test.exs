@@ -34,6 +34,44 @@ defmodule Cave.GraphTest do
         start,b,A,end
         start,b,end
         """,
+        exp_sm_paths_2: """
+        start,A,b,A,b,A,c,A,end
+        start,A,b,A,b,A,end
+        start,A,b,A,b,end
+        start,A,b,A,c,A,b,A,end
+        start,A,b,A,c,A,b,end
+        start,A,b,A,c,A,c,A,end
+        start,A,b,A,c,A,end
+        start,A,b,A,end
+        start,A,b,d,b,A,c,A,end
+        start,A,b,d,b,A,end
+        start,A,b,d,b,end
+        start,A,b,end
+        start,A,c,A,b,A,b,A,end
+        start,A,c,A,b,A,b,end
+        start,A,c,A,b,A,c,A,end
+        start,A,c,A,b,A,end
+        start,A,c,A,b,d,b,A,end
+        start,A,c,A,b,d,b,end
+        start,A,c,A,b,end
+        start,A,c,A,c,A,b,A,end
+        start,A,c,A,c,A,b,end
+        start,A,c,A,c,A,end
+        start,A,c,A,end
+        start,A,end
+        start,b,A,b,A,c,A,end
+        start,b,A,b,A,end
+        start,b,A,b,end
+        start,b,A,c,A,b,A,end
+        start,b,A,c,A,b,end
+        start,b,A,c,A,c,A,end
+        start,b,A,c,A,end
+        start,b,A,end
+        start,b,d,b,A,c,A,end
+        start,b,d,b,A,end
+        start,b,d,b,end
+        start,b,end
+        """,
         md_input: """
         dc-end
         HN-start
@@ -67,6 +105,7 @@ defmodule Cave.GraphTest do
         start,kj,dc,HN,end
         start,kj,dc,end
         """,
+        exp_md_path_count_2: 103,
         lg_input: """
         fs-end
         he-DX
@@ -88,6 +127,7 @@ defmodule Cave.GraphTest do
         start-RW
         """,
         exp_lg_path_count: 226,
+        exp_lg_path_count_2: 3509,
       ]
     end
 
@@ -116,6 +156,29 @@ defmodule Cave.GraphTest do
         |> Cave.Graph.paths()
         |> Enum.count()
       assert act_lg_path_count == fixture.exp_lg_path_count
+    end
+
+    test "walker gets expected paths (small graph, two-visit rule)", fixture do
+      act_sm_paths_2 =
+        Cave.Graph.paths_twice(fixture.exp_sm_graph)
+        |> Enum.sort()
+      assert act_sm_paths_2 == String.split(fixture.exp_sm_paths_2, "\n", trim: true)
+    end
+
+    test "walker gets expected path count (medium graph, two-visit rule)", fixture do
+      act_md_path_count_2 =
+        Cave.Graph.parse_input_string(fixture.md_input)
+        |> Cave.Graph.paths_twice()
+        |> Enum.count()
+      assert act_md_path_count_2 == fixture.exp_md_path_count_2
+    end
+
+    test "walker gets expected path count (large graph, two-visit rule)", fixture do
+      act_lg_path_count_2 =
+        Cave.Graph.parse_input_string(fixture.lg_input)
+        |> Cave.Graph.paths_twice()
+        |> Enum.count()
+      assert act_lg_path_count_2 == fixture.exp_lg_path_count_2
     end
   end
 end

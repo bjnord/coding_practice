@@ -36,8 +36,13 @@ defmodule Cave do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
+    # "[Y]ou realize you might have time to visit a single small cave
+    # twice. Given these new rules, how many paths through this cave
+    # system are there?"
     File.read!(input_file)
     |> parse_input_string()
+    |> paths_twice()
+    |> Enum.count()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
