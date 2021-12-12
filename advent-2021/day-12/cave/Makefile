@@ -3,11 +3,15 @@ FILES = mix.exs test/test_helper.exs \
 	lib/cave.ex test/cave_test.exs \
 	lib/cave/graph.ex test/cave/graph_test.exs
 VERBOSE = 0
+TIMES = 0
+ifneq ($(TIMES), 0)
+TIMESARG = --times
+endif
 
 .PHONY: run test doc console clean
 
 run: $(BIN)
-	$(BIN) input/input.txt
+	$(BIN) $(TIMESARG) input/input.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \

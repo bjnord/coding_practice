@@ -102,4 +102,9 @@ defmodule Cave.Graph do
       ]
   """
   def paths_twice(graph), do: paths(graph, true, [], {:small, "start"})
+  def timed_paths_twice(graph) do
+    tc = :timer.tc(Cave.Graph, :paths_twice, [graph])
+    IO.puts("paths_twice() took #{elem(tc, 0)}µs")
+    elem(tc, 1)
+  end
 end
