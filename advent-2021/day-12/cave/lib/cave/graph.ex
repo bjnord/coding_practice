@@ -39,4 +39,30 @@ defmodule Cave.Graph do
       true -> {:small, name}
     end
   end
+
+  @doc ~S"""
+  Find paths through the cave system.
+
+  ## Examples
+      iex> graph = Cave.Graph.parse_input_string("start-a\nB-start\na-end\nB-end\n")
+      iex> Cave.Graph.paths(graph)
+      ["start,a,end", "start,B,end"]
+  """
+  def paths(graph), do: paths(graph, [], {:small, "start"})
+  defp paths(_graph, path, {:end, _name}) do
+    [
+      ["end" | path]
+      |> Enum.reverse()
+      |> Enum.join(",")
+    ]
+  end
+  defp paths(graph, path, {_kind, name}) do
+    graph[name]
+    |> Enum.reject(fn {next_kind, next_name} ->
+      # puzzle rules say small caves may only be visited once
+      next_kind == :small && Enum.find(path, fn n -> n == next_name end)
+    end)
+    |> Enum.flat_map(fn next_cave -> paths(graph, [name | path], next_cave) end)
+    |> Enum.reject(fn r -> r == [] end)
+  end
 end

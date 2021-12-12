@@ -27,6 +27,8 @@ defmodule Cave do
     # caves at most once?"
     File.read!(input_file)
     |> parse_input_string()
+    |> paths()
+    |> Enum.count()
     |> IO.inspect(label: "Part 1 answer is")
   end
 

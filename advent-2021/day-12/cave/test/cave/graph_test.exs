@@ -94,5 +94,28 @@ defmodule Cave.GraphTest do
     test "parser gets expected graph", fixture do
       assert Cave.Graph.parse_input_string(fixture.sm_input) == fixture.exp_sm_graph
     end
+
+    test "walker gets expected paths (small graph)", fixture do
+      act_sm_paths =
+        Cave.Graph.paths(fixture.exp_sm_graph)
+        |> Enum.sort()
+      assert act_sm_paths == String.split(fixture.exp_sm_paths, "\n", trim: true)
+    end
+
+    test "walker gets expected paths (medium graph)", fixture do
+      act_md_paths =
+        Cave.Graph.parse_input_string(fixture.md_input)
+        |> Cave.Graph.paths()
+        |> Enum.sort()
+      assert act_md_paths == String.split(fixture.exp_md_paths, "\n", trim: true)
+    end
+
+    test "walker gets expected path count (large graph)", fixture do
+      act_lg_path_count =
+        Cave.Graph.parse_input_string(fixture.lg_input)
+        |> Cave.Graph.paths()
+        |> Enum.count()
+      assert act_lg_path_count == fixture.exp_lg_path_count
+    end
   end
 end
