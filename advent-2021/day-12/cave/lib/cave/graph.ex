@@ -62,10 +62,12 @@ defmodule Cave.Graph do
     # If the current cave is a small cave already on the path, this becomes
     # the second visit to it; clear `two_visit` so it can't happen again
     # further along.
-    small_cave_is_on_path =
-      if (kind != :small) || (Enum.find(path, fn n -> n == name end) == nil),
-        do: false, else: true
-    two_visit = two_visit && !small_cave_is_on_path
+    two_visit =
+      cond do
+        kind != :small -> two_visit
+        Enum.find(path, fn n -> n == name end) -> false
+        true -> two_visit
+      end
     ###
     # Now continue the paths recursively, throwing away those that hit a
     # dead end.
