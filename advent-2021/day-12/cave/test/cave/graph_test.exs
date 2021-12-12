@@ -15,12 +15,12 @@ defmodule Cave.GraphTest do
         b-end
         """,
         exp_sm_graph: %{
-          "start" => ["A", "b"],
-          "A" => ["start", "c", "b", "end"],
-          "b" => ["start", "A", "d", "end"],
-          "c" => ["A"],
-          "d" => ["b"],
-          "end" => ["A", "b"],
+          "start" => [{:big, "A"}, {:small, "b"}],
+          "A" => [{:small, "start"}, {:small, "c"}, {:small, "b"}, {:end, "end"}],
+          "b" => [{:small, "start"}, {:big, "A"}, {:small, "d"}, {:end, "end"}],
+          "c" => [{:big, "A"}],
+          "d" => [{:small, "b"}],
+          "end" => [{:big, "A"}, {:small, "b"}],
         },
         exp_sm_paths: """
         start,A,b,A,c,A,end

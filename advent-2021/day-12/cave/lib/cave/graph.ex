@@ -7,8 +7,11 @@ defmodule Cave.Graph do
   Parse input as a block string.
 
   ## Examples
-      iex> Cave.Graph.parse_input_string("start-a\nb-start\na-end\nb-end\n")
-      %{"start" => ["a", "b"], "a" => ["start", "end"], "b" => ["start", "end"], "end" => ["a", "b"]}
+      iex> Cave.Graph.parse_input_string("start-a\nB-start\na-end\nB-end\n")
+      %{"start" => [{:small, "a"}, {:big, "B"}],
+        "a" => [{:small, "start"}, {:end, "end"}],
+        "B" => [{:small, "start"}, {:end, "end"}],
+        "end" => [{:small, "a"}, {:big, "B"}]}
   """
   # TODO OPTIMIZE Elixir 1.13 has `Map.map/2` which would allow us to
   # insert to head of list here, and then reverse all lists at the end
@@ -19,8 +22,8 @@ defmodule Cave.Graph do
     |> Enum.reduce(%{}, fn ({a, b}, graph) ->
       # need to add each pair in both directions:
       graph
-      |> Map.update(a, [b], fn v -> v ++ [b] end)
-      |> Map.update(b, [a], fn v -> v ++ [a] end)
+      |> Map.update(a, [categorize(b)], fn v -> v ++ [categorize(b)] end)
+      |> Map.update(b, [categorize(a)], fn v -> v ++ [categorize(a)] end)
     end)
   end
   defp parse_line(line) do
@@ -28,5 +31,12 @@ defmodule Cave.Graph do
     |> String.trim_trailing
     |> String.split("-")
     |> List.to_tuple()
+  end
+  defp categorize(name) do
+    cond do
+      name == "end" -> {:end, name}
+      String.match?(name, ~r/^\p{Lu}/u) -> {:big, name}
+      true -> {:small, name}
+    end
   end
 end
