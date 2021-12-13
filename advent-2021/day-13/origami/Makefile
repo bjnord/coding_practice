@@ -1,7 +1,7 @@
 BIN = ./origami
 FILES = mix.exs test/test_helper.exs \
 	lib/origami.ex test/origami_test.exs \
-	lib/origami/parser.ex test/origami/parser_test.exs
+	lib/origami/paper.ex test/origami/paper_test.exs
 VERBOSE = 0
 
 .PHONY: run test doc console clean

@@ -3,7 +3,7 @@ defmodule Origami do
   Documentation for Origami.
   """
 
-  import Origami.Parser
+  import Origami.Paper
   import Submarine.CLI
 
   @doc """

@@ -1,16 +1,22 @@
-defmodule Origami.Parser do
+defmodule Origami.Paper do
   @moduledoc """
   Parsing for `Origami`.
   """
+
+  defstruct dimx: 0, dimy: 0, points: {}
 
   @doc ~S"""
   Parse input as a block string.
 
   ## Examples
-      iex> Origami.Parser.parse_input_string("1,2\n3,4\n\nfold along x=5\nfold along y=6\n")
+      iex> Origami.Paper.parse_input_string("1,2\n4,6\n\nfold along x=2\nfold along y=3\n")
       {
-        [{1, 2}, {3, 4}],
-        [{:fold_x, 5}, {:fold_y, 6}],
+        %Origami.Paper{
+          dimx: 5,
+          dimy: 7,
+          points: [{1, 2}, {4, 6}],
+        },
+        [{:fold_x, 2}, {:fold_y, 3}],
       }
   """
   def parse_input_string(input) do
@@ -22,11 +28,21 @@ defmodule Origami.Parser do
       points
       |> String.split("\n", trim: true)
       |> Enum.map(&parse_point/1)
+    {maxx, maxy} =
+      points
+      |> Enum.reduce({0, 0}, fn ({x, y}, {maxx, maxy}) ->
+        maxx = max(maxx, x)
+        maxy = max(maxy, y)
+        {maxx, maxy}
+      end)
     instructions =
       instructions
       |> String.split("\n", trim: true)
       |> Enum.map(&parse_instruction/1)
-    {points, instructions}
+    {
+      %Origami.Paper{dimx: maxx + 1, dimy: maxy + 1, points: points},
+      instructions
+    }
   end
   defp parse_point(line) do
     line
