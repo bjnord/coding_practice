@@ -38,8 +38,14 @@ defmodule Origami do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    File.read!(input_file)
-    |> parse_input_string()
-    |> IO.inspect(label: "Part 2 answer is")
+    # "What code do you use to activate the infrared thermal imaging
+    # camera system?"
+    {paper, instructions} =
+      File.read!(input_file)
+      |> parse_input_string()
+    IO.puts("Part 2 answer is:")
+    fold(paper, instructions)
+    |> render()
+    |> IO.puts()
   end
 end

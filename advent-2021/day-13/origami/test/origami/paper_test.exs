@@ -80,6 +80,15 @@ defmodule Origami.PaperTest do
           ],
         },
         exp_folded_1_n_points: 17,
+        exp_folded_2_render: """
+        #####
+        #...#
+        #...#
+        #...#
+        #####
+        .....
+        .....
+        """,
       ]
     end
 
@@ -97,6 +106,14 @@ defmodule Origami.PaperTest do
         |> Origami.Paper.fold(List.first(fixture.exp_instructions))
       assert act_folded_1 == fixture.exp_folded_1
       assert Origami.Paper.n_points(act_folded_1) == fixture.exp_folded_1_n_points
+    end
+
+    test "folder produces correct final folded paper", fixture do
+      act_folded_2_render =
+        fixture.exp_paper
+        |> Origami.Paper.fold(fixture.exp_instructions)
+        |> Origami.Paper.render()
+      assert act_folded_2_render == fixture.exp_folded_2_render
     end
   end
 end

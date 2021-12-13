@@ -96,7 +96,43 @@ defmodule Origami.Paper do
   end
 
   @doc ~S"""
+  Fold origami `paper` according to the given `instructions`.
+  """
+  def fold(paper, instructions) do
+    instructions
+    |> Enum.reduce(paper, fn (instruction, paper) ->
+      fold(paper, instruction)
+    end)
+  end
+
+  @doc ~S"""
   Return number of points on `paper`.
   """
   def n_points(paper), do: Enum.count(paper.points)
+
+  @doc """
+  Render paper to text.
+  """
+  def render(paper) do
+    paper_points(paper.dimx, paper.dimy)
+    |> Enum.reduce([], fn (point, chars) ->
+      case Enum.find(paper.points, fn p -> p == point end) do
+        nil -> [?. | chars]
+        _ -> [?# | chars]
+      end
+    end)
+    |> Enum.reverse
+    |> Enum.chunk_every(paper.dimx)
+    |> Enum.map(fn chars -> to_string(chars) end)
+    |> Enum.join("\n")
+    |> (fn text -> "#{text}\n" end).()
+  end
+  defp paper_points(dimx, dimy) do
+    for y <- 0..dimy-1 do
+      for x <- 0..dimx-1 do
+        {x, y}
+      end
+    end
+    |> List.flatten()
+  end
 end
