@@ -56,4 +56,47 @@ defmodule Origami.Paper do
       {String.to_atom("fold_#{xy}"), String.to_integer(n)}
     end).()
   end
+
+  @doc ~S"""
+  Fold origami `paper` according to the given instruction.
+  """
+  def fold(paper, {dir, ypos}) when dir == :fold_y do
+    new_points =
+      paper.points
+      |> Enum.map(fn {x, y} ->
+        cond do
+          y > ypos -> {x, y - (y - ypos) * 2}
+          true -> {x, y}
+        end
+      end)
+      |> Enum.sort()
+      |> Enum.uniq()
+    %Origami.Paper{
+      points: new_points,
+      dimx: paper.dimx,
+      dimy: ypos,
+    }
+  end
+  def fold(paper, {dir, xpos}) when dir == :fold_x do
+    new_points =
+      paper.points
+      |> Enum.map(fn {x, y} ->
+        cond do
+          x > xpos -> {x - (x - xpos) * 2, y}
+          true -> {x, y}
+        end
+      end)
+      |> Enum.sort()
+      |> Enum.uniq()
+    %Origami.Paper{
+      points: new_points,
+      dimx: xpos,
+      dimy: paper.dimy,
+    }
+  end
+
+  @doc ~S"""
+  Return number of points on `paper`.
+  """
+  def n_points(paper), do: Enum.count(paper.points)
 end

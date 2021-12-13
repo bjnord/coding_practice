@@ -23,8 +23,14 @@ defmodule Origami do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
-    File.read!(input_file)
-    |> parse_input_string()
+    # "How many dots are visible after completing just the first fold
+    # instruction on your transparent paper?"
+    {paper, instructions} =
+      File.read!(input_file)
+      |> parse_input_string()
+    paper
+    |> fold(List.first(instructions))
+    |> n_points()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
