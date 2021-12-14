@@ -37,8 +37,23 @@ defmodule Polymer.Stepper do
   @doc ~S"""
   Perform `n` steps of polymer insertion.
   """
-  def step(stepper \\ n = 1) do
-    stepper  # TODO
+  def step(stepper, n \\ 1) when n > 0 do
+    Enum.reduce(1..n, stepper, fn (_n, stepper) -> one_step(stepper) end)
+  end
+
+  defp one_step(stepper) do
+    updated_counts =
+      stepper.pair_counts
+      |> Enum.reduce(stepper.pair_counts, fn ({{a, b}, count}, map) ->
+        # find the element to be inserted into the pair
+        c = stepper.rules[{a, b}]
+        # "split" the pair by deducting its previous count, and adding
+        # the count for the two new pairs being created
+        Map.update!(map, {a, b}, &(&1 - count))
+        |> Map.update({a, c}, count, &(&1 + count))
+        |> Map.update({c, b}, count, &(&1 + count))
+      end)
+    %Polymer.Stepper{stepper | pair_counts: updated_counts}
   end
 
   @doc ~S"""

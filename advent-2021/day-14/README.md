@@ -106,6 +106,8 @@ most and least common elements in the result. **What do you get if you
 take the quantity of the most common element and subtract the quantity
 of the least common element?**
 
+Your puzzle answer was `4332887448171`.
+
 ### Part Two Design
 
 Yep. After pondering and not coming up with anything, I figured there was some fancy math algorithm here, so I went to the AoC Reddit for the briefest hint I could find. The first comment on the first post I saw was all I needed.
@@ -121,7 +123,9 @@ After I pondered some more, the light bulb went on: Since we don't need to know 
 1. For each pair `{a, b}` in the map,
    1. Look up `c = {a, b}` from the rules.
    1. This step will create `count` number of new `{a, c}` pairs, and `count` number of new `{c, b}` pairs.
-   1. Update the map with the added counts.
+   1. **AND** this will also **remove** `count` number of `{a, b}` previous pairs (being split).
+      1. Be sure to use the count from the beginning of the step (all insertions happen simultaneously).
+   1. Update the map with the added/removed counts.
 1. Do the previous step N times.
 1. At the end, count both elements in all the pairs in the map.
    1. We have to divide each element's `count` by 2 (it will appear in two pairs).

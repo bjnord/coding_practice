@@ -39,6 +39,7 @@ defmodule Polymer.StepperTest do
         ],
         exp_min_max_4: {5, 23},
         exp_min_max_10: {161, 1749},
+        exp_min_max_40: {3849876073, 2192039569602},
       ]
     end
 
@@ -59,6 +60,20 @@ defmodule Polymer.StepperTest do
         Polymer.Stepper.new("#{polymer4}\n\n#{fixture.rule_lines}")
         |> Polymer.Stepper.min_max()
       assert act_min_max == fixture.exp_min_max_4
+    end
+
+    test "stepper get expected min/max values (10 steps)", fixture do
+      stepper =
+        Polymer.Stepper.new("#{fixture.template}\n\n#{fixture.rule_lines}")
+        |> Polymer.Stepper.step(10)
+      assert Polymer.Stepper.min_max(stepper) == fixture.exp_min_max_10
+    end
+
+    test "stepper get expected min/max values (40 steps)", fixture do
+      stepper =
+        Polymer.Stepper.new("#{fixture.template}\n\n#{fixture.rule_lines}")
+        |> Polymer.Stepper.step(40)
+      assert Polymer.Stepper.min_max(stepper) == fixture.exp_min_max_40
     end
   end
 end
