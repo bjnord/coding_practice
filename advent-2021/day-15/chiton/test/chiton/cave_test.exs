@@ -17,27 +17,52 @@ defmodule Chiton.CaveTest do
         1293138521
         2311944581
         """,
-        exp_cave: %Chiton.Cave{
-          dimx: 10,
-          dimy: 10,
+        exp_min_risk: 40,
+        input3: """
+        116
+        138
+        213
+        """,
+        exp_cave3: %Chiton.Cave{
+          dimx: 3,
+          dimy: 3,
           risks: {
-            {1, 1, 6, 3, 7, 5, 1, 7, 4, 2},
-            {1, 3, 8, 1, 3, 7, 3, 6, 7, 2},
-            {2, 1, 3, 6, 5, 1, 1, 3, 2, 8},
-            {3, 6, 9, 4, 9, 3, 1, 5, 6, 9},
-            {7, 4, 6, 3, 4, 1, 7, 1, 1, 1},
-            {1, 3, 1, 9, 1, 2, 8, 1, 3, 7},
-            {1, 3, 5, 9, 9, 1, 2, 4, 2, 1},
-            {3, 1, 2, 5, 4, 2, 1, 6, 3, 9},
-            {1, 2, 9, 3, 1, 3, 8, 5, 2, 1},
-            {2, 3, 1, 1, 9, 4, 4, 5, 8, 1},
+            {1, 1, 6},
+            {1, 3, 8},
+            {2, 1, 3},
           },
+          dist: %{{0, 0} => 0},
+          unvisited: [
+            {0, 0}, {1, 0}, {2, 0},
+            {0, 1}, {1, 1}, {2, 1},
+            {0, 2}, {1, 2}, {2, 2},
+          ],
+        },
+        exp_distances3: %{
+          {0, 0} => 0, {1, 0} => 1, {2, 0} => 7,
+          {0, 1} => 1, {1, 1} => 4, {2, 1} => 12,
+          {0, 2} => 3, {1, 2} => 4, {2, 2} => 7,
         },
       ]
     end
 
     test "parser gets expected cave struct", fixture do
-      assert Chiton.Cave.new(fixture.input) == fixture.exp_cave
+      assert Chiton.Cave.new(fixture.input3) == fixture.exp_cave3
+    end
+
+    test "Dijkstra finds expected shortest paths (risk levels)", fixture do
+      act_distances =
+        fixture.exp_cave3
+        |> Chiton.Cave.distances()
+      assert act_distances == fixture.exp_distances3
+    end
+
+    test "Dijkstra finds expected minimum-risk path (input)", fixture do
+      act_distances =
+        fixture.input
+        |> Chiton.Cave.new()
+        |> Chiton.Cave.distances()
+      assert act_distances[{9, 9}] == fixture.exp_min_risk
     end
   end
 end
