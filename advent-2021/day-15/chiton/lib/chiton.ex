@@ -21,15 +21,12 @@ defmodule Chiton do
   @doc """
   Process input file and display part 1 solution.
   """
-  # FIXME this makes assumptions about the dimensions of the input
   def part1(input_file) do
     # What is the lowest total risk of any path from the top left to the
     # bottom right?
-    distances =
-      File.read!(input_file)
-      |> Chiton.Cave.new()
-      |> Chiton.Cave.distances()
-    distances[{99, 99}]
+    File.read!(input_file)
+    |> Chiton.Cave.new()
+    |> Chiton.Cave.min_total_risk()
     |> IO.inspect(label: "Part 1 answer is")
   end
 

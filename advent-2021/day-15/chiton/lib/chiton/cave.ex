@@ -52,19 +52,25 @@ defmodule Chiton.Cave do
     |> List.to_tuple()
   end
 
+  @doc ~S"""
+  Find lowest-risk path from origin `{0, 0}` to lowest-right node in `Cave`.
+
+  ## Examples
+      iex> Chiton.Cave.new("01\n23\n") |> Chiton.Cave.min_total_risk()
+      4
+  """
+  def min_total_risk(cave) do
+    distances(cave)
+    |> Map.get({cave.dimx-1, cave.dimy-1})
+  end
+
   ###
   # Dijkstra shortest-path algorithm
   # - at [brilliant.org](https://brilliant.org/wiki/dijkstras-short-path-finder/)
   # - at [freecodecamp.org](https://www.freecodecamp.org/news/dijkstras-shortest-path-algorithm-visual-introduction/)
   ###
 
-  @doc ~S"""
-  Find lowest-risk path from origin `{0, 0}` to each node in `Cave`.
-
-  ## Examples
-      iex> Chiton.Cave.new("01\n23\n") |> Chiton.Cave.distances()
-      %{{0, 0} => 0, {1, 0} => 1, {0, 1} => 2, {1, 1} => 4}
-  """
+  @doc false
   def distances(cave) do
     [cur | tail] = sort_unvisited_by_dist(cave)
     updated_cave =

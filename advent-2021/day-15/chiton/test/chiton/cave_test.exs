@@ -58,11 +58,11 @@ defmodule Chiton.CaveTest do
     end
 
     test "Dijkstra finds expected minimum-risk path (input)", fixture do
-      act_distances =
+      act_min_risk =
         fixture.input
         |> Chiton.Cave.new()
-        |> Chiton.Cave.distances()
-      assert act_distances[{9, 9}] == fixture.exp_min_risk
+        |> Chiton.Cave.min_total_risk()
+      assert act_min_risk == fixture.exp_min_risk
     end
   end
 end
