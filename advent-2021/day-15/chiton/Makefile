@@ -3,11 +3,18 @@ FILES = mix.exs test/test_helper.exs \
 	lib/chiton.ex test/chiton_test.exs \
 	lib/chiton/cave.ex test/chiton/cave_test.exs
 VERBOSE = 0
+TIMES = 0
+ifneq ($(TIMES), 0)
+TIMESARG = --times
+ifneq ($(VERBOSE), 0)
+TIMESARG += --verbose
+endif
+endif
 
 .PHONY: run test doc console clean
 
 run: $(BIN)
-	$(BIN) input/input.txt
+	$(BIN) $(TIMESARG) input/input.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \

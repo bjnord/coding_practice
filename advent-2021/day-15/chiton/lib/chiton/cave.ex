@@ -59,9 +59,25 @@ defmodule Chiton.Cave do
       iex> Chiton.Cave.new("01\n23\n") |> Chiton.Cave.min_total_risk()
       4
   """
-  def min_total_risk(cave) do
+  def min_total_risk(cave, _verbose \\ false) do
     distances(cave)
     |> Map.get({cave.dimx-1, cave.dimy-1})
+  end
+  def timed_min_total_risk(cave, verbose \\ false) do
+    if verbose do
+      pid = spawn(Chiton.Cave, :min_total_risk, [cave, verbose])
+      {:ok, _} = :eprof.start()
+      :eprof.start_profiling([pid])
+      :timer.sleep(15000)  # 15s
+      :eprof.stop_profiling()
+      :eprof.analyze()
+      :eprof.stop()
+      nil
+    else
+      tc = :timer.tc(Chiton.Cave, :min_total_risk, [cave, verbose])
+      IO.puts("min_total_risk() took #{elem(tc, 0)}µs")
+      elem(tc, 1)
+    end
   end
 
   ###
