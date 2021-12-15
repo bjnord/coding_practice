@@ -1,7 +1,7 @@
 BIN = ./chiton
 FILES = mix.exs test/test_helper.exs \
 	lib/chiton.ex test/chiton_test.exs \
-	lib/chiton/parser.ex test/chiton/parser_test.exs
+	lib/chiton/cave.ex test/chiton/cave_test.exs
 VERBOSE = 0
 
 .PHONY: run test doc console clean

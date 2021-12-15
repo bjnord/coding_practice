@@ -23,7 +23,7 @@ defmodule Chiton do
   """
   def part1(input_file) do
     File.read!(input_file)
-    |> Chiton.Parser.parse_input_string()
+    |> Chiton.Cave.new()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -32,7 +32,7 @@ defmodule Chiton do
   """
   def part2(input_file) do
     File.read!(input_file)
-    |> Chiton.Parser.parse_input_string()
+    |> Chiton.Cave.new()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
