@@ -110,6 +110,8 @@ Your puzzle answer was `4332887448171`.
 
 ### Part Two Design
 
+> **Spoilers ahead!**
+
 Yep. After pondering and not coming up with anything, I figured there was some fancy math algorithm here, so I went to the AoC Reddit for the briefest hint I could find. The first comment on the first post I saw was all I needed.
 
 Turns out: Nope! No fancy math, just logical thinking. [User cacaloki said](https://www.reddit.com/r/adventofcode/comments/rg5anc/2021_day_14_part_2_need_algorithm_help/hoi3w0w/):
