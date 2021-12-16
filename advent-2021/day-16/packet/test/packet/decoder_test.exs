@@ -8,9 +8,9 @@ defmodule Packet.DecoderTest do
         input: "D2FE2838006F45291200EE00D40C823060\n",
         input2: "8A004A801A8002F478620080001611562C8802118E34C0015000016115A2E0802F182340A0016C880162017C3686B18A3D4780\n",
         exp_packets: [
-          {6, {:literal, 2021}},
-          {1, {:operator, 6, [{6, {:literal, 10}}, {2, {:literal, 20}}]}},
-          {7, {:operator, 3, [{2, {:literal, 1}}, {4, {:literal, 2}}, {1, {:literal, 3}}]}},
+          {6, {:literal, nil, 2021}},
+          {1, {:operator, 6, [{6, {:literal, nil, 10}}, {2, {:literal, nil, 20}}]}},
+          {7, {:operator, 3, [{2, {:literal, nil, 1}}, {4, {:literal, nil, 2}}, {1, {:literal, nil, 3}}]}},
         ],
         exp_version_sums: [6, 1 + 6 + 2, 7 + 2 + 4 + 1],
         exp_version_sums2: [16, 12, 23, 31],

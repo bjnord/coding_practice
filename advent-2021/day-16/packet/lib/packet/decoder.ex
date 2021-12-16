@@ -59,7 +59,7 @@ defmodule Packet.Decoder do
     # return remaining bits, decoded packet, and consumed payload length
     {
       bits,
-      {version, {:literal, literal}},
+      {version, {:literal, nil, literal}},
       n_digits * 5,
     }
   end
