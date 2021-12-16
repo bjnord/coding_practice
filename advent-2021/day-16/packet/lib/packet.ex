@@ -33,9 +33,12 @@ defmodule Packet do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
+    # "What do you get if you evaluate the expression represented by your
+    # hexadecimal-encoded BITS transmission?"
     File.read!(input_file)
     |> Packet.Decoder.decode()
-    nil  # TODO
+    |> List.first()  # FIXME decode() should return singleton
+    |> Packet.Executor.calculate()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
