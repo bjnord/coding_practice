@@ -22,8 +22,11 @@ defmodule Packet do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
+    # "[W]hat do you get if you add up the version numbers in all packets?"
     File.read!(input_file)
-    |> Packet.Parser.parse()
+    |> Packet.Decoder.decode()
+    |> Enum.map(fn {version, payload} -> version end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -32,7 +35,8 @@ defmodule Packet do
   """
   def part2(input_file) do
     File.read!(input_file)
-    |> Packet.Parser.parse()
+    |> Packet.Decoder.decode()
+    nil  # TODO
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
