@@ -5,7 +5,7 @@ defmodule Packet.DecoderTest do
   describe "puzzle example" do
     setup do
       [
-        input: "D2FE2838006F45291200EE00D40C823060\n",
+        inputs: ["D2FE28\n", "38006F45291200\n", "EE00D40C823060\n"],
         exp_packets: [
           {6, {:literal, nil, 2021}},
           {1, {:operator, 6, [{6, {:literal, nil, 10}}, {2, {:literal, nil, 20}}]}},
@@ -15,7 +15,14 @@ defmodule Packet.DecoderTest do
     end
 
     test "decoder gets expected packets", fixture do
-      assert Packet.Decoder.decode(fixture.input) == fixture.exp_packets
+      [fixture.inputs, fixture.exp_packets]
+      |> Enum.zip()
+      |> Enum.each(fn {input, exp_packet} ->
+        act_packet =
+          Packet.Decoder.decode(input)
+          |> List.first()  # FIXME decode() should return singleton
+        assert act_packet == exp_packet
+      end)
     end
   end
 end

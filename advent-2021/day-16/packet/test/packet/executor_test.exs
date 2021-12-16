@@ -5,8 +5,13 @@ defmodule Packet.ExecutorTest do
   describe "puzzle example" do
     setup do
       [
-        input1: "8A004A801A8002F478620080001611562C8802118E34C0015000016115A2E0802F182340A0016C880162017C3686B18A3D4780\n",
-        exp_version_sums1: [16, 12, 23, 31],
+        inputs: [
+          "8A004A801A8002F478\n",
+          "620080001611562C8802118E34\n",
+          "C0015000016115A2E0802F182340\n",
+          "A0016C880162017C3686B18A3D4780\n"
+        ],
+        exp_version_sums: [16, 12, 23, 31],
         examples: [
           {"C200B40A82", 3},
           {"04005AC33890", 54},
@@ -21,11 +26,15 @@ defmodule Packet.ExecutorTest do
     end
 
     test "executor gets expected version sums", fixture do
-      act_version_sum =
-        fixture.input1
-        |> Packet.Decoder.decode()
-        |> Packet.Executor.version_sum()
-      assert act_version_sum == Enum.sum(fixture.exp_version_sums1)
+      [fixture.inputs, fixture.exp_version_sums]
+      |> Enum.zip()
+      |> Enum.each(fn {input, exp_version_sum} ->
+        act_version_sum =
+          Packet.Decoder.decode(input)
+          |> List.first()  # FIXME decode() should return singleton
+          |> Packet.Executor.version_sum()
+        assert act_version_sum == exp_version_sum
+      end)
     end
 
     test "executor gets expected calculated values", fixture do

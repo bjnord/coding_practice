@@ -25,6 +25,7 @@ defmodule Packet do
     # "[W]hat do you get if you add up the version numbers in all packets?"
     File.read!(input_file)
     |> Packet.Decoder.decode()
+    |> List.first()  # FIXME decode() should return singleton
     |> Packet.Executor.version_sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
