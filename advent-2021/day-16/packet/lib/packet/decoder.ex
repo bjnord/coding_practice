@@ -27,8 +27,8 @@ defmodule Packet.Decoder do
     # take the next packet
     {bits, packet, length} = take_packet(bits)
     ###
-    # take trailing 0s from last hex digit
-    {_zeros, bits} = Enum.split(bits, 4 - rem(length, 4))
+    # take trailing 0s from last byte
+    {_zeros, bits} = Enum.split(bits, 8 - rem(length, 8))
     ###
     # continue taking packets recursively
     take_packets_and_zeros(bits, [packet | packets])
