@@ -2,6 +2,7 @@ BIN = ./packet
 FILES = mix.exs test/test_helper.exs \
 	lib/packet.ex test/packet_test.exs \
 	lib/packet/decoder.ex test/packet/decoder_test.exs \
+	lib/packet/executor.ex \
 	lib/packet/parser.ex test/packet/parser_test.exs
 VERBOSE = 0
 
