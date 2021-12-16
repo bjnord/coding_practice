@@ -13,7 +13,7 @@ defmodule Packet.Decoder do
   def decode(input) do
     input
     |> Packet.Parser.parse()
-    |> take_packets([])
+    |> take_packets_and_zeros([])
   end
 
   ###
@@ -21,19 +21,28 @@ defmodule Packet.Decoder do
   # Essentially it's a big reduce on `bits` yielding a list of `packets`.
   ###
 
-  defp take_packets(bits, packets) when bits == [], do: Enum.reverse(packets)
-  defp take_packets(bits, packets) do
-    {bits, packet} = take_packet(bits)
-    take_packets(bits, [packet | packets])
+  defp take_packets_and_zeros(bits, packets) when bits == [], do: Enum.reverse(packets)
+  defp take_packets_and_zeros(bits, packets) do
+    ###
+    # take the next packet
+    {bits, packet, length} = take_packet(bits)
+    ###
+    # take trailing 0s from last hex digit
+    {_zeros, bits} = Enum.split(bits, 4 - rem(length, 4))
+    ###
+    # continue taking packets recursively
+    take_packets_and_zeros(bits, [packet | packets])
   end
 
   defp take_packet(bits) do
     {bits, version} = take_integer(bits, 3)
     {bits, type} = take_integer(bits, 3)
-    case type do
-      4 -> take_literal_packet(bits, version)
-      _ -> take_todo(bits, version)
-    end
+    {bits, packet, length} =
+      case type do
+        4 -> take_literal_packet(bits, version)
+        _ -> take_todo(bits, version)
+      end
+    {bits, packet, 3 + 3 + length}
   end
 
   defp take_literal_packet(bits, version) do
@@ -47,20 +56,20 @@ defmodule Packet.Decoder do
         {wile, {bits, literal * 0x10 + (bitvalue &&& 0x0F), n_digits + 1}}
       end)
     ###
-    # remove trailing 0s from last hex digit
-    {_zeros, bits} = Enum.split(bits, 4 - rem((3 + 3 + n_digits*5), 4))
-    ###
-    # return remaining bits and resulting packet
+    # return remaining bits, decoded packet, and consumed payload length
     {
       bits,
       {version, {:literal, literal}},
+      n_digits * 5,
     }
   end
 
-  defp take_todo(_bits, version) do
+  defp take_todo(bits, version) do
+    IO.inspect(bits, label: "TODO remaining bits")
     {
       [],
-      {version, {:todo}}
+      {version, {:todo}},
+      2,
     }
   end
 
