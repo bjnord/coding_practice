@@ -21,8 +21,9 @@ defmodule Packet.Decoder do
   # Essentially it's a big reduce on `bits` yielding a list of `packets`.
   ###
 
-  defp take_packets_and_zeros(bits, packets) when bits == [], do: Enum.reverse(packets)
-  defp take_packets_and_zeros(bits, packets) do
+  # at the top level, we take zeroes to "round off" to a full byte
+  defp take_packets_and_zeros(bits, r_packets) when bits == [], do: Enum.reverse(r_packets)
+  defp take_packets_and_zeros(bits, r_packets) do
     ###
     # take the next packet
     {bits, packet, length} = take_packet(bits)
@@ -31,16 +32,40 @@ defmodule Packet.Decoder do
     {_zeros, bits} = Enum.split(bits, 8 - rem(length, 8))
     ###
     # continue taking packets recursively
-    take_packets_and_zeros(bits, [packet | packets])
+    take_packets_and_zeros(bits, [packet | r_packets])
   end
 
-  defp take_packet(bits) do
+  # at lower levels (subpackets), we ignore length and don't take zeroes
+  defp take_packets(bits, r_packets) when bits == [], do: Enum.reverse(r_packets)
+  defp take_packets(bits, r_packets) do
+    ###
+    # take the next packet
+    {bits, packet, _length} = take_packet(bits)
+    ###
+    # continue taking packets recursively
+    take_packets(bits, [packet | r_packets])
+  end
+
+  @doc ~S"""
+  Take a packet.
+
+  ## Examples
+      iex> Packet.Parser.parse("D2FE28\n") |> Packet.Decoder.take_packet()
+      {[0, 0, 0], {6, {:literal, nil, 2021}}, 21}
+
+      iex> Packet.Parser.parse("38006F45291200\n") |> Packet.Decoder.take_packet()
+      {[0, 0, 0, 0, 0, 0, 0], {1, {:operator, 6, [{6, {:literal, nil, 10}}, {2, {:literal, nil, 20}}]}}, 49}
+
+      iex> Packet.Parser.parse("EE00D40C823060\n") |> Packet.Decoder.take_packet()
+      {[0, 0, 0, 0, 0], {7, {:operator, 3, [{2, {:literal, nil, 1}}, {4, {:literal, nil, 2}}, {1, {:literal, nil, 3}}]}}, 51}
+  """
+  def take_packet(bits) do
     {bits, version} = take_integer(bits, 3)
     {bits, type} = take_integer(bits, 3)
     {bits, packet, length} =
       case type do
         4 -> take_literal_packet(bits, version)
-        _ -> take_todo(bits, version)
+        _ -> take_operator_packet(bits, version, type)
       end
     {bits, packet, 3 + 3 + length}
   end
@@ -64,13 +89,35 @@ defmodule Packet.Decoder do
     }
   end
 
-  defp take_todo(bits, version) do
-    IO.inspect(bits, label: "TODO remaining bits")
+  defp take_operator_packet(bits, version, type) do
+    {bits, mode} = take_integer(bits, 1)
+    {bits, subpkts, length} =
+      case mode do
+        0 -> take_fixed_operator_packet(bits)
+        1 -> take_counted_operator_packet(bits)
+      end
     {
-      [],
-      {version, {:todo}},
-      2,
+      bits,
+      {version, {:operator, type, subpkts}},
+      1 + length,
     }
+  end
+
+  defp take_fixed_operator_packet(bits) do
+    {bits, subpkt_length} = take_integer(bits, 15)
+    {subpkt_bits, bits} = Enum.split(bits, subpkt_length)
+    {bits, take_packets(subpkt_bits, []), 15 + subpkt_length}
+  end
+
+  defp take_counted_operator_packet(bits) do
+    {bits, subpkt_count} = take_integer(bits, 11)
+    {bits, r_subpkts, subpkt_length} =
+      1..subpkt_count
+      |> Enum.reduce({bits, [], 0}, fn (_n, {bits, r_subpkts, subpkt_length}) ->
+        {bits, subpkt, length} = take_packet(bits)
+        {bits, [subpkt | r_subpkts], subpkt_length + length}
+      end)
+    {bits, Enum.reverse(r_subpkts), 11 + subpkt_length}
   end
 
   defp take_integer(bits, n) do

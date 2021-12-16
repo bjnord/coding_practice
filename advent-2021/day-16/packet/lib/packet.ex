@@ -25,8 +25,7 @@ defmodule Packet do
     # "[W]hat do you get if you add up the version numbers in all packets?"
     File.read!(input_file)
     |> Packet.Decoder.decode()
-    |> Enum.map(fn {version, payload} -> version end)
-    |> Enum.sum()
+    |> Packet.Executor.version_sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
