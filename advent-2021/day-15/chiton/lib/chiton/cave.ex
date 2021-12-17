@@ -5,7 +5,7 @@ defmodule Chiton.Cave do
 
   alias Submarine.PriorityQueue, as: PriorityQueue
 
-  defstruct dimx: 0, dimy: 0, risks: {}, dist: %{}, unvisited: [], pqueue: nil
+  defstruct dimx: 0, dimy: 0, risks: {}, dist: %{}, unvisited: [], pqueue: nil, visited: nil
 
   @doc ~S"""
   Construct a new `Cave` from `input`.
@@ -15,7 +15,8 @@ defmodule Chiton.Cave do
       %Chiton.Cave{dimx: 2, dimy: 2, risks: {{0, 1}, {2, 3}},
         dist: %{{0, 0} => 0},
         unvisited: [{0, 0}, {1, 0}, {0, 1}, {1, 1}],
-        pqueue: {1, {0, {0, 0}, nil, nil}}}
+        pqueue: {1, {0, {0, 0}, nil, nil}},
+        visited: %MapSet{}}
   """
   def new(input) do
     risks= parse(input)
@@ -30,6 +31,7 @@ defmodule Chiton.Cave do
       dist: %{{0, 0} => 0},
       unvisited: all_nodes(dimx, dimy),
       pqueue: pqueue,
+      visited: MapSet.new(),
     }
   end
   defp row_widths(risks) do
@@ -100,6 +102,7 @@ defmodule Chiton.Cave do
       IO.inspect({cur, cur_}, label: "pop_next_node() mismatch")
       raise "pop_next_node() mismatch"
     end
+    cave = mark_visited(cave, cur)
     updated_cave =
       neighbors(cave, cur)
       |> Enum.reduce(cave, fn (neighbor, cave) ->
@@ -126,12 +129,12 @@ defmodule Chiton.Cave do
     end
   end
 
+  defp mark_visited(cave, node) do
+    %Chiton.Cave{cave | visited: MapSet.put(cave.visited, node)}
+  end
+
   defp visited?(cave, node) do
-    if Enum.member?(cave.unvisited, node) do
-      false
-    else
-      true
-    end
+    MapSet.member?(cave.visited, node)
   end
 
   defp sort_unvisited_by_dist(cave) do

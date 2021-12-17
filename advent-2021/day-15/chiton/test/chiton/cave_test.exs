@@ -38,6 +38,7 @@ defmodule Chiton.CaveTest do
             {0, 2}, {1, 2}, {2, 2},
           ],
           pqueue: {1, {0, {0, 0}, nil, nil}},
+          visited: %MapSet{},
         },
         exp_distances3: %{
           {0, 0} => 0, {1, 0} => 1, {2, 0} => 7,
