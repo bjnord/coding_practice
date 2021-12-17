@@ -2,6 +2,8 @@ defmodule Bingo.ParserTest do
   use ExUnit.Case
   doctest Bingo.Parser
 
+  alias Bingo.Parser, as: Parser
+
   describe "puzzle example" do
     setup do
       [
@@ -36,7 +38,7 @@ defmodule Bingo.ParserTest do
     end
 
     test "parser gets expected balls and boards", fixture do
-      assert Bingo.Parser.parse_input(fixture.input) == {fixture.exp_balls, fixture.exp_boards}
+      assert Parser.parse(fixture.input) == {fixture.exp_balls, fixture.exp_boards}
     end
   end
 end

@@ -3,7 +3,7 @@ defmodule Bingo do
   Documentation for Bingo.
   """
 
-  import Bingo.Parser
+  alias Bingo.Parser, as: Parser
   import Submarine
   import Submarine.CLI
   use Bitwise
@@ -25,9 +25,9 @@ defmodule Bingo do
   Process input file and display part 1 solution.
   """
   def part1(input_file, opts \\ []) do
-    {balls, boards} = input_file
-                      |> File.read!
-                      |> parse_input(opts)
+    {balls, boards} =
+      File.read!(input_file)
+      |> Parser.parse(opts)
     boards
     |> find_first_winning_board(balls)
     |> elem(2)  # score
@@ -136,9 +136,9 @@ defmodule Bingo do
   Process input file and display part 2 solution.
   """
   def part2(input_file, opts \\ []) do
-    {balls, boards} = input_file
-                      |> File.read!
-                      |> parse_input(opts)
+    {balls, boards} =
+      File.read!(input_file)
+      |> Parser.parse(opts)
     boards
     |> find_last_winning_board(balls)
     |> elem(2)  # score
