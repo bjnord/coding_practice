@@ -25,6 +25,7 @@ defmodule Chiton.Cave do
   def new(input, opts \\ []) do
     risks = parse(input)
     opts = Keyword.merge(@defaults, opts)
+    # this enforces uniform row widths:
     [dimx] = row_widths(risks)
     dimy = tuple_size(risks)
     pqueue = PriorityQueue.new()
@@ -45,6 +46,7 @@ defmodule Chiton.Cave do
       do: tuple_size(row)
   end
 
+  # Parse input lines to an NxN tuple matrix.
   @doc false
   def parse(input) do
     input
@@ -96,13 +98,27 @@ defmodule Chiton.Cave do
 
   @doc false
   def distances(cave) do
+    ###
+    # Pop the highest-priority node (lowest risk), that has not already
+    # been visited, from the priority queue. In the first run, the source
+    # node `{0, 0}` will be chosen (because the queue was initialized with
+    # only that in it). In the next run, the next node with the lowest risk
+    # is chosen.
     {cave, cur} = pop_next_unvisited_node(cave)
+    ###
+    # 1. Mark the chosen node as having been visited
+    # 2. Update the `dist` (total path cost) values of the adjacent nodes of
+    #    the current node
     cave =
       mark_visited(cave, cur)
       |> neighbors(cur)
       |> Enum.reduce(cave, fn (neighbor, cave) ->
         update_dist_of(cave, cur, neighbor)
       end)
+    ###
+    # When `pqueue` is empty, the lowest-risk path has been found; return
+    # all node path costs to the caller. Otherwise, continue processing
+    # the queue recursively (using tail recursion).
     if queue_empty?(cave) do
       cave.dist
     else
@@ -114,6 +130,8 @@ defmodule Chiton.Cave do
     PriorityQueue.empty?(cave.pqueue)
   end
 
+  # Pop the highest-priority node `next` (lowest risk), that has not
+  # already been visited, from `pqueue`.
   defp pop_next_unvisited_node(cave) do
     if queue_empty?(cave) do
       {cave, nil}
@@ -136,6 +154,7 @@ defmodule Chiton.Cave do
     MapSet.member?(cave.visited, node)
   end
 
+  # Return a list of nodes adjacent to the `{x, y}` node.
   defp neighbors(cave, {x, y}) do
     [{x, y-1}, {x-1, y}, {x+1, y}, {x, y+1}]
     |> Enum.reject(&(x_out_of_bounds(&1, cave.dimx, cave.scale)))
@@ -144,6 +163,20 @@ defmodule Chiton.Cave do
   defp x_out_of_bounds({x, _y}, dimx, scale), do: x < 0 || x >= dimx * scale
   defp y_out_of_bounds({_x, y}, dimy, scale), do: y < 0 || y >= dimy * scale
 
+  # Update the `dist` (total path cost) values of the node `neighbor`
+  # which is adjacent to the `cur` node:
+  # 1. `risk_at()` returns the risk level from **entering** the given
+  #    `neighbor`
+  # 2. `new_dist` is a new calculation of the total path cost from the
+  #    origin to `neighbor`, ending with the `risk_at()` from `cur` to
+  #    `neighbor` we're now examining
+  # 3. if the new total path cost to `neighbor` is lower than the previous
+  #    one, we've found a shorter route to it:
+  #    - update `dist` with the new total path cost to `neighbor`
+  #    - add or update `neighbor` in the priority queue to have a new
+  #      (higher) priority
+  # 3. otherwise, don't update anything; the existing cost/priority is
+  #    as good or better than the new path would be
   defp update_dist_of(cave, cur, neighbor) do
     cur_dist = Map.get(cave.dist, cur)
     neighbor_dist = Map.get(cave.dist, neighbor)
@@ -156,6 +189,9 @@ defmodule Chiton.Cave do
     end
   end
 
+  # Add or update `node` in `pqueue`. (`PriorityQueue` requires this
+  # formulation due to the data structure it's using.) When completed,
+  # `node` will be in `pqueue` with priority based on `new_dist`.
   defp put_or_update_node(cave, node, old_dist, new_dist) do
     new_pri = priority(node, new_dist)
     pqueue =
@@ -168,12 +204,18 @@ defmodule Chiton.Cave do
     %Cave{cave | pqueue: pqueue}
   end
 
-  # PriorityQueue requires unique priority values, so we salt
-  # distance with the node position
+  # `PriorityQueue` requires unique priority values, so we salt
+  # distance with the node position.
   defp priority({x, y}, dist) when x < 512 and y < 512 do
     dist * 512 * 512 + y * 512 + x
   end
 
+  # Return the risk level for **entering** the node at `{x, y}`. This is
+  # implemented such that the cave can have a "virtual expanded size" (as
+  # directed by `scale`).
+  # - `risks` has the upper-left corner (base) tile data
+  # - that tile is repeated `scale` times horizontally and vertically,
+  #   with risk levels incremented (modulo 9); see Part Two description
   @doc false
   def risk_at(cave, {x, y}) do
     # find tile position
@@ -187,16 +229,16 @@ defmodule Chiton.Cave do
       tx >= cave.scale or ty >= cave.scale ->
         raise "invalid position #{x},#{y} for #{cave.dimx}x#{cave.dimy} scale #{cave.scale}"
       tx == 0 and ty == 0 ->
-        unscaled_risk_at(cave, {x, y})
+        base_risk_at(cave, {x, y})
       true ->
         shift = tx + ty
         # get base-tile risk value, changed from 1..9 to 0..8
-        ans = unscaled_risk_at(cave, {x, y}) - 1
+        ans = base_risk_at(cave, {x, y}) - 1
         # add shift (modulo 9), still 0..8
         ans = rem(ans + shift, 9)
         # return it as 1..9
         ans + 1
     end
   end
-  defp unscaled_risk_at(cave, {x, y}), do: elem(elem(cave.risks, y), x)
+  defp base_risk_at(cave, {x, y}), do: elem(elem(cave.risks, y), x)
 end
