@@ -18,10 +18,7 @@ defmodule Packet.DecoderTest do
       [fixture.inputs, fixture.exp_packets]
       |> Enum.zip()
       |> Enum.each(fn {input, exp_packet} ->
-        act_packet =
-          Packet.Decoder.decode(input)
-          |> List.first()  # FIXME decode() should return singleton
-        assert act_packet == exp_packet
+        assert Packet.Decoder.decode(input) == exp_packet
       end)
     end
   end

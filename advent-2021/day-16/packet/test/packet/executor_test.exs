@@ -31,7 +31,6 @@ defmodule Packet.ExecutorTest do
       |> Enum.each(fn {input, exp_version_sum} ->
         act_version_sum =
           Packet.Decoder.decode(input)
-          |> List.first()  # FIXME decode() should return singleton
           |> Packet.Executor.version_sum()
         assert act_version_sum == exp_version_sum
       end)
@@ -43,7 +42,6 @@ defmodule Packet.ExecutorTest do
         act_value =
           packet_input
           |> Packet.Decoder.decode()
-          |> List.first()  # FIXME decode() should return singleton
           |> Packet.Executor.calculate()
         assert act_value == exp_value
       end)
