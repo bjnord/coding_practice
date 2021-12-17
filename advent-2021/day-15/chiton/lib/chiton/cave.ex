@@ -220,21 +220,11 @@ defmodule Chiton.Cave do
     # find position within tile
     x = rem(x, cave.dimx)
     y = rem(y, cave.dimy)
-    # get scaled risk
-    cond do
-      tx >= cave.scale or ty >= cave.scale ->
-        raise "invalid position #{x},#{y} for #{cave.dimx}x#{cave.dimy} scale #{cave.scale}"
-      tx == 0 and ty == 0 ->
-        base_risk_at(cave, {x, y})
-      true ->
-        shift = tx + ty
-        # get base-tile risk value, changed from 1..9 to 0..8
-        ans = base_risk_at(cave, {x, y}) - 1
-        # add shift (modulo 9), still 0..8
-        ans = rem(ans + shift, 9)
-        # return it as 1..9
-        ans + 1
-    end
+    # get base-tile risk value, changed from 1..9 to 0..8
+    ans = base_risk_at(cave, {x, y}) - 1
+    # increment the risk value (modulo 9), then change it
+    # from 0..8 back to 1..9
+    rem(ans + (tx + ty), 9) + 1
   end
   defp base_risk_at(cave, {x, y}), do: elem(elem(cave.risks, y), x)
 end
