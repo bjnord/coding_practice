@@ -13,6 +13,7 @@ defmodule ProbeTest do
           {:hit, [{9, 0}, {17, -1}, {24, -3}, {30, -6}]},
           {:miss, [{17, -4}, {33, -9}, {48, -15}]},
         ],
+        exp_max_height: 45,
       ]
     end
 
@@ -23,6 +24,11 @@ defmodule ProbeTest do
       |> Enum.each(fn {shot, exp_result} ->
         assert Probe.fire(shot, target) == exp_result
       end)
+    end
+
+    test "max height finder gets the expected max height", fixture do
+      target = Probe.Parser.parse(fixture.input)
+      assert Probe.max_height(target) == fixture.exp_max_height
     end
   end
 end

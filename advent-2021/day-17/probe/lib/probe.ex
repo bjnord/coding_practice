@@ -21,9 +21,33 @@ defmodule Probe do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
+    # "Find the initial velocity that causes the probe to reach the highest
+    # y position and still eventually be within the target area after any
+    # step. What is the highest y position it reaches on this trajectory?"
     File.read!(input_file)
     |> Probe.Parser.parse()
+    |> Probe.max_height()
     |> IO.inspect(label: "Part 1 answer is")
+  end
+
+  @doc """
+  Return the max height that can be achieved by firing the probe toward the
+  target area `{{min_x, max_x}, {min_y, max_y}}` (by trying all plausible
+  firing velocity vectors).
+  """
+  def max_height({{min_x, max_x}, {min_y, max_y}}) do
+    for xv <- 1..max_x, yv <- 1..max_x do
+      fire({xv, yv}, {{min_x, max_x}, {min_y, max_y}})
+    end
+    |> Enum.filter(fn {hit_miss, _positions} -> hit_miss == :hit end)
+    |> Enum.map(fn {_hit_miss, positions} -> max_height_of_positions(positions) end)
+    |> Enum.max()
+  end
+
+  defp max_height_of_positions(positions) do
+    positions
+    |> Enum.map(fn {_x, y} -> y end)
+    |> Enum.max()
   end
 
   @doc """
