@@ -4,7 +4,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/bingo/parser.ex test/bingo/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test console clean
+.PHONY: run test doc console clean
 
 run: $(BIN)
 	$(BIN) input/input.txt
@@ -15,11 +15,14 @@ test:
 	fi
 	PROPCHECK_VERBOSE=$(VERBOSE) mix test
 
+doc:
+	mix docs
+
 console:
 	iex -S mix
 
 clean:
-	rm -rf _build $(BIN) log/*.log
+	rm -rf _build $(BIN) doc log/*.log
 
 $(BIN): $(FILES)
 	mix escript.build
