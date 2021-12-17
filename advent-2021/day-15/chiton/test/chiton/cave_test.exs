@@ -32,11 +32,6 @@ defmodule Chiton.CaveTest do
             {2, 1, 3},
           },
           dist: %{{0, 0} => 0},
-          unvisited: [
-            {0, 0}, {1, 0}, {2, 0},
-            {0, 1}, {1, 1}, {2, 1},
-            {0, 2}, {1, 2}, {2, 2},
-          ],
           pqueue: {1, {0, {0, 0}, nil, nil}},
           visited: %MapSet{},
         },
