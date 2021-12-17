@@ -133,16 +133,12 @@ defmodule Chiton.Cave do
   # Pop the highest-priority node `next` (lowest risk), that has not
   # already been visited, from `pqueue`.
   defp pop_next_unvisited_node(cave) do
-    if queue_empty?(cave) do
-      {cave, nil}
+    {pqueue, next} = PriorityQueue.pop(cave.pqueue)
+    cave = %Cave{cave | pqueue: pqueue}
+    if visited?(cave, next) do
+      pop_next_unvisited_node(cave)
     else
-      {pqueue, next} = PriorityQueue.pop(cave.pqueue)
-      cave = %Cave{cave | pqueue: pqueue}
-      if visited?(cave, next) do
-        pop_next_unvisited_node(cave)
-      else
-        {cave, next}
-      end
+      {cave, next}
     end
   end
 
