@@ -5,20 +5,25 @@ defmodule Chiton.Cave do
 
   alias Submarine.PriorityQueue, as: PriorityQueue
 
-  defstruct dimx: 0, dimy: 0, risks: {}, dist: %{}, pqueue: nil, visited: nil
+  defstruct dimx: 0, dimy: 0, scale: 1, risks: {}, dist: %{}, pqueue: nil, visited: nil
+
+  @defaults [scale: 1]
 
   @doc ~S"""
   Construct a new `Cave` from `input`.
 
+  ## Options
+  - `scale:` makes the cave bigger by a factor of N (default 1)
+
   ## Examples
       iex> Chiton.Cave.new("01\n23\n")
-      %Chiton.Cave{dimx: 2, dimy: 2, risks: {{0, 1}, {2, 3}},
-        dist: %{{0, 0} => 0},
-        pqueue: {1, {0, {0, 0}, nil, nil}},
-        visited: %MapSet{}}
+      %Chiton.Cave{dimx: 2, dimy: 2, scale: 1, risks: {{0, 1}, {2, 3}},
+        dist: %{{0, 0} => 0}, pqueue: {1, {0, {0, 0}, nil, nil}}, visited: %MapSet{},
+      }
   """
-  def new(input) do
-    risks= parse(input)
+  def new(input, opts \\ []) do
+    risks = parse(input)
+    opts = Keyword.merge(@defaults, opts)
     [dimx] = row_widths(risks)
     dimy = tuple_size(risks)
     pqueue = PriorityQueue.new()
@@ -26,6 +31,7 @@ defmodule Chiton.Cave do
     %Chiton.Cave{
       dimx: dimx,
       dimy: dimy,
+      scale: opts[:scale],
       risks: risks,
       dist: %{{0, 0} => 0},
       pqueue: pqueue,
@@ -62,7 +68,7 @@ defmodule Chiton.Cave do
   """
   def min_total_risk(cave, _verbose \\ false) do
     distances(cave)
-    |> Map.get({cave.dimx-1, cave.dimy-1})
+    |> Map.get({cave.dimx * cave.scale - 1, cave.dimy * cave.scale - 1})
   end
   def timed_min_total_risk(cave, verbose \\ false) do
     if verbose do
@@ -131,16 +137,16 @@ defmodule Chiton.Cave do
 
   defp neighbors(cave, {x, y}) do
     [{x, y-1}, {x-1, y}, {x+1, y}, {x, y+1}]
-    |> Enum.reject(&(x_out_of_bounds(&1, cave.dimx)))
-    |> Enum.reject(&(y_out_of_bounds(&1, cave.dimy)))
+    |> Enum.reject(&(x_out_of_bounds(&1, cave.dimx, cave.scale)))
+    |> Enum.reject(&(y_out_of_bounds(&1, cave.dimy, cave.scale)))
   end
-  defp x_out_of_bounds({x, _y}, dimx), do: x < 0 || x >= dimx
-  defp y_out_of_bounds({_x, y}, dimy), do: y < 0 || y >= dimy
+  defp x_out_of_bounds({x, _y}, dimx, scale), do: x < 0 || x >= dimx * scale
+  defp y_out_of_bounds({_x, y}, dimy, scale), do: y < 0 || y >= dimy * scale
 
   defp update_dist_of(cave, cur, neighbor) do
     cur_dist = Map.get(cave.dist, cur)
     neighbor_dist = Map.get(cave.dist, neighbor)
-    new_dist = cur_dist + risk_at(cave.risks, neighbor)
+    new_dist = cur_dist + risk_at(cave, neighbor)
     if new_dist < neighbor_dist do
       cave = put_or_update_node(cave, neighbor, neighbor_dist, new_dist)
       %Chiton.Cave{cave | dist: Map.put(cave.dist, neighbor, new_dist)}
@@ -163,9 +169,33 @@ defmodule Chiton.Cave do
 
   # PriorityQueue requires unique priority values, so we salt
   # distance with the node position
-  defp priority({x, y}, dist) when x < 256 and y < 256 do
-    dist * 256 * 256 + y * 256 + x
+  defp priority({x, y}, dist) when x < 512 and y < 512 do
+    dist * 512 * 512 + y * 512 + x
   end
 
-  defp risk_at(risks, {x, y}), do: elem(elem(risks, y), x)
+  @doc false
+  def risk_at(cave, {x, y}) do
+    # find tile position
+    tx = div(x, cave.dimx)
+    ty = div(y, cave.dimy)
+    # find position within tile
+    x = rem(x, cave.dimx)
+    y = rem(y, cave.dimy)
+    # get scaled risk
+    cond do
+      tx >= cave.scale or ty >= cave.scale ->
+        raise "invalid position #{x},#{y} for #{cave.dimx}x#{cave.dimy} scale #{cave.scale}"
+      tx == 0 and ty == 0 ->
+        unscaled_risk_at(cave, {x, y})
+      true ->
+        shift = tx + ty
+        # get base-tile risk value, changed from 1..9 to 0..8
+        ans = unscaled_risk_at(cave, {x, y}) - 1
+        # add shift (modulo 9), still 0..8
+        ans = rem(ans + shift, 9)
+        # return it as 1..9
+        ans + 1
+    end
+  end
+  defp unscaled_risk_at(cave, {x, y}), do: elem(elem(cave.risks, y), x)
 end
