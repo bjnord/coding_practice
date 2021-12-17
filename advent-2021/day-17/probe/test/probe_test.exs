@@ -14,6 +14,7 @@ defmodule ProbeTest do
           {:miss, [{17, -4}, {33, -9}, {48, -15}]},
         ],
         exp_max_height: 45,
+        exp_hit_count: 112,
       ]
     end
 
@@ -29,6 +30,11 @@ defmodule ProbeTest do
     test "max height finder gets the expected max height", fixture do
       target = Probe.Parser.parse(fixture.input)
       assert Probe.max_height(target) == fixture.exp_max_height
+    end
+
+    test "hit counter gets the expected hit count", fixture do
+      target = Probe.Parser.parse(fixture.input)
+      assert Probe.hit_count(target) == fixture.exp_hit_count
     end
   end
 end

@@ -36,7 +36,8 @@ defmodule Probe do
   firing velocity vectors).
   """
   def max_height({{min_x, max_x}, {min_y, max_y}}) do
-    for xv <- 1..max_x, yv <- 1..max_x do
+    # in puzzle example, hit xv=6..30(max_x) yv=-10(min_y)..9
+    for xv <- 1..max_x, yv <- min_y..-min_y do
       fire({xv, yv}, {{min_x, max_x}, {min_y, max_y}})
     end
     |> Enum.filter(fn {hit_miss, _positions} -> hit_miss == :hit end)
@@ -94,9 +95,25 @@ defmodule Probe do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
+    # "How many distinct initial velocity values cause the probe to be
+    # within the target area after any step?"
     File.read!(input_file)
     |> Probe.Parser.parse()
-    nil  # TODO
+    |> Probe.hit_count()
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Return the number of firing velocity vectors for which the probe will
+  hit the target area `{{min_x, max_x}, {min_y, max_y}}` (by trying all
+  plausible firing velocity vectors).
+  """
+  def hit_count({{min_x, max_x}, {min_y, max_y}}) do
+    # in puzzle example, hit xv=6..30(max_x) yv=-10(min_y)..9
+    for xv <- 1..max_x, yv <- min_y..-min_y do
+      fire({xv, yv}, {{min_x, max_x}, {min_y, max_y}})
+    end
+    |> Enum.filter(fn {hit_miss, _positions} -> hit_miss == :hit end)
+    |> Enum.count()
   end
 end
