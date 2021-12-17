@@ -7,9 +7,9 @@ defmodule Packet.DecoderTest do
       [
         inputs: ["D2FE28\n", "38006F45291200\n", "EE00D40C823060\n"],
         exp_packets: [
-          {6, {:literal, nil, 2021}},
-          {1, {:operator, 6, [{6, {:literal, nil, 10}}, {2, {:literal, nil, 20}}]}},
-          {7, {:operator, 3, [{2, {:literal, nil, 1}}, {4, {:literal, nil, 2}}, {1, {:literal, nil, 3}}]}},
+          {6, {:literal, 2021}},
+          {1, {:op_lt, [{6, {:literal, 10}}, {2, {:literal, 20}}]}},
+          {7, {:op_max, [{2, {:literal, 1}}, {4, {:literal, 2}}, {1, {:literal, 3}}]}},
         ],
       ]
     end

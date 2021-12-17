@@ -12,10 +12,10 @@ defmodule Packet.Decoder do
 
   ## Examples
       iex> Packet.Decoder.decode("D2FE28\n")
-      {6, {:literal, nil, 2021}}
+      {6, {:literal, 2021}}
 
       iex> Packet.Decoder.decode("38006F45291200\n")
-      {1, {:operator, 6, [{6, {:literal, nil, 10}}, {2, {:literal, nil, 20}}]}}
+      {1, {:op_lt, [{6, {:literal, 10}}, {2, {:literal, 20}}]}}
   """
   def decode(input) do
     input
@@ -29,6 +29,11 @@ defmodule Packet.Decoder do
   # Essentially it's a big reduce on `bits` yielding the top-level packet.
   ###
 
+  @op_types %{
+    0 => :op_sum, 1 => :op_prod, 2 => :op_min, 3 => :op_max,
+    4 => :literal, 5 => :op_gt, 6 => :op_lt, 7 => :op_eq,
+  }
+
   defp take_packet(bits) do
     ###
     # take version and type (3 bits each)
@@ -40,7 +45,7 @@ defmodule Packet.Decoder do
     # (one of two kinds based on `type`)
     case type do
       4 -> take_literal_packet(bits, version)
-      _ -> take_operator_packet(bits, version, type)
+      _ -> take_operator_packet(bits, version, @op_types[type])
     end
   end
 
@@ -57,7 +62,7 @@ defmodule Packet.Decoder do
       end)
     ###
     # return remaining bits, and decoded packet
-    {bits, {version, {:literal, nil, literal}}}
+    {bits, {version, {:literal, literal}}}
   end
 
   defp take_operator_packet(bits, version, type) do
@@ -72,7 +77,7 @@ defmodule Packet.Decoder do
       end
     ###
     # return remaining bits, and decoded packet
-    {bits, {version, {:operator, type, subpkts}}}
+    {bits, {version, {type, subpkts}}}
   end
 
   defp take_fixed_operator_packet(bits) do

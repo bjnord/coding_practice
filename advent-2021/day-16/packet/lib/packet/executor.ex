@@ -6,10 +6,10 @@ defmodule Packet.Executor do
   @doc ~S"""
   Return sum of the versions found in (nested) `packets`.
   """
-  def version_sum({version, {type, _subtype, op}}) do
+  def version_sum({version, {type, arg}}) do
     case type do
       :literal -> version
-      :operator -> version + subpkts_version_sum(op)
+      _ -> version + subpkts_version_sum(arg)
     end
   end
   defp subpkts_version_sum(subpkts) do
@@ -20,16 +20,16 @@ defmodule Packet.Executor do
   @doc ~S"""
   Return value calculated from packet (including its nested packets).
   """
-  def calculate({_version, {type, subtype, op}}) do
-    case {type, subtype} do
-      {:literal, _} -> op
-      {:operator, 0} -> calculate_sum(op)
-      {:operator, 1} -> calculate_prod(op)
-      {:operator, 2} -> calculate_min(op)
-      {:operator, 3} -> calculate_max(op)
-      {:operator, 5} -> calculate_gt(op)
-      {:operator, 6} -> calculate_lt(op)
-      {:operator, 7} -> calculate_eq(op)
+  def calculate({_version, {type, arg}}) do
+    case type do
+      :op_sum -> calculate_sum(arg)
+      :op_prod -> calculate_prod(arg)
+      :op_min -> calculate_min(arg)
+      :op_max -> calculate_max(arg)
+      :literal -> arg
+      :op_gt -> calculate_gt(arg)
+      :op_lt -> calculate_lt(arg)
+      :op_eq -> calculate_eq(arg)
     end
   end
 
