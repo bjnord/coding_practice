@@ -3,7 +3,9 @@ defmodule Chiton.Cave do
   Parsing for `Chiton`.
   """
 
-  defstruct dimx: 0, dimy: 0, risks: {}, dist: %{}, unvisited: []
+  alias Submarine.PriorityQueue, as: PriorityQueue
+
+  defstruct dimx: 0, dimy: 0, risks: {}, dist: %{}, unvisited: [], pqueue: nil
 
   @doc ~S"""
   Construct a new `Cave` from `input`.
@@ -12,18 +14,22 @@ defmodule Chiton.Cave do
       iex> Chiton.Cave.new("01\n23\n")
       %Chiton.Cave{dimx: 2, dimy: 2, risks: {{0, 1}, {2, 3}},
         dist: %{{0, 0} => 0},
-        unvisited: [{0, 0}, {1, 0}, {0, 1}, {1, 1}]}
+        unvisited: [{0, 0}, {1, 0}, {0, 1}, {1, 1}],
+        pqueue: {1, {0, {0, 0}, nil, nil}}}
   """
   def new(input) do
     risks= parse(input)
     [dimx] = row_widths(risks)
     dimy = tuple_size(risks)
+    pqueue = PriorityQueue.new()
+             |> PriorityQueue.put({0, 0}, 0)
     %Chiton.Cave{
       dimx: dimx,
       dimy: dimy,
       risks: risks,
       dist: %{{0, 0} => 0},
       unvisited: all_nodes(dimx, dimy),
+      pqueue: pqueue,
     }
   end
   defp row_widths(risks) do
@@ -89,6 +95,11 @@ defmodule Chiton.Cave do
   @doc false
   def distances(cave) do
     [cur | tail] = sort_unvisited_by_dist(cave)
+    {cave, cur_} = pop_next_unvisited_node(cave)
+    if cur != cur_ do
+      IO.inspect({cur, cur_}, label: "pop_next_node() mismatch")
+      raise "pop_next_node() mismatch"
+    end
     updated_cave =
       neighbors(cave, cur)
       |> Enum.reduce(cave, fn (neighbor, cave) ->
@@ -101,10 +112,36 @@ defmodule Chiton.Cave do
     end
   end
 
+  defp pop_next_unvisited_node(cave) do
+    if PriorityQueue.empty?(cave.pqueue) do
+      {cave, nil}
+    else
+      {pqueue, next} = PriorityQueue.pop(cave.pqueue)
+      cave = %Chiton.Cave{cave | pqueue: pqueue}
+      if visited?(cave, next) do
+        pop_next_unvisited_node(cave)
+      else
+        {cave, next}
+      end
+    end
+  end
+
+  defp visited?(cave, node) do
+    if Enum.member?(cave.unvisited, node) do
+      false
+    else
+      true
+    end
+  end
+
   defp sort_unvisited_by_dist(cave) do
     # NB: this works because in Elixir `nil` is huge
     cave.unvisited
-    |> Enum.sort_by(&(Map.get(cave.dist, &1)))
+    |> Enum.sort_by(fn {x, y} ->
+      dist = Map.get(cave.dist, {x, y})
+      pos = y * 256 + x
+      {dist, pos}
+    end)
   end
 
   defp neighbors(cave, {x, y}) do
@@ -120,10 +157,30 @@ defmodule Chiton.Cave do
     neighbor_dist = Map.get(cave.dist, neighbor)
     new_dist = cur_dist + risk_at(cave.risks, neighbor)
     if new_dist < neighbor_dist do
+      cave = put_or_update_node(cave, neighbor, neighbor_dist, new_dist)
       %Chiton.Cave{cave | dist: Map.put(cave.dist, neighbor, new_dist)}
     else
       cave
     end
   end
+
+  defp put_or_update_node(cave, node, old_dist, new_dist) do
+    new_pri = priority(node, new_dist)
+    pqueue =
+      if old_dist == nil do
+        PriorityQueue.put(cave.pqueue, node, new_pri)
+      else
+        old_pri = priority(node, old_dist)
+        PriorityQueue.update(cave.pqueue, node, old_pri, new_pri)
+      end
+    %Chiton.Cave{cave | pqueue: pqueue}
+  end
+
+  # PriorityQueue requires unique priority values, so we salt
+  # distance with the node position
+  defp priority({x, y}, dist) when x < 256 and y < 256 do
+    dist * 256 * 256 + y * 256 + x
+  end
+
   defp risk_at(risks, {x, y}), do: elem(elem(risks, y), x)
 end
