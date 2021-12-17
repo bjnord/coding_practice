@@ -4,6 +4,7 @@ defmodule Chiton do
   """
 
   import Submarine.CLI
+  alias Chiton.Cave, as: Cave
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -24,14 +25,14 @@ defmodule Chiton do
   def part1(input_file, opts) do
     mtr_func =
       if opts[:times] do
-        &Chiton.Cave.timed_min_total_risk/2
+        &Cave.timed_min_total_risk/2
       else
-        &Chiton.Cave.min_total_risk/2
+        &Cave.min_total_risk/2
       end
     # What is the lowest total risk of any path from the top left to the
     # bottom right?
     File.read!(input_file)
-    |> Chiton.Cave.new()
+    |> Cave.new()
     |> mtr_func.(opts[:verbose])
     |> IO.inspect(label: "Part 1 answer is")
   end
@@ -42,14 +43,14 @@ defmodule Chiton do
   def part2(input_file, opts) do
     mtr_func =
       if opts[:times] do
-        &Chiton.Cave.timed_min_total_risk/2
+        &Cave.timed_min_total_risk/2
       else
-        &Chiton.Cave.min_total_risk/2
+        &Cave.min_total_risk/2
       end
     # "Using the full [5x] map, what is the lowest total risk of any path
     # from the top left to the bottom right?"
     File.read!(input_file)
-    |> Chiton.Cave.new(scale: 5)
+    |> Cave.new(scale: 5)
     |> mtr_func.(opts[:verbose])
     |> IO.inspect(label: "Part 2 answer is")
   end

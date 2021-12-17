@@ -4,13 +4,14 @@ defmodule Chiton.Cave do
   """
 
   alias Submarine.PriorityQueue, as: PriorityQueue
+  alias Chiton.Cave, as: Cave
 
   defstruct dimx: 0, dimy: 0, scale: 1, risks: {}, dist: %{}, pqueue: nil, visited: nil
 
   @defaults [scale: 1]
 
   @doc ~S"""
-  Construct a new `Cave` from `input`.
+  Construct a new `Chiton.Cave` from `input`.
 
   ## Options
   - `scale:` makes the cave bigger by a factor of N (default 1)
@@ -28,7 +29,7 @@ defmodule Chiton.Cave do
     dimy = tuple_size(risks)
     pqueue = PriorityQueue.new()
              |> PriorityQueue.put({0, 0}, 0)
-    %Chiton.Cave{
+    %Cave{
       dimx: dimx,
       dimy: dimy,
       scale: opts[:scale],
@@ -60,7 +61,7 @@ defmodule Chiton.Cave do
   end
 
   @doc ~S"""
-  Find lowest-risk path from origin `{0, 0}` to lowest-right node in `Cave`.
+  Find lowest-risk path from origin `{0, 0}` to lowest-right node in cave.
 
   ## Examples
       iex> Chiton.Cave.new("01\n23\n") |> Chiton.Cave.min_total_risk()
@@ -72,7 +73,7 @@ defmodule Chiton.Cave do
   end
   def timed_min_total_risk(cave, verbose \\ false) do
     if verbose do
-      pid = spawn(Chiton.Cave, :min_total_risk, [cave, verbose])
+      pid = spawn(Cave, :min_total_risk, [cave, verbose])
       {:ok, _} = :eprof.start()
       :eprof.start_profiling([pid])
       :timer.sleep(15000)  # 15s
@@ -81,7 +82,7 @@ defmodule Chiton.Cave do
       :eprof.stop()
       nil
     else
-      tc = :timer.tc(Chiton.Cave, :min_total_risk, [cave, verbose])
+      tc = :timer.tc(Cave, :min_total_risk, [cave, verbose])
       IO.puts("min_total_risk() took #{elem(tc, 0)}µs")
       elem(tc, 1)
     end
@@ -118,7 +119,7 @@ defmodule Chiton.Cave do
       {cave, nil}
     else
       {pqueue, next} = PriorityQueue.pop(cave.pqueue)
-      cave = %Chiton.Cave{cave | pqueue: pqueue}
+      cave = %Cave{cave | pqueue: pqueue}
       if visited?(cave, next) do
         pop_next_unvisited_node(cave)
       else
@@ -128,7 +129,7 @@ defmodule Chiton.Cave do
   end
 
   defp mark_visited(cave, node) do
-    %Chiton.Cave{cave | visited: MapSet.put(cave.visited, node)}
+    %Cave{cave | visited: MapSet.put(cave.visited, node)}
   end
 
   defp visited?(cave, node) do
@@ -149,7 +150,7 @@ defmodule Chiton.Cave do
     new_dist = cur_dist + risk_at(cave, neighbor)
     if new_dist < neighbor_dist do
       cave = put_or_update_node(cave, neighbor, neighbor_dist, new_dist)
-      %Chiton.Cave{cave | dist: Map.put(cave.dist, neighbor, new_dist)}
+      %Cave{cave | dist: Map.put(cave.dist, neighbor, new_dist)}
     else
       cave
     end
@@ -164,7 +165,7 @@ defmodule Chiton.Cave do
         old_pri = priority(node, old_dist)
         PriorityQueue.update(cave.pqueue, node, old_pri, new_pri)
       end
-    %Chiton.Cave{cave | pqueue: pqueue}
+    %Cave{cave | pqueue: pqueue}
   end
 
   # PriorityQueue requires unique priority values, so we salt

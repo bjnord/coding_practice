@@ -2,7 +2,9 @@ defmodule Probe do
   @moduledoc """
   Documentation for Probe.
   """
+
   import Submarine.CLI
+  alias Probe.Parser, as: Parser
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -25,7 +27,7 @@ defmodule Probe do
     # y position and still eventually be within the target area after any
     # step. What is the highest y position it reaches on this trajectory?"
     File.read!(input_file)
-    |> Probe.Parser.parse()
+    |> Parser.parse()
     |> Probe.max_height()
     |> IO.inspect(label: "Part 1 answer is")
   end
@@ -98,7 +100,7 @@ defmodule Probe do
     # "How many distinct initial velocity values cause the probe to be
     # within the target area after any step?"
     File.read!(input_file)
-    |> Probe.Parser.parse()
+    |> Parser.parse()
     |> Probe.hit_count()
     |> IO.inspect(label: "Part 2 answer is")
   end

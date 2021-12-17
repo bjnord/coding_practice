@@ -2,6 +2,8 @@ defmodule Packet.ParserTest do
   use ExUnit.Case
   doctest Packet.Parser
 
+  alias Packet.Parser, as: Parser
+
   describe "puzzle example" do
     setup do
       [
@@ -19,7 +21,7 @@ defmodule Packet.ParserTest do
     end
 
     test "parser gets expected bitlists", fixture do
-      assert Enum.map(fixture.inputs, &Packet.Parser.parse/1) == fixture.exp_bitlists
+      assert Enum.map(fixture.inputs, &Parser.parse/1) == fixture.exp_bitlists
     end
   end
 end

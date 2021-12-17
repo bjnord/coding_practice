@@ -2,6 +2,8 @@ defmodule Chiton.CaveTest do
   use ExUnit.Case
   doctest Chiton.Cave
 
+  alias Chiton.Cave, as: Cave
+
   describe "puzzle example" do
     setup do
       [
@@ -24,7 +26,7 @@ defmodule Chiton.CaveTest do
         138
         213
         """,
-        exp_cave3: %Chiton.Cave{
+        exp_cave3: %Cave{
           dimx: 3,
           dimy: 3,
           scale: 1,
@@ -42,7 +44,7 @@ defmodule Chiton.CaveTest do
           {0, 1} => 1, {1, 1} => 4, {2, 1} => 12,
           {0, 2} => 3, {1, 2} => 4, {2, 2} => 7,
         },
-        exp_cave3_scale3: %Chiton.Cave{
+        exp_cave3_scale3: %Cave{
           dimx: 3,
           dimy: 3,
           scale: 3,
@@ -59,29 +61,26 @@ defmodule Chiton.CaveTest do
     end
 
     test "parser gets expected cave struct", fixture do
-      assert Chiton.Cave.new(fixture.input3) == fixture.exp_cave3
+      assert Cave.new(fixture.input3) == fixture.exp_cave3
     end
 
     test "Dijkstra finds expected shortest paths (risk levels)", fixture do
-      act_distances =
-        fixture.exp_cave3
-        |> Chiton.Cave.distances()
-      assert act_distances == fixture.exp_distances3
+      assert Cave.distances(fixture.exp_cave3) == fixture.exp_distances3
     end
 
     test "Dijkstra finds expected minimum-risk path (scale=1)", fixture do
       act_min_risk =
         fixture.input
-        |> Chiton.Cave.new()
-        |> Chiton.Cave.min_total_risk()
+        |> Cave.new()
+        |> Cave.min_total_risk()
       assert act_min_risk == fixture.exp_min_risk
     end
 
     test "Dijkstra finds expected minimum-risk path (scale=5)", fixture do
       act_min_risk_scale5 =
         fixture.input
-        |> Chiton.Cave.new(scale: 5)
-        |> Chiton.Cave.min_total_risk()
+        |> Cave.new(scale: 5)
+        |> Cave.min_total_risk()
       assert act_min_risk_scale5 == fixture.exp_min_risk_scale5
     end
 
@@ -89,7 +88,7 @@ defmodule Chiton.CaveTest do
       cave = fixture.exp_cave3
       [{{0, 0}, 1}, {{0, 2}, 2}, {{2, 2}, 3}, {{2, 0}, 6}, {{1, 1}, 3}, {{2, 1}, 8}]
       |> Enum.each(fn {pos, risk} ->
-        assert Chiton.Cave.risk_at(cave, pos) == risk
+        assert Cave.risk_at(cave, pos) == risk
       end)
     end
 
@@ -108,7 +107,7 @@ defmodule Chiton.CaveTest do
         {{6+0, 6+0}, 5}, {{6+0, 6+2}, 6}, {{6+2, 6+2}, 7}, {{6+2, 6+0}, 1}, {{6+1, 6+1}, 2}, {{6+2, 6+1}, 3},
       ]
       |> Enum.each(fn {{x, y}, risk} ->
-        assert Chiton.Cave.risk_at(cave, {x, y}) == risk
+        assert Cave.risk_at(cave, {x, y}) == risk
       end)
     end
   end

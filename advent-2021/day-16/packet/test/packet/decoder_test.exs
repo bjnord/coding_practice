@@ -2,6 +2,8 @@ defmodule Packet.DecoderTest do
   use ExUnit.Case
   doctest Packet.Decoder
 
+  alias Packet.Decoder, as: Decoder
+
   describe "puzzle example" do
     setup do
       [
@@ -18,7 +20,7 @@ defmodule Packet.DecoderTest do
       [fixture.inputs, fixture.exp_packets]
       |> Enum.zip()
       |> Enum.each(fn {input, exp_packet} ->
-        assert Packet.Decoder.decode(input) == exp_packet
+        assert Decoder.decode(input) == exp_packet
       end)
     end
   end

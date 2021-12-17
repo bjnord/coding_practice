@@ -11,6 +11,7 @@ defmodule Packet.Parser do
   ## Examples
       iex> Packet.Parser.parse("B1\n")
       [1, 0, 1, 1, 0, 0, 0, 1]
+
       iex> Packet.Parser.parse("D2FE28\n")
       [1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0]
   """

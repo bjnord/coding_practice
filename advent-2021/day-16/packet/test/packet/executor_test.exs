@@ -2,6 +2,9 @@ defmodule Packet.ExecutorTest do
   use ExUnit.Case
   doctest Packet.Executor
 
+  alias Packet.Decoder, as: Decoder
+  alias Packet.Executor, as: Executor
+
   describe "puzzle example" do
     setup do
       [
@@ -30,8 +33,8 @@ defmodule Packet.ExecutorTest do
       |> Enum.zip()
       |> Enum.each(fn {input, exp_version_sum} ->
         act_version_sum =
-          Packet.Decoder.decode(input)
-          |> Packet.Executor.version_sum()
+          Decoder.decode(input)
+          |> Executor.version_sum()
         assert act_version_sum == exp_version_sum
       end)
     end
@@ -41,8 +44,8 @@ defmodule Packet.ExecutorTest do
       |> Enum.each(fn {packet_input, exp_value} ->
         act_value =
           packet_input
-          |> Packet.Decoder.decode()
-          |> Packet.Executor.calculate()
+          |> Decoder.decode()
+          |> Executor.calculate()
         assert act_value == exp_value
       end)
     end

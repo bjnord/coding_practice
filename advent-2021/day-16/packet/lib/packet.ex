@@ -4,6 +4,8 @@ defmodule Packet do
   """
 
   import Submarine.CLI
+  alias Packet.Decoder, as: Decoder
+  alias Packet.Executor, as: Executor
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -24,8 +26,8 @@ defmodule Packet do
   def part1(input_file) do
     # "[W]hat do you get if you add up the version numbers in all packets?"
     File.read!(input_file)
-    |> Packet.Decoder.decode()
-    |> Packet.Executor.version_sum()
+    |> Decoder.decode()
+    |> Executor.version_sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -36,8 +38,8 @@ defmodule Packet do
     # "What do you get if you evaluate the expression represented by your
     # hexadecimal-encoded BITS transmission?"
     File.read!(input_file)
-    |> Packet.Decoder.decode()
-    |> Packet.Executor.calculate()
+    |> Decoder.decode()
+    |> Executor.calculate()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
