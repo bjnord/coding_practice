@@ -1,6 +1,7 @@
 BIN = ./bingo
 FILES = mix.exs test/test_helper.exs \
 	lib/bingo.ex test/bingo_test.exs \
+	lib/bingo/board.ex test/bingo/board_test.exs \
 	lib/bingo/parser.ex test/bingo/parser_test.exs
 VERBOSE = 0
 

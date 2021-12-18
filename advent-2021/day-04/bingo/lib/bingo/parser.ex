@@ -14,8 +14,8 @@ defmodule Bingo.Parser do
       {
         [2, 3, 5, 7, 11, 13, 17],
         [
-          {[2, 7, 6, 9, 5, 1, 4, 3, 8], 0b0, nil},
-          {[7, 12, 11, 14, 10, 6, 9, 8, 13], 0b0, nil},
+          [2, 7, 6, 9, 5, 1, 4, 3, 8],
+          [7, 12, 11, 14, 10, 6, 9, 8, 13],
         ],
       }
   """
@@ -35,6 +35,5 @@ defmodule Bingo.Parser do
     tokens
     |> Enum.map(&String.to_integer/1)
     |> Enum.chunk_every(dim * dim)
-    |> Enum.map(fn squares -> {squares, 0b0, nil} end)
   end
 end
