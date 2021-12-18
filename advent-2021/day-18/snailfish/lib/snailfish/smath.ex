@@ -14,8 +14,9 @@ defmodule Snailfish.Smath do
   """
   def add([n]), do: n
   def add([n1, n2]) do
+    #IO.inspect({n1, n2}, label: "add()")
     "[#{n1},#{n2}]"
-    # TODO handle reduction here
+    |> reduce()
   end
   def add([n1 | [n2 | numbers]]), do: add([add([n1, n2]) | numbers])
 
@@ -31,13 +32,22 @@ defmodule Snailfish.Smath do
       iex> Snailfish.Smath.reduce([:o, 11, :s, 1, :c])
       "[[5,6],1]"
   """
+  def reduce(number) when is_binary(number) do
+    Parser.to_tokens(number)
+    |> reduce()
+  end
   def reduce(tokens) when is_list(tokens) do
     i = find_splittable_index(tokens)
-    case i do
+    c = find_explodable_context(tokens)
+    case {i, c} do
       # no further reduction needed
-      nil -> Parser.to_string(tokens)
+      {nil, nil} -> Parser.to_string(tokens)
       # split, and continue reducing
-      _ -> reduce(split_at(tokens, i))
+      {_, nil} -> reduce(split_at(tokens, i))
+      # explode, and continue reducing
+      {nil, _} -> reduce(explode_at(tokens, c))
+      # uh oh... which one first?
+      {_, _} -> raise "found both split and explode"
     end
   end
 
@@ -81,6 +91,7 @@ defmodule Snailfish.Smath do
       "[2,[6,6]]"
   """
   def split_at(tokens, i) when is_list(tokens) do
+    #IO.inspect(i, label: "split_at()")
     {head, [n | tail]} = Enum.split(tokens, i)
     n1 = div(n, 2)
     n2 = n - n1
@@ -168,6 +179,7 @@ defmodule Snailfish.Smath do
   """
   # NB `prev_i == nil and next_i == nil` can't happen
   def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) and prev_i == nil do
+    #IO.inspect({i, prev_i, next_i}, label: "explode_at()")
     ###
     # break tokens into segments
     #IO.inspect(tokens, label: "tokens [prev_i == nil]")

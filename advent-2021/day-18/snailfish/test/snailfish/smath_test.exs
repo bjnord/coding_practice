@@ -74,24 +74,18 @@ defmodule Snailfish.SmathTest do
         """,
         exp_homework_sum: "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]",
         exp_homework_mag: 4140,
-        # TODO move this to sum_numbers:
-        nored_sum_numbers: ["[1,1]", "[2,2]", "[3,3]", "[4,4]"],
-        exp_nored_sum: "[[[[1,1],[2,2]],[3,3]],[4,4]]",
         sum_numbers: [
           ["[[[[4,3],4],4],[7,[[8,4],9]]]", "[1,1]"],
+          ["[1,1]", "[2,2]", "[3,3]", "[4,4]"],
           ["[1,1]", "[2,2]", "[3,3]", "[4,4]", "[5,5]"],
           ["[1,1]", "[2,2]", "[3,3]", "[4,4]", "[5,5]", "[6,6]"],
         ],
         exp_sums: [
           "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]",
+          "[[[[1,1],[2,2]],[3,3]],[4,4]]",
           "[[[[3,0],[5,3]],[4,4]],[5,5]]",
           "[[[[5,0],[7,4]],[5,5]],[6,6]]",
         ],
-        # TODO this one is temporary:
-        reduce_split_test: {
-          [:o, :o, :o, :o, 0, :s, 7, :c, :s, 4, :c, :s, :o, 15, :s, :o, 0, :s, 13, :c, :c, :c, :s, :o, 1, :s, 1, :c, :c],
-          "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]",
-        },
         nonexplodable_number: "[7,[6,[5,[4,3]]]]",
         # in this one, the 5th brace isn't a simple pair:
         tricky_explodable_number: "[[3,[2,[[1,[7,3]],6]]],[5,[4,[3,2]]]]",
@@ -120,17 +114,6 @@ defmodule Snailfish.SmathTest do
       ]
     end
 
-    # TODO this one is temporary (see "move this" above):
-    test "add() produces expected sums (no-reduction example)", fixture do
-      assert Smath.add(fixture.nored_sum_numbers) == fixture.exp_nored_sum
-    end
-
-    # TODO this one is temporary:
-    test "reduce() produces expected reduction (split-only example)", fixture do
-      {tokens, exp_reduction} = fixture.reduce_split_test
-      assert Smath.reduce(tokens) == exp_reduction
-    end
-
     test "find_explodable_context() produces expected contexts", fixture do
       act_contexts =
         [fixture.nonexplodable_number, fixture.tricky_explodable_number | fixture.explodable_numbers]
@@ -150,7 +133,13 @@ defmodule Snailfish.SmathTest do
       assert act_numbers == fixture.exp_exploded_numbers
     end
 
-    # TODO test that sum_numbers produces exp_sums
+    test "add() produces expected sum", fixture do
+      [fixture.sum_numbers, fixture.exp_sums]
+      |> Enum.zip()
+      |> Enum.each(fn {numbers, exp_sum} ->
+        assert Smath.add(numbers) == exp_sum
+      end)
+    end
 
     # TODO test "slightly larger example" here
 
