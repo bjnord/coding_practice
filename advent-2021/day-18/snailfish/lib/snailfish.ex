@@ -3,7 +3,7 @@ defmodule Snailfish do
   Documentation for Snailfish.
   """
 
-  alias Snailfish.Parser, as: Parser
+  alias Snailfish.Smath, as: Smath
   import Submarine.CLI
 
   @doc """
@@ -27,7 +27,8 @@ defmodule Snailfish do
     # appear. What is the magnitude of the final sum?"
     File.read!(input_file)
     |> String.split("\n", trim: true)
-    nil  # TODO
+    |> Smath.add()
+    |> Smath.magnitude()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
