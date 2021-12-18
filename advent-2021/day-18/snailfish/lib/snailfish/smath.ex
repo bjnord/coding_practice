@@ -88,4 +88,44 @@ defmodule Snailfish.Smath do
     # TODO OPTIMIZE this is really inefficient:
     head ++ sn ++ tail
   end
+
+  @doc ~S"""
+  Return index in `tokens` of leftmost explodable pair, or `nil` if none.
+
+  "If any pair is nested inside four pairs, the leftmost such pair explodes."
+
+  ## Examples
+      iex> tokens = Snailfish.Parser.to_tokens("[[1,[[2,3],4]],5]")
+      iex> Snailfish.Smath.find_explodable_index(tokens)
+      nil
+
+      iex> tokens = Snailfish.Parser.to_tokens("[[1,[[[2,3],4],5]],6]")
+      iex> Snailfish.Smath.find_explodable_index(tokens)
+      6
+  """
+  def find_explodable_index(tokens) when is_list(tokens) do
+    Enum.with_index(tokens)
+    |> find_fifth_open(0)
+  end
+
+  defp find_fifth_open([], level) when level > 0,
+    do: raise ArgumentError, "too many open braces"
+  defp find_fifth_open([], _level), do: nil
+  defp find_fifth_open([{tok, i} | tail], level) do
+    if level < 0 do
+      raise ArgumentError, "too many close braces"
+    end
+    cond do
+      level >= 4 and tok == :o -> i
+      true -> find_fifth_open(tail, adjust_level(tok, level))
+    end
+  end
+
+  defp adjust_level(tok, level) do
+    case tok do
+      :o -> level + 1
+      :c -> level - 1
+      _ -> level
+    end
+  end
 end
