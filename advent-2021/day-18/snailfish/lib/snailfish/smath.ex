@@ -26,7 +26,8 @@ defmodule Snailfish.Smath do
   "During reduction, at most one action applies, after which the process
   returns to the top of the list of actions. For example, if split produces
   a pair that meets the explode criteria, that pair explodes before other
-  splits occur." TODO
+  splits occur." (_BJN: I think this just means: If number has a splittable
+  and an explodable, do the explode first._)
 
   ## Examples
       iex> Snailfish.Smath.reduce([:o, 11, :s, 1, :c])
@@ -39,15 +40,13 @@ defmodule Snailfish.Smath do
   def reduce(tokens) when is_list(tokens) do
     i = find_splittable_index(tokens)
     c = find_explodable_context(tokens)
-    case {i, c} do
+    cond do
+      # explode, and continue reducing
+      c != nil -> reduce(explode_at(tokens, c))
+      # split, and continue reducing
+      i != nil -> reduce(split_at(tokens, i))
       # no further reduction needed
       {nil, nil} -> Parser.to_string(tokens)
-      # split, and continue reducing
-      {_, nil} -> reduce(split_at(tokens, i))
-      # explode, and continue reducing
-      {nil, _} -> reduce(explode_at(tokens, c))
-      # uh oh... which one first?
-      {_, _} -> raise "found both split and explode"
     end
   end
 
