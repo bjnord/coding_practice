@@ -5,7 +5,6 @@ defmodule Snailfish.SmathTest do
   alias Snailfish.Parser, as: Parser
   alias Snailfish.Smath, as: Smath
 
-
   describe "puzzle example" do
     setup do
       [
@@ -124,6 +123,17 @@ defmodule Snailfish.SmathTest do
       end)
     end
 
-    # TODO test that homework produces exp_homework_sum & exp_homework_sum
+    test "add() produces expected sum (homework example)", fixture do
+      homework_numbers = String.split(fixture.homework, "\n", trim: true)
+      [acc | numbers] = homework_numbers
+      act_sum =
+        numbers
+        |> Enum.reduce(acc, fn (number, acc) ->
+          Smath.add([acc, number])
+        end)
+      assert act_sum == fixture.exp_homework_sum
+    end
+
+    # TODO test that homework produces exp_homework_mag
   end
 end
