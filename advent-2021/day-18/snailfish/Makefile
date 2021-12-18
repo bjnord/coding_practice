@@ -1,6 +1,7 @@
 BIN = ./snailfish
 FILES = mix.exs test/test_helper.exs \
 	lib/snailfish.ex test/snailfish_test.exs \
+	lib/snailfish/smath.ex test/snailfish/smath_test.exs \
 	lib/snailfish/parser.ex test/snailfish/parser_test.exs
 VERBOSE = 0
 

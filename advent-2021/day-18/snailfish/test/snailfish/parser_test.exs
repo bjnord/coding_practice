@@ -31,9 +31,6 @@ defmodule Snailfish.ParserTest do
           [:o, :o, 2, :s, :o, :o, 7, :s, 7, :c, :s, 7, :c, :c, :s, :o, :o, 5, :s, 8, :c, :s, :o, :o, 9, :s, 3, :c, :s, :o, 0, :s, 2, :c, :c, :c, :c],
           [:o, :o, :o, :o, 5, :s, 2, :c, :s, 5, :c, :s, :o, 8, :s, :o, 3, :s, 7, :c, :c, :c, :s, :o, :o, 5, :s, :o, 7, :s, 5, :c, :c, :s, :o, 4, :s, 4, :c, :c, :c],
         ],
-        # TODO move to Snailfish.Math
-        exp_sum: "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]",
-        exp_mag: 4140,
       ]
     end
 
