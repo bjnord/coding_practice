@@ -35,12 +35,18 @@ defmodule Snailfish do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file, _opts \\ []) do
+  def part2(input_file, opts \\ []) do
+    lm_func =
+      if opts[:times] do
+        &Smath.timed_largest_magnitude/2
+      else
+        &Smath.largest_magnitude/2
+      end
     # "What is the largest magnitude of any sum of two different snailfish
     # numbers from the homework assignment?"
     File.read!(input_file)
     |> String.split("\n", trim: true)
-    |> Smath.largest_magnitude()
+    |> lm_func.(opts[:verbose])
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

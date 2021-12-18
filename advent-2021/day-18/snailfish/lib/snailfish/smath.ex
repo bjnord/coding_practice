@@ -67,7 +67,6 @@ defmodule Snailfish.Smath do
     n1 = div(n, 2)
     n2 = n - n1
     sn = [:o, n1, :s, n2, :c]
-    # TODO OPTIMIZE this is really inefficient:
     head ++ sn ++ tail
   end
 
@@ -84,6 +83,23 @@ defmodule Snailfish.Smath do
     Enum.with_index(tokens)
     |> find_context(0, nil)
   end
+
+  # TODO OPTIMIZE this is the slowest part of `add()` [about 45% of time]
+  #
+  # - `anonymous fn/2 in Enum.with_index/2` [above]
+  # - `Snailfish.Smath.find_context/3`
+  # - `Snailfish.Smath.update_prev_i/3`
+  # - `Snailfish.Smath.adjust_level/2`
+  # - `Snailfish.Smath.simple_pair?/1`
+  #
+  # It would probably be faster to combine this with `explode_at()` and do
+  # it all in one pass: Build up a list of the segments, each segment being
+  # its tokens in reverse order; then if explodable, do the explode and
+  # recombine the segments, otherwise return the original.
+  #
+  # This would also clean up a lot of redundancy in the `explode_at()`
+  # functions. After doing all this, in `SmathTester` remove the context
+  # tests (those are really poking at internals anyway).
 
   defp find_context([], level, _prev_i) when level > 0,
     do: raise ArgumentError, "too many open braces"
@@ -153,7 +169,6 @@ defmodule Snailfish.Smath do
     next = next + rval
     ###
     # reassemble the modified segments
-    # TODO OPTIMIZE this is really inefficient:
     head ++ [0] ++ middle ++ [next] ++ tail
   end
   def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) and next_i == nil do
@@ -168,7 +183,6 @@ defmodule Snailfish.Smath do
     prev = prev + lval
     ###
     # reassemble the modified segments
-    # TODO OPTIMIZE this is really inefficient:
     head ++ [prev] ++ middle ++ [0] ++ tail
   end
   def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) do
@@ -186,7 +200,6 @@ defmodule Snailfish.Smath do
     next = next + rval
     ###
     # reassemble the modified segments
-    # TODO OPTIMIZE this is really inefficient:
     head ++ [prev] ++ lmiddle ++ [0] ++ rmiddle ++ [next] ++ tail
   end
 
@@ -204,7 +217,7 @@ defmodule Snailfish.Smath do
   # regular number is just that number. [...] Magnitude calculations are
   # recursive"
   #
-  # TODO OPTIMIZE can this be made tail-recursive?
+  # TODO RF can this be made tail-recursive?
   def magnitude(number) when is_binary(number) do
     Regex.run(~r/^(.*)\[(\d+),(\d+)\](.*)$/, number)
     |> mag_replace(number)
@@ -220,7 +233,7 @@ defmodule Snailfish.Smath do
   Find largest magnitude of the sums of all combinations of two (different)
   snailfish numbers.
   """
-  def largest_magnitude(numbers) do
+  def largest_magnitude(numbers, _verbose \\ false) do
     hw_nums = List.to_tuple(numbers)
     nn = tuple_size(hw_nums)
     for n1 <- 0..nn-1, n2 <- 0..nn-1 do
@@ -233,5 +246,23 @@ defmodule Snailfish.Smath do
       end
     end
     |> Enum.max()
+  end
+
+  @doc false
+  def timed_largest_magnitude(numbers, verbose \\ false) do
+    if verbose do
+      pid = spawn(Snailfish.Smath, :largest_magnitude, [numbers, verbose])
+      {:ok, _} = :eprof.start()
+      :eprof.start_profiling([pid])
+      :timer.sleep(2500)  # 2.5s
+      :eprof.stop_profiling()
+      :eprof.analyze()
+      :eprof.stop()
+      nil
+    else
+      tc = :timer.tc(Snailfish.Smath, :largest_magnitude, [numbers, verbose])
+      IO.puts("largest_magnitude() took #{elem(tc, 0)}µs")
+      elem(tc, 1)
+    end
   end
 end
