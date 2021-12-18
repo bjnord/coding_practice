@@ -22,6 +22,11 @@ defmodule Snailfish.Smath do
   @doc ~S"""
   Reduce snailfish number (in tokenized form).
 
+  "During reduction, at most one action applies, after which the process
+  returns to the top of the list of actions. For example, if split produces
+  a pair that meets the explode criteria, that pair explodes before other
+  splits occur." TODO
+
   ## Examples
       iex> Snailfish.Smath.reduce([:o, 11, :s, 1, :c])
       "[[5,6],1]"
