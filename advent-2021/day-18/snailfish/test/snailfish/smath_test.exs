@@ -22,6 +22,7 @@ defmodule Snailfish.SmathTest do
         """,
         exp_homework_sum: "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]",
         exp_homework_mag: 4140,
+        exp_homework_largest_mag: 3993,
         sum_numbers: [
           ["[[[[4,3],4],4],[7,[[8,4],9]]]", "[1,1]"],
           ["[1,1]", "[2,2]", "[3,3]", "[4,4]"],
@@ -148,6 +149,14 @@ defmodule Snailfish.SmathTest do
       |> Enum.each(fn {number, exp_magnitude} ->
         assert Smath.magnitude(number) == exp_magnitude
       end)
+    end
+
+    test "largest_magnitude() produces expected magnitude", fixture do
+      act_homework_largest_mag =
+        fixture.homework
+        |> String.split("\n", trim: true)
+        |> Snailfish.largest_magnitude()
+      assert act_homework_largest_mag == fixture.exp_homework_largest_mag
     end
   end
 end

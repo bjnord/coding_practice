@@ -36,9 +36,26 @@ defmodule Snailfish do
   Process input file and display part 2 solution.
   """
   def part2(input_file, _opts \\ []) do
+    # "What is the largest magnitude of any sum of two different snailfish
+    # numbers from the homework assignment?"
     File.read!(input_file)
     |> String.split("\n", trim: true)
-    nil  # TODO
+    |> largest_magnitude()
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  def largest_magnitude(numbers) do
+    hw_nums = List.to_tuple(numbers)
+    nn = tuple_size(hw_nums)
+    for n1 <- 0..nn-1, n2 <- 0..nn-1 do
+      cond do
+        n1 == n2 ->
+          0
+        true ->
+          Smath.add([elem(hw_nums, n1), elem(hw_nums, n2)])
+          |> Smath.magnitude()
+      end
+    end
+    |> Enum.max()
   end
 end
