@@ -90,36 +90,63 @@ defmodule Snailfish.Smath do
   end
 
   @doc ~S"""
-  Return index in `tokens` of leftmost explodable pair, or `nil` if none.
+  Return context of leftmost explodable pair in `tokens`, or `nil` if none.
+  A context is a tuple containing the following indexes in `tokens`:
+  - index of the open-brace of the explodable pair
+  - index of the preceding integer (or `nil` if none)
+  - index of the following integer (or `nil` if none)
 
   "If any pair is nested inside four pairs, the leftmost such pair explodes."
 
   ## Examples
       iex> tokens = Snailfish.Parser.to_tokens("[[1,[[2,3],4]],5]")
-      iex> Snailfish.Smath.find_explodable_index(tokens)
+      iex> Snailfish.Smath.find_explodable_context(tokens)
       nil
 
       iex> tokens = Snailfish.Parser.to_tokens("[[1,[[[2,3],4],5]],6]")
-      iex> Snailfish.Smath.find_explodable_index(tokens)
-      6
+      iex> Snailfish.Smath.find_explodable_context(tokens)
+      {6, 2, 12}
   """
-  def find_explodable_index(tokens) when is_list(tokens) do
+  def find_explodable_context(tokens) when is_list(tokens) do
     Enum.with_index(tokens)
-    |> find_fifth_open(0)
+    |> find_context(0, nil)
   end
 
-  defp find_fifth_open([], level) when level > 0,
+  defp find_context([], level, _prev_i) when level > 0,
     do: raise ArgumentError, "too many open braces"
-  defp find_fifth_open([], _level), do: nil
-  defp find_fifth_open([{tok, i} | tail], level) do
+  defp find_context([], _level, _prev_i), do: nil
+  defp find_context([{tok, i} | tail], level, prev_i) do
     if level < 0 do
       raise ArgumentError, "too many close braces"
     end
+    prev_i = update_prev_i(tok, i, prev_i)
     cond do
-      level >= 4 and tok == :o -> i
-      true -> find_fifth_open(tail, adjust_level(tok, level))
+      level >= 4 and simple_pair?([{tok, i} | tail]) ->
+        {i, prev_i, next_i([{tok, i} | tail], i)}
+      true ->
+        find_context(tail, adjust_level(tok, level), prev_i)
     end
   end
+
+  defp next_i(itokens, i) do
+    {_pair, itokens} = Enum.split(itokens, 5)
+    case Enum.find_index(itokens, &integer_itoken?/1) do
+      nil -> nil
+      rel_i -> i + 5 + rel_i
+    end
+  end
+
+  defp integer_itoken?({tok, _i}) when is_integer(tok), do: true
+  defp integer_itoken?({_tok, _i}), do: false
+
+  # BEHOLD THE POWER OF ELIXIR MATCHING!
+  defp simple_pair?([{:o, _}, {n1, _}, {:s, _}, {n2, _}, {:c, _} | _tail])
+    when is_integer(n1) and is_integer(n2),
+    do: true
+  defp simple_pair?(_itokens), do: false
+
+  defp update_prev_i(tok, i, _prev_i) when is_integer(tok), do: i
+  defp update_prev_i(_tok, _i, prev_i), do: prev_i
 
   defp adjust_level(tok, level) do
     case tok do
