@@ -235,4 +235,30 @@ defmodule Snailfish.Smath do
     # TODO OPTIMIZE this is really inefficient:
     head ++ [prev] ++ lmiddle ++ [0] ++ rmiddle ++ [next] ++ tail
   end
+
+  @doc ~S"""
+  Compute magnitude of snailfish number.
+
+  "The magnitude of a pair is 3 times the magnitude of its left element
+  plus 2 times the magnitude of its right element. The magnitude of a
+  regular number is just that number. [...] Magnitude calculations are
+  recursive"
+
+  ## Examples
+      iex> Snailfish.Smath.magnitude("[9,1]")
+      29
+      iex> Snailfish.Smath.magnitude("[[9,1],[1,9]]")
+      129
+  """
+  # TODO OPTIMIZE can this be made tail-recursive?
+  def magnitude(number) when is_binary(number) do
+    Regex.run(~r/^(.*)\[(\d+),(\d+)\](.*)$/, number)
+    |> mag_replace(number)
+  end
+
+  def mag_replace([_, front, l, r, back], _original) do
+    mag = String.to_integer(l) * 3 + String.to_integer(r) * 2
+    magnitude("#{front}#{mag}#{back}")
+  end
+  def mag_replace(_, original), do: String.to_integer(original)
 end
