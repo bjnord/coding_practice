@@ -14,30 +14,24 @@ defmodule Snailfish.Smath do
   """
   def add([n]), do: n
   def add([n1, n2]) do
-    #IO.inspect({n1, n2}, label: "add()")
     "[#{n1},#{n2}]"
     |> reduce()
   end
   def add([n1 | [n2 | numbers]]), do: add([add([n1, n2]) | numbers])
 
-  @doc ~S"""
-  Reduce snailfish number (in tokenized form).
-
-  "During reduction, at most one action applies, after which the process
-  returns to the top of the list of actions. For example, if split produces
-  a pair that meets the explode criteria, that pair explodes before other
-  splits occur." (_BJN: I think this just means: If number has a splittable
-  and an explodable, do the explode first._)
-
-  ## Examples
-      iex> Snailfish.Smath.reduce([:o, 11, :s, 1, :c])
-      "[[5,6],1]"
-  """
-  def reduce(number) when is_binary(number) do
+  # Reduce snailfish number (in tokenized form).
+  #
+  # "During reduction, at most one action applies, after which the process
+  # returns to the top of the list of actions. For example, if split produces
+  # a pair that meets the explode criteria, that pair explodes before other
+  # splits occur." (_BJN: I think this just means: If number has a splittable
+  # and an explodable, do the explode first._)
+  #
+  defp reduce(number) when is_binary(number) do
     Parser.to_tokens(number)
     |> reduce()
   end
-  def reduce(tokens) when is_list(tokens) do
+  defp reduce(tokens) when is_list(tokens) do
     i = find_splittable_index(tokens)
     c = find_explodable_context(tokens)
     cond do
@@ -50,47 +44,25 @@ defmodule Snailfish.Smath do
     end
   end
 
-  @doc ~S"""
-  Return index in `tokens` of leftmost splittable integer, or `nil` if none.
-
-  "If any regular number is 10 or greater, the leftmost such regular number splits."
-
-  ## Examples
-      iex> tokens = Snailfish.Parser.to_tokens("[[1,2],[[3,4],5]]")
-      iex> Snailfish.Smath.find_splittable_index(tokens)
-      nil
-
-      iex> tokens = [:o, :o, 1, :s, 2, :c, :s, :o, :o, 3, :s, 14, :c, :s, 5, :c, :c]
-      iex> Snailfish.Smath.find_splittable_index(tokens)
-      11
-  """
-  def find_splittable_index(tokens) when is_list(tokens) do
+  # Return index in `tokens` of leftmost splittable integer, or `nil` if none.
+  #
+  # "If any regular number is 10 or greater, the leftmost such regular number splits."
+  #
+  defp find_splittable_index(tokens) when is_list(tokens) do
     Enum.find_index(tokens, &(splittable(&1)))
   end
 
   defp splittable(token) when is_integer(token) and token >= 10, do: true
   defp splittable(_token), do: false
 
-  @doc ~S"""
-  Split integer at `index` in `tokens`. Returns new `tokens`.
-
-  "To split a regular number, replace it with a pair; the left element of
-  the pair should be the regular number divided by two and rounded down,
-  while the right element of the pair should be the regular number divided
-  by two and rounded up."
-
-  ## Examples
-      iex> Snailfish.Smath.split_at([10], 0) |> Snailfish.Parser.to_string()
-      "[5,5]"
-
-      iex> Snailfish.Smath.split_at([:o, 11, :s, 1, :c], 1) |> Snailfish.Parser.to_string()
-      "[[5,6],1]"
-
-      iex> Snailfish.Smath.split_at([:o, 2, :s, 12, :c], 3) |> Snailfish.Parser.to_string()
-      "[2,[6,6]]"
-  """
-  def split_at(tokens, i) when is_list(tokens) do
-    #IO.inspect(i, label: "split_at()")
+  # Split integer at `index` in `tokens`. Returns new `tokens`.
+  #
+  # "To split a regular number, replace it with a pair; the left element of
+  # the pair should be the regular number divided by two and rounded down,
+  # while the right element of the pair should be the regular number divided
+  # by two and rounded up."
+  #
+  defp split_at(tokens, i) when is_list(tokens) do
     {head, [n | tail]} = Enum.split(tokens, i)
     n1 = div(n, 2)
     n2 = n - n1
@@ -99,24 +71,15 @@ defmodule Snailfish.Smath do
     head ++ sn ++ tail
   end
 
-  @doc ~S"""
-  Return context of leftmost explodable pair in `tokens`, or `nil` if none.
-  A context is a tuple containing the following indexes in `tokens`:
-  - index of the open-brace of the explodable pair
-  - index of the preceding integer (or `nil` if none)
-  - index of the following integer (or `nil` if none)
-
-  "If any pair is nested inside four pairs, the leftmost such pair explodes."
-
-  ## Examples
-      iex> tokens = Snailfish.Parser.to_tokens("[[1,[[2,3],4]],5]")
-      iex> Snailfish.Smath.find_explodable_context(tokens)
-      nil
-
-      iex> tokens = Snailfish.Parser.to_tokens("[[1,[[[2,3],4],5]],6]")
-      iex> Snailfish.Smath.find_explodable_context(tokens)
-      {6, 2, 12}
-  """
+  # Return context of leftmost explodable pair in `tokens`, or `nil` if none.
+  # A context is a tuple containing the following indexes in `tokens`:
+  # - index of the open-brace of the explodable pair
+  # - index of the preceding integer (or `nil` if none)
+  # - index of the following integer (or `nil` if none)
+  #
+  # "If any pair is nested inside four pairs, the leftmost such pair explodes."
+  #
+  @doc false
   def find_explodable_context(tokens) when is_list(tokens) do
     Enum.with_index(tokens)
     |> find_context(0, nil)
@@ -166,28 +129,25 @@ defmodule Snailfish.Smath do
     end
   end
 
-  @doc ~S"""
-  Explode pair in the given context in `tokens`. Returns new `tokens`.
-
-  "To explode a pair, the pair's left value is added to the first regular
-  number to the left of the exploding pair (if any), and the pair's
-  right value is added to the first regular number to the right of the
-  exploding pair (if any). Exploding pairs will always consist of two
-  regular numbers. Then, the entire exploding pair is replaced with the
-  regular number 0."
-  """
+  # Explode pair in the given context in `tokens`. Returns new `tokens`.
+  #
+  # "To explode a pair, the pair's left value is added to the first regular
+  # number to the left of the exploding pair (if any), and the pair's
+  # right value is added to the first regular number to the right of the
+  # exploding pair (if any). Exploding pairs will always consist of two
+  # regular numbers. Then, the entire exploding pair is replaced with the
+  # regular number 0."
+  #
   # NB `prev_i == nil and next_i == nil` can't happen
+  #
+  @doc false
   def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) and prev_i == nil do
-    #IO.inspect({i, prev_i, next_i}, label: "explode_at()")
     ###
     # break tokens into segments
-    #IO.inspect(tokens, label: "tokens [prev_i == nil]")
-    #IO.inspect({i, prev_i, next_i}, label: "context [prev_i == nil]")
     {head, tail} = Enum.split(tokens, i)
     {[:o, _lval, :s, rval, :c], tail} = Enum.split(tail, 5)
     {middle, tail} = Enum.split(tail, next_i - i - 5)
     [next | tail] = tail
-    #IO.inspect({head, rval, middle, next, tail}, label: "segments [prev_i == nil]")
     ###
     # do the explode
     next = next + rval
@@ -199,13 +159,10 @@ defmodule Snailfish.Smath do
   def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) and next_i == nil do
     ###
     # break tokens into segments
-    #IO.inspect(tokens, label: "tokens [next_i == nil]")
-    #IO.inspect({i, prev_i, next_i}, label: "context [next_i == nil]")
     {head, tail} = Enum.split(tokens, prev_i)
     [prev | tail] = tail
     {middle, tail} = Enum.split(tail, i - prev_i - 1)
     {[:o, lval, :s, _rval, :c], tail} = Enum.split(tail, 5)
-    #IO.inspect({head, prev, middle, lval, tail}, label: "segments [next_i == nil]")
     ###
     # do the explode
     prev = prev + lval
@@ -217,15 +174,12 @@ defmodule Snailfish.Smath do
   def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) do
     ###
     # break tokens into segments
-    #IO.inspect(tokens, label: "tokens [prev_i and next_i]")
-    #IO.inspect({i, prev_i, next_i}, label: "context [prev_i and next_i]")
     {head, tail} = Enum.split(tokens, prev_i)
     [prev | tail] = tail
     {lmiddle, tail} = Enum.split(tail, i - prev_i - 1)
     {[:o, lval, :s, rval, :c], tail} = Enum.split(tail, 5)
     {rmiddle, tail} = Enum.split(tail, next_i - i - 5)
     [next | tail] = tail
-    #IO.inspect({head, prev, lmiddle, {lval, rval}, rmiddle, next, tail}, label: "segments [prev_i and next_i]")
     ###
     # do the explode
     prev = prev + lval
@@ -239,26 +193,45 @@ defmodule Snailfish.Smath do
   @doc ~S"""
   Compute magnitude of snailfish number.
 
-  "The magnitude of a pair is 3 times the magnitude of its left element
-  plus 2 times the magnitude of its right element. The magnitude of a
-  regular number is just that number. [...] Magnitude calculations are
-  recursive"
-
   ## Examples
       iex> Snailfish.Smath.magnitude("[9,1]")
       29
       iex> Snailfish.Smath.magnitude("[[9,1],[1,9]]")
       129
   """
+  # "The magnitude of a pair is 3 times the magnitude of its left element
+  # plus 2 times the magnitude of its right element. The magnitude of a
+  # regular number is just that number. [...] Magnitude calculations are
+  # recursive"
+  #
   # TODO OPTIMIZE can this be made tail-recursive?
   def magnitude(number) when is_binary(number) do
     Regex.run(~r/^(.*)\[(\d+),(\d+)\](.*)$/, number)
     |> mag_replace(number)
   end
 
-  def mag_replace([_, front, l, r, back], _original) do
+  defp mag_replace([_, front, l, r, back], _original) do
     mag = String.to_integer(l) * 3 + String.to_integer(r) * 2
     magnitude("#{front}#{mag}#{back}")
   end
-  def mag_replace(_, original), do: String.to_integer(original)
+  defp mag_replace(_, original), do: String.to_integer(original)
+
+  @doc """
+  Find largest magnitude of the sums of all combinations of two (different)
+  snailfish numbers.
+  """
+  def largest_magnitude(numbers) do
+    hw_nums = List.to_tuple(numbers)
+    nn = tuple_size(hw_nums)
+    for n1 <- 0..nn-1, n2 <- 0..nn-1 do
+      cond do
+        n1 == n2 ->
+          0
+        true ->
+          add([elem(hw_nums, n1), elem(hw_nums, n2)])
+          |> magnitude()
+      end
+    end
+    |> Enum.max()
+  end
 end

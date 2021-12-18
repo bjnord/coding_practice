@@ -155,7 +155,7 @@ defmodule Snailfish.SmathTest do
       act_homework_largest_mag =
         fixture.homework
         |> String.split("\n", trim: true)
-        |> Snailfish.largest_magnitude()
+        |> Smath.largest_magnitude()
       assert act_homework_largest_mag == fixture.exp_homework_largest_mag
     end
   end

@@ -40,22 +40,7 @@ defmodule Snailfish do
     # numbers from the homework assignment?"
     File.read!(input_file)
     |> String.split("\n", trim: true)
-    |> largest_magnitude()
+    |> Smath.largest_magnitude()
     |> IO.inspect(label: "Part 2 answer is")
-  end
-
-  def largest_magnitude(numbers) do
-    hw_nums = List.to_tuple(numbers)
-    nn = tuple_size(hw_nums)
-    for n1 <- 0..nn-1, n2 <- 0..nn-1 do
-      cond do
-        n1 == n2 ->
-          0
-        true ->
-          Smath.add([elem(hw_nums, n1), elem(hw_nums, n2)])
-          |> Smath.magnitude()
-      end
-    end
-    |> Enum.max()
   end
 end
