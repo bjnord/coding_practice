@@ -23,11 +23,22 @@ defmodule Snailfish.SmathTest do
         exp_homework_mag: 4140,
         nored_sum_numbers: ["[1,1]", "[2,2]", "[3,3]", "[4,4]"],
         exp_nored_sum: "[[[[1,1],[2,2]],[3,3]],[4,4]]",
+        # TODO this one is temporary:
+        reduce_split_test: {
+          [:o, :o, :o, :o, 0, :s, 7, :c, :s, 4, :c, :s, :o, 15, :s, :o, 0, :s, 13, :c, :c, :c, :s, :o, 1, :s, 1, :c, :c],
+          "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]",
+        },
       ]
     end
 
     test "add() produces expected sums (no-reduction example)", fixture do
       assert Smath.add(fixture.nored_sum_numbers) == fixture.exp_nored_sum
+    end
+
+    # TODO this one is temporary:
+    test "reduce() produces expected reduction (split-only example)", fixture do
+      {tokens, exp_reduction} = fixture.reduce_split_test
+      assert Smath.reduce(tokens) == exp_reduction
     end
   end
 end
