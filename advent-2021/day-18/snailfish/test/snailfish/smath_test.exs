@@ -140,6 +140,16 @@ defmodule Snailfish.SmathTest do
       assert act_contexts == exp_contexts
     end
 
+    test "explode_at() produces expected exploded number (no-split examples)", fixture do
+      act_numbers =
+        fixture.explodable_numbers
+        |> Enum.map(&Parser.to_tokens/1)
+        |> Enum.map(&({&1, Smath.find_explodable_context(&1)}))
+        |> Enum.map(fn {tokens, context} -> Smath.explode_at(tokens, context) end)
+        |> Enum.map(&Parser.to_string/1)
+      assert act_numbers == fixture.exp_exploded_numbers
+    end
+
     # TODO test that sum_numbers produces exp_sums
 
     # TODO test "slightly larger example" here

@@ -155,4 +155,73 @@ defmodule Snailfish.Smath do
       _ -> level
     end
   end
+
+  @doc ~S"""
+  Explode pair in the given context in `tokens`. Returns new `tokens`.
+
+  "To explode a pair, the pair's left value is added to the first regular
+  number to the left of the exploding pair (if any), and the pair's
+  right value is added to the first regular number to the right of the
+  exploding pair (if any). Exploding pairs will always consist of two
+  regular numbers. Then, the entire exploding pair is replaced with the
+  regular number 0."
+  """
+  # NB `prev_i == nil and next_i == nil` can't happen
+  def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) and prev_i == nil do
+    ###
+    # break tokens into segments
+    #IO.inspect(tokens, label: "tokens [prev_i == nil]")
+    #IO.inspect({i, prev_i, next_i}, label: "context [prev_i == nil]")
+    {head, tail} = Enum.split(tokens, i)
+    {[:o, _lval, :s, rval, :c], tail} = Enum.split(tail, 5)
+    {middle, tail} = Enum.split(tail, next_i - i - 5)
+    [next | tail] = tail
+    #IO.inspect({head, rval, middle, next, tail}, label: "segments [prev_i == nil]")
+    ###
+    # do the explode
+    next = next + rval
+    ###
+    # reassemble the modified segments
+    # TODO OPTIMIZE this is really inefficient:
+    head ++ [0] ++ middle ++ [next] ++ tail
+  end
+  def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) and next_i == nil do
+    ###
+    # break tokens into segments
+    #IO.inspect(tokens, label: "tokens [next_i == nil]")
+    #IO.inspect({i, prev_i, next_i}, label: "context [next_i == nil]")
+    {head, tail} = Enum.split(tokens, prev_i)
+    [prev | tail] = tail
+    {middle, tail} = Enum.split(tail, i - prev_i - 1)
+    {[:o, lval, :s, _rval, :c], tail} = Enum.split(tail, 5)
+    #IO.inspect({head, prev, middle, lval, tail}, label: "segments [next_i == nil]")
+    ###
+    # do the explode
+    prev = prev + lval
+    ###
+    # reassemble the modified segments
+    # TODO OPTIMIZE this is really inefficient:
+    head ++ [prev] ++ middle ++ [0] ++ tail
+  end
+  def explode_at(tokens, {i, prev_i, next_i}) when is_list(tokens) do
+    ###
+    # break tokens into segments
+    #IO.inspect(tokens, label: "tokens [prev_i and next_i]")
+    #IO.inspect({i, prev_i, next_i}, label: "context [prev_i and next_i]")
+    {head, tail} = Enum.split(tokens, prev_i)
+    [prev | tail] = tail
+    {lmiddle, tail} = Enum.split(tail, i - prev_i - 1)
+    {[:o, lval, :s, rval, :c], tail} = Enum.split(tail, 5)
+    {rmiddle, tail} = Enum.split(tail, next_i - i - 5)
+    [next | tail] = tail
+    #IO.inspect({head, prev, lmiddle, {lval, rval}, rmiddle, next, tail}, label: "segments [prev_i and next_i]")
+    ###
+    # do the explode
+    prev = prev + lval
+    next = next + rval
+    ###
+    # reassemble the modified segments
+    # TODO OPTIMIZE this is really inefficient:
+    head ++ [prev] ++ lmiddle ++ [0] ++ rmiddle ++ [next] ++ tail
+  end
 end
