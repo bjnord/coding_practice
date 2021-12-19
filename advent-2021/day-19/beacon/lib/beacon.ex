@@ -23,6 +23,7 @@ defmodule Beacon do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
+    # "Assemble the full map of beacons. How many beacons are there?"
     File.read!(input_file)
     |> Parser.parse()
     nil  # TODO

@@ -3,6 +3,10 @@ defmodule Beacon.CorrelatorTest do
   doctest Beacon.Correlator
 
   alias Beacon.Correlator, as: Correlator
+  alias Beacon.Scanner, as: Scanner
+
+  # NB any variable with "beacon" in name is assumed **absolute**
+  #    anything relative will have "rel_" in the name
 
   describe "puzzle example" do
     setup do
@@ -146,15 +150,34 @@ defmodule Beacon.CorrelatorTest do
             {30, -46, -14},
           ],
         },
+        exp_t: {1, 9, 17, 9, 24},
+        exp_offset: {
+          {0, 0, 0},
+          {68, -1246, -43},
+          {1105, -1205, 1229},
+          {-92, -2380, -20},
+          {-20, -1133, 1061},
+        },
+        exp_count: {nil, 12, 12, 12, 12},
       ]
     end
 
-    test "correlator gets expected correlations (scanner 0 vs 1)", fixture do
-      {t, offset, count} =
-        Correlator.correlate(fixture.rel_beacon_sets[0], fixture.rel_beacon_sets[1])
-      assert t == 9
-      assert offset == {68, -1246, -43}
-      assert count == 12
+    test "correlator gets expected correlations (all scanners)", fixture do
+      [1, 4, 2, 3]
+      |> Enum.reduce(0, fn (n, n0) ->
+        # get (absolute) beacon positions from previous scanner
+        n0 = if n == 3, do: 1, else: n0  # fudging...
+        scanner_n0 = Scanner.new(fixture.rel_beacon_sets[n0],
+          {0, 0, 0}, elem(fixture.exp_t, n0), elem(fixture.exp_offset, n0))
+        beacons_n0 = Scanner.beacons(scanner_n0)
+        # now do our correlation test (scanner n vs n0)
+        {t, offset, count} =
+          Correlator.correlate(beacons_n0, fixture.rel_beacon_sets[n])
+        assert t == elem(fixture.exp_t, n)
+        assert offset == elem(fixture.exp_offset, n)
+        assert count == elem(fixture.exp_count, n)
+        n
+      end)
     end
   end
 end

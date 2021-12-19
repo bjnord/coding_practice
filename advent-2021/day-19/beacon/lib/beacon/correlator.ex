@@ -5,13 +5,16 @@ defmodule Beacon.Correlator do
 
   alias Beacon.Transformer, as: Transformer
 
+  # NB any variable with "position" in name is assumed **absolute**
+  #    anything relative will have "rel_" in the name
+
   @doc ~S"""
-  Correlate a list of absolute positions with a list of relative positions,
+  Correlate a list of (absolute) positions with a list of relative positions,
   to find a matching transform and 3D offset.
 
   Returns `{t, {x_off, y_off, z_off}, count}`.
   """
-  def correlate(abs_positions, rel_positions) do
+  def correlate(positions, rel_positions) do
     ###
     # Do combinations (A x (R x T)) to find the all offsets between
     # - absolute positions A[]
@@ -22,9 +25,9 @@ defmodule Beacon.Correlator do
         rel_pos
         |> Transformer.transforms()
         |> Enum.flat_map(fn {t, rel_rot_pos} ->
-          abs_positions
-          |> Enum.map(fn abs_pos ->
-            {t, Transformer.position_difference(abs_pos, rel_rot_pos)}
+          positions
+          |> Enum.map(fn pos ->
+            {t, Transformer.position_difference(pos, rel_rot_pos)}
           end)
         end)
       end)

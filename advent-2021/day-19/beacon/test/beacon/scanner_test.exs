@@ -4,6 +4,9 @@ defmodule Beacon.ScannerTest do
 
   alias Beacon.Scanner, as: Scanner
 
+  # NB any variable with "beacon" in name is assumed **absolute**
+  #    anything relative will have "rel_" in the name
+
   describe "puzzle example" do
     setup do
       [
@@ -146,9 +149,10 @@ defmodule Beacon.ScannerTest do
             {30, -46, -14},
           ],
         },
-        transform_1: 9,
-        offset_1: {68, -1246, -43},
-        abs_beacons_0_1: [
+        origin_0: {0, 0, 0},
+        t_1: 9,
+        exp_origin_1: {68, -1246, -43},
+        exp_beacons_1: [
           {-618, -824, -621},
           {-537, -823, -458},
           {-447, -329, 318},
@@ -162,7 +166,9 @@ defmodule Beacon.ScannerTest do
           {459, -707, 401},
           {-485, -357, 347},
         ],
-        abs_beacons_1_4: [
+        t_4: 24,
+        exp_origin_4: {-20, -1133, 1061},
+        exp_beacons_4: [
           {459, -707, 401},
           {-739, -1745, 668},
           {-485, -357, 347},
@@ -176,7 +182,7 @@ defmodule Beacon.ScannerTest do
           {-447, -329, 318},
           {-635, -1737, 486},
         ],
-        abs_beacons: [
+        exp_beacons: [
           {-892, 524, 684},
           {-876, 649, 763},
           {-838, 591, 734},
@@ -261,21 +267,31 @@ defmodule Beacon.ScannerTest do
     end
 
     test "constructor produces expected scanner (scanner 0)", fixture do
-      act_scanner0 =
+      act_scanner_0 =
         Scanner.new(fixture.rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
-      assert Scanner.origin(act_scanner0) == {0, 0, 0}
-      assert Scanner.abs_beacons(act_scanner0) == fixture.rel_beacon_sets[0]
+      assert Scanner.origin(act_scanner_0) == {0, 0, 0}
+      assert Scanner.beacons(act_scanner_0) == fixture.rel_beacon_sets[0]
     end
 
     test "constructor produces expected scanner (scanner 1)", fixture do
-      # scanner 1 was correlated from scanner 0 (the absolute origin)
-      origin = {0, 0, 0}
-      act_scanner1 = Scanner.new(fixture.rel_beacon_sets[1], origin, fixture.transform_1, fixture.offset_1)
-      assert Scanner.origin(act_scanner1) == fixture.offset_1
-      abs_beacons_1 = Scanner.abs_beacons(act_scanner1)
-      fixture.abs_beacons_0_1
-      |> Enum.each(fn abs_beacon ->
-        assert Enum.find(abs_beacons_1, &(&1 == abs_beacon)) != nil
+      act_scanner_1 = Scanner.new(fixture.rel_beacon_sets[1],
+        fixture.origin_0, fixture.t_1, fixture.exp_origin_1)
+      assert Scanner.origin(act_scanner_1) == fixture.exp_origin_1
+      act_beacons_1 = Scanner.beacons(act_scanner_1)
+      fixture.exp_beacons_1
+      |> Enum.each(fn exp_beacon ->
+        assert Enum.find(act_beacons_1, &(&1 == exp_beacon)) != nil
+      end)
+    end
+
+    test "constructor produces expected scanner (scanner 4)", fixture do
+      act_scanner_4 = Scanner.new(fixture.rel_beacon_sets[4],
+        fixture.origin_0, fixture.t_4, fixture.exp_origin_4)
+      assert Scanner.origin(act_scanner_4) == fixture.exp_origin_4
+      act_beacons_4 = Scanner.beacons(act_scanner_4)
+      fixture.exp_beacons_4
+      |> Enum.each(fn exp_beacon ->
+        assert Enum.find(act_beacons_4, &(&1 == exp_beacon)) != nil
       end)
     end
   end
