@@ -1,6 +1,7 @@
 BIN = ./beacon
 FILES = mix.exs test/test_helper.exs \
 	lib/beacon.ex test/beacon_test.exs \
+	lib/beacon/transformer.ex \
 	lib/beacon/parser.ex test/beacon/parser_test.exs
 VERBOSE = 0
 
