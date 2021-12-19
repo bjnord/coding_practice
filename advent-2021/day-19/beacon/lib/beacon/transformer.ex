@@ -5,6 +5,10 @@ defmodule Beacon.Transformer do
   h/t [How to get all 24 rotations of a 3-dimensional array?"](https://stackoverflow.com/a/50546727/291754)
   """
 
+  def position_sum({i0, j0, k0}, {i1, j1, k1}) do
+    {i0 + i1, j0 + j1, k0 + k1}
+  end
+
   def position_difference({i0, j0, k0}, {i1, j1, k1}) do
     {i0 - i1, j0 - j1, k0 - k1}
   end
