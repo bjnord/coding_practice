@@ -44,7 +44,9 @@ defmodule Beacon do
         |> Transformer.transforms()
         |> Enum.flat_map(fn {t, s1_rot_pos} ->
           scanners[0]  # positions
-          |> Enum.map(fn s0_pos -> {t, sub_pos(s0_pos, s1_rot_pos)} end)
+          |> Enum.map(fn s0_pos ->
+            {t, Transformer.position_difference(s0_pos, s1_rot_pos)}
+          end)
         end)
       end)
     IO.inspect(Enum.count(offsets), label: "n_offsets")
@@ -58,9 +60,6 @@ defmodule Beacon do
       |> Enum.sort_by(fn {_k, v} -> -v end)
       |> Enum.map(&(elem(&1, 0)))
     IO.inspect({hi_key, offset_counts[hi_key]}, label: "highest transform,pos and count")
-  end
-  defp sub_pos({i0, j0, k0}, {i1, j1, k1}) do
-    {i0 - i1, j0 - j1, k0 - k1}
   end
 
   @doc """

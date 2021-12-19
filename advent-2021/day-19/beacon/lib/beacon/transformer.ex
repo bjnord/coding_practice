@@ -1,9 +1,13 @@
 defmodule Beacon.Transformer do
   @moduledoc """
-  Transformation functions for `Beacon`.
+  Tensor and transformation functions for `Beacon`.
 
   h/t [How to get all 24 rotations of a 3-dimensional array?"](https://stackoverflow.com/a/50546727/291754)
   """
+
+  def position_difference({i0, j0, k0}, {i1, j1, k1}) do
+    {i0 - i1, j0 - j1, k0 - k1}
+  end
 
   def transforms(p) do
     for t <- 1..24, into: [], do: {t, transform(p, t)}
