@@ -151,4 +151,43 @@ defmodule Trench.Image do
         |> Enum.count(&(&1 == 1))
     end
   end
+
+  @doc ~S"""
+  Render image to image frame file.
+  """
+  # each source image pixel is rendered as 2x2 in the output file
+  def visualize(image, dim, frame_n) do
+    nnn = String.pad_leading(Integer.to_string(frame_n), 3, "0")
+    path = "viz/frame#{nnn}.pbm"
+    {:ok, file} = File.open(path, [:write])
+    radius = div(dim, 2)  # image width 200px = 201 points [-100..100]
+    n_points = (radius * 2) + 1
+    px_per_line = n_points * 2  # 201 points = 402 pixels
+    IO.binwrite(file, "P1\n# AoC 2021 Day 20\n#{px_per_line} #{px_per_line}\n")
+    text =
+      image_points(radius)
+      |> Enum.reduce([], fn (point, chars) ->
+        ch =
+          case image.pixmap[point] do
+            nil -> if image.infinity == :all_ones, do: ?1, else: ?0
+            1   -> ?1
+            0   -> ?0
+          end
+        [ch, 32, ch, 32 | chars]  # 2 pixels wide w/space delim
+      end)
+      |> Enum.reverse
+      |> Enum.chunk_every(px_per_line * 2)  # 402 px per line = 804 chars
+      |> Enum.map(&(to_double_string(&1)))
+      |> Enum.join("\n")
+      |> (fn text -> "#{text}" end).()
+    IO.binwrite(file, "#{text}\n")
+    File.close(path)
+  end
+
+  defp to_double_string(chars) do
+    chars
+    |> to_string()
+    |> String.slice(1..-1)
+    |> (fn line -> "#{line}\n#{line}" end).()
+  end
 end

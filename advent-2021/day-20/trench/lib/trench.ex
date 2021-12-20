@@ -18,6 +18,7 @@ defmodule Trench do
     {input_file, opts} = parse_args(argv)
     if Enum.member?(opts[:parts], 1), do: part1(input_file)
     if Enum.member?(opts[:parts], 2), do: part2(input_file)
+    if opts[:visualize], do: visualize(input_file)
   end
 
   @doc """
@@ -54,5 +55,23 @@ defmodule Trench do
     end)
     |> Image.lit_count()
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Process input file and produce visualization of part 2 solution.
+  """
+  def visualize(input_file) do
+    {algor, {radius, pixmap}} =
+      File.read!(input_file)
+      |> Parser.parse()
+    image = Image.new({radius, pixmap})
+    viz_dim = 220
+    Image.visualize(image, viz_dim, 0)
+    1..50
+    |> Enum.reduce(image, fn (n, enh_image) ->
+      enh_image = Image.apply(enh_image, algor)
+      Image.visualize(enh_image, viz_dim, n)
+      enh_image
+    end)
   end
 end

@@ -11,7 +11,7 @@ defmodule Submarine.CLI do
   Returns a tuple with the input filename and an options `Keyword` list.
   """
   def parse_args(argv) do
-    switches = [strict: [parts: :string, verbose: :boolean, times: :boolean]]
+    switches = [strict: [parts: :string, verbose: :boolean, times: :boolean, visualize: :boolean]]
     {opts, argv, unhandled} = OptionParser.parse(argv, switches)
     opts = Keyword.update(opts, :parts, @default_parts, fn parts -> part_list(parts) end)
     cond do
@@ -39,7 +39,7 @@ defmodule Submarine.CLI do
   defp usage() do
     escript = :escript.script_name()
     parts = Enum.join(@default_parts)
-    IO.puts(:stderr, "Usage: #{escript} [--parts=#{parts}] [--verbose] [--times] <input-file>")
+    IO.puts(:stderr, "Usage: #{escript} [--parts=#{parts}] [--verbose] [--times] [--visualize] <input-file>")
     System.halt(64)
   end
 end

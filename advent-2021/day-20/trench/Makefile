@@ -5,10 +5,13 @@ FILES = mix.exs test/test_helper.exs \
 	lib/trench/parser.ex test/trench/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test doc console clean
+.PHONY: run viz test doc console clean
 
 run: $(BIN)
 	$(BIN) input/input.txt
+
+viz: $(BIN)
+	$(BIN) --parts=0 --visualize input/input.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
@@ -23,7 +26,7 @@ console:
 	iex -S mix
 
 clean:
-	rm -rf _build $(BIN) doc log/*.log
+	rm -rf _build $(BIN) doc log/*.log viz/*.*
 
 $(BIN): $(FILES)
 	mix escript.build
