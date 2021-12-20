@@ -41,10 +41,18 @@ defmodule Trench do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    {_algor, _image} =
+    # "Start again with the original input image and apply the image
+    # enhancement algorithm 50 times. How many pixels are lit in the
+    # resulting image?"
+    {algor, {radius, pixmap}} =
       File.read!(input_file)
       |> Parser.parse()
-    nil  # TODO
+    image = Image.new({radius, pixmap})
+    1..50
+    |> Enum.reduce(image, fn (_n, enh_image) ->
+      Image.apply(enh_image, algor)
+    end)
+    |> Image.lit_count()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

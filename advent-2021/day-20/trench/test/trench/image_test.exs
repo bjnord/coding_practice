@@ -53,6 +53,7 @@ defmodule Trench.ImageTest do
         ...............
         ...............
         """,
+        exp_step_50_lit: 3351,
       ]
     end
 
@@ -86,6 +87,17 @@ defmodule Trench.ImageTest do
       assert Image.radius(image_step_2) == fixture.exp_step_2_radius
       assert Image.render(image_step_2) == fixture.exp_step_2
       assert Image.lit_count(image_step_2) == fixture.exp_step_2_lit
+    end
+
+    test "image gets expected algorithm result (50 steps)", fixture do
+      algor = Parser.parse_algor(fixture.algor)
+      image = Image.new({fixture.radius, fixture.pixmap})
+      enh_image =
+        1..50
+        |> Enum.reduce(image, fn (_n, enh_image) ->
+          Image.apply(enh_image, algor)
+        end)
+      assert Image.lit_count(enh_image) == fixture.exp_step_50_lit
     end
   end
 end
