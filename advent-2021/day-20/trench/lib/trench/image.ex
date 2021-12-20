@@ -5,7 +5,7 @@ defmodule Trench.Image do
 
   alias Trench.Image, as: Image
 
-  defstruct radius: 0, pixmap: %{}
+  defstruct radius: 0, pixmap: %{}, infinity: :all_zeros
 
   @doc ~S"""
   Construct new `Image`.
@@ -20,10 +20,9 @@ defmodule Trench.Image do
   Return pixel value (0 or 1) at location `{x, y}`.
   """
   def pixel_at(image, {x, y}) do
-    # because it's an infinite canvas, return 0 when `nil`
     case image.pixmap[{x, y}] do
-      1 -> 1
-      _ -> 0
+      nil -> if image.infinity == :all_ones, do: 1, else: 0
+      px  -> px
     end
   end
 
@@ -32,14 +31,16 @@ defmodule Trench.Image do
   """
   def apply(image, algor) do
     {_px, enh_image} = set_new_pixel_at(image, image, algor, {0, 0})
-    apply(enh_image, image, algor, 1, image.radius)
+    apply(enh_image, image, algor, 1, image.radius, [nil, nil, nil])
   end
-  defp apply(enh_image, image, algor, radius, min_radius) do
-    #IO.puts("apply radius=#{radius} (min_radius=#{min_radius})")
+  defp apply(enh_image, image, algor, radius, min_radius, states) do
+    #IO.puts("apply radius=#{radius} (min_radius=#{min_radius}, repeat_state=#{repeat_state(states)})")
+
     #  XXY  <- each row and column
     #  Y Y  <- is shortened/offset
     #  YXX  <- so no wasted overlap
     #
+    ###
     # top and bottom rows
     {n_ones_x, enh_image} =
       -radius..(radius-1)
@@ -48,6 +49,7 @@ defmodule Trench.Image do
         {px_bot, enh_image} = set_new_pixel_at(enh_image, image, algor, {x + 1, radius})
         {n_ones + px_top + px_bot, enh_image}
       end)
+    ###
     # left and right columns
     {n_ones_y, enh_image} =
       -(radius-1)..radius
@@ -56,16 +58,41 @@ defmodule Trench.Image do
         {px_right, enh_image} = set_new_pixel_at(enh_image, image, algor, {radius, y - 1})
         {n_ones + px_left + px_right, enh_image}
       end)
+    states = [state(n_ones_x + n_ones_y, (radius * 2) * 4) | states]
+#    abort_radius = 500  # FIXME DEBUG TEMP
     cond do
+#      radius >= abort_radius ->  # FIXME DEBUG TEMP
+#        IO.puts("  STOP: abort_radius=#{abort_radius} reached")
+#        %Image{enh_image | radius: radius}
       radius < min_radius ->
-        apply(enh_image, image, algor, radius + 1, min_radius)
-      (n_ones_x + n_ones_y) > 0 ->
-        #IO.puts("  got n_ones x=#{n_ones_x} y=#{n_ones_y}")
-        apply(enh_image, image, algor, radius + 1, min_radius)
+        #IO.puts("  still under min_radius")
+        apply(enh_image, image, algor, radius + 1, min_radius, states)
+      repeat_state(states) == :all_zeros ->
+        #IO.puts("  STOP: repeating all-0s border")
+        %Image{enh_image | radius: radius, infinity: :all_zeros}
+      repeat_state(states) == :all_ones ->
+        #IO.puts("  STOP: repeating all-1s border")
+        %Image{enh_image | radius: radius, infinity: :all_ones}
       true ->
-        %Image{enh_image | radius: radius}
+        #IO.puts("  got n_ones x=#{n_ones_x} y=#{n_ones_y}")
+#        %Image{enh_image | radius: radius + 1}  # FIXME DEBUG TEMP
+#        |> Image.render()
+#        |> IO.puts()
+        apply(enh_image, image, algor, radius + 1, min_radius, states)
     end
   end
+
+  defp state(n_ones, max_ones) do
+    cond do
+      n_ones == max_ones -> :all_ones
+      n_ones == 0 -> :all_zeros
+      true -> :mixed
+    end
+  end
+
+  defp repeat_state([s2, s1, s0 | _]) when s0 == s1 and s1 == s2 and s2 == :all_ones, do: s2
+  defp repeat_state([s2, s1, s0 | _]) when s0 == s1 and s1 == s2 and s2 == :all_zeros, do: s2
+  defp repeat_state(_), do: :mixed
 
   @doc false
   def set_new_pixel_at(enh_image, image, algor, {x, y}) do
@@ -102,10 +129,13 @@ defmodule Trench.Image do
     line_len = image.radius * 2 + 1
     image_points(image.radius)
     |> Enum.reduce([], fn (point, chars) ->
-      case image.pixmap[point] do
-        1 -> [?# | chars]
-        0 -> [?. | chars]
-      end
+      char =
+        case image.pixmap[point] do
+          nil -> if image.infinity == :all_ones, do: 1, else: 0
+          1   -> ?#
+          0   -> ?.
+        end
+      [char | chars]
     end)
     |> Enum.reverse
     |> Enum.chunk_every(line_len)
@@ -127,7 +157,12 @@ defmodule Trench.Image do
   Return count of lit pixels in image.
   """
   def lit_count(image) do
-    Map.values(image.pixmap)
-    |> Enum.count(&(&1 == 1))
+    case image.infinity do
+      :all_ones ->
+        :infinite
+      _ ->
+        Map.values(image.pixmap)
+        |> Enum.count(&(&1 == 1))
+    end
   end
 end
