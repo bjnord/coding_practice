@@ -31,6 +31,7 @@ defmodule Trench.ImageTest do
         .........
         """,
         exp_step_2_radius: 5,
+        exp_step_2_lit: 35,
         exp_step_2: """
         ...........
         ........#..
@@ -76,6 +77,7 @@ defmodule Trench.ImageTest do
       image_step_2 = Image.apply(image_step_1, algor)
       assert Image.radius(image_step_2) == fixture.exp_step_2_radius
       assert Image.render(image_step_2) == fixture.exp_step_2
+      assert Image.lit_count(image_step_2) == fixture.exp_step_2_lit
     end
   end
 end

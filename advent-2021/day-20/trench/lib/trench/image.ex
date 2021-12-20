@@ -122,4 +122,12 @@ defmodule Trench.Image do
     end
     |> List.flatten()
   end
+
+  @doc ~S"""
+  Return count of lit pixels in image.
+  """
+  def lit_count(image) do
+    Map.values(image.pixmap)
+    |> Enum.count(&(&1 == 1))
+  end
 end

@@ -3,6 +3,7 @@ defmodule Trench do
   Documentation for Trench.
   """
 
+  alias Trench.Image, as: Image
   alias Trench.Parser, as: Parser
   import Submarine.CLI
 
@@ -25,10 +26,14 @@ defmodule Trench do
   def part1(input_file) do
     # "Start with the original input image and apply the image enhancement
     # algorithm twice [...]. How many pixels are lit in the resulting image?"
-    {_algor, _image} =
+    {algor, {radius, pixmap}} =
       File.read!(input_file)
       |> Parser.parse()
-    nil  # TODO
+    {radius, pixmap}
+    |> Image.new()
+    |> Image.apply(algor)
+    |> Image.apply(algor)
+    |> Image.lit_count()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
