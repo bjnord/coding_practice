@@ -11,7 +11,8 @@ defmodule Trench.Parser do
     {parse_algor(algor), parse_image(pixels)}
   end
 
-  defp parse_algor(algor) do
+  @doc false
+  def parse_algor(algor) do
     algor
     |> String.trim_trailing()
     |> String.to_charlist()

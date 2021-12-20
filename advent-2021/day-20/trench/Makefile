@@ -1,6 +1,7 @@
 BIN = ./trench
 FILES = mix.exs test/test_helper.exs \
 	lib/trench.ex test/trench_test.exs \
+	lib/trench/image.ex test/trench/image_test.exs \
 	lib/trench/parser.ex test/trench/parser_test.exs
 VERBOSE = 0
 
