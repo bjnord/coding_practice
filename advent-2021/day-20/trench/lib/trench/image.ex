@@ -34,8 +34,6 @@ defmodule Trench.Image do
     apply(enh_image, image, algor, 1, image.radius, [nil, nil, nil])
   end
   defp apply(enh_image, image, algor, radius, min_radius, states) do
-    #IO.puts("apply radius=#{radius} (min_radius=#{min_radius}, repeat_state=#{repeat_state(states)})")
-
     #  XXY  <- each row and column
     #  Y Y  <- is shortened/offset
     #  YXX  <- so no wasted overlap
@@ -59,25 +57,14 @@ defmodule Trench.Image do
         {n_ones + px_left + px_right, enh_image}
       end)
     states = [state(n_ones_x + n_ones_y, (radius * 2) * 4) | states]
-#    abort_radius = 500  # FIXME DEBUG TEMP
     cond do
-#      radius >= abort_radius ->  # FIXME DEBUG TEMP
-#        IO.puts("  STOP: abort_radius=#{abort_radius} reached")
-#        %Image{enh_image | radius: radius}
       radius < min_radius ->
-        #IO.puts("  still under min_radius")
         apply(enh_image, image, algor, radius + 1, min_radius, states)
       repeat_state(states) == :all_zeros ->
-        #IO.puts("  STOP: repeating all-0s border")
         %Image{enh_image | radius: radius, infinity: :all_zeros}
       repeat_state(states) == :all_ones ->
-        #IO.puts("  STOP: repeating all-1s border")
         %Image{enh_image | radius: radius, infinity: :all_ones}
       true ->
-        #IO.puts("  got n_ones x=#{n_ones_x} y=#{n_ones_y}")
-#        %Image{enh_image | radius: radius + 1}  # FIXME DEBUG TEMP
-#        |> Image.render()
-#        |> IO.puts()
         apply(enh_image, image, algor, radius + 1, min_radius, states)
     end
   end
@@ -97,7 +84,6 @@ defmodule Trench.Image do
   @doc false
   def set_new_pixel_at(enh_image, image, algor, {x, y}) do
     px = new_pixel_at(image, algor, {x, y})
-    #IO.inspect({px, x, y}, label: "    px, {x, y}")
     enh_image = set_pixel_at(enh_image, {x, y}, px)
     {px, enh_image}
   end
