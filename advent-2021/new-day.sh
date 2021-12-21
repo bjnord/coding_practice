@@ -140,23 +140,23 @@ if [ ! -d input ]; then
 fi
 PARSER="lib/$PROJECT/parser.ex"
 if [ ! -f $PARSER ]; then
-	log "copying $PARSER from day-03/diagnostic"
+	log "copying $PARSER from day-09/smoke"
 	mkdir -p "lib/$PROJECT"
-	SOURCE="`echo \"$ADVENTPATH/day-03/diagnostic/$PARSER\" | sed \"s/$PROJECT/diagnostic/\"`"
-	perl -pe "s/diagnostic/$PROJECT/g; s/Diagnostic/$MODULE/g;" $SOURCE >$PARSER
+	SOURCE="`echo \"$ADVENTPATH/day-09/smoke/$PARSER\" | sed \"s/$PROJECT/smoke/\"`"
+	perl -pe "s/smoke/$PROJECT/g; s/Smoke/$MODULE/g;" $SOURCE >$PARSER
 fi
 PARSERTEST="test/$PROJECT/parser_test.exs"
 if [ ! -f $PARSERTEST ]; then
-	log "copying $PARSERTEST from day-03/diagnostic"
+	log "copying $PARSERTEST from day-09/smoke"
 	mkdir -p "test/$PROJECT"
-	SOURCE="`echo \"$ADVENTPATH/day-03/diagnostic/$PARSERTEST\" | sed \"s/$PROJECT/diagnostic/\"`"
-	perl -pe "s/diagnostic/$PROJECT/g; s/Diagnostic/$MODULE/g;" $SOURCE >$PARSERTEST
+	SOURCE="`echo \"$ADVENTPATH/day-09/smoke/$PARSERTEST\" | sed \"s/$PROJECT/smoke/\"`"
+	perl -pe "s/smoke/$PROJECT/g; s/Smoke/$MODULE/g;" $SOURCE >$PARSERTEST
 fi
 
 cat >/tmp/main_parts$$ <<MAIN_PARTS
 
-  import $MODULE.Parser
-  import Submarine.CLI
+  alias $MODULE.Parser, as: Parser
+  alias Submarine.CLI, as: CLI
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -166,26 +166,28 @@ cat >/tmp/main_parts$$ <<MAIN_PARTS
   - argv: Command-line arguments
   """
   def main(argv) do
-    {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
+    {input_file, opts} = CLI.parse_args(argv)
+    if Enum.member?(opts[:parts], 1), do: part1(input_file)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file)
   end
 
   @doc """
   Process input file and display part 1 solution.
   """
-  def part1(input_file, opts \\\\ []) do
-    input_file
-    |> parse_input(opts)
+  def part1(input_file) do
+    File.read!(input_file)
+    |> Parser.parse()
+    nil  # TODO
     |> IO.inspect(label: "Part 1 answer is")
   end
 
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file, opts \\\\ []) do
-    input_file
-    |> parse_input(opts)
+  def part2(input_file) do
+    File.read!(input_file)
+    |> Parser.parse()
+    nil  # TODO
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
