@@ -2,7 +2,6 @@ defmodule Beacon.ScannerTest do
   use ExUnit.Case
   doctest Beacon.Scanner
 
-  alias Beacon.Correlator, as: Correlator
   alias Beacon.Scanner, as: Scanner
 
   # NB any variable with "beacon" in name is assumed **absolute**
@@ -217,22 +216,11 @@ defmodule Beacon.ScannerTest do
     end
 
     test "computation of max Manhattan distance", fixture do
-      # FIXME can use Beacon.build_cloud() here
-      scanner_0 = Scanner.new(fixture.rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
-      scanners =
-        [1, 4, 2, 3]
-        |> Enum.reduce({scanner_0, [scanner_0]}, fn (n, {cloud, scanners}) ->
-          {t, offset, count} = Correlator.correlate(
-            Scanner.beacons(cloud), fixture.rel_beacon_sets[n]
-          )
-          assert count >= 12
-          scanner_n = Scanner.new(
-            fixture.rel_beacon_sets[n], fixture.origin_0, t, offset
-          )
-          {Scanner.merge_beacons(cloud, scanner_n), [scanner_n | scanners]}
-        end)
+      act_max_manhattan =
+        Beacon.build_cloud(fixture.rel_beacon_sets)
         |> elem(1)
-      assert Scanner.max_manhattan(scanners) == fixture.exp_max_manhattan
+        |> Scanner.max_manhattan()
+      assert act_max_manhattan == fixture.exp_max_manhattan
     end
   end
 end

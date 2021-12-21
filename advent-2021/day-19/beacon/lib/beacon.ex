@@ -17,25 +17,31 @@ defmodule Beacon do
   """
   def main(argv) do
     {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
+    {cloud, scanners} =
+      File.read!(input_file)
+      |> Parser.parse()
+      |> build_cloud(opts)
+    if Enum.member?(opts[:parts], 1), do: part1(cloud)
+    if Enum.member?(opts[:parts], 2), do: part2(scanners)
   end
 
   @doc """
-  Process input file and display part 1 solution.
+  Produce and display part 1 solution.
   """
-  def part1(input_file, opts) do
+  def part1(cloud) do
     # "Assemble the full map of beacons. How many beacons are there?"
-    File.read!(input_file)
-    |> Parser.parse()
-    |> build_cloud(opts)
-    |> elem(0)
+    cloud
     |> Scanner.beacons()
     |> Enum.count()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
-  # FIXME @doc
+  @doc """
+  Build a single `Scanner` by progressively correlating and folding in
+  all the given `rel_beacon_sets`.
+
+  Returns `{cloud_scanner, scanners}`.
+  """
   def build_cloud(rel_beacon_sets, opts \\ []) do
     ###
     # we (arbitrarily) pick scanner 0 as the origin
@@ -63,32 +69,21 @@ defmodule Beacon do
   end
 
   defp find_next_correlation(cloud, rel_beacon_sets) do
-    # TODO `reduce_while()` seems the wrong choice here;
-    #      `Enum.find_value()` maybe?
-    Map.keys(rel_beacon_sets)
-    |> Enum.reduce_while(0, fn (n, n_tried) ->
+    rel_beacon_sets
+    |> Enum.find_value(fn {n, rel_beacon_set} ->
       {t, offset, count} =
         Scanner.beacons(cloud)
-        |> Correlator.correlate(rel_beacon_sets[n])
-      cond do
-        count >= 12 ->
-          {:halt, {n, t, offset}}
-        n_tried + 1 >= map_size(rel_beacon_sets) ->
-          {:halt, nil}
-        true ->
-          {:cont, n_tried + 1}
-      end
+        |> Correlator.correlate(rel_beacon_set)
+      if count >= 12, do: {n, t, offset}, else: nil
     end)
   end
 
   @doc """
-  Process input file and display part 2 solution.
+  Produce and display part 2 solution.
   """
-  def part2(input_file, opts) do
-    File.read!(input_file)
-    |> Parser.parse()
-    |> build_cloud(opts)
-    |> elem(1)
+  def part2(scanners) do
+    # "What is the largest Manhattan distance between any two scanners?"
+    scanners
     |> Scanner.max_manhattan()
     |> IO.inspect(label: "Part 2 answer is")
   end
