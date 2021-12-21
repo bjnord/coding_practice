@@ -3,8 +3,6 @@ defmodule Syntax.Parser do
   Parsing for `Syntax`.
   """
 
-  use Bitwise
-
   @doc ~S"""
   Parse the input file.
   """

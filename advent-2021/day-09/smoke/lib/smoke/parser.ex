@@ -3,8 +3,6 @@ defmodule Smoke.Parser do
   Parsing for `Smoke`.
   """
 
-  use Bitwise
-
   @doc ~S"""
   Parse the input file.
   """

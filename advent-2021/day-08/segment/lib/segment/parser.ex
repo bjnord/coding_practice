@@ -3,8 +3,6 @@ defmodule Segment.Parser do
   Parsing for `Segment`.
   """
 
-  use Bitwise
-
   @doc ~S"""
   Parse the input file.
   """

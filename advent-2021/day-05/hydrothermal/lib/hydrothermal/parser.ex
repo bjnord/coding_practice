@@ -3,8 +3,6 @@ defmodule Hydrothermal.Parser do
   Parsing for `Hydrothermal`.
   """
 
-  use Bitwise
-
   @doc ~S"""
   Parse the input file.
   """
