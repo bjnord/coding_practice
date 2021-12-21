@@ -45,22 +45,21 @@ defmodule Beacon do
   def build_cloud(rel_beacon_sets, opts \\ []) do
     ###
     # we (arbitrarily) pick scanner 0 as the origin
-    cloud = Scanner.new(rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
+    cloud = Scanner.new(rel_beacon_sets[0], 1, {0, 0, 0})
     rel_beacon_sets = Map.delete(rel_beacon_sets, 0)
     ###
     # find all the other scanners, by looking for correlations of at least
     # 12 beacons; fold each found scanner's beacons into the cloud
+    acc = {cloud, [cloud], rel_beacon_sets}
     1..map_size(rel_beacon_sets)
-    |> Enum.reduce({cloud, [cloud], rel_beacon_sets}, fn (_, {cloud, scanners, rel_beacon_sets}) ->
+    |> Enum.reduce(acc, fn (_, {cloud, scanners, rel_beacon_sets}) ->
       if opts[:verbose] do
-        IO.inspect(map_size(rel_beacon_sets), label: "remaining scanners to find")
+        IO.inspect(map_size(rel_beacon_sets), label: "scanners left to find")
       end
       # find next scanner that correlates with one we've already found
-      {n, t, offset} =
-        find_next_correlation(cloud, rel_beacon_sets)
+      {n, t, offset} = find_next_correlation(cloud, rel_beacon_sets)
       # build scanner struct, and merge its beacons into the cloud
-      scanner_n =
-        Scanner.new(rel_beacon_sets[n], Scanner.origin(cloud), t, offset)
+      scanner_n = Scanner.new(rel_beacon_sets[n], t, offset)
       cloud = Scanner.merge_beacons(cloud, scanner_n)
       # remove found scanner's relative beacons
       {cloud, [scanner_n | scanners], Map.delete(rel_beacon_sets, n)}

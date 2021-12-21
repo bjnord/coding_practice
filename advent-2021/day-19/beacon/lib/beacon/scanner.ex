@@ -21,15 +21,14 @@ defmodule Beacon.Scanner do
   ## Parameters
   1. `rel_beacons`: list of relative `{x, y, z}` beacon positions
   1. `t` (transform), `offset`: to change them into absolute beacon positions
-  1. `origin`: origin of scanner the beacons were correlated to
   """
-  def new(rel_beacons, origin, t, offset) do
+  def new(rel_beacons, t, offset) do
     beacons =
       rel_beacons
       |> Enum.map(fn rb -> Transformer.transform(rb, t) end)
       |> Enum.map(fn rtb -> Transformer.position_sum(offset, rtb) end)
     %Scanner{
-      origin: Transformer.position_sum(origin, offset),
+      origin: offset,
       beacons: beacons,
     }
   end

@@ -168,7 +168,7 @@ defmodule Beacon.CorrelatorTest do
         # get (absolute) beacon positions from previous scanner
         n0 = if n == 3, do: 1, else: n0  # fudging...
         scanner_n0 = Scanner.new(fixture.rel_beacon_sets[n0],
-          {0, 0, 0}, elem(fixture.exp_t, n0), elem(fixture.exp_offset, n0))
+          elem(fixture.exp_t, n0), elem(fixture.exp_offset, n0))
         beacons_n0 = Scanner.beacons(scanner_n0)
         # now do our correlation test (scanner n vs n0)
         {t, offset, count} =

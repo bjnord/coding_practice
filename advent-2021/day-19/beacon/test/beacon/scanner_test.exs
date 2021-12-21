@@ -149,7 +149,6 @@ defmodule Beacon.ScannerTest do
             {30, -46, -14},
           ],
         },
-        origin_0: {0, 0, 0},
         t_1: 9,
         exp_origin_1: {68, -1246, -43},
         exp_beacons_1: [
@@ -188,14 +187,14 @@ defmodule Beacon.ScannerTest do
 
     test "constructor produces expected scanner (scanner 0)", fixture do
       act_scanner_0 =
-        Scanner.new(fixture.rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
+        Scanner.new(fixture.rel_beacon_sets[0], 1, {0, 0, 0})
       assert Scanner.origin(act_scanner_0) == {0, 0, 0}
       assert Scanner.beacons(act_scanner_0) == fixture.rel_beacon_sets[0]
     end
 
     test "constructor produces expected scanner (scanner 1)", fixture do
       act_scanner_1 = Scanner.new(fixture.rel_beacon_sets[1],
-        fixture.origin_0, fixture.t_1, fixture.exp_origin_1)
+        fixture.t_1, fixture.exp_origin_1)
       assert Scanner.origin(act_scanner_1) == fixture.exp_origin_1
       act_beacons_1 = Scanner.beacons(act_scanner_1)
       fixture.exp_beacons_1
@@ -206,7 +205,7 @@ defmodule Beacon.ScannerTest do
 
     test "constructor produces expected scanner (scanner 4)", fixture do
       act_scanner_4 = Scanner.new(fixture.rel_beacon_sets[4],
-        fixture.origin_0, fixture.t_4, fixture.exp_origin_4)
+        fixture.t_4, fixture.exp_origin_4)
       assert Scanner.origin(act_scanner_4) == fixture.exp_origin_4
       act_beacons_4 = Scanner.beacons(act_scanner_4)
       fixture.exp_beacons_4
