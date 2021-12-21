@@ -461,10 +461,13 @@ I came up with this algorithm:
 1. For any scanner n, can we find 12 points in the same scanner n transformation T, such that `{i0, j0, k0} = T{in, jn, kn} + {ic, jc, kc}`, given some constant relative position c between the two scanners?
 
 1. And it worked! A quick experiment with the puzzle example ("scanner 1 must be at 68,-1246,-43 (relative to scanner 0)"), (1) using all combinations of scanner 0 beacons, scanner 1 beacons, and 24 transformations of scanner 1, (2) calculating the offsets (vector subtraction), and (3) finding the offset with the most occurrences, yields this:
-        scanners[0] count: 25
-        scanners[1] count: 25
-        n_offsets: 15000
-        highest transform,pos and count: {{9, {68, -1246, -43}}, 12}
+
+```
+scanners[0] count: 25
+scanners[1] count: 25
+n_offsets: 15000
+highest transform,pos and count: {{9, {68, -1246, -43}}, 12}
+```
 
 #### Stuck
 
@@ -559,7 +562,7 @@ For the y-axis rotation:
 > if you also use Z, a 90 degree rotation around the Z axis, then 4 rotations suffice:
 
 ```
-1.  I
+1.  I = XXXX = YYYY = ZZZZ
 2.  X = YXZ
 3.  Y = ZYX
 4.  Z = XZY
