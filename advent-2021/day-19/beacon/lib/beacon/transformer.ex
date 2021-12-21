@@ -21,7 +21,7 @@ defmodule Beacon.Transformer do
 
   def x({i, j, k}), do: {i, -k, j}
   def y({i, j, k}), do: {k, j, -i}
-  def z({i, j, k}), do: {-j, i, k}
+  def z({i, j, k}), do: {j, -i, k}
 
   ###
   # NOTE the function calls below are wrapped inside-out
@@ -29,7 +29,7 @@ defmodule Beacon.Transformer do
 
   ### IDENTITY ###
 
-  # 1.  I
+  # 1.  I = XXXX = YYYY = ZZZZ
   def transform(p, n) when n == 1, do: p
 
   ### ONE ROTATION ###
@@ -89,4 +89,41 @@ defmodule Beacon.Transformer do
   def transform(p, n) when n == 23, do: x(x(y(x(p))))
   # 24. XYYY
   def transform(p, n) when n == 24, do: y(y(y(x(p))))
+
+  ###
+  # The code below verifies some equivalances, as a bug-finding technique.
+  ###
+
+  ### IDENTITY ###
+
+  # 1.  I = XXXX = YYYY = ZZZZ
+  def same_as(p, n) when n == 1 do
+    [x(x(x(x(p)))), y(y(y(y(p)))), z(z(z(z(p))))]
+  end
+
+  ### ONE ROTATION ###
+
+  # 2.  X = YXZ
+  def same_as(p, n) when n == 2, do: [z(x(y(p)))]
+  # 3.  Y = ZYX
+  def same_as(p, n) when n == 3, do: [x(y(z(p)))]
+  # 4.  Z = XZY
+  def same_as(p, n) when n == 4, do: [y(z(x(p)))]
+
+  ### TWO ROTATIONS ###
+
+  # 5.  XX = XYXZ = YXXY = YXYZ = YXZX = YYZZ = YZXZ = ZXXZ = ZZYY
+  def same_as(p, n) when n == 5 do
+    [
+      z(x(y(x(p)))), y(x(x(y(p)))), z(y(x(y(p)))), x(z(x(y(p)))),
+      z(z(y(y(p)))), z(x(z(y(p)))), z(x(x(z(p)))), y(y(z(z(p)))),
+    ]
+  end
+  # 6.  XY = YZ = ZX = XZYX = YXZY = ZYXZ
+  def same_as(p, n) when n == 6 do
+    [
+      z(y(p)), x(z(p)),
+      x(y(z(x(p)))), y(z(x(y(p)))), z(x(y(z(p)))),
+    ]
+  end
 end

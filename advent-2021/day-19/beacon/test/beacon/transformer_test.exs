@@ -12,5 +12,17 @@ defmodule Beacon.TransformerTest do
         |> Enum.count()
       assert act_count == 24
     end
+
+    test "transformer same-as are same as transform" do
+      pos = {3, 11, 103}
+      1..6
+      |> Enum.each(fn n ->
+        base_pos = Transformer.transform(pos, n)
+        Transformer.same_as(pos, n)
+        |> Enum.each(fn same_pos ->
+          assert same_pos == base_pos
+        end)
+      end)
+    end
   end
 end
