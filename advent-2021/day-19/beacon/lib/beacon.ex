@@ -33,53 +33,52 @@ defmodule Beacon do
     |> IO.inspect(label: "Part 1 answer is")
   end
 
+  # FIXME @doc
   def find(rel_beacon_sets) do
     ###
     # we (arbitrarily) pick scanner 0 as the origin
-    scanner_0 = Scanner.new(rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
-    beacons_0 = Scanner.beacons(scanner_0)
-    n_beacon_sets = map_size(rel_beacon_sets)
-                    #|> IO.inspect(label: "n_beacon_sets")
+    cloud = Scanner.new(rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
+    rel_beacon_sets = Map.delete(rel_beacon_sets, 0)
+    IO.puts("starting with scanner 0 as origin/cloud")
+    IO.inspect(Enum.count(Scanner.beacons(cloud)), label: "  # of cloud beacons")
     ###
-    # find all the other scanners, by looking for correlations of
-    # at least 12 beacons -- and accumulate beacons from all scanners
-    1..n_beacon_sets-1
-    |> Enum.reduce({%{0 => scanner_0}, beacons_0}, fn (_, {scanners, beacons}) ->
-      #IO.inspect(map_size(scanners), label: "found scanner count")
+    # find all the other scanners, by looking for correlations of at least
+    # 12 beacons; fold each found scanner's beacons into the cloud
+    1..map_size(rel_beacon_sets)
+    |> Enum.reduce({cloud, rel_beacon_sets}, fn (_, {cloud, rel_beacon_sets}) ->
+      IO.inspect(map_size(rel_beacon_sets), label: "remaining scanners to find")
       # find next scanner that correlates with one we've already found
-      {n, n0, t, offset} =
-        1..n_beacon_sets-1
-        |> Enum.reject(&(Map.has_key?(scanners, &1)))
-        |> Enum.find_value(&(find_correlation(scanners, rel_beacon_sets, &1)))
-        #|> IO.inspect(label: "found correlation")  # USEFUL
-      # build next scanner
+      {n, t, offset} =
+        find_next_correlation(cloud, rel_beacon_sets)
+        |> IO.inspect(label: "  found correlation")
+      # build scanner struct, and merge its beacons into the cloud
       scanner_n =
-        Scanner.new(rel_beacon_sets[n], Scanner.origin(scanners[n0]), t, offset)
-        #|> IO.inspect(label: "newly built scanner #{n}")
-      # get (absolute) beacon positions from previous scanner
-      beacons_n = Scanner.beacons(scanner_n)
-      # return next accumulator
-      {Map.put(scanners, n, scanner_n), beacons ++ beacons_n}
+        Scanner.new(rel_beacon_sets[n], Scanner.origin(cloud), t, offset)
+      cloud = Scanner.merge_beacons(cloud, scanner_n)
+      IO.inspect(Enum.count(Scanner.beacons(cloud)), label: "  # of cloud beacons")
+      # remove found scanner's relative beacons
+      {cloud, Map.delete(rel_beacon_sets, n)}
     end)
-    |> elem(1)
-    |> Enum.uniq()
-    |> Enum.sort()
+    |> elem(0)
+    |> Scanner.beacons()
   end
 
-  defp find_correlation(scanners, rel_beacon_sets, n) do
-    # TODO cleaner as a comprehension?
-    Enum.reduce_while(scanners, 0, fn ({n0, scanner}, n_tried) ->
+  defp find_next_correlation(cloud, rel_beacon_sets) do
+    # TODO `reduce_while()` seems the wrong choice here;
+    #      `Enum.find_value()` maybe?
+    Map.keys(rel_beacon_sets)
+    |> Enum.reduce_while(0, fn (n, n_tried) ->
       {t, offset, count} =
-        Scanner.beacons(scanner)
+        Scanner.beacons(cloud)
         |> Correlator.correlate(rel_beacon_sets[n])
-        #|> IO.inspect(label: "  attempted correlation of #{n} to #{n0} yields")  # USEFUL
+        |> IO.inspect(label: "  attempted correlation of #{n} to cloud yields")
       cond do
         count >= 12 ->
-          {:halt, {n, n0, t, offset}}
-        n_tried+1 >= map_size(scanners) ->
+          {:halt, {n, t, offset}}
+        n_tried + 1 >= map_size(rel_beacon_sets) ->
           {:halt, nil}
         true ->
-          {:cont, n_tried+1}
+          {:cont, n_tried + 1}
       end
     end)
   end

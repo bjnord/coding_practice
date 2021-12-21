@@ -45,4 +45,15 @@ defmodule Beacon.Scanner do
   def origin(scanner) do
     scanner.origin
   end
+
+  @doc ~S"""
+  Merge beacons from `source_scanner` into this `scanner`.
+  """
+  def merge_beacons(scanner, source_scanner) do
+    new_beacons =
+      (scanner.beacons ++ source_scanner.beacons)
+      |> Enum.uniq()
+      |> Enum.sort()
+    %Beacon.Scanner{scanner | beacons: new_beacons}
+  end
 end
