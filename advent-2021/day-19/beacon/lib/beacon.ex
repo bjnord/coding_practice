@@ -28,13 +28,15 @@ defmodule Beacon do
     # "Assemble the full map of beacons. How many beacons are there?"
     File.read!(input_file)
     |> Parser.parse()
-    |> find()
+    |> build_cloud()
+    |> elem(0)
+    |> Scanner.beacons()
     |> Enum.count()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
   # FIXME @doc
-  def find(rel_beacon_sets) do
+  def build_cloud(rel_beacon_sets) do
     ###
     # we (arbitrarily) pick scanner 0 as the origin
     cloud = Scanner.new(rel_beacon_sets[0], {0, 0, 0}, 1, {0, 0, 0})
@@ -45,7 +47,7 @@ defmodule Beacon do
     # find all the other scanners, by looking for correlations of at least
     # 12 beacons; fold each found scanner's beacons into the cloud
     1..map_size(rel_beacon_sets)
-    |> Enum.reduce({cloud, rel_beacon_sets}, fn (_, {cloud, rel_beacon_sets}) ->
+    |> Enum.reduce({cloud, [cloud], rel_beacon_sets}, fn (_, {cloud, scanners, rel_beacon_sets}) ->
       IO.inspect(map_size(rel_beacon_sets), label: "remaining scanners to find")
       # find next scanner that correlates with one we've already found
       {n, t, offset} =
@@ -57,10 +59,9 @@ defmodule Beacon do
       cloud = Scanner.merge_beacons(cloud, scanner_n)
       IO.inspect(Enum.count(Scanner.beacons(cloud)), label: "  # of cloud beacons")
       # remove found scanner's relative beacons
-      {cloud, Map.delete(rel_beacon_sets, n)}
+      {cloud, [scanner_n | scanners], Map.delete(rel_beacon_sets, n)}
     end)
-    |> elem(0)
-    |> Scanner.beacons()
+    |> Tuple.delete_at(2)
   end
 
   defp find_next_correlation(cloud, rel_beacon_sets) do
@@ -89,7 +90,9 @@ defmodule Beacon do
   def part2(input_file) do
     File.read!(input_file)
     |> Parser.parse()
-    nil  # TODO
+    |> build_cloud()
+    |> elem(1)
+    |> Scanner.max_manhattan()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

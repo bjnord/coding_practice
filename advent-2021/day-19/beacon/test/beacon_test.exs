@@ -2,6 +2,8 @@ defmodule BeaconTest do
   use ExUnit.Case
   doctest Beacon
 
+  alias Beacon.Scanner, as: Scanner
+
   # NB any variable with "beacon" in name is assumed **absolute**
   #    anything relative will have "rel_" in the name
 
@@ -232,7 +234,11 @@ defmodule BeaconTest do
     end
 
     test "finder finds all beacons", fixture do
-      assert Beacon.find(fixture.rel_beacon_sets) == fixture.exp_beacons
+      act_beacons =
+        Beacon.build_cloud(fixture.rel_beacon_sets)
+        |> elem(0)
+        |> Scanner.beacons()
+      assert act_beacons == fixture.exp_beacons
     end
   end
 end

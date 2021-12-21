@@ -3,7 +3,9 @@ defmodule Beacon.Scanner do
   Scanner for `Beacon`.
   """
 
+  alias Beacon.Scanner, as: Scanner
   alias Beacon.Transformer, as: Transformer
+  alias Submarine.SubMath, as: SubMath
 
   # NB any variable with "beacon" in name is assumed **absolute**
   #    anything relative will have "rel_" in the name
@@ -26,7 +28,7 @@ defmodule Beacon.Scanner do
       rel_beacons
       |> Enum.map(fn rb -> Transformer.transform(rb, t) end)
       |> Enum.map(fn rtb -> Transformer.position_sum(offset, rtb) end)
-    %Beacon.Scanner{
+    %Scanner{
       origin: Transformer.position_sum(origin, offset),
       beacons: beacons,
     }
@@ -54,6 +56,18 @@ defmodule Beacon.Scanner do
       (scanner.beacons ++ source_scanner.beacons)
       |> Enum.uniq()
       |> Enum.sort()
-    %Beacon.Scanner{scanner | beacons: new_beacons}
+    %Scanner{scanner | beacons: new_beacons}
+  end
+
+  @doc ~S"""
+  Find maximum Manhattan distance between any two `scanners`.
+  """
+  def max_manhattan(scanners) do
+    origins = Enum.map(scanners, &(Scanner.origin(&1)))
+    origins
+    |> Enum.flat_map(fn o1 ->
+      Enum.map(origins, &(SubMath.manhattan(o1, &1)))
+    end)
+    |> Enum.max()
   end
 end
