@@ -123,7 +123,7 @@ defmodule Trench.Image do
         end
       [char | chars]
     end)
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.chunk_every(line_len)
     |> Enum.map(fn chars -> to_string(chars) end)
     |> Enum.join("\n")
@@ -172,7 +172,7 @@ defmodule Trench.Image do
           end
         [ch, 32, ch, 32 | chars]  # 2 pixels wide w/space delim
       end)
-      |> Enum.reverse
+      |> Enum.reverse()
       |> Enum.chunk_every(px_per_line * 2)  # 402 px per line = 804 chars
       |> Enum.map(&(to_double_string(&1)))
       |> Enum.join("\n")

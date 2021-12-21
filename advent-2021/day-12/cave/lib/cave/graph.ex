@@ -28,7 +28,7 @@ defmodule Cave.Graph do
   end
   defp parse_line(line) do
     line
-    |> String.trim_trailing
+    |> String.trim_trailing()
     |> String.split("-")
     |> List.to_tuple()
   end

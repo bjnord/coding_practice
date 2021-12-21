@@ -37,7 +37,7 @@ defmodule Whale do
     max = Enum.max(crabs)
     min..max
     |> Enum.map(fn p -> align_crabs_fuel(p, crabs) end)
-    |> Enum.min
+    |> Enum.min()
   end
 
   @doc """
@@ -66,7 +66,7 @@ defmodule Whale do
     max = Enum.max(crabs)
     min..max
     |> Enum.map(fn p -> align_crabs_fuel_c(p, crabs) end)
-    |> Enum.min
+    |> Enum.min()
   end
 
   @doc """

@@ -34,7 +34,7 @@ defmodule Syntax.Parser do
   """
   def parse_line(line) do
     line
-    |> String.trim_trailing
-    |> String.to_charlist
+    |> String.trim_trailing()
+    |> String.to_charlist()
   end
 end

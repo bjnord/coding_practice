@@ -36,8 +36,8 @@ defmodule Diagnostic.Parser do
   """
   def parse_line(line) do
     line
-    |> String.trim_trailing
-    |> String.to_charlist
+    |> String.trim_trailing()
+    |> String.to_charlist()
     |> Enum.map(fn b -> b &&& 1 end)
   end
 end

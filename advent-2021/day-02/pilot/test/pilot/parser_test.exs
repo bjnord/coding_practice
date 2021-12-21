@@ -2,6 +2,8 @@ defmodule Pilot.ParserTest do
   use ExUnit.Case
   doctest Pilot.Parser
 
+  alias Pilot.Parser, as: Parser
+
   describe "puzzle example" do
     setup do
       [
@@ -25,9 +27,10 @@ defmodule Pilot.ParserTest do
     end
 
     test "parser gets expected steps", fixture do
-      act_steps = fixture.input
-                  |> String.split("\n", trim: true)
-                  |> Pilot.Parser.parse_lines
+      act_steps =
+        fixture.input
+        |> String.split("\n", trim: true)
+        |> Parser.parse_lines()
       assert act_steps == fixture.exp_steps
     end
   end

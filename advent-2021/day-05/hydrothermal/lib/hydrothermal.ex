@@ -69,7 +69,7 @@ defmodule Hydrothermal do
         {:cont, {[{x, y} | points], {x + dx, y + dy}}}
       end
     end)
-    |> Enum.reverse
+    |> Enum.reverse()
   end
 
   @doc """
@@ -120,7 +120,7 @@ defmodule Hydrothermal do
         count -> [?0 + count | chars]
       end
     end)
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.chunk_every(dim)
     |> Enum.map(fn chars -> to_string(chars) end)
     |> Enum.join("\n")

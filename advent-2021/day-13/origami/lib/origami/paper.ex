@@ -121,7 +121,7 @@ defmodule Origami.Paper do
         _ -> [?# | chars]
       end
     end)
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.chunk_every(paper.dimx)
     |> Enum.map(fn chars -> to_string(chars) end)
     |> Enum.join("\n")

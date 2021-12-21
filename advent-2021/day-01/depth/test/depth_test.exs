@@ -18,7 +18,7 @@ defmodule DepthTest do
   property "an always-increasing list has exactly length-1 increases" do
     forall list <- integer_list() do
       list = Enum.sort(list)
-             |> Enum.dedup
+             |> Enum.dedup()
       Depth.count_increases(list) == length(list) - 1
     end
   end
@@ -26,8 +26,8 @@ defmodule DepthTest do
   property "an always-decreasing list has 0 increases" do
     forall list <- integer_list() do
       list = Enum.sort(list)
-             |> Enum.reverse
-             |> Enum.dedup
+             |> Enum.reverse()
+             |> Enum.dedup()
       Depth.count_increases(list) == 0
     end
   end

@@ -28,7 +28,7 @@ defmodule Segment.Parser do
   """
   def parse_line(line) do
     line
-    |> String.trim_trailing
+    |> String.trim_trailing()
     |> String.split(" | ")
     |> Enum.map(&String.split/1)
     |> Enum.map(fn ss -> Enum.map(ss, &String.to_charlist/1) end)
