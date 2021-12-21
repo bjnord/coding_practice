@@ -10,7 +10,7 @@ VERBOSE = 0
 .PHONY: run test doc console clean
 
 run: $(BIN)
-	$(BIN) input/input.txt
+	$(BIN) --verbose input/input.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
