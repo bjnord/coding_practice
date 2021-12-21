@@ -3,19 +3,6 @@ defmodule Smoke do
   Documentation for Smoke.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Smoke.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
-
   import Smoke.FloorMap
   alias Smoke.Parser, as: Parser
   import Submarine.CLI
