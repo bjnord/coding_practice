@@ -55,12 +55,9 @@ defmodule Octopus.Grid do
   @doc false
   # Returns a list of all `{x, y}` positions for the given `grid`.
   defp positions(grid) do
-    for y <- 0..grid.dimy-1 do
-      for x <- 0..grid.dimx-1 do
-        {x, y}
-      end
+    for y <- 0..grid.dimy-1, x <- 0..grid.dimx-1 do
+      {x, y}
     end
-    |> List.flatten()
   end
 
   @doc false

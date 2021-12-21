@@ -131,12 +131,9 @@ defmodule Trench.Image do
   end
 
   defp image_points(radius) do
-    for y <- -radius..radius do
-      for x <- -radius..radius do
-        {x, y}
-      end
+    for y <- -radius..radius, x <- -radius..radius do
+      {x, y}
     end
-    |> List.flatten()
   end
 
   @doc ~S"""

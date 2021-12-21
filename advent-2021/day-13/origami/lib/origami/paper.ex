@@ -127,12 +127,10 @@ defmodule Origami.Paper do
     |> Enum.join("\n")
     |> (fn text -> "#{text}\n" end).()
   end
+
   defp paper_points(dimx, dimy) do
-    for y <- 0..dimy-1 do
-      for x <- 0..dimx-1 do
-        {x, y}
-      end
+    for y <- 0..dimy-1, x <- 0..dimx-1 do
+      {x, y}
     end
-    |> List.flatten()
   end
 end

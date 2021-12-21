@@ -126,13 +126,11 @@ defmodule Hydrothermal do
     |> Enum.join("\n")
     |> (fn text -> "#{text}\n" end).()
   end
+
   defp grid_map_points(dim) do
-    for y <- 0..dim-1 do
-      for x <- 0..dim-1 do
-        {x, y}
-      end
+    for y <- 0..dim-1, x <- 0..dim-1 do
+      {x, y}
     end
-    |> List.flatten()
   end
 
   @doc """
