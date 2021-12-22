@@ -223,6 +223,13 @@ defmodule Reactor.CuboidTest do
             ]
           },
         ],
+        cuboids_to_sum: [
+          {{10, 10, 10}, {12, 12, 12}},  # 3x3x3 = 27
+          {{-5, -9, -7}, {-5, -5, -4}},  # 1x5x4 = 20
+          {{ 0,  0,  0}, { 0,  7,  0}},  # 1x8x1 = 8
+          {{ 3,  3,  3}, { 3,  3,  3}},  # 1x1x1 = 1
+        ],
+        exp_cuboid_sum: 27 + 20 + 8 + 1,
       ]
     end
 
@@ -309,6 +316,10 @@ defmodule Reactor.CuboidTest do
           assert Cuboid.shave(range_50, cuboid) == exp_shaved_cuboids
         end
       end)
+    end
+
+    test "cuboid counter gets expected sum", fixture do
+      assert Cuboid.count_on(fixture.cuboids_to_sum) == fixture.exp_cuboid_sum
     end
   end
 end

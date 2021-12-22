@@ -107,7 +107,11 @@ defmodule Reactor.Cuboid do
   @doc ~S"""
   Return count of the "on" cubes found in the given list of `cuboids`.
   """
-  def count_on(_cuboids) do
-    nil  # TODO
+  def count_on(cuboids) do
+    cuboids
+    |> Enum.map(fn {{x0, y0, z0}, {x1, y1, z1}} ->
+      (x1 - x0 + 1) * (y1 - y0 + 1) * (z1 - z0 + 1)
+    end)
+    |> Enum.sum()
   end
 end
