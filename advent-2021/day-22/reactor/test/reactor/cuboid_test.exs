@@ -184,16 +184,43 @@ defmodule Reactor.CuboidTest do
           },
           # overlapping three planes:
           { {{-22, -23, -27}, { 62,  63,  67}}, "overlapping right-top-front",
-            []
+            [
+              {{-22, -23,  51}, { 50,  50,  67}},  # front
+              {{-22,  51, -27}, { 50,  63,  67}},  # top
+              {{ 51, -23, -27}, { 62,  63,  67}},  # right
+            ]
           },
           { {{-62, -23, -67}, { 22,  63,  27}}, "overlapping left-top-back",
-            []
+            [
+              {{-50, -23, -67}, { 22,  50, -51}},  # back
+              {{-50,  51, -67}, { 22,  63,  27}},  # top
+              {{-62, -23, -67}, {-51,  63,  27}},  # left
+            ]
           },
           { {{-22, -63, -27}, { 62,  23,  67}}, "overlapping right-bottom-front",
-            []
+            [
+              {{-22, -50,  51}, { 50,  23,  67}},  # front
+              {{-22, -63, -27}, { 50, -51,  67}},  # bottom
+              {{ 51, -63, -27}, { 62,  23,  67}},  # right
+            ]
           },
           { {{-62, -63, -67}, { 22,  23,  27}}, "overlapping left-bottom-back",
-            []
+            [
+              {{-50, -50, -67}, { 22,  23, -51}},  # back
+              {{-50, -63, -67}, { 22, -51,  27}},  # bottom
+              {{-62, -63, -67}, {-51,  23,  27}},  # left
+            ]
+          },
+          # engulfing: (produces 6 cuboids)
+          { {{-62, -63, -67}, { 62,  63,  67}}, "overlapping all (engulfing)",
+            [
+              {{-50, -50, -67}, { 50,  50, -51}},  # back
+              {{-50, -50,  51}, { 50,  50,  67}},  # front
+              {{-50, -63, -67}, { 50, -51,  67}},  # bottom
+              {{-50,  51, -67}, { 50,  63,  67}},  # top
+              {{-62, -63, -67}, {-51,  63,  67}},  # left
+              {{ 51, -63, -67}, { 62,  63,  67}},  # right
+            ]
           },
         ],
       ]
@@ -259,7 +286,7 @@ defmodule Reactor.CuboidTest do
       fixture.tests
       |> Enum.each(fn {cuboid, contained, _intersects, _description} ->
         if contained do
-          assert Cuboid.shave(cuboid, range_50) == []
+          assert Cuboid.shave(range_50, cuboid) == []
         end
       end)
     end
@@ -269,7 +296,7 @@ defmodule Reactor.CuboidTest do
       fixture.tests
       |> Enum.each(fn {cuboid, _contained, intersects, _description} ->
         if !intersects do
-          assert Cuboid.shave(cuboid, range_50) == []
+          assert Cuboid.shave(range_50, cuboid) == []
         end
       end)
     end
@@ -279,7 +306,7 @@ defmodule Reactor.CuboidTest do
       fixture.shaving_tests
       |> Enum.each(fn {cuboid, _description, exp_shaved_cuboids} ->
         if exp_shaved_cuboids != [] do  # FIXME TEMP DEBUG
-          assert Cuboid.shave(cuboid, range_50) == exp_shaved_cuboids
+          assert Cuboid.shave(range_50, cuboid) == exp_shaved_cuboids
         end
       end)
     end

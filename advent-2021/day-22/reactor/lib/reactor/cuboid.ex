@@ -59,7 +59,49 @@ defmodule Reactor.Cuboid do
   contains the second, this ends up returning an empty list.
   """
   def shave({{x0, y0, z0}, {x1, y1, z1}}, {{i0, j0, k0}, {i1, j1, k1}}) do
-    []  # TODO
+    #IO.inspect({{{x0, y0, z0}, {x1, y1, z1}}, {{i0, j0, k0}, {i1, j1, k1}}}, label: "shaving")
+    ###
+    # shave right (+X)
+    {max_x, shavings} = if i1 > x1 and i0 <= x1 do
+      {x1, [ {{x1+1, j0, k0}, {i1, j1, k1}} ]}
+    else
+      {1_000_000, []}
+    end
+    ###
+    # shave left (-X)
+    {min_x, shavings} = if i0 < x0 and i1 >= x0 do
+      {x0, [ {{i0, j0, k0}, {x0-1, j1, k1}} | shavings]}
+    else
+      {-1_000_000, shavings}
+    end
+    ###
+    # shave top (+Y)
+    {max_y, shavings} = if j1 > y1 and j0 <= y1 do
+      {y1, [ {{max(i0, min_x), y1+1, k0}, {min(i1, max_x), j1, k1}} | shavings]}
+    else
+      {1_000_000, shavings}
+    end
+    ###
+    # shave bottom (-Y)
+    {min_y, shavings} = if j0 < y0 and j1 >= y0 do
+      {y0, [ {{max(i0, min_x), j0, k0}, {min(i1, max_x), y0-1, k1}} | shavings]}
+    else
+      {-1_000_000, shavings}
+    end
+    ###
+    # shave front (+Z)
+    shavings = if k1 > z1 and k0 <= z1 do
+      [ {{max(i0, min_x), max(j0, min_y), z1+1}, {min(i1, max_x), min(j1, max_y), k1}} | shavings]
+    else
+      shavings
+    end
+    ###
+    # shave back (-Z)
+    shavings = if k0 < z0 and k1 >= z0 do
+      [ {{max(i0, min_x), max(j0, min_y), k0}, {min(i1, max_x), min(j1, max_y), z0-1}} | shavings]
+    else
+      shavings
+    end
   end
 
   @doc ~S"""
