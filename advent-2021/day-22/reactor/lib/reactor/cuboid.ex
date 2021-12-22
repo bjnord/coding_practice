@@ -1,6 +1,11 @@
 defmodule Reactor.Cuboid do
   @moduledoc """
   Cuboid math for `Reactor`.
+
+  Conventions ("right-hand rule"):
+  - +x right, -x left
+  - +y up,    -y down
+  - +z front, -z back
   """
 
   @doc ~S"""

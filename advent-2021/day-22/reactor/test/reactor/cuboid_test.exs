@@ -32,6 +32,132 @@ defmodule Reactor.CuboidTest do
         on x=-54112..-39298,y=-85059..-49293,z=-27449..7877
         on x=967..23432,y=45373..81175,z=27513..53682
         """,
+        # TODO should generate these cases programmatically
+        tests: [
+          # |-cuboid-------------------------|  contained?  intersects?  description
+          { {{-50, -50, -50}, { 50,  50,  50}}, true,       true,        "equal" },
+          { {{-10, -10, -10}, { 10,  10,  10}}, true,       true,        "contained in middle" },
+
+          # touching inside of one plane:
+          { {{-10, -10, -10}, { 50,  10,  10}}, true,       true,        "contained just inside right" },
+          { {{-50, -10, -10}, { 10,  10,  10}}, true,       true,        "contained just inside left" },
+          { {{-10, -10, -10}, { 10,  50,  10}}, true,       true,        "contained just inside top" },
+          { {{-10, -50, -10}, { 10,  10,  10}}, true,       true,        "contained just inside bottom" },
+          { {{-10, -10, -10}, { 10,  10,  50}}, true,       true,        "contained just inside front" },
+          { {{-10, -10, -50}, { 10,  10,  10}}, true,       true,        "contained just inside back" },
+          # touching inside of two planes:
+          { {{-10, -10, -10}, { 50,  50,  10}}, true,       true,        "contained just inside right-top" },
+          { {{-50, -10, -10}, { 10,  50,  10}}, true,       true,        "contained just inside left-top" },
+          { {{-10, -50, -10}, { 50,  10,  10}}, true,       true,        "contained just inside right-bottom" },
+          { {{-50, -50, -10}, { 10,  10,  10}}, true,       true,        "contained just inside left-bottom" },
+          { {{-10, -10, -10}, { 10,  50,  50}}, true,       true,        "contained just inside top-front" },
+          { {{-10, -50, -10}, { 10,  10,  50}}, true,       true,        "contained just inside bottom-front" },
+          { {{-10, -10, -50}, { 10,  50,  10}}, true,       true,        "contained just inside top-back" },
+          { {{-10, -50, -50}, { 10,  10,  10}}, true,       true,        "contained just inside bottom-back" },
+          { {{-10, -10, -10}, { 50,  10,  50}}, true,       true,        "contained just inside front-right" },
+          { {{-10, -10, -50}, { 50,  10,  10}}, true,       true,        "contained just inside back-right" },
+          { {{-50, -10, -10}, { 10,  10,  50}}, true,       true,        "contained just inside front-left" },
+          { {{-50, -10, -50}, { 10,  10,  10}}, true,       true,        "contained just inside back-left" },
+          # touching inside of three planes:
+          { {{-10, -10, -10}, { 50,  50,  50}}, true,       true,        "contained just inside right-top-front" },
+          { {{-10, -10, -50}, { 50,  50,  10}}, true,       true,        "contained just inside right-top-back" },
+          { {{-50, -10, -10}, { 10,  50,  50}}, true,       true,        "contained just inside left-top-front" },
+          { {{-50, -10, -50}, { 10,  50,  10}}, true,       true,        "contained just inside left-top-back" },
+          { {{-10, -50, -10}, { 50,  10,  50}}, true,       true,        "contained just inside right-bottom-front" },
+          { {{-10, -50, -50}, { 50,  10,  10}}, true,       true,        "contained just inside right-bottom-back" },
+          { {{-50, -50, -10}, { 10,  10,  50}}, true,       true,        "contained just inside left-bottom-front" },
+          { {{-50, -50, -50}, { 10,  10,  10}}, true,       true,        "contained just inside left-bottom-back" },
+
+          # just peeking out of one plane:
+          { {{-10, -10, -10}, { 51,  10,  10}}, false,      true,        "peeking just out of right" },
+          { {{-51, -10, -10}, { 10,  10,  10}}, false,      true,        "peeking just out of left" },
+          { {{-10, -10, -10}, { 10,  51,  10}}, false,      true,        "peeking just out of top" },
+          { {{-10, -51, -10}, { 10,  10,  10}}, false,      true,        "peeking just out of bottom" },
+          { {{-10, -10, -10}, { 10,  10,  51}}, false,      true,        "peeking just out of front" },
+          { {{-10, -10, -51}, { 10,  10,  10}}, false,      true,        "peeking just out of back" },
+          # just peeking out of two planes:
+          { {{-10, -10, -10}, { 51,  51,  10}}, false,      true,        "peeking just out of right-top" },
+          { {{-51, -10, -10}, { 10,  51,  10}}, false,      true,        "peeking just out of left-top" },
+          { {{-10, -51, -10}, { 51,  10,  10}}, false,      true,        "peeking just out of right-bottom" },
+          { {{-51, -51, -10}, { 10,  10,  10}}, false,      true,        "peeking just out of left-bottom" },
+          { {{-10, -10, -10}, { 10,  51,  51}}, false,      true,        "peeking just out of top-front" },
+          { {{-10, -51, -10}, { 10,  10,  51}}, false,      true,        "peeking just out of bottom-front" },
+          { {{-10, -10, -51}, { 10,  51,  10}}, false,      true,        "peeking just out of top-back" },
+          { {{-10, -51, -51}, { 10,  10,  10}}, false,      true,        "peeking just out of bottom-back" },
+          { {{-10, -10, -10}, { 51,  10,  51}}, false,      true,        "peeking just out of front-right" },
+          { {{-10, -10, -51}, { 51,  10,  10}}, false,      true,        "peeking just out of back-right" },
+          { {{-51, -10, -10}, { 10,  10,  51}}, false,      true,        "peeking just out of front-left" },
+          { {{-51, -10, -51}, { 10,  10,  10}}, false,      true,        "peeking just out of back-left" },
+          # just peeking out of three planes:
+          { {{-10, -10, -10}, { 51,  51,  51}}, false,      true,        "peeking just out of right-top-front" },
+          { {{-10, -10, -51}, { 51,  51,  10}}, false,      true,        "peeking just out of right-top-back" },
+          { {{-51, -10, -10}, { 10,  51,  51}}, false,      true,        "peeking just out of left-top-front" },
+          { {{-51, -10, -51}, { 10,  51,  10}}, false,      true,        "peeking just out of left-top-back" },
+          { {{-10, -51, -10}, { 51,  10,  51}}, false,      true,        "peeking just out of right-bottom-front" },
+          { {{-10, -51, -51}, { 51,  10,  10}}, false,      true,        "peeking just out of right-bottom-back" },
+          { {{-51, -51, -10}, { 10,  10,  51}}, false,      true,        "peeking just out of left-bottom-front" },
+          { {{-51, -51, -51}, { 10,  10,  10}}, false,      true,        "peeking just out of left-bottom-back" },
+
+          # barely overlapping one plane:
+          { {{ 50, -10, -10}, { 70,  10,  10}}, false,      true,        "barely overlapping right" },
+          { {{-70, -10, -10}, {-50,  10,  10}}, false,      true,        "barely overlapping left" },
+          { {{-10,  50, -10}, { 10,  70,  10}}, false,      true,        "barely overlapping top" },
+          { {{-10, -70, -10}, { 10, -50,  10}}, false,      true,        "barely overlapping bottom" },
+          { {{-10, -10,  50}, { 10,  10,  70}}, false,      true,        "barely overlapping front" },
+          { {{-10, -10, -70}, { 10,  10, -50}}, false,      true,        "barely overlapping back" },
+          # barely overlapping two planes (a line):
+          { {{ 50,  50, -10}, { 70,  70,  10}}, false,      true,        "barely overlapping right-top" },
+          { {{-70,  50, -10}, {-50,  70,  10}}, false,      true,        "barely overlapping left-top" },
+          { {{ 50, -70, -10}, { 70, -50,  10}}, false,      true,        "barely overlapping right-bottom" },
+          { {{-70, -70, -10}, {-50, -50,  10}}, false,      true,        "barely overlapping left-bottom" },
+          { {{-10,  50,  50}, { 10,  70,  70}}, false,      true,        "barely overlapping top-front" },
+          { {{-10, -70,  50}, { 10, -50,  70}}, false,      true,        "barely overlapping bottom-front" },
+          { {{-10,  50, -70}, { 10,  70, -50}}, false,      true,        "barely overlapping top-back" },
+          { {{-10, -70, -70}, { 10, -50, -50}}, false,      true,        "barely overlapping bottom-back" },
+          { {{ 50, -10,  50}, { 70,  10,  70}}, false,      true,        "barely overlapping front-right" },
+          { {{ 50, -10, -70}, { 70,  10, -50}}, false,      true,        "barely overlapping back-right" },
+          { {{-70, -10,  50}, {-50,  10,  70}}, false,      true,        "barely overlapping front-left" },
+          { {{-70, -10, -70}, {-50,  10, -50}}, false,      true,        "barely overlapping back-left" },
+          # barely overlapping three planes (a point):
+          { {{ 50,  50,  50}, { 70,  70,  70}}, false,      true,        "barely overlapping right-top-front" },
+          { {{-70,  50, -70}, {-50,  70, -50}}, false,      true,        "barely overlapping right-top-back" },
+          { {{ 50,  50,  50}, { 70,  70,  70}}, false,      true,        "barely overlapping left-top-front" },
+          { {{-70,  50, -70}, {-50,  70, -50}}, false,      true,        "barely overlapping left-top-back" },
+          { {{ 50, -70,  50}, { 70, -50,  70}}, false,      true,        "barely overlapping right-bottom-front" },
+          { {{-70, -70, -70}, {-50, -50, -50}}, false,      true,        "barely overlapping right-bottom-back" },
+          { {{ 50, -70,  50}, { 70, -50,  70}}, false,      true,        "barely overlapping left-bottom-front" },
+          { {{-70, -70, -70}, {-50, -50, -50}}, false,      true,        "barely overlapping left-bottom-back" },
+
+          # just outside one plane:
+          { {{ 51, -10, -10}, { 70,  10,  10}}, false,      false,       "just outside right" },
+          { {{-70, -10, -10}, {-51,  10,  10}}, false,      false,       "just outside left" },
+          { {{-10,  51, -10}, { 10,  70,  10}}, false,      false,       "just outside top" },
+          { {{-10, -70, -10}, { 10, -51,  10}}, false,      false,       "just outside bottom" },
+          { {{-10, -10,  51}, { 10,  10,  70}}, false,      false,       "just outside front" },
+          { {{-10, -10, -70}, { 10,  10, -51}}, false,      false,       "just outside back" },
+          # just outside two planes (a line):
+          { {{ 51,  51, -10}, { 70,  70,  10}}, false,      false,       "just outside right-top" },
+          { {{-70,  51, -10}, {-51,  70,  10}}, false,      false,       "just outside left-top" },
+          { {{ 51, -70, -10}, { 70, -51,  10}}, false,      false,       "just outside right-bottom" },
+          { {{-70, -70, -10}, {-51, -51,  10}}, false,      false,       "just outside left-bottom" },
+          { {{-10,  51,  51}, { 10,  70,  70}}, false,      false,       "just outside top-front" },
+          { {{-10, -70,  51}, { 10, -51,  70}}, false,      false,       "just outside bottom-front" },
+          { {{-10,  51, -70}, { 10,  70, -51}}, false,      false,       "just outside top-back" },
+          { {{-10, -70, -70}, { 10, -51, -51}}, false,      false,       "just outside bottom-back" },
+          { {{ 51, -10,  51}, { 70,  10,  70}}, false,      false,       "just outside front-right" },
+          { {{ 51, -10, -70}, { 70,  10, -51}}, false,      false,       "just outside back-right" },
+          { {{-70, -10,  51}, {-51,  10,  70}}, false,      false,       "just outside front-left" },
+          { {{-70, -10, -70}, {-51,  10, -51}}, false,      false,       "just outside back-left" },
+          # just outside three planes (a point):
+          { {{ 51,  51,  51}, { 70,  70,  70}}, false,      false,       "just outside right-top-front" },
+          { {{-70,  51, -70}, {-51,  70, -51}}, false,      false,       "just outside right-top-back" },
+          { {{ 51,  51,  51}, { 70,  70,  70}}, false,      false,       "just outside left-top-front" },
+          { {{-70,  51, -70}, {-51,  70, -51}}, false,      false,       "just outside left-top-back" },
+          { {{ 51, -70,  51}, { 70, -51,  70}}, false,      false,       "just outside right-bottom-front" },
+          { {{-70, -70, -70}, {-51, -51, -51}}, false,      false,       "just outside right-bottom-back" },
+          { {{ 51, -70,  51}, { 70, -51,  70}}, false,      false,       "just outside left-bottom-front" },
+          { {{-70, -70, -70}, {-51, -51, -51}}, false,      false,       "just outside left-bottom-back" },
+        ],
       ]
     end
 
@@ -78,6 +204,15 @@ defmodule Reactor.CuboidTest do
       |> Parser.parse()
       |> Enum.each(fn {_on_off, cuboid} ->
         assert Cuboid.contains?(range_50, cuboid) or !Cuboid.intersects?(range_50, cuboid)
+      end)
+    end
+
+    test "containment and intersection tests", fixture do
+      range_50 = {{-50, -50, -50}, {50, 50, 50}}
+      fixture.tests
+      |> Enum.each(fn {cuboid, contained, intersects, _description} ->
+        assert Cuboid.contains?(range_50, cuboid) == contained
+        assert Cuboid.intersects?(range_50, cuboid) == intersects
       end)
     end
   end
