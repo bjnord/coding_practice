@@ -27,8 +27,17 @@ defmodule Reactor do
     # the region x=-50..50,y=-50..50,z=-50..50, how many cubes are on?"
     File.read!(input_file)
     |> Parser.parse()
-    nil  # TODO
+    |> reboot(-50, 50)
     |> IO.inspect(label: "Part 1 answer is")
+  end
+
+  @doc """
+  Reboot the reactor, following the given `steps`.
+
+  Returns the final count of `:on` cubes.
+  """
+  def reboot(_steps, min \\ -1_000_000, max \\ 1_000_000) do
+    div(min, 2) + max  # TODO
   end
 
   @doc """
