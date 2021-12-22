@@ -36,11 +36,32 @@ defmodule Reactor do
   @doc """
   Reboot the reactor, following the given `steps`.
 
-  Returns a list of the final cuboids, all of which are fully "on".
+  Returns a list of the final cuboids, all of whose cubes are `:on`.
   """
-  def reboot(_steps, _min \\ -1_000_000, _max \\ 1_000_000) do
-    # TODO -- NOTE -- remember to exclude steps outside min/max!
-    []  # TODO
+  def reboot(steps, min \\ -1_000_000, max \\ 1_000_000) do
+    steps
+    |> Enum.filter(fn {_on_off, cuboid} ->
+      Cuboid.intersects?({{min, min, min}, {max, max, max}}, cuboid)
+    end)
+    |> Enum.reduce([], fn ({on_off, cur_step_cuboid}, prev_step_cuboids) ->
+      shavings =
+        prev_step_cuboids
+        |> Enum.flat_map(fn prev_step_cuboid ->
+          if Cuboid.intersects?(cur_step_cuboid, prev_step_cuboid) do
+            # shave prev (this handles wholly-contained prev):
+            Cuboid.shave(cur_step_cuboid, prev_step_cuboid)
+          else
+            # preserve prev unchanged:
+            [prev_step_cuboid]
+          end
+        end)
+      case on_off do
+        :on ->
+          [cur_step_cuboid | shavings]
+        :off ->
+          shavings
+      end
+    end)
   end
 
   @doc """

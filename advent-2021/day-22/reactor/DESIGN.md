@@ -115,13 +115,14 @@ The rules would seem to be:
 1. for an "on" step:
    - remove previous cuboids wholly contained by this step's dimensions
    - reduce each previous cuboid to new cuboids composed of cubes which fall outside the intersection
-     - in 3D, this will create up to 3 new cuboids (test all the combinations!)
+     - in 3D, this will create up to 6 new cuboids (test all the combinations!)
+   - leave unchanged previous cuboids which don't intersect this step's dimensions
    - create new cuboid of this step's dimensions
 
 1. for an "off" step:
    - remove previous cuboids wholly contained by this step's dimensions
    - reduce each previous cuboid to new cuboids composed of cubes which fall outside the intersection
-     - in 3D, this will create up to 3 new cuboids
+     - in 3D, this will create up to 6 new cuboids
    - leave unchanged previous cuboids which don't intersect this step's dimensions
    - (don't create anything else)
 

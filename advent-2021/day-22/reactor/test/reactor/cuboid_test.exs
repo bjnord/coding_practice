@@ -159,6 +159,10 @@ defmodule Reactor.CuboidTest do
           { {{-70, -70, -70}, {-51, -51, -51}}, false,      false,       "just outside left-bottom-back" },
         ],
         shaving_tests: [
+          # NOTE test "shaving (fully contained)" (below)
+          #      - tests the "engulfed-by" case
+          # NOTE test "shaving (no intersection)" (below)
+          #      - tests cuboids that don't intersect
           # overlapping one plane:
           { {{-62, -43, -47}, { 42,  23,  47}}, "overlapping left",
             []
@@ -211,7 +215,7 @@ defmodule Reactor.CuboidTest do
               {{-62, -63, -67}, {-51,  23,  27}},  # left
             ]
           },
-          # engulfing: (produces 6 cuboids)
+          # engulfing:
           { {{-62, -63, -67}, { 62,  63,  67}}, "overlapping all (engulfing)",
             [
               {{-50, -50, -67}, { 50,  50, -51}},  # back
@@ -312,7 +316,7 @@ defmodule Reactor.CuboidTest do
       range_50 = {{-50, -50, -50}, {50, 50, 50}}
       fixture.shaving_tests
       |> Enum.each(fn {cuboid, _description, exp_shaved_cuboids} ->
-        if exp_shaved_cuboids != [] do  # FIXME TEMP DEBUG
+        if exp_shaved_cuboids != [] do  # TODO finish the rest of the tests
           assert Cuboid.shave(range_50, cuboid) == exp_shaved_cuboids
         end
       end)

@@ -2,6 +2,7 @@ defmodule ReactorTest do
   use ExUnit.Case
   doctest Reactor
 
+  alias Reactor.Cuboid, as: Cuboid
   alias Reactor.Parser, as: Parser
 
   describe "puzzle example" do
@@ -42,19 +43,21 @@ defmodule ReactorTest do
       ]
     end
 
-    test "rebooter gets expected cubes (smaller example)", fixture do
+    test "rebooter gets expected 'on' cube count (smaller example)", fixture do
       act_n_cubes =
         fixture.input
         |> Parser.parse()
         |> Reactor.reboot(-50, 50)
+        |> Cuboid.count_on()
       assert act_n_cubes == fixture.exp_n_cubes
     end
 
-    test "rebooter gets expected cubes (larger example)", fixture do
+    test "rebooter gets expected 'on' cube count (larger example)", fixture do
       act_larger_n_cubes =
         fixture.larger_input
         |> Parser.parse()
         |> Reactor.reboot(-50, 50)
+        |> Cuboid.count_on()
       assert act_larger_n_cubes == fixture.exp_larger_n_cubes
     end
   end

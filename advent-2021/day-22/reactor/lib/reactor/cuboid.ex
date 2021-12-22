@@ -97,7 +97,7 @@ defmodule Reactor.Cuboid do
     end
     ###
     # shave back (-Z)
-    shavings = if k0 < z0 and k1 >= z0 do
+    if k0 < z0 and k1 >= z0 do
       [ {{max(i0, min_x), max(j0, min_y), k0}, {min(i1, max_x), min(j1, max_y), z0-1}} | shavings]
     else
       shavings
