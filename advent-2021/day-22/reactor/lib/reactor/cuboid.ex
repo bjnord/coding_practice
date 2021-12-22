@@ -2,10 +2,14 @@ defmodule Reactor.Cuboid do
   @moduledoc """
   Cuboid math for `Reactor`.
 
+  A "cuboid" is made up of unit cubes from position `{x0, y0, z0}`
+  to `{x1, y1, z1}`. The cuboid can be a point, line, plane, or cube
+  (depending on its dimensions).
+
   Conventions ("right-hand rule"):
-  - +x right, -x left
-  - +y up,    -y down
-  - +z front, -z back
+  - `+x right, -x left`
+  - `+y up,    -y down`
+  - `+z front, -z back`
   """
 
   @doc ~S"""
@@ -44,5 +48,24 @@ defmodule Reactor.Cuboid do
       z1 < z0 -> raise ArgumentError, "Z coordinates swapped"
       true    -> true
     end
+  end
+
+  @doc ~S"""
+  Shave off up to 6 new cuboids from the second given cuboid, defined by
+  the volume **outside of** the first given cuboid (_i.e._ the area of
+  non-intersection).
+
+  If the two given cuboids don't intersect, or if the first cuboid wholly
+  contains the second, this ends up returning an empty list.
+  """
+  def shave({{x0, y0, z0}, {x1, y1, z1}}, {{i0, j0, k0}, {i1, j1, k1}}) do
+    []  # TODO
+  end
+
+  @doc ~S"""
+  Return count of the "on" cubes found in the given list of `cuboids`.
+  """
+  def count_on(_cuboids) do
+    nil  # TODO
   end
 end

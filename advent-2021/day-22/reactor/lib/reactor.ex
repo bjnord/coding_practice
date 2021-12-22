@@ -3,6 +3,7 @@ defmodule Reactor do
   Documentation for Reactor.
   """
 
+  alias Reactor.Cuboid, as: Cuboid
   alias Reactor.Parser, as: Parser
   alias Submarine.CLI, as: CLI
 
@@ -28,16 +29,18 @@ defmodule Reactor do
     File.read!(input_file)
     |> Parser.parse()
     |> reboot(-50, 50)
+    |> Cuboid.count_on()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
   @doc """
   Reboot the reactor, following the given `steps`.
 
-  Returns the final count of `:on` cubes.
+  Returns a list of the final cuboids, all of which are fully "on".
   """
-  def reboot(_steps, min \\ -1_000_000, max \\ 1_000_000) do
-    div(min, 2) + max  # TODO
+  def reboot(_steps, _min \\ -1_000_000, _max \\ 1_000_000) do
+    # TODO -- NOTE -- remember to exclude steps outside min/max!
+    []  # TODO
   end
 
   @doc """
