@@ -68,9 +68,12 @@ defmodule Reactor do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
+    # "Starting again with all cubes off, execute all reboot steps.
+    # Afterward, considering all cubes, how many cubes are on?"
     File.read!(input_file)
     |> Parser.parse()
-    nil  # TODO
+    |> reboot()
+    |> Cuboid.count_on()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

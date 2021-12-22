@@ -59,7 +59,6 @@ defmodule Reactor.Cuboid do
   contains the second, this ends up returning an empty list.
   """
   def shave({{x0, y0, z0}, {x1, y1, z1}}, {{i0, j0, k0}, {i1, j1, k1}}) do
-    #IO.inspect({{{x0, y0, z0}, {x1, y1, z1}}, {{i0, j0, k0}, {i1, j1, k1}}}, label: "shaving")
     ###
     # shave right (+X)
     {max_x, shavings} = if i1 > x1 and i0 <= x1 do
