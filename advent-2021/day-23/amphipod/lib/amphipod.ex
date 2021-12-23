@@ -2,6 +2,8 @@ defmodule Amphipod do
   @moduledoc """
   Documentation for Amphipod.
   """
+
+  alias Amphipod.Game
   alias Amphipod.Parser
   alias Submarine.CLI
 
@@ -22,8 +24,11 @@ defmodule Amphipod do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
+    # "What is the least energy required to organize the amphipods?"
     File.read!(input_file)
     |> Parser.parse()
+    |> Game.new()
+    |> Game.play()
     nil  # TODO
     |> IO.inspect(label: "Part 1 answer is")
   end
