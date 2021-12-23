@@ -1,1 +1,6 @@
-<h1>Hello, parts.</h1>
+<h2>Part 1</h2>
+<p><b>In the output values, how many times do digits 1, 4, 7, or 8 appear?</b></p>
+<p>Your puzzle answer was <%= @part1 %>.</p>
+<h2>Part 2</h2>
+<p>For each entry, determine all of the wire/segment connections and decode the four-digit output values. <b>What do you get if you add up all of the output values?</b></p>
+<p>Your puzzle answer was <%= @part2 %>.</p>
