@@ -6,25 +6,32 @@ defmodule Amphipod.Game do
   alias Amphipod.Board
   alias Amphipod.Game
 
-  defstruct players: %{}, board: %Board{}, moves: [], total_cost: 0
+  defstruct p_types: %{}, p_states: %{}, board: %Board{}, moves: [], total_cost: 0
 
   @doc ~S"""
   Construct new game.
   """
   def new(amphipos) do
     board = Board.new(amphipos)
-    players =
+    p_types =
       amphipos
       |> Enum.with_index()
-      |> Enum.map(fn {{type, _pos}, n} -> {n, {type, :start}} end)
+      |> Enum.map(fn {{type, _pos}, n} -> {n, type} end)
+      |> Enum.into(%{})
+    # FIXME silliness:
+    p_states =
+      amphipos
+      |> Enum.with_index()
+      |> Enum.map(fn {{_type, _pos}, n} -> {n, :start} end)
       |> Enum.into(%{})
     %Game{
-      players: players,
+      p_types: p_types,
+      p_states: p_states,
       board: board,
     }
   end
 
-  def n_players(game), do: Enum.count(game.players)
+  def n_players(game), do: Enum.count(game.p_types)
 
   @doc ~S"""
   Return list of legal moves for `player`.
@@ -32,12 +39,12 @@ defmodule Amphipod.Game do
   Each return item is `{player, state, pos, cost}`.
   """
   def legal_moves(game, player) do
-    {type, state} = game.players[player]
-    case state do
+    case game.p_states[player] do
       :start ->
-        hall_moves(game.board, player, type) ++ home_moves(game.board, player, type)
+        # prioritize home moves; likely lower-cost in the end
+        home_moves(game.board, player, game.p_types[player]) ++ hall_moves(game.board, player, game.p_types[player])
       :hall ->
-        home_moves(game.board, player, type)
+        home_moves(game.board, player, game.p_types[player])
       :home ->
         []
     end
@@ -60,11 +67,10 @@ defmodule Amphipod.Game do
   end
 
   def make_move(game, {player, state, pos, cost}) do
-    {type, _state} = game.players[player]
-    players = Map.replace!(game.players, player, {type, state})
+    p_states = Map.replace!(game.p_states, player, state)
     board = Board.update_player_pos(game.board, player, pos)
     moves = [{player, state, pos, cost} | game.moves]
     total_cost = game.total_cost + cost
-    %Game{players: players, board: board, moves: moves, total_cost: total_cost}
+    %Game{game | p_states: p_states, board: board, moves: moves, total_cost: total_cost}
   end
 end
