@@ -27,11 +27,10 @@ defmodule Amphipod.Parser do
     chars
     |> Enum.map_reduce(0, fn (char, x) ->
       case char do
-        ?A -> {{:amber, {x, y}}, x+1}
-        ?B -> {{:bronze, {x, y}}, x+1}
-        ?C -> {{:copper, {x, y}}, x+1}
-        ?D -> {{:desert, {x, y}}, x+1}
-        _  -> {nil, x+1}
+        c when c in ?A..?D ->
+          {{c - ?A, {x, y}}, x+1}
+        _ ->
+          {nil, x+1}
       end
     end)
     |> elem(0)
