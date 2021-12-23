@@ -42,24 +42,29 @@ defmodule Amphipod.Game do
     case game.p_states[player] do
       :start ->
         # prioritize home moves; likely lower-cost in the end
-        home_moves(game.board, player, game.p_types[player]) ++ hall_moves(game.board, player, game.p_types[player])
+        home_moves(game, player, game.p_types[player]) ++ hall_moves(game, player, game.p_types[player])
       :hall ->
-        home_moves(game.board, player, game.p_types[player])
+        home_moves(game, player, game.p_types[player])
       :home ->
         []
     end
   end
 
-  defp hall_moves(board, player, type) do
-    Board.hall_positions_accessible_to(board, player)
+  defp hall_moves(game, player, type) do
+    Board.hall_positions_accessible_to(game.board, player)
     |> Enum.map(&(to_move(player, :hall, type, &1)))
   end
 
-  defp home_moves(board, player, type) do
+  defp home_moves(game, player, type) do
     # NB we've designed it so room = type
-    Board.room_positions_accessible_to(board, player, type)
-    # FIXME needs to reject if unfriendlies present
+    Board.room_positions_accessible_to(game.board, player, type, neighbor_is_ok(game))
+    |> Enum.sort_by(fn {_x, y} -> y end)
+    |> Enum.take(1)  # only use the lowest available
     |> Enum.map(&(to_move(player, :home, type, &1)))
+  end
+
+  defp neighbor_is_ok(game) do
+    fn (player, neighbor) -> !strangers?(game, player, neighbor) end
   end
 
   defp to_move(player, state, _type, {pos, dist}) do

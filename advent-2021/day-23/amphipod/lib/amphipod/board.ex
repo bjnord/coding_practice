@@ -82,11 +82,13 @@ defmodule Amphipod.Board do
   Is the given position occupied by a player?
   """
   def occupied?(board, pos) do
+    if occupied_by(board, pos), do: true, else: false
+  end
+
+  defp occupied_by(board, pos) do
     # FIXME OPTIMIZE maintain a map keyed in the other direction
-    player =
-      Map.values(board.player_pos)
-      |> Enum.find(&(&1 == pos))
-    if player, do: true, else: false
+    Enum.map(board.player_pos, &(&1))
+    |> Enum.find_value(fn {k, v} -> if v == pos, do: k, else: nil end)
   end
 
   @doc ~S"""
@@ -104,12 +106,32 @@ defmodule Amphipod.Board do
   @doc ~S"""
   Return list of `room` positions currently accessible to the given `player`.
 
+  If a `neighbor_is_ok` callback is provided,
+  - it will **only** be called on **occupied** neighboring spaces,
+  - with two parameters, `player` and `neighbor_player`
+  If the callback returns
+  - `false`, the potential `room` position is filtered out
+  - `true`, the potential `room` position is kept
+
   Each return item is `{pos, dist}`.
   """
-  def room_positions_accessible_to(board, _player, room) do
+  def room_positions_accessible_to(board, player, room, neighbor_is_ok \\ nil) do
     # FIXME needs to check if path is blocked
     room_pos(board, room)
     |> Enum.reject(&(occupied?(board, &1)))
+    |> Enum.filter(fn {x, y} ->
+      if neighbor_is_ok do
+        # at this time, we only support 2-space rooms, and we only
+        # care about the neighbor below the top space
+        neighbor = occupied_by(board, {x, y-1})
+        case neighbor do
+          nil      -> true
+          neighbor -> neighbor_is_ok.(player, neighbor)
+        end
+      else
+        true
+      end
+    end)
     |> Enum.map(&({&1, 7}))  # FIXME 7 -> Manhattan distance
   end
 
@@ -117,6 +139,5 @@ defmodule Amphipod.Board do
     x_offset = 2  # FIXME won't work for non-tiny
     0..1
     |> Enum.map(&({room*2+x_offset, &1}))
-    |> IO.inspect(label: "room_pos(#{room})")
   end
 end
