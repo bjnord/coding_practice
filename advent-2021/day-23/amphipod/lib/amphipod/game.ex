@@ -73,4 +73,8 @@ defmodule Amphipod.Game do
     total_cost = game.total_cost + cost
     %Game{game | p_states: p_states, board: board, moves: moves, total_cost: total_cost}
   end
+
+  def strangers?(game, player1, player2) do
+    game.p_types[player1] != game.p_types[player2]
+  end
 end

@@ -40,5 +40,13 @@ defmodule Amphipod.GameTest do
       game = Game.new(fixture.input_amphipos)
       assert Game.n_players(game) == fixture.exp_input_n_players
     end
+
+    test "strangers", fixture do
+      game = Game.new(fixture.tiny_amphipos)
+      assert Game.strangers?(game, 0, 1) == true
+      assert Game.strangers?(game, 0, 2) == true
+      assert Game.strangers?(game, 0, 3) == false
+      assert Game.strangers?(game, 1, 1) == false
+    end
   end
 end
