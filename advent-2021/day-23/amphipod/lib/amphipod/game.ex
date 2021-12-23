@@ -38,17 +38,21 @@ defmodule Amphipod.Game do
   Play the game.
   """
   def play(game) do
-    moves =
+    next_moves =
       Map.keys(game.p_states)
       |> Enum.flat_map(fn player -> legal_moves(game, player) end)
+      |> Enum.sort_by(&(elem(&1, 3)))  # cost
     # FIXME rewrite this with initial / base case guards
-    if moves == [] do
+    if next_moves == [] do
       game
     else
-      game =
-        List.first(moves)
-        |> (fn move -> make_move(game, move) end).()
-      play(game)
+      next_moves
+      |> Enum.map(fn move ->
+        make_move(game, move)
+        |> play()
+      end)
+      |> Enum.sort_by(&(&1.total_cost))
+      |> List.first()  # lowest-cost final outcome
     end
   end
 

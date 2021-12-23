@@ -143,8 +143,9 @@ defmodule Amphipod.Board do
     |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
   end
 
-  defp room_pos(_board, room) do
-    x_offset = 2  # FIXME only works for tiny
+  defp room_pos(board, room) do
+    #hall_length = Enum.count(board.hall_pos) + board.n_rooms
+    x_offset = div(Enum.count(board.hall_pos) - (board.n_rooms-1), 2) + 1
     0..1
     |> Enum.map(&({room*2+x_offset, &1}))
   end
