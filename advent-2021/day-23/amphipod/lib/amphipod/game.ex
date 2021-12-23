@@ -136,7 +136,7 @@ defmodule Amphipod.Game do
   defp home_moves(game, player, type) do
     # NB we've designed it so room = type
     Board.room_positions_accessible_to(game.board, player, type, neighbor_is_ok(game))
-    |> Enum.sort_by(fn {_x, y} -> y end)
+    |> Enum.sort_by(fn {{_x, y}, _dist} -> y end)
     |> Enum.take(1)  # only use the lowest available
     |> Enum.map(&(to_move(player, :home, type, &1)))
   end
