@@ -44,7 +44,14 @@ defmodule Amphipod.Game do
       |> Enum.sort_by(&(elem(&1, 3)))  # cost
     # FIXME rewrite this with initial / base case guards
     if next_moves == [] do
-      game
+      if Game.won?(game) do
+        #IO.puts("leaf: won in #{Enum.count(game.moves)} moves")
+        game
+      else
+        # deadlock: return with infinitely high cost
+        #IO.puts("leaf: deadlocked in #{Enum.count(game.moves)} moves")
+        %Game{game | total_cost: nil}
+      end
     else
       next_moves
       |> Enum.map(fn move ->
@@ -60,10 +67,20 @@ defmodule Amphipod.Game do
   Has the game achieved a winning outcome?
   """
   def won?(game) do
-    Board.room_occupants(game.board)
-    |> Enum.all?(fn {room, players} ->
-      Enum.all?(players, &(game.p_types[&1] == room))
-    end)
+    occupants = Board.room_occupants(game.board)
+    uniform =
+      occupants
+      |> Enum.all?(fn {room, players} ->
+        Enum.all?(players, &(game.p_types[&1] == room))
+      end)
+    n_home =
+      occupants
+      |> Enum.flat_map(fn {_room, room_players} -> room_players end)
+      |> Enum.count()
+    cond do
+      uniform and n_home == n_players(game) -> true
+      true                                  -> false
+    end
   end
 
   def render(game) do
@@ -77,6 +94,11 @@ defmodule Amphipod.Game do
       IO.puts("/-- #{n_s} -- $#{c_s} --\\")
       Board.render(igame.board, render_player_as(game))
       |> IO.puts()
+#      IO.puts("----")
+#      Map.keys(igame.p_types)
+#      |> Enum.each(fn player ->
+#        IO.inspect(legal_moves(igame, player), label: "player #{player} legal moves")
+#      end)
       IO.puts("")
       {igame, n+1}
     end)

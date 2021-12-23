@@ -105,11 +105,34 @@ defmodule Amphipod.Board do
 
   Each return item is `{pos, dist}`.
   """
-  def hall_positions_accessible_to(board, _player) do
-    # FIXME needs to check if path is blocked
-    board.hall_pos
-    |> Enum.reject(&(occupied?(board, &1)))
-    |> Enum.map(&({&1, 8}))  # FIXME 8 -> Manhattan distance
+  def hall_positions_accessible_to(board, player) do
+    ###
+    # we don't currently support hall-to-hall moves
+    # so a to-hall move is always (1) up to the hallway
+    {x, y} = board.player_pos[player]
+    v_blocked = vert_path_blocked?(board, {x, y+1}, {x, 2})
+    ###
+    # (2) and then right/left
+    cond do
+      v_blocked ->
+        []
+      true      ->
+        board.hall_pos
+        |> Enum.reject(&(horiz_path_blocked?(board, {x, 2}, &1)))
+        |> Enum.map(&({&1, 8}))  # FIXME 8 -> Manhattan distance
+    end
+  end
+
+  defp horiz_path_blocked?(board, {x0, 2}, {x1, 2}) do
+    # (don't include the x0 position in the check; it's either where the
+    # player is now, or it was already tested with the to-hall check)
+    x0..x1
+    |> Enum.any?(fn x -> x != x0 and occupied?(board, {x, 2}) end)
+  end
+
+  defp vert_path_blocked?(board, {x, y0}, {x, y1}) do
+    y0..y1
+    |> Enum.any?(fn y -> occupied?(board, {x, y}) end)
   end
 
   @doc ~S"""
@@ -125,9 +148,8 @@ defmodule Amphipod.Board do
   Each return item is `{pos, dist}`.
   """
   def room_positions_accessible_to(board, player, room, neighbor_is_ok \\ nil) do
-    # FIXME needs to check if path is blocked
     room_pos(board, room)
-    |> Enum.reject(&(occupied?(board, &1)))
+    |> Enum.reject(&(path_to_room_blocked?(board, board.player_pos[player], &1)))
     |> Enum.filter(fn {x, y} ->
       if neighbor_is_ok do
         # at this time, we only support 2-space rooms, and we only
@@ -142,6 +164,25 @@ defmodule Amphipod.Board do
       end
     end)
     |> Enum.map(&({&1, 7}))  # FIXME 7 -> Manhattan distance
+  end
+
+  defp path_to_room_blocked?(board, {x0, y0}, {x1, y1}) do
+    ###
+    # we could be starting from a different room (up-and-over)
+    # so first get up to the hallway if needed
+    v1_blocked =
+      if y0 > 2 do
+        vert_path_blocked?(board, {x0, y0+1}, {x0, 2})
+      else
+        false  # already in the hallway
+      end
+    ###
+    # now check the left/right traverse
+    h_blocked = horiz_path_blocked?(board, {x0, 2}, {x1, 2})
+    ###
+    # last check the move down to final destination
+    v2_blocked = vert_path_blocked?(board, {x1, 3}, {x1, y1})
+    v1_blocked or h_blocked or v2_blocked
   end
 
   def room_occupants(board) do
