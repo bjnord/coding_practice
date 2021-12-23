@@ -250,4 +250,14 @@ defmodule Amphipod.Board do
       true                  -> false
     end
   end
+
+  def path_distance({x0, y0}, {x1, y1}) do
+    cond do
+      y0 < 2 and y1 < 2 ->  # room-to-room
+        abs(x0 - x1) + abs(y0 - y1) +  # Manhattan distance PLUS
+          abs(2 - y0) + abs(2 - y1)    # vert distance up to hallway
+      true -> # room-to-hall or hall-to-room
+        abs(x0 - x1) + abs(y0 - y1)    # Manhattan distance
+    end
+  end
 end

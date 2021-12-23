@@ -85,5 +85,17 @@ defmodule Amphipod.BoardTest do
       assert Board.occupied?(upd_board, {2, 1}) == false
       assert Board.occupied?(upd_board, {1, 2}) == true
     end
+
+    test "path distance" do
+      # room-to-hall
+      assert Board.path_distance({2, 0}, {3, 2}) == 1 + 2
+      assert Board.path_distance({2, 1}, {5, 2}) == 3 + 1
+      # hall-to-room
+      assert Board.path_distance({1, 2}, {4, 0}) == 3 + 2
+      assert Board.path_distance({3, 2}, {2, 1}) == 1 + 1
+      # room-to-room
+      assert Board.path_distance({2, 0}, {4, 0}) == 2 + 2 + 2
+      assert Board.path_distance({4, 1}, {2, 1}) == 1 + 2 + 1
+    end
   end
 end
