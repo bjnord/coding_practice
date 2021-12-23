@@ -2,6 +2,8 @@ defmodule Segment.ParserTest do
   use ExUnit.Case
   doctest Segment.Parser
 
+  alias Segment.Parser
+
   describe "puzzle example" do
     setup do
       [
@@ -14,7 +16,7 @@ defmodule Segment.ParserTest do
     end
 
     test "parser gets expected note", fixture do
-      assert Segment.Parser.parse_line(fixture.input_line) == fixture.exp_note
+      assert Parser.parse_line(fixture.input_line) == fixture.exp_note
     end
   end
 end

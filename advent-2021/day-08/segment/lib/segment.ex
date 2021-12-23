@@ -3,7 +3,8 @@ defmodule Segment do
   Documentation for Segment.
   """
 
-  import Segment.Parser
+  alias Segment.Decoder
+  alias Segment.Parser
   import Submarine.CLI
 
   @doc """
@@ -15,17 +16,17 @@ defmodule Segment do
   """
   def main(argv) do
     {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
+    if Enum.member?(opts[:parts], 1), do: part1(input_file)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file)
   end
 
   @doc """
   Process input file and display part 1 solution.
   """
-  def part1(input_file, opts \\ []) do
-    input_file
-    |> parse_input(opts)
-    |> Enum.map(&Segment.count_unique/1)
+  def part1(input_file) do
+    File.read!(input_file)
+    |> Parser.parse()
+    |> Enum.map(&count_unique/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
@@ -49,10 +50,10 @@ defmodule Segment do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file, opts \\ []) do
-    input_file
-    |> parse_input(opts)
-    |> Enum.map(&Segment.Decoder.digits_of_note/1)
+  def part2(input_file) do
+    File.read!(input_file)
+    |> Parser.parse()
+    |> Enum.map(&Decoder.digits_of_note/1)
     |> Enum.map(&String.to_integer/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")

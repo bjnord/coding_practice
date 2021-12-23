@@ -2,6 +2,9 @@ defmodule Segment.DecoderTest do
   use ExUnit.Case
   doctest Segment.Decoder
 
+  alias Segment.Decoder
+  alias Segment.Parser
+
   describe "puzzle example" do
     setup do
       [
@@ -25,8 +28,8 @@ defmodule Segment.DecoderTest do
     test "get correct digits from output values", fixture do
       act_digits =
         fixture.note_lines
-        |> Segment.Parser.parse_input_string()
-        |> Enum.map(&Segment.Decoder.digits_of_note/1)
+        |> Parser.parse()
+        |> Enum.map(&Decoder.digits_of_note/1)
         |> Enum.join(" ")
       assert act_digits == fixture.exp_digits
     end
@@ -34,8 +37,8 @@ defmodule Segment.DecoderTest do
     test "get correct part 2 answer", fixture do
       act_part2 =
         fixture.note_lines
-        |> Segment.Parser.parse_input_string()
-        |> Enum.map(&Segment.Decoder.digits_of_note/1)
+        |> Parser.parse()
+        |> Enum.map(&Decoder.digits_of_note/1)
         |> Enum.map(&String.to_integer/1)
         |> Enum.sum()
       assert act_part2 == fixture.exp_part2

@@ -2,6 +2,8 @@ defmodule SegmentTest do
   use ExUnit.Case
   doctest Segment
 
+  alias Segment.Parser
+
   describe "puzzle example" do
     setup do
       [
@@ -24,7 +26,7 @@ defmodule SegmentTest do
     test "output value counter gets expected unique count", fixture do
       act_unique =
         fixture.note_lines
-        |> Segment.Parser.parse_input_string()
+        |> Parser.parse()
         |> Enum.map(&Segment.count_unique/1)
         |> Enum.sum()
       assert act_unique == fixture.exp_unique
