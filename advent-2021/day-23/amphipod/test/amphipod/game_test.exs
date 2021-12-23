@@ -48,5 +48,20 @@ defmodule Amphipod.GameTest do
       assert Game.strangers?(game, 0, 3) == false
       assert Game.strangers?(game, 1, 1) == false
     end
+
+    @tag :pending
+    test "gameplay (initial tiny)", fixture do
+      _game = Game.new(fixture.tiny_amphipos)
+              |> IO.inspect(label: "(initial tiny) game")
+      # TODO implement Game.play()
+      #       - at first just one move
+      #       - then the minimal move linearly to bottom (no fork/rollup)
+      #       - then the Full Monty
+    end
+
+    @tag :pending
+    test "gameplay (initial input)", _fixture do
+      # NOTE FIXME in `Board.room_pos()` needed for input case to work
+    end
   end
 end

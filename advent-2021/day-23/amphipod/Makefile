@@ -13,7 +13,7 @@ test:
 	@if [ -f _build/propcheck.ctex ]; then \
 		MIX_ENV=test mix propcheck.clean; \
 	fi
-	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+	PROPCHECK_VERBOSE=$(VERBOSE) mix test --exclude=pending
 
 doc:
 	mix docs
