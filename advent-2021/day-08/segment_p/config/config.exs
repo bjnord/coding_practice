@@ -12,7 +12,8 @@ config :segment_p,
 
 # Configures the endpoint
 config :segment_p, SegmentPWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "aquist.nordist.net"],
+  http: [ip: {172,31,29,8}],
   secret_key_base: "L1LMfXmIm5GxKOZwKcIkQTldfRB+bxn4Klp+Kaor45HZ2603A7qs7QPLOnYxCN4l",
   render_errors: [view: SegmentPWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: SegmentP.PubSub, adapter: Phoenix.PubSub.PG2],

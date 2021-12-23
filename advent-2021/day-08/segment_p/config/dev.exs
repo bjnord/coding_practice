@@ -2,8 +2,8 @@ use Mix.Config
 
 # Configure your database
 config :segment_p, SegmentP.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "segment_p",
+  password: "segment_p",
   database: "segment_p_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
