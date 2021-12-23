@@ -52,6 +52,16 @@ defmodule Amphipod.Game do
     end
   end
 
+  @doc ~S"""
+  Has the game achieved a winning outcome?
+  """
+  def won?(game) do
+    Board.room_occupants(game.board)
+    |> Enum.all?(fn {room, players} ->
+      Enum.all?(players, &(game.p_types[&1] == room))
+    end)
+  end
+
   def render(game) do
     igame = Game.new(game.amphipos)
     game.moves

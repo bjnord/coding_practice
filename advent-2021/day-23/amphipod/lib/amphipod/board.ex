@@ -135,6 +135,14 @@ defmodule Amphipod.Board do
     |> Enum.map(&({&1, 7}))  # FIXME 7 -> Manhattan distance
   end
 
+  def room_occupants(board) do
+    for room <- 0..board.n_rooms-1, pos <- room_pos(board, room) do
+      {room, occupied_by(board, pos)}
+    end
+    |> Enum.reject(&(elem(&1, 1) == nil))
+    |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
+  end
+
   defp room_pos(_board, room) do
     x_offset = 2  # FIXME only works for tiny
     0..1
