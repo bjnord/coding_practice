@@ -16,7 +16,7 @@ defmodule SegmentPWeb.Router do
   scope "/", SegmentPWeb do
     pipe_through :browser
 
-    get "/parts", SegmentController, :parts
+    get "/parts", PartsController, :index
     get "/", PageController, :index
   end
 
