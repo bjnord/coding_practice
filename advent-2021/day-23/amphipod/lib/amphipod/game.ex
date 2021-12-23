@@ -6,7 +6,7 @@ defmodule Amphipod.Game do
   alias Amphipod.Board
   alias Amphipod.Game
 
-  defstruct p_types: %{}, p_states: %{}, board: %Board{}, moves: [], total_cost: 0
+  defstruct p_types: %{}, p_states: %{}, board: %Board{}, moves: [], total_cost: 0, amphipos: nil
 
   @doc ~S"""
   Construct new game.
@@ -28,10 +28,52 @@ defmodule Amphipod.Game do
       p_types: p_types,
       p_states: p_states,
       board: board,
+      amphipos: amphipos,
     }
   end
 
   def n_players(game), do: Enum.count(game.p_types)
+
+  @doc ~S"""
+  Play the game.
+  """
+  def play(game) do
+    moves =
+      Map.keys(game.p_states)
+      |> Enum.flat_map(fn player -> legal_moves(game, player) end)
+    # FIXME rewrite this with initial / base case guards
+    if moves == [] do
+      game
+    else
+      game =
+        List.first(moves)
+        |> (fn move -> make_move(game, move) end).()
+      play(game)
+    end
+  end
+
+  def render(game) do
+    igame = Game.new(game.amphipos)
+    game.moves
+    |> Enum.reverse()
+    |> Enum.reduce({igame, 1}, fn (move, {igame, n}) ->
+      igame = make_move(igame, move)
+      n_s = String.pad_leading(Integer.to_string(n), 2, " ")
+      c_s = String.pad_leading(Integer.to_string(igame.total_cost), 4, " ")
+      IO.puts("/-- #{n_s} -- $#{c_s} --\\")
+      Board.render(igame.board, render_player_as(game))
+      |> IO.puts()
+      IO.puts("")
+      {igame, n+1}
+    end)
+  end
+
+  defp render_player_as(game) do
+    fn (player) ->
+      base = if rem(player, 2) == 1, do: ?a, else: ?A
+      game.p_types[player] + base
+    end
+  end
 
   @doc ~S"""
   Return list of legal moves for `player`.

@@ -136,8 +136,59 @@ defmodule Amphipod.Board do
   end
 
   defp room_pos(_board, room) do
-    x_offset = 2  # FIXME won't work for non-tiny
+    x_offset = 2  # FIXME only works for tiny
     0..1
     |> Enum.map(&({room*2+x_offset, &1}))
+  end
+
+  # FIXME only works for tiny
+  def render(board, render_player_as \\ nil) do
+    max_x = 6
+    for y <- 3..-1, x <- 0..max_x do
+      render_char(board, {x, y}, max_x, render_player_as)
+    end
+    |> Enum.chunk_every(max_x + 1)
+    |> Enum.map(&to_string/1)
+    |> Enum.join("\n")
+    |> (fn text -> "#{text}\n" end).()
+  end
+
+  defp render_char(board, pos, max_x, render_player_as) do
+    player = occupied_by(board, pos)
+    cond do
+      player != nil ->
+        if render_player_as do
+          render_player_as.(player)
+        else
+          ?0 + player
+        end
+      board_position?(pos) ->
+        ?.
+      corner?(pos, max_x) ->
+        32  # SP
+      true ->
+        ?#
+    end
+  end
+
+  # FIXME only works for tiny
+  defp board_position?(pos) do
+    [
+      {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2},
+      {2, 1}, {2, 0}, {4, 1}, {4, 0},
+    ]
+    |> Enum.find(&(&1 == pos))
+    |> (fn v -> if v, do: true, else: false end).()
+  end
+
+  # FIXME only works for tiny
+  defp corner?({x, y}, max_x) do
+    cond do
+      y < -1 or  y > 3      -> true
+      x < 0  or  x > max_x  -> true
+      y <= 0 and x == 0     -> true
+      y <= 0 and x == max_x -> true
+      true                  -> false
+    end
   end
 end
