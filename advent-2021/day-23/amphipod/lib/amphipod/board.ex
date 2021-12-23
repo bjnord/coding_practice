@@ -19,7 +19,7 @@ defmodule Amphipod.Board do
 
   alias Amphipod.Board
 
-  defstruct n_rooms: 0, hall_pos: [], player_pos: %{}
+  defstruct n_rooms: 0, hall_pos: [], player_pos: %{}, pos_player: %{}
 
   @doc ~S"""
   Construct new game board.
@@ -39,10 +39,16 @@ defmodule Amphipod.Board do
       |> Enum.with_index()
       |> Enum.map(fn {{_type, pos}, n} -> {n, pos} end)
       |> Enum.into(%{})
+    pos_player =
+      amphipos
+      |> Enum.with_index()
+      |> Enum.map(fn {{_type, pos}, n} -> {pos, n} end)
+      |> Enum.into(%{})
     %Board{
       n_rooms: n_rooms,
       hall_pos: hall_positions(n_rooms, min_x, max_x),
       player_pos: player_pos,
+      pos_player: pos_player,
     }
   end
 
@@ -61,11 +67,9 @@ defmodule Amphipod.Board do
   Raises `KeyError` if the given `player` is not found.
   """
   def player_pos(board, player) do
-    pos = board.player_pos[player]
-    if pos == nil do
-      raise KeyError, "player #{player} not found on board"
-    else
-      pos
+    case board.player_pos[player] do
+      nil -> raise KeyError, "player #{player} not found on board"
+      pos -> pos
     end
   end
 
@@ -75,20 +79,25 @@ defmodule Amphipod.Board do
   Raises `KeyError` if the given `player` is not found.
   """
   def update_player_pos(board, player, pos) do
-    %Board{board | player_pos: Map.replace!(board.player_pos, player, pos)}
+    old_pos = player_pos(board, player)
+    if board.pos_player[pos] != nil do
+      raise KeyError, "player #{board.pos_player[pos]} already occupies #{pos}"
+    end
+    pos_player =
+      board.pos_player
+      |> Map.delete(old_pos)
+      |> Map.put(pos, player)
+    %Board{board |
+      player_pos: Map.replace!(board.player_pos, player, pos),
+      pos_player: pos_player,
+    }
   end
 
   @doc ~S"""
   Is the given position occupied by a player?
   """
   def occupied?(board, pos) do
-    if occupied_by(board, pos), do: true, else: false
-  end
-
-  defp occupied_by(board, pos) do
-    # FIXME OPTIMIZE maintain a map keyed in the other direction
-    Enum.map(board.player_pos, &(&1))
-    |> Enum.find_value(fn {k, v} -> if v == pos, do: k, else: nil end)
+    if board.pos_player[pos], do: true, else: false
   end
 
   @doc ~S"""
@@ -123,7 +132,7 @@ defmodule Amphipod.Board do
       if neighbor_is_ok do
         # at this time, we only support 2-space rooms, and we only
         # care about the neighbor below the top space
-        neighbor = occupied_by(board, {x, y-1})
+        neighbor = board.pos_player[{x, y-1}]
         case neighbor do
           nil      -> true
           neighbor -> neighbor_is_ok.(player, neighbor)
@@ -137,7 +146,7 @@ defmodule Amphipod.Board do
 
   def room_occupants(board) do
     for room <- 0..board.n_rooms-1, pos <- room_pos(board, room) do
-      {room, occupied_by(board, pos)}
+      {room, board.pos_player[pos]}
     end
     |> Enum.reject(&(elem(&1, 1) == nil))
     |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
@@ -163,7 +172,7 @@ defmodule Amphipod.Board do
   end
 
   defp render_char(board, pos, max_x, render_player_as) do
-    player = occupied_by(board, pos)
+    player = board.pos_player[pos]
     cond do
       player != nil ->
         if render_player_as do
