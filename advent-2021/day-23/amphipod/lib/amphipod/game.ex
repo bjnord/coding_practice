@@ -83,25 +83,32 @@ defmodule Amphipod.Game do
     end
   end
 
-  def render(game) do
+  def render(game, show_next_moves \\ false) do
     igame = Game.new(game.amphipos)
+    render_move(igame, 0, show_next_moves)
     game.moves
     |> Enum.reverse()
     |> Enum.reduce({igame, 1}, fn (move, {igame, n}) ->
       igame = make_move(igame, move)
-      n_s = String.pad_leading(Integer.to_string(n), 2, " ")
-      c_s = String.pad_leading(Integer.to_string(igame.total_cost), 4, " ")
-      IO.puts("/-- #{n_s} -- $#{c_s} --\\")
-      Board.render(igame.board, render_player_as(game))
-      |> IO.puts()
-#      IO.puts("----")
-#      Map.keys(igame.p_types)
-#      |> Enum.each(fn player ->
-#        IO.inspect(legal_moves(igame, player), label: "player #{player} legal moves")
-#      end)
-      IO.puts("")
+      render_move(igame, n, show_next_moves)
       {igame, n+1}
     end)
+  end
+
+  defp render_move(game, n, show_next_moves) do
+    n_s = String.pad_leading(Integer.to_string(n), 2, " ")
+    c_s = String.pad_leading(Integer.to_string(game.total_cost), 4, " ")
+    IO.puts("/-- #{n_s} -- $#{c_s} --\\")
+    Board.render(game.board, render_player_as(game))
+    |> IO.puts()
+    if show_next_moves do
+      IO.puts("----")
+      Map.keys(game.p_types)
+      |> Enum.each(fn player ->
+        IO.inspect(legal_moves(game, player), label: "player #{player} legal moves")
+      end)
+    end
+    IO.puts("")
   end
 
   defp render_player_as(game) do
@@ -145,8 +152,13 @@ defmodule Amphipod.Game do
     fn (player, neighbor) -> !strangers?(game, player, neighbor) end
   end
 
-  defp to_move(player, state, _type, {pos, dist}) do
-    {player, state, pos, dist*dist}  # TODO cost = dist * cost(type)
+  defp to_move(player, state, type, {pos, dist}) do
+    {player, state, pos, dist * cost_of_type(type)}
+  end
+
+  defp cost_of_type(type) do
+    :math.pow(10, type)
+    |> round()
   end
 
   def make_move(game, {player, state, pos, cost}) do

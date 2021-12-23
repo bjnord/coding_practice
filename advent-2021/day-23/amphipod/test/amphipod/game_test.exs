@@ -53,7 +53,7 @@ defmodule Amphipod.GameTest do
       game =
         Game.new(fixture.tiny_amphipos)
         |> Game.play()
-      #Game.render(game)
+      #Game.render(game, false)
       assert Game.won?(game) == true
     end
 

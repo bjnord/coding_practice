@@ -116,10 +116,10 @@ defmodule Amphipod.Board do
     cond do
       v_blocked ->
         []
-      true      ->
+      true ->
         board.hall_pos
         |> Enum.reject(&(horiz_path_blocked?(board, {x, 2}, &1)))
-        |> Enum.map(&({&1, 8}))  # FIXME 8 -> Manhattan distance
+        |> Enum.map(&({&1, path_distance({x, y}, &1)}))
     end
   end
 
@@ -163,7 +163,7 @@ defmodule Amphipod.Board do
         true
       end
     end)
-    |> Enum.map(&({&1, 7}))  # FIXME 7 -> Manhattan distance
+    |> Enum.map(&({&1, path_distance(board.player_pos[player], &1)}))
   end
 
   defp path_to_room_blocked?(board, {x0, y0}, {x1, y1}) do
