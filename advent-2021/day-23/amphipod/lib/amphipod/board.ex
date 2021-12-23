@@ -19,7 +19,7 @@ defmodule Amphipod.Board do
 
   alias Amphipod.Board
 
-  defstruct n_rooms: 0, hallway_pos: [], player_pos: %{}
+  defstruct n_rooms: 0, hall_pos: [], player_pos: %{}
 
   @doc ~S"""
   Construct new game board.
@@ -41,12 +41,12 @@ defmodule Amphipod.Board do
       |> Enum.into(%{})
     %Board{
       n_rooms: n_rooms,
-      hallway_pos: hallway_positions(n_rooms, min_x, max_x),
+      hall_pos: hall_positions(n_rooms, min_x, max_x),
       player_pos: player_pos,
     }
   end
 
-  defp hallway_positions(n_rooms, min_x, max_x) do
+  defp hall_positions(n_rooms, min_x, max_x) do
     leftcul_x = for x <- 1..min_x-1, do: x
     n_cul = Enum.count(leftcul_x)
     rightcul_x = for x <- max_x+1..max_x+n_cul, do: x
@@ -87,5 +87,36 @@ defmodule Amphipod.Board do
       Map.values(board.player_pos)
       |> Enum.find(&(&1 == pos))
     if player, do: true, else: false
+  end
+
+  @doc ~S"""
+  Return list of hall positions currently accessible to the given `player`.
+
+  Each return item is `{pos, dist}`.
+  """
+  def hall_positions_accessible_to(board, _player) do
+    # FIXME needs to check if path is blocked
+    board.hall_pos
+    |> Enum.reject(&(occupied?(board, &1)))
+    |> Enum.map(&({&1, 8}))  # FIXME 8 -> Manhattan distance
+  end
+
+  @doc ~S"""
+  Return list of `room` positions currently accessible to the given `player`.
+
+  Each return item is `{pos, dist}`.
+  """
+  def room_positions_accessible_to(board, _player, room) do
+    # FIXME needs to check if path is blocked
+    room_pos(board, room)
+    |> Enum.reject(&(occupied?(board, &1)))
+    |> Enum.map(&({&1, 7}))  # FIXME 7 -> Manhattan distance
+  end
+
+  defp room_pos(_board, room) do
+    x_offset = 2  # FIXME won't work for non-tiny
+    0..1
+    |> Enum.map(&({room*2+x_offset, &1}))
+    |> IO.inspect(label: "room_pos(#{room})")
   end
 end

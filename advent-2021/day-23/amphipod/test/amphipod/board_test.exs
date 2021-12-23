@@ -19,7 +19,7 @@ defmodule Amphipod.BoardTest do
         ],
         exp_input_new_board: %Board{
           n_rooms: 4,
-          hallway_pos: [
+          hall_pos: [
             {1, 2}, {2, 2},
             {4, 2}, {6, 2}, {8, 2},
             {10, 2}, {11, 2},
@@ -37,7 +37,7 @@ defmodule Amphipod.BoardTest do
         ],
         exp_tiny_new_board: %Board{
           n_rooms: 2,
-          hallway_pos: [
+          hall_pos: [
             {1, 2},
             {3, 2},
             {5, 2},
