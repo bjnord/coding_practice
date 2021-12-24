@@ -108,7 +108,7 @@ defmodule Logic.Unit do
   end
 
   @inst_width 16
-  @var_width 16
+  @var_width 10
   @var_pad 2
 
   defp dump_inst(inst) do

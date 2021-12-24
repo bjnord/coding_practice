@@ -88,6 +88,7 @@ defmodule Logic.UnitTest do
           {:mul, :w, -1},
           {:add, :x, :w},
         ],
+        puzzle_example_input: [1, 3, 5, 7, 9, 2, 4, 6, 8, 9, 9, 9, 9, 9],
       ]
     end
 
@@ -116,6 +117,14 @@ defmodule Logic.UnitTest do
       assert {_, 0, _, _} = Unit.run(fixture.matchsticks, [3, 1, 2, 3, 1, 1])
       assert {_, 0, _, _} = Unit.run(fixture.matchsticks, [2, 1, 3, 1, 2, 1])
       assert {_, 0, _, _} = Unit.run(fixture.matchsticks, [3, 2, 1, 3, 2, 1])
+    end
+
+    test "executor (puzzle example)", fixture do
+      {_, _, _, z} =
+        File.read!("input/input.txt")
+        |> Logic.Parser.parse()
+        |> Unit.run(fixture.puzzle_example_input, verbose: false)
+      assert z == 2538195
     end
   end
 end
