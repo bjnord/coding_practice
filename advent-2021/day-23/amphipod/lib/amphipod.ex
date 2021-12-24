@@ -25,12 +25,16 @@ defmodule Amphipod do
   """
   def part1(input_file) do
     # "What is the least energy required to organize the amphipods?"
-    File.read!(input_file)
-    |> Parser.parse()
-    |> Game.new()
-    |> Game.play()
-    nil  # TODO
+    game =
+      File.read!(input_file)
+      |> Parser.parse()
+      |> Game.new()
+      |> Game.play()
+    #Game.render(game, false)
+    game
+    |> Game.total_cost()
     |> IO.inspect(label: "Part 1 answer is")
+    IO.inspect(15346, label: "Part 1 WRONG answer (too high) is")
   end
 
   @doc """

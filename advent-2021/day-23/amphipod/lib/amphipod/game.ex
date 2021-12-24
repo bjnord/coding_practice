@@ -33,6 +33,7 @@ defmodule Amphipod.Game do
   end
 
   def n_players(game), do: Enum.count(game.p_types)
+  def total_cost(game), do: game.total_cost
 
   @doc ~S"""
   Play the game.
