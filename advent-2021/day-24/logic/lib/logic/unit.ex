@@ -10,9 +10,7 @@ defmodule Logic.Unit do
   """
   def run(program, input, opts \\ []) do
     vars = {0, 0, 0, 0}
-    if opts[:verbose] do
-      IO.inspect(vars, label: "INITIAL")
-    end
+    if opts[:verbose], do: dump(:initial, vars)
     program
     |> Enum.reduce({vars, input}, fn (inst, {vars, input}) ->
       execute(inst, vars, input, opts)
@@ -72,9 +70,7 @@ defmodule Logic.Unit do
           {a, av, input}
       end
     vars = write_var(vars, var, value)
-    if opts[:verbose] do
-      IO.inspect({inst, vars}, label: "INST")
-    end
+    if opts[:verbose], do: dump(inst, vars)
     {vars, input}
   end
 
@@ -104,5 +100,58 @@ defmodule Logic.Unit do
       :y -> {w, x, n, z}
       :z -> {w, x, y, n}
     end
+  end
+
+  defp dump(inst, vars) do
+    dump_inst(inst)
+    dump_vars(vars)
+  end
+
+  @inst_width 16
+  @var_width 16
+  @var_pad 2
+
+  defp dump_inst(inst) do
+    case inst do
+      :initial ->
+        String.pad_trailing("", @inst_width)
+      {op, a} ->
+        op_s = String.upcase(Atom.to_string(op))
+        a_s = format_operand(a)
+        String.pad_trailing("#{op_s} #{a_s}", @inst_width)
+      {op, a, b} ->
+        op_s = String.upcase(Atom.to_string(op))
+        a_s = format_operand(a)
+        b_s = format_operand(b)
+        String.pad_trailing("#{op_s} #{a_s} #{b_s}", @inst_width)
+    end
+    |> IO.write()
+  end
+
+  defp format_operand(o) when is_atom(o) do
+    String.upcase(Atom.to_string(o))
+  end
+  defp format_operand(o) when is_integer(o) do
+    Integer.to_string(o)
+  end
+
+  defp dump_vars(vars) do
+    vars
+    |> Tuple.to_list()
+    |> Enum.with_index()
+    |> Enum.each(&dump_var/1)
+    IO.puts("")
+  end
+
+  defp dump_var({v, n}) do
+    vs = String.pad_leading(Integer.to_string(v), @var_width)
+    ns = [?W + n] |> to_string()
+    pad =
+      case n do
+        3 -> ""
+        _ -> String.pad_trailing("", @var_pad)
+      end
+    "#{ns}:[#{vs}]#{pad}"
+    |> IO.write()
   end
 end
