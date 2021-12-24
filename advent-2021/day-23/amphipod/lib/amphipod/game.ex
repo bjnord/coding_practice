@@ -37,7 +37,8 @@ defmodule Amphipod.Game do
   @doc ~S"""
   Play the game.
   """
-  def play(game) do
+  def play(game), do: play(game, game)
+  def play(game, best_game) do
     next_moves =
       Map.keys(game.p_states)
       |> Enum.flat_map(fn player -> legal_moves(game, player) end)
@@ -54,12 +55,37 @@ defmodule Amphipod.Game do
       end
     else
       next_moves
-      |> Enum.map(fn move ->
-        make_move(game, move)
-        |> play()
+      |> Enum.sort_by(&(elem(&1, 3)))  # try lowest-cost first
+      |> Enum.reduce(best_game, fn (move, best_game) ->
+        if worse_cost(game, move, best_game) do
+          #IO.puts("leaf: tossed")
+          best_game  # already worse than our known best; skip move
+        else
+          game_w_move = play(make_move(game, move))
+          cond do
+            !Game.won?(best_game) ->
+              game_w_move  # just getting started
+            Game.won?(game) and (game_w_move.total_cost < best_game.total_cost) ->
+              game_w_move  # our child found a better winner
+            true ->
+              best_game
+          end
+        end
       end)
-      |> Enum.sort_by(&(&1.total_cost))
-      |> List.first()  # lowest-cost final outcome
+    end
+  end
+
+  defp worse_cost(game, move, best_game) do
+    IO.inspect({Enum.count(game.moves), game.total_cost, elem(move, 3),
+      Enum.count(best_game.moves), best_game.total_cost, Game.won?(best_game)},
+      label: "worse_cost?")
+    cond do
+      !Game.won?(best_game) ->
+        false  # just getting started
+      game.total_cost + elem(move, 3) >= best_game.total_cost ->
+        true
+      true ->
+        false
     end
   end
 
