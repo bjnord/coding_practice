@@ -200,9 +200,16 @@ defmodule Amphipod.Board do
     |> Enum.map(&({room*2+x_offset, &1}))
   end
 
-  # FIXME only works for tiny
   def render(board, render_player_as \\ nil) do
-    max_x = 6
+    max_x =
+      case {board.n_rooms, Enum.count(board.hall_pos)} do
+        {2, 3} -> 6   # tiny
+        {3, 4} -> 8   # small
+        {3, 6} -> 10  # medium
+        {4, 7} -> 12  # example, input
+        {_, _} ->
+          raise "not yet implemented"
+      end
     for y <- 3..-1, x <- 0..max_x do
       render_char(board, {x, y}, max_x, render_player_as)
     end
@@ -221,32 +228,62 @@ defmodule Amphipod.Board do
         else
           ?0 + player
         end
-      board_position?(pos) ->
+      board_position?(board, pos) ->
         ?.
-      corner?(pos, max_x) ->
+      corner?(board, pos, max_x) ->
         32  # SP
       true ->
         ?#
     end
   end
 
-  # FIXME only works for tiny
-  defp board_position?(pos) do
-    [
-      {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2},
-      {2, 1}, {2, 0}, {4, 1}, {4, 0},
-    ]
+  defp board_position?(board, pos) do
+    floor_pos =
+      case {board.n_rooms, Enum.count(board.hall_pos)} do
+        {2, 3} ->  # tiny
+          [
+            {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2},
+            {2, 1}, {2, 0}, {4, 1}, {4, 0},
+          ]
+        {3, 4} ->  # small
+          [
+            {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2},
+            {2, 1}, {2, 0}, {4, 1}, {4, 0}, {6, 1}, {6, 0},
+          ]
+        {3, 6} ->  # medium
+          [
+            {1, 2}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {9, 2},
+                    {3, 1}, {3, 0}, {5, 1}, {5, 0}, {7, 1}, {7, 0}
+          ]
+        {4, 7} ->  # example, input
+          raise "not yet implemented"
+        {_, _} ->
+          raise "not yet implemented"
+      end
+    floor_pos
     |> Enum.find(&(&1 == pos))
     |> (fn v -> if v, do: true, else: false end).()
   end
 
-  # FIXME only works for tiny
-  defp corner?({x, y}, max_x) do
+  defp corner?(board, {x, y}, max_x) do
+    {min_c, max_c} =
+      case {board.n_rooms, Enum.count(board.hall_pos)} do
+        {2, 3} ->  # tiny
+          {0, max_x}
+        {3, 4} ->  # small
+          {0, max_x}
+        {3, 6} ->  # medium
+          {1, max_x-1}
+        {4, 7} ->  # example, input
+          {1, max_x-1}
+        {_, _} ->
+          raise "not yet implemented"
+      end
     cond do
       y < -1 or  y > 3      -> true
       x < 0  or  x > max_x  -> true
-      y <= 0 and x == 0     -> true
-      y <= 0 and x == max_x -> true
+      y <= 0 and x <= min_c -> true
+      y <= 0 and x >= max_c -> true
       true                  -> false
     end
   end
