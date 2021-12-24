@@ -30,6 +30,47 @@ defmodule Logic.ParserTest do
         div w 2
         mod w 2
         """,
+        matchsticks: """
+        add x 21
+        inp w
+        mul z 0
+        add z -4
+        add z w
+        mul w -1
+        add x w
+        add x z
+        inp w
+        mul z 0
+        add z -4
+        add z w
+        mul w -1
+        add x w
+        add x z
+        inp w
+        mul z 0
+        add z -4
+        add z w
+        mul w -1
+        add x w
+        add x z
+        inp w
+        mul z 0
+        add z -4
+        add z w
+        mul w -1
+        add x w
+        add x z
+        inp w
+        mul z 0
+        add z -4
+        add z w
+        mul w -1
+        add x w
+        add x z
+        inp w
+        mul w -1
+        add x w
+        """,
         exp_program2: [
           {:inp, :z},
           {:inp, :x},
@@ -49,6 +90,53 @@ defmodule Logic.ParserTest do
           {:div, :w, 2},
           {:mod, :w, 2},
         ],
+        exp_matchsticks: [
+          {:add, :x, 21},
+          # 21
+          {:inp, :w},
+          {:mul, :z, 0},
+          {:add, :z, -4},
+          {:add, :z, :w},
+          {:mul, :w, -1},
+          {:add, :x, :w},
+          {:add, :x, :z},
+          # 17
+          {:inp, :w},
+          {:mul, :z, 0},
+          {:add, :z, -4},
+          {:add, :z, :w},
+          {:mul, :w, -1},
+          {:add, :x, :w},
+          {:add, :x, :z},
+          # 13
+          {:inp, :w},
+          {:mul, :z, 0},
+          {:add, :z, -4},
+          {:add, :z, :w},
+          {:mul, :w, -1},
+          {:add, :x, :w},
+          {:add, :x, :z},
+          # 9
+          {:inp, :w},
+          {:mul, :z, 0},
+          {:add, :z, -4},
+          {:add, :z, :w},
+          {:mul, :w, -1},
+          {:add, :x, :w},
+          {:add, :x, :z},
+          # 5
+          {:inp, :w},
+          {:mul, :z, 0},
+          {:add, :z, -4},
+          {:add, :z, :w},
+          {:mul, :w, -1},
+          {:add, :x, :w},
+          {:add, :x, :z},
+          # 1
+          {:inp, :w},
+          {:mul, :w, -1},
+          {:add, :x, :w},
+        ],
       ]
     end
 
@@ -58,6 +146,10 @@ defmodule Logic.ParserTest do
 
     test "parser gets expected program (example 3)", fixture do
       assert Parser.parse(fixture.input3) == fixture.exp_program3
+    end
+
+    test "parser gets expected program (matchsticks)", fixture do
+      assert Parser.parse(fixture.matchsticks) == fixture.exp_matchsticks
     end
   end
 end

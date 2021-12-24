@@ -1,6 +1,7 @@
 BIN = ./logic
 FILES = mix.exs test/test_helper.exs \
 	lib/logic.ex test/logic_test.exs \
+	lib/logic/unit.ex test/logic/unit_test.exs \
 	lib/logic/parser.ex test/logic/parser_test.exs
 VERBOSE = 0
 
