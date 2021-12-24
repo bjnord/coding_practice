@@ -1,0 +1,39 @@
+add x 21
+inp w
+mul z 0
+add z -4
+add z w
+mul w -1
+add x w
+add x z
+inp w
+mul z 0
+add z -4
+add z w
+mul w -1
+add x w
+add x z
+inp w
+mul z 0
+add z -4
+add z w
+mul w -1
+add x w
+add x z
+inp w
+mul z 0
+add z -4
+add z w
+mul w -1
+add x w
+add x z
+inp w
+mul z 0
+add z -4
+add z w
+mul w -1
+add x w
+add x z
+inp w
+mul w -1
+add x w

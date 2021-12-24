@@ -8,21 +8,31 @@ defmodule Logic.Unit do
 
   Return final variable values `{w, x, y, z}`.
   """
-  def run(program, input) do
+  def run(program, input, opts \\ []) do
+    vars = {0, 0, 0, 0}
+    if opts[:verbose] do
+      IO.inspect(vars, label: "INITIAL")
+    end
     program
-    |> Enum.reduce({{0, 0, 0, 0}, input}, fn (inst, {vars, input}) ->
-      execute(inst, vars, input)
+    |> Enum.reduce({vars, input}, fn (inst, {vars, input}) ->
+      execute(inst, vars, input, opts)
     end)
     |> elem(0)
   end
 
-  defp execute(inst, vars, input) do
-    #IO.inspect({inst, vars, input}, label: "IN")
+  defp execute(inst, vars, input, opts) do
     {var, value, input} =
       case inst do
         # inp a - Read an input value and write it to variable a.
         {:inp, a} ->
-          [iv | input] = input
+          [iv | input] =
+            case input do
+              [] ->
+                ivs = IO.gets("Enter integer: ")
+                [String.to_integer(String.trim_trailing(ivs))]
+              _  ->
+                input
+            end
           {a, iv, input}
 
         # add a b - Add the value of a to the value of b, then store the
@@ -61,17 +71,18 @@ defmodule Logic.Unit do
             end
           {a, av, input}
       end
-    {write_var(vars, var, value), input}
-    #|> IO.inspect(label: "OUT")
+    vars = write_var(vars, var, value)
+    if opts[:verbose] do
+      IO.inspect({inst, vars}, label: "INST")
+    end
+    {vars, input}
   end
 
   defp read_vars({w, x, y, z}, a, b) do
-    #IO.inspect({{w, x, y, z}, a, b}, label: "READ IN")
     {
       read_var({w, x, y, z}, a, false),
       read_var({w, x, y, z}, b, true),
     }
-    #|> IO.inspect(label: "READ OUT")
   end
 
   defp read_var({w, x, y, z}, var, _int_ok) when is_atom(var) do
@@ -87,13 +98,11 @@ defmodule Logic.Unit do
   end
 
   defp write_var({w, x, y, z}, var, n) when is_atom(var) and is_integer(n) do
-    #IO.inspect({{w, x, y, z}, var, n}, label: "WRITE IN")
     case var do
       :w -> {n, x, y, z}
       :x -> {w, n, y, z}
       :y -> {w, x, n, z}
       :z -> {w, x, y, n}
     end
-    #|> IO.inspect(label: "WRITE OUT")
   end
 end

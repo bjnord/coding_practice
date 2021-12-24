@@ -5,10 +5,13 @@ FILES = mix.exs test/test_helper.exs \
 	lib/logic/parser.ex test/logic/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test doc console clean
+.PHONY: run matchsticks test doc console clean
 
 run: $(BIN)
 	$(BIN) input/input.txt
+
+matchsticks: $(BIN)
+	$(BIN) --parts=3 --verbose input/matchsticks.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
