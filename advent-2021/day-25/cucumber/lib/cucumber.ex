@@ -3,6 +3,7 @@ defmodule Cucumber do
   Documentation for Cucumber.
   """
 
+  alias Cucumber.Herd, as: Herd
   alias Cucumber.Parser, as: Parser
   alias Submarine.CLI, as: CLI
 
@@ -23,9 +24,10 @@ defmodule Cucumber do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
+    # "What is the first step on which no sea cucumbers move?"
     File.read!(input_file)
-    |> Parser.parse()
-    nil  # TODO
+    |> Herd.new()
+    |> Herd.blocked_step()
     |> IO.inspect(label: "Part 1 answer is")
   end
 

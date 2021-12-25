@@ -68,7 +68,6 @@ defmodule Cucumber.HerdTest do
         v.v..>>v.v
         ....v..v.>
         """,
-        ex2_steps: 58,
         ex2_final: """
         ..>>v>vv..
         ..v.>>vv..
@@ -80,6 +79,7 @@ defmodule Cucumber.HerdTest do
         >vv......>
         .>v.vv.v..
         """,
+        exp_ex2_blocked_step: 58,
       ]
     end
 
@@ -126,14 +126,11 @@ defmodule Cucumber.HerdTest do
       assert Herd.south_pos(herd) == fixture.exp_ex1_final_south
     end
 
-    test "blocked herds at expected number of steps (example 2)", fixture do
-      herd =
+    test "blocked-step detector gets expected step (example 2)", fixture do
+      act_blocked_step =
         Herd.new(fixture.ex2_initial)
-        |> Herd.move(fixture.ex2_steps - 1)
-      before_pos = {Herd.east_pos(herd), Herd.south_pos(herd)}
-      herd = Herd.move(herd, 1)
-      after_pos = {Herd.east_pos(herd), Herd.south_pos(herd)}
-      assert before_pos == after_pos
+        |> Herd.blocked_step()
+      assert act_blocked_step == fixture.exp_ex2_blocked_step
     end
   end
 end

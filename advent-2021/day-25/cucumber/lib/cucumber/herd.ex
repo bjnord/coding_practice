@@ -76,22 +76,26 @@ defmodule Cucumber.Herd do
   end
 
   @doc ~S"""
-  Move the given herd `n` times.
+  Return the step at which the herd has stopped moving.
   """
+  def blocked_step(herd) do
+    1..1_000_000
+    |> Enum.reduce_while(herd, fn (n, prev_herd) ->
+      herd = move(prev_herd)
+      if herd.grid == prev_herd.grid do
+        {:halt, n}
+      else
+        {:cont, herd}
+      end
+    end)
+  end
+
+  @doc false
   def move(herd, n) do
     Enum.reduce(1..n, herd, fn (_n, herd) -> move(herd) end)
   end
 
-  @doc ~S"""
-  Move the given herd once.
-
-  ## Examples
-      iex> Cucumber.Herd.new(".>.\n..v\n") |> Cucumber.Herd.move(1)
-      %Cucumber.Herd{dimx: 3, dimy: 2, east: [{2, 0}], south: [{2, 1}],
-        grid: {{:floor, :floor, :east}, {:floor, :floor, :south}}}
-  """
-  # FIXME once working, make this `defp` or `@doc false`
-  def move(herd) do
+  defp move(herd) do
     # "Every step, the sea cucumbers in the east-facing herd attempt to
     # move forward one location, then the sea cucumbers in the south-facing
     # herd attempt to move forward one location. [...] During a single step,
