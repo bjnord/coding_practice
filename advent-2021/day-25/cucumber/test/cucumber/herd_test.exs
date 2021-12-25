@@ -117,5 +117,23 @@ defmodule Cucumber.HerdTest do
         Herd.new(fixture.uneven_widths)
       end
     end
+
+    test "mover produces expected positions (example 1)", fixture do
+      herd =
+        Herd.new(fixture.ex1_initial)
+        |> Herd.move(fixture.ex1_steps)
+      assert Herd.east_pos(herd) == fixture.exp_ex1_final_east
+      assert Herd.south_pos(herd) == fixture.exp_ex1_final_south
+    end
+
+    test "blocked herds at expected number of steps (example 2)", fixture do
+      herd =
+        Herd.new(fixture.ex2_initial)
+        |> Herd.move(fixture.ex2_steps - 1)
+      before_pos = {Herd.east_pos(herd), Herd.south_pos(herd)}
+      herd = Herd.move(herd, 1)
+      after_pos = {Herd.east_pos(herd), Herd.south_pos(herd)}
+      assert before_pos == after_pos
+    end
   end
 end
