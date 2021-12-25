@@ -91,6 +91,18 @@ defmodule Cucumber.HerdTest do
       assert Herd.parse(fixture.ex1_final) == fixture.exp_ex1_final_matrix
     end
 
+    test "parser gets expected positions (example 1 initial)", fixture do
+      herd = Herd.new(fixture.ex1_initial)
+      assert Herd.east_pos(herd) == fixture.exp_ex1_initial_east
+      assert Herd.south_pos(herd) == fixture.exp_ex1_initial_south
+    end
+
+    test "parser gets expected positions (example 1 final)", fixture do
+      herd = Herd.new(fixture.ex1_final)
+      assert Herd.east_pos(herd) == fixture.exp_ex1_final_east
+      assert Herd.south_pos(herd) == fixture.exp_ex1_final_south
+    end
+
     test "constructor gets correct dimensions", fixture do
       [{fixture.ex1_initial, {7, 7}}, {fixture.ex2_initial, {10, 9}}]
       |> Enum.each(fn {input, {exp_dimx, exp_dimy}} ->
