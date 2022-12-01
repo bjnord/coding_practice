@@ -1,6 +1,5 @@
 'use strict';
 const expect = require('chai').expect;
-const fs = require('fs');
 const food = require('../src/food');
 describe('parsing tests', () => {
   it('should parse one subsection correctly', () => {
