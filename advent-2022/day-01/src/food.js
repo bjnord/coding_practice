@@ -22,3 +22,16 @@ exports.parse = (input) => {
 exports.parseSection = (section) => {
   return section.trim().split(/\n/).map((line) => parseInt(line));
 };
+/**
+ * Calculate total calories of each elf's inventory.
+ *
+ * @param {Array.Array.Integer} sections - list of elf sections, each of which is a list of item calories
+ *
+ * @return {Array.Integer}
+ *   Returns a list of total item calories for each elf section, sorted highest first.
+ */
+exports.totalCaloriesSorted = (sections) => {
+  return sections.map((itemCalories) => {
+    return itemCalories.reduce((acc, cal) => acc + cal);
+  }).sort((a, b) => b - a);
+};
