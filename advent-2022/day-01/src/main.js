@@ -4,10 +4,13 @@ const fs = require('fs');
 const input = fs.readFileSync('input/input.txt', 'utf8');
 
 // PART 1
-const tbpThing = food.parse(input);
-const answer1 = 0;
-console.log('part 1: expected answer:                5937');
-console.log(`part 1: actual answer:                  ${answer1}`);
+const sections = food.parse(input);
+const elfCalories = sections.map((items) => {
+  return items.reduce((acc, cal) => acc + cal);
+});
+const maxElfCalories = Math.max(...elfCalories);
+console.log('part 1: expected answer:                64929');
+console.log(`part 1: calories of elf having most:    ${maxElfCalories}`);
 console.log('');
 
 // PART 2
