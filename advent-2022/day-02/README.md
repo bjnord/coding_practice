@@ -60,6 +60,8 @@ a total score of `15` (8 + 1 + 6).
 **What would your total score be if everything goes exactly according to
 your strategy guide?**
 
+Your puzzle answer was `12645`.
+
 ## Part One Design
 
 I first did a quick implementation using a brute-force if/then/else
@@ -115,6 +117,8 @@ guide, you would get a total score of `12`.
 Following the Elf's instructions for the second column, **what would your
 total score be if everything goes exactly according to your strategy
 guide?**
+
+Your puzzle answer was `11756`.
 
 ## Part Two Design
 
