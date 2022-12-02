@@ -45,3 +45,28 @@ exports.score = (round) => {
     );
   return (l + 1) + score;
 };
+
+exports.scoreRounds2 = (rounds) => {
+  return rounds.map((round) => module.exports.score2(round))
+    .reduce((total, score) => total + score);
+};
+
+exports.score2 = (round) => {
+  const outcome = round.player;
+  const score = outcome * 3;
+  const r = round.opponent;
+  let l;
+  if (outcome === 0) {  // lose
+    l = r - 1;
+  } else if (outcome === 1) {  // draw
+    l = r;
+  } else {  // win
+    l = r + 1;
+  }
+  if (l < 0) {
+    l = l + 3;
+  } else if (l > 2) {
+    l = l - 3;
+  }
+  return (l + 1) + score;
+};
