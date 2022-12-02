@@ -60,6 +60,36 @@ a total score of `15` (8 + 1 + 6).
 **What would your total score be if everything goes exactly according to
 your strategy guide?**
 
+## Part One Design
+
+I first did a quick implementation using a brute-force if/then/else
+approach to get the two stars; I knew modulo arithmetic would be
+simpler and more elegant, but I was too tired to work it out until
+I had some sleep. :) This is a situation where comprehensive unit
+tests give you the confidence to refactor the implementation later.
+
+One way to derive the necessary equation is to create a table with all
+the combinations, and then ask, "Does the value go up or down along
+the row (X) and column (Y)?" That tells you whether X and Y should
+be positive or negative in the equation. Then it's just deciding what
+constant to use to get the value you want.
+
+- Y axis = opponent's move
+- X axis = player's move
+
+|      |  0r  |  1p  |  2s  |
+|------|------|------|------|
+|  0r  |   1  |   2  |   0  |
+|------|------|------|------|
+|  1p  |   0  |   1  |   2  |
+|------|------|------|------|
+|  2s  |   2  |   0  |   1  |
+
+- so the equation `(X - Y + 1) mod 3` yields:
+  - 2 for player win
+  - 1 for player draw
+  - 0 for player loss
+
 ## Part Two
 
 The Elf finishes helping with the tent and sneaks back over to you.

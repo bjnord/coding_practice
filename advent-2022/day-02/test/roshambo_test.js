@@ -15,6 +15,28 @@ describe('parsing tests', () => {
     expect(roshambo.parse(exampleInput)).to.eql(expected);
   });
 });
+describe('outcome tests', () => {
+  it('should declare a win correctly', () => {
+    const round = roshambo.parseLine('A Y');
+    expect(roshambo.outcomeForPlay(round)).to.eql(2);
+  });
+  it('should declare a wrap-win correctly', () => {
+    const round = roshambo.parseLine('C X');
+    expect(roshambo.outcomeForPlay(round)).to.eql(2);
+  });
+  it('should declare a loss correctly', () => {
+    const round = roshambo.parseLine('B X');
+    expect(roshambo.outcomeForPlay(round)).to.eql(0);
+  });
+  it('should declare a wrap-loss correctly', () => {
+    const round = roshambo.parseLine('A Z');
+    expect(roshambo.outcomeForPlay(round)).to.eql(0);
+  });
+  it('should declare a draw correctly', () => {
+    const round = roshambo.parseLine('C Z');
+    expect(roshambo.outcomeForPlay(round)).to.eql(1);
+  });
+});
 describe('scoring tests (strategy type 1)', () => {
   it('should score a win correctly', () => {
     const round = roshambo.parseLine('A Y');
@@ -32,7 +54,7 @@ describe('scoring tests (strategy type 1)', () => {
     const round = roshambo.parseLine('A Z');
     expect(roshambo.score(round)).to.eql(3 + 0);
   });
-  it('should score a tie correctly', () => {
+  it('should score a draw correctly', () => {
     const round = roshambo.parseLine('C Z');
     expect(roshambo.score(round)).to.eql(3 + 3);
   });
