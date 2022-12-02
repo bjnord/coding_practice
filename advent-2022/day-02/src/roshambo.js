@@ -26,3 +26,22 @@ exports.parseLine = (line) => {
     player: moves[1].charCodeAt(0) - 88,
   };
 };
+
+exports.scoreRounds = (rounds) => {
+  return rounds.map((round) => module.exports.score(round))
+    .reduce((total, score) => total + score);
+};
+
+exports.score = (round) => {
+  const l = round.player;
+  const r = round.opponent;
+  const score =
+    ((l === 0) && (r === 2)) ? 6 : (
+      ((l === 2) && (r === 0)) ? 0 : (
+        (l > r) ? 6 : (
+          (l === r) ? 3 : 0
+        )
+      )
+    );
+  return (l + 1) + score;
+};

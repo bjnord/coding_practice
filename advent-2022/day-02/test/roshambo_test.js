@@ -15,3 +15,29 @@ describe('parsing tests', () => {
     expect(roshambo.parse(exampleInput)).to.eql(expected);
   });
 });
+describe('scoring tests', () => {
+  it('should score a win correctly', () => {
+    const round = roshambo.parseLine('A Y');
+    expect(roshambo.score(round)).to.eql(2 + 6);
+  });
+  it('should score a wrap-win correctly', () => {
+    const round = roshambo.parseLine('C X');
+    expect(roshambo.score(round)).to.eql(1 + 6);
+  });
+  it('should score a loss correctly', () => {
+    const round = roshambo.parseLine('B X');
+    expect(roshambo.score(round)).to.eql(1 + 0);
+  });
+  it('should score a wrap-loss correctly', () => {
+    const round = roshambo.parseLine('A Z');
+    expect(roshambo.score(round)).to.eql(3 + 0);
+  });
+  it('should score a tie correctly', () => {
+    const round = roshambo.parseLine('C Z');
+    expect(roshambo.score(round)).to.eql(3 + 3);
+  });
+  it('should compute total score correctly', () => {
+    const rounds = roshambo.parse(exampleInput);
+    expect(roshambo.scoreRounds(rounds)).to.eql(15);
+  });
+});
