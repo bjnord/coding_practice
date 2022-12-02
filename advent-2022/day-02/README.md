@@ -81,9 +81,9 @@ constant to use to get the value you want.
 
 |      |  0r  |  1p  |  2s  |
 |------|------|------|------|
-|  0r  |   1  |   2  |   0  |
-|  1p  |   0  |   1  |   2  |
-|  2s  |   2  |   0  |   1  |
+|**0r**|   1  |   2  |   0  |
+|**1p**|   0  |   1  |   2  |
+|**2s**|   2  |   0  |   1  |
 
 - so the equation `(X - Y + 1) mod 3` yields:
   - 2 for player win
@@ -128,9 +128,9 @@ Your puzzle answer was `11756`.
 
 |      | loss | draw |  win |
 |------|------|------|------|
-|  0r  |   2  |   0  |   1  |
-|  1p  |   0  |   1  |   2  |
-|  2s  |   1  |   2  |   0  |
+|**0r**|   2  |   0  |   1  |
+|**1p**|   0  |   1  |   2  |
+|**2s**|   1  |   2  |   0  |
 
 - so the equation `(X + Y - 1) mod 3` yields:
   - 0 to play rock
