@@ -63,6 +63,20 @@ describe('scoring tests (strategy type 1)', () => {
     expect(roshambo.scoreRounds(rounds)).to.eql(15);
   });
 });
+describe('play tests', () => {
+  it('should choose shape for a draw correctly', () => {
+    const round = roshambo.parseLine('A Y');
+    expect(roshambo.playForOutcome(round)).to.eql(0);
+  });
+  it('should choose shape for a loss correctly', () => {
+    const round = roshambo.parseLine('B X');
+    expect(roshambo.playForOutcome(round)).to.eql(0);
+  });
+  it('should choose shape for a win correctly', () => {
+    const round = roshambo.parseLine('C Z');
+    expect(roshambo.playForOutcome(round)).to.eql(0);
+  });
+});
 describe('scoring tests (strategy type 2)', () => {
   it('should score a draw correctly', () => {
     const round = roshambo.parseLine('A Y');

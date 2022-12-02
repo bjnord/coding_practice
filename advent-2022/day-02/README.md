@@ -115,3 +115,24 @@ guide, you would get a total score of `12`.
 Following the Elf's instructions for the second column, **what would your
 total score be if everything goes exactly according to your strategy
 guide?**
+
+## Part Two Design
+
+- Y axis = opponent's move
+- X axis = desired outcome
+  - 0 to lose
+  - 1 to draw
+  - 2 to win
+
+|      | loss | draw |  win |
+|------|------|------|------|
+|  0r  |   2  |   0  |   1  |
+|------|------|------|------|
+|  1p  |   0  |   1  |   2  |
+|------|------|------|------|
+|  2s  |   1  |   2  |   0  |
+
+- so the equation `(X + Y - 1) mod 3` yields:
+  - 0 to play rock
+  - 1 to play paper
+  - 2 to play scissors

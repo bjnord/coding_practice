@@ -49,27 +49,23 @@ exports.score = (round) => {
   return shapeScore + outcomeScore;
 };
 
+exports.playForOutcome = (round) => {
+  return math.mod((round.player + round.opponent - 1), 3);
+};
+
 exports.scoreRounds2 = (rounds) => {
   return rounds.map((round) => module.exports.score2(round))
     .reduce((total, score) => total + score);
 };
 
+/*
+ * "The score for a single round is the score for the shape you selected
+ * (1 for Rock, 2 for Paper, and 3 for Scissors) plus the score for the
+ * outcome of the round (0 if you lost, 3 if the round was a draw, and
+ * 6 if you won)."
+ */
 exports.score2 = (round) => {
-  const outcome = round.player;
-  const score = outcome * 3;
-  const r = round.opponent;
-  let l;
-  if (outcome === 0) {  // lose
-    l = r - 1;
-  } else if (outcome === 1) {  // draw
-    l = r;
-  } else {  // win
-    l = r + 1;
-  }
-  if (l < 0) {
-    l = l + 3;
-  } else if (l > 2) {
-    l = l - 3;
-  }
-  return (l + 1) + score;
+  const shapeScore = module.exports.playForOutcome(round) + 1;
+  const outcomeScore = round.player * 3;
+  return shapeScore + outcomeScore;
 };
