@@ -21,5 +21,8 @@ exports.parse = (input) => {
  */
 exports.parseLine = (line) => {
   const moves = line.trim().split(/\s/);
-  return {opponent: moves[0], player: moves[1]};
+  return {
+    opponent: moves[0].charCodeAt(0) - 65,
+    player: moves[1].charCodeAt(0) - 88,
+  };
 };
