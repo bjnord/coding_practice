@@ -85,14 +85,14 @@ exports.itemPriority = (ch) => {
 exports.commonItems3 = (rucksacks) => {
   const commons = [];
   for (let i = 0; i < rucksacks.length; i = i + 3) {
-    let common = null;
-    for (const ch in rucksacks[i+0][2]) {
-      if (rucksacks[i+1][2][ch] && rucksacks[i+2][2][ch]) {
-        common = ch;
-        break;
-      }
+    const items = util.commonKeys(rucksacks[i+0][2], rucksacks[i+1][2], rucksacks[i+2][2]);
+    if (items.length === 0) {
+      throw new SyntaxError('no common item found');
+    } else if (items.length === 1) {
+      commons.push(items[0]);
+    } else {
+      throw new SyntaxError('multiple common items found');
     }
-    commons.push(common);
   }
   return commons;
 };

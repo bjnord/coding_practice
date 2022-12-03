@@ -70,4 +70,16 @@ describe('rucksack group tests', () => {
     const expected = ['r', 'Z'];
     expect(rucksack.commonItems3(rucksacks)).to.eql(expected);
   });
+  it('should throw exception if no common item found', () => {
+    const rucksacks = rucksack.parse(exampleInput);
+    delete rucksacks[0][2]['r'];
+    const noCommonFn = () => { rucksack.commonItems3(rucksacks); };
+    expect(noCommonFn).to.throw(SyntaxError);
+  });
+  it('should throw exception if multiple common items found', () => {
+    const rucksacks = rucksack.parse(exampleInput);
+    rucksacks[0][2]['z'] = true;
+    const multiCommonFn = () => { rucksack.commonItems3(rucksacks); };
+    expect(multiCommonFn).to.throw(SyntaxError);
+  });
 });
