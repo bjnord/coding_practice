@@ -26,3 +26,30 @@ exports.parseLine = (line) => {
   }
   return [line.substring(0, len/2), line.substring(len/2, len)];
 };
+
+exports.commonItem = (ruck) => {
+  // FIXME DRY
+  const items0 = ruck[0].split('').reduce((h, ch) => {
+    h[ch] = true;
+    return h;
+  }, {});
+  const items1 = ruck[1].split('').reduce((h, ch) => {
+    h[ch] = true;
+    return h;
+  }, {});
+  for (let ch in items0) {
+    if (items1[ch]) {
+      return ch;
+    }
+  }
+  return null;
+};
+
+exports.itemPriority = (ch) => {
+  const code = ch.charCodeAt(0);
+  if (code >= 97) {
+    return code - 96;
+  } else {
+    return code - 64 + 26;
+  }
+};
