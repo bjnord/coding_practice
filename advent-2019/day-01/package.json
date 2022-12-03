@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary mocha"
+    "coverage": "nyc --reporter=lcov --reporter=text mocha"
   },
   "author": "Brent J. Nordquist",
   "license": "ISC",
