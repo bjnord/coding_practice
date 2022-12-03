@@ -1,4 +1,4 @@
-# Day 2 Visualization
+# Day 2 Visualizations
 
 ## Artwork
 
