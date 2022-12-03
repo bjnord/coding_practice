@@ -17,8 +17,8 @@ describe('parsing tests', () => {
     expect(rucksack.parseLine('vJrwpWtwJgWrhcsFMMfFFhFp')).to.eql(expected);
   });
   it('should throw exception for odd-sized line', () => {
-    const oddParse = () => { rucksack.parseLine('AbcdEfg'); };
-    expect(oddParse).to.throw(SyntaxError);
+    const oddParseFn = () => { rucksack.parseLine('AbcdEfg'); };
+    expect(oddParseFn).to.throw(SyntaxError);
   });
   it('should parse a whole input set correctly', () => {
     const expected = [
@@ -47,9 +47,15 @@ describe('analysis tests', () => {
     const actual = rucksacks.map((ruck) => rucksack.commonItem(ruck));
     expect(actual).to.eql(expected);
   });
-  it('should return null if no common item found', () => {
+  it('should throw exception if no common item found', () => {
     const ruck = rucksack.parseLine('AbcdEfgh');
-    expect(rucksack.commonItem(ruck)).to.equal(null);
+    const noCommonFn = () => { rucksack.commonItem(ruck); };
+    expect(noCommonFn).to.throw(SyntaxError);
+  });
+  it('should throw exception if multiple common items found', () => {
+    const ruck = rucksack.parseLine('AbcdEcfb');
+    const multiCommonFn = () => { rucksack.commonItem(ruck); };
+    expect(multiCommonFn).to.throw(SyntaxError);
   });
   it('should compute rucksack item priority correctly', () => {
     const items = ['p', 'L', 'P', 'v', 't', 's'];

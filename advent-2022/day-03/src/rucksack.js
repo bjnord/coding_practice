@@ -1,4 +1,5 @@
 'use strict';
+const util = require('../../shared/src/util');
 /**
  * @module rucksack
  *
@@ -62,12 +63,14 @@ exports.parseLine = (line) => {
 };
 
 exports.commonItem = (ruck) => {
-  for (const ch in ruck[0]) {
-    if (ruck[1][ch]) {
-      return ch;
-    }
+  const items = util.commonKeys(...ruck);
+  if (items.length === 0) {
+    throw new SyntaxError('no common item found');
+  } else if (items.length === 1) {
+    return items[0];
+  } else {
+    throw new SyntaxError('multiple common items found');
   }
-  return null;
 };
 
 exports.itemPriority = (ch) => {
