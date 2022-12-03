@@ -40,7 +40,7 @@ exports.parseLine = (line) => {
 };
 
 exports.commonItem = (ruck) => {
-  for (let ch in ruck[0]) {
+  for (const ch in ruck[0]) {
     if (ruck[1][ch]) {
       return ch;
     }
@@ -58,10 +58,10 @@ exports.itemPriority = (ch) => {
 };
 
 exports.commonItems3 = (rucksacks) => {
-  let commons = [];
+  const commons = [];
   for (let i = 0; i < rucksacks.length; i = i + 3) {
     let common = null;
-    for (let ch in rucksacks[i+0][0]) {
+    for (const ch in rucksacks[i+0][0]) {
       if (rucksacks[i+1][0][ch] || rucksacks[i+1][1][ch]) {
         if (rucksacks[i+2][0][ch] || rucksacks[i+2][1][ch]) {
           common = ch;
@@ -73,7 +73,7 @@ exports.commonItems3 = (rucksacks) => {
       commons.push(common);
       continue;
     }
-    for (let ch in rucksacks[i+0][1]) {
+    for (const ch in rucksacks[i+0][1]) {
       if (rucksacks[i+1][0][ch] || rucksacks[i+1][1][ch]) {
         if (rucksacks[i+2][0][ch] || rucksacks[i+2][1][ch]) {
           common = ch;
