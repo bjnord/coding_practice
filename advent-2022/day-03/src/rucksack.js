@@ -11,6 +11,15 @@
 exports.parse = (input) => {
   return input.trim().split(/\n/).map((line) => module.exports.parseLine(line));
 };
+/*
+ * Convert string of item characters into hash.
+ */
+const itemsToHash = (items) => {
+  return items.split('').reduce((h, ch) => {
+    h[ch] = true;
+    return h;
+  }, {});
+};
 /**
  * Parse one line from the puzzle input.
  *
@@ -28,15 +37,8 @@ exports.parseLine = (line) => {
 };
 
 exports.commonItem = (ruck) => {
-  // FIXME DRY
-  const items0 = ruck[0].split('').reduce((h, ch) => {
-    h[ch] = true;
-    return h;
-  }, {});
-  const items1 = ruck[1].split('').reduce((h, ch) => {
-    h[ch] = true;
-    return h;
-  }, {});
+  const items0 = itemsToHash(ruck[0]);
+  const items1 = itemsToHash(ruck[1]);
   for (let ch in items0) {
     if (items1[ch]) {
       return ch;
