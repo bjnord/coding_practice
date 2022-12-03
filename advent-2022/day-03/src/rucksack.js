@@ -33,14 +33,15 @@ exports.parseLine = (line) => {
   if ((len % 2) === 1) {
     throw 'invalid odd-sized line';
   }
-  return [line.substring(0, len/2), line.substring(len/2, len)];
+  return [
+    itemsToHash(line.substring(0, len/2)),
+    itemsToHash(line.substring(len/2, len)),
+  ];
 };
 
 exports.commonItem = (ruck) => {
-  const items0 = itemsToHash(ruck[0]);
-  const items1 = itemsToHash(ruck[1]);
-  for (let ch in items0) {
-    if (items1[ch]) {
+  for (let ch in ruck[0]) {
+    if (ruck[1][ch]) {
       return ch;
     }
   }
