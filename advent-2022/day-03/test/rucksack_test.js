@@ -9,51 +9,31 @@ describe('parsing tests', () => {
         'r': true, 't': true, 'v': true, 'w': true, },
       { 'F': true, 'M': true, 'c': true, 'f': true,
         'h': true, 'p': true, 's': true, },
+      { 'F': true, 'J': true, 'M': true, 'W': true,
+        'c': true, 'f': true, 'g': true, 'h': true,
+        'p': true, 'r': true, 's': true, 't': true,
+        'v': true, 'w': true, },
     ];
     expect(rucksack.parseLine('vJrwpWtwJgWrhcsFMMfFFhFp')).to.eql(expected);
   });
   it('should parse a whole input set correctly', () => {
     const expected = [
-      [
-        { 'J': true, 'W': true, 'g': true, 'p': true,
-          'r': true, 't': true, 'v': true, 'w': true, },
-        { 'F': true, 'M': true, 'c': true, 'f': true,
-          'h': true, 'p': true, 's': true, },
-      ],
-      [
-        { 'D': true, 'G': true, 'H': true, 'L': true,
-          'N': true, 'R': true, 'j': true, 'q': true,
-          'z': true, },
-        { 'F': true, 'L': true, 'M': true, 'S': true,
-          'Z': true, 'f': true, 'r': true, 's': true, },
-      ],
-      [
-        { 'P': true, 'V': true, 'd': true, 'm': true,
-          'q': true, 'r': true, 'z': true, },
-        { 'B': true, 'P': true, 'T': true, 'W': true,
-          'g': true, 'v': true, 'w': true, }
-      ],
-      [
-        { 'H': true, 'L': true, 'M': true, 'Z': true,
-          'h': true, 'q': true, 'v': true, 'w': true, },
-        { 'B': true, 'F': true, 'Q': true, 'S': true,
-          'T': true, 'b': true, 'c': true, 'j': true,
-          'n': true, 'v': true, },
-      ],
-      [
-        { 'G': true, 'J': true, 'R': true, 'g': true,
-          't': true, },
-        { 'Q': true, 'T': true, 'Z': true, 'c': true,
-          't': true, },
-      ],
-      [
-        { 'C': true, 'G': true, 'J': true, 'P': true,
-          'Z': true, 'r': true, 's': true, 'z': true, },
-        { 'D': true, 'L': true, 'M': true, 'm': true,
-          'p': true, 's': true, 'w': true, },
-      ],
+      { 'J': true, 'W': true, 'g': true, 'p': true,
+        'r': true, 't': true, 'v': true, 'w': true, },
+      { 'D': true, 'G': true, 'H': true, 'L': true,
+        'N': true, 'R': true, 'j': true, 'q': true,
+        'z': true, },
+      { 'P': true, 'V': true, 'd': true, 'm': true,
+        'q': true, 'r': true, 'z': true, },
+      { 'H': true, 'L': true, 'M': true, 'Z': true,
+        'h': true, 'q': true, 'v': true, 'w': true, },
+      { 'G': true, 'J': true, 'R': true, 'g': true,
+        't': true, },
+      { 'C': true, 'G': true, 'J': true, 'P': true,
+        'Z': true, 'r': true, 's': true, 'z': true, },
     ];
-    expect(rucksack.parse(exampleInput)).to.eql(expected);
+    const actual = rucksack.parse(exampleInput).map((ruck) => ruck[0]);
+    expect(actual).to.eql(expected);
   });
 });
 describe('analysis tests', () => {

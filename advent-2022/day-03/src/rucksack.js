@@ -1,11 +1,32 @@
 'use strict';
-/** @module */
+/**
+ * @module rucksack
+ *
+ * @description
+ *
+ * The rucksack data structure used in this module's functions is a three
+ * element array, each of which is a hash whose keys are the item types.
+ * - element 0: first compartment
+ * - element 1: second compartment
+ * - element 2: both compartments
+ *
+ * For example, the line `PmmdPrvPwwTg` (having the two halves `PmmdPr` and
+ * `vPwwTg`) would be represented as:
+ * ```
+ *   [
+ *     { 'P': true, 'd': true, 'm': true, 'r': true, },
+ *     { 'P': true, 'T': true, 'g': true, 'v': true, 'w': true, },
+ *     { 'P': true, 'T': true, 'd': true, 'g': true,
+ *       'm': true, 'r': true, 'v': true, 'w': true, },
+ *   ]
+ * ```
+ */
 /**
  * Parse the puzzle input.
  *
  * @param {string} input - lines of puzzle input separated by `\n`
  *
- * @return {Array.Object}
+ * @return {Array.Array.Object}
  *   Returns a list of rucksacks.
  */
 exports.parse = (input) => {
@@ -25,7 +46,7 @@ const itemsToHash = (items) => {
  *
  * @param {string} line - line of puzzle input
  *
- * @return {Object}
+ * @return {Array.Object}
  *   Returns a rucksack.
  */
 exports.parseLine = (line) => {
@@ -36,6 +57,7 @@ exports.parseLine = (line) => {
   return [
     itemsToHash(line.substring(0, len/2)),
     itemsToHash(line.substring(len/2, len)),
+    itemsToHash(line),
   ];
 };
 
@@ -61,21 +83,9 @@ exports.commonItems3 = (rucksacks) => {
   const commons = [];
   for (let i = 0; i < rucksacks.length; i = i + 3) {
     let common = null;
-    for (const ch in rucksacks[i+0][0]) {
-      if (rucksacks[i+1][0][ch] || rucksacks[i+1][1][ch]) {
-        if (rucksacks[i+2][0][ch] || rucksacks[i+2][1][ch]) {
-          common = ch;
-          break;
-        }
-      }
-    }
-    if (common) {
-      commons.push(common);
-      continue;
-    }
-    for (const ch in rucksacks[i+0][1]) {
-      if (rucksacks[i+1][0][ch] || rucksacks[i+1][1][ch]) {
-        if (rucksacks[i+2][0][ch] || rucksacks[i+2][1][ch]) {
+    for (const ch in rucksacks[i+0][2]) {
+      if (rucksacks[i+1][2][ch]) {
+        if (rucksacks[i+2][2][ch]) {
           common = ch;
           break;
         }
