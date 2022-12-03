@@ -12,7 +12,8 @@ console.log(`part 1: actual answer:                  ${sum}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                1');
-console.log(`part 2: actual answer:                  ${answer2}`);
+const priorities2 = rucksack.commonItems3(rucksacks).map((item) => rucksack.itemPriority(item));
+const sum2 = priorities2.reduce((sum, pri) => sum + pri);
+console.log('part 2: expected answer:                2825');
+console.log(`part 2: actual answer:                  ${sum2}`);
 console.log('');

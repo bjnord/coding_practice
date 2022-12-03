@@ -56,3 +56,32 @@ exports.itemPriority = (ch) => {
     return code - 64 + 26;
   }
 };
+
+exports.commonItems3 = (rucksacks) => {
+  let commons = [];
+  for (let i = 0; i < rucksacks.length; i = i + 3) {
+    let common = null;
+    for (let ch in rucksacks[i+0][0]) {
+      if (rucksacks[i+1][0][ch] || rucksacks[i+1][1][ch]) {
+        if (rucksacks[i+2][0][ch] || rucksacks[i+2][1][ch]) {
+          common = ch;
+          break;
+        }
+      }
+    }
+    if (common) {
+      commons.push(common);
+      continue;
+    }
+    for (let ch in rucksacks[i+0][1]) {
+      if (rucksacks[i+1][0][ch] || rucksacks[i+1][1][ch]) {
+        if (rucksacks[i+2][0][ch] || rucksacks[i+2][1][ch]) {
+          common = ch;
+          break;
+        }
+      }
+    }
+    commons.push(common);
+  }
+  return commons;
+};

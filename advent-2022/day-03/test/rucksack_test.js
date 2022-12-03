@@ -58,3 +58,10 @@ describe('analysis tests', () => {
     expect(actual).to.eql(expected);
   });
 });
+describe('rucksack group tests', () => {
+  it('should determine rucksack group common item correctly', () => {
+    const rucksacks = rucksack.parse(exampleInput);
+    const expected = ['r', 'Z'];
+    expect(rucksack.commonItems3(rucksacks)).to.eql(expected);
+  });
+});
