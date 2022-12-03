@@ -1,6 +1,6 @@
 'use strict';
 const math = require('../../shared/src/math');
-/** @module */
+/** @module roshambo */
 /**
  * Parse the puzzle input.
  *
@@ -49,7 +49,7 @@ exports.outcomeForPlay = (round) => {
   return math.mod((round.player - round.opponent + 1), 3);
 };
 /**
- * Calculate score for all roshambo rounds (strategy type 1).
+ * Calculate the score for all roshambo rounds (strategy type 1).
  *
  * @param {Array.Object} rounds - list of roshambo rounds
  *
@@ -61,7 +61,7 @@ exports.scoreRounds = (rounds) => {
     .reduce((total, score) => total + score);
 };
 /**
- * Calculate score for one roshambo round (strategy type 1).
+ * Calculate the score for one roshambo round (strategy type 1).
  *
  * In this strategy type, the `round.player` represents the
  * play made.
@@ -104,7 +104,7 @@ exports.playForOutcome = (round) => {
   return math.mod((round.player + round.opponent - 1), 3);
 };
 /**
- * Calculate score for all roshambo rounds (strategy type 2).
+ * Calculate the score for all roshambo rounds (strategy type 2).
  *
  * @param {Array.Object} rounds - list of roshambo rounds
  *
@@ -116,7 +116,7 @@ exports.scoreRounds2 = (rounds) => {
     .reduce((total, score) => total + score);
 };
 /**
- * Calculate score for one roshambo round (strategy type 2).
+ * Calculate the score for one roshambo round (strategy type 2).
  *
  * In this strategy type, the `round.player` represents the
  * desired outcome.

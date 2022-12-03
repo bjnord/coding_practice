@@ -34,7 +34,7 @@ exports.parse = (input) => {
   return input.trim().split(/\n/).map((line) => module.exports.parseLine(line));
 };
 /*
- * Convert string of item characters into hash.
+ * Convert a string of item characters into hash.
  */
 const itemsToHash = (items) => {
   return items.split('').reduce((h, ch) => {
@@ -61,7 +61,17 @@ exports.parseLine = (line) => {
     itemsToHash(line),
   ];
 };
-
+/**
+ * Find the common item between two rucksack compartments.
+ *
+ * @param {Array.Object} ruck - the rucksack
+ *
+ * @return {string}
+ *   Returns the item found in both compartments of the rucksack.
+ * @throws {SyntaxError}
+ *   Throws an error if no common item is found, or if multiple common items
+ *   are.
+ */
 exports.commonItem = (ruck) => {
   const items = util.commonKeys(...ruck);
   if (items.length === 0) {
@@ -72,7 +82,17 @@ exports.commonItem = (ruck) => {
     throw new SyntaxError('multiple common items found');
   }
 };
-
+/**
+ * Calculate the priority of an item.
+ *
+ * - Lowercase item types a through z have priorities 1 through 26.
+ * - Uppercase item types A through Z have priorities 27 through 52.
+ *
+ * @param {string} ch - the item
+ *
+ * @returns {number}
+ *   Returns the priority of the item.
+ */
 exports.itemPriority = (ch) => {
   const code = ch.charCodeAt(0);
   if (code >= 97) {
@@ -81,9 +101,21 @@ exports.itemPriority = (ch) => {
     return code - 64 + 26;
   }
 };
-
+/**
+ * Find the common item between every three rucksacks.
+ *
+ * @param {Array.Array.Object} rucksacks - the rucksacks
+ *
+ * @return {Array.string}
+ *   Returns a list of the item found in each group of three rucksacks.
+ * @throws {SyntaxError}
+ *   Throws an error if, for any group of three rucksacks, no common item
+ *   is found, or if multiple common items are.
+ */
 exports.commonItems3 = (rucksacks) => {
   const commons = [];
+  // TODO is there a JS equivalent of Elixir's `take`?
+  //      if not, would a custom iterator be cleaner?
   for (let i = 0; i < rucksacks.length; i = i + 3) {
     const items = util.commonKeys(rucksacks[i+0][2], rucksacks[i+1][2], rucksacks[i+2][2]);
     if (items.length === 0) {
