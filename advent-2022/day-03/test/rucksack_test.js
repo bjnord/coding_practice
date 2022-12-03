@@ -16,6 +16,10 @@ describe('parsing tests', () => {
     ];
     expect(rucksack.parseLine('vJrwpWtwJgWrhcsFMMfFFhFp')).to.eql(expected);
   });
+  it('should throw exception for odd-sized line', () => {
+    const oddParse = () => { rucksack.parseLine('AbcdEfg'); };
+    expect(oddParse).to.throw(SyntaxError);
+  });
   it('should parse a whole input set correctly', () => {
     const expected = [
       { 'J': true, 'W': true, 'g': true, 'p': true,
@@ -42,6 +46,10 @@ describe('analysis tests', () => {
     const expected = ['p', 'L', 'P', 'v', 't', 's'];
     const actual = rucksacks.map((ruck) => rucksack.commonItem(ruck));
     expect(actual).to.eql(expected);
+  });
+  it('should return null if no common item found', () => {
+    const ruck = rucksack.parseLine('AbcdEfgh');
+    expect(rucksack.commonItem(ruck)).to.equal(null);
   });
   it('should compute rucksack item priority correctly', () => {
     const items = ['p', 'L', 'P', 'v', 't', 's'];

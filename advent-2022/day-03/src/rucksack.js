@@ -52,7 +52,7 @@ const itemsToHash = (items) => {
 exports.parseLine = (line) => {
   const len = line.length;
   if ((len % 2) === 1) {
-    throw 'invalid odd-sized line';
+    throw new SyntaxError('invalid odd-sized line');
   }
   return [
     itemsToHash(line.substring(0, len/2)),
@@ -84,11 +84,9 @@ exports.commonItems3 = (rucksacks) => {
   for (let i = 0; i < rucksacks.length; i = i + 3) {
     let common = null;
     for (const ch in rucksacks[i+0][2]) {
-      if (rucksacks[i+1][2][ch]) {
-        if (rucksacks[i+2][2][ch]) {
-          common = ch;
-          break;
-        }
+      if (rucksacks[i+1][2][ch] && rucksacks[i+2][2][ch]) {
+        common = ch;
+        break;
       }
     }
     commons.push(common);
