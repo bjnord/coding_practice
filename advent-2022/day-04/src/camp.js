@@ -25,3 +25,12 @@ exports.parseLine = (line) => {
     return {min: minMax[0], max: minMax[1]};
   });
 };
+
+exports.fullContainment = (pair) => {
+  if ((pair[0].min >= pair[1].min) && (pair[0].max <= pair[1].max)) {
+    return true;
+  } else if ((pair[1].min >= pair[0].min) && (pair[1].max <= pair[0].max)) {
+    return true;
+  }
+  return false;
+};

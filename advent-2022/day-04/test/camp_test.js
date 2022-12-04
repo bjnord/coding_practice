@@ -22,3 +22,40 @@ describe('parsing tests', () => {
     expect(camp.parse(exampleInput)).to.eql(expected);
   });
 });
+describe('containment tests', () => {
+  it('should detect no containment (disjoint)', () => {
+    const assignmentPair = [
+      {min: 2, max: 4},
+      {min: 6, max: 8},
+    ];
+    expect(camp.fullContainment(assignmentPair)).to.equal(false);
+  });
+  it('should detect no containment (overlap)', () => {
+    const assignmentPair = [
+      {min: 5, max: 7},
+      {min: 7, max: 9},
+    ];
+    expect(camp.fullContainment(assignmentPair)).to.equal(false);
+  });
+  it('should detect containment (1st contains 2nd)', () => {
+    const assignmentPair = [
+      {min: 3, max: 7},
+      {min: 5, max: 7},
+    ];
+    expect(camp.fullContainment(assignmentPair)).to.equal(true);
+  });
+  it('should detect containment (2nd contains 1st)', () => {
+    const assignmentPair = [
+      {min: 2, max: 8},
+      {min: 3, max: 7},
+    ];
+    expect(camp.fullContainment(assignmentPair)).to.equal(true);
+  });
+  it('should detect containment (2nd contains 1st at edge)', () => {
+    const assignmentPair = [
+      {min: 6, max: 6},
+      {min: 4, max: 6},
+    ];
+    expect(camp.fullContainment(assignmentPair)).to.equal(true);
+  });
+});
