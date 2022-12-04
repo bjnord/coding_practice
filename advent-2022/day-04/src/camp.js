@@ -34,3 +34,10 @@ exports.fullContainment = (pair) => {
   }
   return false;
 };
+
+exports.overlap = (pair) => {
+  if ((pair[0].min <= pair[1].max) && (pair[0].max >= pair[1].min)) {
+    return true;
+  }
+  return false;
+};

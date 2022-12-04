@@ -13,7 +13,9 @@ console.log(`part 1: pairs with full containment: ${containedPairs.length}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:             1');
-console.log(`part 2: pairs which overlap at all:  ${answer2}`);
+const overlappingPairs = assignmentPairs.filter((pair) => {
+  return camp.overlap(pair);
+});
+console.log('part 2: expected answer:             886');
+console.log(`part 2: pairs which overlap at all:  ${overlappingPairs.length}`);
 console.log('');

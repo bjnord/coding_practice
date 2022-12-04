@@ -59,3 +59,40 @@ describe('containment tests', () => {
     expect(camp.fullContainment(assignmentPair)).to.equal(true);
   });
 });
+describe('overlap tests', () => {
+  it('should detect no overlap (disjoint)', () => {
+    const assignmentPair = [
+      {min: 2, max: 3},
+      {min: 4, max: 5},
+    ];
+    expect(camp.overlap(assignmentPair)).to.equal(false);
+  });
+  it('should detect overlap (touching)', () => {
+    const assignmentPair = [
+      {min: 5, max: 7},
+      {min: 7, max: 9},
+    ];
+    expect(camp.overlap(assignmentPair)).to.equal(true);
+  });
+  it('should detect overlap (1st contains 2nd)', () => {
+    const assignmentPair = [
+      {min: 3, max: 7},
+      {min: 5, max: 7},
+    ];
+    expect(camp.overlap(assignmentPair)).to.equal(true);
+  });
+  it('should detect overlap (2nd contains 1st)', () => {
+    const assignmentPair = [
+      {min: 2, max: 8},
+      {min: 3, max: 7},
+    ];
+    expect(camp.overlap(assignmentPair)).to.equal(true);
+  });
+  it('should detect overlap (neither contained)', () => {
+    const assignmentPair = [
+      {min: 2, max: 6},
+      {min: 4, max: 8},
+    ];
+    expect(camp.overlap(assignmentPair)).to.equal(true);
+  });
+});
