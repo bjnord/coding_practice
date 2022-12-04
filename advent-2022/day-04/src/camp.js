@@ -1,5 +1,23 @@
 'use strict';
-/** @module camp */
+/**
+ * @module camp
+ *
+ * @description
+ *
+ * The assignment pair data structure used in this module's functions is
+ * a two element array, each of which is a hash representing the section
+ * assignment.
+ * - element 0: first elf assignment
+ * - element 1: second elf assignment
+ *
+ * For example, the line `2-4,6-8` would be represented as:
+ * ```
+ *   [
+ *     {min: 2, max: 4},
+ *     {min: 6, max: 8},
+ *   ]
+ * ```
+ */
 /**
  * Parse the puzzle input.
  *
@@ -25,8 +43,15 @@ exports.parseLine = (line) => {
     return {min: minMax[0], max: minMax[1]};
   });
 };
-
-exports.fullContainment = (pair) => {
+/**
+ * Is one elf's assignment fully contained by the other's?
+ *
+ * @param {Array.Object} pair - the assignment pair
+ *
+ * @return {boolean}
+ *   Returns indication of whether one assignment fully contains the other.
+ */
+exports.fullContainment = (pair) => {  // eslint-disable-line complexity
   if ((pair[0].min >= pair[1].min) && (pair[0].max <= pair[1].max)) {
     return true;
   } else if ((pair[1].min >= pair[0].min) && (pair[1].max <= pair[0].max)) {
@@ -34,7 +59,14 @@ exports.fullContainment = (pair) => {
   }
   return false;
 };
-
+/**
+ * Does one elf's assignment overlap the other's?
+ *
+ * @param {Array.Object} pair - the assignment pair
+ *
+ * @return {boolean}
+ *   Returns indication of whether one assignment overlaps the other.
+ */
 exports.overlap = (pair) => {
   if ((pair[0].min <= pair[1].max) && (pair[0].max >= pair[1].min)) {
     return true;
