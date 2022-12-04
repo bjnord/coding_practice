@@ -4,6 +4,11 @@ const fs = require('fs');
 const input = fs.readFileSync('input/input.txt', 'utf8');
 const assignmentPairs = camp.parse(input);
 
+if (process.argv[process.argv.length - 1] === '--dump') {
+  camp.dumpPairs(assignmentPairs);
+  process.exit(0);
+}
+
 // PART 1
 const containedPairs = assignmentPairs.filter((pair) => {
   return camp.fullContainment(pair);

@@ -73,3 +73,59 @@ exports.overlap = (pair) => {
   }
   return false;
 };
+/*
+ * Print a line representing one elf assignment.
+ *
+ * From the puzzle description:
+ * `.234.....  2-4`
+ */
+/* istanbul ignore next */
+const dumpLine = (range) => {
+  let dots = '';
+  let i = 1;
+  for (; i < range.min; i++) {
+    dots += '.';
+  }
+  for (; i <= range.max; i++) {
+    dots += String.fromCharCode(48 + i % 10);
+  }
+  for (; i <= 99; i++) {
+    dots += '.';
+  }
+  console.log(`${dots}  ${range.min}-${range.max}`);
+};
+/*
+ * Print lines representing the assignments for a pair of elves.
+ * Also show indication of whether they overlap or have containment.
+ */
+/* istanbul ignore next */
+const dumpPair = (pair) => {
+  dumpLine(pair[0]);
+  dumpLine(pair[1]);
+  if (module.exports.fullContainment(pair)) {
+    console.log('FULL CONTAINMENT, OVERLAP');
+  } else if (module.exports.overlap(pair)) {
+    console.log('OVERLAP');
+  } else {
+    console.log('DISJOINT');
+  }
+  console.log('');
+};
+/**
+ * Print a visual representation of all elf assignments.
+ *
+ * From the puzzle description (plus overlap/containment indicator):
+ * ```
+ *   .2345678.  2-8
+ *   ..34567..  3-7
+ *   FULL CONTAINMENT, OVERLAP
+ * ```
+ *
+ * @param {Array.Array.Object} pairs - the elf assignments
+ */
+/* istanbul ignore next */
+exports.dumpPairs = (pairs) => {
+  for (const pair of pairs) {
+    dumpPair(pair);
+  }
+};
