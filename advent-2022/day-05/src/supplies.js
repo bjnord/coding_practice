@@ -1,17 +1,17 @@
 'use strict';
 /** @module supplies */
 /**
- * Parse the crates section of the puzzle input.
+ * Parse the stacks section of the puzzle input.
  *
  * @param {string} input - lines of puzzle input separated by `\n`
  *
  * @return {Array.Array.number}
  *   Returns a list of stacks of crates.
  */
-exports.parseCrates = (input) => {
-  const cratesInput = input.split(/\n\n/)[0];
+exports.parseStacks = (input) => {
+  const stacksInput = input.split(/\n\n/)[0];
   const stacks = [];
-  cratesInput.split(/\n/)
+  stacksInput.split(/\n/)
     .filter((line) => line.includes('['))
     .forEach((line) => {
       const nstacks = (line.length + 1) / 4;
@@ -50,40 +50,40 @@ exports.parseSteps = (input) => {
 };
 
 // TODO detect empty stack
-const moveCrate = (crates, from, to) => {
-  const crate = crates[from].pop();
-  crates[to].push(crate);
+const moveCrate = (stacks, from, to) => {
+  const crate = stacks[from].pop();
+  stacks[to].push(crate);
 };
 
-const topCrates = (crates) => {
-  return crates.map((stack) => stack[stack.length - 1]).join('');
+const topCrates = (stacks) => {
+  return stacks.map((stack) => stack[stack.length - 1]).join('');
 };
 
-exports.moveCrates = (crates, steps) => {
+exports.moveCrates = (stacks, steps) => {
   for (const step of steps) {
     for (let i = 0; i < step[0]; i++) {  // # crates to move
-      moveCrate(crates, step[1] - 1, step[2] - 1);
+      moveCrate(stacks, step[1] - 1, step[2] - 1);
     }
   }
-  return topCrates(crates);
+  return topCrates(stacks);
 };
 
 // TODO detect empty stack
-const moveCrateGroup = (crates, n, from, to) => {
+const moveCrateGroup = (stacks, n, from, to) => {
   const temp = [];
   for (let i = 0; i < n; i++) {
-    const crate = crates[from].pop();
+    const crate = stacks[from].pop();
     temp.push(crate);
   }
   for (let i = 0; i < n; i++) {
     const crate = temp.pop();
-    crates[to].push(crate);
+    stacks[to].push(crate);
   }
 };
 
-exports.multiMoveCrates = (crates, steps) => {
+exports.multiMoveCrates = (stacks, steps) => {
   for (const step of steps) {
-    moveCrateGroup(crates, step[0], step[1] - 1, step[2] - 1);
+    moveCrateGroup(stacks, step[0], step[1] - 1, step[2] - 1);
   }
-  return topCrates(crates);
+  return topCrates(stacks);
 };

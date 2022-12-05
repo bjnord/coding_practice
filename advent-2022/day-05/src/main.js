@@ -5,15 +5,15 @@ const input = fs.readFileSync('input/input.txt', 'utf8');
 const steps = supplies.parseSteps(input);
 
 // PART 1
-const crates = supplies.parseCrates(input);
-const tops = supplies.moveCrates(crates, steps);
+const stacks = supplies.parseStacks(input);
+const tops = supplies.moveCrates(stacks, steps);
 console.log('part 1: expected answer:                HBTMTBSDC');
 console.log(`part 1: actual answer:                  ${tops}`);
 console.log('');
 
 // PART 2
-const multiCrates = supplies.parseCrates(input);
-const multiTops = supplies.multiMoveCrates(multiCrates, steps);
+const stacks2 = supplies.parseStacks(input);
+const tops2 = supplies.multiMoveCrates(stacks2, steps);
 console.log('part 2: expected answer:                PQTJRSHWS');
-console.log(`part 2: actual answer:                  ${multiTops}`);
+console.log(`part 2: actual answer:                  ${tops2}`);
 console.log('');

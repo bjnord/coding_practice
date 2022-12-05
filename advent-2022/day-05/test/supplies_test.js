@@ -3,13 +3,13 @@ const expect = require('chai').expect;
 const supplies = require('../src/supplies');
 const exampleInput = '    [D]    \n[N] [C]    \n[Z] [M] [P]\n 1   2   3 \n\nmove 1 from 2 to 1\nmove 3 from 1 to 3\nmove 2 from 2 to 1\n move 1 from 1 to 2\n';
 describe('parsing tests', () => {
-  it('should parse crates correctly', () => {
+  it('should parse stacks correctly', () => {
     const expected = [
       ['Z', 'N'],
       ['M', 'C', 'D'],
       ['P'],
     ];
-    expect(supplies.parseCrates(exampleInput)).to.eql(expected);
+    expect(supplies.parseStacks(exampleInput)).to.eql(expected);
   });
   it('should parse steps correctly', () => {
     const expected = [
@@ -21,19 +21,17 @@ describe('parsing tests', () => {
     expect(supplies.parseSteps(exampleInput)).to.eql(expected);
   });
 });
-describe('procedure tests (style 1)', () => {
-  it('should move crates correctly', () => {
-    const crates = supplies.parseCrates(exampleInput);
+describe('move tests', () => {
+  it('should move single crates correctly', () => {
+    const stacks = supplies.parseStacks(exampleInput);
     const steps = supplies.parseSteps(exampleInput);
     const expected = 'CMZ';
-    expect(supplies.moveCrates(crates, steps)).to.equal(expected);
+    expect(supplies.moveCrates(stacks, steps)).to.equal(expected);
   });
-});
-describe('procedure tests (style 2)', () => {
-  it('should multi-move crates correctly', () => {
-    const crates = supplies.parseCrates(exampleInput);
+  it('should move multiple crates correctly', () => {
+    const stacks = supplies.parseStacks(exampleInput);
     const steps = supplies.parseSteps(exampleInput);
     const expected = 'MCD';
-    expect(supplies.multiMoveCrates(crates, steps)).to.equal(expected);
+    expect(supplies.multiMoveCrates(stacks, steps)).to.equal(expected);
   });
 });
