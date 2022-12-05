@@ -1,4 +1,5 @@
 'use strict';
+const EmptyStackError = require('../src/empty_stack_error');
 /**
  * @module supplies
  *
@@ -100,8 +101,10 @@ exports.parseSteps = (input) => {
 /*
  * Move one crate from stack `from` to stack `to`.
  */
-// TODO detect empty stack
 const moveCrate = (stacks, from, to) => {
+  if (stacks[from].length === 0) {
+    throw new EmptyStackError(`stack ${from} is empty`);
+  }
   const crate = stacks[from].pop();
   stacks[to].push(crate);
 };
@@ -133,8 +136,10 @@ exports.moveCrates = (stacks, steps) => {
  * Move `n` crates (as a group, all at once) from stack `from` to
  * stack `to`.
  */
-// TODO detect empty stack
 const moveCrateGroup = (stacks, n, from, to) => {
+  if (stacks[from].length < n) {
+    throw new EmptyStackError(`stack ${from} has fewer than ${n} crates`);
+  }
   const group = stacks[from].splice(stacks[from].length - n, n);
   stacks[to].push(...group);
 };
