@@ -21,3 +21,11 @@ describe('parsing tests', () => {
     expect(supplies.parseSteps(exampleInput)).to.eql(expected);
   });
 });
+describe('procedure tests', () => {
+  it('should move crates correctly', () => {
+    const crates = supplies.parseCrates(exampleInput);
+    const steps = supplies.parseSteps(exampleInput);
+    const expected = 'CMZ';
+    expect(supplies.moveCrates(crates, steps)).to.equal(expected);
+  });
+});

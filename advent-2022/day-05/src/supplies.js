@@ -48,3 +48,22 @@ exports.parseSteps = (input) => {
       ];
     });
 };
+
+// TODO detect empty stack
+const moveCrate = (crates, from, to) => {
+  const crate = crates[from].pop();
+  crates[to].push(crate);
+};
+
+const topCrates = (crates) => {
+  return crates.map((stack) => stack[stack.length - 1]).join('');
+};
+
+exports.moveCrates = (crates, steps) => {
+  for (const step of steps) {
+    for (let i = 0; i < step[0]; i++) {  // # crates to move
+      moveCrate(crates, step[1] - 1, step[2] - 1);
+    }
+  }
+  return topCrates(crates);
+};
