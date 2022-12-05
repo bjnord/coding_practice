@@ -70,15 +70,8 @@ exports.moveCrates = (stacks, steps) => {
 
 // TODO detect empty stack
 const moveCrateGroup = (stacks, n, from, to) => {
-  const temp = [];
-  for (let i = 0; i < n; i++) {
-    const crate = stacks[from].pop();
-    temp.push(crate);
-  }
-  for (let i = 0; i < n; i++) {
-    const crate = temp.pop();
-    stacks[to].push(crate);
-  }
+  const group = stacks[from].splice(stacks[from].length - n, n);
+  stacks[to].push(...group);
 };
 
 exports.multiMoveCrates = (stacks, steps) => {
