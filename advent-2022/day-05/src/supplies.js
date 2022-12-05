@@ -67,3 +67,23 @@ exports.moveCrates = (crates, steps) => {
   }
   return topCrates(crates);
 };
+
+// TODO detect empty stack
+const moveCrateGroup = (crates, n, from, to) => {
+  const temp = [];
+  for (let i = 0; i < n; i++) {
+    const crate = crates[from].pop();
+    temp.push(crate);
+  }
+  for (let i = 0; i < n; i++) {
+    const crate = temp.pop();
+    crates[to].push(crate);
+  }
+};
+
+exports.multiMoveCrates = (crates, steps) => {
+  for (const step of steps) {
+    moveCrateGroup(crates, step[0], step[1] - 1, step[2] - 1);
+  }
+  return topCrates(crates);
+};
