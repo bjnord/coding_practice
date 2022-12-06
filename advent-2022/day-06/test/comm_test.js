@@ -1,20 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
 const comm = require('../src/comm');
-const exampleInput = 'one\ntwo\nthree\n';
-describe('parsing tests', () => {
-  it('should parse one line correctly', () => {
-    expect(comm.parseLine('one')).to.eql(null);
-  });
-  it('should parse a whole input set correctly', () => {
-    const expected = [
-      null,
-      null,
-      null,
-    ];
-    expect(comm.parse(exampleInput)).to.eql(expected);
-  });
-});
 describe('start-of-packet marker tests', () => {
   it('should find first marker for example 1', () => {
     const example1 = 'mjqjpqmgbljsphdztnvjfqwrcgsmlb';
