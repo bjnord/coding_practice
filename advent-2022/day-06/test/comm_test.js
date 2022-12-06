@@ -18,23 +18,23 @@ describe('parsing tests', () => {
 describe('start-of-packet marker tests', () => {
   it('should find first marker for example 1', () => {
     const example1 = 'mjqjpqmgbljsphdztnvjfqwrcgsmlb';
-    expect(comm.firstMarker(example1)).to.equal(7);
+    expect(comm.firstPacketMarker(example1)).to.equal(7);
   });
   it('should find first marker for example 2', () => {
     const example2 = 'bvwbjplbgvbhsrlpgdmjqwftvncz';
-    expect(comm.firstMarker(example2)).to.equal(5);
+    expect(comm.firstPacketMarker(example2)).to.equal(5);
   });
   it('should find first marker for example 3', () => {
     const example3 = 'nppdvjthqldpwncqszvftbrmjlhg';
-    expect(comm.firstMarker(example3)).to.equal(6);
+    expect(comm.firstPacketMarker(example3)).to.equal(6);
   });
   it('should find first marker for example 4', () => {
     const example4 = 'nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg';
-    expect(comm.firstMarker(example4)).to.equal(10);
+    expect(comm.firstPacketMarker(example4)).to.equal(10);
   });
   it('should find first marker for example 5', () => {
     const example5 = 'zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw';
-    expect(comm.firstMarker(example5)).to.equal(11);
+    expect(comm.firstPacketMarker(example5)).to.equal(11);
   });
 });
 describe('start-of-message marker tests', () => {

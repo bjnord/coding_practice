@@ -4,7 +4,7 @@ const fs = require('fs');
 const input = fs.readFileSync('input/input.txt', 'utf8').trim();
 
 // PART 1
-const answer1 = comm.firstMarker(input);
+const answer1 = comm.firstPacketMarker(input);
 console.log('part 1: expected answer:                1816');
 console.log(`part 1: actual answer:                  ${answer1}`);
 console.log('');

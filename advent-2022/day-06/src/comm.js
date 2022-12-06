@@ -23,7 +23,7 @@ exports.parseLine = (line) => {
   return null;
 };
 
-exports.firstMarker = (data) => {
+exports.firstPacketMarker = (data) => {
   for (let i = 0; i <= data.length - 4; i++) {
     let match = true;
     for (let j = 0; j < 4; j++) {
