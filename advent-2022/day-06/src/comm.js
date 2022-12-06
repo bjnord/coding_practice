@@ -6,7 +6,7 @@ exports.firstPacketMarker = (data) => {
     let match = true;
     for (let j = 0; j < 4; j++) {
       for (let k = 0; k < j; k++) {
-        if (data.charAt(i + j) == data.charAt(i + k)) {
+        if (data.charAt(i + j) === data.charAt(i + k)) {
           match = false;
           break;
         }
@@ -27,7 +27,7 @@ exports.firstMessageMarker = (data) => {
     let match = true;
     for (let j = 0; j < 14; j++) {
       for (let k = 0; k < j; k++) {
-        if (data.charAt(i + j) == data.charAt(i + k)) {
+        if (data.charAt(i + j) === data.charAt(i + k)) {
           match = false;
           break;
         }
