@@ -10,7 +10,7 @@ console.log(`part 1: actual answer:                  ${answer1}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                1');
+const answer2 = comm.firstMessageMarker(input);
+console.log('part 2: expected answer:                2625');
 console.log(`part 2: actual answer:                  ${answer2}`);
 console.log('');
