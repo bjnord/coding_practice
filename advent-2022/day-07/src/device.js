@@ -48,19 +48,19 @@ exports.parse = (input) => {
 
 const calculateSize = ((subtree, path) => {
   const level = path.split('/').length - 1;
-  const subdirs = subtree.dirs
+  const entries = subtree.dirs
     .map((subdir) => calculateSize(subdir, path + subdir.name + '/'))
     .flat();
   const filesSize = subtree.files
     .reduce((total, file) => total + file.size, 0);
-  const dirsSize = subdirs
-    .filter((subdir) => subdir.name.split('/').length === (level + 2))
-    .reduce((total, subdir) => total + subdir.size, 0);
-  subdirs.push({
-    name: path,
+  const dirsSize = entries
+    .filter((entry) => entry.path.split('/').length === (level + 2))
+    .reduce((total, entry) => total + entry.size, 0);
+  entries.push({
+    path,
     size: filesSize + dirsSize,
   });
-  return subdirs;
+  return entries;
 });
 
 exports.calculateSizes = (tree) => {
@@ -69,7 +69,7 @@ exports.calculateSizes = (tree) => {
 
 exports.directoryToDelete = ((tree) => {
   const entries = module.exports.calculateSizes(tree);
-  const rootEntry = entries.find((entry) => entry.name === '/');
+  const rootEntry = entries.find((entry) => entry.path === '/');
   const freeSize = 70000000 - rootEntry.size;
   const addlFreeSize = 30000000 - freeSize;
   const sizableEntries = entries.filter((entry) => entry.size >= addlFreeSize)

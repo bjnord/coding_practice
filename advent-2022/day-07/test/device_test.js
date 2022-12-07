@@ -56,17 +56,17 @@ describe('size calculation tests', () => {
   it('should calculate size of one level correctly', () => {
     const dir = device.parse(dirInput);
     const expected = [
-      {name: '/', size: 14848514 + 8504156},
+      {path: '/', size: 14848514 + 8504156},
     ];
     expect(device.calculateSizes(dir)).to.eql(expected);
   });
   it('should calculate size of entire tree correctly', () => {
     const tree = device.parse(exampleInput);
     const expected = [
-      {name: '/a/e/', size: 584},
-      {name: '/a/', size: 94853},
-      {name: '/d/', size: 24933642},
-      {name: '/', size: 48381165},
+      {path: '/a/e/', size: 584},
+      {path: '/a/', size: 94853},
+      {path: '/d/', size: 24933642},
+      {path: '/', size: 48381165},
     ];
     expect(device.calculateSizes(tree)).to.eql(expected);
   });
@@ -74,7 +74,7 @@ describe('size calculation tests', () => {
 describe('directory find tests', () => {
   it('should find the correct directory to delete', () => {
     const tree = device.parse(exampleInput);
-    const expected = {name: '/d/', size: 24933642};
+    const expected = {path: '/d/', size: 24933642};
     expect(device.directoryToDelete(tree)).to.eql(expected);
   });
 });
