@@ -1,15 +1,27 @@
 'use strict';
 /** @module device */
 const parseDir = ((lines, name) => {
-  const dir = {name: name, files: []};
-  for (let i = 0; i < lines.length; i++) {
-    let m;
-    m = lines[i].match(/^(\d+)\s+(\S+)/);
-    if (m) {
-      dir.files.push({name: m[2], size: parseInt(m[1])});
+  const dir = {name: name, files: [], dirs: []};
+  while (lines.length > 0) {
+    const line = lines.shift();
+    const mFile = line.match(/^(\d+)\s+(\S+)/);
+    if (mFile) {
+      dir.files.push({name: mFile[2], size: parseInt(mFile[1])});
       continue;
     }
+    const mDir = line.match(/^\$\s+cd\s+(\S+)/);
+    if (mDir) {
+      if (mDir[1] === '..') {
+        dir.lines = lines;
+        return dir;
+      }
+      const childDir = parseDir(lines, mDir[1]);
+      lines = childDir.lines;
+      delete childDir['lines'];
+      dir.dirs.push(childDir);
+    }
   }
+  dir.lines = [];
   return dir;
 });
 /**
@@ -26,5 +38,10 @@ exports.parse = (input) => {
   if (cdr !== '$ cd /') {
     throw new SyntaxError(`unexpected first line ${cdr}`);
   }
-  return parseDir(lines, '/');
-}
+  const tree = parseDir(lines, '/');
+  if (tree.lines.length > 0) {
+    throw new SyntaxError('extra lines at end of input');
+  }
+  delete tree['lines'];
+  return tree;
+};
