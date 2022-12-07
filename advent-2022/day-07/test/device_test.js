@@ -60,4 +60,14 @@ describe('size calculation tests', () => {
     ];
     expect(device.calculateSizes(dir)).to.eql(expected);
   });
+  it('should calculate size of entire tree correctly', () => {
+    const tree = device.parse(exampleInput);
+    const expected = [
+      {name: '/a/e/', size: 584},
+      {name: '/a/', size: 94853},
+      {name: '/d/', size: 24933642},
+      {name: '/', size: 48381165},
+    ];
+    expect(device.calculateSizes(tree)).to.eql(expected);
+  });
 });

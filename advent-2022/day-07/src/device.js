@@ -46,15 +46,23 @@ exports.parse = (input) => {
   return tree;
 };
 
-const calculateSize = ((dir) => {
-  const filesSize = dir.files
+const calculateSize = ((subtree, path) => {
+  const level = path.split('/').length - 1;
+  const subdirs = subtree.dirs
+    .map((subdir) => calculateSize(subdir, path + subdir.name + '/'))
+    .flat();
+  const filesSize = subtree.files
     .reduce((total, file) => total + file.size, 0);
-  return [{
-    name: dir.name,
-    size: filesSize,
-  }];
+  const dirsSize = subdirs
+    .filter((subdir) => subdir.name.split('/').length === (level + 2))
+    .reduce((total, subdir) => total + subdir.size, 0);
+  subdirs.push({
+    name: path,
+    size: filesSize + dirsSize,
+  });
+  return subdirs;
 });
 
 exports.calculateSizes = (tree) => {
-  return calculateSize(tree);
+  return calculateSize(tree, '/');
 };
