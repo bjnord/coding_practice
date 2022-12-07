@@ -71,3 +71,10 @@ describe('size calculation tests', () => {
     expect(device.calculateSizes(tree)).to.eql(expected);
   });
 });
+describe('directory find tests', () => {
+  it('should find the correct directory to delete', () => {
+    const tree = device.parse(exampleInput);
+    const expected = {name: '/d/', size: 24933642};
+    expect(device.directoryToDelete(tree)).to.eql(expected);
+  });
+});

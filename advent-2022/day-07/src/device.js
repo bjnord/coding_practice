@@ -66,3 +66,13 @@ const calculateSize = ((subtree, path) => {
 exports.calculateSizes = (tree) => {
   return calculateSize(tree, '/');
 };
+
+exports.directoryToDelete = ((tree) => {
+  const entries = module.exports.calculateSizes(tree);
+  const rootEntry = entries.find((entry) => entry.name === '/');
+  const freeSize = 70000000 - rootEntry.size;
+  const addlFreeSize = 30000000 - freeSize;
+  const sizableEntries = entries.filter((entry) => entry.size >= addlFreeSize)
+    .sort((a, b) => Math.sign(a - b));
+  return sizableEntries[0];
+});

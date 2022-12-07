@@ -14,7 +14,7 @@ console.log(`part 1: total size of <=100k directories: ${totalSize}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                  1');
-console.log(`part 2: actual answer:                    ${answer2}`);
+const entry = device.directoryToDelete(tree);
+console.log('part 2: expected answer:                  10096985');
+console.log(`part 2: size of directory to delete:      ${entry.size}`);
 console.log('');
