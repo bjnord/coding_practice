@@ -45,3 +45,16 @@ exports.parse = (input) => {
   delete tree['lines'];
   return tree;
 };
+
+const calculateSize = ((dir) => {
+  const filesSize = dir.files
+    .reduce((total, file) => total + file.size, 0);
+  return [{
+    name: dir.name,
+    size: filesSize,
+  }];
+});
+
+exports.calculateSizes = (tree) => {
+  return calculateSize(tree);
+};

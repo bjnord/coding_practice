@@ -52,3 +52,12 @@ describe('parsing tests', () => {
     expect(device.parse(exampleInput)).to.eql(expected);
   });
 });
+describe('size calculation tests', () => {
+  it('should calculate size of one level correctly', () => {
+    const dir = device.parse(dirInput);
+    const expected = [
+      {name: '/', size: 14848514 + 8504156},
+    ];
+    expect(device.calculateSizes(dir)).to.eql(expected);
+  });
+});
