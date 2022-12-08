@@ -46,26 +46,34 @@ exports.parse = (input) => {
   return tree;
 };
 
+const filesSize = ((subtree) => {
+  return subtree.files.reduce((total, file) => total + file.size, 0);
+});
+
+exports.entriesMatching = ((entries, path) => {
+  const patt = new RegExp(`^${path}\\w+/$`);
+  return entries.filter((entry) => entry.path.match(patt));
+});
+
+const dirsSize = ((entries, path) => {
+  return module.exports.entriesMatching(entries, path)
+    .reduce((total, entry) => total + entry.size, 0);
+});
+
 const calculateSize = ((subtree, path) => {
-  const level = path.split('/').length - 1;
   const entries = subtree.dirs
     .map((subdir) => calculateSize(subdir, path + subdir.name + '/'))
     .flat();
-  const filesSize = subtree.files
-    .reduce((total, file) => total + file.size, 0);
-  const dirsSize = entries
-    .filter((entry) => entry.path.split('/').length === (level + 2))
-    .reduce((total, entry) => total + entry.size, 0);
   entries.push({
     path,
-    size: filesSize + dirsSize,
+    size: filesSize(subtree) + dirsSize(entries, path),
   });
   return entries;
 });
 
-exports.calculateSizes = (tree) => {
+exports.calculateSizes = ((tree) => {
   return calculateSize(tree, '/');
-};
+});
 
 exports.directoryToDelete = ((tree) => {
   const entries = module.exports.calculateSizes(tree);

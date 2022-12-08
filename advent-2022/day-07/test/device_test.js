@@ -72,6 +72,17 @@ describe('size calculation tests', () => {
   });
 });
 describe('directory find tests', () => {
+  it('should find entries matching path', () => {
+    const entries = [
+      {path: '/a/e/', size: 584},
+      {path: '/a/', size: 94853},
+      {path: '/d/', size: 24933642},
+      {path: '/', size: 48381165},
+    ];
+    expect(device.entriesMatching(entries, '/a/')).to.eql(entries.slice(0, 1));
+    expect(device.entriesMatching(entries, '/d/')).to.eql([]);
+    expect(device.entriesMatching(entries, '/')).to.eql(entries.slice(1, 3));
+  });
   it('should find the correct directory to delete', () => {
     const tree = device.parse(exampleInput);
     const expected = {path: '/d/', size: 24933642};
