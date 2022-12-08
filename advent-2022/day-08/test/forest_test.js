@@ -54,4 +54,8 @@ describe('visibility tests', () => {
     expect(forest.scenicScore(grid, 4, 2)).to.equal(0);
     expect(forest.scenicScore(grid, 2, 0)).to.equal(0);
   });
+  it('should find the max scenic score', () => {
+    const grid = forest.parse(exampleInput);
+    expect(forest.maxScenicScore(grid)).to.equal(8);
+  });
 });

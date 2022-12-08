@@ -145,3 +145,17 @@ exports.scenicScore = (grid, y, x) => {
   score *= dist;
   return score;
 };
+
+exports.maxScenicScore = (grid) => {
+  const dim = grid[0].length;
+  let max = 0;
+  for (let y = 0; y < dim; y++) {
+    for (let x = 0; x < dim; x++) {
+      const ss = module.exports.scenicScore(grid, y, x);
+      if (ss > max) {
+        max = ss;
+      }
+    }
+  }
+  return max;
+};

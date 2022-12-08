@@ -11,7 +11,7 @@ console.log(`part 1: number of visible trees: ${answer1}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:         1');
-console.log(`part 2: actual answer:           ${answer2}`);
+const answer2 = forest.maxScenicScore(grid);
+console.log('part 2: expected answer:         383520');
+console.log(`part 2: maximum scenic score:    ${answer2}`);
 console.log('');
