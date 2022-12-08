@@ -39,4 +39,8 @@ describe('visibility tests', () => {
     expect(forest.isVisible(grid, 3, 2)).to.equal(true);
     expect(forest.isVisible(grid, 3, 3)).to.equal(false);
   });
+  it('should determine how many trees are visible', () => {
+    const grid = forest.parse(exampleInput);
+    expect(forest.nVisible(grid)).to.equal(21);
+  });
 });
