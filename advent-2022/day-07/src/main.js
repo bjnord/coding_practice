@@ -5,7 +5,7 @@ const input = fs.readFileSync('input/input.txt', 'utf8');
 const tree = device.parse(input);
 
 // PART 1
-const entries = device.calculateSizes(tree);
+const entries = device.calculateDirectorySizes(tree);
 const totalSize = entries.map((entry) => entry.size)
   .filter((size) => size <= 100000)
   .reduce((total, size) => total + size, 0);
