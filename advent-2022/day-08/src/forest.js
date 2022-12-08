@@ -89,3 +89,59 @@ exports.nVisible = (grid) => {
   }
   return total;
 };
+
+exports.scenicScore = (grid, y, x) => {
+  const dim = grid[0].length;
+  // "If a tree is right on the edge, at least one of its viewing distances will be zero."
+  if ((y <= 0) || (y >= dim - 1)) {
+    return 0;
+  } else if ((x <= 0) || (x >= dim - 1)) {
+    return 0;
+  }
+  // consider tree at [y, x]
+  //console.log(`[${y},${x}] = ${grid[y][x]}`);
+  let j;
+  let dist;
+  let score = 1;
+  // look to left
+  for (j = x - 1, dist = 0; j >= 0; j--) {
+    //console.log(`  [${y},${j}] = ${grid[y][j]}`);
+    dist += 1;
+    if (grid[y][j] >= grid[y][x]) {
+      //console.log(`    TALL`);
+      break;
+    }
+  }
+  score *= dist;
+  // look to right
+  for (j = x + 1, dist = 0; j < dim; j++) {
+    //console.log(`  [${y},${j}] = ${grid[y][j]}`);
+    dist += 1;
+    if (grid[y][j] >= grid[y][x]) {
+      //console.log(`    TALL`);
+      break;
+    }
+  }
+  score *= dist;
+  // look to top
+  for (j = y - 1, dist = 0; j >= 0; j--) {
+    //console.log(`  [${j},${x}] = ${grid[j][x]}`);
+    dist += 1;
+    if (grid[j][x] >= grid[y][x]) {
+      //console.log(`    TALL`);
+      break;
+    }
+  }
+  score *= dist;
+  // look to bottom
+  for (j = y + 1, dist = 0; j < dim; j++) {
+    //console.log(`  [${j},${x}] = ${grid[j][x]}`);
+    dist += 1;
+    if (grid[j][x] >= grid[y][x]) {
+      //console.log(`    TALL`);
+      break;
+    }
+  }
+  score *= dist;
+  return score;
+};

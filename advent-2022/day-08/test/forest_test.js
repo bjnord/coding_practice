@@ -43,4 +43,15 @@ describe('visibility tests', () => {
     const grid = forest.parse(exampleInput);
     expect(forest.nVisible(grid)).to.equal(21);
   });
+  it('should calculate scenic scores correctly', () => {
+    const grid = forest.parse(exampleInput);
+    // puzzle examples:
+    expect(forest.scenicScore(grid, 1, 2)).to.equal(4);
+    expect(forest.scenicScore(grid, 3, 2)).to.equal(8);
+    // "If a tree is right on the edge, at least one of its viewing distances will be zero."
+    expect(forest.scenicScore(grid, 0, 2)).to.equal(0);
+    expect(forest.scenicScore(grid, 2, 4)).to.equal(0);
+    expect(forest.scenicScore(grid, 4, 2)).to.equal(0);
+    expect(forest.scenicScore(grid, 2, 0)).to.equal(0);
+  });
 });
