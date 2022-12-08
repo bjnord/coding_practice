@@ -86,9 +86,6 @@ exports.parse = (input) => {
     throw new SyntaxError(`unexpected first line ${cdr}`);
   }
   const tree = parseDir(lines, '/');
-  if (tree.lines.length > 0) {
-    throw new SyntaxError('extra lines at end of input');
-  }
   delete tree['lines'];
   return tree;
 };

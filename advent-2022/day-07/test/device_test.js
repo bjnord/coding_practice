@@ -51,6 +51,11 @@ describe('parsing tests', () => {
     };
     expect(device.parse(exampleInput)).to.eql(expected);
   });
+  it('should throw exception for bad first line', () => {
+    const badInput = 'ls\ndir a\n14848514 b.txt\n8504156 c.dat\ndir d\n';
+    const badParseFn = () => { device.parse(badInput); };
+    expect(badParseFn).to.throw(SyntaxError);
+  });
 });
 describe('size calculation tests', () => {
   it('should calculate size of one level correctly', () => {
