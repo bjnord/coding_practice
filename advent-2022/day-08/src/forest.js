@@ -23,57 +23,44 @@ exports.isVisible = (grid, y, x) => {
     return true;
   }
   // consider tree at [y, x]
-  //console.log(`[${y},${x}] = ${grid[y][x]}`);
   // look from left
   let j = 0;
   for (; j < x; j++) {
-    //console.log(`  [${y},${j}] = ${grid[y][j]}`);
     if (grid[y][j] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   if (j === x) {
-    //console.log(`    SHORT`);
     return true;
   }
   // look from right
   j = dim - 1;
   for (; j > x; j--) {
-    //console.log(`  [${y},${j}] = ${grid[y][j]}`);
     if (grid[y][j] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   if (j === x) {
-    //console.log(`    SHORT`);
     return true;
   }
   // look from top
   j = 0;
   for (; j < y; j++) {
-    //console.log(`  [${j},${x}] = ${grid[j][x]}`);
     if (grid[j][x] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   if (j === y) {
-    //console.log(`    SHORT`);
     return true;
   }
   // look from bottom
   j = dim - 1;
   for (; j > y; j--) {
-    //console.log(`  [${j},${x}] = ${grid[j][x]}`);
     if (grid[j][x] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   if (j === y) {
-    //console.log(`    SHORT`);
     return true;
   }
   return false;
@@ -99,46 +86,37 @@ exports.scenicScore = (grid, y, x) => {
     return 0;
   }
   // consider tree at [y, x]
-  //console.log(`[${y},${x}] = ${grid[y][x]}`);
   let j;
   let dist;
   let score = 1;
   // look to left
   for (j = x - 1, dist = 0; j >= 0; j--) {
-    //console.log(`  [${y},${j}] = ${grid[y][j]}`);
     dist += 1;
     if (grid[y][j] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   score *= dist;
   // look to right
   for (j = x + 1, dist = 0; j < dim; j++) {
-    //console.log(`  [${y},${j}] = ${grid[y][j]}`);
     dist += 1;
     if (grid[y][j] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   score *= dist;
   // look to top
   for (j = y - 1, dist = 0; j >= 0; j--) {
-    //console.log(`  [${j},${x}] = ${grid[j][x]}`);
     dist += 1;
     if (grid[j][x] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
   score *= dist;
   // look to bottom
   for (j = y + 1, dist = 0; j < dim; j++) {
-    //console.log(`  [${j},${x}] = ${grid[j][x]}`);
     dist += 1;
     if (grid[j][x] >= grid[y][x]) {
-      //console.log(`    TALL`);
       break;
     }
   }
