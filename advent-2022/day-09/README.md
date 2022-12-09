@@ -10,20 +10,20 @@ gorge which was carved out by the massive river far below you.
 
 You step carefully; as you do, the ropes stretch and twist. You decide
 to distract yourself by modeling rope physics; maybe you can even figure
-out where *not* to step.
+out where **not** to step.
 
-Consider a rope with a knot at each end; these knots mark the *head* and
-the *tail* of the rope. If the head moves far enough away from the tail,
+Consider a rope with a knot at each end; these knots mark the **head** and
+the **tail** of the rope. If the head moves far enough away from the tail,
 the tail is pulled toward the head.
 
 Due to nebulous reasoning involving [Planck
 lengths](https://en.wikipedia.org/wiki/Planck_units#Planck_length), you
 should be able to model the positions of the knots on a two-dimensional
-grid. Then, by following a hypothetical *series of motions* (your puzzle
+grid. Then, by following a hypothetical **series of motions** (your puzzle
 input) for the head, you can determine how the tail will move.
 
 Due to the aforementioned Planck lengths, the rope must be quite short;
-in fact, the head (`H`) and tail (`T`) must *always be touching*
+in fact, the head (`H`) and tail (`T`) must **always be touching**
 (diagonally adjacent and even overlapping both count as touching):
 
 ```
@@ -91,8 +91,8 @@ For example:
     R 2
 ```
 
-This series of motions moves the head *right* four steps, then *up* four
-steps, then *left* three steps, then *down* one step, and so on. After
+This series of motions moves the head **right** four steps, then **up** four
+steps, then **left** three steps, then **down** one step, and so on. After
 each step, you'll need to update the position of the tail if the step
 means the head is no longer adjacent to the tail. Visually, these
 motions occur as follows (`s` marks the starting position as a reference
@@ -269,7 +269,7 @@ point):
 ```
 
 After simulating the rope, you can count up all of the positions the
-*tail visited at least once*. In this diagram, `s` again marks the
+**tail visited at least once**. In this diagram, `s` again marks the
 starting position (which the tail also visited) and `#` marks other
 positions the tail visited:
 
@@ -283,8 +283,8 @@ positions the tail visited:
 
 So, there are `13` positions the tail visited at least once.
 
-Simulate your complete hypothetical series of motions. *How many
-positions does the tail of the rope visit at least once?*
+Simulate your complete hypothetical series of motions. **How many
+positions does the tail of the rope visit at least once?**
 
 Your puzzle answer was `6236`.
 
@@ -298,7 +298,7 @@ The ropes are moving too quickly to grab; you only have a few seconds to
 choose how to arch your body to avoid being hit. Fortunately, your
 simulation can be extended to support longer ropes.
 
-Rather than two knots, you now must simulate a rope consisting of *ten*
+Rather than two knots, you now must simulate a rope consisting of **ten**
 knots. One knot is still the head of the rope and moves according to the
 series of motions. Each knot further down the rope follows the knot in
 front of it using the same rules as before.
@@ -478,7 +478,7 @@ knots marked `H`, `1`, `2`, ..., `9`, the motions now occur as follows:
 
 Now, you need to keep track of the positions the new tail, `9`, visits.
 In this example, the tail never moves, and so it only visits `1`
-position. However, *be careful*: more types of motion are possible than
+position. However, **be careful**: more types of motion are possible than
 before, so you might want to visually compare your simulated rope to the
 one above.
 
@@ -742,8 +742,8 @@ Now, the tail (`9`) visits `36` positions (including `s`) at least once:
 ```
 
 Simulate your complete series of motions on a larger rope with ten
-knots. *How many positions does the tail of the rope visit at least
-once?*
+knots. **How many positions does the tail of the rope visit at least
+once?**
 
 Your puzzle answer was `2449`.
 
@@ -753,7 +753,7 @@ I quickly completed parts one and two, and my tests passed both puzzle examples,
 
 In the early days, the puzzle descriptions are more likely to give you warnings like this about potential pitfalls:
 
-> However, *be careful*: more types of motion are possible than
+> However, **be careful**: more types of motion are possible than
 > before, so you might want to visually compare your simulated rope to the
 > one above.
 
