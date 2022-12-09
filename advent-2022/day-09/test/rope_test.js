@@ -20,3 +20,9 @@ describe('parsing tests', () => {
     expect(rope.parse(exampleInput)).to.eql(expected);
   });
 });
+describe('motion tests', () => {
+  it('should follow motions and report positions visited', () => {
+    const motions = rope.parse(exampleInput);
+    expect(rope.followMotions(motions)).to.eql(13);
+  });
+});
