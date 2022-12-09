@@ -34,20 +34,20 @@ exports.touching = ((a, b) => {
 
 exports.move = ((pos, dir) => {
   switch (dir) {
-    case 'R':
-      pos.x += 1;
-      break;
-    case 'L':
-      pos.x -= 1;
-      break;
-    case 'D':
-      pos.y += 1;
-      break;
-    case 'U':
-      pos.y -= 1;
-      break;
-    default:
-      throw new SyntaxError(`unknown direction '${dir}'`);
+  case 'R':
+    pos.x += 1;
+    break;
+  case 'L':
+    pos.x -= 1;
+    break;
+  case 'D':
+    pos.y += 1;
+    break;
+  case 'U':
+    pos.y -= 1;
+    break;
+  default:
+    throw new SyntaxError(`unknown direction '${dir}'`);
   }
 });
 
