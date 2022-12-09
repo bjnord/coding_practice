@@ -94,3 +94,25 @@ exports.followMotions = ((motions) => {
   //console.dir(visited);
   return Object.keys(visited).length;
 });
+
+exports.followMotions10 = ((motions) => {
+  const rope = [
+    {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
+    {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
+    {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
+    {y: 0, x: 0},
+  ];
+  const visited = {};
+  visited[posKey(rope[9])] = true;
+  motions.forEach((motion) => {
+    for (let i = 0; i < motion[1]; i++) {
+      module.exports.move(rope[0], motion[0]);
+      for (let k = 1; k < 10; k++) {
+        module.exports.moveTail(rope[k], rope[k-1]);
+      }
+      visited[posKey(rope[9])] = true;
+    }
+  });
+  //console.dir(visited);
+  return Object.keys(visited).length;
+});
