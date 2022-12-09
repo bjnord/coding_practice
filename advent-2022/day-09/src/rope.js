@@ -40,10 +40,10 @@ exports.move = ((pos, dir) => {
     case 'L':
       pos.x -= 1;
       break;
-    case 'U':
+    case 'D':
       pos.y += 1;
       break;
-    case 'D':
+    case 'U':
       pos.y -= 1;
       break;
     default:
@@ -73,6 +73,9 @@ exports.moveTail = ((tail, head) => {
   if (Math.abs(dx) > Math.abs(dy)) {
     tail.x += (dx / 2);
     tail.y += dy;
+  } else if ((Math.abs(dx) === 2) && (Math.abs(dy) === 2)) {
+    tail.x += (dx / 2);
+    tail.y += (dy / 2);
   } else {
     tail.x += dx;
     tail.y += (dy / 2);
@@ -95,7 +98,26 @@ exports.followMotions = ((motions) => {
   return Object.keys(visited).length;
 });
 
-exports.followMotions10 = ((motions) => {
+const dumpRope = ((rope, grid) => {
+  for (let y = grid.y0; y <= grid.y1; y++) {
+    let line = '';
+    for (let x = grid.x0; x <= grid.x1; x++) {
+      for (let i = 0; i < 10; i++) {
+        if ((rope[i].y === y) && (rope[i].x === x)) {
+          const ch = (i === 0) ? 'H' : ('' + i);
+          line += ch;
+          break;
+        } else if (i === 9) {
+          line += '.';
+        }
+      }
+    }
+    console.log(line);
+  }
+  console.log('');
+});
+
+exports.followMotions10 = ((motions, dumpGrid) => {
   const rope = [
     {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
     {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
@@ -105,12 +127,22 @@ exports.followMotions10 = ((motions) => {
   const visited = {};
   visited[posKey(rope[9])] = true;
   motions.forEach((motion) => {
+    if (dumpGrid) {
+      console.log(`== ${motion[0]} ${motion[1]} ==`);
+      console.log('');
+    }
     for (let i = 0; i < motion[1]; i++) {
       module.exports.move(rope[0], motion[0]);
       for (let k = 1; k < 10; k++) {
         module.exports.moveTail(rope[k], rope[k-1]);
       }
       visited[posKey(rope[9])] = true;
+      if (dumpGrid && (dumpGrid.all === true)) {
+        dumpRope(rope, dumpGrid);
+      }
+    }
+    if (dumpGrid && (dumpGrid.all === false)) {
+      dumpRope(rope, dumpGrid);
     }
   });
   //console.dir(visited);

@@ -24,12 +24,14 @@ describe('parsing tests', () => {
 describe('motion tests', () => {
   it('should follow 2-knot motions and report positions visited', () => {
     const motions = rope.parse(exampleInput);
-    expect(rope.followMotions(motions)).to.eql(13);
+    expect(rope.followMotions(motions)).to.equal(13);
   });
   it('should follow 10-knot motions and report positions visited', () => {
+    const dumpGrid = {y0: -4, y1: 0, x0: 0, x1: 5, all: true};
     const motions = rope.parse(exampleInput);
-    expect(rope.followMotions10(motions)).to.eql(1);
+    expect(rope.followMotions10(motions, null)).to.equal(1);
+    const dumpGrid2 = {y0: -15, y1: 5, x0: -11, x1: 14, all: false};
     const motions2 = rope.parse(exampleInput2);
-    expect(rope.followMotions10(motions2)).to.eql(36);
+    expect(rope.followMotions10(motions2, null)).to.equal(36);
   });
 });
