@@ -1,5 +1,12 @@
 # Day 3 Visualizations
 
+## Comics
+
+[Advent of Code comics](https://www.webtoons.com/en/challenge/advent-of-code/list?title_no=713188)
+by [Fish N Chips UK](https://www.webtoons.com/en/creator/69q8f)
+
+1. [Rucksack Reorganization](https://www.webtoons.com/en/challenge/advent-of-code/rucksack-reorganization/viewer?title_no=713188&episode_no=32)
+
 ## Artwork
 
 1. MidJourney by [Reddit user Iain\_M\_Norman](https://www.reddit.com/user/Iain_M_Norman)

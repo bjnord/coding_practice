@@ -12,7 +12,19 @@
 
 (see Reddit post for video)
 
+## Comics
+
+[Advent of Code comics](https://www.webtoons.com/en/challenge/advent-of-code/list?title_no=713188)
+by [Fish N Chips UK](https://www.webtoons.com/en/creator/69q8f)
+
+1. [Rock Paper Scissors](https://www.webtoons.com/en/challenge/advent-of-code/rock-paper-scissors/viewer?title_no=713188&episode_no=31)
+
 ## Artwork
+
+1. MidJourney by [Reddit user r\_is\_for\_army](https://www.reddit.com/user/r_is_for_army)
+   ([permalink](https://www.reddit.com/r/adventofcode/comments/zewngg/midjourney_artwork_of_day_2_the_rock_paper/))
+
+![elves playing rock paper scissors](tvkll7cs0g4a1.png)
 
 1. MidJourney by [Reddit user Iain\_M\_Norman](https://www.reddit.com/user/Iain_M_Norman)
    ([permalink](https://www.reddit.com/r/adventofcode/comments/zadxlp/ai_imagine_advent_of_code_2022_day_2/iyle2lw/))
