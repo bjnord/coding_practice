@@ -17,9 +17,9 @@ describe('parsing tests', () => {
   });
 });
 describe('execution tests', () => {
+  const longInput = fs.readFileSync('input/example.txt', 'utf8');
+  const longProgram = processor.parse(longInput);
   it('should find the six signal strengths correctly', () => {
-    const longInput = fs.readFileSync('input/example.txt', 'utf8');
-    const longProgram = processor.parse(longInput);
     const expected = [
       420,
       1140,
@@ -29,5 +29,34 @@ describe('execution tests', () => {
       3960,
     ];
     expect(processor.signalStrengths(longProgram)).to.eql(expected);
+  });
+  it('should render pixels correctly', () => {
+    const expected = [
+      true,  true,  false, false, true,  true,  false, false, true,  true,
+      false, false, true,  true,  false, false, true,  true,  false, false,
+      true,  true,  false, false, true,  true,  false, false, true,  true,
+      false, false, true,  true,  false, false, true,  true,  false, false,
+      true,  true,  true,  false, false, false, true,  true,  true,  false,
+      false, false, true,  true,  true,  false, false, false, true,  true,
+      true,  false, false, false, true,  true,  true,  false, false, false,
+      true,  true,  true,  false, false, false, true,  true,  true,  false,
+      true,  true,  true,  true,  false, false, false, false, true,  true,
+      true,  true,  false, false, false, false, true,  true,  true,  true,
+      false, false, false, false, true,  true,  true,  true,  false, false,
+      false, false, true,  true,  true,  true,  false, false, false, false,
+      true,  true,  true,  true,  true,  false, false, false, false, false,
+      true,  true,  true,  true,  true,  false, false, false, false, false,
+      true,  true,  true,  true,  true,  false, false, false, false, false,
+      true,  true,  true,  true,  true,  false, false, false, false, false,
+      true,  true,  true,  true,  true,  true,  false, false, false, false,
+      false, false, true,  true,  true,  true,  true,  true,  false, false,
+      false, false, false, false, true,  true,  true,  true,  true,  true,
+      false, false, false, false, false, false, true,  true,  true,  true,
+      true,  true,  true,  true,  true,  true,  true,  false, false, false,
+      false, false, false, false, true,  true,  true,  true,  true,  true,
+      true,  false, false, false, false, false, false, false, true,  true,
+      true,  true,  true,  true,  true,  false, false, false, false, false,
+    ];
+    expect(processor.renderPixels(longProgram)).to.eql(expected);
   });
 });

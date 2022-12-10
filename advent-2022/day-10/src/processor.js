@@ -58,3 +58,44 @@ exports.signalStrengths = ((program) => {
   }
   return ss;
 });
+
+exports.pixelLit = ((cycle, x) => {
+  const pos = (cycle - 1) % 40;
+  return ((pos >= x - 1) && (pos <= x + 1));
+});
+
+exports.renderPixels = ((program) => {
+  let cycle = 1;
+  let x = 1;
+  const pixels = [];
+  for (const inst of program) {
+    if (inst.op === 'addx') {
+      // now "during" the first of two cycles needed for `addx`
+      pixels.push(module.exports.pixelLit(cycle, x));
+      cycle++;
+      if (cycle > 240) {
+        break;
+      }
+      // now "during" the second of two cycles needed for `addx`
+      pixels.push(module.exports.pixelLit(cycle, x));
+      // now "after" the two cycles needed for `addx`
+      x += inst.arg;
+    } else {  // noop
+      // "during" the lone cycle needed for `noop`
+      pixels.push(module.exports.pixelLit(cycle, x));
+    }
+    cycle++;
+    if (cycle > 240) {
+      break;
+    }
+  }
+  return pixels;
+});
+
+exports.dumpPixels = ((pixels) => {
+  const str = pixels.map((px) => px ? '#' : '.')
+    .reduce((str, ch) => str + ch, '');
+  for (let i = 0; i < 240; i += 40) {
+    console.log(str.substring(i, i + 40));
+  }
+});

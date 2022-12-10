@@ -12,7 +12,8 @@ console.log(`part 1: sum of six signal strengths:    ${ssSum}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                1');
-console.log(`part 2: actual answer:                  ${answer2}`);
+const pixels = processor.renderPixels(program);
+console.log('part 2: expected answer:                EHZFZHCZ');
+console.log('part 2: actual answer:');
+processor.dumpPixels(pixels);
 console.log('');
