@@ -22,6 +22,26 @@ describe('parsing tests', () => {
   });
 });
 describe('motion tests', () => {
+  it('should move head knot correctly', () => {
+    const positions = [
+      {y: 0, x: 2}, {y: 1, x: 3}, {y: -4, x: 7}, {y: 5, x: -2},
+    ];
+    const directions = [
+      'R', 'L', 'D', 'U',
+    ];
+    const newPositions = [
+      {y: 0, x: 3}, {y: 1, x: 2}, {y: -3, x: 7}, {y: 4, x: -2},
+    ];
+    for (let i = 0; i < positions.length; i++) {
+      rope.move(positions[i], directions[i]);
+      expect(positions[i]).to.eql(newPositions[i]);
+    }
+  });
+  it('should throw exception for unknown direction', () => {
+    const pos = {y: 0, x: 0};
+    const badMoveFn = () => { rope.move(pos, 'S'); };
+    expect(badMoveFn).to.throw(SyntaxError);
+  });
   it('should follow 2-knot motions and report positions visited', () => {
     const motions = rope.parse(exampleInput);
     expect(rope.followMotions(motions)).to.equal(13);

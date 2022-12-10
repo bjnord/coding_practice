@@ -31,24 +31,27 @@ exports.touching = ((a, b) => {
   const dx = Math.abs(a.x - b.x);
   return (dy <= 1) && (dx <= 1);
 });
-
+const moveDelta = {
+  R: {y: 0, x: 1},
+  L: {y: 0, x: -1},
+  D: {y: 1, x: 0},
+  U: {y: -1, x: 0},
+};
+/**
+ * Move head knot one unit in the given direction.
+ *
+ * (The `pos` argument is directly updated; the function doesn't
+ * return anything.)
+ *
+ * @param pos {Object} - current position of knot
+ * @param dir {string} - direction to move (`R` `L` `D` `U`)
+ */
 exports.move = ((pos, dir) => {
-  switch (dir) {
-  case 'R':
-    pos.x += 1;
-    break;
-  case 'L':
-    pos.x -= 1;
-    break;
-  case 'D':
-    pos.y += 1;
-    break;
-  case 'U':
-    pos.y -= 1;
-    break;
-  default:
+  if (!moveDelta[dir]) {
     throw new SyntaxError(`unknown direction '${dir}'`);
   }
+  pos.y += moveDelta[dir].y;
+  pos.x += moveDelta[dir].x;
 });
 
 exports.moveTail = ((tail, head) => {
