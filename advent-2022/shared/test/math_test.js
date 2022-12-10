@@ -12,3 +12,18 @@ describe('modulo tests', () => {
     expect(math.mod(-1, 3)).to.eql(2);
   });
 });
+describe('integer-unit tests', () => {
+  it('should evaluate zero correctly', () => {
+    expect(math.intUnit(0)).to.equal(0);
+  });
+  it('should evaluate negatives correctly', () => {
+    expect(math.intUnit(-1)).to.equal(-1);
+    expect(math.intUnit(-3)).to.equal(-1);
+    expect(math.intUnit(-10)).to.equal(-1);
+  });
+  it('should evaluate positives correctly', () => {
+    expect(math.intUnit(1)).to.equal(1);
+    expect(math.intUnit(3)).to.equal(1);
+    expect(math.intUnit(10)).to.equal(1);
+  });
+});
