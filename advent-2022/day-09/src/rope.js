@@ -1,4 +1,5 @@
 'use strict';
+const math = require('../../shared/src/math');
 /** @module rope */
 /**
  * Parse the puzzle input.
@@ -71,7 +72,7 @@ const moveDelta = {
  * (The `pos` argument is directly updated; the function doesn't
  * return anything.)
  *
- * @param pos {Object} - current position of knot
+ * @param pos {Object} - position of head knot
  * @param dir {string} - direction to move (`R` `L` `D` `U`)
  */
 exports.move = ((pos, dir) => {
@@ -81,36 +82,21 @@ exports.move = ((pos, dir) => {
   pos.y += moveDelta[dir].y;
   pos.x += moveDelta[dir].x;
 });
-
+/**
+ * Move tail knot one unit if not touching head knot.
+ *
+ * (The `tail` argument is directly updated; the function doesn't
+ * return anything.)
+ *
+ * @param tail {Object} - position of tail knot
+ * @param head {Object} - position of head knot
+ */
 exports.moveTail = ((tail, head) => {
-  const dy = head.y - tail.y;
-  const dx = head.x - tail.x;
-  // "If the head is ever two steps directly up, down, left, or right
-  // from the tail, the tail must also move one step in that direction
-  // so it remains close enough"
-  if ((Math.abs(dx) === 2) && (dy === 0)) {
-    tail.x += (dx / 2);
-    return;
-  } else if ((Math.abs(dy) === 2) && (dx === 0)) {
-    tail.y += (dy / 2);
-    return;
-  }
-  // "Otherwise, if the head and tail aren't touching and aren't in
-  // the same row or column, the tail always moves one step diagonally
-  // to keep up"
   if (module.exports.touching(tail, head)) {
     return;
   }
-  if (Math.abs(dx) > Math.abs(dy)) {
-    tail.x += (dx / 2);
-    tail.y += dy;
-  } else if ((Math.abs(dx) === 2) && (Math.abs(dy) === 2)) {
-    tail.x += (dx / 2);
-    tail.y += (dy / 2);
-  } else {
-    tail.x += dx;
-    tail.y += (dy / 2);
-  }
+  tail.y += math.intUnit(head.y - tail.y);
+  tail.x += math.intUnit(head.x - tail.x);
 });
 
 exports.followMotions = ((motions) => {

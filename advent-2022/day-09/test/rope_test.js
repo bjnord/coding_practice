@@ -69,6 +69,32 @@ describe('motion tests', () => {
       expect(positions[i]).to.eql(newPositions[i]);
     }
   });
+  it('should move tail knot correctly', () => {
+    const tailHeadPositions = [
+      [{y: 1, x: 1}, {y: 1, x: 1}],
+      [{y: 0, x: 1}, {y: 0, x: -1}],
+      [{y: 1, x: 0}, {y: -1, x: 0}],
+      [{y: 0, x: 2}, {y: 1, x: 3}],
+      [{y: 1, x: -1}, {y: -1, x: 0}],
+      [{y: 1, x: -1}, {y: 0, x: 1}],
+      [{y: -4, x: 7}, {y: -3, x: 5}],
+      [{y: 1, x: -3}, {y: 3, x: -1}],
+    ];
+    const newTailPositions = [
+      {y: 1, x: 1},
+      {y: 0, x: 0},
+      {y: 0, x: 0},
+      {y: 0, x: 2},
+      {y: 0, x: 0},
+      {y: 0, x: 0},
+      {y: -3, x: 6},
+      {y: 2, x: -2},
+    ];
+    for (let i = 0; i < tailHeadPositions.length; i++) {
+      rope.moveTail(tailHeadPositions[i][0], tailHeadPositions[i][1]);
+      expect(tailHeadPositions[i][0]).to.eql(newTailPositions[i]);
+    }
+  });
   it('should throw exception for unknown direction', () => {
     const pos = {y: 0, x: 0};
     const badMoveFn = () => { rope.move(pos, 'S'); };
