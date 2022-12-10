@@ -288,6 +288,12 @@ positions does the tail of the rope visit at least once?**
 
 Your puzzle answer was `6236`.
 
+### Part One Design
+
+> **Mild spoiler ahead.**
+
+After finishing day 9, I learned that the distance between two knots on a grid being used by this puzzle has a name: the "chessboard distance" or ["Chebyshev distance"](https://en.wikipedia.org/wiki/Chebyshev_distance).
+
 ## Part Two
 
 A rope snaps! Suddenly, the river is getting a lot closer than you
@@ -749,6 +755,8 @@ Your puzzle answer was `2449`.
 
 ### Part Two Design
 
+> **Mild spoiler ahead.**
+
 I quickly completed parts one and two, and my tests passed both puzzle examples, but the part two answer I got for my puzzle input was wrong.
 
 In the early days, the puzzle descriptions are more likely to give you warnings like this about potential pitfalls:
@@ -757,6 +765,6 @@ In the early days, the puzzle descriptions are more likely to give you warnings 
 > before, so you might want to visually compare your simulated rope to the
 > one above.
 
-Sure enough, by implementing a state dumper and comparing, I found a place where my code had the wrong tail motion, but by coincidence ended up with the same number of visited positions for the two puzzle examples.
+Sure enough, by implementing a state dumper and comparing visually, I found a place where my code had the wrong tail motion, but by coincidence ended up with the same number of visited positions for the two puzzle examples.
 
 ...or was that not a coincidence, but sociopathic design on the part of the puzzle author? ;)

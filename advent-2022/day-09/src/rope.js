@@ -23,13 +23,41 @@ exports.parseLine = (line) => {
   const tokens = line.split(/\s+/);
   return [tokens[0], parseInt(tokens[1])];
 };
-
-const posKey = ((coord) => '' + coord.y + ',' + coord.x);
-
-exports.touching = ((a, b) => {
+/*
+ * Turn y,x `Object` position into `string` suitable for a map key.
+ */
+const posKey = ((pos) => '' + pos.y + ',' + pos.x);
+/**
+ * Compute the chessboard distance between the given positions.
+ *
+ * This is "the minimum number of moves needed by a king to go from
+ * one square on a chessboard to another". See
+ * [this article](https://en.wikipedia.org/wiki/Chebyshev_distance)
+ * for more.
+ *
+ * @param a {Object} - first position
+ * @param b {Object} - second position
+ *
+ * @return {number}
+ *   Returns the chessboard distance between the given positions.
+ */
+exports.chessDistance = ((a, b) => {
   const dy = Math.abs(a.y - b.y);
   const dx = Math.abs(a.x - b.x);
-  return (dy <= 1) && (dx <= 1);
+  return Math.max(dy, dx);
+});
+/**
+ * Are the two given positions touching?
+ *
+ * @param a {Object} - first position
+ * @param b {Object} - second position
+ *
+ * @return {boolean}
+ *   Returns `true` if the two positions overlap (same square), or are on
+ *   adjacent squares (including diagonal).
+ */
+exports.touching = ((a, b) => {
+  return module.exports.chessDistance(a, b) <= 1;
 });
 const moveDelta = {
   R: {y: 0, x: 1},
