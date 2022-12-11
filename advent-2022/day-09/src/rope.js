@@ -99,7 +99,7 @@ exports.moveTail = ((tail, head) => {
   tail.x += math.intUnit(head.x - tail.x);
 });
 
-exports.followMotions = ((motions) => {
+exports.followMotions2 = ((motions) => {
   const head = {y: 0, x: 0};
   const tail = {y: 0, x: 0};
   const visited = {};
@@ -133,16 +133,21 @@ const dumpRope = ((rope, grid) => {
   }
   console.log('');
 });
-
-exports.followMotions10 = ((motions, dumpGrid) => {
-  const rope = [
-    {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
-    {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
-    {y: 0, x: 0}, {y: 0, x: 0}, {y: 0, x: 0},
-    {y: 0, x: 0},
-  ];
+/**
+ * Simulate an n-knot rope whose head follows a list of motions.
+ *
+ * @param motions {Array.number} - the list of motions
+ * @param nKnots {number} - the number of knots in the rope
+ * @param dumpGrid {boolean} - dimensions and options for debug output
+ *
+ * @return {number}
+ *   Returns the number of positions the tail of the rope visited
+ *   at least once.
+ */
+exports.followMotions = ((motions, nKnots, dumpGrid) => {
+  const rope = Array(...Array(nKnots)).map(() => new Object({y: 0, x: 0}));
   const visited = {};
-  visited[posKey(rope[9])] = true;
+  visited[posKey(rope[nKnots - 1])] = true;
   motions.forEach((motion) => {
     if (dumpGrid) {
       console.log(`== ${motion[0]} ${motion[1]} ==`);
@@ -150,10 +155,10 @@ exports.followMotions10 = ((motions, dumpGrid) => {
     }
     for (let i = 0; i < motion[1]; i++) {
       module.exports.move(rope[0], motion[0]);
-      for (let k = 1; k < 10; k++) {
+      for (let k = 1; k < nKnots; k++) {
         module.exports.moveTail(rope[k], rope[k-1]);
       }
-      visited[posKey(rope[9])] = true;
+      visited[posKey(rope[nKnots - 1])] = true;
       if (dumpGrid && (dumpGrid.all === true)) {
         dumpRope(rope, dumpGrid);
       }
@@ -162,6 +167,5 @@ exports.followMotions10 = ((motions, dumpGrid) => {
       dumpRope(rope, dumpGrid);
     }
   });
-  //console.dir(visited);
   return Object.keys(visited).length;
 });

@@ -102,16 +102,16 @@ describe('motion tests', () => {
   });
   it('should follow 2-knot motions and report positions visited', () => {
     const motions = rope.parse(exampleInput);
-    expect(rope.followMotions(motions)).to.equal(13);
+    expect(rope.followMotions2(motions)).to.equal(13);
   });
   it('should follow 10-knot motions and report positions visited', () => {
     // eslint-disable-next-line no-unused-vars
     const dumpGrid = {y0: -4, y1: 0, x0: 0, x1: 5, all: true};
     const motions = rope.parse(exampleInput);
-    expect(rope.followMotions10(motions, null)).to.equal(1);
+    expect(rope.followMotions(motions, 10, null)).to.equal(1);
     // eslint-disable-next-line no-unused-vars
     const dumpGrid2 = {y0: -15, y1: 5, x0: -11, x1: 14, all: false};
     const motions2 = rope.parse(exampleInput2);
-    expect(rope.followMotions10(motions2, null)).to.equal(36);
+    expect(rope.followMotions(motions2, 10, null)).to.equal(36);
   });
 });
