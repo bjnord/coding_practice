@@ -101,29 +101,69 @@ exports.moveTail = ((tail, head) => {
   tail.y += math.intUnit(head.y - tail.y);
   tail.x += math.intUnit(head.x - tail.x);
 });
-/**
- * Dump visual depition of rope to the console.
- *
- * @param rope {Array.Object} - the rope (list of knots, each being a position)
- * @param grid {Object} - dimensions and options for debug output
+/*
+ * Dump motion section header to the console.
  */
-const dumpRope = ((rope, grid) => {
-  for (let y = grid.y0; y <= grid.y1; y++) {
-    let line = '';
-    for (let x = grid.x0; x <= grid.x1; x++) {
-      for (let i = 0; i < 10; i++) {
-        if ((rope[i].y === y) && (rope[i].x === x)) {
-          const ch = (i === 0) ? 'H' : ('' + i);
-          line += ch;
-          break;
-        } else if (i === 9) {
-          line += '.';
-        }
-      }
+/* istanbul ignore next */
+const dumpHeader = ((motion, grid) => {
+  if (!grid) {
+    return;
+  }
+  console.log(`== ${motion[0]} ${motion[1]} ==`);
+  console.log('');
+});
+/*
+ * Render character for given grid position.
+ */
+/* istanbul ignore next */
+const ropeChar = ((i) => (i === 0) ? 'H' : ('' + i));
+/* istanbul ignore next */
+const lineChar = ((rope, y, x) => {
+  for (let i = 0; i < rope.length; i++) {
+    if ((rope[i].y === y) && (rope[i].x === x)) {
+      return ropeChar(i);
     }
-    console.log(line);
+  }
+  return '.';
+});
+/*
+ * Dump one line of rope depiction to the console.
+ */
+/* istanbul ignore next */
+const dumpRopeLine = ((rope, grid, y) => {
+  let line = '';
+  for (let x = grid.x0; x <= grid.x1; x++) {
+    line += lineChar(rope, y, x);
+  }
+  console.log(line);
+});
+/*
+ * Dump visual depiction of rope to the console.
+ */
+/* istanbul ignore next */
+const dumpRope = ((rope, grid, dumpAll) => {
+  if (!grid || (grid.all !== dumpAll)) {
+    return;
+  }
+  for (let y = grid.y0; y <= grid.y1; y++) {
+    dumpRopeLine(rope, grid, y);
   }
   console.log('');
+});
+/*
+ * Simulate one motion (N moves in a given direction).
+ */
+const followMotion = ((motion, rope, visited, dumpGrid) => {
+  dumpHeader(motion, dumpGrid);
+  for (let i = 0; i < motion[1]; i++) {
+    module.exports.move(rope[0], motion[0]);
+    for (let k = 1; k < rope.length; k++) {
+      module.exports.moveTail(rope[k], rope[k-1]);
+    }
+    visited[posKey(rope[rope.length-1])] = true;
+    dumpRope(rope, dumpGrid, true);
+  }
+  dumpRope(rope, dumpGrid, false);
 });
 /**
  * Simulate an n-knot rope whose head follows a list of motions.
@@ -139,25 +179,6 @@ const dumpRope = ((rope, grid) => {
 exports.followMotions = ((motions, nKnots, dumpGrid) => {
   const rope = Array(...Array(nKnots)).map(() => new Object({y: 0, x: 0}));
   const visited = {};
-  visited[posKey(rope[nKnots - 1])] = true;
-  motions.forEach((motion) => {
-    if (dumpGrid) {
-      console.log(`== ${motion[0]} ${motion[1]} ==`);
-      console.log('');
-    }
-    for (let i = 0; i < motion[1]; i++) {
-      module.exports.move(rope[0], motion[0]);
-      for (let k = 1; k < nKnots; k++) {
-        module.exports.moveTail(rope[k], rope[k-1]);
-      }
-      visited[posKey(rope[nKnots - 1])] = true;
-      if (dumpGrid && (dumpGrid.all === true)) {
-        dumpRope(rope, dumpGrid);
-      }
-    }
-    if (dumpGrid && (dumpGrid.all === false)) {
-      dumpRope(rope, dumpGrid);
-    }
-  });
+  motions.forEach((motion) => followMotion(motion, rope, visited, dumpGrid));
   return Object.keys(visited).length;
 });
