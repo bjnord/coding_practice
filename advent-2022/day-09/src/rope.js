@@ -1,6 +1,20 @@
 'use strict';
 const math = require('../../shared/src/math');
-/** @module rope */
+/**
+ * @module rope
+ *
+ * @description
+ *
+ * The **motion** data structure used in this module's functions is
+ * an array with the following attributes:
+ * - element 0: move direction (`R` `L` `D` `U`)
+ * - element 1: move count (integer)
+ *
+ * The **position** data structure used in this module's functions is
+ * an object with the following attributes:
+ * - `y`: Y position (integer)
+ * - `x`: X position (integer)
+ */
 /**
  * Parse the puzzle input.
  *
@@ -86,7 +100,7 @@ exports.move = ((pos, dir) => {
   pos.x += moveDelta[dir].x;
 });
 /**
- * Move tail knot one unit if not touching head knot.
+ * Move tail knot one unit toward head knot, if not touching it.
  *
  * (The `tail` argument is directly updated; the function doesn't
  * return anything.)
@@ -168,9 +182,10 @@ const followMotion = ((motion, rope, visited, dumpGrid) => {
 /**
  * Simulate an n-knot rope whose head follows a list of motions.
  *
- * @param motions {Array.number} - the list of motions
+ * @param motions {Array.Array} - the list of motions
  * @param nKnots {number} - the number of knots in the rope
- * @param dumpGrid {boolean} - dimensions and options for debug output
+ * @param dumpGrid {Object} - dimensions and options for debug output
+ *   (or `null` to disable)
  *
  * @return {number}
  *   Returns the number of positions the tail of the rope visited
