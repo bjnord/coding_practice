@@ -364,4 +364,10 @@ inspected; you'll need to find another way to keep your worry levels
 manageable. Starting again from the initial state in your puzzle input,
 **what is the level of monkey business after 10000 rounds?**
 
-Answer:
+Your puzzle answer was `16792940265`.
+
+### Part Two Design
+
+> **Significant spoiler ahead!**
+
+Given that math is usually where I struggle during AoC, I'm rather proud that I figured out part 2 after a few minutes' thought. I had already seen that the number of monkeys (and thus the number of divisible-by tests) was relatively small. I had a big smile on my face when I did `grep 'divisible by' input/*.txt` and saw they were all prime numbers. :D
