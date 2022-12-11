@@ -5,7 +5,7 @@ const input = fs.readFileSync('input/input.txt', 'utf8');
 const motions = rope.parse(input);
 
 // PART 1
-const answer1 = rope.followMotions2(motions);
+const answer1 = rope.followMotions(motions, 2, null);
 console.log('part 1: expected answer:                6236');
 console.log(`part 1: positions 2-knot tail visited:  ${answer1}`);
 console.log('');

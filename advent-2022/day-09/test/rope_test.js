@@ -102,7 +102,7 @@ describe('motion tests', () => {
   });
   it('should follow 2-knot motions and report positions visited', () => {
     const motions = rope.parse(exampleInput);
-    expect(rope.followMotions2(motions)).to.equal(13);
+    expect(rope.followMotions(motions, 2, null)).to.equal(13);
   });
   it('should follow 10-knot motions and report positions visited', () => {
     // eslint-disable-next-line no-unused-vars

@@ -60,6 +60,9 @@ exports.chessDistance = ((a, b) => {
 exports.touching = ((a, b) => {
   return module.exports.chessDistance(a, b) <= 1;
 });
+/*
+ * dy/dx for each type of head motion
+ */
 const moveDelta = {
   R: {y: 0, x: 1},
   L: {y: 0, x: -1},
@@ -98,23 +101,12 @@ exports.moveTail = ((tail, head) => {
   tail.y += math.intUnit(head.y - tail.y);
   tail.x += math.intUnit(head.x - tail.x);
 });
-
-exports.followMotions2 = ((motions) => {
-  const head = {y: 0, x: 0};
-  const tail = {y: 0, x: 0};
-  const visited = {};
-  visited[posKey(tail)] = true;
-  motions.forEach((motion) => {
-    for (let i = 0; i < motion[1]; i++) {
-      module.exports.move(head, motion[0]);
-      module.exports.moveTail(tail, head);
-      visited[posKey(tail)] = true;
-    }
-  });
-  //console.dir(visited);
-  return Object.keys(visited).length;
-});
-
+/**
+ * Dump visual depition of rope to the console.
+ *
+ * @param rope {Array.Object} - the rope (list of knots, each being a position)
+ * @param grid {Object} - dimensions and options for debug output
+ */
 const dumpRope = ((rope, grid) => {
   for (let y = grid.y0; y <= grid.y1; y++) {
     let line = '';
