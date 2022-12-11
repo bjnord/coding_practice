@@ -30,3 +30,22 @@ exports.mod = (n, m) => {
 exports.intUnit = (n) => {
   return (n === 0) ? 0 : (Math.abs(n) / n);
 };
+/**
+ * Compute the chessboard distance between the given positions.
+ *
+ * This is "the minimum number of moves needed by a king to go from
+ * one square on a chessboard to another". See
+ * [this article](https://en.wikipedia.org/wiki/Chebyshev_distance)
+ * for more.
+ *
+ * @param a {Object} - 1st position (with attributes `y` and `x`)
+ * @param b {Object} - 2nd position (with attributes `y` and `x`)
+ *
+ * @return {number}
+ *   Returns the chessboard distance between the given positions.
+ */
+exports.chessboardDistance = ((a, b) => {
+  const dy = Math.abs(a.y - b.y);
+  const dx = Math.abs(a.x - b.x);
+  return Math.max(dy, dx);
+});

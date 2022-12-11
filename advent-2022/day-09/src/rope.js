@@ -43,25 +43,6 @@ exports.parseLine = (line) => {
  */
 const posKey = ((pos) => '' + pos.y + ',' + pos.x);
 /**
- * Compute the chessboard distance between the given positions.
- *
- * This is "the minimum number of moves needed by a king to go from
- * one square on a chessboard to another". See
- * [this article](https://en.wikipedia.org/wiki/Chebyshev_distance)
- * for more.
- *
- * @param a {Object} - first position
- * @param b {Object} - second position
- *
- * @return {number}
- *   Returns the chessboard distance between the given positions.
- */
-exports.chessDistance = ((a, b) => {
-  const dy = Math.abs(a.y - b.y);
-  const dx = Math.abs(a.x - b.x);
-  return Math.max(dy, dx);
-});
-/**
  * Are the two given positions touching?
  *
  * @param a {Object} - first position
@@ -72,7 +53,7 @@ exports.chessDistance = ((a, b) => {
  *   adjacent squares (including diagonal).
  */
 exports.touching = ((a, b) => {
-  return module.exports.chessDistance(a, b) <= 1;
+  return math.chessboardDistance(a, b) <= 1;
 });
 /*
  * dy/dx for each type of head motion

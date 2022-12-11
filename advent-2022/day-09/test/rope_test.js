@@ -22,21 +22,6 @@ describe('parsing tests', () => {
   });
 });
 describe('math tests', () => {
-  it('should compute chessboard distance correctly', () => {
-    const positions = [
-      [{y: 0, x: 0}, {y: 0, x: 0}, 0],
-      [{y: 1, x: 1}, {y: 2, x: 1}, 1],
-      [{y: -1, x: -1}, {y: -2, x: -1}, 1],
-      [{y: 0, x: 2}, {y: 1, x: 3}, 1],
-      [{y: 0, x: -2}, {y: -1, x: -3}, 1],
-      [{y: 3, x: -1}, {y: 4, x: 1}, 2],
-      [{y: -2, x: 1}, {y: -4, x: 2}, 2],
-    ];
-    for (let i = 0; i < positions.length; i++) {
-      expect(rope.chessDistance(positions[i][0], positions[i][1])).to.equal(positions[i][2]);
-      expect(rope.chessDistance(positions[i][1], positions[i][0])).to.equal(positions[i][2]);
-    }
-  });
   it('should determine correctly if two positions are touching', () => {
     const positions = [
       [{y: 0, x: 0}, {y: 0, x: 0}, true],
