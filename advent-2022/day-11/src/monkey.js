@@ -57,7 +57,7 @@ exports.parseSection = (section) => {
   const trueMonkey = parseInt(trueMonkeyMatch[1]);
   const falseMonkeyMatch = lines[5].match(/If\s+false:\s+throw\s+to\s+monkey\s+(\d+)/);
   const falseMonkey = parseInt(falseMonkeyMatch[1]);
-  return {n, items, inst, testDiv, trueMonkey, falseMonkey};
+  return {n, nInspect: 0, items, inst, testDiv, trueMonkey, falseMonkey};
 };
 
 exports.runInst = ((item, inst) => {
@@ -86,6 +86,7 @@ exports.runRound = ((monkeys) => {
     while (m.items.length > 0) {
       const item = m.items.shift();
       const newItem = Math.floor(module.exports.runInst(item, m.inst) / 3);
+      m.nInspect++;
       if ((newItem % m.testDiv) === 0) {
         //console.debug(`T: Item with worry level ${newItem} is thrown to monkey ${m.trueMonkey}`);
         monkeys[m.trueMonkey].items.push(newItem);
@@ -97,4 +98,10 @@ exports.runRound = ((monkeys) => {
   }
   //console.debug('AFTER:');
   //console.dir(monkeys.map((m) => m.items));
+});
+
+exports.mostActive = ((monkeys) => {
+  return monkeys.map((m) => m.nInspect)
+    .sort((a, b) => Math.sign(b - a))
+    .slice(0, 2);
 });

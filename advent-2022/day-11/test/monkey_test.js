@@ -7,7 +7,7 @@ describe('parsing tests', () => {
   it('should parse one section correctly', () => {
     const exampleMonkey = exampleInput.split(/\n\n/)[0];
     const expected = {
-      n: 0,
+      n: 0, nInspect: 0,
       items: [79, 98],
       inst: {arg1: null, op: '*', arg2: 19},
       testDiv: 23,
@@ -49,9 +49,13 @@ describe('round tests', () => {
       [],
       [],
     ];
+    const expInspect = [101, 95, 7, 105];
+    const expMostAct = [105, 101];
     for (let i = 0; i < 20; i++) {
       monkey.runRound(monkeys);
     }
     expect(monkeys.map((m) => m.items)).to.eql(expected);
+    expect(monkeys.map((m) => m.nInspect)).to.eql(expInspect);
+    expect(monkey.mostActive(monkeys)).to.eql(expMostAct);
   });
 });
