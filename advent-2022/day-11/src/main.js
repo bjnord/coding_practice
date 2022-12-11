@@ -6,7 +6,7 @@ const monkeys = monkey.parse(input);
 
 // PART 1
 for (let i = 0; i < 20; i++) {
-  monkey.runRound(monkeys);
+  monkey.runRound(monkeys, true);
 }
 const ans1 = monkey.mostActive(monkeys);
 console.log('part 1: expected answer:                      117624');

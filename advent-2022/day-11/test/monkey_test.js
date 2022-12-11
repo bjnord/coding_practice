@@ -38,7 +38,7 @@ describe('round tests', () => {
       [],
       [],
     ];
-    monkey.runRound(monkeys);
+    monkey.runRound(monkeys, true);
     expect(monkeys.map((m) => m.items)).to.eql(expected);
   });
   it('should execute 20 rounds correctly', () => {
@@ -52,7 +52,7 @@ describe('round tests', () => {
     const expInspect = [101, 95, 7, 105];
     const expMostAct = [105, 101];
     for (let i = 0; i < 20; i++) {
-      monkey.runRound(monkeys);
+      monkey.runRound(monkeys, true);
     }
     expect(monkeys.map((m) => m.items)).to.eql(expected);
     expect(monkeys.map((m) => m.nInspect)).to.eql(expInspect);

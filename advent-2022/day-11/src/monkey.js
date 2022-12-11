@@ -79,20 +79,24 @@ exports.runInst = ((item, inst) => {
   }
 });
 
-exports.runRound = ((monkeys) => {
+exports.runRound = ((monkeys, div3) => {
   //console.debug('BEFORE:');
   //console.dir(monkeys.map((m) => m.items));
+  const modProduct = monkeys.map((m) => m.testDiv)
+    .reduce((prod, div) => prod * div, 1);
+  //console.debug(`for nMonkeys=${monkeys.length} modProduct=${modProduct}`);
   for (const m of monkeys) {
     while (m.items.length > 0) {
       const item = m.items.shift();
-      const newItem = Math.floor(module.exports.runInst(item, m.inst) / 3);
+      const newItem = module.exports.runInst(item, m.inst);
+      const quelledItem = div3 ? Math.floor(newItem / 3) : (newItem % modProduct);
       m.nInspect++;
-      if ((newItem % m.testDiv) === 0) {
-        //console.debug(`T: Item with worry level ${newItem} is thrown to monkey ${m.trueMonkey}`);
-        monkeys[m.trueMonkey].items.push(newItem);
+      if ((quelledItem % m.testDiv) === 0) {
+        //console.debug(`T: Item with worry level ${quelledItem} is thrown to monkey ${m.trueMonkey}`);
+        monkeys[m.trueMonkey].items.push(quelledItem);
       } else {
-        //console.debug(`F: Item with worry level ${newItem} is thrown to monkey ${m.falseMonkey}`);
-        monkeys[m.falseMonkey].items.push(newItem);
+        //console.debug(`F: Item with worry level ${quelledItem} is thrown to monkey ${m.falseMonkey}`);
+        monkeys[m.falseMonkey].items.push(quelledItem);
       }
     }
   }
