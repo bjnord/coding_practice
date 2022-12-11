@@ -101,6 +101,8 @@ describe('motion tests', () => {
     expect(badMoveFn).to.throw(SyntaxError);
   });
   it('should follow 2-knot motions and report positions visited', () => {
+    // eslint-disable-next-line no-unused-vars
+    const dumpGrid = {y0: -4, y1: 0, x0: 0, x1: 5, all: true};
     const motions = rope.parse(exampleInput);
     expect(rope.followMotions(motions, 2, null)).to.equal(13);
   });
