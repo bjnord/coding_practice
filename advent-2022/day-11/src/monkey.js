@@ -59,3 +59,42 @@ exports.parseSection = (section) => {
   const falseMonkey = parseInt(falseMonkeyMatch[1]);
   return {n, items, inst, testDiv, trueMonkey, falseMonkey};
 };
+
+exports.runInst = ((item, inst) => {
+  switch (inst.op) {
+  case '*':
+    if (inst.arg2) {
+      return item * inst.arg2;
+    } else {
+      return item * item;
+    }
+  case '+':
+    if (inst.arg2) {
+      return item + inst.arg2;
+    } else {
+      return item + item;
+    }
+  default:
+    throw new SyntaxError(`unknown op ${inst.op}`);
+  }
+});
+
+exports.runRound = ((monkeys) => {
+  //console.debug('BEFORE:');
+  //console.dir(monkeys.map((m) => m.items));
+  for (const m of monkeys) {
+    while (m.items.length > 0) {
+      const item = m.items.shift();
+      const newItem = Math.floor(module.exports.runInst(item, m.inst) / 3);
+      if ((newItem % m.testDiv) === 0) {
+        //console.debug(`T: Item with worry level ${newItem} is thrown to monkey ${m.trueMonkey}`);
+        monkeys[m.trueMonkey].items.push(newItem);
+      } else {
+        //console.debug(`F: Item with worry level ${newItem} is thrown to monkey ${m.falseMonkey}`);
+        monkeys[m.falseMonkey].items.push(newItem);
+      }
+    }
+  }
+  //console.debug('AFTER:');
+  //console.dir(monkeys.map((m) => m.items));
+});

@@ -17,6 +17,41 @@ describe('parsing tests', () => {
     expect(monkey.parseSection(exampleMonkey)).to.eql(expected);
   });
   it('should parse a whole input set correctly', () => {
-    console.debug('** TODO **');
+    console.debug('** TODO ** parse a whole input set');
+  });
+});
+describe('round tests', () => {
+  it('should execute multiply instruction correctly', () => {
+    expect(monkey.runInst(79, {arg1: null, op: '*', arg2: 19})).to.equal(1501);
+    expect(monkey.runInst(97, {arg1: null, op: '*', arg2: null})).to.equal(9409);
+  });
+  it('should execute add instruction correctly', () => {
+    expect(monkey.runInst(65, {arg1: null, op: '+', arg2: 6})).to.equal(71);
+    expect(monkey.runInst(37, {arg1: null, op: '+', arg2: null})).to.equal(74);
+  });
+  console.debug('** TODO ** test unknown op exception');
+  it('should execute one round correctly', () => {
+    const monkeys = monkey.parse(exampleInput);
+    const expected = [
+      [20, 23, 27, 26],
+      [2080, 25, 167, 207, 401, 1046],
+      [],
+      [],
+    ];
+    monkey.runRound(monkeys);
+    expect(monkeys.map((m) => m.items)).to.eql(expected);
+  });
+  it('should execute 20 rounds correctly', () => {
+    const monkeys = monkey.parse(exampleInput);
+    const expected = [
+      [10, 12, 14, 26, 34],
+      [245, 93, 53, 199, 115],
+      [],
+      [],
+    ];
+    for (let i = 0; i < 20; i++) {
+      monkey.runRound(monkeys);
+    }
+    expect(monkeys.map((m) => m.items)).to.eql(expected);
   });
 });
