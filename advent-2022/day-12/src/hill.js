@@ -5,19 +5,28 @@
  *
  * @param {string} input - lines of puzzle input separated by `\n`
  *
- * @return {Array.Object}
- *   Returns a list of [TBP].
+ * @return {Object}
+ *   Returns the height map.
  */
 exports.parse = (input) => {
-  return input.trim().split(/\n/).map((line) => module.exports.parseLine(line));
+  const rows = input.trim().split(/\n/).map((line) => module.exports.parseLine(line));
+  const startRowI = rows.findIndex((row) => 'start' in row);
+  const endRowI = rows.findIndex((row) => 'end' in row);
+  return {
+    height: rows.length,
+    width: rows[0].heights.length,
+    start: [startRowI, rows[startRowI].start],
+    end: [endRowI, rows[endRowI].end],
+    rows
+  };
 };
 /**
  * Parse one line from the puzzle input.
  *
- * @param {string} line - line of puzzle input (_e.g._ `...`)
+ * @param {string} line - line of puzzle input (_e.g._ `Sabqponm`)
  *
- * @return {Object}
- *   Returns a [TBP].
+ * @return {Array.number}
+ *   Returns the corresponding row of the height map.
  */
 exports.parseLine = (line) => {
   const h = {heights: []};

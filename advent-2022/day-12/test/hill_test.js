@@ -16,25 +16,31 @@ describe('parsing tests', () => {
     expect(hill.parseLine('accszExk')).to.eql(expect3);
   });
   it('should parse a whole input set correctly', () => {
-    const expected = [
-      {
-        heights: [1, 1, 2, 17, 16, 15, 14, 13],
-        start: 0,
-      },
-      {
-        heights: [1, 2, 3, 18, 25, 24, 24, 12],
-      },
-      {
-        end: 5,
-        heights: [1, 3, 3, 19, 26, 26, 24, 11],
-      },
-      {
-        heights: [1, 3, 3, 20, 21, 22, 23, 10],
-      },
-      {
-        heights: [1, 2, 4, 5, 6, 7, 8, 9],
-      },
-    ];
+    const expected = {
+      height: 5,
+      width: 8,
+      start: [0, 0],
+      end: [2, 5],
+      rows: [
+        {
+          heights: [1, 1, 2, 17, 16, 15, 14, 13],
+          start: 0,
+        },
+        {
+          heights: [1, 2, 3, 18, 25, 24, 24, 12],
+        },
+        {
+          end: 5,
+          heights: [1, 3, 3, 19, 26, 26, 24, 11],
+        },
+        {
+          heights: [1, 3, 3, 20, 21, 22, 23, 10],
+        },
+        {
+          heights: [1, 2, 4, 5, 6, 7, 8, 9],
+        },
+      ],
+    };
     expect(hill.parse(exampleInput)).to.eql(expected);
   });
 });
