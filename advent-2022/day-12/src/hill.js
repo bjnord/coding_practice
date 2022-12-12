@@ -132,3 +132,27 @@ exports.dijkstra = ((grid, start) => {
 
   return steps;
 });
+
+exports.startPositions = ((grid) => {
+  const startPos = [];
+  for (let y = 0; y < grid.height; y++) {
+    for (let x = 0; x < grid.width; x++) {
+      if (grid.rows[y].heights[x] === 1) {
+        startPos.push([y, x]);
+      }
+    }
+  }
+  return startPos;
+});
+
+exports.fewestSteps = ((grid) => {
+  const startPos = module.exports.startPositions(grid);
+  let fewest = 999999999;
+  for (const start of startPos) {
+    const steps = module.exports.dijkstra(grid, start);
+    if (steps < fewest) {
+      fewest = steps;
+    }
+  }
+  return fewest;
+});

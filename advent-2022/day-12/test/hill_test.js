@@ -85,3 +85,19 @@ describe('Dijkstra tests', () => {
     expect(hill.dijkstra(exampleGrid, [4, 0])).to.equal(29);
   });
 });
+describe('height map tests', () => {
+  it('should find start positions correctly', () => {
+    const expected = [
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [2, 0],
+      [3, 0],
+      [4, 0],
+    ];
+    expect(hill.startPositions(exampleGrid, 999999999)).to.eql(expected);
+  });
+  it('should find fewest-steps start position correctly', () => {
+    expect(hill.fewestSteps(exampleGrid)).to.eql(29);
+  });
+});

@@ -11,7 +11,7 @@ console.log(`part 1: fewest steps to best signal:    ${steps}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                1');
-console.log(`part 2: actual answer:                  ${answer2}`);
+const fewestSteps = hill.fewestSteps(heightMap);
+console.log('part 2: expected answer:                480');
+console.log(`part 2: actual answer:                  ${fewestSteps}`);
 console.log('');
