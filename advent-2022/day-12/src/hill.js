@@ -95,7 +95,7 @@ exports.dijkstra = ((grid, start) => {
     start = [grid.start[0], grid.start[1]];
   }
   const dist = new Array(grid.height * grid.width).fill(999999999);
-  dist[grid.start[0] * grid.width + grid.start[1]] = 0;
+  dist[start[0] * grid.width + start[1]] = 0;
 
   // entries are [dist, pos]
   const q = new FastPriorityQueue((a, b) => {

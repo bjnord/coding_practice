@@ -78,7 +78,10 @@ describe('Dijkstra tests', () => {
   it('should find high weight for disallowed height change', () => {
     expect(hill.weight(exampleGrid, [2, 0], [2, 1])).to.equal(999999999);
   });
-  it('should find shortest path from start to end', () => {
+  it('should find shortest path from default start to end', () => {
     expect(hill.dijkstra(exampleGrid)).to.equal(31);
+  });
+  it('should find shortest path from provided start to end', () => {
+    expect(hill.dijkstra(exampleGrid, [4, 0])).to.equal(29);
   });
 });
