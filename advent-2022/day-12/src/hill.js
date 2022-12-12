@@ -69,3 +69,66 @@ exports.weight = ((grid, pos1, pos2) => {
     return 1;
   }
 });
+
+// Pseudocode from [this article](https://brilliant.org/wiki/dijkstras-short-path-finder/)
+//
+//    dist[source]  := 0                     // Distance from source to source is set to 0
+//    for each vertex v in Graph:            // Initializations
+//        if v ≠ source
+//            dist[v]  := infinity           // Unknown distance function from source to each node set to infinity
+//        add v to Q                         // All nodes initially in Q
+//
+//    while Q is not empty:                  // The main loop
+//        v := vertex in Q with min dist[v]  // In the first run-through, this vertex is the source node
+//        remove v from Q 
+//
+//        for each neighbor u of v:           // where neighbor u has not yet been removed from Q.
+//            alt := dist[v] + length(v, u)
+//            if alt < dist[u]:               // A shorter path to u has been found
+//                dist[u]  := alt            // Update distance of u 
+//
+//    return dist[]
+
+const posKey = ((pos) => '' + pos[0] + ',' + pos[1]);
+
+exports.dijkstra = ((grid) => {
+  const dist = new Array(grid.height * grid.width).fill(999999999);
+  dist[grid.start[0] * grid.width + grid.start[1]] = 0;
+
+  const q = {};
+  for (let y = 0; y < grid.height; y++) {
+    for (let x = 0; x < grid.width; x++) {
+      q[posKey([y, x])] = [y, x];
+    }
+  }
+  //console.debug(`q keys length=${Object.keys(q).length}`);
+
+  while (Object.keys(q).length > 0) {
+    const posDistPairs = Object.keys(q)
+      .map((k) => [q[k], dist[q[k][0] * grid.width + q[k][1]]])
+      .sort((a, b) => Math.sign(a[1] - b[1]));
+    //console.debug('posDistPairs:');
+    //console.dir(posDistPairs);
+    const pos = posDistPairs[0][0];
+    //console.debug(`minDist pos=${pos[0]},${pos[1]}`);
+    //console.dir(pos);
+    delete q[posKey(pos)];
+
+    for (const nPos of module.exports.neighbors(grid, pos)) {
+      //console.debug(`  neighbor=${nPos[0]},${nPos[1]}`);
+      //console.dir(nPos);
+      const alt = dist[pos[0] * grid.width + pos[1]]
+        + module.exports.weight(grid, pos, nPos);
+      if (alt < dist[nPos[0] * grid.width + nPos[1]]) {
+        //console.debug(`    shorter alt=${alt}`);
+        dist[nPos[0] * grid.width + nPos[1]] = alt;
+      }
+    }
+  }
+
+  const steps = dist[grid.end[0] * grid.width + grid.end[1]];
+  //console.debug(`steps=${steps}  dist[]:`);
+  //console.dir(dist);
+
+  return steps;
+});
