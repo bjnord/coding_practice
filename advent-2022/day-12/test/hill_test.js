@@ -67,3 +67,15 @@ describe('neighbor position tests', () => {
     expect(hill.neighbors(exampleGrid, [3, 7])).to.eql(expected);
   });
 });
+describe('Dijkstra tests', () => {
+  it('should find normal weight for 1-higher elevation', () => {
+    expect(hill.weight(exampleGrid, [1, 0], [1, 1])).to.equal(1);
+  });
+  it('should find normal weight for equal/lower elevation', () => {
+    expect(hill.weight(exampleGrid, [3, 1], [3, 2])).to.equal(1);
+    expect(hill.weight(exampleGrid, [3, 1], [4, 1])).to.equal(1);
+  });
+  it('should find high weight for disallowed height change', () => {
+    expect(hill.weight(exampleGrid, [2, 0], [2, 1])).to.equal(999999999);
+  });
+});

@@ -59,3 +59,13 @@ exports.neighbors = ((grid, pos) => {
   }
   return neighbors;
 });
+
+exports.weight = ((grid, pos1, pos2) => {
+  const height1 = grid.rows[pos1[0]].heights[pos1[1]];
+  const height2 = grid.rows[pos2[0]].heights[pos2[1]];
+  if (height2 > height1 + 1) {
+    return 999999999;
+  } else {
+    return 1;
+  }
+});
