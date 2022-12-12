@@ -1,4 +1,5 @@
 'use strict';
+const FastPriorityQueue = require('fastpriorityqueue');
 /** @module hill */
 /**
  * Parse the puzzle input.
@@ -89,39 +90,38 @@ exports.weight = ((grid, pos1, pos2) => {
 //
 //    return dist[]
 
-const posKey = ((pos) => '' + pos[0] + ',' + pos[1]);
-
-exports.dijkstra = ((grid) => {
+exports.dijkstra = ((grid, start) => {
+  if (!start) {
+    start = [grid.start[0], grid.start[1]];
+  }
   const dist = new Array(grid.height * grid.width).fill(999999999);
   dist[grid.start[0] * grid.width + grid.start[1]] = 0;
 
-  const q = {};
+  // entries are [dist, pos]
+  const q = new FastPriorityQueue((a, b) => {
+    return a[0] < b[0];
+  });
   for (let y = 0; y < grid.height; y++) {
     for (let x = 0; x < grid.width; x++) {
-      q[posKey([y, x])] = [y, x];
+      q.add([dist[y * grid.width + x], [y, x]]);
     }
   }
-  //console.debug(`q keys length=${Object.keys(q).length}`);
 
-  while (Object.keys(q).length > 0) {
-    const posDistPairs = Object.keys(q)
-      .map((k) => [q[k], dist[q[k][0] * grid.width + q[k][1]]])
-      .sort((a, b) => Math.sign(a[1] - b[1]));
-    //console.debug('posDistPairs:');
-    //console.dir(posDistPairs);
-    const pos = posDistPairs[0][0];
+  while (!q.isEmpty()) {
+    const pos = q.poll()[1];
     //console.debug(`minDist pos=${pos[0]},${pos[1]}`);
     //console.dir(pos);
-    delete q[posKey(pos)];
 
     for (const nPos of module.exports.neighbors(grid, pos)) {
-      //console.debug(`  neighbor=${nPos[0]},${nPos[1]}`);
-      //console.dir(nPos);
       const alt = dist[pos[0] * grid.width + pos[1]]
         + module.exports.weight(grid, pos, nPos);
       if (alt < dist[nPos[0] * grid.width + nPos[1]]) {
         //console.debug(`    shorter alt=${alt}`);
         dist[nPos[0] * grid.width + nPos[1]] = alt;
+        q.removeOne((entry) => {
+          return ((entry[1][0] === nPos[0]) && (entry[1][1] === nPos[1]));
+        });
+        q.add([alt, nPos]);
       }
     }
   }
