@@ -2,6 +2,7 @@
 const expect = require('chai').expect;
 const hill = require('../src/hill');
 const exampleInput = 'Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi\n';
+const exampleGrid = hill.parse(exampleInput);
 describe('parsing tests', () => {
   it('should parse one line correctly', () => {
     const expect1 = {
@@ -41,6 +42,28 @@ describe('parsing tests', () => {
         },
       ],
     };
-    expect(hill.parse(exampleInput)).to.eql(expected);
+    expect(exampleGrid).to.eql(expected);
+  });
+});
+describe('neighbor position tests', () => {
+  it('should find neighbors properly (interior)', () => {
+    const expected = [[0, 1], [2, 1], [1, 0], [1, 2]];
+    expect(hill.neighbors(exampleGrid, [1, 1])).to.eql(expected);
+  });
+  it('should find neighbors properly (top edge)', () => {
+    const expected = [[1, 2], [0, 1], [0, 3]];
+    expect(hill.neighbors(exampleGrid, [0, 2])).to.eql(expected);
+  });
+  it('should find neighbors properly (bottom edge)', () => {
+    const expected = [[3, 3], [4, 2], [4, 4]];
+    expect(hill.neighbors(exampleGrid, [4, 3])).to.eql(expected);
+  });
+  it('should find neighbors properly (left edge)', () => {
+    const expected = [[1, 0], [3, 0], [2, 1]];
+    expect(hill.neighbors(exampleGrid, [2, 0])).to.eql(expected);
+  });
+  it('should find neighbors properly (right edge)', () => {
+    const expected = [[2, 7], [4, 7], [3, 6]];
+    expect(hill.neighbors(exampleGrid, [3, 7])).to.eql(expected);
   });
 });

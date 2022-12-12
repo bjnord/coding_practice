@@ -43,3 +43,19 @@ exports.parseLine = (line) => {
   }
   return h;
 };
+
+exports.neighbors = ((grid, pos) => {
+  const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  const neighbors = [];
+  for (const delta of deltas) {
+    const nPos = [pos[0], pos[1]];
+    nPos[0] += delta[0];
+    nPos[1] += delta[1];
+    if ((nPos[0] >= 0) && (nPos[0] < grid.height)) {
+      if ((nPos[1] >= 0) && (nPos[1] < grid.width)) {
+        neighbors.push(nPos);
+      }
+    }
+  }
+  return neighbors;
+});
