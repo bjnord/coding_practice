@@ -49,3 +49,22 @@ exports.chessboardDistance = ((a, b) => {
   const dx = Math.abs(a.x - b.x);
   return Math.max(dy, dx);
 });
+/**
+ * Compute the Manhattan distance between the given positions.
+ *
+ * This is "the distance a car would drive to get from one intersection
+ * to another". See
+ * [this article](https://en.wikipedia.org/wiki/Taxicab_geometry)
+ * for more.
+ *
+ * @param a {Object} - 1st position (with attributes `y` and `x`)
+ * @param b {Object} - 2nd position (with attributes `y` and `x`)
+ *
+ * @return {number}
+ *   Returns the Manhattan distance between the given positions.
+ */
+exports.manhattanDistance = ((a, b) => {
+  const dy = Math.abs(a.y - b.y);
+  const dx = Math.abs(a.x - b.x);
+  return dy + dx;
+});

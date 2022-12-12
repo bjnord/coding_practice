@@ -44,3 +44,20 @@ describe('chessboard distance tests', () => {
     }
   });
 });
+describe('Manhattan distance tests', () => {
+  it('should compute Manhattan distance correctly', () => {
+    const positions = [
+      [{y: 0, x: 0}, {y: 0, x: 0}, 0],
+      [{y: 1, x: 1}, {y: 2, x: 1}, 1],
+      [{y: -1, x: -1}, {y: -2, x: -1}, 1],
+      [{y: 0, x: 2}, {y: 1, x: 3}, 2],
+      [{y: 0, x: -2}, {y: -1, x: -3}, 2],
+      [{y: 3, x: -1}, {y: 4, x: 1}, 3],
+      [{y: -2, x: 1}, {y: -4, x: 3}, 4],
+    ];
+    for (let i = 0; i < positions.length; i++) {
+      expect(math.manhattanDistance(positions[i][0], positions[i][1])).to.equal(positions[i][2]);
+      expect(math.manhattanDistance(positions[i][1], positions[i][0])).to.equal(positions[i][2]);
+    }
+  });
+});
