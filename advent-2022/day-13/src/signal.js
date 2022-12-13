@@ -20,9 +20,45 @@ exports.parse = (input) => {
  *   Returns a packet pair.
  */
 exports.parsePair = (lines) => {
-  let s = lines.split(/\n/);
+  const s = lines.split(/\n/);
   return {
     left: eval(s[0]),
     right: eval(s[1]),
   };
 };
+
+const compareLists = ((a, b) => {
+  for (let i = 0; i < a.length; i++) {
+    if (b[i] === undefined) {
+      // right side smaller = NOT correct order
+      return 1;
+    }
+    const c = module.exports.compare(a[i], b[i]);
+    if (c !== 0) {
+      return c;
+    }
+  }
+  if (b.length > a.length) {
+    // left side smaller = correct order
+    return -1;
+  }
+  return 0;
+});
+
+exports.compare = ((a, b) => {
+  if (Array.isArray(a)) {
+    if (Array.isArray(b)) {
+      return compareLists(a, b);
+    } else {
+      return compareLists(a, [b]);
+    }
+  } else if (Array.isArray(b)) {
+    return compareLists([a], b);
+  } else {
+    return (a < b) ? -1 : ((a > b) ? 1 : 0);
+  }
+});
+
+exports.comparePairs = ((pairs) => {
+  return pairs.map((pair) => module.exports.compare(pair.left, pair.right));
+});
