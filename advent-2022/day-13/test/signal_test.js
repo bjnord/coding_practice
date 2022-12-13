@@ -54,3 +54,29 @@ describe('comparison tests', () => {
     expect(signal.comparePairs(pairs)).to.eql(expected);
   });
 });
+describe('sorting tests', () => {
+  it('should sort all packets correctly', () => {
+    const pairs = signal.parse(exampleInput);
+    const expected = [
+      [],
+      [[]],
+      [[[]]],
+      [1, 1, 3, 1, 1],
+      [1, 1, 5, 1, 1],
+      [[1], [2, 3, 4]],
+      [1, [2, [3, [4, [5, 6, 0]]]], 8, 9],
+      [1, [2, [3, [4, [5, 6, 7]]]], 8, 9],
+      [[1], 4],
+      [[2]],
+      [3],
+      [[4, 4], 4, 4],
+      [[4, 4], 4, 4, 4],
+      [[6]],
+      [7, 7, 7],
+      [7, 7, 7, 7],
+      [[8, 7, 6]],
+      [9],
+    ];
+    expect(signal.sortPackets(pairs)).to.eql(expected);
+  });
+});

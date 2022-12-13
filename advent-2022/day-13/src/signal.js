@@ -62,3 +62,20 @@ exports.compare = ((a, b) => {
 exports.comparePairs = ((pairs) => {
   return pairs.map((pair) => module.exports.compare(pair.left, pair.right));
 });
+
+exports.sortPackets = ((pairs) => {
+  const packets = pairs.map((pair) => [pair.left, pair.right])
+    .flat().concat([[[2]], [[6]]])
+    .sort((a, b) => module.exports.compare(a, b));
+  return packets;
+});
+
+exports.isDividerPacket = ((packet, n) => {
+  if (!Array.isArray(packet)) {
+    return false;
+  } else if (!Array.isArray(packet[0])) {
+    return false;
+  } else {
+    return packet[0][0] === n;
+  }
+});

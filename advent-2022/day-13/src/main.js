@@ -13,7 +13,9 @@ console.log(`part 1: actual answer:                  ${answer1}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                1');
-console.log(`part 2: actual answer:                  ${answer2}`);
+const packets = signal.sortPackets(pairs);
+const divider2 = packets.findIndex((packet) => signal.isDividerPacket(packet, 2)) + 1;
+const divider6 = packets.findIndex((packet) => signal.isDividerPacket(packet, 6)) + 1;
+console.log('part 2: expected answer:                21836');
+console.log(`part 2: actual answer:                  ${divider2 * divider6}`);
 console.log('');
