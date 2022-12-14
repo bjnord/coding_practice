@@ -64,3 +64,34 @@ exports.makeMap = ((paths) => {
   }
   return {grid, maxY};
 });
+
+exports.dropSand = ((map) => {
+  let pos = {y: 0, x: 500};
+  for (;;) {
+    if (pos.y > map.maxY) {
+      // falls into endless void
+      return false;
+    } else if (!map.grid[posKey({y: pos.y + 1, x: pos.x})]) {
+      // falls straight down
+      pos = {y: pos.y + 1, x: pos.x};
+    } else if (!map.grid[posKey({y: pos.y + 1, x: pos.x - 1})]) {
+      // falls down & left
+      pos = {y: pos.y + 1, x: pos.x - 1};
+    } else if (!map.grid[posKey({y: pos.y + 1, x: pos.x + 1})]) {
+      // falls down & right
+      pos = {y: pos.y + 1, x: pos.x + 1};
+    } else {
+      // came to rest
+      map.grid[posKey(pos)] = 2;
+      return true;
+    }
+  }
+});
+
+exports.totalSand = ((map) => {
+  for (let i = 0; ; i++) {
+    if (!module.exports.dropSand(map)) {
+      return i;
+    }
+  }
+});

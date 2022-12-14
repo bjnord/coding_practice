@@ -29,3 +29,36 @@ describe('parsing tests', () => {
     expect(map.grid['6,495']).to.equal(undefined);
   });
 });
+describe('flow tests', () => {
+  it('should simulate flow correctly', () => {
+    const steps = [
+      {drop: 1, rest: {y: 8, x: 500}},
+      {drop: 1, rest: {y: 8, x: 499}},
+      {drop: 3, rest: {y: 8, x: 498}},
+      {drop: 8, rest: {y: 5, x: 500}},
+      {drop: 3, rest: {y: 4, x: 500}},
+      {drop: 3, rest: {y: 3, x: 500}},
+      {drop: 2, rest: {y: 3, x: 501}},
+      {drop: 1, rest: {y: 2, x: 500}},
+      {drop: 1, rest: {y: 5, x: 497}},
+      {drop: 1, rest: {y: 8, x: 495}},
+    ];
+    const map = regolith.makeMap(regolith.parse(exampleInput));
+    for (const step of steps) {
+      for (let i = 0; i < step.drop; i++) {
+        //console.debug(`i=${i} expecting sand at rest`);
+        //console.dir(map.grid);
+        expect(regolith.dropSand(map)).to.equal(true);
+      }
+      const key = `${step.rest.y},${step.rest.x}`;  // FIXME DRY
+      //console.debug(`expecting key=${key} to be sand`);
+      expect(map.grid[key]).to.equal(2);
+    }
+    //console.debug('expecting fall into void');
+    expect(regolith.dropSand(map)).to.equal(false);
+  });
+  it('should calculate total sand correctly', () => {
+    const map = regolith.makeMap(regolith.parse(exampleInput));
+    expect(regolith.totalSand(map)).to.equal(24);
+  });
+});
