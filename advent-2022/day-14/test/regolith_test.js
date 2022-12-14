@@ -57,8 +57,13 @@ describe('flow tests', () => {
     //console.debug('expecting fall into void');
     expect(regolith.dropSand(map)).to.equal(false);
   });
-  it('should calculate total sand correctly', () => {
+  it('should calculate total sand correctly (no floor)', () => {
     const map = regolith.makeMap(regolith.parse(exampleInput));
     expect(regolith.totalSand(map)).to.equal(24);
+  });
+  it('should calculate total sand correctly (floor)', () => {
+    const map = regolith.makeMap(regolith.parse(exampleInput));
+    map.floorY = map.maxY + 2;
+    expect(regolith.totalSand(map)).to.equal(93);
   });
 });

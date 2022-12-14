@@ -67,6 +67,10 @@ exports.makeMap = ((paths) => {
 
 exports.dropSand = ((map) => {
   let pos = {y: 0, x: 500};
+  if (map.grid[posKey(pos)]) {
+    // no more room for incoming sand
+    return false;
+  }
   for (;;) {
     if (pos.y > map.maxY) {
       // falls into endless void
@@ -81,7 +85,12 @@ exports.dropSand = ((map) => {
       // falls down & right
       pos = {y: pos.y + 1, x: pos.x + 1};
     } else {
-      // came to rest
+      // came to rest w/sand below
+      map.grid[posKey(pos)] = 2;
+      return true;
+    }
+    if (map.floorY && ((pos.y + 1) === map.floorY)) {
+      // came to rest w/floor below
       map.grid[posKey(pos)] = 2;
       return true;
     }
