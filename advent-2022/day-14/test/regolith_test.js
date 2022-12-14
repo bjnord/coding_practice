@@ -16,4 +16,16 @@ describe('parsing tests', () => {
     ];
     expect(regolith.parse(exampleInput)).to.eql(expected);
   });
+  it('should produce the map correctly', () => {
+    const map = regolith.makeMap(regolith.parse(exampleInput));
+    expect(Object.keys(map.grid).length).to.equal(20);
+    expect(map.maxY).to.equal(9);
+    expect(map.grid['5,498']).to.equal(1);
+    expect(map.grid['8,502']).to.equal(1);
+    expect(map.grid['4,503']).to.equal(1);
+    expect(map.grid['9,494']).to.equal(1);
+    expect(map.grid['0,500']).to.equal(undefined);
+    expect(map.grid['4,501']).to.equal(undefined);
+    expect(map.grid['6,495']).to.equal(undefined);
+  });
 });
