@@ -30,31 +30,36 @@ exports.parseLine = (line) => {
   return pair;
 };
 
-exports.notAt = ((pair, row) => {
-  const dx = pair.range - Math.abs(pair.sensor.y - row);
-  const points = [];
-  for (let i = -dx; i <= dx; i++) {
-    points.push({y: row, x: pair.sensor.x + i});
-  }
-  return points;
-});
-
 const posKey = ((pos) => '' + pos.y + ',' + pos.x);
 
 exports.countNotAt = ((pairs, row) => {
   const grid = {};
-  for (const pair of pairs) {
-    const points = module.exports.notAt(pair, row);
-    for (const point of points) {
-      grid[posKey(point)] = true;
+  const pairsCovering = module.exports.pairsCoveringRow(pairs, row);
+  const rangesCovering = module.exports.columnRangesCoveringRow(pairsCovering, row);
+  const ranges = module.exports.mergeRanges(rangesCovering);
+  //console.debug(`countNotAt ranges.length=${ranges.length}`);
+  for (const range of ranges) {
+    //console.debug(`- range [${row}, ${range[0]}..${range[1]}]`);
+    for (let x = range[0]; x <= range[1]; x++) {
+      grid[posKey({y: row, x})] = true;
     }
   }
-  for (const pair of pairs) {
+  //console.debug(`countNotAt pairsCovering.length=${pairsCovering.length}`);
+  for (const pair of pairsCovering) {
     if (pair.beacon.y === row) {
+      //console.debug(`- beacon at [${pair.beacon.y}, ${pair.beacon.x}]`);
       delete grid[posKey(pair.beacon)];
     }
   }
   return Object.keys(grid).length;
+});
+
+exports.pairsCoveringRow = ((pairs, row) => {
+  return pairs.filter((pair) => {
+    const y0 = pair.sensor.y - pair.range;
+    const y1 = pair.sensor.y + pair.range;
+    return (y0 <= row) && (row <= y1);
+  });
 });
 
 exports.pairsCoveringColumn = ((pairs, col) => {
@@ -62,6 +67,13 @@ exports.pairsCoveringColumn = ((pairs, col) => {
     const x0 = pair.sensor.x - pair.range;
     const x1 = pair.sensor.x + pair.range;
     return (x0 <= col) && (col <= x1);
+  });
+});
+
+exports.columnRangesCoveringRow = ((pairs, row) => {
+  return pairs.map((pair) => {
+    const dx = pair.range - Math.abs(pair.sensor.y - row);
+    return [pair.sensor.x - dx, pair.sensor.x + dx];
   });
 });
 

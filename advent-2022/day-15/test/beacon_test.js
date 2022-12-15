@@ -32,24 +32,86 @@ describe('parsing tests', () => {
   });
 });
 describe('location tests', () => {
-  it('should compute no-beacon location on 1 row correctly', () => {
-    const pair = beacon.parseLine('Sensor at x=8, y=7: closest beacon is at x=2, y=10');
+  it('should find pairs w/sensors covering row (y=0)', () => {
     const expected = [
-      {y: 10, x: 2},
-      {y: 10, x: 3},
-      {y: 10, x: 4},
-      {y: 10, x: 5},
-      {y: 10, x: 6},
-      {y: 10, x: 7},
-      {y: 10, x: 8},
-      {y: 10, x: 9},
-      {y: 10, x: 10},
-      {y: 10, x: 11},
-      {y: 10, x: 12},
-      {y: 10, x: 13},
-      {y: 10, x: 14},
+      {sensor: {y: 2, x: 13}, beacon: {y: 3, x: 15}, range: 3},
+      {sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}, range: 9},
+      {sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}, range: 10},
+      {sensor: {y: 1, x: 20}, beacon: {y: 3, x: 15}, range: 7},
     ];
-    expect(beacon.notAt(pair, 10)).to.eql(expected);
+    const pairs = beacon.parse(exampleInput);
+    expect(beacon.pairsCoveringRow(pairs, 0)).to.eql(expected);
+  });
+  it('should find pairs w/sensors covering row (y=10)', () => {
+    const expected = [
+      {sensor: {y: 14, x: 12}, beacon: {y: 16, x: 10}, range: 4},
+      {sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}, range: 9},
+      {sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}, range: 10},
+      {sensor: {y: 11, x: 0}, beacon: {y: 10, x: 2}, range: 3},
+      {sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}, range: 8},
+      {sensor: {y: 7, x: 16}, beacon: {y: 3, x: 15}, range: 5},
+    ];
+    const pairs = beacon.parse(exampleInput);
+    expect(beacon.pairsCoveringRow(pairs, 10)).to.eql(expected);
+  });
+  it('should find pairs w/sensors covering row (y=20)', () => {
+    const expected = [
+      {sensor: {y: 18, x: 2}, beacon: {y: 15, x: -2}, range: 7},
+      {sensor: {y: 20, x: 10}, beacon: {y: 16, x: 10}, range: 4},
+      {sensor: {y: 17, x: 14}, beacon: {y: 16, x: 10}, range: 5},
+      {sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}, range: 8},
+      {sensor: {y: 20, x: 17}, beacon: {y: 22, x: 21}, range: 6},
+    ];
+    const pairs = beacon.parse(exampleInput);
+    expect(beacon.pairsCoveringRow(pairs, 20)).to.eql(expected);
+  });
+  it('should find column ranges covering row (y=0)', () => {
+    const expected = [
+      //{sensor: {y: 2, x: 13}, beacon: {y: 3, x: 15}, range: 3},
+      [12, 14],
+      //{sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}, range: 9},
+      [6, 10],
+      //{sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}, range: 10},
+      [-8, 12],
+      //{sensor: {y: 1, x: 20}, beacon: {y: 3, x: 15}, range: 7},
+      [14, 26],
+    ];
+    const pairs = beacon.pairsCoveringRow(beacon.parse(exampleInput), 0);
+    expect(beacon.columnRangesCoveringRow(pairs, 0)).to.eql(expected);
+  });
+  it('should find column ranges covering row (y=10)', () => {
+    const expected = [
+      //{sensor: {y: 14, x: 12}, beacon: {y: 16, x: 10}, range: 4},
+      [12, 12],
+      //{sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}, range: 9},
+      [2, 14],
+      //{sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}, range: 10},
+      [2, 2],
+      //{sensor: {y: 11, x: 0}, beacon: {y: 10, x: 2}, range: 3},
+      [-2, 2],
+      //{sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}, range: 8},
+      [16, 24],
+      //{sensor: {y: 7, x: 16}, beacon: {y: 3, x: 15}, range: 5},
+      [14, 18],
+    ];
+    const pairs = beacon.pairsCoveringRow(beacon.parse(exampleInput), 10);
+    expect(beacon.columnRangesCoveringRow(pairs, 10)).to.eql(expected);
+  });
+  it('should find column ranges covering row (y=20)', () => {
+    const expected = [
+      //{sensor: {y: 18, x: 2}, beacon: {y: 15, x: -2}, range: 7},
+      [-3, 7],
+      //{sensor: {y: 20, x: 10}, beacon: {y: 16, x: 10}, range: 4},
+      [6, 14],
+      //{sensor: {y: 17, x: 14}, beacon: {y: 16, x: 10}, range: 5},
+      [12, 16],
+      //{sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}, range: 8},
+      [18, 22],
+      //{sensor: {y: 20, x: 17}, beacon: {y: 22, x: 21}, range: 6},
+      [11, 23],
+    ];
+    const pairs = beacon.pairsCoveringRow(beacon.parse(exampleInput), 20);
+    expect(beacon.columnRangesCoveringRow(pairs, 20)).to.eql(expected);
   });
   it('should compute count of no-beacon locations on 1 row correctly', () => {
     const pairs = beacon.parse(exampleInput);
