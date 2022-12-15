@@ -32,26 +32,33 @@ exports.parseLine = (line) => {
 
 const posKey = ((pos) => '' + pos.y + ',' + pos.x);
 
+const uniqueBeaconsOf = ((pairs) => {
+  const seen = {};
+  pairs.map((pair) => pair.beacon).filter((beacon) => {
+    if (seen[posKey(beacon)]) {
+      return false;
+    } else {
+      seen[posKey(beacon)] = beacon;
+      return true;
+    }
+  });
+  return Object.values(seen);
+});
+
 exports.countNotAt = ((pairs, row) => {
-  const grid = {};
   const pairsCovering = module.exports.pairsCoveringRow(pairs, row);
   const rangesCovering = module.exports.columnRangesCoveringRow(pairsCovering, row);
   const ranges = module.exports.mergeRanges(rangesCovering);
-  //console.debug(`countNotAt ranges.length=${ranges.length}`);
+  let count = 0;
   for (const range of ranges) {
-    //console.debug(`- range [${row}, ${range[0]}..${range[1]}]`);
-    for (let x = range[0]; x <= range[1]; x++) {
-      grid[posKey({y: row, x})] = true;
+    count += (range[1] - range[0] + 1);
+    for (const beacon of uniqueBeaconsOf(pairsCovering)) {
+      if ((beacon.y === row) && (range[0] <= beacon.x) && (beacon.x <= range[1])) {
+        count--;
+      }
     }
   }
-  //console.debug(`countNotAt pairsCovering.length=${pairsCovering.length}`);
-  for (const pair of pairsCovering) {
-    if (pair.beacon.y === row) {
-      //console.debug(`- beacon at [${pair.beacon.y}, ${pair.beacon.x}]`);
-      delete grid[posKey(pair.beacon)];
-    }
-  }
-  return Object.keys(grid).length;
+  return count;
 });
 
 exports.pairsCoveringRow = ((pairs, row) => {

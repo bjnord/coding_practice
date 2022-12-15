@@ -148,7 +148,7 @@ Every AoC year has to use the Manhattan distance at least once. It's a law. :)
 
 I quickly coded up a naïve solution that takes several seconds to run but produces the correct answer.
 
-**TODO** Refactor part 1 to use part 2 techniques.
+After I finished part 2, I went back and refactored part 1 to use part 2 techniques. It was then I realized I implemented part 2 "sideways" so I ended up having to implement both row-wise and column-wise functions. Ah well!
 
 ## Part Two
 
