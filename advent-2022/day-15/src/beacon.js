@@ -22,15 +22,16 @@ exports.parse = (input) => {
  */
 exports.parseLine = (line) => {
   const m = line.match(/Sensor\s+at\s+x=([\d-]+),\s+y=([\d-]+):\s+closest\s+beacon\s+is\s+at\s+x=([\d-]+),\s+y=([\d-]+)/);
-  return {
+  const pair = {
     sensor: {y: parseInt(m[2]), x: parseInt(m[1])},
     beacon: {y: parseInt(m[4]), x: parseInt(m[3])},
   };
+  pair.range = math.manhattanDistance(pair.sensor, pair.beacon);
+  return pair;
 };
 
 exports.notAt = ((pair, row) => {
-  const md = math.manhattanDistance(pair.sensor, pair.beacon);
-  const dx = md - Math.abs(pair.sensor.y - row);
+  const dx = pair.range - Math.abs(pair.sensor.y - row);
   const points = [];
   for (let i = -dx; i <= dx; i++) {
     points.push({y: row, x: pair.sensor.x + i});

@@ -7,26 +7,27 @@ describe('parsing tests', () => {
     const expected = {
       sensor: {y: 18, x: 2},
       beacon: {y: 15, x: -2},
+      range: 7,
     };
     expect(beacon.parseLine('Sensor at x=2, y=18: closest beacon is at x=-2, y=15')).to.eql(expected);
   });
   it('should parse a whole input set correctly', () => {
     const expected =
     [
-      {sensor: {y: 18, x: 2}, beacon: {y: 15, x: -2}},
-      {sensor: {y: 16, x: 9}, beacon: {y: 16, x: 10}},
-      {sensor: {y: 2, x: 13}, beacon: {y: 3, x: 15}},
-      {sensor: {y: 14, x: 12}, beacon: {y: 16, x: 10}},
-      {sensor: {y: 20, x: 10}, beacon: {y: 16, x: 10}},
-      {sensor: {y: 17, x: 14}, beacon: {y: 16, x: 10}},
-      {sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}},
-      {sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}},
-      {sensor: {y: 11, x: 0}, beacon: {y: 10, x: 2}},
-      {sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}},
-      {sensor: {y: 20, x: 17}, beacon: {y: 22, x: 21}},
-      {sensor: {y: 7, x: 16}, beacon: {y: 3, x: 15}},
-      {sensor: {y: 3, x: 14}, beacon: {y: 3, x: 15}},
-      {sensor: {y: 1, x: 20}, beacon: {y: 3, x: 15}},
+      {sensor: {y: 18, x: 2}, beacon: {y: 15, x: -2}, range: 7},
+      {sensor: {y: 16, x: 9}, beacon: {y: 16, x: 10}, range: 1},
+      {sensor: {y: 2, x: 13}, beacon: {y: 3, x: 15}, range: 3},
+      {sensor: {y: 14, x: 12}, beacon: {y: 16, x: 10}, range: 4},
+      {sensor: {y: 20, x: 10}, beacon: {y: 16, x: 10}, range: 4},
+      {sensor: {y: 17, x: 14}, beacon: {y: 16, x: 10}, range: 5},
+      {sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}, range: 9},
+      {sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}, range: 10},
+      {sensor: {y: 11, x: 0}, beacon: {y: 10, x: 2}, range: 3},
+      {sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}, range: 8},
+      {sensor: {y: 20, x: 17}, beacon: {y: 22, x: 21}, range: 6},
+      {sensor: {y: 7, x: 16}, beacon: {y: 3, x: 15}, range: 5},
+      {sensor: {y: 3, x: 14}, beacon: {y: 3, x: 15}, range: 1},
+      {sensor: {y: 1, x: 20}, beacon: {y: 3, x: 15}, range: 7},
     ];
     expect(beacon.parse(exampleInput)).to.eql(expected);
   });
