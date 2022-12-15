@@ -139,20 +139,24 @@ exports.findBeaconAtColumn = ((pairs, col, clipAt) => {
   if (ranges.length === 1) {
     return null;
   } else if (ranges.length < 1) {
+    /* istanbul ignore next */
     throw new SyntaxError('merged row range not found');
   } else if (ranges.length > 2) {
+    /* istanbul ignore next */
     throw new SyntaxError('more than 2 merged row ranges found');
   }
   if (ranges[0][0] < ranges[1][0]) {
     if ((ranges[0][1] + 2) === ranges[1][0]) {
       return ranges[0][1] + 1;
     } else {
+      /* istanbul ignore next */
       throw new SyntaxError(`first range end=${ranges[0][1]} second range begin=${ranges[1][0]}: not gap of 2`);
     }
   } else {
     if ((ranges[1][1] + 2) === ranges[0][0]) {
       return ranges[1][1] + 1;
     } else {
+      /* istanbul ignore next */
       throw new SyntaxError(`first range end=${ranges[1][1]} second range begin=${ranges[0][0]}: not gap of 2`);
     }
   }
