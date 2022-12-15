@@ -1,4 +1,5 @@
 'use strict';
+const math = require('../../shared/src/math');
 /** @module beacon */
 /**
  * Parse the puzzle input.
@@ -26,3 +27,31 @@ exports.parseLine = (line) => {
     beacon: {y: parseInt(m[4]), x: parseInt(m[3])},
   };
 };
+
+exports.notAt = ((pair, row) => {
+  const md = math.manhattanDistance(pair.sensor, pair.beacon);
+  const dx = md - Math.abs(pair.sensor.y - row);
+  const points = [];
+  for (let i = -dx; i <= dx; i++) {
+    points.push({y: row, x: pair.sensor.x + i});
+  }
+  return points;
+});
+
+const posKey = ((pos) => '' + pos.y + ',' + pos.x);
+
+exports.countNotAt = ((pairs, row) => {
+  const grid = {};
+  for (const pair of pairs) {
+    const points = module.exports.notAt(pair, row);
+    for (const point of points) {
+      grid[posKey(point)] = true;
+    }
+  }
+  for (const pair of pairs) {
+    if (pair.beacon.y === row) {
+      delete grid[posKey(pair.beacon)];
+    }
+  }
+  return Object.keys(grid).length;
+});

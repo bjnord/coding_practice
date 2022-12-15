@@ -31,3 +31,28 @@ describe('parsing tests', () => {
     expect(beacon.parse(exampleInput)).to.eql(expected);
   });
 });
+describe('location tests', () => {
+  it('should compute no-beacon location on 1 row correctly', () => {
+    const pair = beacon.parseLine('Sensor at x=8, y=7: closest beacon is at x=2, y=10');
+    const expected = [
+      { y: 10, x: 2 },
+      { y: 10, x: 3 },
+      { y: 10, x: 4 },
+      { y: 10, x: 5 },
+      { y: 10, x: 6 },
+      { y: 10, x: 7 },
+      { y: 10, x: 8 },
+      { y: 10, x: 9 },
+      { y: 10, x: 10 },
+      { y: 10, x: 11 },
+      { y: 10, x: 12 },
+      { y: 10, x: 13 },
+      { y: 10, x: 14 },
+    ];
+    expect(beacon.notAt(pair, 10)).to.eql(expected);
+  });
+  it('should compute count of no-beacon locations on 1 row correctly', () => {
+    const pairs = beacon.parse(exampleInput);
+    expect(beacon.countNotAt(pairs, 10)).to.equal(26);
+  });
+});
