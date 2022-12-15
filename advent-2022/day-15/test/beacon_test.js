@@ -13,20 +13,20 @@ describe('parsing tests', () => {
   it('should parse a whole input set correctly', () => {
     const expected =
     [
-      { sensor: { x: 2, y: 18 }, beacon: { x: -2, y: 15 }, },
-      { sensor: { x: 9, y: 16 }, beacon: { x: 10, y: 16 }, },
-      { sensor: { x: 13, y: 2 }, beacon: { x: 15, y: 3 }, },
-      { sensor: { x: 12, y: 14 }, beacon: { x: 10, y: 16 }, },
-      { sensor: { x: 10, y: 20 }, beacon: { x: 10, y: 16 }, },
-      { sensor: { x: 14, y: 17 }, beacon: { x: 10, y: 16 }, },
-      { sensor: { x: 8, y: 7 }, beacon: { x: 2, y: 10 }, },
-      { sensor: { x: 2, y: 0 }, beacon: { x: 2, y: 10 }, },
-      { sensor: { x: 0, y: 11 }, beacon: { x: 2, y: 10 }, },
-      { sensor: { x: 20, y: 14 }, beacon: { x: 25, y: 17 }, },
-      { sensor: { x: 17, y: 20 }, beacon: { x: 21, y: 22 }, },
-      { sensor: { x: 16, y: 7 }, beacon: { x: 15, y: 3 }, },
-      { sensor: { x: 14, y: 3 }, beacon: { x: 15, y: 3 }, },
-      { sensor: { x: 20, y: 1 }, beacon: { x: 15, y: 3 }, },
+      {sensor: {y: 18, x: 2}, beacon: {y: 15, x: -2}},
+      {sensor: {y: 16, x: 9}, beacon: {y: 16, x: 10}},
+      {sensor: {y: 2, x: 13}, beacon: {y: 3, x: 15}},
+      {sensor: {y: 14, x: 12}, beacon: {y: 16, x: 10}},
+      {sensor: {y: 20, x: 10}, beacon: {y: 16, x: 10}},
+      {sensor: {y: 17, x: 14}, beacon: {y: 16, x: 10}},
+      {sensor: {y: 7, x: 8}, beacon: {y: 10, x: 2}},
+      {sensor: {y: 0, x: 2}, beacon: {y: 10, x: 2}},
+      {sensor: {y: 11, x: 0}, beacon: {y: 10, x: 2}},
+      {sensor: {y: 14, x: 20}, beacon: {y: 17, x: 25}},
+      {sensor: {y: 20, x: 17}, beacon: {y: 22, x: 21}},
+      {sensor: {y: 7, x: 16}, beacon: {y: 3, x: 15}},
+      {sensor: {y: 3, x: 14}, beacon: {y: 3, x: 15}},
+      {sensor: {y: 1, x: 20}, beacon: {y: 3, x: 15}},
     ];
     expect(beacon.parse(exampleInput)).to.eql(expected);
   });
@@ -35,19 +35,19 @@ describe('location tests', () => {
   it('should compute no-beacon location on 1 row correctly', () => {
     const pair = beacon.parseLine('Sensor at x=8, y=7: closest beacon is at x=2, y=10');
     const expected = [
-      { y: 10, x: 2 },
-      { y: 10, x: 3 },
-      { y: 10, x: 4 },
-      { y: 10, x: 5 },
-      { y: 10, x: 6 },
-      { y: 10, x: 7 },
-      { y: 10, x: 8 },
-      { y: 10, x: 9 },
-      { y: 10, x: 10 },
-      { y: 10, x: 11 },
-      { y: 10, x: 12 },
-      { y: 10, x: 13 },
-      { y: 10, x: 14 },
+      {y: 10, x: 2},
+      {y: 10, x: 3},
+      {y: 10, x: 4},
+      {y: 10, x: 5},
+      {y: 10, x: 6},
+      {y: 10, x: 7},
+      {y: 10, x: 8},
+      {y: 10, x: 9},
+      {y: 10, x: 10},
+      {y: 10, x: 11},
+      {y: 10, x: 12},
+      {y: 10, x: 13},
+      {y: 10, x: 14},
     ];
     expect(beacon.notAt(pair, 10)).to.eql(expected);
   });
