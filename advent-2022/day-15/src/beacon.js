@@ -56,3 +56,85 @@ exports.countNotAt = ((pairs, row) => {
   }
   return Object.keys(grid).length;
 });
+
+exports.pairsCoveringColumn = ((pairs, col) => {
+  return pairs.filter((pair) => {
+    const x0 = pair.sensor.x - pair.range;
+    const x1 = pair.sensor.x + pair.range;
+    return (x0 <= col) && (col <= x1);
+  });
+});
+
+exports.rowRangesCoveringColumn = ((pairs, col) => {
+  return pairs.map((pair) => {
+    const dy = pair.range - Math.abs(pair.sensor.x - col);
+    return [pair.sensor.y - dy, pair.sensor.y + dy];
+  });
+});
+
+exports.clipRanges = ((ranges, limit) => {
+  return ranges.map((range) => {
+    return [Math.max(range[0], 0), Math.min(range[1], limit)];
+  });
+});
+
+exports.rangesOverlap = ((a, b) => {
+  if (a[0] > b[0]) {
+    const c = a;
+    a = b;
+    b = c;
+  }
+  return b[0] <= (a[1] + 1);
+});
+
+// assumes they overlap!
+exports.mergeRange = ((a, b) => {
+  return [Math.min(a[0], b[0]), Math.max(a[1], b[1])];
+});
+
+exports.mergeRanges = ((ranges) => {
+  const newRanges = [];
+  let mergedRange = ranges.shift();
+  let shrunk = false;
+  for (const range of ranges) {
+    if (module.exports.rangesOverlap(mergedRange, range)) {
+      mergedRange = module.exports.mergeRange(mergedRange, range);
+      shrunk = true;
+    } else {
+      newRanges.push(range);
+    }
+  }
+  newRanges.push(mergedRange);
+  if (shrunk && (newRanges.length > 1)) {
+    return module.exports.mergeRanges(newRanges);
+  } else {
+    return newRanges;
+  }
+});
+
+// returns row (`y` value) if found, or `null` if not found
+exports.findBeaconAtColumn = ((pairs, col, clipAt) => {
+  const pairsCovering = module.exports.pairsCoveringColumn(pairs, col);
+  const rangesCovering = module.exports.clipRanges(module.exports.rowRangesCoveringColumn(pairsCovering, col), clipAt);
+  const ranges = module.exports.mergeRanges(rangesCovering);
+  if (ranges.length === 1) {
+    return null;
+  } else if (ranges.length < 1) {
+    throw new SyntaxError('merged row range not found');
+  } else if (ranges.length > 2) {
+    throw new SyntaxError('more than 2 merged row ranges found');
+  }
+  if (ranges[0][0] < ranges[1][0]) {
+    if ((ranges[0][1] + 2) === ranges[1][0]) {
+      return ranges[0][1] + 1;
+    } else {
+      throw new SyntaxError(`first range end=${ranges[0][1]} second range begin=${ranges[1][0]}: not gap of 2`);
+    }
+  } else {
+    if ((ranges[1][1] + 2) === ranges[0][0]) {
+      return ranges[1][1] + 1;
+    } else {
+      throw new SyntaxError(`first range end=${ranges[1][1]} second range begin=${ranges[0][0]}: not gap of 2`);
+    }
+  }
+});
