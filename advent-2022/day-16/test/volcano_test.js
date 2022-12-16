@@ -30,6 +30,13 @@ describe('Volcano constructor tests', () => {
       expect(volcano.valve(exp.name).label()).to.eql(exp.label);
     }
   });
+  it('should start with correct location', () => {
+    expect(volcano.currentValve().name()).to.eql('AA');
+  });
+  it('should start with correct neighbor valves', () => {
+    const neighbors = volcano.neighborValves().map((valve) => valve.name());
+    expect(neighbors.sort()).to.eql(['BB', 'DD', 'II']);
+  });
 });
 describe('Volcano valve tests', () => {
   it('should start with all valves closed', () => {

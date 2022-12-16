@@ -22,6 +22,7 @@ class Volcano
         graph[valve.name()] = valve;
         return graph;
       }, {});
+    this._currentValve = 'AA';
   }
   valve(name)
   {
@@ -31,14 +32,23 @@ class Volcano
   {
     return Object.values(this._valves);
   }
+  currentValve()
+  {
+    return this.valve(this._currentValve);
+  }
+  neighborValves()
+  {
+    return this.currentValve().tunnels()
+      .map((name) => this.valve(name));
+  }
   closedValves()
   {
-    return Object.values(this._valves)
+    return this.valves()
       .filter((valve) => valve.isClosed());
   }
   totalRate()
   {
-    return Object.values(this._valves)
+    return this.valves()
       .reduce((total, valve) => total + valve.currentRate(), 0);
   }
   writeGraph(path)
