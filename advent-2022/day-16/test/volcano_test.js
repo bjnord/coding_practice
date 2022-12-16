@@ -31,13 +31,20 @@ describe('Volcano constructor tests', () => {
     }
   });
 });
-describe('Volcano valve state tests', () => {
-  let volcano;
-  before(() => {
-    volcano = new Volcano(exampleInput);
-  });
+describe('Volcano valve tests', () => {
   it('should start with all valves closed', () => {
+    const volcano = new Volcano(exampleInput);
     const nValves = volcano.valves().length;
     expect(volcano.closedValves().length).to.equal(nValves);
+  });
+  it('should reflect total pressure of open valves', () => {
+    const volcano = new Volcano(exampleInput);
+    expect(volcano.totalRate()).to.equal(0);
+    volcano.valve('BB').open();
+    expect(volcano.totalRate()).to.equal(13);
+    volcano.valve('CC').open();
+    expect(volcano.totalRate()).to.equal(13 + 2);
+    volcano.valve('DD').open();
+    expect(volcano.totalRate()).to.equal(13 + 2 + 20);
   });
 });

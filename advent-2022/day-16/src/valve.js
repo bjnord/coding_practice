@@ -27,6 +27,10 @@ class Valve
   {
     return this._rate;
   }
+  currentRate()
+  {
+    return this._opened ? this._rate : 0;
+  }
   tunnels()
   {
     return this._tunnels;

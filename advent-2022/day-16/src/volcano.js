@@ -36,6 +36,11 @@ class Volcano
     return Object.values(this._valves)
       .filter((valve) => valve.isClosed());
   }
+  totalRate()
+  {
+    return Object.values(this._valves)
+      .reduce((total, valve) => total + valve.currentRate(), 0);
+  }
   writeGraph(path)
   {
     const f = fs.openSync(path, 'w');

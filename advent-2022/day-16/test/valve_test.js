@@ -21,15 +21,18 @@ describe('Valve constructor tests', () => {
   });
 });
 describe('Valve state tests', () => {
-  let valve;
-  before(() => {
-    valve = new Valve(exampleLine);
-  });
-  it('should report correct valve state', () => {
+  it('should report current valve state', () => {
+    const valve = new Valve(exampleLine);
     expect(valve.isClosed()).to.equal(true);
     expect(valve.isOpen()).to.equal(false);
     valve.open();
     expect(valve.isClosed()).to.equal(false);
     expect(valve.isOpen()).to.equal(true);
+  });
+  it('should report current valve rate', () => {
+    const valve = new Valve(exampleLine);
+    expect(valve.currentRate()).to.equal(0);
+    valve.open();
+    expect(valve.currentRate()).to.equal(13);
   });
 });
