@@ -55,3 +55,14 @@ describe('Volcano valve tests', () => {
     expect(volcano.totalRate()).to.equal(13 + 2 + 20);
   });
 });
+describe('Volcano valve opening tests', () => {
+  it('should find the next best valve to open', () => {
+    const volcano = new Volcano(exampleInput);
+    volcano.openBestValve();
+    expect(volcano.currentValve().name()).to.equal('DD');
+    expect(volcano.totalRate()).to.equal(20);
+    volcano.openBestValve();
+    expect(volcano.currentValve().name()).to.equal('BB');
+    expect(volcano.totalRate()).to.equal(33);
+  });
+});
