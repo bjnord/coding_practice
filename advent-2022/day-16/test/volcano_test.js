@@ -17,16 +17,18 @@ describe('constructor tests', () => {
   let volcano;
   before(() => {
     volcano = new Volcano(exampleInput);
+    volcano.writeGraph('graph/example.mermaid');
   });
   it('should parse example input correctly', () => {
     const expected = [
-      {name: 'AA', rate: 0, tunnels: ['DD', 'II', 'BB']},
-      {name: 'DD', rate: 20, tunnels: ['CC', 'AA', 'EE']},
-      {name: 'JJ', rate: 21, tunnels: ['II']},
+      {name: 'AA', rate: 0, tunnels: ['DD', 'II', 'BB'], label: 'AA 0'},
+      {name: 'DD', rate: 20, tunnels: ['CC', 'AA', 'EE'], label: 'DD 20'},
+      {name: 'JJ', rate: 21, tunnels: ['II'], label: 'JJ 21'},
     ];
     for (const exp of expected) {
       expect(volcano.valve(exp.name).rate()).to.equal(exp.rate);
       expect(volcano.valve(exp.name).tunnels()).to.eql(exp.tunnels);
+      expect(volcano.valve(exp.name).label()).to.eql(exp.label);
     }
   });
 });

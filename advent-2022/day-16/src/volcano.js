@@ -1,4 +1,5 @@
 'use strict';
+const fs = require('fs');
 const Valve = require('../src/valve');
 
 class Volcano
@@ -25,6 +26,21 @@ class Volcano
   valve(name)
   {
     return this._valves[name];
+  }
+  valves()
+  {
+    return Object.values(this._valves);
+  }
+  writeGraph(path)
+  {
+    const f = fs.openSync(path, 'w');
+    fs.writeSync(f, 'graph LR\n');
+    for (const valve of this.valves()) {
+      for (const tunnel of valve.tunnels()) {
+        fs.writeSync(f, `  ${valve.name()}(${valve.label()}) --> ${tunnel}\n`);
+      }
+    }
+    fs.closeSync(f);
   }
 }
 module.exports = Volcano;

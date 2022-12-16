@@ -30,5 +30,9 @@ class Valve
   {
     return this._tunnels;
   }
+  label()
+  {
+    return `${this._name} ${this._rate}`;
+  }
 }
 module.exports = Valve;
