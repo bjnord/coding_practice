@@ -31,6 +31,11 @@ class Volcano
   {
     return Object.values(this._valves);
   }
+  closedValves()
+  {
+    return Object.values(this._valves)
+      .filter((valve) => valve.isClosed());
+  }
   writeGraph(path)
   {
     const f = fs.openSync(path, 'w');

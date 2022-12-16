@@ -17,6 +17,7 @@ class Valve
     this._name = m[1];
     this._rate = parseInt(m[2]);
     this._tunnels = m[3].split(/,\s+/);
+    this._opened = false;
   }
   name()
   {
@@ -33,6 +34,18 @@ class Valve
   label()
   {
     return `${this._name} ${this._rate}`;
+  }
+  isOpen()
+  {
+    return this._opened;
+  }
+  isClosed()
+  {
+    return !this._opened;
+  }
+  open()
+  {
+    this._opened = true;
   }
 }
 module.exports = Valve;
