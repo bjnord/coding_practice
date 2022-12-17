@@ -16,14 +16,51 @@ class Volcano
    */
   constructor(input)
   {
+    // hash of Valve class objects, key = valve name
+    // (this has all valves including 0-rate ones)
     this._valves = input.trim().split(/\n/)
       .map((line) => new Valve(line))
-      .reduce((graph, valve) => {
-        graph[valve.name()] = valve;
-        return graph;
+      .reduce((h, valve) => {
+        h[valve.name()] = valve;
+        return h;
+      }, {});
+    // hash of path lists, key = valve name
+    // (this only has non-0-rate valves plus root AA)
+    this._valvePaths = this.valves()
+      .filter((valve) => this._isPathValve(valve))
+      .map((valve) => {
+        return [
+          valve.name(),
+          valve.tunnelNames().map((tunnelName) => {
+            return this._tunnelPath(valve.name(), tunnelName);
+          }),
+        ]
+      })
+      .reduce((h, pathPair) => {
+        h[pathPair[0]] = pathPair[1];
+        return h;
       }, {});
     this._currentValveName = 'AA';
     this._timeLeft = 30;
+  }
+  _isPathValve(valve)
+  {
+    return (valve.name() === 'AA') || (valve.rate() > 0);
+  }
+  _tunnelPath(prevName, name)
+  {
+    for (let cost = 1; ; cost++) {
+      const valve = this.valve(name);
+      if (this._isPathValve(valve)) {
+        return {cost, endName: name};
+      }
+      // 0-rate valves only have two tunnels; continue the path by taking
+      // the one we didn't get here via
+      const nextName = valve.tunnelNames()
+        .find((tunnelName) => tunnelName !== prevName);
+      prevName = name;
+      name = nextName;
+    }
   }
   valve(valveName)
   {
@@ -39,7 +76,7 @@ class Volcano
   }
   pathsOf(valve)
   {
-    return valve.tunnelNames().map((valveName) => ({cost: 1, endName: valveName}));
+    return this._valvePaths[valve.name()];
   }
   closedValves()
   {
@@ -103,9 +140,11 @@ class Volcano
     const f = fs.openSync(filePath, 'w');
     fs.writeSync(f, 'graph LR\n');
     for (const valve of this.valves()) {
-      for (const path of this.pathsOf(valve)) {
-        const neighbor = this.valve(path.endName);
-        fs.writeSync(f, `  ${valve.name()}(${valve.label()})-->|${path.cost}|${neighbor.name()}\n`);
+      if (this._isPathValve(valve)) {
+        for (const path of this.pathsOf(valve)) {
+          const neighbor = this.valve(path.endName);
+          fs.writeSync(f, `  ${valve.name()}(${valve.label()})-->|${path.cost}|${neighbor.name()}\n`);
+        }
       }
     }
     fs.closeSync(f);

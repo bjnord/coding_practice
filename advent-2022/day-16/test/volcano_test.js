@@ -26,7 +26,7 @@ describe('Volcano constructor tests', () => {
         label: 'AA 0',
         paths: [
           {cost: 1, endName: 'DD'},
-          {cost: 1, endName: 'II'},
+          {cost: 2, endName: 'JJ'},
           {cost: 1, endName: 'BB'},
         ],
       },
@@ -45,7 +45,16 @@ describe('Volcano constructor tests', () => {
         rate: 21,
         label: 'JJ 21',
         paths: [
-          {cost: 1, endName: 'II'},
+          {cost: 2, endName: 'AA'},
+        ],
+      },
+      {
+        name: 'EE',
+        rate: 3,
+        label: 'EE 3',
+        paths: [
+          {cost: 3, endName: 'HH'},
+          {cost: 1, endName: 'DD'},
         ],
       },
     ];
