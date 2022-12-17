@@ -139,11 +139,15 @@ class Volcano
   {
     const f = fs.openSync(filePath, 'w');
     fs.writeSync(f, 'graph LR\n');
+    const drew = {};
     for (const valve of this.valves()) {
       if (this._isPathValve(valve)) {
         for (const path of this.pathsOf(valve)) {
           const neighbor = this.valve(path.endName);
-          fs.writeSync(f, `  ${valve.name()}(${valve.label()})-->|${path.cost}|${neighbor.name()}\n`);
+          if (!drew[`${valve.name()}${neighbor.name()}`] && !drew[`${neighbor.name()}${valve.name()}`]) {
+            fs.writeSync(f, `  ${valve.name()}(${valve.label()})---|${path.cost}|${neighbor.name()}(${neighbor.label()})\n`);
+            drew[`${valve.name()}${neighbor.name()}`] = true;
+          }
         }
       }
     }

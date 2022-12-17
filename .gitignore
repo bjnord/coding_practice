@@ -3,7 +3,7 @@
 */*/coverage/
 */*/dist/
 */*/doc/
-*/*/graph/
+*/*/graph/*.mermaid
 */*/node_modules/
 synacor/tmp/
 hogan-57/*/*/target/
