@@ -1,5 +1,6 @@
 'use strict';
 const Board = require('../src/board');
+const floyd = require('../../../advent-2019/shared/src/floyd');
 
 class Tetris
 {
@@ -14,7 +15,6 @@ class Tetris
   constructor(input, debug)
   {
     this._jets = input.trim().split('');
-    this._currentJet = 0;
     // element 0 of each shape is the lowest row
     // TODO might not need the trailing 0s
     this._shapes = [
@@ -37,10 +37,15 @@ class Tetris
       // ##
       [0b1100, 0b1100, 0b0000, 0b0000],
     ];
-    this._currentShape = 0;
     this._debug = debug;
+    this._initialize();
+  }
+  _initialize()
+  {
+    this._currentJet = 0;
+    this._currentShape = 0;
     this._board = new Board(this._debug);
-  };
+  }
   nextJet()
   {
     const jet = this._jets[this._currentJet];
@@ -160,15 +165,94 @@ class Tetris
   {
     for (let i = 0; i < n; i++) {
       this.dropNextShape();
-      if (debugAt) {
-        //console.log(`dropped shape ${i}`);
+//    if (debugAt) {
+//      console.log(`dropped shape ${i}`);
         if (i >= debugAt) {
           // FIXME accessing private member
           this._board._debug = true;
           this._debug = true;
         }
-      }
+//    }
     }
+  }
+  dropShapesCyclical(n)
+  {
+    /*
+     * Ensure we're using BigInt.
+     */
+    const argType = Object.prototype.toString.call(n);
+    if (argType !== '[object BigInt]') {
+      throw new TypeError('argument must be BigInt');
+    }
+    /*
+     * Fill board enough for Floyd to find a cycle
+     */
+    const stateKey = ((state) => state.sum << state.afterShape);
+    const states = {};
+    const initialState = (() => ({sum: 0, afterShape: 4}));
+    for (let i = 0, state = initialState(); i < 100000; i++) {
+      this.dropNextShape();
+      const newState = this._board.state();
+      if (newState.sum === state.sum) {
+        throw new SyntaxError(`populate i=${i} consecutive sums match ${state.sum}`);
+      } else if (newState.afterShape !== ((state.afterShape + 1) % 5)) {
+        throw new SyntaxError(`populate i=${i} shape=${state.afterShape} newShape=${newState.afterShape}`);
+      }
+      states[stateKey(state)] = newState;
+      state = newState;
+    }
+    const nFirstShapes = this._board.nShapesAdded();
+    if (this._debug) {
+      console.debug(`nFirstShapes=${nFirstShapes} states.length=${Object.keys(states).length}`);
+    }
+    /*
+     * Run Floyd cycle detection.
+     */
+    // f: function which transforms the current state to the
+    //    next state in the sequence [`f(x0)` returns `x1`]
+    const f = ((x) => {
+//    console.log(`f(i=${x.i}) called`);
+      if (!x) {
+        throw new SyntaxError(`board exhausted; states.length=${Object.keys(states).length}`);
+      }
+      return states[stateKey(x)];
+    });
+    // eq: function which detects equality of two states
+    //     [`eq(a, b)` returns `true` if states are equal]
+    const eq = ((a, b) => {
+//    console.log(`eq(${a.sum}/${a.afterShape}, b=${b.sum}/${b.afterShape}) called`);
+      return (a.sum === b.sum) && (a.afterShape === b.afterShape);
+    });
+    // 3rd param: initial state (of the type `f(x)` expects)
+    // return:    [cycle-length, first-occurrence]
+    const lmu = floyd.run(f, eq, initialState());
+    const cycleLength = BigInt(lmu[0]);
+    const firstOccurrence = BigInt(lmu[1]);
+    /*
+     * Do the math!
+     */
+    this._initialize();
+    // drop the initial shapes before the first cycle begins, and
+    // record that height:
+    for (let i = 0n; i < firstOccurrence; i++, n--) {
+      this.dropNextShape();
+    }
+    const firstHeight = BigInt(this.boardHeight());
+    // drop one cycle's worth of shapes to determine cycle height:
+    for (let i = 0n; i < cycleLength; i++, n--) {
+      this.dropNextShape();
+    }
+    const cycleHeight = BigInt(this.boardHeight()) - firstHeight;
+    // figure out how many cycles we're skipping, and their height:
+    const skipCycles = n / cycleLength;
+    const skipHeight = skipCycles * cycleHeight;
+    const skipRem = n % cycleLength;
+    // drop the last fractional cycle's shapes:
+    for (let i = 0n; i < skipRem; i++, n--) {
+      this.dropNextShape();
+    }
+    const remHeight = BigInt(this.boardHeight()) - firstHeight - cycleHeight;
+    return firstHeight + cycleHeight + skipHeight + remHeight;
   }
 }
 module.exports = Tetris;

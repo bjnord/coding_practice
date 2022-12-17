@@ -60,3 +60,18 @@ describe('Tetris play tests', () => {
     expect(tetris.boardHeight()).to.equal(3068);
   });
 });
+describe('Tetris cyclical play tests', () => {
+  it('should throw exception if not BigInt', () => {
+    const tetris = new Tetris(exampleInput);
+    const badCallFn = () => { tetris.dropShapesCyclical(1); };
+    expect(badCallFn).to.throw(TypeError);
+  });
+  it('should compute the correct height after many, many shapes drop', () => {
+    const tetris = new Tetris(exampleInput);
+    const nShapes = 1000000000000n;
+    const expected = 1514285714288n;
+    const actual = tetris.dropShapesCyclical(nShapes);
+//  console.debug(`cyclical expected=${expected} actual=${actual}`);
+    expect(actual).to.equal(expected);
+  });
+});

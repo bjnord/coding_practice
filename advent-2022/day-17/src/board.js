@@ -2,17 +2,35 @@
 
 class Board
 {
+  static get stateRows() {
+    return 100;
+  }
   constructor(debug)
   {
     // element 0 is the lowest row
     this._rows = [
       0b1111111,  // floor
     ];
+    this._nShapesAdded = 0;
+    this._lastShape = undefined;
     this._debug = debug;
   }
   height()
   {
     return this._rows.length - 1;
+  }
+  nShapesAdded()
+  {
+    return this._nShapesAdded;
+  }
+  state()
+  {
+    if (this.height() < 1) {
+      return undefined;
+    }
+    const sum = this._rows.slice(-Board.stateRows)
+      .reduce((s, row, i) => s + ((row * i) << (i & 15)), 0);
+    return {sum, afterShape: this._lastShape};
   }
   makeSpace()
   {
@@ -85,6 +103,9 @@ class Board
         this._rows.push(line);
       }
     }
+    this._nShapesAdded++;
+    // FIXME needs to be passed as param
+    this._lastShape = (this._nShapesAdded - 1) % 5;
   }
   _drawLine(line, ch)
   {
