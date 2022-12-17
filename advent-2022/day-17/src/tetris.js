@@ -11,7 +11,7 @@ class Tetris
    * @return {Array.Object}
    *   Returns a list of [TBP].
    */
-  constructor(input)
+  constructor(input, debug)
   {
     this._jets = input.trim().split('');
     this._currentJet = 0;
@@ -38,7 +38,8 @@ class Tetris
       [0b1100, 0b1100, 0b0000, 0b0000],
     ];
     this._currentShape = 0;
-    this._board = new Board();
+    this._debug = debug;
+    this._board = new Board(this._debug);
   };
   nextJet()
   {
@@ -68,7 +69,9 @@ class Tetris
       consoleDir = 'left';
       if (shape.find((line) => line & 0b1000000) !== undefined) {
         // left wall blocks movement
-        console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [W]`);
+        if (this._debug) {
+          console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [W]`);
+        }
         return shape;
       }
       newShape = shape.map((b) => b << 1);
@@ -77,7 +80,9 @@ class Tetris
       consoleDir = 'right';
       if (shape.find((line) => line & 0b0000001) !== undefined) {
         // right wall blocks movement
-        console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [W]`);
+        if (this._debug) {
+          console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [W]`);
+        }
         return shape;
       }
       newShape = shape.map((b) => b >> 1);
@@ -87,30 +92,40 @@ class Tetris
     }
     if (this._board.collision(mergeRow, overlap, newShape, true)) {
       // tower blocks movement
-      console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [T]`);
+      if (this._debug) {
+        console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [T]`);
+      }
       return shape;
     }
-    console.log(`Jet of gas pushes rock ${consoleDir}:`);
+    if (this._debug) {
+      console.log(`Jet of gas pushes rock ${consoleDir}:`);
+    }
     return newShape;
   }
   dropNextShape()
   {
     this._board.makeSpace();
     let shape = this.nextShape().map((b) => b << 1);
-    console.log('The next rock begins falling:');
-    this._board.drawShape(shape, '@');
-    this._board.drawBoard();
+    if (this._debug) {
+      console.log('The next rock begins falling:');
+      this._board.drawShape(shape, '@');
+      this._board.drawBoard();
+    }
     let mergeRow = this._board.height();
     let overlap = 0;
     for (;;) {
       shape = this.blow(mergeRow, overlap, shape);
-      this._board.drawShape(shape, '@');
-      this._board.drawBoard();
-      if (this._board.shrink()) {
-        // mergeRow is just empty space; shape can continue falling
-        console.log('Rock falls 1 unit:');
+      if (this._debug) {
         this._board.drawShape(shape, '@');
         this._board.drawBoard();
+      }
+      if (this._board.shrink()) {
+        // mergeRow is just empty space; shape can continue falling
+        if (this._debug) {
+          console.log('Rock falls 1 unit:');
+          this._board.drawShape(shape, '@');
+          this._board.drawBoard();
+        }
         mergeRow--;
       } else if (this._board.collision(mergeRow, overlap + 1, shape)) {
         // shape hit top of tower and can't fall any further
@@ -122,18 +137,24 @@ class Tetris
         // shape can fall, overlapping with top of tower
         mergeRow--;
         overlap++;
-        console.log('Rock falls 1 unit: [O]');
-        // TODO sadly the draw functions can't handle this yet
-        this._board.drawShape(shape, '@');
-        for (let r = 0; r < overlap; r++) {
-          console.log(' ~~~~~~~ ');
+        if (this._debug) {
+          console.log('Rock falls 1 unit: [O]');
+          // TODO sadly the draw functions can't handle this yet
+          this._board.drawShape(shape, '@');
+          for (let r = 0; r < overlap; r++) {
+            console.log(' ~~~~~~~ ');
+          }
+          this._board.drawBoard();
         }
-        this._board.drawBoard();
       }
     }
-    console.log('Rock falls 1 unit, causing it to come to rest:');
+    if (this._debug) {
+      console.log('Rock falls 1 unit, causing it to come to rest:');
+    }
     this._board.addShape(mergeRow, overlap, shape);
-    this._board.drawBoard();
+    if (this._debug) {
+      this._board.drawBoard();
+    }
   }
 }
 module.exports = Tetris;

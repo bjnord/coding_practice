@@ -2,12 +2,13 @@
 
 class Board
 {
-  constructor()
+  constructor(debug)
   {
     // element 0 is the lowest row
     this._rows = [
       0b1111111,  // floor
     ];
+    this._debug = debug;
   }
   height()
   {
@@ -34,23 +35,33 @@ class Board
   }
   collision(mergeRow, overlap, shape, horiz) {
     const consoleHoriz = horiz ? 'horiz ' : '';
-    console.log(`${consoleHoriz}collision mergeRow=${mergeRow} overlap=${overlap} height=${this.height()}`);
+    if (this._debug) {
+      console.log(`${consoleHoriz}collision mergeRow=${mergeRow} overlap=${overlap} height=${this.height()}`);
+    }
     for (let i = 0; i < overlap; i++) {
       const j = horiz ? (this.height() - i) : mergeRow;
       if (j > 0) {  // above floor
         const consoleHorizJ = horiz ? 'horiz ' : '';
-        console.log(`${consoleHorizJ}collision mergeRow=${mergeRow} i=${i}/${overlap} j=${j}`);
+        if (this._debug) {
+          console.log(`${consoleHorizJ}collision mergeRow=${mergeRow} i=${i}/${overlap} j=${j}`);
+        }
         const boardTop = (this._rows[j] === undefined) ? 0b0000000 : this._rows[j];
         const shapeBot = shape[i];
-        console.log('---cmp---');
-        this._drawLine(shapeBot, '@');
-        this._drawLine(boardTop, '#');
+        if (this._debug) {
+          console.log('---cmp---');
+          this._drawLine(shapeBot, '@');
+          this._drawLine(boardTop, '#');
+        }
         if ((boardTop & shapeBot) !== 0b0000000) {
-          console.log('---!!!---');
+          if (this._debug) {
+            console.log('---!!!---');
+          }
           return true;
         }
-        console.log('---------');
-      } else {
+        if (this._debug) {
+          console.log('---------');
+        }
+      } else if (this._debug) {
         console.log(`collision mergeRow=${mergeRow} i=${i}/${overlap} floor`);
       }
     }
@@ -59,7 +70,9 @@ class Board
   addShape(mergeRow, overlap, shape)
   {
     let nMerge = Math.min(overlap, shape.length);
-    console.log(`addShape height=${this.height()} mergeRow=${mergeRow} overlap=${overlap} nMerge=${nMerge}`);
+    if (this._debug) {
+      console.log(`addShape height=${this.height()} mergeRow=${mergeRow} overlap=${overlap} nMerge=${nMerge}`);
+    }
     for (let r = 1; r <= nMerge; r++) {
       const line = shape.shift();
       if ((this._rows[mergeRow + r] & line) !== 0b0000000) {
