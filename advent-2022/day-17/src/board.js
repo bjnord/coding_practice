@@ -32,12 +32,41 @@ class Board
   {
     while (this.shrink());
   }
-  collision(mergeHeight, overlap, shape) {
-    return false;  // TODO
+  collision(mergeRow, overlap, shape, horiz) {
+    const consoleHoriz = horiz ? 'horiz ' : '';
+    console.log(`${consoleHoriz}collision mergeRow=${mergeRow} overlap=${overlap} height=${this.height()}`);
+    for (let i = 0; i < overlap; i++) {
+      const j = horiz ? (this.height() - i) : mergeRow;
+      if (j > 0) {  // above floor
+        const consoleHorizJ = horiz ? 'horiz ' : '';
+        console.log(`${consoleHorizJ}collision mergeRow=${mergeRow} i=${i}/${overlap} j=${j}`);
+        const boardTop = (this._rows[j] === undefined) ? 0b0000000 : this._rows[j];
+        const shapeBot = shape[i];
+        console.log('---cmp---');
+        this._drawLine(shapeBot, '@');
+        this._drawLine(boardTop, '#');
+        if ((boardTop & shapeBot) !== 0b0000000) {
+          console.log('---!!!---');
+          return true;
+        }
+        console.log('---------');
+      } else {
+        console.log(`collision mergeRow=${mergeRow} i=${i}/${overlap} floor`);
+      }
+    }
+    return false;
   }
-  addShape(shape, overlap)
+  addShape(mergeRow, overlap, shape)
   {
-    // TODO use overlap
+    let nMerge = Math.min(overlap, shape.length);
+    console.log(`addShape height=${this.height()} mergeRow=${mergeRow} overlap=${overlap} nMerge=${nMerge}`);
+    for (let r = 1; r <= nMerge; r++) {
+      const line = shape.shift();
+      if ((this._rows[mergeRow + r] & line) !== 0b0000000) {
+        throw new SyntaxError('unexpected collision');
+      }
+      this._rows[mergeRow + r] |= line;
+    }
     for (const line of shape) {
       if (line !== 0b0000000) {
         this._rows.push(line);

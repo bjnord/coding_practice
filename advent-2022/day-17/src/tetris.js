@@ -59,51 +59,80 @@ class Tetris
   {
     return this._board.height();
   }
+  blow(mergeRow, overlap, shape)
+  {
+    let newShape;
+    let consoleDir;
+    switch (this.nextJet()) {
+    case '<':
+      consoleDir = 'left';
+      if (shape.find((line) => line & 0b1000000) !== undefined) {
+        // left wall blocks movement
+        console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [W]`);
+        return shape;
+      }
+      newShape = shape.map((b) => b << 1);
+      break;
+    case '>':
+      consoleDir = 'right';
+      if (shape.find((line) => line & 0b0000001) !== undefined) {
+        // right wall blocks movement
+        console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [W]`);
+        return shape;
+      }
+      newShape = shape.map((b) => b >> 1);
+      break;
+    default:
+      throw new SyntaxError('unknown jet');
+    }
+    if (this._board.collision(mergeRow, overlap, newShape, true)) {
+      // tower blocks movement
+      console.log(`Jet of gas pushes rock ${consoleDir}, but nothing happens: [T]`);
+      return shape;
+    }
+    console.log(`Jet of gas pushes rock ${consoleDir}:`);
+    return newShape;
+  }
   dropNextShape()
   {
     this._board.makeSpace();
     let shape = this.nextShape().map((b) => b << 1);
-    // "The rock begins falling"
+    console.log('The next rock begins falling:');
     this._board.drawShape(shape, '@');
     this._board.drawBoard();
     let mergeRow = this._board.height();
     let overlap = 0;
-    while (mergeRow >= 0) {
-      // "Jet of gas pushes rock""
-      switch (this.nextJet()) {
-      case '<':
-        if (shape.find((line) => line & 0b1000000) === undefined) {
-          shape = shape.map((b) => b << 1);
-        }
-        break;
-      case '>':
-        if (shape.find((line) => line & 0b0000001) === undefined) {
-          shape = shape.map((b) => b >> 1);
-        }
-        break;
-      default:
-        throw new SyntaxError('unknown jet');
-      }
+    for (;;) {
+      shape = this.blow(mergeRow, overlap, shape);
       this._board.drawShape(shape, '@');
       this._board.drawBoard();
-      // "Rock falls one unit"
       if (this._board.shrink()) {
         // mergeRow is just empty space; shape can continue falling
+        console.log('Rock falls 1 unit:');
         this._board.drawShape(shape, '@');
         this._board.drawBoard();
         mergeRow--;
       } else if (this._board.collision(mergeRow, overlap + 1, shape)) {
         // shape hit top of tower and can't fall any further
         break;
+      } else if (mergeRow <= 0) {
+        // shape hit floor and can't fall any further
+        break;
       } else {
         // shape can fall, overlapping with top of tower
         mergeRow--;
         overlap++;
+        console.log('Rock falls 1 unit: [O]');
         // TODO sadly the draw functions can't handle this yet
+        this._board.drawShape(shape, '@');
+        for (let r = 0; r < overlap; r++) {
+          console.log(' ~~~~~~~ ');
+        }
+        this._board.drawBoard();
       }
     }
-    // "Rock comes to rest"
-    this._board.addShape(shape, overlap);
+    console.log('Rock falls 1 unit, causing it to come to rest:');
+    this._board.addShape(mergeRow, overlap, shape);
     this._board.drawBoard();
   }
 }

@@ -47,8 +47,7 @@ describe('Tetris play tests', () => {
   it('should have the correct heights after shapes drop', () => {
     const tetris = new Tetris(exampleInput);
     const expected = [
-      //1, 4, 6, 7, 9, 10, 13, 15, 17, 17,
-      1  // TODO drop more shapes
+      1, 4, 6, 7, 9, 10, 13, 15, 17, 17,
     ];
     for (const exp of expected) {
       tetris.dropNextShape();
