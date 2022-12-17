@@ -191,7 +191,7 @@ Trying to think through this problem, I decided to graph the volcano tunnels wit
 
 1. **All** the 0-rate valves have only two tunnels.
 
-So the 0-rate valves are basically nulls that make the graph more complicated. The graph can be greatly simplified by turning paths like EE-FF-GG-HH (cost 1 times 3) into path EE-HH (cost 3).
+So the 0-rate valves are basically nulls that make the graph more complicated. The graph can be [greatly simplified](graph/input.svg) by turning paths like `EE-FF-GG-HH` (cost 1 times 3) into path `EE-HH` (cost 3).
 
 But I wasn't able to think of a way to produce the "methodical approach" given in the example.
 
@@ -201,6 +201,6 @@ But I wasn't able to think of a way to produce the "methodical approach" given i
 
 1. Determining the optimal route involves more than just the graph edge travel and opening costs; it has to take into account how big the valve is too. Travelling farther to reach a higher-value valve may or may not pay off.
 
-1. You can't simply start at AA, move to the valve that will release the most pressure in the time left and open it, and repeat the process. This was the first approach I tried, but the initial best-value valve is JJ, whereas the puzzle example starts with DD.
+1. You can't simply start at `AA`, move to the valve that will release the most pressure in the time left and open it, and repeat the process. This was the first approach I tried, but the initial best-value valve is `JJ`, whereas the puzzle example starts with `DD`.
 
-1. The optimal solution may go past a valve without opening it on the way to a higher-value target, and opening it later on the way back, etc. The puzzle example does this, skipping EE on the way to open HH.
+1. The optimal solution may go past a valve without opening it on the way to a higher-value target, and opening it later on the way back, etc. The puzzle example does this, skipping `EE` on the way to open `HH`.
