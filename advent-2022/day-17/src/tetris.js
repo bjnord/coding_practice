@@ -156,5 +156,19 @@ class Tetris
       this._board.drawBoard();
     }
   }
+  dropShapes(n, debugAt)
+  {
+    for (let i = 0; i < n; i++) {
+      this.dropNextShape();
+      if (debugAt) {
+        //console.log(`dropped shape ${i}`);
+        if (i >= debugAt) {
+          // FIXME accessing private member
+          this._board._debug = true;
+          this._debug = true;
+        }
+      }
+    }
+  }
 }
 module.exports = Tetris;

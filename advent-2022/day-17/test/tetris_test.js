@@ -44,7 +44,7 @@ describe('Tetris constructor tests', () => {
   });
 });
 describe('Tetris play tests', () => {
-  it('should have the correct heights after shapes drop', () => {
+  it('should have the correct heights after each shape drops', () => {
     const tetris = new Tetris(exampleInput);
     const expected = [
       1, 4, 6, 7, 9, 10, 13, 15, 17, 17,
@@ -53,5 +53,10 @@ describe('Tetris play tests', () => {
       tetris.dropNextShape();
       expect(tetris.boardHeight()).to.equal(exp);
     }
+  });
+  it('should have the correct heights after many shapes drop', () => {
+    const tetris = new Tetris(exampleInput);
+    tetris.dropShapes(2022);
+    expect(tetris.boardHeight()).to.equal(3068);
   });
 });

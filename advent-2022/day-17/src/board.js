@@ -39,7 +39,7 @@ class Board
       console.log(`${consoleHoriz}collision mergeRow=${mergeRow} overlap=${overlap} height=${this.height()}`);
     }
     for (let i = 0; i < overlap; i++) {
-      const j = horiz ? (this.height() - i) : mergeRow;
+      const j = horiz ? (mergeRow + i + 1) : (mergeRow + i);
       if (j > 0) {  // above floor
         const consoleHorizJ = horiz ? 'horiz ' : '';
         if (this._debug) {
@@ -69,7 +69,7 @@ class Board
   }
   addShape(mergeRow, overlap, shape)
   {
-    let nMerge = Math.min(overlap, shape.length);
+    const nMerge = Math.min(overlap, shape.length);
     if (this._debug) {
       console.log(`addShape height=${this.height()} mergeRow=${mergeRow} overlap=${overlap} nMerge=${nMerge}`);
     }
