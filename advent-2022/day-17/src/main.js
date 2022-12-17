@@ -14,6 +14,6 @@ console.log('');
 tetris = new Tetris(input);
 const nShapes = 1000000000000n;
 const answer2 = tetris.dropShapesCyclical(nShapes);
-console.log('part 2: expected answer:                1');
-console.log(`part 2: actual answer:                  ${answer2}`);
+console.log('part 2: expected answer:                1561739130391');
+console.log(`part 2: board height after 1T shapes:   ${answer2}`);
 console.log('');
