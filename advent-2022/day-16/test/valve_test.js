@@ -11,12 +11,12 @@ describe('Valve constructor tests', () => {
     const expected = {
       name: 'BB',
       rate: 13,
-      tunnels: ['CC', 'AA'],
+      tunnelNames: ['CC', 'AA'],
       label: 'BB 13',
     };
     expect(valve.name()).to.equal(expected.name);
     expect(valve.rate()).to.equal(expected.rate);
-    expect(valve.tunnels()).to.eql(expected.tunnels);
+    expect(valve.tunnelNames()).to.eql(expected.tunnelNames);
     expect(valve.label()).to.eql(expected.label);
   });
 });

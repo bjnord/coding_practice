@@ -22,12 +22,12 @@ class Volcano
         graph[valve.name()] = valve;
         return graph;
       }, {});
-    this._currentValve = 'AA';
+    this._currentValveName = 'AA';
     this._timeLeft = 30;
   }
-  valve(name)
+  valve(valveName)
   {
-    return this._valves[name];
+    return this._valves[valveName];
   }
   valves()
   {
@@ -35,15 +35,11 @@ class Volcano
   }
   currentValve()
   {
-    return this.valve(this._currentValve);
+    return this.valve(this._currentValveName);
   }
-  neighborValves()
+  pathsOf(valve)
   {
-    return this.neighborValvesOf(this.currentValve());
-  }
-  neighborValvesOf(valve)
-  {
-    return valve.tunnels().map((name) => this.valve(name));
+    return valve.tunnelNames().map((valveName) => ({cost: 1, endName: valveName}));
   }
   closedValves()
   {
@@ -56,29 +52,31 @@ class Volcano
   }
   _move(valveName, time)
   {
-    this._currentValve = valveName;
+    this._currentValveName = valveName;
     this._time = time;
   }
   openBestValve()
   {
     this._bestCandidate = {};
     this._bestCandidate[this.currentValve().name()] = {
-      name: this.currentValve().name(),
+      valveName: this.currentValve().name(),
       rateGain: 0,
       timeLeft: this._timeLeft - 1,
     };
-    this._visitNeighborsOf(this.currentValve(), this._timeLeft);
+    this._visitPathsOf(this.currentValve(), this._timeLeft);
     const sortedCandidates = Object.values(this._bestCandidate)
       .sort((a, b) => Math.sign(b.rateGain - a.rateGain));
-    this._move(sortedCandidates[0].name, sortedCandidates[0].timeLeft);
-    this.valve(sortedCandidates[0].name).open();
+    console.debug('sorted best valve candidates:');
+    console.dir(sortedCandidates);
+    this._move(sortedCandidates[0].valveName, sortedCandidates[0].timeLeft);
+    this.valve(sortedCandidates[0].valveName).open();
   }
-  _unvisitedNeighborValvesOf(valve)
+  _unvisitedPathsOf(valve)
   {
-    return this.neighborValvesOf(valve)
-      .filter((valve) => !(valve.name() in this._bestCandidate));
+    return this.pathsOf(valve)
+      .filter((path) => !(path.endName in this._bestCandidate));
   }
-  _visitNeighborsOf(valve, timeLeft)
+  _visitPathsOf(valve, timeLeft)
   {
     // don't bother unless we have one turn to move, one turn to open the
     // valve, and at least one turn of flow
@@ -86,26 +84,28 @@ class Volcano
       return;
     }
     // with all moves costing 1, BFS will find shortest path to each valve
-    const unvisitedNeighbors = this._unvisitedNeighborValvesOf(valve);
-    for (const neighbor of unvisitedNeighbors) {
-      const rateGain = neighbor.isOpen() ? 0 : (neighbor.rate() * (timeLeft - 2));
+    const unvisitedPaths = this._unvisitedPathsOf(valve);
+    for (const path of unvisitedPaths) {
+      const neighbor = this.valve(path.endName);
+      const rateGain = neighbor.isOpen() ? 0 : (neighbor.rate() * (timeLeft - path.cost - 1));
       this._bestCandidate[neighbor.name()] = {
-        name: neighbor.name(),
+        valveName: neighbor.name(),
         rateGain,
-        timeLeft: timeLeft - 2,
+        timeLeft: timeLeft - path.cost - 1,
       };
     }
-    for (const neighbor of unvisitedNeighbors) {
-      this._visitNeighborsOf(neighbor, timeLeft - 1);
+    for (const path of unvisitedPaths) {
+      this._visitPathsOf(this.valve(path.endName), timeLeft - path.cost);
     }
   }
-  writeGraph(path)
+  writeGraph(filePath)
   {
-    const f = fs.openSync(path, 'w');
+    const f = fs.openSync(filePath, 'w');
     fs.writeSync(f, 'graph LR\n');
     for (const valve of this.valves()) {
-      for (const tunnel of valve.tunnels()) {
-        fs.writeSync(f, `  ${valve.name()}(${valve.label()}) --> ${tunnel}\n`);
+      for (const path of this.pathsOf(valve)) {
+        const neighbor = this.valve(path.endName);
+        fs.writeSync(f, `  ${valve.name()}(${valve.label()})-->|${path.cost}|${neighbor.name()}\n`);
       }
     }
     fs.closeSync(f);

@@ -16,7 +16,7 @@ class Valve
     const m = line.match(/^Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? ([\w\s,]+)$/);
     this._name = m[1];
     this._rate = parseInt(m[2]);
-    this._tunnels = m[3].split(/,\s+/);
+    this._tunnelNames = m[3].split(/,\s+/);
     this._opened = false;
   }
   name()
@@ -31,9 +31,9 @@ class Valve
   {
     return this._opened ? this._rate : 0;
   }
-  tunnels()
+  tunnelNames()
   {
-    return this._tunnels;
+    return this._tunnelNames;
   }
   label()
   {

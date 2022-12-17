@@ -20,22 +20,44 @@ describe('Volcano constructor tests', () => {
   });
   it('should parse example input correctly', () => {
     const expected = [
-      {name: 'AA', rate: 0, tunnels: ['DD', 'II', 'BB'], label: 'AA 0'},
-      {name: 'DD', rate: 20, tunnels: ['CC', 'AA', 'EE'], label: 'DD 20'},
-      {name: 'JJ', rate: 21, tunnels: ['II'], label: 'JJ 21'},
+      {
+        name: 'AA',
+        rate: 0,
+        label: 'AA 0',
+        paths: [
+          {cost: 1, endName: 'DD'},
+          {cost: 1, endName: 'II'},
+          {cost: 1, endName: 'BB'},
+        ],
+      },
+      {
+        name: 'DD',
+        rate: 20,
+        label: 'DD 20',
+        paths: [
+          {cost: 1, endName: 'CC'},
+          {cost: 1, endName: 'AA'},
+          {cost: 1, endName: 'EE'},
+        ],
+      },
+      {
+        name: 'JJ',
+        rate: 21,
+        label: 'JJ 21',
+        paths: [
+          {cost: 1, endName: 'II'},
+        ],
+      },
     ];
     for (const exp of expected) {
-      expect(volcano.valve(exp.name).rate()).to.equal(exp.rate);
-      expect(volcano.valve(exp.name).tunnels()).to.eql(exp.tunnels);
-      expect(volcano.valve(exp.name).label()).to.eql(exp.label);
+      const valve = volcano.valve(exp.name);
+      expect(valve.rate()).to.equal(exp.rate);
+      expect(valve.label()).to.eql(exp.label);
+      expect(volcano.pathsOf(valve)).to.eql(exp.paths);
     }
   });
   it('should start with correct location', () => {
     expect(volcano.currentValve().name()).to.eql('AA');
-  });
-  it('should start with correct neighbor valves', () => {
-    const neighbors = volcano.neighborValves().map((valve) => valve.name());
-    expect(neighbors.sort()).to.eql(['BB', 'DD', 'II']);
   });
 });
 describe('Volcano valve tests', () => {
