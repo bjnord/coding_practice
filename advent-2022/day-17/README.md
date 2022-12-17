@@ -382,7 +382,7 @@ Your puzzle answer was `3141`.
 
 Have you heard this one?
 
-![math, computer science, software engineering](viz/ben-rady-m-cs-se.jpg)
+<img src="viz/ben-rady-m-cs-se.jpg" width="480" alt="math, computer science, software engineering" />
 
 I tend to do a lot of "software engineering" on AoC puzzles. :)
 
