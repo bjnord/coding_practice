@@ -404,7 +404,7 @@ Your puzzle answer was `1561739130391`.
 
 > **Spoilers ahead!**
 
-Mercifully I immediately knew what to do for part 2. I was able to reuse my [2019 Floyd's algorithm in JavaScript](../advent-2019/shared/src/floyd.js) implementation. The tricky bit as always is figuring out what represents the state; I chose:
+Mercifully I immediately knew what to do for part 2. I was able to reuse my [2019 Floyd's algorithm in JavaScript](../../advent-2019/shared/src/floyd.js) implementation. The tricky bit as always is figuring out what represents the state; I chose:
 
 1. last type of piece that dropped
 1. hash of the top N rows of the board; took me a bit to write a hash function that uses enough bits to be reasonably unique
