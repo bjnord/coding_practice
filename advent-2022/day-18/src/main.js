@@ -17,6 +17,6 @@ console.log('');
 
 // PART 2
 const answer2 = lava.trueSurfaceArea(droplet);
-console.log('part 2: expected answer:                  **TOOLOW** 2040 **TOOHIGH** 2152');
+console.log('part 2: expected answer:                  2052');
 console.log(`part 2: exterior surface area of droplet: ${answer2}`);
 console.log('');
