@@ -10,7 +10,7 @@ if (process.argv[process.argv.length - 1] === '--dump') {
 }
 
 // PART 1
-const answer1 = lava.surfaceArea(droplet);
+const answer1 = lava.simpleSurfaceArea(droplet);
 console.log('part 1: expected answer:                  3448');
 console.log(`part 1: simple surface area of droplet:   ${answer1}`);
 console.log('');

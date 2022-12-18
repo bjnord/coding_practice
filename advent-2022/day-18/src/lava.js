@@ -89,7 +89,7 @@ const faceOff = ((map) => {
   return diff;
 });
 
-exports.surfaceArea = ((droplet) => {
+exports.simpleSurfaceArea = ((droplet) => {
   const nFaces = droplet.length * 6;
   // z + y faces
   const zyFunc = ((cube) => [`${cube.z},${cube.y}`, cube.x]);
@@ -194,7 +194,7 @@ exports.trueSurfaceArea = ((droplet) => {
   //console.log('interiorDroplet:');
   //console.dir(interiorDroplet);
   // result
-  const extArea = module.exports.surfaceArea(droplet);
+  const extArea = module.exports.simpleSurfaceArea(droplet);
   const intArea = (intersectCubes.length > 0) ? module.exports.trueSurfaceArea(interiorDroplet) : 0;
   return extArea - intArea;
 });
