@@ -144,6 +144,6 @@ exports.trueSurfaceArea = ((droplet) => {
   const interiorDroplet = module.exports.parse(interiorInput);
   // result
   const extArea = module.exports.surfaceArea(droplet);
-  const intArea = module.exports.surfaceArea(interiorDroplet);
+  const intArea = (intersectCubes.length > 0) ? module.exports.trueSurfaceArea(interiorDroplet) : 0;
   return extArea - intArea;
 });
