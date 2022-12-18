@@ -1,5 +1,6 @@
 'use strict';
 /** @module lava */
+const _debug = false;
 /**
  * Parse the puzzle input.
  *
@@ -147,6 +148,15 @@ exports.dropletDim = ((droplet) => {
   };
 });
 
+// is `cube` within the bounds of `dim` **plus** 1 air cube plane
+// on all sides?
+exports.withinDroplet = ((cube, dim) => {
+  const zOK = ((dim.minZ - 1) <= cube.z) && (cube.z <= (dim.maxZ + 1));
+  const yOK = ((dim.minY - 1) <= cube.y) && (cube.y <= (dim.maxY + 1));
+  const xOK = ((dim.minX - 1) <= cube.x) && (cube.x <= (dim.maxX + 1));
+  return zOK && yOK && xOK;
+});
+
 const cubesToInput = ((cubes) => {
   let input = '';
   for (const cube of cubes) {
@@ -155,46 +165,98 @@ const cubesToInput = ((cubes) => {
   return input;
 });
 
+const neighborCubes = ((cube) => {
+  const neighbors = [
+    {z: cube.z - 1, y: cube.y,     x: cube.x,     },
+    {z: cube.z + 1, y: cube.y,     x: cube.x,     },
+    {z: cube.z,     y: cube.y - 1, x: cube.x,     },
+    {z: cube.z,     y: cube.y + 1, x: cube.x,     },
+    {z: cube.z,     y: cube.y,     x: cube.x - 1, },
+    {z: cube.z,     y: cube.y,     x: cube.x + 1, },
+  ];
+  return neighbors.map((neighbor) => {
+    neighbor.s = cubeKey(neighbor);
+    return neighbor;
+  });
+});
+
+// worker (non-recursive)
+// returns neighbor cubes that should be visited
+const calcAirCube = ((cube, dim, lavaCubes, lavaFaces) => {
+  const children = [];
+  for (const neighbor of neighborCubes(cube)) {
+    if (!module.exports.withinDroplet(neighbor, dim)) {
+      // neighbor is outside the box; do nothing
+    } else if (lavaCubes[neighbor.s]) {
+      // neighbor is lava: add one face to my count
+      if (!lavaFaces[cube.s]) {
+        lavaFaces[cube.s] = 1;
+      } else {
+        lavaFaces[cube.s]++;
+      }
+    } else if (lavaFaces[neighbor.s] === undefined) {
+      // neighbor is unvisited air: add to next list
+      children.push(neighbor);
+    }
+  }
+  if (lavaFaces[cube.s] === undefined) {
+    lavaFaces[cube.s] = 0;
+  }
+  if (_debug) {
+    console.log(`walked me=${cube.s} nFaces=${lavaFaces[cube.s]} nChildren=${children.length}:`);
+    console.dir(cube);
+    console.dir(children);
+  }
+  return children;
+});
+
+// walk air cubes recursively
+// breadth-first search (BFS)
+// includes one cube plane outside each droplet face
+const walkAirCubes = ((cubes, dim, lavaCubes, lavaFaces) => {
+  if (cubes.length < 1) {
+    return;
+  }
+  let nextCubes = [];
+  for (const cube of cubes) {
+    const children = calcAirCube(cube, dim, lavaCubes, lavaFaces);
+    // append new children to end:
+    for (const child of children) {
+      if (!nextCubes.find((cube) => cube.s === child.s)) {
+        nextCubes.push(child);
+      }
+    }
+  }
+  if (_debug) {
+    console.log(`walked current cubes; nextCubes=${nextCubes.length}:`);
+    console.dir(nextCubes);
+    console.log('lavaFaces:');
+    console.dir(lavaFaces);
+  }
+  // tail recursion
+  walkAirCubes(nextCubes, dim, lavaCubes, lavaFaces);
+});
+
 exports.trueSurfaceArea = ((droplet) => {
-  // z + y faces
-  const zyFunc = ((cube) => [`${cube.z},${cube.y}`, cube.x]);
-  const zyMap = buildMap(droplet, zyFunc);
-  const zyIntCubes = interiorCubes(zyMap, 'x');
-  //console.log('zy:');
-  //for (const cube of zyIntCubes) {
-  //  console.dir(cube);
-  //}
-  // z + x faces
-  const zxFunc = ((cube) => [`${cube.z},${cube.x}`, cube.y]);
-  const zxMap = buildMap(droplet, zxFunc);
-  const zxIntCubes = interiorCubes(zxMap, 'y');
-  //console.log('zx:');
-  //for (const cube of zxIntCubes) {
-  //  console.dir(cube);
-  //}
-  const cubeEq = ((a, b) => (a.z === b.z) && (a.y === b.y) && (a.x === b.x));
-  let intersectCubes = zxIntCubes.filter((a) => zyIntCubes.find((b) => cubeEq(a, b)));
-  // y + x faces
-  const yxFunc = ((cube) => [`${cube.y},${cube.x}`, cube.z]);
-  const yxMap = buildMap(droplet, yxFunc);
-  const yxIntCubes = interiorCubes(yxMap, 'z');
-  //console.log('yx:');
-  //for (const cube of yxIntCubes) {
-  //  console.dir(cube);
-  //}
-  intersectCubes = yxIntCubes.filter((a) => intersectCubes.find((b) => cubeEq(a, b)));
-  //console.log('intersection:');
-  //for (const cube of intersectCubes) {
-  //  console.dir(cube);
-  //}
-  const interiorInput = cubesToInput(intersectCubes);
-  //console.log('interiorInput:');
-  //console.log(interiorInput);
-  const interiorDroplet = module.exports.parse(interiorInput);
-  //console.log('interiorDroplet:');
-  //console.dir(interiorDroplet);
-  // result
-  const extArea = module.exports.simpleSurfaceArea(droplet);
-  const intArea = (intersectCubes.length > 0) ? module.exports.trueSurfaceArea(interiorDroplet) : 0;
-  return extArea - intArea;
+  const dim = module.exports.dropletDim(droplet);
+  const lavaCubes = droplet.reduce((h, cube) => {
+    h[cube.s] = cube;
+    return h;
+  }, {});
+  if (_debug) {
+    console.log(`lavaCubes[${Object.keys(lavaCubes).length}]:`)
+    console.dir(lavaCubes);
+  }
+  // guaranteed to be an air cube:
+  const rootAirCube = {
+    z: dim.minZ - 1,
+    y: dim.minZ - 1,
+    x: dim.minZ - 1,
+  };
+  rootAirCube.s = cubeKey(rootAirCube);
+  const lavaFaces = {};
+  walkAirCubes([rootAirCube], dim, lavaCubes, lavaFaces);
+  const nLavaFaces = Object.values(lavaFaces)
+    .reduce((total, nFaces) => total + nFaces, 0);
+  return nLavaFaces;
 });

@@ -32,8 +32,8 @@ describe('simple surface area tests', () => {
     expect(lava.simpleSurfaceArea(droplet)).to.equal(10);
   });
   it('should calculate the second example correctly', () => {
-    const droplet = lava.parse(exampleInput2);
-    expect(lava.simpleSurfaceArea(droplet)).to.equal(64);
+    const droplet2 = lava.parse(exampleInput2);
+    expect(lava.simpleSurfaceArea(droplet2)).to.equal(64);
   });
 });
 describe('true surface area tests', () => {
@@ -47,16 +47,20 @@ describe('true surface area tests', () => {
     expect(lava.dropletDim(droplet)).to.eql(expected);
   });
   it('should calculate dimensions correctly (2nd example)', () => {
-    const droplet = lava.parse(exampleInput2);
+    const droplet2 = lava.parse(exampleInput2);
     const expected = {
       minZ: 1, maxZ: 6,
       minY: 1, maxY: 3,
       minX: 1, maxX: 3,
     };
-    expect(lava.dropletDim(droplet)).to.eql(expected);
+    expect(lava.dropletDim(droplet2)).to.eql(expected);
+  });
+  it('should calculate surface area correctly (1st example)', () => {
+    const droplet = lava.parse(exampleInput);
+    expect(lava.trueSurfaceArea(droplet)).to.equal(10);
   });
   it('should calculate surface area correctly (2nd example)', () => {
-    const droplet = lava.parse(exampleInput2);
-    expect(lava.trueSurfaceArea(droplet)).to.equal(58);
+    const droplet2 = lava.parse(exampleInput2);
+    expect(lava.trueSurfaceArea(droplet2)).to.equal(58);
   });
 });
