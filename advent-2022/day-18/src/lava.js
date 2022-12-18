@@ -99,6 +99,17 @@ const interiorCubes = ((map, dim) => {
   return cubes;
 });
 
+exports.dropletDim = ((droplet) => {
+  return {
+    minZ: droplet.reduce((min, cube) => (cube.z < min) ? cube.z : min, 999999999),
+    maxZ: droplet.reduce((max, cube) => (cube.z > max) ? cube.z : max, -999999999),
+    minY: droplet.reduce((min, cube) => (cube.y < min) ? cube.y : min, 999999999),
+    maxY: droplet.reduce((max, cube) => (cube.y > max) ? cube.y : max, -999999999),
+    minX: droplet.reduce((min, cube) => (cube.x < min) ? cube.x : min, 999999999),
+    maxX: droplet.reduce((max, cube) => (cube.x > max) ? cube.x : max, -999999999),
+  };
+});
+
 const cubesToInput = ((cubes) => {
   let s = '';
   for (const cube of cubes) {
