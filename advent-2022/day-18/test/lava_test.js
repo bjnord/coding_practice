@@ -35,4 +35,8 @@ describe('surface area tests', () => {
     const droplet = lava.parse(exampleInput2);
     expect(lava.surfaceArea(droplet)).to.equal(64);
   });
+  it('should calculate the second example correctly (true)', () => {
+    const droplet = lava.parse(exampleInput2);
+    expect(lava.trueSurfaceArea(droplet)).to.equal(58);
+  });
 });

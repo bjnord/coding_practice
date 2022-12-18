@@ -72,3 +72,78 @@ exports.surfaceArea = ((droplet) => {
   // result
   return nFaces - zyDiff - zxDiff - yxDiff;
 });
+
+const interiorCubes = ((map, dim) => {
+  const cubes = [];
+  for (const k in map) {
+    let prevV = undefined;
+    for (const v of map[k]) {
+      if (prevV && (v.coord > prevV.coord + 1)) {
+        for (let i = prevV.coord + 1; i < v.coord; i++) {
+          switch (dim) {
+          case 'z':
+            cubes.push({z: i, y: v.cube.y, x: v.cube.x});
+            break;
+          case 'y':
+            cubes.push({z: v.cube.z, y: i, x: v.cube.x});
+            break;
+          case 'x':
+            cubes.push({z: v.cube.z, y: v.cube.y, x: i});
+            break;
+          }
+        }
+      }
+      prevV = v;
+    }
+  }
+  return cubes;
+});
+
+const cubesToInput = ((cubes) => {
+  let s = '';
+  for (const cube of cubes) {
+    s += `${cube.x},${cube.y},${cube.z}\n`;
+  }
+  return s;
+});
+
+exports.trueSurfaceArea = ((droplet) => {
+  // z + y faces
+  const zyFunc = ((cube) => [`${cube.z},${cube.y}`, cube.x]);
+  const zyMap = buildMap(droplet, zyFunc);
+  const zyIntCubes = interiorCubes(zyMap, 'x');
+  //console.log('zy:');
+  //for (const cube of zyIntCubes) {
+  //  console.dir(cube);
+  //}
+  // z + x faces
+  const zxFunc = ((cube) => [`${cube.z},${cube.x}`, cube.y]);
+  const zxMap = buildMap(droplet, zxFunc);
+  const zxIntCubes = interiorCubes(zxMap, 'y');
+  //console.log('zx:');
+  //for (const cube of zxIntCubes) {
+  //  console.dir(cube);
+  //}
+  const cubeEq = ((a, b) => (a.z === b.z) && (a.y === b.y) && (a.x === b.x));
+  let intersectCubes = zxIntCubes.filter((a) => zyIntCubes.find((b) => cubeEq(a, b)));
+  // y + x faces
+  const yxFunc = ((cube) => [`${cube.y},${cube.x}`, cube.z]);
+  const yxMap = buildMap(droplet, yxFunc);
+  const yxIntCubes = interiorCubes(yxMap, 'z');
+  //console.log('yx:');
+  //for (const cube of yxIntCubes) {
+  //  console.dir(cube);
+  //}
+  intersectCubes = yxIntCubes.filter((a) => intersectCubes.find((b) => cubeEq(a, b)));
+  //console.log('intersection:');
+  //for (const cube of intersectCubes) {
+  //  console.dir(cube);
+  //}
+  const interiorInput = cubesToInput(intersectCubes);
+  //console.log(interiorInput);
+  const interiorDroplet = module.exports.parse(interiorInput);
+  // result
+  const extArea = module.exports.surfaceArea(droplet);
+  const intArea = module.exports.surfaceArea(interiorDroplet);
+  return extArea - intArea;
+});
