@@ -11,6 +11,8 @@
 exports.parse = (input) => {
   return input.trim().split(/\n/).map((line) => module.exports.parseLine(line));
 };
+
+const cubeKey = ((cube) => `${cube.x},${cube.y},${cube.z}`);
 /**
  * Parse one line from the puzzle input.
  *
@@ -21,7 +23,9 @@ exports.parse = (input) => {
  */
 exports.parseLine = (line) => {
   const coords = line.split(',').map((coord) => parseInt(coord));
-  return {z: coords[2], y: coords[1], x: coords[0]};
+  const cube = {z: coords[2], y: coords[1], x: coords[0]};
+  cube.s = cubeKey(cube);
+  return cube;
 };
 
 const buildMap = ((droplet, func) => {
@@ -80,17 +84,20 @@ const interiorCubes = ((map, dim) => {
     for (const v of map[k]) {
       if (prevV && (v.coord > prevV.coord + 1)) {
         for (let i = prevV.coord + 1; i < v.coord; i++) {
+          let cube;
           switch (dim) {
           case 'z':
-            cubes.push({z: i, y: v.cube.y, x: v.cube.x});
+            cube = {z: i, y: v.cube.y, x: v.cube.x};
             break;
           case 'y':
-            cubes.push({z: v.cube.z, y: i, x: v.cube.x});
+            cube = {z: v.cube.z, y: i, x: v.cube.x};
             break;
           case 'x':
-            cubes.push({z: v.cube.z, y: v.cube.y, x: i});
+            cube = {z: v.cube.z, y: v.cube.y, x: i};
             break;
           }
+          cube.s = cubeKey(cube);
+          cubes.push(cube);
         }
       }
       prevV = v;
@@ -111,11 +118,11 @@ exports.dropletDim = ((droplet) => {
 });
 
 const cubesToInput = ((cubes) => {
-  let s = '';
+  let input = '';
   for (const cube of cubes) {
-    s += `${cube.x},${cube.y},${cube.z}\n`;
+    input += `${cube.s}\n`;
   }
-  return s;
+  return input;
 });
 
 exports.trueSurfaceArea = ((droplet) => {
@@ -151,8 +158,11 @@ exports.trueSurfaceArea = ((droplet) => {
   //  console.dir(cube);
   //}
   const interiorInput = cubesToInput(intersectCubes);
+  //console.log('interiorInput:');
   //console.log(interiorInput);
   const interiorDroplet = module.exports.parse(interiorInput);
+  //console.log('interiorDroplet:');
+  //console.dir(interiorDroplet);
   // result
   const extArea = module.exports.surfaceArea(droplet);
   const intArea = (intersectCubes.length > 0) ? module.exports.trueSurfaceArea(interiorDroplet) : 0;
