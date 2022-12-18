@@ -76,7 +76,7 @@ describe('Dijkstra tests', () => {
     expect(hill.weight(exampleGrid, [3, 1], [4, 1])).to.equal(1);
   });
   it('should find high weight for disallowed height change', () => {
-    expect(hill.weight(exampleGrid, [2, 0], [2, 1])).to.equal(999999999);
+    expect(hill.weight(exampleGrid, [2, 0], [2, 1])).to.equal(Number.MAX_SAFE_INTEGER);
   });
   it('should find shortest path from default start to end', () => {
     expect(hill.dijkstra(exampleGrid)).to.equal(31);
@@ -95,7 +95,7 @@ describe('height map tests', () => {
       [3, 0],
       [4, 0],
     ];
-    expect(hill.startPositions(exampleGrid, 999999999)).to.eql(expected);
+    expect(hill.startPositions(exampleGrid, Number.MAX_SAFE_INTEGER)).to.eql(expected);
   });
   it('should find fewest-steps start position correctly', () => {
     expect(hill.fewestSteps(exampleGrid)).to.eql(29);

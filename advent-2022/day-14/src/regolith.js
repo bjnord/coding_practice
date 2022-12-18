@@ -52,7 +52,7 @@ const rockLine = ((grid, from, to) => {
 
 exports.makeMap = ((paths) => {
   const grid = {};
-  let maxY = -999999999;
+  let maxY = -Number.MAX_SAFE_INTEGER;
   for (const path of paths) {
     let from = path.shift();
     while (path.length > 0) {

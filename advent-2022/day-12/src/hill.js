@@ -65,7 +65,7 @@ exports.weight = ((grid, pos1, pos2) => {
   const height1 = grid.rows[pos1[0]].heights[pos1[1]];
   const height2 = grid.rows[pos2[0]].heights[pos2[1]];
   if (height2 > height1 + 1) {
-    return 999999999;
+    return Number.MAX_SAFE_INTEGER;
   } else {
     return 1;
   }
@@ -94,7 +94,7 @@ exports.dijkstra = ((grid, start) => {
   if (!start) {
     start = [grid.start[0], grid.start[1]];
   }
-  const dist = new Array(grid.height * grid.width).fill(999999999);
+  const dist = new Array(grid.height * grid.width).fill(Number.MAX_SAFE_INTEGER);
   dist[start[0] * grid.width + start[1]] = 0;
 
   // entries are [dist, pos]
@@ -147,7 +147,7 @@ exports.startPositions = ((grid) => {
 
 exports.fewestSteps = ((grid) => {
   const startPos = module.exports.startPositions(grid);
-  let fewest = 999999999;
+  let fewest = Number.MAX_SAFE_INTEGER;
   for (const start of startPos) {
     const steps = module.exports.dijkstra(grid, start);
     if (steps < fewest) {

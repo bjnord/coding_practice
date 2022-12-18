@@ -139,12 +139,12 @@ const interiorCubes = ((map, dim) => {
 
 exports.dropletDim = ((droplet) => {
   return {
-    minZ: droplet.reduce((min, cube) => (cube.z < min) ? cube.z : min, 999999999),
-    maxZ: droplet.reduce((max, cube) => (cube.z > max) ? cube.z : max, -999999999),
-    minY: droplet.reduce((min, cube) => (cube.y < min) ? cube.y : min, 999999999),
-    maxY: droplet.reduce((max, cube) => (cube.y > max) ? cube.y : max, -999999999),
-    minX: droplet.reduce((min, cube) => (cube.x < min) ? cube.x : min, 999999999),
-    maxX: droplet.reduce((max, cube) => (cube.x > max) ? cube.x : max, -999999999),
+    minZ: droplet.reduce((min, cube) => (cube.z < min) ? cube.z : min, Number.MAX_SAFE_INTEGER),
+    maxZ: droplet.reduce((max, cube) => (cube.z > max) ? cube.z : max, -Number.MAX_SAFE_INTEGER),
+    minY: droplet.reduce((min, cube) => (cube.y < min) ? cube.y : min, Number.MAX_SAFE_INTEGER),
+    maxY: droplet.reduce((max, cube) => (cube.y > max) ? cube.y : max, -Number.MAX_SAFE_INTEGER),
+    minX: droplet.reduce((min, cube) => (cube.x < min) ? cube.x : min, Number.MAX_SAFE_INTEGER),
+    maxX: droplet.reduce((max, cube) => (cube.x > max) ? cube.x : max, -Number.MAX_SAFE_INTEGER),
   };
 });
 
