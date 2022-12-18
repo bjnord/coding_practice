@@ -29,14 +29,14 @@ const buildMap = ((droplet, func) => {
     // 0=key of 2 dimensions, 1=3rd dimension coord
     const pair = func(cube);
     if (!m[pair[0]]) {
-      m[pair[0]] = [pair[1]];
+      m[pair[0]] = [{coord: pair[1], cube}];
     } else {
-      m[pair[0]].push(pair[1]);
+      m[pair[0]].push({coord: pair[1], cube});
     }
     return m;
   }, {});
   for (const k in map) {
-    map[k] = map[k].sort((a, b) => Math.sign(a - b));
+    map[k] = map[k].sort((a, b) => Math.sign(a.coord - b.coord));
   }
   return map;
 });
@@ -44,12 +44,12 @@ const buildMap = ((droplet, func) => {
 const faceOff = ((map) => {
   let diff = 0;
   for (const k in map) {
-    let prevCoord = undefined;
-    for (const coord of map[k]) {
-      if (coord === prevCoord + 1) {
+    let prevV = undefined;
+    for (const v of map[k]) {
+      if (prevV && (v.coord === prevV.coord + 1)) {
         diff += 2;
       }
-      prevCoord = coord;
+      prevV = v;
     }
   }
   return diff;
