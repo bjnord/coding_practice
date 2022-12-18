@@ -23,3 +23,52 @@ exports.parseLine = (line) => {
   const coords = line.split(',').map((coord) => parseInt(coord));
   return {z: coords[2], y: coords[1], x: coords[0]};
 };
+
+const buildMap = ((droplet, func) => {
+  const map = droplet.reduce((m, cube) => {
+    // 0=key of 2 dimensions, 1=3rd dimension coord
+    const pair = func(cube);
+    if (!m[pair[0]]) {
+      m[pair[0]] = [pair[1]];
+    } else {
+      m[pair[0]].push(pair[1]);
+    }
+    return m;
+  }, {});
+  for (const k in map) {
+    map[k] = map[k].sort((a, b) => Math.sign(a - b));
+  }
+  return map;
+});
+
+const faceOff = ((map) => {
+  let diff = 0;
+  for (const k in map) {
+    let prevCoord = undefined;
+    for (const coord of map[k]) {
+      if (coord === prevCoord + 1) {
+        diff += 2;
+      }
+      prevCoord = coord;
+    }
+  }
+  return diff;
+});
+
+exports.surfaceArea = ((droplet) => {
+  const nFaces = droplet.length * 6;
+  // z + y faces
+  const zyFunc = ((cube) => [`${cube.z},${cube.y}`, cube.x]);
+  const zyMap = buildMap(droplet, zyFunc);
+  const zyDiff = faceOff(zyMap);
+  // z + x faces
+  const zxFunc = ((cube) => [`${cube.z},${cube.x}`, cube.y]);
+  const zxMap = buildMap(droplet, zxFunc);
+  const zxDiff = faceOff(zxMap);
+  // y + x faces
+  const yxFunc = ((cube) => [`${cube.y},${cube.x}`, cube.z]);
+  const yxMap = buildMap(droplet, yxFunc);
+  const yxDiff = faceOff(yxMap);
+  // result
+  return nFaces - zyDiff - zxDiff - yxDiff;
+});

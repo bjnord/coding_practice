@@ -26,3 +26,13 @@ describe('parsing tests', () => {
     expect(lava.parse(exampleInput2)).to.eql(expected2);
   });
 });
+describe('surface area tests', () => {
+  it('should calculate the first example correctly', () => {
+    const droplet = lava.parse(exampleInput);
+    expect(lava.surfaceArea(droplet)).to.equal(10);
+  });
+  it('should calculate the second example correctly', () => {
+    const droplet = lava.parse(exampleInput2);
+    expect(lava.surfaceArea(droplet)).to.equal(64);
+  });
+});
