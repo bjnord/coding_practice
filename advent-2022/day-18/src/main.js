@@ -4,6 +4,11 @@ const fs = require('fs');
 const input = fs.readFileSync('input/input.txt', 'utf8');
 const droplet = lava.parse(input);
 
+if (process.argv[process.argv.length - 1] === '--dump') {
+  lava.dump(droplet);
+  process.exit(0);
+}
+
 // PART 1
 const answer1 = lava.surfaceArea(droplet);
 console.log('part 1: expected answer:                  3448');

@@ -28,6 +28,36 @@ exports.parseLine = (line) => {
   return cube;
 };
 
+const dumpPlane = ((lavaCubes, dim, z) => {
+  console.log(`[[ ---- z=${z} ---- ]]`);
+  for (let y = dim.maxY; y >= dim.minY; y--) {
+    let line = '';
+    for (let x = dim.minX; x <= dim.maxX; x++) {
+      if (lavaCubes[cubeKey({z, y, x})]) {
+        line += '#';
+      } else {
+        line += '.';
+      }
+    }
+    console.log(line);
+  }
+  console.log('');
+});
+
+exports.dump = ((droplet) => {
+  const dim = module.exports.dropletDim(droplet);
+  const lavaCubes = droplet.reduce((h, cube) => {
+    h[cube.s] = cube;
+    return h;
+  }, {});
+  console.log('droplet dimensions:');
+  console.dir(dim);
+  console.log('');
+  for (let z = dim.minZ; z <= dim.maxZ; z++) {
+    dumpPlane(lavaCubes, dim, z);
+  }
+});
+
 const buildMap = ((droplet, func) => {
   const map = droplet.reduce((m, cube) => {
     // 0=key of 2 dimensions, 1=3rd dimension coord
