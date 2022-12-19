@@ -8,7 +8,8 @@ describe('Factory run tests', () => {
   it('should run correctly', () => {
     const blueprint = new Blueprint(exampleBlueprint1);
     const factory = new RobotFactory(blueprint);
-    factory.run();
+    // TODO this is a limited stub
+    expect(factory.run()).to.equal(0);
     expect(factory.resources('clay')).to.equal(121);
   });
 });
