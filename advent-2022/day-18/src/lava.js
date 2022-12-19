@@ -29,6 +29,7 @@ exports.parseLine = (line) => {
   return cube;
 };
 
+/* istanbul ignore next */
 const dumpPlane = ((lavaCubes, dim, z) => {
   console.log(`[[ ---- z=${z} ---- ]]`);
   for (let y = dim.maxY; y >= dim.minY; y--) {
@@ -45,6 +46,7 @@ const dumpPlane = ((lavaCubes, dim, z) => {
   console.log('');
 });
 
+/* istanbul ignore next */
 exports.dump = ((droplet) => {
   const dim = module.exports.dropletDim(droplet);
   const lavaCubes = droplet.reduce((h, cube) => {
@@ -165,6 +167,7 @@ const calcAirCube = ((cube, dim, lavaCubes, lavaFaces) => {
   if (lavaFaces[cube.s] === undefined) {
     lavaFaces[cube.s] = 0;
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.log(`walked me=${cube.s} nFaces=${lavaFaces[cube.s]} nChildren=${children.length}:`);
     console.dir(cube);
@@ -190,6 +193,7 @@ const walkAirCubes = ((cubes, dim, lavaCubes, lavaFaces) => {
       }
     }
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.log(`walked current cubes; nextCubes=${nextCubes.length}:`);
     console.dir(nextCubes);
@@ -206,6 +210,7 @@ exports.trueSurfaceArea = ((droplet) => {
     h[cube.s] = cube;
     return h;
   }, {});
+  /* istanbul ignore next */
   if (_debug) {
     console.log(`lavaCubes[${Object.keys(lavaCubes).length}]:`);
     console.dir(lavaCubes);
