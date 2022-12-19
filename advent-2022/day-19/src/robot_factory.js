@@ -8,19 +8,21 @@ class RobotFactory
   }
   static robotTypes()
   {
-    return ['ore', 'clay', 'obsidian', 'geode'];
+    return ['nothing', 'ore', 'clay', 'obsidian', 'geode'];
   }
   constructor(blueprint, debug)
   {
     this._blueprint = blueprint;
     this._minutesLeft = RobotFactory.minutesLimit();
     this._resources = {
+      nothing: 0,
       ore: 0,
       clay: 0,
       obsidian: 0,
       geode: 0,
     }
     this._robots = {
+      nothing: 0,
       ore: 1,
       clay: 0,
       obsidian: 0,
@@ -58,7 +60,9 @@ class RobotFactory
   {
     let s = `${this._minutesLeft}`;
     for (const robotType of RobotFactory.robotTypes()) {
-      s += ` ${this._resources[robotType]} ${this._robots[robotType]}`;
+      if (robotType !== 'nothing') {
+        s += ` ${this._resources[robotType]} ${this._robots[robotType]}`;
+      }
     }
     return s;
   }
@@ -72,20 +76,48 @@ class RobotFactory
   }
   haveResourcesToBuild(robotType)
   {
-    // TODO this is a stub from minimal refactoring
-    if (robotType !== 'clay') {
-      return false;
+    if (robotType === 'nothing') {
+      return true;
     }
-    return this._resources['ore'] >= this._blueprint.costs('clay').ore;
+    for (const [resource, cost] of Object.entries(this._blueprint.costs(robotType))) {
+      if (this._resources[resource] < cost) {
+        return false;
+      }
+    }
+    return true;
   }
   consumeResourcesToBuild(robotType)
   {
-    // TODO this is a stub from minimal refactoring
-    if (robotType === 'clay') {
-      this._resources['ore'] -= this._blueprint.costs('clay').ore;
-    } else {
-      throw new SyntaxError('only clay supported for now');
+    if (robotType === 'nothing') {
+      return;
     }
+    for (const [resource, cost] of Object.entries(this._blueprint.costs(robotType))) {
+      this._resources[resource] -= cost;
+      if (this._resources[resource] < 0) {
+        throw new SyntaxError(`resource ${resource} went negative`);
+      }
+    }
+  }
+  /*
+   * TODO this is a crude attempt at pruning that didn't really work
+   */
+  notEnoughOf(robotType)
+  {
+    // these robots should be built toward the end of the 24 minutes
+    if ((this.minute <= 12) && (robotType === 'geode')) {
+      return false;
+    } else if ((this.minute <= 8) && (robotType === 'obsidian')) {
+      return false;
+    }
+    // TODO these will probably only work for the example blueprints
+    const enough = {
+      nothing: 18,
+      ore: 3,
+      clay: 7,
+      obsidian: 7,
+      geode: 3,
+    }
+    return this._robots[robotType] < enough[robotType];
   }
   run()
   {
@@ -93,24 +125,33 @@ class RobotFactory
       throw new SyntaxError('run() called with no time left');
     }
     const buildOptions = RobotFactory.robotTypes()
+      .filter((robotType) => this.notEnoughOf(robotType))
       .filter((robotType) => this.haveResourcesToBuild(robotType));
-    buildOptions.unshift('nothing');  // always an option
+    const state = this.state();
     let maxGeodes = -Number.MAX_SAFE_INTEGER;
-    while (buildOptions.length > 1) {
+    while (buildOptions.length > 0) {
       const buildOption = buildOptions.shift();
       // dynamic programming: see if we've been at this state before
-      let newGeodes = this._nGeodesAtState[this.state()];
+      const stateOption = `${state} ${buildOption}`;
+      let newGeodes = this._nGeodesAtState[stateOption];
       if (newGeodes === undefined) {
-//      console.debug(`trying t=${this.minute()} step(${buildOption}) [clone]`);
-        const factory = this.clone();
-        newGeodes = factory.step(buildOption);
-        this._nGeodesAtState[this.state()] = newGeodes;
+//      console.debug(`trying t=${this.minute()} step(${buildOption})`);
+        if (buildOptions.length > 0) {
+          const factory = this.clone();
+          newGeodes = factory.step(buildOption);
+        } else {
+          newGeodes = this.step(buildOption);
+        }
+        this._nGeodesAtState[stateOption] = newGeodes;
       }
       maxGeodes = Math.max(maxGeodes, newGeodes);
+      // FIXME DEBUG TEMP:
+      if ((this._nGeodesAtState['MAX'] == undefined) || (this._nGeodesAtState['MAX'] < maxGeodes)) {
+        console.debug(`MAX up to ${maxGeodes} [clone]`);
+        this._nGeodesAtState['MAX'] = maxGeodes;
+      }
     }
-//  console.debug(`trying t=${this.minute()} step(${buildOptions[0]})`);
-    const newGeodes = this.step(buildOptions[0]);
-    return Math.max(maxGeodes, newGeodes);
+    return maxGeodes;
   }
   minute()
   {
