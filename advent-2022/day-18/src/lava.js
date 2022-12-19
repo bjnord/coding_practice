@@ -108,35 +108,6 @@ exports.simpleSurfaceArea = ((droplet) => {
   return nFaces - zyDiff - zxDiff - yxDiff;
 });
 
-const interiorCubes = ((map, dim) => {
-  const cubes = [];
-  for (const k in map) {
-    let prevV = undefined;
-    for (const v of map[k]) {
-      if (prevV && (v.coord > prevV.coord + 1)) {
-        for (let i = prevV.coord + 1; i < v.coord; i++) {
-          let cube;
-          switch (dim) {
-          case 'z':
-            cube = {z: i, y: v.cube.y, x: v.cube.x};
-            break;
-          case 'y':
-            cube = {z: v.cube.z, y: i, x: v.cube.x};
-            break;
-          case 'x':
-            cube = {z: v.cube.z, y: v.cube.y, x: i};
-            break;
-          }
-          cube.s = cubeKey(cube);
-          cubes.push(cube);
-        }
-      }
-      prevV = v;
-    }
-  }
-  return cubes;
-});
-
 exports.dropletDim = ((droplet) => {
   return {
     minZ: droplet.reduce((min, cube) => (cube.z < min) ? cube.z : min, Number.MAX_SAFE_INTEGER),
@@ -155,14 +126,6 @@ exports.withinDroplet = ((cube, dim) => {
   const yOK = ((dim.minY - 1) <= cube.y) && (cube.y <= (dim.maxY + 1));
   const xOK = ((dim.minX - 1) <= cube.x) && (cube.x <= (dim.maxX + 1));
   return zOK && yOK && xOK;
-});
-
-const cubesToInput = ((cubes) => {
-  let input = '';
-  for (const cube of cubes) {
-    input += `${cube.s}\n`;
-  }
-  return input;
 });
 
 const neighborCubes = ((cube) => {
@@ -217,7 +180,7 @@ const walkAirCubes = ((cubes, dim, lavaCubes, lavaFaces) => {
   if (cubes.length < 1) {
     return;
   }
-  let nextCubes = [];
+  const nextCubes = [];
   for (const cube of cubes) {
     const children = calcAirCube(cube, dim, lavaCubes, lavaFaces);
     // append new children to end:
@@ -244,7 +207,7 @@ exports.trueSurfaceArea = ((droplet) => {
     return h;
   }, {});
   if (_debug) {
-    console.log(`lavaCubes[${Object.keys(lavaCubes).length}]:`)
+    console.log(`lavaCubes[${Object.keys(lavaCubes).length}]:`);
     console.dir(lavaCubes);
   }
   // guaranteed to be an air cube:
