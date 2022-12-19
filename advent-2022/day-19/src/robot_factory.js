@@ -2,10 +2,14 @@
 
 class RobotFactory
 {
+  static minutesLimit()
+  {
+    return 24;
+  }
   constructor(blueprint, debug)
   {
     this._blueprint = blueprint;
-    this._minute = 1;
+    this._minutesLeft = RobotFactory.minutesLimit();
     this._resources = {
       ore: 0,
       clay: 0,
@@ -27,19 +31,23 @@ class RobotFactory
   }
   run()
   {
-    for (let t = 0; t < 24; t++) {
+    while (this._minutesLeft > 0) {
       this.step();
     }
+  }
+  minute()
+  {
+    return RobotFactory.minutesLimit() - this._minutesLeft + 1;
   }
   step()
   {
     if (this._debug) {
-      console.log(`== Minute ${this._minute} ==`);
+      console.log(`== Minute ${this.minute()} ==`);
     }
     this.startBuilding()
     this.collectResources()
     this.finishBuilding()
-    this._minute++;
+    this._minutesLeft--;
     if (this._debug) {
       console.log('');
     }
