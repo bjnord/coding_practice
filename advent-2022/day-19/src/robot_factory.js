@@ -6,6 +6,10 @@ class RobotFactory
   {
     return 24;
   }
+  static robotTypes()
+  {
+    return ['ore', 'clay', 'obsidian', 'geode'];
+  }
   constructor(blueprint, debug)
   {
     this._blueprint = blueprint;
@@ -24,10 +28,47 @@ class RobotFactory
     }
     this._nowBuilding = undefined;
     this._debug = debug;
+    // dynamic programming state cache
+    this._nGeodesAtState = {};
+  }
+  clone()
+  {
+    const clone = new RobotFactory(this._blueprint);
+    clone._minutesLeft = this._minutesLeft;
+    clone._resources = RobotFactory.robotTypes()
+      .reduce((h, robotType) => {
+        h[robotType] = this.resources(robotType);
+        return h;
+      }, {});
+    clone._robots = RobotFactory.robotTypes()
+      .reduce((h, robotType) => {
+        h[robotType] = this.robots(robotType);
+        return h;
+      }, {});
+    if (this._nowBuilding) {
+      throw new SyntaxError('clone while building');
+    }
+    clone._nowBuilding = undefined;
+    clone._debug = this._debug;
+    // it's OK (and in fact beneficial) for this to be a reference:
+    clone._nGeodesAtState = this._nGeodesAtState;
+    return clone;
+  }
+  state()
+  {
+    let s = `${this._minutesLeft}`;
+    for (const robotType of RobotFactory.robotTypes()) {
+      s += ` ${this._resources[robotType]} ${this._robots[robotType]}`;
+    }
+    return s;
   }
   resources(resourceType)
   {
     return this._resources[resourceType];
+  }
+  robots(robotType)
+  {
+    return this._robots[robotType];
   }
   haveResourcesToBuild(robotType)
   {
@@ -51,11 +92,25 @@ class RobotFactory
     if (this._minutesLeft < 1) {
       throw new SyntaxError('run() called with no time left');
     }
-    const buildOptions = ['ore', 'clay', 'obsidian', 'geode']
+    const buildOptions = RobotFactory.robotTypes()
       .filter((robotType) => this.haveResourcesToBuild(robotType));
     buildOptions.unshift('nothing');  // always an option
-    // TODO here we would clone and do DFS
-    return this.step(buildOptions[buildOptions.length - 1]);
+    let maxGeodes = -Number.MAX_SAFE_INTEGER;
+    while (buildOptions.length > 1) {
+      const buildOption = buildOptions.shift();
+      // dynamic programming: see if we've been at this state before
+      let newGeodes = this._nGeodesAtState[this.state()];
+      if (newGeodes === undefined) {
+//      console.debug(`trying t=${this.minute()} step(${buildOption}) [clone]`);
+        const factory = this.clone();
+        newGeodes = factory.step(buildOption);
+        this._nGeodesAtState[this.state()] = newGeodes;
+      }
+      maxGeodes = Math.max(maxGeodes, newGeodes);
+    }
+//  console.debug(`trying t=${this.minute()} step(${buildOptions[0]})`);
+    const newGeodes = this.step(buildOptions[0]);
+    return Math.max(maxGeodes, newGeodes);
   }
   minute()
   {
@@ -103,7 +158,7 @@ class RobotFactory
   }
   collectResources()
   {
-    for (const robotType of ['ore', 'clay', 'obsidian', 'geode']) {
+    for (const robotType of RobotFactory.robotTypes()) {
       const nRobots = this._robots[robotType];
       if (nRobots > 0) {
         const action = (nRobots === 1) ? `robot ${this._verb(robotType)}s` : `robots ${this._verb(robotType)}`;
