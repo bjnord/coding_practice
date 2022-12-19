@@ -1,8 +1,17 @@
 'use strict';
 const expect = require('chai').expect;
+const fs = require('fs');
 const lava = require('../src/lava');
 const exampleInput = '1,1,1\n2,1,1\n';
 const exampleInput2 = '2,2,2\n1,2,2\n3,2,2\n2,1,2\n2,3,2\n2,2,1\n2,2,3\n2,2,4\n2,2,6\n1,2,5\n3,2,5\n2,1,5\n2,3,5\n';
+/*
+ * a 5x4x6 box that has:
+ * - an exterior tunnel opening cube at z=1
+ * - a 2x4 interior cavern at z=2 (reachable via tunnel opening)
+ * - a 2x4 interior cavern at z=4 (sealed, not reachable)
+ * - 5*4*6 total cubes - 1 - 8 - 8 = 103 lava cubes
+ */
+const exampleInputTunnel = fs.readFileSync('input/tunnel.txt', 'utf8');
 describe('parsing tests', () => {
   it('should parse one line correctly', () => {
     expect(lava.parseLine('2,1,5')).to.eql({z: 5, y: 1, x: 2, s: '2,1,5'});
@@ -46,6 +55,15 @@ describe('true surface area tests', () => {
     };
     expect(lava.dropletDim(droplet)).to.eql(expected);
   });
+  it('should calculate dimensions correctly (tunnel example)', () => {
+    const dropletTunnel = lava.parse(exampleInputTunnel);
+    const expected = {
+      minZ: 1, maxZ: 5,
+      minY: 1, maxY: 4,
+      minX: 1, maxX: 6,
+    };
+    expect(lava.dropletDim(dropletTunnel)).to.eql(expected);
+  });
   it('should calculate dimensions correctly (2nd example)', () => {
     const droplet2 = lava.parse(exampleInput2);
     const expected = {
@@ -62,5 +80,18 @@ describe('true surface area tests', () => {
   it('should calculate surface area correctly (2nd example)', () => {
     const droplet2 = lava.parse(exampleInput2);
     expect(lava.trueSurfaceArea(droplet2)).to.equal(58);
+  });
+  it('should calculate surface area correctly (tunnel example)', () => {
+    // see comment at top for description of this object
+    const dropletTunnel = lava.parse(exampleInputTunnel);
+    expect(dropletTunnel.length).to.equal(103);
+    const boxSurface = 2 * (5 * 4) + 2 * (5 * 6) + 2 * (4 * 6);
+    const expSurface = boxSurface
+      - 1                // tunnel opening cube exterior hole
+      + 4                // tunnel opening cube faces
+      + 2 * (2 * 4) - 1  // tunnel chamber front/back faces (- hole)
+      + 2 * (1 * 4)      // tunnel chamber top/bottom faces
+      + 2 * (1 * 2);     // tunnel chamber left/right faces
+    expect(lava.trueSurfaceArea(dropletTunnel)).to.equal(expSurface);
   });
 });
