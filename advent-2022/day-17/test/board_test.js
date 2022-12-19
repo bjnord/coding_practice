@@ -14,21 +14,12 @@ describe('Board operation tests', () => {
   it('should make and trim space (initial board)', () => {
     const board = new Board();
     board.makeSpace();
-//  console.log('');
-//  console.log('spacious:');
-//  board.drawBoard();
     expect(board.height()).to.equal(3);
     board.makeSpace();
     expect(board.height()).to.equal(3);
     board.shrink();
-//  console.log('');
-//  console.log('short people got:');
-//  board.drawBoard();
     expect(board.height()).to.equal(2);
     board.trimSpace();
-//  console.log('');
-//  console.log('neatly trimmed:');
-//  board.drawBoard();
     expect(board.height()).to.equal(0);
     board.trimSpace();
     expect(board.height()).to.equal(0);
@@ -52,7 +43,6 @@ describe('Board operation tests', () => {
       expect(board.height()).to.equal((i + 1) * 4);
       expect(board.state().afterShape).to.equal(i % 5);
       expect(board.state().sum).to.not.equal(lastSum);
-//    console.debug(`nShapes=${nShapes} i=${i} lastSum=${lastSum} sum=${board.state().sum}`);
       lastSum = board.state().sum;
     }
   });

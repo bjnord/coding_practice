@@ -161,18 +161,10 @@ class Tetris
       this._board.drawBoard();
     }
   }
-  dropShapes(n, debugAt)
+  dropShapes(n)
   {
     for (let i = 0; i < n; i++) {
       this.dropNextShape();
-//    if (debugAt) {
-//      console.log(`dropped shape ${i}`);
-        if (i >= debugAt) {
-          // FIXME accessing private member
-          this._board._debug = true;
-          this._debug = true;
-        }
-//    }
     }
   }
   dropShapesCyclical(n)
@@ -211,7 +203,6 @@ class Tetris
     // f: function which transforms the current state to the
     //    next state in the sequence [`f(x0)` returns `x1`]
     const f = ((x) => {
-//    console.log(`f(i=${x.i}) called`);
       if (!x) {
         throw new SyntaxError(`board exhausted; states.length=${Object.keys(states).length}`);
       }
@@ -220,7 +211,6 @@ class Tetris
     // eq: function which detects equality of two states
     //     [`eq(a, b)` returns `true` if states are equal]
     const eq = ((a, b) => {
-//    console.log(`eq(${a.sum}/${a.afterShape}, b=${b.sum}/${b.afterShape}) called`);
       return (a.sum === b.sum) && (a.afterShape === b.afterShape);
     });
     // 3rd param: initial state (of the type `f(x)` expects)

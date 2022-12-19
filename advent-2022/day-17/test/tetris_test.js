@@ -1,7 +1,8 @@
 'use strict';
 const expect = require('chai').expect;
+const fs = require('fs');
 const Tetris = require('../src/tetris');
-const exampleInput = '>>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>';
+const exampleInput = fs.readFileSync('input/example.txt', 'utf8');
 describe('Tetris constructor tests', () => {
   it('should return the correct jet sequence', () => {
     const expected = [
@@ -18,7 +19,7 @@ describe('Tetris constructor tests', () => {
       '>', '>', '>', '<', '<',
     ];
     const tetris = new Tetris(exampleInput);
-    for (let i = 0; i < exampleInput.length - 5; i++) {
+    for (let i = 0; i < exampleInput.trim().length - 5; i++) {
       tetris.nextJet();
     }
     for (let i = 0; i < expected.length; i++) {
@@ -71,7 +72,6 @@ describe('Tetris cyclical play tests', () => {
     const nShapes = 1000000000000n;
     const expected = 1514285714288n;
     const actual = tetris.dropShapesCyclical(nShapes);
-//  console.debug(`cyclical expected=${expected} actual=${actual}`);
     expect(actual).to.equal(expected);
   });
 });

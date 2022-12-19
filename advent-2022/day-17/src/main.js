@@ -3,6 +3,13 @@ const Tetris = require('../src/tetris');
 const fs = require('fs');
 const input = fs.readFileSync('input/input.txt', 'utf8');
 
+if (process.argv[process.argv.length - 1] === '--dump') {
+  const exampleInput = fs.readFileSync('input/example.txt', 'utf8');
+  const example = new Tetris(exampleInput, true);
+  example.dropShapes(11);
+  process.exit(0);
+}
+
 // PART 1
 let tetris = new Tetris(input);
 tetris.dropShapes(2022);
