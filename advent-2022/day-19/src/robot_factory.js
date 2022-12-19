@@ -29,27 +29,55 @@ class RobotFactory
   {
     return this._resources[resourceType];
   }
+  haveResourcesToBuild(robotType)
+  {
+    // TODO this is a stub from minimal refactoring
+    if (robotType !== 'clay') {
+      return false;
+    }
+    return this._resources['ore'] >= this._blueprint.costs('clay').ore;
+  }
+  consumeResourcesToBuild(robotType)
+  {
+    // TODO this is a stub from minimal refactoring
+    if (robotType === 'clay') {
+      this._resources['ore'] -= this._blueprint.costs('clay').ore;
+    } else {
+      throw new SyntaxError('only clay supported for now');
+    }
+  }
   run()
   {
-    while (this._minutesLeft > 0) {
-      this.step();
+    if (this._minutesLeft < 1) {
+      throw new SyntaxError('run() called with no time left');
     }
+    const buildOptions = ['ore', 'clay', 'obsidian', 'geode']
+      .filter((robotType) => this.haveResourcesToBuild(robotType));
+    buildOptions.unshift('nothing');  // always an option
+    // TODO here we would clone and do DFS
+    return this.step(buildOptions[buildOptions.length - 1]);
   }
   minute()
   {
     return RobotFactory.minutesLimit() - this._minutesLeft + 1;
   }
-  step()
+  step(buildRobotType)
   {
     if (this._debug) {
       console.log(`== Minute ${this.minute()} ==`);
     }
-    this.startBuilding()
+    this.startBuilding(buildRobotType)
     this.collectResources()
     this.finishBuilding()
     this._minutesLeft--;
     if (this._debug) {
       console.log('');
+    }
+    if (this._minutesLeft > 0) {
+      return this.run();
+    } else {
+      // end of recursion
+      return this._resources['geode'];
     }
   }
   _an(robotType)
@@ -60,17 +88,17 @@ class RobotFactory
   {
     return (robotType === 'geode') ? 'crack' : 'collect';
   }
-  /*
-   * TODO This will be the **key algorithm** that drives the factory.
-   */
-  startBuilding()
+  startBuilding(robotType)
   {
-    if (this._resources['ore'] >= this._blueprint.costs('clay').ore) {
-      this._resources['ore'] -= this._blueprint.costs('clay').ore;
+    if (!robotType) {
+      throw new SyntaxError('startBuilding() robotType required');
+    } else if (robotType !== 'nothing') {
+      this._nowBuilding = robotType;
+      this.consumeResourcesToBuild(robotType);
       if (this._debug) {
-        console.log(`Spend ${this._blueprint.costs('clay').ore} ore to start building ${this._an('clay')} clay-${this._verb('clay')}ing robot.`);
+        // FIXME this only works for single-resource robots
+        console.log(`Spend ${this._blueprint.costs(robotType).ore} ore to start building ${this._an(robotType)} ${robotType}-${this._verb(robotType)}ing robot.`);
       }
-      this._nowBuilding = 'clay';
     }
   }
   collectResources()
