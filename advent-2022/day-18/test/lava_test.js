@@ -4,6 +4,7 @@ const fs = require('fs');
 const lava = require('../src/lava');
 const exampleInput = '1,1,1\n2,1,1\n';
 const exampleInput2 = '2,2,2\n1,2,2\n3,2,2\n2,1,2\n2,3,2\n2,2,1\n2,2,3\n2,2,4\n2,2,6\n1,2,5\n3,2,5\n2,1,5\n2,3,5\n';
+const exampleInputCatbert = fs.readFileSync('input/Catbert321.txt', 'utf8');
 /*
  * a 5x4x6 box that has:
  * - an exterior tunnel opening cube at z=1
@@ -36,13 +37,17 @@ describe('parsing tests', () => {
   });
 });
 describe('simple surface area tests', () => {
-  it('should calculate the first example correctly', () => {
+  it('should calculate simple surface area correctly (1st example)', () => {
     const droplet = lava.parse(exampleInput);
     expect(lava.simpleSurfaceArea(droplet)).to.equal(10);
   });
-  it('should calculate the second example correctly', () => {
+  it('should calculate simple surface area correctly (2nd example)', () => {
     const droplet2 = lava.parse(exampleInput2);
     expect(lava.simpleSurfaceArea(droplet2)).to.equal(64);
+  });
+  it('should calculate simple surface area correctly (Catbert321 example)', () => {
+    const dropletCatbert = lava.parse(exampleInputCatbert);
+    expect(lava.simpleSurfaceArea(dropletCatbert)).to.equal(108);
   });
 });
 describe('true surface area tests', () => {
@@ -80,6 +85,10 @@ describe('true surface area tests', () => {
   it('should calculate surface area correctly (2nd example)', () => {
     const droplet2 = lava.parse(exampleInput2);
     expect(lava.trueSurfaceArea(droplet2)).to.equal(58);
+  });
+  it('should calculate surface area correctly (Catbert321 example)', () => {
+    const dropletCatbert = lava.parse(exampleInputCatbert);
+    expect(lava.trueSurfaceArea(dropletCatbert)).to.equal(90);
   });
   it('should calculate surface area correctly (tunnel example)', () => {
     // see comment at top for description of this object
