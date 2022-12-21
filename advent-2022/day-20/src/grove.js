@@ -1,6 +1,7 @@
 'use strict';
 const math = require('../../shared/src/math');
 const _debug = false;
+const _assertIntegrity = true;
 /** @module grove */
 /**
  * Parse the puzzle input.
@@ -37,6 +38,20 @@ exports.state = ((numbers) => {
     slots,
     slotIndex,
   };
+});
+
+const assertIntegrity = ((state) => {
+  const expSum = ((state.count - 1) * state.count) / 2;
+  const slotsSum = state.slots.reduce((sum, s) => sum + s, 0);
+  if (slotsSum !== expSum) {
+    console.dir(state.slots);
+    throw new SyntaxError('state.slots integrity fail');
+  }
+  const slotIndexSum = state.slotIndex.reduce((sum, si) => sum + si, 0);
+  if (slotIndexSum !== expSum) {
+    console.dir(state.slotIndex);
+    throw new SyntaxError('state.slotIndex integrity fail');
+  }
 });
 
 exports.currentNumbers = ((state) => {
@@ -154,6 +169,9 @@ exports.doMove = ((state) => {
     }
   }
 
+  if (_assertIntegrity) {
+    assertIntegrity(state);
+  }
   if (_debug) {
     console.debug('slots now:')
     console.dir(state.slots);
