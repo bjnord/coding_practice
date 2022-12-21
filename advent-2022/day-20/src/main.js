@@ -9,7 +9,7 @@ const state = grove.state(numbers);
 grove.doMoves(state);
 const answer1 = grove.coordinates(state)
   .reduce((sum, coord) => sum + coord, 0);
-console.log('part 1: expected answer:                **TOOLOW** 1242');
+console.log('part 1: expected answer:                6712');
 console.log(`part 1: sum of grove coordinates:       ${answer1}`);
 console.log('');
 
