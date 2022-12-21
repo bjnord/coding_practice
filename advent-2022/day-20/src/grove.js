@@ -113,9 +113,6 @@ exports.rotateRight = ((state, slot, dist) => {
 });
 
 exports.doMove = ((state) => {
-  if (state.curIndex >= state.count) {
-    throw new SyntaxError('moves exhausted');
-  }
   // "what's the current position (`curSlot`) of the number that
   // originally was in `curIndex`?"
   const curSlot = state.slotIndex[state.curIndex];
@@ -133,11 +130,28 @@ exports.doMove = ((state) => {
   }
   // move left
   else if (curNumber < 0) {
-    module.exports.rotateRight(state, curSlot, curNumber);
+    let dist = math.mod(curNumber, state.count - 1);
+    if (dist === 0) {
+      if (_debug) {
+        console.debug(`  no move`);
+      }
+    } else {
+      if (dist > 0) {
+        dist -= (state.count - 1);
+      }
+      module.exports.rotateRight(state, curSlot, dist);
+    }
   }
   // move right
   else {
-    module.exports.rotateLeft(state, curSlot, curNumber);
+    const dist = math.mod(curNumber, state.count - 1);
+    if (dist === 0) {
+      if (_debug) {
+        console.debug(`  no move`);
+      }
+    } else {
+      module.exports.rotateLeft(state, curSlot, dist);
+    }
   }
 
   if (_debug) {
@@ -147,7 +161,9 @@ exports.doMove = ((state) => {
     console.dir(state.slotIndex);
     console.debug('--');
   }
-  state.curIndex++;
+  if (++state.curIndex > state.count) {
+    state.curIndex = 0;
+  }
 });
 
 exports.doMoves = ((state) => {
