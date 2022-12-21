@@ -36,8 +36,8 @@ exports.parseLine = (line) => {
   return monkey;
 };
 
-exports.rootMonkeyNumber = ((monkeys) => {
-  const monkeyNumber = monkeys.reduce((h, monkey) => {
+exports.monkeyNumbers = ((monkeys) => {
+  const monkeyNumbers = monkeys.reduce((h, monkey) => {
     if (monkey.number !== undefined) {
       if (_debug) {
         console.debug(`monkey ${monkey.name} immediately yells ${monkey.number}`);
@@ -46,24 +46,24 @@ exports.rootMonkeyNumber = ((monkeys) => {
     }
     return h;
   }, {});
-  let monkeysLeft = monkeys.length - Object.keys(monkeyNumber).length;
+  let monkeysLeft = monkeys.length - Object.keys(monkeyNumbers).length;
   while (monkeysLeft > 0) {
     for (const monkey of monkeys) {
       if (monkey.number === undefined) {
-        if ((monkeyNumber[monkey.arg1] !== undefined) && (monkeyNumber[monkey.arg2] !== undefined)) {
+        if ((monkeyNumbers[monkey.arg1] !== undefined) && (monkeyNumbers[monkey.arg2] !== undefined)) {
           let number;
           switch (monkey.op) {
             case '+':
-              number = monkeyNumber[monkey.arg1] + monkeyNumber[monkey.arg2];
+              number = monkeyNumbers[monkey.arg1] + monkeyNumbers[monkey.arg2];
               break;
             case '-':
-              number = monkeyNumber[monkey.arg1] - monkeyNumber[monkey.arg2];
+              number = monkeyNumbers[monkey.arg1] - monkeyNumbers[monkey.arg2];
               break;
             case '*':
-              number = monkeyNumber[monkey.arg1] * monkeyNumber[monkey.arg2];
+              number = monkeyNumbers[monkey.arg1] * monkeyNumbers[monkey.arg2];
               break;
             case '/':
-              number = monkeyNumber[monkey.arg1] / monkeyNumber[monkey.arg2];
+              number = monkeyNumbers[monkey.arg1] / monkeyNumbers[monkey.arg2];
               break;
             default:
               throw new SyntaxError(`unknown op ${monkey.op}`);
@@ -72,13 +72,11 @@ exports.rootMonkeyNumber = ((monkeys) => {
           if (_debug) {
             console.debug(`monkey ${monkey.name} can now yell ${monkey.number}`);
           }
-          monkeyNumber[monkey.name] = number;
+          monkeyNumbers[monkey.name] = number;
           monkeysLeft--;
-          if (monkey.name === 'root') {
-            return monkey.number;
-          }
         }
       }
     }
   }
+  return monkeyNumbers;
 });
