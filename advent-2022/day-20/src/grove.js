@@ -48,6 +48,28 @@ exports.currentNumbers = ((state) => {
   return curNumbers;
 });
 
+exports.rotatedEqual = ((a, b) => {
+  if (a.length !== b.length) {
+    throw new SyntaxError(`a.length ${a.length} !== b.length ${b.length}`);
+  }
+  const bRot = [...b];
+  for (let i = 0; i < a.length; i++) {
+    const el = bRot.shift();
+    bRot.push(el);
+    let equal = true;
+    for (let j = 0; j < a.length; j++) {
+      if (a[j] !== bRot[j]) {
+        equal = false;
+        break;
+      }
+    }
+    if (equal) {
+      return true;
+    }
+  }
+  return false;
+});
+
 exports.rotateLeft = ((state, fromSlot, toSlot) => {
   if (fromSlot < 0) {
     throw new SyntaxError(`fromSlot=${fromSlot} < 0`);

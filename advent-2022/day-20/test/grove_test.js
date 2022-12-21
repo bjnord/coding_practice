@@ -1,7 +1,21 @@
 'use strict';
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
+const Assertion = chai.Assertion;
 const grove = require('../src/grove');
 const exampleInput = '1\n2\n-3\n3\n-2\n0\n4\n';
+const assertRotatedEq = ((state, expectedNumbers) => {
+  const currentNumbers = grove.currentNumbers(state);
+  const checkRotatedEq = new Assertion(currentNumbers);
+  checkRotatedEq.assert(
+    grove.rotatedEqual(currentNumbers, expectedNumbers),
+    "expected #{this}",
+    "expected #{this} not",
+    expectedNumbers,
+    currentNumbers,
+    true
+  );
+});
 describe('parsing tests', () => {
   it('should parse one line correctly', () => {
     expect(grove.parseLine('1')).to.eql(1);
@@ -19,7 +33,29 @@ describe('parsing tests', () => {
     expect(grove.parse(exampleInput)).to.eql(expected);
   });
 });
-describe('decrypting tests', () => {
+describe('array equality tests', () => {
+  it('should detect equal unrotated arrays', () => {
+    expect(grove.rotatedEqual([1, 4, 9, 25], [1, 4, 9, 25])).to.be.true;
+  });
+  it('should detect equal rotated arrays', () => {
+    expect(grove.rotatedEqual([1, 4, 9, 25], [4, 9, 25, 1])).to.be.true;
+    expect(grove.rotatedEqual([1, 4, 9, 25], [9, 25, 1, 4])).to.be.true;
+    expect(grove.rotatedEqual([1, 4, 9, 25], [25, 1, 4, 9])).to.be.true;
+  });
+  it('should detect unequal swapped arrays', () => {
+    expect(grove.rotatedEqual([1, 4, 9, 25], [4, 1, 9, 25])).to.be.false;
+    expect(grove.rotatedEqual([1, 4, 9, 25], [1, 9, 25, 4])).to.be.false;
+  });
+  it('should detect unequal different arrays', () => {
+    expect(grove.rotatedEqual([1, 4, 9, 25], [1, 4, 8, 25])).to.be.false;
+    expect(grove.rotatedEqual([1, 4, 9, 25], [9, 24, 1, 4])).to.be.false;
+  });
+  it('should throw exception for different-sized arrays', () => {
+    const badEqualFn = () => { grove.rotatedEqual([1, 4, 9], [4, 9, 25, 1]); };
+    expect(badEqualFn).to.throw(SyntaxError);
+  });
+});
+describe('rotation tests', () => {
   it('should do left rotations properly', () => {
     // TODO should also check slotIndex[] before/after
     const tests = [
@@ -144,6 +180,8 @@ describe('decrypting tests', () => {
     expect(grove.destSlot(0, 3, 7)).to.equal(3);
     expect(grove.destSlot(4, 5, 7)).to.equal(3);
   });
+});
+describe('decrypting tests', () => {
   it('should execute each move correctly (puzzle example)', () => {
     const numbers = grove.parse(exampleInput);
     const state = grove.state(numbers);
@@ -167,9 +205,9 @@ describe('decrypting tests', () => {
     ];
     const exp0 = expected.shift();
     expect(grove.currentNumbers(state)).to.eql(exp0);
-    for (const exp of expected) {
+    for (const expectedNumbers of expected) {
       grove.doMove(state);
-      expect(grove.currentNumbers(state)).to.eql(exp);
+      assertRotatedEq(state, expectedNumbers);
     }
   });
   it('should find grove coordinates correctly (puzzle example)', () => {
