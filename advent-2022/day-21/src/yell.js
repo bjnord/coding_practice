@@ -94,7 +94,7 @@ const reciprocal = ((n) => {
   }
 });
 
-exports.humanYell = ((monkeys, monkeyNumbers) => {
+exports.humanYell = ((monkeys) => {
   const parentOfName = {};
   const monkeyOfName = {};
   for (const monkey of monkeys) {
@@ -103,6 +103,10 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
       parentOfName[monkey.arg2] = monkey;
     }
     monkeyOfName[monkey.name] = monkey;
+  }
+  const root = monkeyOfName['root'];
+  if (!root || (root.number === undefined)) {
+    throw new SyntaxError('must call monkeyNumbers() first');
   }
   if (_debug) {
     console.debug('parentOfName:');
@@ -138,7 +142,6 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
     console.debug('jobStack:');
     console.dir(jobStack);
   }
-  const root = monkeyOfName['root'];
   let rootValue;
   if (root.arg1 === humanBranch.name) {
     rootValue = monkeyOfName[root.arg2].number;
