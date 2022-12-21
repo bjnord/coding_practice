@@ -1,5 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
+const fs = require('fs');
 const yell = require('../src/yell');
 const exampleInput = 'root: pppw + sjmn\ndbpl: 5\ncczh: sllz + lgvd\nzczc: 2\nptdq: humn - dvpt\ndvpt: 3\nlfqf: 4\nhumn: 5\nljgn: 2\nsjmn: drzm * dbpl\nsllz: 4\npppw: cczh / lfqf\nlgvd: ljgn * ptdq\ndrzm: hmdt - zczc\nhmdt: 32\n';
 describe('parsing tests', () => {
@@ -65,6 +66,13 @@ describe('yelling tests', () => {
     ];
     const commutativeInput = commutative.join('\n') + '\n';
     const monkeys = yell.parse(commutativeInput);
+    yell.monkeyNumbers(monkeys);
+    expect(yell.humanYell(monkeys)).to.equal(19);
+  });
+  it('should calculate what the human yells correctly (Reddit user Cue_23 example)', () => {
+    // h/t https://www.reddit.com/r/adventofcode/comments/zrtw6y/2022_day_21_part_2_another_example/j14zz01/
+    const cue23Input = fs.readFileSync('input/Cue_23.txt', 'utf8');
+    const monkeys = yell.parse(cue23Input);
     yell.monkeyNumbers(monkeys);
     expect(yell.humanYell(monkeys)).to.equal(19);
   });
