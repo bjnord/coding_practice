@@ -124,7 +124,7 @@ describe('rotation tests', () => {
   it('should throw exceptions for invalid left rotations', () => {
     const badLowFn = () => { grove.rotateLeft({count: 5}, -1, 2); };
     expect(badLowFn).to.throw(SyntaxError);
-    const badHighFn = () => { grove.rotateLeft({count: 5}, 7, 5); };
+    const badHighFn = () => { grove.rotateLeft({count: 5}, 5, 4); };
     expect(badHighFn).to.throw(SyntaxError);
     const badDistFn = () => { grove.rotateLeft({count: 5}, 0, -1); };
     expect(badDistFn).to.throw(SyntaxError);
@@ -197,9 +197,9 @@ describe('rotation tests', () => {
   it('should throw exceptions for invalid right rotations', () => {
     const badLowFn = () => { grove.rotateRight({count: 5}, -1, 2); };
     expect(badLowFn).to.throw(SyntaxError);
-    const badHighFn = () => { grove.rotateRight({count: 5}, 7, 5); };
+    const badHighFn = () => { grove.rotateRight({count: 5}, 5, 0); };
     expect(badHighFn).to.throw(SyntaxError);
-    const badDistFn = () => { grove.rotateLeft({count: 5}, 6, 1); };
+    const badDistFn = () => { grove.rotateRight({count: 5}, 4, 1); };
     expect(badDistFn).to.throw(SyntaxError);
   });
 });
@@ -253,6 +253,13 @@ describe('decrypting tests', () => {
     const state = grove.state(numbers);
     grove.doMoves(state);
     expect(grove.coordinates(state)).to.eql([4, -3, 2]);
+  });
+  it('should throw exception if round was incomplete', () => {
+    const numbers = grove.parse(exampleInput);
+    const state = grove.state(numbers);
+    grove.doMove(state);
+    const incompleteFn = () => { grove.coordinates(state); };
+    expect(incompleteFn).to.throw(SyntaxError);
   });
   it('should find grove coordinates correctly (Reddit user MouseyPounds example)', () => {
     // h/t https://www.reddit.com/r/adventofcode/comments/zr29qd/2022_day_20_part_1_python_hidden_edge_case/j11d86z/

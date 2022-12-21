@@ -43,11 +43,13 @@ exports.state = ((numbers) => {
 const assertIntegrity = ((state) => {
   const expSum = ((state.count - 1) * state.count) / 2;
   const slotsSum = state.slots.reduce((sum, s) => sum + s, 0);
+  /* istanbul ignore next */
   if (slotsSum !== expSum) {
     console.dir(state.slots);
     throw new SyntaxError('state.slots integrity fail');
   }
   const slotIndexSum = state.slotIndex.reduce((sum, si) => sum + si, 0);
+  /* istanbul ignore next */
   if (slotIndexSum !== expSum) {
     console.dir(state.slotIndex);
     throw new SyntaxError('state.slotIndex integrity fail');
@@ -56,6 +58,7 @@ const assertIntegrity = ((state) => {
 
 exports.currentNumbers = ((state) => {
   const curNumbers = state.slots.map((slot) => state.numbers[slot]);
+  /* istanbul ignore next */
   if (_debug) {
     console.debug('numbers now:');
     console.dir(curNumbers);
@@ -99,6 +102,7 @@ exports.rotateLeft = ((state, slot, dist) => {
     const old = state.slots[modI];
     const modJ = math.mod(i + 1, state.count);
     state.slots[modI] = (i === slot + dist) ? original : state.slots[modJ];
+    /* istanbul ignore next */
     if (_debug) {
       console.debug(`  modI=${modI} old=${old} new=${state.slots[modI]}`);
     }
@@ -120,6 +124,7 @@ exports.rotateRight = ((state, slot, dist) => {
     const old = state.slots[modI];
     const modJ = math.mod(i - 1, state.count);
     state.slots[modI] = (i === slot + dist) ? original : state.slots[modJ];
+    /* istanbul ignore next */
     if (_debug) {
       console.debug(`  modI=${modI} old=${old} new=${state.slots[modI]}`);
     }
@@ -132,13 +137,15 @@ exports.doMove = ((state) => {
   // originally was in `curIndex`?"
   const curSlot = state.slotIndex[state.curIndex];
   const curNumber = state.numbers[state.slots[curSlot]];
+  /* istanbul ignore next */
   if (_debug) {
     module.exports.currentNumbers(state);
     console.debug(`move i=${state.curIndex}: moving ${curNumber} currently in slot=${curSlot}`);
   }
 
   // no move
-  if (curNumber === 0) {
+  if (math.mod(curNumber, state.count - 1) === 0) {
+    /* istanbul ignore next */
     if (_debug) {
       console.debug('  no move');
     }
@@ -146,32 +153,20 @@ exports.doMove = ((state) => {
   // move left
   else if (curNumber < 0) {
     let dist = math.mod(curNumber, state.count - 1);
-    if (dist === 0) {
-      if (_debug) {
-        console.debug('  no move');
-      }
-    } else {
-      if (dist > 0) {
-        dist -= (state.count - 1);
-      }
-      module.exports.rotateRight(state, curSlot, dist);
-    }
+    dist -= (state.count - 1);
+    module.exports.rotateRight(state, curSlot, dist);
   }
   // move right
   else {
     const dist = math.mod(curNumber, state.count - 1);
-    if (dist === 0) {
-      if (_debug) {
-        console.debug('  no move');
-      }
-    } else {
-      module.exports.rotateLeft(state, curSlot, dist);
-    }
+    module.exports.rotateLeft(state, curSlot, dist);
   }
 
+  /* istanbul ignore next */
   if (_assertIntegrity) {
     assertIntegrity(state);
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.debug('slots now:');
     console.dir(state.slots);
@@ -194,11 +189,13 @@ exports.coordinates = ((state) => {
   if (state.curIndex !== 0) {
     throw new SyntaxError('not all moves made');
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.debug('');
     console.debug('**********');
   }
   const currentNumbers = module.exports.currentNumbers(state);
+  /* istanbul ignore next */
   if (_debug) {
     console.debug('slots now:');
     console.dir(state.slots);
@@ -210,9 +207,11 @@ exports.coordinates = ((state) => {
   // originally was in `zeroIndex`?"
   const zeroSlot = state.slotIndex[zeroIndex];
   const zeroNumber = state.numbers[state.slots[zeroSlot]];
+  /* istanbul ignore next */
   if (zeroNumber !== 0) {
     throw new SyntaxError("didn't find 0 where expected");
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.debug(`zeroIndex=${zeroIndex} zeroSlot=${zeroSlot} zeroNumber=${zeroNumber}`);
   }
@@ -220,6 +219,7 @@ exports.coordinates = ((state) => {
   for (const i of [1000, 2000, 3000]) {
     const coordSlot = math.mod(zeroSlot + i, state.count);
     const coordNumber = currentNumbers[coordSlot];
+    /* istanbul ignore next */
     if (_debug) {
       console.debug(`i=${i} coordSlot=${coordSlot} coordNumber=${coordNumber}`);
     }
