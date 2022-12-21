@@ -26,7 +26,12 @@ describe('yelling tests', () => {
   });
   it('should calculate what the human yells correctly', () => {
     const monkeys = yell.parse(exampleInput);
-    const monkeyNumbers = yell.monkeyNumbers(monkeys);
-    expect(yell.humanYell(monkeys, monkeyNumbers)).to.equal(301);
+    yell.monkeyNumbers(monkeys);
+    expect(yell.humanYell(monkeys)).to.equal(301);
+  });
+  it('should throw exception if prereq function not called', () => {
+    const monkeys = yell.parse(exampleInput);
+    const noPrereqFn = () => { yell.humanYell(monkeys); };
+    expect(noPrereqFn).to.throw(SyntaxError);
   });
 });
