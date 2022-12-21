@@ -9,8 +9,8 @@ const assertRotatedEq = ((state, expectedNumbers) => {
   const checkRotatedEq = new Assertion(currentNumbers);
   checkRotatedEq.assert(
     grove.rotatedEqual(currentNumbers, expectedNumbers),
-    "expected #{this}",
-    "expected #{this} not",
+    'expected #{this}',
+    'expected #{this} not',
     expectedNumbers,
     currentNumbers,
     true
