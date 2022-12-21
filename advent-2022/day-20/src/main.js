@@ -9,12 +9,17 @@ const state = grove.state(numbers);
 grove.doMoves(state);
 const answer1 = grove.coordinates(state)
   .reduce((sum, coord) => sum + coord, 0);
-console.log('part 1: expected answer:                6712');
-console.log(`part 1: sum of grove coordinates:       ${answer1}`);
+console.log('part 1: expected answer:          6712');
+console.log(`part 1: sum of grove coordinates: ${answer1}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:                1');
-console.log(`part 2: actual answer:                  ${answer2}`);
+const state2 = grove.state(grove.keyTransform(numbers, 811589153));
+for (let i = 0; i < 10; i++) {
+  grove.doMoves(state2);
+}
+const answer2 = grove.coordinates(state2)
+  .reduce((sum, coord) => sum + coord, 0);
+console.log('part 2: expected answer:          1595584274798');
+console.log(`part 2: sum of grove coordinates: ${answer2}`);
 console.log('');
