@@ -57,7 +57,7 @@ const assertIntegrity = ((state) => {
 exports.currentNumbers = ((state) => {
   const curNumbers = state.slots.map((slot) => state.numbers[slot]);
   if (_debug) {
-    console.debug('numbers now:')
+    console.debug('numbers now:');
     console.dir(curNumbers);
   }
   return curNumbers;
@@ -98,7 +98,7 @@ exports.rotateLeft = ((state, slot, dist) => {
     const modI = math.mod(i, state.count);
     const old = state.slots[modI];
     const modJ = math.mod(i + 1, state.count);
-    state.slots[modI] = (i == slot + dist) ? original : state.slots[modJ];
+    state.slots[modI] = (i === slot + dist) ? original : state.slots[modJ];
     if (_debug) {
       console.debug(`  modI=${modI} old=${old} new=${state.slots[modI]}`);
     }
@@ -119,7 +119,7 @@ exports.rotateRight = ((state, slot, dist) => {
     const modI = math.mod(i, state.count);
     const old = state.slots[modI];
     const modJ = math.mod(i - 1, state.count);
-    state.slots[modI] = (i == slot + dist) ? original : state.slots[modJ];
+    state.slots[modI] = (i === slot + dist) ? original : state.slots[modJ];
     if (_debug) {
       console.debug(`  modI=${modI} old=${old} new=${state.slots[modI]}`);
     }
@@ -140,7 +140,7 @@ exports.doMove = ((state) => {
   // no move
   if (curNumber === 0) {
     if (_debug) {
-      console.debug(`  no move`);
+      console.debug('  no move');
     }
   }
   // move left
@@ -148,7 +148,7 @@ exports.doMove = ((state) => {
     let dist = math.mod(curNumber, state.count - 1);
     if (dist === 0) {
       if (_debug) {
-        console.debug(`  no move`);
+        console.debug('  no move');
       }
     } else {
       if (dist > 0) {
@@ -162,7 +162,7 @@ exports.doMove = ((state) => {
     const dist = math.mod(curNumber, state.count - 1);
     if (dist === 0) {
       if (_debug) {
-        console.debug(`  no move`);
+        console.debug('  no move');
       }
     } else {
       module.exports.rotateLeft(state, curSlot, dist);
@@ -173,9 +173,9 @@ exports.doMove = ((state) => {
     assertIntegrity(state);
   }
   if (_debug) {
-    console.debug('slots now:')
+    console.debug('slots now:');
     console.dir(state.slots);
-    console.debug('slotIndex now:')
+    console.debug('slotIndex now:');
     console.dir(state.slotIndex);
     console.debug('--');
   }
@@ -200,9 +200,9 @@ exports.coordinates = ((state) => {
   }
   const currentNumbers = module.exports.currentNumbers(state);
   if (_debug) {
-    console.debug('slots now:')
+    console.debug('slots now:');
     console.dir(state.slots);
-    console.debug('slotIndex now:')
+    console.debug('slotIndex now:');
     console.dir(state.slotIndex);
   }
   const zeroIndex = state.numbers.indexOf(0);
