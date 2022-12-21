@@ -228,6 +228,6 @@ exports.coordinates = ((state) => {
   return coords;
 });
 
-exports.keyTransform = ((numbers, key) => {
-  return numbers.map((n) => n * key);
+exports.keyTransform = ((numbers) => {
+  return numbers.map((n) => n * 811589153);
 });
