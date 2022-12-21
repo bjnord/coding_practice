@@ -11,7 +11,7 @@ console.log(`part 1: number that root monkey yells:  ${monkeyNumbers['root']}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
+const answer2 = yell.humanYell(monkeys, monkeyNumbers);
 console.log('part 2: expected answer:                1');
 console.log(`part 2: actual answer:                  ${answer2}`);
 console.log('');
