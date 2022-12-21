@@ -22,7 +22,10 @@ exports.parse = (input) => {
  *   Returns a monkey.
  */
 exports.parseLine = (line) => {
-  const kj = line.split(': ');
+  const kj = line.trim().split(': ');
+  if (kj.length !== 2) {
+    throw new SyntaxError(`invalid line [${line}]`);
+  }
   const monkey = {name: kj[0]};
   const job = kj[1].split(' ');
   if (job.length === 1) {
@@ -40,6 +43,7 @@ exports.parseLine = (line) => {
 exports.monkeyNumbers = ((monkeys) => {
   const monkeyNumbers = monkeys.reduce((h, monkey) => {
     if (monkey.number !== undefined) {
+      /* istanbul ignore next */
       if (_debug) {
         console.debug(`monkey ${monkey.name} immediately yells ${monkey.number}`);
       }
@@ -70,6 +74,7 @@ exports.monkeyNumbers = ((monkeys) => {
             throw new SyntaxError(`unknown op ${monkey.op}`);
           }
           monkey.number = number;
+          /* istanbul ignore next */
           if (_debug) {
             console.debug(`monkey ${monkey.name} can now yell ${monkey.number}`);
           }
@@ -108,6 +113,7 @@ exports.humanYell = ((monkeys) => {
   if (!root || (root.number === undefined)) {
     throw new SyntaxError('must call monkeyNumbers() first');
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.debug('parentOfName:');
     console.dir(parentOfName);
@@ -119,16 +125,19 @@ exports.humanYell = ((monkeys) => {
   for (let n = 'humn', m = parentOfName[n]; m; n = m.name, m = parentOfName[n]) {
     // m is "the monkey with n as one of its arguments"
     if (m.arg1 === n) {
+      /* istanbul ignore next */
       if (_debug) {
         console.debug(`${n} ${m.op} ${monkeyOfName[m.arg2].number}`);
       }
       jobStack.push({op: m.op, arg: monkeyOfName[m.arg2].number});
     } else if (m.arg2 === n) {
+      /* istanbul ignore next */
       if (_debug) {
         console.debug(`${monkeyOfName[m.arg1].number} ${m.op} ${n}`);
       }
       jobStack.push({op: m.op, arg: monkeyOfName[m.arg1].number, commute: true});
     } else {
+      /* istanbul ignore next */
       throw new SyntaxError(`n ${n} not found as arg of ${m.name}`);
     }
     if (parentOfName[m.name].name === 'root') {
@@ -136,6 +145,7 @@ exports.humanYell = ((monkeys) => {
       break;
     }
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.debug('humanBranch:');
     console.dir(humanBranch);
@@ -148,8 +158,10 @@ exports.humanYell = ((monkeys) => {
   } else if (root.arg2 === humanBranch.name) {
     rootValue = monkeyOfName[root.arg1].number;
   } else {
+    /* istanbul ignore next */
     throw new SyntaxError("can't determine rootValue");
   }
+  /* istanbul ignore next */
   if (_debug) {
     console.debug(`rootValue=${rootValue}`);
   }
@@ -188,8 +200,11 @@ exports.humanYell = ((monkeys) => {
       }
       break;
     default:
+      /* (this one is caught by prior `monkeyNumbers()` call) */
+      /* istanbul ignore next */
       throw new SyntaxError(`unknown job.op ${job.op}`);
     }
+    /* istanbul ignore next */
     if (_debug) {
       console.debug(`oldValue=${oldValue} op=${job.op} arg=${job.arg} yellValue=${yellValue}`);
     }
