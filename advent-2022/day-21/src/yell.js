@@ -54,20 +54,20 @@ exports.monkeyNumbers = ((monkeys) => {
         if ((monkeyNumbers[monkey.arg1] !== undefined) && (monkeyNumbers[monkey.arg2] !== undefined)) {
           let number;
           switch (monkey.op) {
-            case '+':
-              number = monkeyNumbers[monkey.arg1] + monkeyNumbers[monkey.arg2];
-              break;
-            case '-':
-              number = monkeyNumbers[monkey.arg1] - monkeyNumbers[monkey.arg2];
-              break;
-            case '*':
-              number = monkeyNumbers[monkey.arg1] * monkeyNumbers[monkey.arg2];
-              break;
-            case '/':
-              number = monkeyNumbers[monkey.arg1] / monkeyNumbers[monkey.arg2];
-              break;
-            default:
-              throw new SyntaxError(`unknown op ${monkey.op}`);
+          case '+':
+            number = monkeyNumbers[monkey.arg1] + monkeyNumbers[monkey.arg2];
+            break;
+          case '-':
+            number = monkeyNumbers[monkey.arg1] - monkeyNumbers[monkey.arg2];
+            break;
+          case '*':
+            number = monkeyNumbers[monkey.arg1] * monkeyNumbers[monkey.arg2];
+            break;
+          case '/':
+            number = monkeyNumbers[monkey.arg1] / monkeyNumbers[monkey.arg2];
+            break;
+          default:
+            throw new SyntaxError(`unknown op ${monkey.op}`);
           }
           monkey.number = number;
           if (_debug) {
@@ -111,7 +111,7 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
     console.dir(monkeyOfName);
   }
   let humanBranch;
-  let jobStack = [];
+  const jobStack = [];
   for (let n = 'humn', m = parentOfName[n]; m; n = m.name, m = parentOfName[n]) {
     // m is "the monkey with n as one of its arguments"
     if (m.arg1 === n) {
@@ -127,7 +127,7 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
     } else {
       throw new SyntaxError(`n ${n} not found as arg of ${m.name}`);
     }
-    if (parentOfName[m.name].name == 'root') {
+    if (parentOfName[m.name].name === 'root') {
       humanBranch = m;
       break;
     }
@@ -156,36 +156,36 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
     const oldValue = yellValue;
     // we do the inverse
     switch (job.op) {
-      case '+':
-        // (n + 3) - 3 = n
-        // (3 + n) - 3 = n
-        yellValue = mathjs.subtract(yellValue, job.arg);
-        break;
-      case '-':
-        if (job.commute) {
-          // -((3 - n) - 3) = n
-          yellValue = mathjs.unaryMinus(mathjs.subtract(yellValue, job.arg));
-        } else {
-          // (n - 3) + 3 = n
-          yellValue = mathjs.add(yellValue, job.arg);
-        }
-        break;
-      case '*':
-        // (n * 3) / 3 = n
-        // (3 * n) / 3 = n
-        yellValue = mathjs.divide(yellValue, job.arg);
-        break;
-      case '/':
-        if (job.commute) {
-          // reciprocal(3 / n) * 3 = n
-          yellValue = mathjs.multiply(reciprocal(yellValue), job.arg);
-        } else {
-          // (n / 3) * 3 = n
-          yellValue = mathjs.multiply(yellValue, job.arg);
-        }
-        break;
-      default:
-        throw new SyntaxError(`unknown job.op ${job.op}`);
+    case '+':
+      // (n + 3) - 3 = n
+      // (3 + n) - 3 = n
+      yellValue = mathjs.subtract(yellValue, job.arg);
+      break;
+    case '-':
+      if (job.commute) {
+        // -((3 - n) - 3) = n
+        yellValue = mathjs.unaryMinus(mathjs.subtract(yellValue, job.arg));
+      } else {
+        // (n - 3) + 3 = n
+        yellValue = mathjs.add(yellValue, job.arg);
+      }
+      break;
+    case '*':
+      // (n * 3) / 3 = n
+      // (3 * n) / 3 = n
+      yellValue = mathjs.divide(yellValue, job.arg);
+      break;
+    case '/':
+      if (job.commute) {
+        // reciprocal(3 / n) * 3 = n
+        yellValue = mathjs.multiply(reciprocal(yellValue), job.arg);
+      } else {
+        // (n / 3) * 3 = n
+        yellValue = mathjs.multiply(yellValue, job.arg);
+      }
+      break;
+    default:
+      throw new SyntaxError(`unknown job.op ${job.op}`);
     }
     if (_debug) {
       console.debug(`oldValue=${oldValue} op=${job.op} arg=${job.arg} yellValue=${yellValue}`);
