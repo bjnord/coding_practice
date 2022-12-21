@@ -21,6 +21,7 @@ describe('parsing tests', () => {
 describe('yelling tests', () => {
   it('should calculate what the root monkey yells correctly', () => {
     const monkeys = yell.parse(exampleInput);
-    expect(yell.rootMonkeyNumber(monkeys)).to.equal(152);
+    const monkeyNumbers = yell.monkeyNumbers(monkeys);
+    expect(monkeyNumbers['root']).to.equal(152);
   });
 });
