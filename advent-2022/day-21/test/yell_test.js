@@ -29,6 +29,12 @@ describe('yelling tests', () => {
     yell.monkeyNumbers(monkeys);
     expect(yell.humanYell(monkeys)).to.equal(301);
   });
+  it('should calculate what the human yells correctly (root flip)', () => {
+    const flipInput = exampleInput.replace('root: pppw + sjmn', 'root: sjmn + pppw');
+    const monkeys = yell.parse(flipInput);
+    yell.monkeyNumbers(monkeys);
+    expect(yell.humanYell(monkeys)).to.equal(301);
+  });
   it('should throw exception if prereq function not called', () => {
     const monkeys = yell.parse(exampleInput);
     const noPrereqFn = () => { yell.humanYell(monkeys); };
