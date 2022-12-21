@@ -1,4 +1,5 @@
 'use strict';
+const _debug = false;
 /** @module yell */
 /**
  * Parse the puzzle input.
@@ -34,3 +35,50 @@ exports.parseLine = (line) => {
   }
   return monkey;
 };
+
+exports.rootMonkeyNumber = ((monkeys) => {
+  const monkeyNumber = monkeys.reduce((h, monkey) => {
+    if (monkey.number !== undefined) {
+      if (_debug) {
+        console.debug(`monkey ${monkey.name} immediately yells ${monkey.number}`);
+      }
+      h[monkey.name] = monkey.number;
+    }
+    return h;
+  }, {});
+  let monkeysLeft = monkeys.length - Object.keys(monkeyNumber).length;
+  while (monkeysLeft > 0) {
+    for (const monkey of monkeys) {
+      if (monkey.number === undefined) {
+        if ((monkeyNumber[monkey.arg1] !== undefined) && (monkeyNumber[monkey.arg2] !== undefined)) {
+          let number;
+          switch (monkey.op) {
+            case '+':
+              number = monkeyNumber[monkey.arg1] + monkeyNumber[monkey.arg2];
+              break;
+            case '-':
+              number = monkeyNumber[monkey.arg1] - monkeyNumber[monkey.arg2];
+              break;
+            case '*':
+              number = monkeyNumber[monkey.arg1] * monkeyNumber[monkey.arg2];
+              break;
+            case '/':
+              number = monkeyNumber[monkey.arg1] / monkeyNumber[monkey.arg2];
+              break;
+            default:
+              throw new SyntaxError(`unknown op ${monkey.op}`);
+          }
+          monkey.number = number;
+          if (_debug) {
+            console.debug(`monkey ${monkey.name} can now yell ${monkey.number}`);
+          }
+          monkeyNumber[monkey.name] = number;
+          monkeysLeft--;
+          if (monkey.name === 'root') {
+            return monkey.number;
+          }
+        }
+      }
+    }
+  }
+});
