@@ -146,7 +146,7 @@ exports.humanYell = ((monkeys) => {
   if (root.arg1 === humanBranch.name) {
     rootValue = monkeyOfName[root.arg2].number;
   } else if (root.arg2 === humanBranch.name) {
-    rootValue = monkeyOfName[root.arg2].number;
+    rootValue = monkeyOfName[root.arg1].number;
   } else {
     throw new SyntaxError("can't determine rootValue");
   }
