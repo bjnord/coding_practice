@@ -24,4 +24,9 @@ describe('yelling tests', () => {
     const monkeyNumbers = yell.monkeyNumbers(monkeys);
     expect(monkeyNumbers['root']).to.equal(152);
   });
+  it('should calculate what the human yells correctly', () => {
+    const monkeys = yell.parse(exampleInput);
+    const monkeyNumbers = yell.monkeyNumbers(monkeys);
+    expect(yell.humanYell(monkeys, monkeyNumbers)).to.equal(301);
+  });
 });
