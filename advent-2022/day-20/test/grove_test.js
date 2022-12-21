@@ -266,7 +266,7 @@ describe('decrypting tests', () => {
 });
 describe('complex decrypting tests', () => {
   it('should execute each round correctly (puzzle example)', () => {
-    const numbers = grove.keyTransform(grove.parse(exampleInput), 811589153);
+    const numbers = grove.keyTransform(grove.parse(exampleInput));
     const state = grove.state(numbers);
     const expected = [
       // Initial arrangement:

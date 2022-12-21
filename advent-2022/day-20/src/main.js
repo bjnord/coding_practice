@@ -14,7 +14,7 @@ console.log(`part 1: sum of grove coordinates: ${answer1}`);
 console.log('');
 
 // PART 2
-const state2 = grove.state(grove.keyTransform(numbers, 811589153));
+const state2 = grove.state(grove.keyTransform(numbers));
 for (let i = 0; i < 10; i++) {
   grove.doMoves(state2);
 }
