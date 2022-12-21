@@ -1,5 +1,7 @@
 # Day 4 Visualizations
 
+> **NOTE** Visualizations are often **spoilers** by their very nature.
+
 ## Visualizations
 
 1. "Mount of wasted effort" by [Reddit user nbardiuk](https://www.reddit.com/user/nbardiuk)

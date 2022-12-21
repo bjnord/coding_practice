@@ -1,5 +1,7 @@
 # Day 2 Visualizations
 
+> **NOTE** Visualizations are often **spoilers** by their very nature.
+
 ## Visualizations
 
 1. Bitwig modular synth by [Reddit user Iain\_M\_Norman](https://www.reddit.com/user/Iain_M_Norman)

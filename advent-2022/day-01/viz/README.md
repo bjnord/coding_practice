@@ -1,5 +1,7 @@
 # Day 1 Visualizations
 
+> **NOTE** Visualizations are often **spoilers** by their very nature.
+
 ## Comics
 
 [Advent of Code comics](https://www.webtoons.com/en/challenge/advent-of-code/list?title_no=713188)
