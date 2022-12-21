@@ -1,0 +1,23 @@
+nice: 6
+earl: dark / sour
+chip: tofu * rice
+pure: 3
+root: tree * chip
+tofu: 3
+dams: 3
+grey: 5377482938105
+corn: 31
+cane: earl - cake
+ruby: 7
+humn: 69
+cake: nice * ruby
+bars: 77
+rice: dams * pure
+dark: 53900
+lone: 5377482938110
+milk: humn + corn
+sour: bars * pies
+tree: bell - cane
+pink: lone - grey
+bell: 55
+pies: milk / pink
