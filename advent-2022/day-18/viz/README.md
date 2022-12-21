@@ -6,6 +6,7 @@
 
 1. trapped air GIF by [Reddit user Ok-Curve902](https://www.reddit.com/user/Ok-Curve902)
    ([permalink](https://www.reddit.com/r/adventofcode/comments/zow3f3/2022_day_18_part_2_trapped_air/)):
+
    ![GIF](bdj502931n6a1.gif)
 
 1. plane slices by [Reddit user nbardiuk](https://www.reddit.com/user/nbardiuk)
@@ -18,7 +19,7 @@
 
 1. color-coded by [Reddit user seligman99](https://www.reddit.com/user/seligman99)
    ([permalink](https://www.reddit.com/r/adventofcode/comments/zosde3/2022_day_18_part_2_visualizing_the_lava_drop/)):
-   [Reddit video](https://imgur.com/a/e0rbktk)
+   [Imgur video](https://imgur.com/a/e0rbktk)
 
 1. very pretty Blender by [Reddit user CrazyA99](https://www.reddit.com/user/CrazyA99)
    ([permalink](https://www.reddit.com/r/adventofcode/comments/zpj74r/2022_day_18_yet_another_animated_blender_render/)):
@@ -39,4 +40,5 @@ by [Fish N Chips UK](https://www.webtoons.com/en/creator/69q8f)
 
 1. 3D printed droplet by [Reddit user jstanley0\_](https://www.reddit.com/user/jstanley0_)
    ([permalink](https://www.reddit.com/r/adventofcode/comments/zp71cd/2022_day_18_3d_printed_obsidian_chunk/)):
+
    ![JPG](uoqdnc9h8r6a1.jpg)
