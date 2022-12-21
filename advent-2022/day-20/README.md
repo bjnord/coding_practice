@@ -155,3 +155,15 @@ the 3000th is `-1623178306`; adding these together produces
 
 Apply the decryption key and mix your encrypted file ten times. *What is
 the sum of the three numbers that form the grove coordinates?*
+
+Your puzzle answer was `1595584274798`.
+
+### Part Two Design
+
+> **Spoilers ahead!**
+
+There is **another gotcha with problems of this type**: When you move a slot once or more around the circle, your modulo has to be **one less** because you don't count the one being moved. As [Reddit user Greenimba](https://www.reddit.com/user/Greenimba) says:
+
+> You're not looking at "elements in a list", you're looking at "_spaces between_ all the other elements in the list". The current element shouldn't be a part of the list of spaces, so you get n - 1 possible spaces for it to be.
+
+[This example](https://www.reddit.com/r/adventofcode/comments/zr29qd/2022_day_20_part_1_python_hidden_edge_case/j119tzk/) by [Reddit user 1234abcdcba4321](https://www.reddit.com/user/1234abcdcba4321) helped me figure it out, eventually.
