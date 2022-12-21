@@ -143,8 +143,9 @@ exports.doMove = ((state) => {
     console.debug(`move i=${state.curIndex}: moving ${curNumber} currently in slot=${curSlot}`);
   }
 
+  const dist = math.mod(curNumber, state.count - 1);
   // no move
-  if (math.mod(curNumber, state.count - 1) === 0) {
+  if (dist === 0) {
     /* istanbul ignore next */
     if (_debug) {
       console.debug('  no move');
@@ -152,13 +153,10 @@ exports.doMove = ((state) => {
   }
   // move left
   else if (curNumber < 0) {
-    let dist = math.mod(curNumber, state.count - 1);
-    dist -= (state.count - 1);
-    module.exports.rotateRight(state, curSlot, dist);
+    module.exports.rotateRight(state, curSlot, dist - (state.count - 1));
   }
   // move right
   else {
-    const dist = math.mod(curNumber, state.count - 1);
     module.exports.rotateLeft(state, curSlot, dist);
   }
 
