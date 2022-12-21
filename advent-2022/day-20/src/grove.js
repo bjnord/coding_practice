@@ -227,3 +227,7 @@ exports.coordinates = ((state) => {
   }
   return coords;
 });
+
+exports.keyTransform = ((numbers, key) => {
+  return numbers.map((n) => n * key);
+});

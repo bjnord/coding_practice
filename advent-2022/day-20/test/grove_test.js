@@ -264,3 +264,39 @@ describe('decrypting tests', () => {
     expect(actual).to.eql(expected);
   });
 });
+describe('complex decrypting tests', () => {
+  it('should execute each round correctly (puzzle example)', () => {
+    const numbers = grove.keyTransform(grove.parse(exampleInput), 811589153);
+    const state = grove.state(numbers);
+    const expected = [
+      // Initial arrangement:
+      [811589153, 1623178306, -2434767459, 2434767459, -1623178306, 0, 3246356612],
+      // After 1 round of mixing:
+      [0, -2434767459, 3246356612, -1623178306, 2434767459, 1623178306, 811589153],
+      // After 2 rounds of mixing:
+      [0, 2434767459, 1623178306, 3246356612, -2434767459, -1623178306, 811589153],
+      // After 3 rounds of mixing:
+      [0, 811589153, 2434767459, 3246356612, 1623178306, -1623178306, -2434767459],
+      // After 4 rounds of mixing:
+      [0, 1623178306, -2434767459, 811589153, 2434767459, 3246356612, -1623178306],
+      // After 5 rounds of mixing:
+      [0, 811589153, -1623178306, 1623178306, -2434767459, 3246356612, 2434767459],
+      // After 6 rounds of mixing:
+      [0, 811589153, -1623178306, 3246356612, -2434767459, 1623178306, 2434767459],
+      // After 7 rounds of mixing:
+      [0, -2434767459, 2434767459, 1623178306, -1623178306, 811589153, 3246356612],
+      // After 8 rounds of mixing:
+      [0, 1623178306, 3246356612, 811589153, -2434767459, 2434767459, -1623178306],
+      // After 9 rounds of mixing:
+      [0, 811589153, 1623178306, -2434767459, 3246356612, 2434767459, -1623178306],
+      // After 10 rounds of mixing:
+      [0, -2434767459, 1623178306, 3246356612, -1623178306, 2434767459, 811589153],
+    ];
+    const exp0 = expected.shift();
+    expect(grove.currentNumbers(state)).to.eql(exp0);
+    for (const expectedNumbers of expected) {
+      grove.doMoves(state);
+      assertRotatedEq(state, expectedNumbers);
+    }
+  });
+});
