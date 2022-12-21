@@ -179,7 +179,7 @@ exports.doMove = ((state) => {
     console.dir(state.slotIndex);
     console.debug('--');
   }
-  if (++state.curIndex > state.count) {
+  if (++state.curIndex >= state.count) {
     state.curIndex = 0;
   }
 });
@@ -191,7 +191,7 @@ exports.doMoves = ((state) => {
 });
 
 exports.coordinates = ((state) => {
-  if (state.curIndex < state.count) {
+  if (state.curIndex !== 0) {
     throw new SyntaxError('not all moves made');
   }
   if (_debug) {
