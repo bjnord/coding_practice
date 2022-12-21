@@ -1,6 +1,6 @@
 # Day 18 Visualizations
 
-> **NOTE** Visualizations are often **spoilers** by their very nature.
+> **NOTE:** Visualizations are often **spoilers** by their very nature.
 
 ## Visualizations
 
