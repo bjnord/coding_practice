@@ -34,7 +34,7 @@ class Volcano
           valve.tunnelNames().map((tunnelName) => {
             return this._tunnelPath(valve.name(), tunnelName);
           }),
-        ]
+        ];
       })
       .reduce((h, pathPair) => {
         h[pathPair[0]] = pathPair[1];
