@@ -22,17 +22,17 @@ exports.parse = (input) => {
  *   Returns a monkey.
  */
 exports.parseLine = (line) => {
-  const kv = line.split(': ');
-  const monkey = {name: kv[0]};
-  const op = kv[1].split(' ');
-  if (op.length === 1) {
-    monkey['number'] = parseInt(op[0]);
-  } else if (op.length === 3) {
-    monkey['arg1'] = op[0];
-    monkey['op'] = op[1];
-    monkey['arg2'] = op[2];
+  const kj = line.split(': ');
+  const monkey = {name: kj[0]};
+  const job = kj[1].split(' ');
+  if (job.length === 1) {
+    monkey['number'] = parseInt(job[0]);
+  } else if (job.length === 3) {
+    monkey['arg1'] = job[0];
+    monkey['op'] = job[1];
+    monkey['arg2'] = job[2];
   } else {
-    throw new SyntaxError(`invalid line value [${kv[1]}]`);
+    throw new SyntaxError(`invalid line value [${kj[1]}]`);
   }
   return monkey;
 };
@@ -111,19 +111,19 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
     console.dir(monkeyOfName);
   }
   let humanBranch;
-  let opStack = [];
+  let jobStack = [];
   for (let n = 'humn', m = parentOfName[n]; m; n = m.name, m = parentOfName[n]) {
     // m is "the monkey with n as one of its arguments"
     if (m.arg1 === n) {
       if (_debug) {
         console.debug(`${n} ${m.op} ${monkeyOfName[m.arg2].number}`);
       }
-      opStack.push({op: m.op, arg: monkeyOfName[m.arg2].number});
+      jobStack.push({op: m.op, arg: monkeyOfName[m.arg2].number});
     } else if (m.arg2 === n) {
       if (_debug) {
         console.debug(`${monkeyOfName[m.arg1].number} ${m.op} ${n}`);
       }
-      opStack.push({op: m.op, arg: monkeyOfName[m.arg1].number, commute: true});
+      jobStack.push({op: m.op, arg: monkeyOfName[m.arg1].number, commute: true});
     } else {
       throw new SyntaxError(`n ${n} not found as arg of ${m.name}`);
     }
@@ -135,8 +135,8 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
   if (_debug) {
     console.debug('humanBranch:');
     console.dir(humanBranch);
-    console.debug('opStack:');
-    console.dir(opStack);
+    console.debug('jobStack:');
+    console.dir(jobStack);
   }
   const root = monkeyOfName['root'];
   let rootValue;
@@ -151,44 +151,44 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
     console.debug(`rootValue=${rootValue}`);
   }
   let yellValue = mathjs.fraction(rootValue, 1);
-  while (opStack.length > 0) {
-    const op = opStack.pop();
+  while (jobStack.length > 0) {
+    const job = jobStack.pop();
     const oldValue = yellValue;
     // we do the inverse
-    switch (op.op) {
+    switch (job.op) {
       case '+':
         // (n + 3) - 3 = n
         // (3 + n) - 3 = n
-        yellValue = mathjs.subtract(yellValue, op.arg);
+        yellValue = mathjs.subtract(yellValue, job.arg);
         break;
       case '-':
-        if (op.commute) {
+        if (job.commute) {
           // -((3 - n) - 3) = n
-          yellValue = mathjs.unaryMinus(mathjs.subtract(yellValue, op.arg));
+          yellValue = mathjs.unaryMinus(mathjs.subtract(yellValue, job.arg));
         } else {
           // (n - 3) + 3 = n
-          yellValue = mathjs.add(yellValue, op.arg);
+          yellValue = mathjs.add(yellValue, job.arg);
         }
         break;
       case '*':
         // (n * 3) / 3 = n
         // (3 * n) / 3 = n
-        yellValue = mathjs.divide(yellValue, op.arg);
+        yellValue = mathjs.divide(yellValue, job.arg);
         break;
       case '/':
-        if (op.commute) {
+        if (job.commute) {
           // reciprocal(3 / n) * 3 = n
-          yellValue = mathjs.multiply(reciprocal(yellValue), op.arg);
+          yellValue = mathjs.multiply(reciprocal(yellValue), job.arg);
         } else {
           // (n / 3) * 3 = n
-          yellValue = mathjs.multiply(yellValue, op.arg);
+          yellValue = mathjs.multiply(yellValue, job.arg);
         }
         break;
       default:
-        throw new SyntaxError(`unknown op.op ${op.op}`);
+        throw new SyntaxError(`unknown job.op ${job.op}`);
     }
     if (_debug) {
-      console.debug(`oldValue=${oldValue} op=${op.op} arg=${op.arg} yellValue=${yellValue}`);
+      console.debug(`oldValue=${oldValue} op=${job.op} arg=${job.arg} yellValue=${yellValue}`);
     }
   }
   return mathjs.number(yellValue);
