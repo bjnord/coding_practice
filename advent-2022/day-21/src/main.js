@@ -12,6 +12,6 @@ console.log('');
 
 // PART 2
 const answer2 = yell.humanYell(monkeys, monkeyNumbers);
-console.log('part 2: expected answer:                1');
+console.log('part 2: expected answer:                3378273370680');
 console.log(`part 2: actual answer:                  ${answer2}`);
 console.log('');

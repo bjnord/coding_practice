@@ -1,4 +1,5 @@
 'use strict';
+const mathjs = require('mathjs');
 const _debug = false;
 /** @module yell */
 /**
@@ -81,6 +82,18 @@ exports.monkeyNumbers = ((monkeys) => {
   return monkeyNumbers;
 });
 
+// TODO double-check that mathjs doesn't have a way to do this?
+const reciprocal = ((n) => {
+  const pair = mathjs.format(n).split('/').map((d) => parseInt(d));
+  if (pair.length === 1) {
+    return mathjs.fraction(1, pair[0]);
+  } else if (pair.length === 2) {
+    return mathjs.fraction(pair[1], pair[0]);
+  } else {
+    return undefined;
+  }
+});
+
 exports.humanYell = ((monkeys, monkeyNumbers) => {
   const parentOfName = {};
   const monkeyOfName = {};
@@ -102,18 +115,15 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
   for (let n = 'humn', m = parentOfName[n]; m; n = m.name, m = parentOfName[n]) {
     // m is "the monkey with n as one of its arguments"
     if (m.arg1 === n) {
+      if (_debug) {
+        console.debug(`${n} ${m.op} ${monkeyOfName[m.arg2].number}`);
+      }
       opStack.push({op: m.op, arg: monkeyOfName[m.arg2].number});
     } else if (m.arg2 === n) {
-      const arg = monkeyOfName[m.arg1].number;
-      if (m.op === '-') {
-        // n - 4  =  n + (-4)
-        opStack.push({op: '+', arg: -arg});
-      } else if (m.op === '/') {
-        // n / 4  =  n * (1 / 4)
-        opStack.push({op: '*', arg: 1 / arg});
-      } else {
-        opStack.push({op: m.op, arg});
+      if (_debug) {
+        console.debug(`${monkeyOfName[m.arg1].number} ${m.op} ${n}`);
       }
+      opStack.push({op: m.op, arg: monkeyOfName[m.arg1].number, commute: true});
     } else {
       throw new SyntaxError(`n ${n} not found as arg of ${m.name}`);
     }
@@ -140,29 +150,46 @@ exports.humanYell = ((monkeys, monkeyNumbers) => {
   if (_debug) {
     console.debug(`rootValue=${rootValue}`);
   }
+  let yellValue = mathjs.fraction(rootValue, 1);
   while (opStack.length > 0) {
     const op = opStack.pop();
-    const oldValue = rootValue;
+    const oldValue = yellValue;
     // we do the inverse
     switch (op.op) {
       case '+':
-        rootValue -= op.arg;
+        // (n + 3) - 3 = n
+        // (3 + n) - 3 = n
+        yellValue = mathjs.subtract(yellValue, op.arg);
         break;
       case '-':
-        rootValue += op.arg;
+        if (op.commute) {
+          // -((3 - n) - 3) = n
+          yellValue = mathjs.unaryMinus(mathjs.subtract(yellValue, op.arg));
+        } else {
+          // (n - 3) + 3 = n
+          yellValue = mathjs.add(yellValue, op.arg);
+        }
         break;
       case '*':
-        rootValue /= op.arg;
+        // (n * 3) / 3 = n
+        // (3 * n) / 3 = n
+        yellValue = mathjs.divide(yellValue, op.arg);
         break;
       case '/':
-        rootValue *= op.arg;
+        if (op.commute) {
+          // reciprocal(3 / n) * 3 = n
+          yellValue = mathjs.multiply(reciprocal(yellValue), op.arg);
+        } else {
+          // (n / 3) * 3 = n
+          yellValue = mathjs.multiply(yellValue, op.arg);
+        }
         break;
       default:
         throw new SyntaxError(`unknown op.op ${op.op}`);
     }
     if (_debug) {
-      console.debug(`oldValue=${oldValue} op=${op.op} arg=${op.arg} rootValue=${rootValue}`);
+      console.debug(`oldValue=${oldValue} op=${op.op} arg=${op.arg} yellValue=${yellValue}`);
     }
   }
-  return rootValue;
+  return mathjs.number(yellValue);
 });
