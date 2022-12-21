@@ -64,7 +64,7 @@ describe('rotation tests', () => {
         slots:     [3, 4, 5, 6, 0, 1, 2],
         slotIndex: [],
         _fromSlot: 0,
-        _toSlot:   1,
+        _dist:     1,
         _newSlots: [4, 3, 5, 6, 0, 1, 2],
       },
       { // rotate at right edge
@@ -72,7 +72,7 @@ describe('rotation tests', () => {
         slots:     [2, 4, 6, 0, 1, 3, 5],
         slotIndex: [],
         _fromSlot: 5,
-        _toSlot:   6,
+        _dist:     1,
         _newSlots: [2, 4, 6, 0, 1, 5, 3],
       },
       { // rotate small in middle
@@ -80,7 +80,7 @@ describe('rotation tests', () => {
         slots:     [1, 4, 2, 5, 3, 6, 0],
         slotIndex: [],
         _fromSlot: 2,
-        _toSlot:   4,
+        _dist:     2,
         _newSlots: [1, 4, 5, 3, 2, 6, 0],
       },
       { // rotate big in middle
@@ -88,7 +88,7 @@ describe('rotation tests', () => {
         slots:     [5, 6, 0, 2, 1, 3, 4],
         slotIndex: [],
         _fromSlot: 1,
-        _toSlot:   5,
+        _dist:     4,
         _newSlots: [5, 0, 2, 1, 3, 6, 4],
       },
       { // rotate all
@@ -96,22 +96,38 @@ describe('rotation tests', () => {
         slots:     [6, 5, 4, 3, 2, 1, 0],
         slotIndex: [],
         _fromSlot: 0,
-        _toSlot:   6,
+        _dist:     6,
         _newSlots: [5, 4, 3, 2, 1, 0, 6],
+      },
+      { // rotate small across edge
+        count:     7,
+        slots:     [1, 4, 2, 5, 3, 6, 0],
+        slotIndex: [],
+        _fromSlot: 6,
+        _dist:     1,
+        _newSlots: [0, 4, 2, 5, 3, 6, 1],
+      },
+      { // rotate big across edge
+        count:     7,
+        slots:     [1, 4, 2, 5, 3, 6, 0],
+        slotIndex: [],
+        _fromSlot: 5,
+        _dist:     3,
+        _newSlots: [4, 6, 2, 5, 3, 0, 1],
       },
     ];
     for (const test of tests) {
-      grove.rotateLeft(test, test._fromSlot, test._toSlot);
+      grove.rotateLeft(test, test._fromSlot, test._dist);
       expect(test.slots).to.eql(test._newSlots);
     }
   });
   it('should throw exceptions for invalid left rotations', () => {
-    const badFromFn = () => { grove.rotateLeft({count: 5}, -1, 2); };
-    expect(badFromFn).to.throw(SyntaxError);
-    const badToFn = () => { grove.rotateLeft({count: 5}, 2, 5); };
-    expect(badToFn).to.throw(SyntaxError);
-    const badOrderFn = () => { grove.rotateLeft({count: 5}, 3, 2); };
-    expect(badOrderFn).to.throw(SyntaxError);
+    const badLowFn = () => { grove.rotateLeft({count: 5}, -1, 2); };
+    expect(badLowFn).to.throw(SyntaxError);
+    const badHighFn = () => { grove.rotateLeft({count: 5}, 7, 5); };
+    expect(badHighFn).to.throw(SyntaxError);
+    const badDistFn = () => { grove.rotateLeft({count: 5}, 0, -1); };
+    expect(badDistFn).to.throw(SyntaxError);
   });
   it('should do right rotations properly', () => {
     // TODO should also check slotIndex[] before/after
@@ -120,65 +136,71 @@ describe('rotation tests', () => {
         count:     7,
         slots:     [3, 4, 5, 6, 0, 1, 2],
         slotIndex: [],
-        _fromSlot: 0,
-        _toSlot:   1,
+        _fromSlot: 1,
+        _dist:     -1,
         _newSlots: [4, 3, 5, 6, 0, 1, 2],
       },
       { // rotate at right edge
         count:     7,
         slots:     [2, 4, 6, 0, 1, 3, 5],
         slotIndex: [],
-        _fromSlot: 5,
-        _toSlot:   6,
+        _fromSlot: 6,
+        _dist:     -1,
         _newSlots: [2, 4, 6, 0, 1, 5, 3],
       },
       { // rotate small in middle
         count:     7,
         slots:     [1, 4, 2, 5, 3, 6, 0],
         slotIndex: [],
-        _fromSlot: 2,
-        _toSlot:   4,
+        _fromSlot: 4,
+        _dist:     -2,
         _newSlots: [1, 4, 3, 2, 5, 6, 0],
       },
       { // rotate big in middle
         count:     7,
         slots:     [5, 6, 0, 2, 1, 3, 4],
         slotIndex: [],
-        _fromSlot: 1,
-        _toSlot:   5,
+        _fromSlot: 5,
+        _dist:     -4,
         _newSlots: [5, 3, 6, 0, 2, 1, 4],
       },
       { // rotate all
         count:     7,
         slots:     [6, 5, 4, 3, 2, 1, 0],
         slotIndex: [],
-        _fromSlot: 0,
-        _toSlot:   6,
+        _fromSlot: 6,
+        _dist:     -6,
         _newSlots: [0, 6, 5, 4, 3, 2, 1],
+      },
+      { // rotate small across edge
+        count:     7,
+        slots:     [1, 4, 2, 5, 3, 6, 0],
+        slotIndex: [],
+        _fromSlot: 0,
+        _dist:     -2,
+        _newSlots: [0, 4, 2, 5, 3, 1, 6],
+      },
+      { // rotate big across edge
+        count:     7,
+        slots:     [1, 4, 2, 5, 3, 6, 0],
+        slotIndex: [],
+        _fromSlot: 1,
+        _dist:     -4,
+        _newSlots: [0, 1, 2, 5, 4, 3, 6],
       },
     ];
     for (const test of tests) {
-      grove.rotateRight(test, test._fromSlot, test._toSlot);
+      grove.rotateRight(test, test._fromSlot, test._dist);
       expect(test.slots).to.eql(test._newSlots);
     }
   });
   it('should throw exceptions for invalid right rotations', () => {
-    const badFromFn = () => { grove.rotateRight({count: 5}, -1, 2); };
-    expect(badFromFn).to.throw(SyntaxError);
-    const badToFn = () => { grove.rotateRight({count: 5}, 2, 5); };
-    expect(badToFn).to.throw(SyntaxError);
-    const badOrderFn = () => { grove.rotateRight({count: 5}, 3, 2); };
-    expect(badOrderFn).to.throw(SyntaxError);
-  });
-  it('should calculate destSlot correctly', () => {
-    // these are the ones shown in the puzzle example:
-    expect(grove.destSlot(1, 0, 7)).to.equal(1);
-    expect(grove.destSlot(2, 0, 7)).to.equal(2);
-    expect(grove.destSlot(-3, 1, 7)).to.equal(4);
-    expect(grove.destSlot(3, 2, 7)).to.equal(5);
-    expect(grove.destSlot(-2, 2, 7)).to.equal(6);
-    expect(grove.destSlot(0, 3, 7)).to.equal(3);
-    expect(grove.destSlot(4, 5, 7)).to.equal(3);
+    const badLowFn = () => { grove.rotateRight({count: 5}, -1, 2); };
+    expect(badLowFn).to.throw(SyntaxError);
+    const badHighFn = () => { grove.rotateRight({count: 5}, 7, 5); };
+    expect(badHighFn).to.throw(SyntaxError);
+    const badDistFn = () => { grove.rotateLeft({count: 5}, 6, 1); };
+    expect(badDistFn).to.throw(SyntaxError);
   });
 });
 describe('decrypting tests', () => {
@@ -210,10 +232,35 @@ describe('decrypting tests', () => {
       assertRotatedEq(state, expectedNumbers);
     }
   });
+  it('should execute each move correctly (Reddit user hugseverycat example)', () => {
+    // h/t https://www.reddit.com/r/adventofcode/comments/zr29qd/2022_day_20_part_1_python_hidden_edge_case/j11bcdy/
+    const numbers = [0, -1, -1, 1];
+    const expected = [-1, 1, -1, 0];
+    const state = grove.state(numbers);
+    grove.doMoves(state);
+    assertRotatedEq(state, expected);
+  });
+  it('should execute each move correctly (Reddit user 1234abcdcba4321 example)', () => {
+    // h/t https://www.reddit.com/r/adventofcode/comments/zr29qd/2022_day_20_part_1_python_hidden_edge_case/j119tzk/
+    const numbers = [3, 1, 0];
+    const expected = [3, 1, 0];
+    const state = grove.state(numbers);
+    grove.doMoves(state);
+    assertRotatedEq(state, expected);
+  });
   it('should find grove coordinates correctly (puzzle example)', () => {
     const numbers = grove.parse(exampleInput);
     const state = grove.state(numbers);
     grove.doMoves(state);
     expect(grove.coordinates(state)).to.eql([4, -3, 2]);
+  });
+  it('should find grove coordinates correctly (Reddit user MouseyPounds example)', () => {
+    // h/t https://www.reddit.com/r/adventofcode/comments/zr29qd/2022_day_20_part_1_python_hidden_edge_case/j11d86z/
+    const numbers = [1, 2, -3, 3, -2, 0, 8];
+    const expected = 7;
+    const state = grove.state(numbers);
+    grove.doMoves(state);
+    const actual = grove.coordinates(state).reduce((sum, n) => sum + n, 0);
+    expect(actual).to.eql(expected);
   });
 });
