@@ -55,8 +55,9 @@ class BoardMapWalker
       return -1;
     case 180:
       return 1;
+    /* istanbul ignore next */
     default:
-      return 0;
+      throw new SyntaxError('_dy() for non-vertical direction');
     }
   }
   _vertStep()
@@ -79,8 +80,9 @@ class BoardMapWalker
       return -1;
     case 90:
       return 1;
+    /* istanbul ignore next */
     default:
-      return 0;
+      throw new SyntaxError('_dx() for non-horizontal direction');
     }
   }
   _horizStep()

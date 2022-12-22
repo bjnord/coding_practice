@@ -79,3 +79,20 @@ describe('BoardMap constructor tests', () => {
     expect(map.cellIsWall(12, 0), 'X wall 12,0').to.be.undefined;
   });
 });
+describe('BoardMap constructor tests (pathological)', () => {
+  it('should throw exception for invalid cell', () => {
+    const badCellsInput = '...\n.#.\n?.#\n';
+    const badCellsFn = () => { new BoardMap(badCellsInput); };
+    expect(badCellsFn).to.throw(SyntaxError);
+  });
+  it('should throw exception for horizontal discontinuity', () => {
+    const badHorizInput = '...   ...\n.#.   .#.\n...   ...\n';
+    const badHorizFn = () => { new BoardMap(badHorizInput); };
+    expect(badHorizFn).to.throw(SyntaxError);
+  });
+  it('should throw exception for horizontal discontinuity', () => {
+    const badVertInput = '...\n.#.\n...\n   \n   \n   \n...\n.#.\n...\n';
+    const badVertFn = () => { new BoardMap(badVertInput); };
+    expect(badVertFn).to.throw(SyntaxError);
+  });
+});

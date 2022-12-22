@@ -136,10 +136,10 @@ describe('BoardMapWalker movement tests', () => {
       }
     }
   });
-  it('should throw exception for invalid turn direction', () => {
+  it('should throw exception for invalid move distance', () => {
     const map = new BoardMap('.');
     const walker = new BoardMapWalker(map);
-    const badTurnFn = () => { walker.turn(45); };
-    expect(badTurnFn).to.throw(SyntaxError);
+    const badMoveFn = () => { walker.move(0); };
+    expect(badMoveFn).to.throw(SyntaxError);
   });
 });
