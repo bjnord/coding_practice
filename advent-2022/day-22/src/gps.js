@@ -18,6 +18,31 @@ exports.parse = (input) => {
     steps: module.exports.parseSteps(sections[1]),
   };
 };
+/*
+ * Parser state: Return initial state.
+ */
+const _initialState = (() => {
+  return {steps: [], n: 0};
+});
+/*
+ * Parser state: Accumuluate digit to value.
+ */
+const _accumulateDigit = ((state, ch) => {
+  state.n = state.n * 10 + (ch - '0');
+});
+/*
+ * Parser state: Push accumulated value as a "move" step.
+ */
+const _pushMove = ((state) => {
+  state.steps.push({move: state.n});
+  state.n = 0;
+});
+/*
+ * Parser state: Push character as a "turn" step.
+ */
+const _pushTurn = ((state, ch) => {
+  state.steps.push({turn: (ch === 'L') ? -90 : 90});
+});
 /**
  * Parse the steps line from the puzzle input.
  *
@@ -29,17 +54,15 @@ exports.parse = (input) => {
 exports.parseSteps = (line) => {
   return line.trim().concat('\n').split('').reduce((state, ch) => {
     if (ch === '\n') {
-      state.steps.push({move: state.n});
-      state.n = 0;
+      _pushMove(state);
     } else if ((ch >= '0') && (ch <= '9')) {
-      state.n = state.n * 10 + (ch - '0');
+      _accumulateDigit(state, ch);
     } else {
-      state.steps.push({move: state.n});
-      state.n = 0;
-      state.steps.push({turn: (ch === 'L') ? -90 : 90});
+      _pushMove(state);
+      _pushTurn(state, ch);
     }
     return state;
-  }, {steps: [], n: 0}).steps;
+  }, _initialState()).steps;
 };
 /**
  * Follow the steps in a set of notes.
