@@ -6,6 +6,7 @@ class BoardMapWalker
   constructor(map, debug)
   {
     this._map = map;
+    this._trail = this._map.clone();
     this._y = 0;
     this._x = map.rowRange(this._y)[0];
     this._dir = 90;
@@ -104,6 +105,7 @@ class BoardMapWalker
       throw new SyntaxError(`invalid move of ${dist} steps`);
     }
     for (let i = 0; i < dist; i++) {
+      this._trail._setCell(this._y, this._x, this.facingChar());
       if (math.mod(this._dir, 180) === 0) {
         this._vertStep();
       } else {
@@ -111,6 +113,10 @@ class BoardMapWalker
       }
     }
     return this.position();
+  }
+  trail()
+  {
+    return this._trail.render();
   }
   /*
    * (This method only used by unit tests.)

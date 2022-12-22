@@ -108,5 +108,11 @@ class BoardMap
     const eq = this._cellEquals(y, x, BOARD_MAP_VOID);
     return (eq === true) || (eq === undefined);
   }
+  render()
+  {
+    return this._cells.map((row) => {
+      return row.join('');
+    }).join('\n').concat('\n');
+  }
 }
 module.exports = BoardMap;
