@@ -3,11 +3,11 @@ const expect = require('chai').expect;
 const fs = require('fs');
 const BoardMap = require('../src/board_map');
 const BoardMapWalker = require('../src/board_map_walker');
-const exampleLines = fs.readFileSync('input/example.txt', 'utf8');
-const exampleInput = exampleLines.split('\n\n')[0];
+const exampleInput = fs.readFileSync('input/example.txt', 'utf8');
+const exampleMapInput = exampleInput.split('\n\n')[0];
 describe('BoardMapWalker constructor tests', () => {
   it('should get the correct initial state', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleMapInput);
     const walker = new BoardMapWalker(map);
     expect(walker.position(), 'walker position').to.eql({y: 0, x: 8});
     expect(walker.direction(), 'walker direction').to.eql(90);
@@ -57,7 +57,7 @@ describe('BoardMapWalker turning tests', () => {
 });
 describe('BoardMapWalker movement tests', () => {
   it('should calculate position correctly after moves', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleMapInput);
     const walker = new BoardMapWalker(map);
     const tests = [
       {turn: -90},
@@ -84,7 +84,7 @@ describe('BoardMapWalker movement tests', () => {
     }
   });
   it('should calculate position correctly after walls', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleMapInput);
     const walker = new BoardMapWalker(map);
     const tests = [
       {move: 2, newPos: {y: 0, x: 10}},
@@ -136,7 +136,7 @@ describe('BoardMapWalker movement tests', () => {
 });
 describe('BoardMapWalker teleportation tests', () => {
   it('should teleport+move correctly (AB example)', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleMapInput);
     const walker = new BoardMapWalker(map);
     walker._teleport(6, 11, 90);
     expect(walker.position(), 'teleport 6,11 > position').to.eql({y: 6, x: 11});
@@ -145,7 +145,7 @@ describe('BoardMapWalker teleportation tests', () => {
     expect(walker.position(), 'teleport 6,11 > post-move position').to.eql({y: 6, x: 0});
   });
   it('should teleport+move correctly (CD example)', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleMapInput);
     const walker = new BoardMapWalker(map);
     walker._teleport(7, 6, 180);
     expect(walker.position(), 'teleport 7,6 v position').to.eql({y: 7, x: 6});

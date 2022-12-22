@@ -2,12 +2,12 @@
 const expect = require('chai').expect;
 const fs = require('fs');
 const BoardMap = require('../src/board_map');
-const exampleLines = fs.readFileSync('input/example.txt', 'utf8');
-const exampleInput = exampleLines.split('\n\n')[0];
+const exmapleInput = fs.readFileSync('input/example.txt', 'utf8');
+const exampleMapInput = exmapleInput.split('\n\n')[0];
 describe('BoardMap constructor tests', () => {
   let map;
   before(() => {
-    map = new BoardMap(exampleInput);
+    map = new BoardMap(exampleMapInput);
   });
   it('should return correct column ranges', () => {
     expect(map.columnRange(0)).to.eql([4, 7]);
@@ -45,7 +45,7 @@ describe('BoardMap constructor tests', () => {
 describe('BoardMap cell tests', () => {
   let map;
   before(() => {
-    map = new BoardMap(exampleInput);
+    map = new BoardMap(exampleMapInput);
   });
   it('floor cell test should return correct values', () => {
     expect(map.cellIsFloor(0, 0), '! floor 0,0').to.be.false;
