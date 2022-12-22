@@ -54,3 +54,38 @@ describe('BoardMapWalker turning tests', () => {
     expect(badTurnFn).to.throw(SyntaxError);
   });
 });
+describe('BoardMapWalker movement tests', () => {
+  it('should calculate position correctly after moves', () => {
+    const map = new BoardMap(exampleInput);
+    const walker = new BoardMapWalker(map);
+    const tests = [
+      {turn: -90},
+      {move: 1, newPos: {y: 11, x: 8}},
+      {move: 5, newPos: {y: 6, x: 8}},
+      {turn: 90},
+      {move: 3, newPos: {y: 6, x: 11}},  // A
+      {move: 1, newPos: {y: 6, x: 0}},   // B
+      {turn: 90},
+      {move: 1, newPos: {y: 7, x: 0}},
+      {turn: -90},
+      {move: 5, newPos: {y: 7, x: 5}},   // C
+      {turn: 90},
+      {move: 1, newPos: {y: 4, x: 5}},   // D
+    ];
+    for (const test of tests) {
+      if (test.turn) {
+        walker.turn(test.turn);
+      } else {
+        const pos = walker.positionString();
+        expect(walker.move(test.move), `walker move ${test.move} from ${pos}`).to.eql(test.newPos);
+        expect(walker.position(), `walker newPos ${test.move} from ${pos}`).to.eql(test.newPos);
+      }
+    }
+  });
+  it('should throw exception for invalid turn direction', () => {
+    const map = new BoardMap('.');
+    const walker = new BoardMapWalker(map);
+    const badTurnFn = () => { walker.turn(45) };
+    expect(badTurnFn).to.throw(SyntaxError);
+  });
+});

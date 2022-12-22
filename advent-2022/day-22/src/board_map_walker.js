@@ -5,13 +5,19 @@ class BoardMapWalker
 {
   constructor(map, debug)
   {
+    this._map = map;
     this._y = 0;
     this._x = map.rowRange(this._y)[0];
     this._dir = 90;
+    this._debug = debug;
   }
   position()
   {
     return {y: this._y, x: this._x};
+  }
+  positionString()
+  {
+    return `${this._y},${this._x}`;
   }
   direction()
   {
@@ -29,6 +35,64 @@ class BoardMapWalker
       break;
     }
     return this._dir;
+  }
+  _dy()
+  {
+    switch (this._dir) {
+    case 0:
+      return -1;
+    case 180:
+      return 1;
+    default:
+      return 0;
+    }
+  }
+  _vertStep()
+  {
+    const range = this._map.columnRange(this._x);
+    const rangeLen = range[1] - range[0] + 1;
+    const newY = math.mod(this._y - range[0] + this._dy(), rangeLen) + range[0];
+    /* istanbul ignore next */
+    if (this._debug) {
+      console.debug(`_vertStep range=${range[0]}-${range[1]} rangeLen=${rangeLen} y=${this._y} newY=${newY}`);
+    }
+    this._y = newY;
+  }
+  _dx()
+  {
+    switch (this._dir) {
+    case 270:
+      return -1;
+    case 90:
+      return 1;
+    default:
+      return 0;
+    }
+  }
+  _horizStep()
+  {
+    const range = this._map.rowRange(this._y);
+    const rangeLen = range[1] - range[0] + 1;
+    const newX = math.mod(this._x - range[0] + this._dx(), rangeLen) + range[0];
+    /* istanbul ignore next */
+    if (this._debug) {
+      console.debug(`_horizStep range=${range[0]}-${range[1]} rangeLen=${rangeLen} x=${this._x} newX=${newX}`);
+    }
+    this._x = newX;
+  }
+  move(dist)
+  {
+    if (dist < 1) {
+      throw new SyntaxError(`invalid move of ${dist} steps`);
+    }
+    for (let i = 0; i < dist; i++) {
+      if (math.mod(this._dir, 180) === 0) {
+        this._vertStep();
+      } else {
+        this._horizStep();
+      }
+    }
+    return this.position();
   }
 }
 module.exports = BoardMapWalker;
