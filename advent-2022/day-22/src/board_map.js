@@ -17,7 +17,7 @@ class BoardMap
     input.split('\n').forEach((line, y) => {
       // important not to `trim()` here (need leading spaces)
       line.split('').forEach((ch, x) => {
-        if ((ch == BOARD_MAP_FLOOR) || (ch == BOARD_MAP_WALL)) {
+        if ((ch === BOARD_MAP_FLOOR) || (ch === BOARD_MAP_WALL)) {
           this._extendColumnRange(y, x);
           this._extendRowRange(y, x);
         } else if (ch !== BOARD_MAP_VOID) {
@@ -26,6 +26,7 @@ class BoardMap
         this._setCell(y, x, ch);
       });
     });
+    this._debug = debug;
   }
   _extendColumnRange(y, x)
   {

@@ -59,7 +59,7 @@ describe('BoardMapWalker turning tests', () => {
   it('should throw exception for invalid turn direction', () => {
     const map = new BoardMap('.');
     const walker = new BoardMapWalker(map);
-    const badTurnFn = () => { walker.turn(45) };
+    const badTurnFn = () => { walker.turn(45); };
     expect(badTurnFn).to.throw(SyntaxError);
   });
 });
@@ -138,7 +138,7 @@ describe('BoardMapWalker movement tests', () => {
   it('should throw exception for invalid turn direction', () => {
     const map = new BoardMap('.');
     const walker = new BoardMapWalker(map);
-    const badTurnFn = () => { walker.turn(45) };
+    const badTurnFn = () => { walker.turn(45); };
     expect(badTurnFn).to.throw(SyntaxError);
   });
 });

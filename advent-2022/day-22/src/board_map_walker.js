@@ -51,7 +51,6 @@ class BoardMapWalker
       break;
     default:
       throw new SyntaxError(`invalid turn of '${deg}' degrees`);
-      break;
     }
     return this._dir;
   }
