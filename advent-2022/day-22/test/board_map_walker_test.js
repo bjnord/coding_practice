@@ -27,12 +27,12 @@ describe('BoardMapWalker turning tests', () => {
     const map = new BoardMap('.');
     const walker = new BoardMapWalker(map);
     const tests = [
-      {way: -90, newDir: 0, facing: 3},
-      {way: -90, newDir: 270, facing: 2},
+      {way: -90, newDir: 0, facing: 3, facingChar: '^'},
+      {way: -90, newDir: 270, facing: 2, facingChar: '<'},
       {way: 90, newDir: 0},
       {way: -90, newDir: 270},
-      {way: -90, newDir: 180, facing: 1},
-      {way: -90, newDir: 90, facing: 0},
+      {way: -90, newDir: 180, facing: 1, facingChar: 'v'},
+      {way: -90, newDir: 90, facing: 0, facingChar: '>'},
       {way: -90, newDir: 0},
       {way: -90, newDir: 270},
       {way: 90, newDir: 0},
@@ -53,6 +53,7 @@ describe('BoardMapWalker turning tests', () => {
       expect(walker.direction(), `walker newDir ${test.way} from ${dir}`).to.equal(test.newDir);
       if (test.facing !== undefined) {
         expect(walker.facing(), `walker facing ${test.way} from ${dir}`).to.equal(test.facing);
+        expect(walker.facingChar(), `walker facing-char ${test.way} from ${dir}`).to.equal(test.facingChar);
       }
     }
   });

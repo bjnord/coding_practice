@@ -29,17 +29,11 @@ class BoardMapWalker
    */
   facing()
   {
-    // FIXME this can be one equation
-    switch (this._dir) {
-    case 0:
-      return 3;
-    case 90:
-      return 0;
-    case 180:
-      return 1;
-    case 270:
-      return 2;
-    };
+    return math.mod(this._dir - 90, 360) / 90;
+  }
+  facingChar()
+  {
+    return ['>', 'v', '<', '^'][this.facing()];
   }
   turn(deg)
   {
