@@ -101,3 +101,49 @@ describe('BoardMap constructor tests (pathological)', () => {
     expect(badVertFn).to.throw(SyntaxError);
   });
 });
+describe('BoardMap face tests', () => {
+  let map;
+  before(() => {
+    map = new BoardMap(exampleMapInput);
+  });
+  it('should get correct face values for positions (face 1)', () => {
+    expect(map._face({y: 0, x: 8})).to.equal(1);
+    expect(map._face({y: 3, x: 11})).to.equal(1);
+  });
+  it('should get correct face values for positions (face 2)', () => {
+    expect(map._face({y: 4, x: 0})).to.equal(2);
+    expect(map._face({y: 7, x: 3})).to.equal(2);
+  });
+  it('should get correct face values for positions (face 3)', () => {
+    expect(map._face({y: 4, x: 4})).to.equal(3);
+    expect(map._face({y: 7, x: 7})).to.equal(3);
+  });
+  it('should get correct face values for positions (face 4)', () => {
+    expect(map._face({y: 4, x: 8})).to.equal(4);
+    expect(map._face({y: 7, x: 11})).to.equal(4);
+  });
+  it('should get correct face values for positions (face 5)', () => {
+    expect(map._face({y: 8, x: 8})).to.equal(5);
+    expect(map._face({y: 11, x: 11})).to.equal(5);
+  });
+  it('should get correct face values for positions (face 6)', () => {
+    expect(map._face({y: 8, x: 12})).to.equal(6);
+    expect(map._face({y: 11, x: 15})).to.equal(6);
+  });
+  it('should get correct face values for positions (void)', () => {
+    expect(map._face({y: 0, x: 0})).to.be.undefined;
+    expect(map._face({y: 0, x: 7})).to.be.undefined;
+    expect(map._face({y: 0, x: 15})).to.be.undefined;
+    expect(map._face({y: 3, x: 12})).to.be.undefined;
+    expect(map._face({y: 7, x: 15})).to.be.undefined;
+    expect(map._face({y: 8, x: 0})).to.be.undefined;
+    expect(map._face({y: 11, x: 0})).to.be.undefined;
+    expect(map._face({y: 11, x: 7})).to.be.undefined;
+  });
+  it('should get correct face values for positions (invalid)', () => {
+    expect(map._face({y: -1, x: 0})).to.be.undefined;
+    expect(map._face({y: 0, x: -1})).to.be.undefined;
+    expect(map._face({y: 0, x: 16})).to.be.undefined;
+    expect(map._face({y: 12, x: 0})).to.be.undefined;
+  });
+});

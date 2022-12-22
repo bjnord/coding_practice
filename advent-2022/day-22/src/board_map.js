@@ -114,5 +114,92 @@ class BoardMap
       return row.join('');
     }).join('\n').concat('\n');
   }
+  /*
+   * The puzzle example has 4x4 faces aligned like this:
+   * ```
+   * +----+
+   * |  1 |
+   * |234 |
+   * |  56|
+   * +----+
+   * ```
+   */
+  _face4(pos)
+  {
+    if (pos.y < 0) {
+      return undefined;
+    } else if (pos.y < 4) {
+      if ((8 <= pos.x) && (pos.x < 12)) {
+        return 1;
+      }
+    } else if (pos.y < 8) {
+      if ((0 <= pos.x) && (pos.x < 4)) {
+        return 2;
+      } else if ((4 <= pos.x) && (pos.x < 8)) {
+        return 3;
+      } else if ((8 <= pos.x) && (pos.x < 12)) {
+        return 4;
+      }
+    } else if (pos.y < 12) {
+      if ((8 <= pos.x) && (pos.x < 12)) {
+        return 5;
+      } else if ((12 <= pos.x) && (pos.x < 16)) {
+        return 6;
+      }
+    }
+    return undefined;
+  }
+  /*
+   * My puzzle input has 50x50 faces aligned like this:
+   * ```
+   * +---+
+   * | 12|
+   * | 3 |
+   * |45 |
+   * |6  |
+   * +---+
+   * ```
+   */
+  _face50(pos)
+  {
+    if (pos.y < 0) {
+      return undefined;
+    } else if (pos.y < 50) {
+      if ((50 <= pos.x) && (pos.x < 100)) {
+        return 1;
+      } else if ((100 <= pos.x) && (pos.x < 150)) {
+        return 2;
+      }
+    } else if (pos.y < 100) {
+      if ((50 <= pos.x) && (pos.x < 100)) {
+        return 3;
+      }
+    } else if (pos.y < 150) {
+      if ((0 <= pos.x) && (pos.x < 50)) {
+        return 4;
+      } else if ((50 <= pos.x) && (pos.x < 100)) {
+        return 5;
+      }
+    } else if (pos.y < 200) {
+      if ((0 <= pos.x) && (pos.x < 50)) {
+        return 6;
+      }
+    }
+    return undefined;
+  }
+  /*
+   * NOTE: This is **not** a generalized cube-folding solution.
+   *       It only works for the example and my puzzle input.
+   */
+  _face(pos)
+  {
+    if (this._cells.length === 12) {
+      return this._face4(pos);
+    } else if (this._cells.length === 200) {
+      return this._face50(pos);
+    } else {
+      throw new SyntaxError('unsupported cube size');
+    }
+  }
 }
 module.exports = BoardMap;
