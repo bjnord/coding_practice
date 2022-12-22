@@ -14,6 +14,7 @@ class BoardMap
     this._initialize(debug);
     if (input) {
       this._parseInput(input);
+      this._buildEdgeFaces();
     }
   }
   _initialize(debug)
@@ -29,6 +30,7 @@ class BoardMap
     clone._rowRanges = this._rowRanges.map((range) => [...range]);
     clone._columnRanges = this._columnRanges.map((range) => [...range]);
     clone._cells = this._cells.map((row) => [...row]);
+    clone._edgeFaces = this._edgeFaces;  // OK by reference
     return clone;
   }
   _parseInput(input)
@@ -254,6 +256,68 @@ class BoardMap
     } else {
       throw new SyntaxError('_edge: unsupported cube size');
     }
+  }
+  _buildEdgeFaces()
+  {
+    this._edgeFaces = 'abcdefghijkm'.split('').reduce((h, e) => {
+      h[e] = [];
+      return h;
+    }, {});
+    if (this._cells.length === 12) {
+      for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 4; x++) {
+          const pos = {y: y * 4, x: x * 4};
+          if (this._face4(pos) === undefined) {
+            continue;
+          }
+          for (const axis of ['x', 'y']) {
+            for (const delta of [-1, 1]) {
+              const edge = this._edge4(pos, axis, delta);
+              if (this._debug) {
+                console.debug(`pos=${pos.y},${pos.x} face=${this._face4(pos)} axis=${axis} delta=${delta} found edge=${edge}`);
+              }
+              this._edgeFaces[edge].push(this._face4(pos));
+            }
+          }
+        }
+      }
+    } else if (this._cells.length === 200) {
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 3; x++) {
+          const pos = {y: y * 50, x: x * 50};
+          if (this._face50(pos) === undefined) {
+            continue;
+          }
+          for (const axis of ['x', 'y']) {
+            for (const delta of [-1, 1]) {
+              const edge = this._edge50(pos, axis, delta);
+              if (this._debug) {
+                console.debug(`pos=${pos.y},${pos.x} face=${this._face50(pos)} axis=${axis} delta=${delta} found edge=${edge}`);
+              }
+              this._edgeFaces[edge].push(this._face50(pos));
+            }
+          }
+        }
+      }
+    } else if (this._cells.length <= 4) {
+      // small/partial board maps used by some unit tests
+    } else {
+      throw new SyntaxError(`_buildEdgeFaces: unsupported cube size (rows=${this._cells.length})`);
+    }
+  }
+  _toFace(fromFace, edge)
+  {
+    const pair = this._edgeFaces[edge];
+    if (pair && (pair.length === 2)) {
+      if (pair[0] === fromFace) {
+        return pair[1];
+      } else if (pair[1] === fromFace) {
+        return pair[0];
+      } else {
+        throw new SyntaxError(`toFace(${fromFace}, ${edge}) not found in [${pair[0]}, ${pair[1]}]`);
+      }
+    }
+    throw new SyntaxError(`toFace(${fromFace}, ${edge}) not found`);
   }
 }
 module.exports = BoardMap;

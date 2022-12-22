@@ -156,8 +156,24 @@ describe('BoardMap edge tests', () => {
     expect(map._edge({y: 5, x: 11}, 'x', 1)).to.equal('f');
     expect(map._edge({y: 8, x: 14}, 'y', -1)).to.equal('f');
   });
-  it('should get correct face values for positions (face 2)', () => {
+  it('should get correct face values for positions (face 5/2)', () => {
     expect(map._edge({y: 11, x: 10}, 'y', 1)).to.equal('j');
     expect(map._edge({y: 7, x: 1}, 'y', 1)).to.equal('j');
+  });
+  it('should get correct to-face values (face 4/6)', () => {
+    expect(map._toFace(4, 'f')).to.equal(6);
+    expect(map._toFace(6, 'f')).to.equal(4);
+  });
+  it('should get correct to-face values (face 5/2)', () => {
+    expect(map._toFace(5, 'j')).to.equal(2);
+    expect(map._toFace(2, 'j')).to.equal(5);
+  });
+  it('should throw exception for invalid edge', () => {
+    const badEdgeFn = () => { map._toFace(1, 'q'); };
+    expect(badEdgeFn).to.throw(SyntaxError);
+  });
+  it('should throw exception for invalid fromFace', () => {
+    const badFromFaceFn = () => { map._toFace(1, 'f'); };
+    expect(badFromFaceFn).to.throw(SyntaxError);
   });
 });
