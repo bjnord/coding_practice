@@ -1,18 +1,9 @@
 'use strict';
 const expect = require('chai').expect;
+const fs = require('fs');
 const BoardMap = require('../src/board_map');
-const exampleInput = `        ...#
-        .#..
-        #...
-        ....
-...#.......#
-........#...
-..#....#....
-..........#.
-        ...#....
-        .....#..
-        .#......
-        ......#.`;
+const exampleLines = fs.readFileSync('input/example.txt', 'utf8');
+const exampleInput = exampleLines.split('\n\n')[0];
 describe('BoardMap constructor tests', () => {
   let map;
   before(() => {

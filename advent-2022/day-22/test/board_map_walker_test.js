@@ -1,20 +1,11 @@
 'use strict';
 const expect = require('chai').expect;
+const fs = require('fs');
 const gps = require('../src/gps');
 const BoardMap = require('../src/board_map');
 const BoardMapWalker = require('../src/board_map_walker');
-const exampleInput = `        ...#
-        .#..
-        #...
-        ....
-...#.......#
-........#...
-..#....#....
-..........#.
-        ...#....
-        .....#..
-        .#......
-        ......#.`;
+const exampleLines = fs.readFileSync('input/example.txt', 'utf8');
+const exampleInput = exampleLines.split('\n\n')[0];
 describe('BoardMapWalker constructor tests', () => {
   it('should get the correct initial state', () => {
     const map = new BoardMap(exampleInput);

@@ -1,20 +1,8 @@
 'use strict';
 const expect = require('chai').expect;
+const fs = require('fs');
 const gps = require('../src/gps');
-const exampleInput = `        ...#
-        .#..
-        #...
-        ....
-...#.......#
-........#...
-..#....#....
-..........#.
-        ...#....
-        .....#..
-        .#......
-        ......#.
-
-10R5L5R10L4R5L5`;
+const exampleInput = fs.readFileSync('input/example.txt', 'utf8');
 describe('parsing tests', () => {
   it('should parse steps correctly', () => {
     const expected = [
