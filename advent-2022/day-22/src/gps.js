@@ -1,4 +1,5 @@
 'use strict';
+const BoardMap = require('../src/board_map');
 /** @module gps */
 /**
  * Parse the puzzle input.
@@ -9,8 +10,10 @@
  *   Returns a set of notes.
  */
 exports.parse = (input) => {
-  const sections = input.trim().split(/\n\n/);
+  // important not to `trim()` here (need leading spaces)
+  const sections = input.split(/\n\n/);
   return {
+    map: new BoardMap(sections[0]),
     steps: module.exports.parseSteps(sections[1]),
   };
 };

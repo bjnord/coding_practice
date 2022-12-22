@@ -36,7 +36,7 @@ describe('parsing tests', () => {
   });
   it('should parse a whole input set correctly', () => {
     const notes = gps.parse(exampleInput);
-    expect(notes.steps.length).to.eql(13);
-    expect('TODO').to.eql('check dimensions of map');
+    expect(notes.steps.length).to.equal(13);
+    expect(notes.map.cellIsWall(1, 9)).to.be.true;
   });
 });
