@@ -42,6 +42,20 @@ describe('BoardMap constructor tests', () => {
     const badRowFn = () => { map.rowRange(12); };
     expect(badRowFn).to.throw(SyntaxError);
   });
+  it('should clone a board correctly', () => {
+    const clonedMap = map.clone();
+    expect(clonedMap.columnRange(1)).to.eql([4, 7]);
+    expect(clonedMap.rowRange(1)).to.eql([8, 11]);
+    expect(clonedMap.cellIsFloor(0, 8), 'floor 0,8').to.be.true;
+    expect(clonedMap.cellIsWall(0, 11), 'wall 0,11').to.be.true;
+    expect(clonedMap.cellIsVoid(1, 1), 'void 1,1').to.be.true;
+  });
+});
+describe('BoardMap cell tests', () => {
+  let map;
+  before(() => {
+    map = new BoardMap(exampleInput);
+  });
   it('floor cell test should return correct values', () => {
     expect(map.cellIsFloor(0, 0), '! floor 0,0').to.be.false;
     expect(map.cellIsFloor(0, 8), 'floor 0,8').to.be.true;

@@ -11,9 +11,28 @@ class BoardMap
 {
   constructor(input, debug)
   {
+    this._initialize(debug);
+    if (input) {
+      this._parseInput(input);
+    }
+  }
+  _initialize(debug)
+  {
     this._rowRanges = [];
     this._columnRanges = [];
     this._cells = [];
+    this._debug = debug;
+  }
+  clone()
+  {
+    const clone = new BoardMap(undefined, this._debug);
+    clone._rowRanges = this._rowRanges.map((range) => [...range]);
+    clone._columnRanges = this._columnRanges.map((range) => [...range]);
+    clone._cells = this._cells.map((row) => [...row]);
+    return clone;
+  }
+  _parseInput(input)
+  {
     input.split('\n').forEach((line, y) => {
       // important not to `trim()` here (need leading spaces)
       line.split('').forEach((ch, x) => {
@@ -26,7 +45,6 @@ class BoardMap
         this._setCell(y, x, ch);
       });
     });
-    this._debug = debug;
   }
   _extendColumnRange(y, x)
   {
