@@ -1,4 +1,5 @@
 'use strict';
+const math = require('../../shared/src/math');
 
 class BoardMapWalker
 {
@@ -14,6 +15,19 @@ class BoardMapWalker
   }
   direction()
   {
+    return this._dir;
+  }
+  turn(deg)
+  {
+    switch (deg) {
+    case -90:
+    case 90:
+      this._dir = math.mod(this._dir + deg, 360);
+      break;
+    default:
+      throw new SyntaxError(`invalid turn of '${deg}' degrees`);
+      break;
+    }
     return this._dir;
   }
 }

@@ -22,3 +22,35 @@ describe('BoardMapWalker constructor tests', () => {
     expect(walker.direction(), 'walker direction').to.eql(90);
   });
 });
+describe('BoardMapWalker turning tests', () => {
+  it('should calculate direction correctly after turns', () => {
+    const map = new BoardMap('.');
+    const walker = new BoardMapWalker(map);
+    const tests = [
+      {way: -90, newDir: 0},
+      {way: -90, newDir: 270},
+      {way: 90, newDir: 0},
+      {way: -90, newDir: 270},
+      {way: -90, newDir: 180},
+      {way: -90, newDir: 90},
+      {way: -90, newDir: 0},
+      {way: -90, newDir: 270},
+      {way: 90, newDir: 0},
+      {way: 90, newDir: 90},
+      {way: 90, newDir: 180},
+      {way: 90, newDir: 270},
+      {way: 90, newDir: 0},
+    ];
+    for (const test of tests) {
+      const dir = walker.direction();
+      expect(walker.turn(test.way), `walker turn ${test.way} from ${dir}`).to.equal(test.newDir);
+      expect(walker.direction(), `walker newDir ${test.way} from ${dir}`).to.equal(test.newDir);
+    }
+  });
+  it('should throw exception for invalid turn direction', () => {
+    const map = new BoardMap('.');
+    const walker = new BoardMapWalker(map);
+    const badTurnFn = () => { walker.turn(45) };
+    expect(badTurnFn).to.throw(SyntaxError);
+  });
+});
