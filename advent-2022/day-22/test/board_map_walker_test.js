@@ -143,3 +143,23 @@ describe('BoardMapWalker movement tests', () => {
     expect(badMoveFn).to.throw(SyntaxError);
   });
 });
+describe('BoardMapWalker teleportation tests', () => {
+  it('should teleport+move correctly (AB example)', () => {
+    const map = new BoardMap(exampleInput);
+    const walker = new BoardMapWalker(map);
+    walker._teleport(6, 11, 90);
+    expect(walker.position(), 'teleport 6,11 > position').to.eql({y: 6, x: 11});
+    expect(walker.facingChar(), 'teleport 6,11 > facing-char').to.equal('>');
+    walker.move(1);
+    expect(walker.position(), 'teleport 6,11 > post-move position').to.eql({y: 6, x: 0});
+  });
+  it('should teleport+move correctly (CD example)', () => {
+    const map = new BoardMap(exampleInput);
+    const walker = new BoardMapWalker(map);
+    walker._teleport(7, 6, 180);
+    expect(walker.position(), 'teleport 7,6 v position').to.eql({y: 7, x: 6});
+    expect(walker.facingChar(), 'teleport 7,6 v facing-char').to.equal('v');
+    walker.move(1);
+    expect(walker.position(), 'teleport 7,6 v post-move position').to.eql({y: 4, x: 6});
+  });
+});

@@ -112,5 +112,14 @@ class BoardMapWalker
     }
     return this.position();
   }
+  /*
+   * (This method only used by unit tests.)
+   */
+  _teleport(y, x, dir)
+  {
+    this._y = y;
+    this._x = x;
+    this._dir = dir;
+  }
 }
 module.exports = BoardMapWalker;
