@@ -27,13 +27,13 @@ class BoardMapWalker
    * "Facing is 0 for right (>), 1 for down (v), 2 for left (<), and
    * 3 for up (^)."
    */
-  facing()
+  facingValue()
   {
     return math.mod(this._dir - 90, 360) / 90;
   }
   facingChar()
   {
-    return ['>', 'v', '<', '^'][this.facing()];
+    return ['>', 'v', '<', '^'][this.facingValue()];
   }
   turn(deg)
   {

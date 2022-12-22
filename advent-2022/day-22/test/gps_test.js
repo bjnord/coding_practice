@@ -45,7 +45,7 @@ describe('stepping tests', () => {
     const notes = gps.parse(exampleInput);
     gps.followNotes(notes);
     expect(notes.walker.position(), 'final position').to.eql({y: 5, x: 7});
-    expect(notes.walker.facing(), 'final facing').to.equal(0);
+    expect(notes.walker.facingValue(), 'final facing-value').to.equal(0);
   });
   it('should calculate the final state correctly', () => {
     const notes = gps.parse(exampleInput);

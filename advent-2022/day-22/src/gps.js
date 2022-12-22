@@ -94,5 +94,5 @@ exports.password = ((notes) => {
   const col = notes.walker.position().x + 1;
   // "The final password is the sum of 1000 times the row,
   // 4 times the column, and the facing."
-  return 1000 * row + 4 * col + notes.walker.facing();
+  return 1000 * row + 4 * col + notes.walker.facingValue();
 });
