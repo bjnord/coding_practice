@@ -23,6 +23,24 @@ class BoardMapWalker
   {
     return this._dir;
   }
+  /*
+   * "Facing is 0 for right (>), 1 for down (v), 2 for left (<), and
+   * 3 for up (^)."
+   */
+  facing()
+  {
+    // FIXME this can be one equation
+    switch (this._dir) {
+    case 0:
+      return 3;
+    case 90:
+      return 0;
+    case 180:
+      return 1;
+    case 270:
+      return 2;
+    };
+  }
   turn(deg)
   {
     switch (deg) {

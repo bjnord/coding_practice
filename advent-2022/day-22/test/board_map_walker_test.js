@@ -23,16 +23,16 @@ describe('BoardMapWalker constructor tests', () => {
   });
 });
 describe('BoardMapWalker turning tests', () => {
-  it('should calculate direction correctly after turns', () => {
+  it('should calculate direction/facing correctly after turns', () => {
     const map = new BoardMap('.');
     const walker = new BoardMapWalker(map);
     const tests = [
-      {way: -90, newDir: 0},
-      {way: -90, newDir: 270},
+      {way: -90, newDir: 0, facing: 3},
+      {way: -90, newDir: 270, facing: 2},
       {way: 90, newDir: 0},
       {way: -90, newDir: 270},
-      {way: -90, newDir: 180},
-      {way: -90, newDir: 90},
+      {way: -90, newDir: 180, facing: 1},
+      {way: -90, newDir: 90, facing: 0},
       {way: -90, newDir: 0},
       {way: -90, newDir: 270},
       {way: 90, newDir: 0},
@@ -51,6 +51,9 @@ describe('BoardMapWalker turning tests', () => {
       const dir = walker.direction();
       expect(walker.turn(test.way), `walker turn ${test.way} from ${dir}`).to.equal(test.newDir);
       expect(walker.direction(), `walker newDir ${test.way} from ${dir}`).to.equal(test.newDir);
+      if (test.facing !== undefined) {
+        expect(walker.facing(), `walker facing ${test.way} from ${dir}`).to.equal(test.facing);
+      }
     }
   });
   it('should throw exception for invalid turn direction', () => {

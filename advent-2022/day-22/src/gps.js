@@ -1,5 +1,6 @@
 'use strict';
 const BoardMap = require('../src/board_map');
+const BoardMapWalker = require('../src/board_map_walker');
 /** @module gps */
 /**
  * Parse the puzzle input.
@@ -40,3 +41,35 @@ exports.parseSteps = (line) => {
     return state;
   }, {steps: [], n: 0}).steps;
 };
+/**
+ * Follow the steps in a set of notes.
+ *
+ * @param {Object} notes - the set of notes
+ */
+exports.followNotes = ((notes) => {
+  notes.walker = new BoardMapWalker(notes.map);
+  for (const step of notes.steps) {
+    if (step.turn) {
+      notes.walker.turn(step.turn);
+    } else {
+      notes.walker.move(step.move);
+    }
+  }
+});
+/**
+ * Calculate the password for a set of notes.
+ *
+ * @param {Object} notes - the set of notes
+ *
+ * @return {number}
+ *   Returns the password for a set of notes.
+ */
+exports.password = ((notes) => {
+  // "Rows start from 1 at the top and count downward; columns start
+  // from 1 at the left and count rightward."
+  const row = notes.walker.position().y + 1;
+  const col = notes.walker.position().x + 1;
+  // "The final password is the sum of 1000 times the row,
+  // 4 times the column, and the facing."
+  return 1000 * row + 4 * col + notes.walker.facing();
+});

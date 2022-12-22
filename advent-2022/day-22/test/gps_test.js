@@ -40,3 +40,16 @@ describe('parsing tests', () => {
     expect(notes.map.cellIsWall(1, 9)).to.be.true;
   });
 });
+describe('stepping tests', () => {
+  it('should calculate the final state correctly', () => {
+    const notes = gps.parse(exampleInput);
+    gps.followNotes(notes);
+    expect(notes.walker.position(), 'final position').to.eql({y: 5, x: 7});
+    expect(notes.walker.facing(), 'final facing').to.equal(0);
+  });
+  it('should calculate the final state correctly', () => {
+    const notes = gps.parse(exampleInput);
+    gps.followNotes(notes);
+    expect(gps.password(notes)).to.equal(6032);
+  });
+});
