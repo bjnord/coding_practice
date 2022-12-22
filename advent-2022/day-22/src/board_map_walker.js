@@ -114,7 +114,7 @@ class BoardMapWalker
     }
     return this.position();
   }
-  trail()
+  renderTrail()
   {
     return this._trail.render();
   }

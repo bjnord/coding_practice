@@ -1,7 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
 const fs = require('fs');
-const gps = require('../src/gps');
 const BoardMap = require('../src/board_map');
 const BoardMapWalker = require('../src/board_map_walker');
 const exampleLines = fs.readFileSync('input/example.txt', 'utf8');
@@ -153,14 +152,5 @@ describe('BoardMapWalker teleportation tests', () => {
     expect(walker.facingChar(), 'teleport 7,6 v facing-char').to.equal('v');
     walker.move(1);
     expect(walker.position(), 'teleport 7,6 v post-move position').to.eql({y: 4, x: 6});
-  });
-});
-describe('BoardMapWalker trail tests', () => {
-  it('should produce a correct trail map', () => {
-    const smallInput = '        ...#    \n        .#..    \n        #...    \n        ....    \n\n3R2R3';
-    const expTrail   = '        >>v#    \n        .#v.    \n        #<<.    \n        ....    \n';
-    const notes = gps.parse(smallInput);
-    gps.followNotes(notes);
-    expect(notes.walker.trail()).to.equal(expTrail);
   });
 });

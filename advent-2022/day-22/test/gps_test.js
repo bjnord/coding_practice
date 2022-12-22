@@ -41,3 +41,12 @@ describe('stepping tests', () => {
     expect(gps.password(notes)).to.equal(6032);
   });
 });
+describe('trail map tests', () => {
+  it('should produce a correct trail map', () => {
+    const smallInput = '        ...#    \n        .#..    \n        #...    \n        ....    \n\n3R2R3';
+    const expTrail   = '        >>v#    \n        .#v.    \n        #<<.    \n        ....    \n';
+    const notes = gps.parse(smallInput);
+    gps.followNotes(notes);
+    expect(gps.renderTrail(notes)).to.equal(expTrail);
+  });
+});

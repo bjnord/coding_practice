@@ -96,3 +96,14 @@ exports.password = ((notes) => {
   // 4 times the column, and the facing."
   return 1000 * row + 4 * col + notes.walker.facingValue();
 });
+/**
+ * Produce the trail map for a set of notes.
+ *
+ * @param {Object} notes - the set of notes
+ *
+ * @return {string}
+ *   Returns a map render (lines separated by `\n`) with the trail marked.
+ */
+exports.renderTrail = ((notes) => {
+  return notes.walker.renderTrail(notes);
+});
