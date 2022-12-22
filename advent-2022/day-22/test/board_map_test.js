@@ -147,3 +147,17 @@ describe('BoardMap face tests', () => {
     expect(map._face({y: 12, x: 0})).to.be.undefined;
   });
 });
+describe('BoardMap edge tests', () => {
+  let map;
+  before(() => {
+    map = new BoardMap(exampleMapInput);
+  });
+  it('should get correct face values for positions (face 4/6)', () => {
+    expect(map._edge({y: 5, x: 11}, 'x', 1)).to.equal('f');
+    expect(map._edge({y: 8, x: 14}, 'y', -1)).to.equal('f');
+  });
+  it('should get correct face values for positions (face 2)', () => {
+    expect(map._edge({y: 11, x: 10}, 'y', 1)).to.equal('j');
+    expect(map._edge({y: 7, x: 1}, 'y', 1)).to.equal('j');
+  });
+});

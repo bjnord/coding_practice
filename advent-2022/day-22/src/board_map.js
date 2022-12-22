@@ -150,6 +150,50 @@ class BoardMap
     return undefined;
   }
   /*
+   * These are the edge names for the puzzle example:
+   * ```
+   * +---------+
+   * |     a   |
+   * |    b1c  |
+   * | a b d   |
+   * |m2k3e4f  |
+   * | j h g f |
+   * |    h5i6c|
+   * |     j m |
+   * +---------+
+   * ```
+   */
+  _edge4(pos, axis, delta)
+  {
+    const index = ((axis === 'y') ? 0x1 : 0x0) + ((delta < 0) ? 0x2 : 0x0);
+    // these are built going clockwise starting from the right:
+    let edge = undefined;
+    switch (this._face4(pos)) {
+    case 1:
+      edge = 'cdba'.substring(index, index+1);
+      break;
+    case 2:
+      edge = 'kjma'.substring(index, index+1);
+      break;
+    case 3:
+      edge = 'ehkb'.substring(index, index+1);
+      break;
+    case 4:
+      edge = 'fged'.substring(index, index+1);
+      break;
+    case 5:
+      edge = 'ijhg'.substring(index, index+1);
+      break;
+    case 6:
+      edge = 'cmif'.substring(index, index+1);
+      break;
+    }
+    if (this._debug) {
+      console.debug(`face=${this._face4(pos)} axis=${axis} delta=${delta} index=${index.toString(2)} edge=${edge}`);
+    }
+    return edge;
+  }
+  /*
    * My puzzle input has 50x50 faces aligned like this:
    * ```
    * +---+
@@ -198,7 +242,17 @@ class BoardMap
     } else if (this._cells.length === 200) {
       return this._face50(pos);
     } else {
-      throw new SyntaxError('unsupported cube size');
+      throw new SyntaxError('_face: unsupported cube size');
+    }
+  }
+  _edge(pos, axis, delta)
+  {
+    if (this._cells.length === 12) {
+      return this._edge4(pos, axis, delta);
+    } else if (this._cells.length === 200) {
+      return this._edge50(pos, axis, delta);
+    } else {
+      throw new SyntaxError('_edge: unsupported cube size');
     }
   }
 }
