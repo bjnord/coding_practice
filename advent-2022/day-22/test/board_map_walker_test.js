@@ -40,6 +40,12 @@ describe('BoardMapWalker turning tests', () => {
       {way: 90, newDir: 180},
       {way: 90, newDir: 270},
       {way: 90, newDir: 0},
+      // (180deg turns are for unit tests)
+      {way: 180, newDir: 180},
+      {way: 180, newDir: 0},
+      {way: 90, newDir: 90},
+      {way: 180, newDir: 270},
+      {way: 180, newDir: 90},
     ];
     for (const test of tests) {
       const dir = walker.direction();
@@ -71,6 +77,50 @@ describe('BoardMapWalker movement tests', () => {
       {move: 5, newPos: {y: 7, x: 5}},   // C
       {turn: 90},
       {move: 1, newPos: {y: 4, x: 5}},   // D
+    ];
+    for (const test of tests) {
+      if (test.turn) {
+        walker.turn(test.turn);
+      } else {
+        const pos = walker.positionString();
+        expect(walker.move(test.move), `walker move ${test.move} from ${pos}`).to.eql(test.newPos);
+        expect(walker.position(), `walker newPos ${test.move} from ${pos}`).to.eql(test.newPos);
+      }
+    }
+  });
+  it('should calculate position correctly after walls', () => {
+    const map = new BoardMap(exampleInput);
+    const walker = new BoardMapWalker(map);
+    const tests = [
+      {move: 2, newPos: {y: 0, x: 10}},
+      {move: 3, newPos: {y: 0, x: 10}},  // bump R 3x
+      {turn: 180},
+      {move: 2, newPos: {y: 0, x: 8}},
+      {move: 3, newPos: {y: 0, x: 8}},   // bump L 3x (wrap)
+      {turn: 180},
+      {move: 2, newPos: {y: 0, x: 10}},
+      {turn: 90},
+      {move: 2, newPos: {y: 2, x: 10}},
+      {turn: -90},
+      {move: 1, newPos: {y: 2, x: 11}},
+      {move: 3, newPos: {y: 2, x: 11}},  // bump R 3x (wrap)
+      {turn: 90},
+      {move: 1, newPos: {y: 3, x: 11}},
+      {turn: -90},
+      {move: 1, newPos: {y: 3, x: 8}},
+      {turn: -90},
+      {move: 3, newPos: {y: 3, x: 8}},   // bump U 3x
+      {turn: 180},
+      {move: 1, newPos: {y: 4, x: 8}},
+      {turn: -90},
+      {move: 2, newPos: {y: 4, x: 10}},
+      {move: 1, newPos: {y: 4, x: 10}},  // bump R
+      {turn: -90},
+      {move: 5, newPos: {y: 11, x: 10}},
+      {turn: 90},
+      {move: 1, newPos: {y: 11, x: 11}},
+      {turn: 90},
+      {move: 2, newPos: {y: 11, x: 11}}, // bump D 2x (wrap)
     ];
     for (const test of tests) {
       if (test.turn) {

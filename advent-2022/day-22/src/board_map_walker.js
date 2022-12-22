@@ -28,6 +28,7 @@ class BoardMapWalker
     switch (deg) {
     case -90:
     case 90:
+    case 180:
       this._dir = math.mod(this._dir + deg, 360);
       break;
     default:
@@ -56,7 +57,9 @@ class BoardMapWalker
     if (this._debug) {
       console.debug(`_vertStep range=${range[0]}-${range[1]} rangeLen=${rangeLen} y=${this._y} newY=${newY}`);
     }
-    this._y = newY;
+    if (this._map.cellIsFloor(newY, this._x)) {
+      this._y = newY;
+    }
   }
   _dx()
   {
@@ -78,7 +81,9 @@ class BoardMapWalker
     if (this._debug) {
       console.debug(`_horizStep range=${range[0]}-${range[1]} rangeLen=${rangeLen} x=${this._x} newX=${newX}`);
     }
-    this._x = newX;
+    if (this._map.cellIsFloor(this._y, newX)) {
+      this._x = newX;
+    }
   }
   move(dist)
   {
