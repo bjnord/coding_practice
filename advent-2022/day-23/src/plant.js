@@ -131,6 +131,24 @@ const checkDirections = ((elf, neighbors, round) => {
   return undefined;
 });
 
+exports.minMax = ((elves) => {
+  const ymm = elves.reduce((mm, pos) => {
+    mm.min = Math.min(pos.y, mm.min);
+    mm.max = Math.max(pos.y, mm.max);
+    return mm;
+  }, {min: Number.MAX_SAFE_INTEGER, max: -Number.MAX_SAFE_INTEGER});
+  const xmm = elves.reduce((mm, pos) => {
+    mm.min = Math.min(pos.x, mm.min);
+    mm.max = Math.max(pos.x, mm.max);
+    return mm;
+  }, {min: Number.MAX_SAFE_INTEGER, max: -Number.MAX_SAFE_INTEGER});
+  // NB y axis has higher values upward
+  return {
+    min: {y: ymm.max, x: xmm.min},
+    max: {y: ymm.min, x: xmm.max},
+  };
+});
+
 exports.initialState = ((elves) => {
   const mapMin = (elves.length === 5) ? {y:  0, x:  0} : {y:  2, x: -3}
   const mapMax = (elves.length === 5) ? {y: -5, x:  4} : {y: -9, x: 10}
@@ -242,6 +260,19 @@ exports.doRounds = ((state, limit) => {
       return;
     }
   }
+});
+
+exports.empties = ((state) => {
+  const minMax = module.exports.minMax(Object.values(state.map));
+  let empties = 0;
+  for (let y = minMax.min.y; y >= minMax.max.y; y--) {
+    for (let x = minMax.min.x; x <= minMax.max.x; x++) {
+      if (!state.map[posKey({y, x})]) {
+        empties++;
+      }
+    }
+  }
+  return empties;
 });
 
 exports.dump = ((state) => {

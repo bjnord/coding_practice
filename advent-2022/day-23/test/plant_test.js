@@ -19,7 +19,17 @@ describe('parsing tests', () => {
     expect(plant.parse(smallExInput)).to.eql(expected);
   });
 });
-describe('map tests', () => {
+describe('min/max tests', () => {
+  it('should find min/max ranges correctly', () => {
+    const elves = plant.parse(smallExInput);
+    const expected = {
+      min: {y: -1, x: 2},
+      max: {y: -4, x: 3},
+    };
+    expect(plant.minMax(elves)).to.eql(expected);
+  });
+});
+describe('neighbor tests', () => {
   let map;
   before(() => {
     map = plant.makeMap(plant.parse(smallExInput));
@@ -79,6 +89,7 @@ describe('round tests', () => {
     for (const elfKey of actual) {
       expect(expected.includes(elfKey), `final elf ${elfKey}`).to.be.true;
     }
+    expect(plant.empties(state)).to.eql(25);
   });
   it('should perform 10 rounds correctly (large)', () => {
     const elves = plant.parse(exampleInput);
@@ -99,5 +110,11 @@ describe('round tests', () => {
     for (const elfKey of actual) {
       expect(expected.includes(elfKey), `final elf ${elfKey}`).to.be.true;
     }
+    const expectedMinMax = {
+      min: {y:  2, x: -2},
+      max: {y: -8, x:  9},
+    };
+    expect(plant.minMax(Object.values(state.map))).to.eql(expectedMinMax);
+    expect(plant.empties(state)).to.eql(110);
   });
 });
