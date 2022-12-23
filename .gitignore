@@ -4,7 +4,7 @@
 */*/dist/
 */*/doc/
 */*/graph/*.mermaid
-*/*/node_modules/
+*/*/node_modules
 synacor/tmp/
 hogan-57/*/*/target/
 rust/*/target/
