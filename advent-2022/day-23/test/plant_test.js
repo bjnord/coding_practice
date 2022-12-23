@@ -37,21 +37,21 @@ describe('neighbor tests', () => {
   it('should find neighbors correctly (-4,2)', () => {
     const expected = [
       {y: -4, x: 3},
-    ]
+    ];
     expect(plant.neighborElves({y: -4, x: 2}, map)).to.eql(expected);
   });
   it('should find neighbors correctly (-1,3)', () => {
     const expected = [
       {y: -1, x: 2},
       {y: -2, x: 2},
-    ]
+    ];
     expect(plant.neighborElves({y: -1, x: 3}, map)).to.eql(expected);
   });
   it('should find neighbors correctly (-2,2)', () => {
     const expected = [
       {y: -1, x: 2},
       {y: -1, x: 3},
-    ]
+    ];
     expect(plant.neighborElves({y: -2, x: 2}, map)).to.eql(expected);
   });
 });

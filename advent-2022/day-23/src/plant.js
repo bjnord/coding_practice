@@ -84,7 +84,7 @@ const checkDirections = ((elf, neighbors, round) => {
     if (dirs[roundDir][1] === 0) {
       // check N/S (y axis)
       for (let x = -1; x <= 1; x++) {
-        const nPos = {y: elf.y + dirs[roundDir][0], x: elf.x + x}
+        const nPos = {y: elf.y + dirs[roundDir][0], x: elf.x + x};
         if (neighborKeys.includes(posKey(nPos))) {
           if (_debug) {
             console.debug(`found at x=${x} nPos=${posKey(nPos)}`);
@@ -98,12 +98,12 @@ const checkDirections = ((elf, neighbors, round) => {
         }
       }
       if (edgeClear) {
-        return {y: elf.y + dirs[roundDir][0], x: elf.x}
+        return {y: elf.y + dirs[roundDir][0], x: elf.x};
       }
     } else {
       // check E/W (x axis)
       for (let y = 1; y >= -1; y--) {
-        const nPos = {y: elf.y + y, x: elf.x + dirs[roundDir][1]}
+        const nPos = {y: elf.y + y, x: elf.x + dirs[roundDir][1]};
         if (neighborKeys.includes(posKey(nPos))) {
           if (_debug) {
             console.debug(`found at y=${y} nPos=${posKey(nPos)}`);
@@ -117,7 +117,7 @@ const checkDirections = ((elf, neighbors, round) => {
         }
       }
       if (edgeClear) {
-        return {y: elf.y, x: elf.x + dirs[roundDir][1]}
+        return {y: elf.y, x: elf.x + dirs[roundDir][1]};
       }
     }
     if (_debug) {
@@ -150,8 +150,8 @@ exports.minMax = ((elves) => {
 });
 
 exports.initialState = ((elves) => {
-  const mapMin = (elves.length === 5) ? {y:  0, x:  0} : {y:  2, x: -3}
-  const mapMax = (elves.length === 5) ? {y: -5, x:  4} : {y: -9, x: 10}
+  const mapMin = (elves.length === 5) ? {y:  0, x:  0} : {y:  2, x: -3};
+  const mapMax = (elves.length === 5) ? {y: -5, x:  4} : {y: -9, x: 10};
   return {
     map: module.exports.makeMap(elves),
     round: 1,
