@@ -164,6 +164,22 @@ class BoardMapWalker
       x: this._negate4(pos.y * matrix[1][0]) + this._negate4(pos.x * matrix[1][1]),
     };
   }
+  _negate50(n)
+  {
+    const nn = (n < 0) ? (49 + n) : n;
+    return nn;
+  }
+  _transformPos50(pos, matrix)
+  {
+    return {
+      y: this._negate50(pos.y * matrix[0][0]) + this._negate50(pos.x * matrix[0][1]),
+      x: this._negate50(pos.y * matrix[1][0]) + this._negate50(pos.x * matrix[1][1]),
+    };
+  }
+  /*
+   * NOTE: This is **not** a generalized cube-folding solution.
+   *       It only works for the example and my puzzle input.
+   */
   _transformPos(pos, matrix)
   {
     if (this._map._cells.length === 12) {

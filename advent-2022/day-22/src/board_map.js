@@ -348,6 +348,58 @@ class BoardMap
     }
     return edge;
   }
+  _transformMatrix50(fromFace, toFace, axis, delta)
+  {
+    const deltaChar = (delta < 0) ? '-' : '+';
+    const key = `${deltaChar}${axis}${fromFace}${toFace}`;
+    // 0y-to-0y opp  arrows: `y = -y, x = x` 180d -- +x52, +x25
+    // 3y-to-3y opp  arrows: `y = -y, x = x` 180d -- -x14, -x41
+    // 0x-to-3x same arrows: `y = -y, x = x`   0d -- -y26
+    // 3x-to-0x same arrows: `y = -y, x = x`   0d -- +y62
+    //
+    // 0y-to-3x same arrows: `y = x,  x = y` -90d -- +x65, +x32
+    // 0x-to-3y same arrows: `y = x,  x = y`  90d -- -y16, -y43
+    // 3y-to-0x same arrows: `y = x,  x = y` -90d -- -x34, -x61
+    // 3x-to-0y same arrows: `y = x,  x = y`  90d -- +y23, +y56
+    switch (key) {
+    case '-x14':
+    case '+x52':
+    case '-x41':
+    case '+x25':
+      return [
+        [-1,  0],  // y = -y
+        [ 0,  1],  // x = x
+        180,
+      ];
+    case '+y62':
+    case '-y26':
+      return [
+        [-1,  0],  // y = -y
+        [ 0,  1],  // x = x
+        0,
+      ];
+    case '+x65':
+    case '-x34':
+    case '-x61':
+    case '+x32':
+      return [
+        [ 0,  1],  // y = x
+        [ 1,  0],  // x = y
+        -90,
+      ];
+    case '+y23':
+    case '+y56':
+    case '-y16':
+    case '-y43':
+      return [
+        [ 0,  1],  // y = x
+        [ 1,  0],  // x = y
+        90,
+      ];
+    default:
+      throw new SyntaxError(`_transformMatrix50:  ***  add key=${key}  ***`);
+    }
+  }
   /*
    * NOTE: This is **not** a generalized cube-folding solution.
    *       It only works for the example and my puzzle input.
