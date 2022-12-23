@@ -282,6 +282,73 @@ class BoardMap
     return undefined;
   }
   /*
+   * These are the `y`,`x` origin corners of each puzzle input face:
+   */
+  _faceOffset50(face)
+  {
+    switch(face) {
+    case 1:
+      return {dy: 0, dx: 50};
+    case 2:
+      return {dy: 0, dx: 100};
+    case 3:
+      return {dy: 50, dx: 50};
+    case 4:
+      return {dy: 100, dx: 0};
+    case 5:
+      return {dy: 100, dx: 50};
+    case 6:
+      return {dy: 150, dx: 0};
+    }
+    return undefined;
+  }
+  /*
+   * These are the edge names for my puzzle input:
+   * ```
+   * +-------+
+   * |   a m |
+   * |  b1c2i|
+   * |   d f |
+   * |  e3f  |
+   * | e g   |
+   * |b4h5i  |
+   * | k j   |
+   * |a6j    |
+   * | m     |
+   * +-------+
+   * ```
+   */
+  _edge50(pos, axis, delta)
+  {
+    const index = ((axis === 'y') ? 0x1 : 0x0) + ((delta < 0) ? 0x2 : 0x0);
+    // these are built going clockwise starting from the right:
+    let edge = undefined;
+    switch (this._face50(pos)) {
+    case 1:
+      edge = 'cdba'.substring(index, index+1);
+      break;
+    case 2:
+      edge = 'ifcm'.substring(index, index+1);
+      break;
+    case 3:
+      edge = 'fged'.substring(index, index+1);
+      break;
+    case 4:
+      edge = 'hkbe'.substring(index, index+1);
+      break;
+    case 5:
+      edge = 'ijhg'.substring(index, index+1);
+      break;
+    case 6:
+      edge = 'jmak'.substring(index, index+1);
+      break;
+    }
+    if (this._debug) {
+      console.debug(`face=${this._face50(pos)} axis=${axis} delta=${delta} index=${index.toString(2)} edge=${edge}`);
+    }
+    return edge;
+  }
+  /*
    * NOTE: This is **not** a generalized cube-folding solution.
    *       It only works for the example and my puzzle input.
    */
