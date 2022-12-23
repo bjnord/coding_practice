@@ -28,17 +28,30 @@ describe('parsing tests', () => {
     expect(notes.map.cellIsWall(1, 9)).to.be.true;
   });
 });
-describe('stepping tests', () => {
+describe('stepping tests (flat)', () => {
   it('should calculate the final state correctly', () => {
     const notes = gps.parse(exampleInput);
     gps.followNotes(notes);
     expect(notes.walker.position(), 'final position').to.eql({y: 5, x: 7});
     expect(notes.walker.facingValue(), 'final facing-value').to.equal(0);
   });
-  it('should calculate the final state correctly', () => {
+  it('should calculate the final password correctly', () => {
     const notes = gps.parse(exampleInput);
     gps.followNotes(notes);
     expect(gps.password(notes)).to.equal(6032);
+  });
+});
+describe('stepping tests (cube)', () => {
+  it('should calculate the final state correctly', () => {
+    const notes = gps.parse(exampleInput);
+    gps.followNotes(notes, true);
+    expect(notes.walker.position(), 'final position').to.eql({y: 4, x: 6});
+    expect(notes.walker.facingValue(), 'final facing-value').to.equal(3);
+  });
+  it('should calculate the final password correctly', () => {
+    const notes = gps.parse(exampleInput);
+    gps.followNotes(notes, true);
+    expect(gps.password(notes)).to.equal(5031);
   });
 });
 describe('trail map tests', () => {

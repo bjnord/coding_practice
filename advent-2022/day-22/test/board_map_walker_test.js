@@ -154,3 +154,29 @@ describe('BoardMapWalker teleportation tests', () => {
     expect(walker.position(), 'teleport 7,6 v post-move position').to.eql({y: 4, x: 6});
   });
 });
+describe('BoardMapWalker transformation tests', () => {
+  it('should calculate transform correctly (AB example)', () => {
+    const map = new BoardMap(exampleMapInput);
+    const walker = new BoardMapWalker(map);
+    walker._teleport(5, 11, 90);
+    const newPD = walker._transformPD('x', 12);
+    expect(newPD.pos, 'from 5,11 to 8,14').to.eql({y: 8, x: 14});
+    expect(newPD.dir, 'from 5,11,90 to 8,14,180').to.eql(180);
+  });
+  it('should calculate transform correctly (CD example)', () => {
+    const map = new BoardMap(exampleMapInput);
+    const walker = new BoardMapWalker(map);
+    walker._teleport(11, 10, 180);
+    const newPD = walker._transformPD('y', 12);
+    expect(newPD.pos, 'from 11,10 to 7,1').to.eql({y: 7, x: 1});
+    expect(newPD.dir, 'from 11,10,180 to 7,1,0').to.eql(0);
+  });
+  it('should calculate transform correctly (E example)', () => {
+    const map = new BoardMap(exampleMapInput);
+    const walker = new BoardMapWalker(map);
+    walker._teleport(4, 6, 0);
+    const newPD = walker._transformPD('y', 3);
+    expect(newPD.pos, 'from 4,6 to 2,8').to.eql({y: 2, x: 8});
+    expect(newPD.dir, 'from 4,6,0 to 2,8,90').to.eql(90);
+  });
+});

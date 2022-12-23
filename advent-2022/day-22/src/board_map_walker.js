@@ -3,13 +3,14 @@ const math = require('../../shared/src/math');
 
 class BoardMapWalker
 {
-  constructor(map, debug)
+  constructor(map, cubic, debug)
   {
     this._map = map;
     this._trail = this._map.clone();
     this._y = 0;
     this._x = map.rowRange(this._y)[0];
     this._dir = 90;
+    this._cubic = cubic;
     this._debug = debug;
   }
   position()
@@ -61,6 +62,16 @@ class BoardMapWalker
       throw new SyntaxError('_dy() for non-vertical direction');
     }
   }
+  _vertOffEdge(newY)
+  {
+    if ((this._dy() < 0) && (newY > this._y)) {
+      return true;
+    } else if ((this._dy() > 0) && (newY < this._y)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   _vertStep()
   {
     const range = this._map.columnRange(this._x);
@@ -70,7 +81,23 @@ class BoardMapWalker
     if (this._debug) {
       console.debug(`_vertStep range=${range[0]}-${range[1]} rangeLen=${rangeLen} y=${this._y} newY=${newY}`);
     }
-    if (this._map.cellIsFloor(newY, this._x)) {
+    if (this._cubic && this._vertOffEdge(newY)) {
+      const newPD = this._transformPD('y', newY);
+      if (this._map.cellIsFloor(newPD.pos.y, newPD.pos.x)) {
+        this._y = newPD.pos.y;
+        this._x = newPD.pos.x;
+        this._dir = newPD.dir;
+        /* istanbul ignore next */
+        if (this._debug) {
+          console.debug(`completing move to ${this._y},${this._x} ${this._dir}`);
+        }
+      } else {
+        /* istanbul ignore next */
+        if (this._debug) {
+          console.debug(`bumped wall; staying at ${this._y},${this._x} ${this._dir}`);
+        }
+      }
+    } else if (this._map.cellIsFloor(newY, this._x)) {
       this._y = newY;
     }
   }
@@ -86,6 +113,16 @@ class BoardMapWalker
       throw new SyntaxError('_dx() for non-horizontal direction');
     }
   }
+  _horizOffEdge(newX)
+  {
+    if ((this._dx() < 0) && (newX > this._x)) {
+      return true;
+    } else if ((this._dx() > 0) && (newX < this._x)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   _horizStep()
   {
     const range = this._map.rowRange(this._y);
@@ -95,9 +132,76 @@ class BoardMapWalker
     if (this._debug) {
       console.debug(`_horizStep range=${range[0]}-${range[1]} rangeLen=${rangeLen} x=${this._x} newX=${newX}`);
     }
-    if (this._map.cellIsFloor(this._y, newX)) {
+    if (this._cubic && this._horizOffEdge(newX)) {
+      const newPD = this._transformPD('x', newX);
+      if (this._map.cellIsFloor(newPD.pos.y, newPD.pos.x)) {
+        this._y = newPD.pos.y;
+        this._x = newPD.pos.x;
+        this._dir = newPD.dir;
+        /* istanbul ignore next */
+        if (this._debug) {
+          console.debug(`completing move to ${this._y},${this._x} ${this._dir}`);
+        }
+      } else {
+        /* istanbul ignore next */
+        if (this._debug) {
+          console.debug(`bumped wall; staying at ${this._y},${this._x} ${this._dir}`);
+        }
+      }
+    } else if (this._map.cellIsFloor(this._y, newX)) {
       this._x = newX;
     }
+  }
+  _negate4(n)
+  {
+    const nn = (n < 0) ? (3 + n) : n;
+//  console.debug(`_negate4 ${n} -> ${nn}`);
+    return nn;
+  }
+  _transformPos4(pos, matrix)
+  {
+    return {
+      y: this._negate4(pos.y * matrix[0][0]) + this._negate4(pos.x * matrix[0][1]),
+      x: this._negate4(pos.y * matrix[1][0]) + this._negate4(pos.x * matrix[1][1]),
+    };
+  }
+  _transformPD(axis, newCoord)
+  {
+    if (this._map._cells.length !== 12) {
+      throw new SyntaxError('TODO');
+    }
+    // find face we're currently on, and edge we're walking over
+    const fromPos = {y: this._y, x: this._x};
+    const fromFace = this._map._face4(fromPos);
+    const delta = (axis === 'y') ? this._dy() : this._dx();
+    const edge = this._map._edge4(fromPos, axis, delta);
+    // find position relative to current face
+    const relPos = {y: math.mod(this._y, 4), x: math.mod(this._x, 4)};
+    // find face we're walking onto
+    const toFace = this._map._toFace(fromFace, edge);
+    /* istanbul ignore next */
+    if (this._debug) {
+      console.debug(`relPos=${relPos.y},${relPos.x} fromFace=${fromFace} toFace=${toFace} edge=${edge}`);
+    }
+    // transform
+    const matrix = this._map._transformMatrix4(fromFace, toFace, axis, delta);
+    const transPos = this._transformPos4(relPos, matrix);
+    /* istanbul ignore next */
+    if (this._debug) {
+      console.debug(`relative transPos=${transPos.y},${transPos.x} via matrix:`);
+      console.dir(matrix);
+    }
+    const transDir = math.mod(this._dir + matrix[2], 360);
+    // change relative position back to absolute
+    const offset = this._map._faceOffset(toFace);
+    transPos.y += offset.dy;
+    transPos.x += offset.dx;
+    /* istanbul ignore next */
+    if (this._debug) {
+      console.debug(`absolute transPos=${transPos.y},${transPos.x} transDir=${transDir}`);
+    }
+    // returned transformed position and direction
+    return {pos: transPos, dir: transDir};
   }
   move(dist)
   {

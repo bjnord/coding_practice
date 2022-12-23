@@ -10,11 +10,11 @@ const BoardMapWalker = require('../src/board_map_walker');
  * @return {Object}
  *   Returns a set of notes.
  */
-exports.parse = (input) => {
+exports.parse = (input, debug) => {
   // important not to `trim()` here (need leading spaces)
   const sections = input.split(/\n\n/);
   return {
-    map: new BoardMap(sections[0]),
+    map: new BoardMap(sections[0], debug),
     steps: module.exports.parseSteps(sections[1]),
   };
 };
@@ -68,14 +68,27 @@ exports.parseSteps = (line) => {
  * Follow the steps in a set of notes.
  *
  * @param {Object} notes - the set of notes
+ * @param {boolean} cubic - treat the board map as a cube?
  */
-exports.followNotes = ((notes) => {
-  notes.walker = new BoardMapWalker(notes.map);
+exports.followNotes = ((notes, cubic, debug) => {
+  notes.walker = new BoardMapWalker(notes.map, cubic, debug);
   for (const step of notes.steps) {
     if (step.turn) {
       notes.walker.turn(step.turn);
+      /* istanbul ignore next */
+      if (debug) {
+        const pos = notes.walker.position();
+        const dir = notes.walker.direction();
+        console.debug(`=== after turn ${step.turn}: pos ${pos.y},${pos.x} dir ${dir}`);
+      }
     } else {
       notes.walker.move(step.move);
+      /* istanbul ignore next */
+      if (debug) {
+        const pos = notes.walker.position();
+        const dir = notes.walker.direction();
+        console.debug(`=== after move ${step.move}: pos ${pos.y},${pos.x} dir ${dir}`);
+      }
     }
   }
 });

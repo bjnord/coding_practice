@@ -152,6 +152,27 @@ class BoardMap
     return undefined;
   }
   /*
+   * These are the `y`,`x` origin corners of each puzzle example face:
+   */
+  _faceOffset4(face)
+  {
+    switch(face) {
+    case 1:
+      return {dy: 0, dx: 8};
+    case 2:
+      return {dy: 4, dx: 0};
+    case 3:
+      return {dy: 4, dx: 4};
+    case 4:
+      return {dy: 4, dx: 8};
+    case 5:
+      return {dy: 8, dx: 8};
+    case 6:
+      return {dy: 8, dx: 12};
+    }
+    return undefined;
+  }
+  /*
    * These are the edge names for the puzzle example:
    * ```
    * +---------+
@@ -194,6 +215,33 @@ class BoardMap
       console.debug(`face=${this._face4(pos)} axis=${axis} delta=${delta} index=${index.toString(2)} edge=${edge}`);
     }
     return edge;
+  }
+  _transformMatrix4(fromFace, toFace, axis, delta)
+  {
+    const deltaChar = (delta < 0) ? '-' : '+';
+    const key = `${deltaChar}${axis}${fromFace}${toFace}`;
+    switch (key) {
+      case '+x46':
+        return [
+          [ 0, -1],  // y = -x
+          [-1,  0],  // x = -y
+          90,        // R -> D
+        ];
+      case '+y52':
+        return [
+          [ 1,  0],  // y = y
+          [ 0, -1],  // x = -x
+          180,       // D -> U
+        ];
+      case '-y31':
+        return [
+          [ 0,  1],  // y = x
+          [ 1,  0],  // x = y
+          90,        // D -> U
+        ];
+      default:
+        throw new SyntaxError(`_transformMatrix4 add key=${key}`);
+    }
   }
   /*
    * My puzzle input has 50x50 faces aligned like this:
@@ -243,6 +291,16 @@ class BoardMap
       return this._face4(pos);
     } else if (this._cells.length === 200) {
       return this._face50(pos);
+    } else {
+      throw new SyntaxError('_face: unsupported cube size');
+    }
+  }
+  _faceOffset(face)
+  {
+    if (this._cells.length === 12) {
+      return this._faceOffset4(face);
+    } else if (this._cells.length === 200) {
+      return this._faceOffset50(face);
     } else {
       throw new SyntaxError('_face: unsupported cube size');
     }
