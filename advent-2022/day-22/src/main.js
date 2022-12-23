@@ -22,6 +22,6 @@ console.log('');
 // PART 2
 notes = gps.parse(input);
 gps.followNotes(notes, true);
-console.log('part 2: expected answer:       **TOOLOW** 148329');
+console.log('part 2: expected answer:       ** TOOLOW: 148329, TOOHIGH: 154156 **');
 console.log(`part 2: final password (cube): ${gps.password(notes)}`);
 console.log('');
