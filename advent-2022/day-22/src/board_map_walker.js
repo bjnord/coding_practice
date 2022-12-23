@@ -155,7 +155,6 @@ class BoardMapWalker
   _negate4(n)
   {
     const nn = (n < 0) ? (3 + n) : n;
-//  console.debug(`_negate4 ${n} -> ${nn}`);
     return nn;
   }
   _transformPos4(pos, matrix)
@@ -165,18 +164,33 @@ class BoardMapWalker
       x: this._negate4(pos.y * matrix[1][0]) + this._negate4(pos.x * matrix[1][1]),
     };
   }
+  _transformPos(pos, matrix)
+  {
+    if (this._map._cells.length === 12) {
+      return this._transformPos4(pos, matrix);
+    } else if (this._map._cells.length === 200) {
+      return this._transformPos50(pos, matrix);
+    } else {
+      throw new SyntaxError('_transformPos: unsupported cube size');
+    }
+  }
   _transformPD(axis, newCoord)
   {
-    if (this._map._cells.length !== 12) {
-      throw new SyntaxError('TODO');
+    let edgeLen;
+    if (this._map._cells.length === 12) {
+      edgeLen = 4;
+    } else if (this._map._cells.length === 200) {
+      edgeLen = 50;
+    } else {
+      throw new SyntaxError('_transformPD: unsupported cube size');
     }
     // find face we're currently on, and edge we're walking over
     const fromPos = {y: this._y, x: this._x};
-    const fromFace = this._map._face4(fromPos);
+    const fromFace = this._map._face(fromPos);
     const delta = (axis === 'y') ? this._dy() : this._dx();
-    const edge = this._map._edge4(fromPos, axis, delta);
+    const edge = this._map._edge(fromPos, axis, delta);
     // find position relative to current face
-    const relPos = {y: math.mod(this._y, 4), x: math.mod(this._x, 4)};
+    const relPos = {y: math.mod(this._y, edgeLen), x: math.mod(this._x, edgeLen)};
     // find face we're walking onto
     const toFace = this._map._toFace(fromFace, edge);
     /* istanbul ignore next */
@@ -184,8 +198,8 @@ class BoardMapWalker
       console.debug(`relPos=${relPos.y},${relPos.x} fromFace=${fromFace} toFace=${toFace} edge=${edge}`);
     }
     // transform
-    const matrix = this._map._transformMatrix4(fromFace, toFace, axis, delta);
-    const transPos = this._transformPos4(relPos, matrix);
+    const matrix = this._map._transformMatrix(fromFace, toFace, axis, delta);
+    const transPos = this._transformPos(relPos, matrix);
     /* istanbul ignore next */
     if (this._debug) {
       console.debug(`relative transPos=${transPos.y},${transPos.x} via matrix:`);

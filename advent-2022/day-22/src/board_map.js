@@ -237,10 +237,10 @@ class BoardMap
         return [
           [ 0,  1],  // y = x
           [ 1,  0],  // x = y
-          90,        // D -> U
+          90,        // U -> R
         ];
       default:
-        throw new SyntaxError(`_transformMatrix4 add key=${key}`);
+        throw new SyntaxError(`_transformMatrix4:  ***  add key=${key}  ***`);
     }
   }
   /*
@@ -302,7 +302,7 @@ class BoardMap
     } else if (this._cells.length === 200) {
       return this._faceOffset50(face);
     } else {
-      throw new SyntaxError('_face: unsupported cube size');
+      throw new SyntaxError('_faceOffset: unsupported cube size');
     }
   }
   _edge(pos, axis, delta)
@@ -313,6 +313,16 @@ class BoardMap
       return this._edge50(pos, axis, delta);
     } else {
       throw new SyntaxError('_edge: unsupported cube size');
+    }
+  }
+  _transformMatrix(fromFace, toFace, axis, delta)
+  {
+    if (this._cells.length === 12) {
+      return this._transformMatrix4(fromFace, toFace, axis, delta);
+    } else if (this._cells.length === 200) {
+      return this._transformMatrix50(fromFace, toFace, axis, delta);
+    } else {
+      throw new SyntaxError('_transformMatrix: unsupported cube size');
     }
   }
   _buildEdgeFaces()
