@@ -117,4 +117,11 @@ describe('round tests', () => {
     expect(plant.minMax(Object.values(state.map))).to.eql(expectedMinMax);
     expect(plant.empties(state)).to.eql(110);
   });
+  it('should find stopping round correctly (large)', () => {
+    const elves = plant.parse(exampleInput);
+    const state = plant.initialState(elves);
+    plant.doRounds(state);
+    expect(state.anyElfMoved, '! any elf moved').to.be.false;
+    expect(state.round - 1).to.equal(20);
+  });
 });

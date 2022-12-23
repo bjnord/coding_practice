@@ -12,7 +12,8 @@ console.log(`part 1: empty tiles in bounding rect: ${plant.empties(state)}`);
 console.log('');
 
 // PART 2
-const answer2 = 0;
-console.log('part 2: expected answer:              1');
-console.log(`part 2: actual answer:                ${answer2}`);
+plant.doRounds(state);
+const answer2 = state.round - 1;
+console.log('part 2: expected answer:              930');
+console.log(`part 2: stopping round:               ${answer2}`);
 console.log('');
