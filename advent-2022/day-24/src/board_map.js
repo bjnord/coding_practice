@@ -22,13 +22,7 @@ class BoardMap
   {
     this._height = 0;
     for (const line of input.trim().split(/\n/)) {
-      if (this._endPos !== undefined) {
-        throw new SyntaxError('floor after end');
-      }
       this._parseLine(line);
-      if ((this._height === 0) && (this._blizzards.length > 0)) {
-        throw new SyntaxError('floor before start');
-      }
       this._height += 1;
     }
     if (this._endPos === undefined) {
@@ -40,15 +34,30 @@ class BoardMap
    */
   _parseLine(line)
   {
+    if (this._endPos !== undefined) {
+      throw new SyntaxError('middle after end');
+    }
+    this._parseLineContents(line);
+    if ((this._height === 0) && (this._blizzards.length > 0)) {
+      throw new SyntaxError('middle before start');
+    }
+  }
+  /*
+   * Parse contents of a line of puzzle input.
+   */
+  _parseLineContents(line)
+  {
     this._width = line.length;
     const door = BoardMap._parseEdgeLine(line);
     if (door !== undefined) {
+      // start/end row
       if (this._height === 0) {
         this._startPos = {y: 0, x: door};
       } else {
         this._endPos = {y: -this._height, x: door};
       }
     } else {
+      // middle row
       this._blizzards = this._blizzards.concat(BoardMap._parseLineBlizzards(line, this._height));
     }
   }
