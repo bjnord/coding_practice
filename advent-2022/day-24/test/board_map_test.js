@@ -9,7 +9,7 @@ const exampleInput = `#.#####
 #...v.#
 #.....#
 #####.#`;
-describe('Board construction tests', () => {
+describe('BoardMap construction tests', () => {
   it('should parse a whole input set correctly', () => {
     const map = new BoardMap(exampleInput);
     expect(map.height(), 'example 1 height').to.equal(7);
@@ -68,7 +68,7 @@ describe('Board construction tests', () => {
     expect(actBlizzards2, 'example 2 blizzards').to.eql(expBlizzards2);
   });
 });
-describe('Board construction tests (pathological boards)', () => {
+describe('BoardMap construction tests (pathological boards)', () => {
   it('should detect invalid cell characater', () => {
     const inputBadCell = '#.###\n#.>E#\n###.#\n';
     const badCellFn = () => { new BoardMap(inputBadCell); };
@@ -100,8 +100,8 @@ describe('Board construction tests (pathological boards)', () => {
     expect(badEndFn, 'end row with no door').to.throw(SyntaxError);
   });
 });
-describe('Board blizzard movement tests', () => {
-  it('should parse a whole input set correctly', () => {
+describe('BoardMap blizzard movement tests', () => {
+  it('should move blizzards correctly', () => {
     const map = new BoardMap(exampleInput);
     const expBlizzardPos1 = [
       {y: -2, x: 2},

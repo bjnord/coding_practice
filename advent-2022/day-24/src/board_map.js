@@ -43,7 +43,7 @@ class BoardMap
     }
   }
   /*
-   * Parse contents of a line of puzzle input.
+   * Parse the contents of a line of puzzle input.
    */
   _parseLineContents(line)
   {
@@ -85,7 +85,8 @@ class BoardMap
       || (line.substring(line.length - 2) === '##');
   }
   /*
-   * Parse start/end row, returning X position of door (or `undefined`).
+   * Parse a start/end row, returning the `x` position of the door
+   * (or `undefined`).
    */
   static _parseEdgeLine(line)
   {
@@ -100,17 +101,17 @@ class BoardMap
     }
   }
   /**
-   * Get height of board.
+   * Get the height of the board.
    *
    * @return {number}
-   *   Returns the number of rows in board (including edges).
+   *   Returns the number of rows in the board (including edges).
    */
   height()
   {
     return this._height;
   }
   /**
-   * Get width of board.
+   * Get the width of the board.
    *
    * @return {number}
    *   Returns the number of columns in board (including edges).
@@ -120,7 +121,7 @@ class BoardMap
     return this._width;
   }
   /**
-   * Get starting position.
+   * Get the starting position.
    *
    * @return {Object}
    *   Returns the `y`,`x` starting position.
@@ -130,7 +131,7 @@ class BoardMap
     return this._startPos;
   }
   /**
-   * Get ending position.
+   * Get the ending position.
    *
    * @return {Object}
    *   Returns the `y`,`x` ending position.
@@ -140,7 +141,7 @@ class BoardMap
     return this._endPos;
   }
   /**
-   * Get current blizzards.
+   * Get the current blizzards.
    *
    * @return {Array.Blizzard}
    *   Returns a list of blizzards.

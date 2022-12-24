@@ -44,7 +44,7 @@ class Blizzard
     return _BLIZZARD_CHARS.indexOf(ch) >= 0;
   }
   /**
-   * Get current position.
+   * Get the current position.
    *
    * @return {Object}
    *   Returns the current `y`,`x` position of this blizzard.
@@ -54,7 +54,7 @@ class Blizzard
     return this._pos;
   }
   /**
-   * Get direction.
+   * Get the direction.
    *
    * @return {Object}
    *   Returns the `dy`,`dx` direction of this blizzard.
