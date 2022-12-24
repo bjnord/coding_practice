@@ -1,4 +1,5 @@
 'use strict';
+const math = require('../../shared/src/math');
 
 const _BLIZZARD_CHARS = '^>v<';
 
@@ -61,6 +62,16 @@ class Blizzard
   direction()
   {
     return this._dir;
+  }
+  /**
+   * Move the blizzard, given a map of `dim` dimensions.
+   *
+   * @param {Object} dim - `y`,`x` dimensions of map (including edges)
+   */
+  move(dim)
+  {
+    this._pos.y = -(math.mod((-this._pos.y - 1) + -this._dir.y, dim.y - 2) + 1);
+    this._pos.x =  (math.mod(( this._pos.x - 1) +  this._dir.x, dim.x - 2) + 1);
   }
 }
 module.exports = Blizzard;
