@@ -17,8 +17,8 @@ describe('Board construction tests', () => {
     expect(map.startPosition()).to.eql({y: 0, x: 1});
     expect(map.endPosition()).to.eql({y: -6, x: 5});
     const expBlizzards = [
-      {y: 2, x: 1, dir: {y: 0, x: 1}},
-      {y: 4, x: 4, dir: {y: -1, x: 0}},
+      {pos: {y: 2, x: 1}, dir: {y: 0, x: 1}},
+      {pos: {y: 4, x: 4}, dir: {y: -1, x: 0}},
     ];
     expect(map.blizzards()).to.eql(expBlizzards);
   });
@@ -30,28 +30,28 @@ describe('Board construction tests', () => {
     expect(map2.startPosition()).to.eql({y: 0, x: 1});
     expect(map2.endPosition()).to.eql({y: -5, x: 6});
     const expBlizzards2 = [
-      {y: 1, x: 1, dir: {y: 0, x: 1}},
-      {y: 1, x: 2, dir: {y: 0, x: 1}},
-      {y: 1, x: 4, dir: {y: 0, x: -1}},
-      {y: 1, x: 5, dir: {y: 1, x: 0}},
-      {y: 1, x: 6, dir: {y: 0, x: -1}},
+      {pos: {y: 1, x: 1}, dir: {y: 0, x: 1}},
+      {pos: {y: 1, x: 2}, dir: {y: 0, x: 1}},
+      {pos: {y: 1, x: 4}, dir: {y: 0, x: -1}},
+      {pos: {y: 1, x: 5}, dir: {y: 1, x: 0}},
+      {pos: {y: 1, x: 6}, dir: {y: 0, x: -1}},
       //
-      {y: 2, x: 2, dir: {y: 0, x: -1}},
-      {y: 2, x: 5, dir: {y: 0, x: -1}},
-      {y: 2, x: 6, dir: {y: 0, x: -1}},
+      {pos: {y: 2, x: 2}, dir: {y: 0, x: -1}},
+      {pos: {y: 2, x: 5}, dir: {y: 0, x: -1}},
+      {pos: {y: 2, x: 6}, dir: {y: 0, x: -1}},
       //
-      {y: 3, x: 1, dir: {y: 0, x: 1}},
-      {y: 3, x: 2, dir: {y: -1, x: 0}},
-      {y: 3, x: 4, dir: {y: 0, x: 1}},
-      {y: 3, x: 5, dir: {y: 0, x: -1}},
-      {y: 3, x: 6, dir: {y: 0, x: 1}},
+      {pos: {y: 3, x: 1}, dir: {y: 0, x: 1}},
+      {pos: {y: 3, x: 2}, dir: {y: -1, x: 0}},
+      {pos: {y: 3, x: 4}, dir: {y: 0, x: 1}},
+      {pos: {y: 3, x: 5}, dir: {y: 0, x: -1}},
+      {pos: {y: 3, x: 6}, dir: {y: 0, x: 1}},
       //
-      {y: 4, x: 1, dir: {y: 0, x: -1}},
-      {y: 4, x: 2, dir: {y: 1, x: 0}},
-      {y: 4, x: 3, dir: {y: -1, x: 0}},
-      {y: 4, x: 4, dir: {y: 1, x: 0}},
-      {y: 4, x: 5, dir: {y: 1, x: 0}},
-      {y: 4, x: 6, dir: {y: 0, x: 1}},
+      {pos: {y: 4, x: 1}, dir: {y: 0, x: -1}},
+      {pos: {y: 4, x: 2}, dir: {y: 1, x: 0}},
+      {pos: {y: 4, x: 3}, dir: {y: -1, x: 0}},
+      {pos: {y: 4, x: 4}, dir: {y: 1, x: 0}},
+      {pos: {y: 4, x: 5}, dir: {y: 1, x: 0}},
+      {pos: {y: 4, x: 6}, dir: {y: 0, x: 1}},
     ];
     expect(map2.blizzards()).to.eql(expBlizzards2);
   });

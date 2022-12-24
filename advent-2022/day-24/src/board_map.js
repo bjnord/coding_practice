@@ -74,7 +74,7 @@ class BoardMap
     line.split('').forEach((ch, x) => {
       const dir = BoardMap._parseBlizzardDir(ch);
       if (dir) {
-        lineBlizzards.push({y, x, dir});
+        lineBlizzards.push({pos: {y, x}, dir});
       } else if ((ch !== '#') && (ch !== '.')) {
         throw new SyntaxError(`unknown cell '${ch}' at ${y},${x}`);
       }
