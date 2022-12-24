@@ -12,10 +12,10 @@ const exampleInput = `#.#####
 describe('Board construction tests', () => {
   it('should parse a whole input set correctly', () => {
     const map = new BoardMap(exampleInput);
-    expect(map.height()).to.equal(7);
-    expect(map.width()).to.equal(7);
-    expect(map.startPosition()).to.eql({y: 0, x: 1});
-    expect(map.endPosition()).to.eql({y: -6, x: 5});
+    expect(map.height(), 'example 1 height').to.equal(7);
+    expect(map.width(), 'example 1 width').to.equal(7);
+    expect(map.startPosition(), 'example 1 start pos').to.eql({y: 0, x: 1});
+    expect(map.endPosition(), 'example 1 end pos').to.eql({y: -6, x: 5});
     const expBlizzards = [
       {pos: {y: 2, x: 1}, dir: {y: 0, x: 1}},
       {pos: {y: 4, x: 4}, dir: {y: -1, x: 0}},
@@ -26,15 +26,15 @@ describe('Board construction tests', () => {
         dir: blizzard.direction(),
       };
     });
-    expect(actBlizzards).to.eql(expBlizzards);
+    expect(actBlizzards, 'example 1 blizzards').to.eql(expBlizzards);
   });
   it('should parse a whole input set correctly (complex example)', () => {
     const exampleInput2 = fs.readFileSync('input/example2.txt', 'utf8');
     const map2 = new BoardMap(exampleInput2);
-    expect(map2.height()).to.equal(6);
-    expect(map2.width()).to.equal(8);
-    expect(map2.startPosition()).to.eql({y: 0, x: 1});
-    expect(map2.endPosition()).to.eql({y: -5, x: 6});
+    expect(map2.height(), 'example 2 height').to.equal(6);
+    expect(map2.width(), 'example 2 width').to.equal(8);
+    expect(map2.startPosition(), 'example 2 start pos').to.eql({y: 0, x: 1});
+    expect(map2.endPosition(), 'example 2 end pos').to.eql({y: -5, x: 6});
     const expBlizzards2 = [
       {pos: {y: 1, x: 1}, dir: {y: 0, x: 1}},
       {pos: {y: 1, x: 2}, dir: {y: 0, x: 1}},
@@ -65,7 +65,7 @@ describe('Board construction tests', () => {
         dir: blizzard.direction(),
       };
     });
-    expect(actBlizzards2).to.eql(expBlizzards2);
+    expect(actBlizzards2, 'example 2 blizzards').to.eql(expBlizzards2);
   });
 });
 describe('Board construction tests (pathological boards)', () => {
