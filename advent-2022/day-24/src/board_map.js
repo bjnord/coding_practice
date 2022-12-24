@@ -149,5 +149,12 @@ class BoardMap
   {
     return this._blizzards;
   }
+  /**
+   * Move the blizzards.
+   */
+  moveBlizzards()
+  {
+    this._blizzards.forEach((b) => b.move({y: this._height, x: this._width}));
+  }
 }
 module.exports = BoardMap;

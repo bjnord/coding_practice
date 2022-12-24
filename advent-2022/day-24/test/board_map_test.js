@@ -100,3 +100,20 @@ describe('Board construction tests (pathological boards)', () => {
     expect(badEndFn, 'end row with no door').to.throw(SyntaxError);
   });
 });
+describe('Board blizzard movement tests', () => {
+  it('should parse a whole input set correctly', () => {
+    const map = new BoardMap(exampleInput);
+    const expBlizzardPos1 = [
+      {y: -2, x: 2},
+      {y: -5, x: 4},
+    ];
+    const expBlizzardPos2 = [
+      {y: -2, x: 3},
+      {y: -1, x: 4},
+    ];
+    map.moveBlizzards();
+    expect(map.blizzards().map((b) => b.position()), 'example 1 post-move-1 pos').to.eql(expBlizzardPos1);
+    map.moveBlizzards();
+    expect(map.blizzards().map((b) => b.position()), 'example 1 post-move-2 pos').to.eql(expBlizzardPos2);
+  });
+});
