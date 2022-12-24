@@ -16,7 +16,7 @@ class Blizzard
       throw new SyntaxError(`invalid type character '${ch}'`);
     }
     this._pos = pos;
-    this._dir = Blizzard._parseBlizzardDir(ch)
+    this._dir = Blizzard._parseBlizzardDir(ch);
   }
   /*
    * Translate line character to blizzard direction.
