@@ -21,7 +21,7 @@ class BoardMap
   {
     this._height = 0;
     for (const line of input.trim().split(/\n/)) {
-      if (this._endX !== undefined) {
+      if (this._endPos !== undefined) {
         throw new SyntaxError('floor after end');
       }
       this._parseLine(line);
@@ -30,7 +30,7 @@ class BoardMap
       }
       this._height += 1;
     }
-    if (this._endX === undefined) {
+    if (this._endPos === undefined) {
       throw new SyntaxError('end not found');
     }
   }
@@ -43,9 +43,9 @@ class BoardMap
     const door = BoardMap._parseEdgeLine(line);
     if (door !== undefined) {
       if (this._height === 0) {
-        this._startX = door;
+        this._startPos = {y: 0, x: door};
       } else {
-        this._endX = door;
+        this._endPos = {y: -this._height, x: door};
       }
     } else {
       this._blizzards = this._blizzards.concat(BoardMap._parseLineBlizzards(line, this._height));
@@ -132,7 +132,7 @@ class BoardMap
    */
   startPosition()
   {
-    return {y: 0, x: this._startX};
+    return this._startPos;
   }
   /**
    * Get ending position.
@@ -142,7 +142,7 @@ class BoardMap
    */
   endPosition()
   {
-    return {y: -this._height + 1, x: this._endX};
+    return this._endPos;
   }
   /**
    * Get current blizzards.
