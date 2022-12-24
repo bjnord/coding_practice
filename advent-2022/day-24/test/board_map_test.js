@@ -17,8 +17,8 @@ describe('Board construction tests', () => {
     expect(map.startPosition(), 'example 1 start pos').to.eql({y: 0, x: 1});
     expect(map.endPosition(), 'example 1 end pos').to.eql({y: -6, x: 5});
     const expBlizzards = [
-      {pos: {y: 2, x: 1}, dir: {y: 0, x: 1}},
-      {pos: {y: 4, x: 4}, dir: {y: -1, x: 0}},
+      {pos: {y: -2, x: 1}, dir: {y: 0, x: 1}},
+      {pos: {y: -4, x: 4}, dir: {y: -1, x: 0}},
     ];
     const actBlizzards = map.blizzards().map((blizzard) => {
       return {
@@ -36,28 +36,28 @@ describe('Board construction tests', () => {
     expect(map2.startPosition(), 'example 2 start pos').to.eql({y: 0, x: 1});
     expect(map2.endPosition(), 'example 2 end pos').to.eql({y: -5, x: 6});
     const expBlizzards2 = [
-      {pos: {y: 1, x: 1}, dir: {y: 0, x: 1}},
-      {pos: {y: 1, x: 2}, dir: {y: 0, x: 1}},
-      {pos: {y: 1, x: 4}, dir: {y: 0, x: -1}},
-      {pos: {y: 1, x: 5}, dir: {y: 1, x: 0}},
-      {pos: {y: 1, x: 6}, dir: {y: 0, x: -1}},
+      {pos: {y: -1, x: 1}, dir: {y: 0, x: 1}},
+      {pos: {y: -1, x: 2}, dir: {y: 0, x: 1}},
+      {pos: {y: -1, x: 4}, dir: {y: 0, x: -1}},
+      {pos: {y: -1, x: 5}, dir: {y: 1, x: 0}},
+      {pos: {y: -1, x: 6}, dir: {y: 0, x: -1}},
       //
-      {pos: {y: 2, x: 2}, dir: {y: 0, x: -1}},
-      {pos: {y: 2, x: 5}, dir: {y: 0, x: -1}},
-      {pos: {y: 2, x: 6}, dir: {y: 0, x: -1}},
+      {pos: {y: -2, x: 2}, dir: {y: 0, x: -1}},
+      {pos: {y: -2, x: 5}, dir: {y: 0, x: -1}},
+      {pos: {y: -2, x: 6}, dir: {y: 0, x: -1}},
       //
-      {pos: {y: 3, x: 1}, dir: {y: 0, x: 1}},
-      {pos: {y: 3, x: 2}, dir: {y: -1, x: 0}},
-      {pos: {y: 3, x: 4}, dir: {y: 0, x: 1}},
-      {pos: {y: 3, x: 5}, dir: {y: 0, x: -1}},
-      {pos: {y: 3, x: 6}, dir: {y: 0, x: 1}},
+      {pos: {y: -3, x: 1}, dir: {y: 0, x: 1}},
+      {pos: {y: -3, x: 2}, dir: {y: -1, x: 0}},
+      {pos: {y: -3, x: 4}, dir: {y: 0, x: 1}},
+      {pos: {y: -3, x: 5}, dir: {y: 0, x: -1}},
+      {pos: {y: -3, x: 6}, dir: {y: 0, x: 1}},
       //
-      {pos: {y: 4, x: 1}, dir: {y: 0, x: -1}},
-      {pos: {y: 4, x: 2}, dir: {y: 1, x: 0}},
-      {pos: {y: 4, x: 3}, dir: {y: -1, x: 0}},
-      {pos: {y: 4, x: 4}, dir: {y: 1, x: 0}},
-      {pos: {y: 4, x: 5}, dir: {y: 1, x: 0}},
-      {pos: {y: 4, x: 6}, dir: {y: 0, x: 1}},
+      {pos: {y: -4, x: 1}, dir: {y: 0, x: -1}},
+      {pos: {y: -4, x: 2}, dir: {y: 1, x: 0}},
+      {pos: {y: -4, x: 3}, dir: {y: -1, x: 0}},
+      {pos: {y: -4, x: 4}, dir: {y: 1, x: 0}},
+      {pos: {y: -4, x: 5}, dir: {y: 1, x: 0}},
+      {pos: {y: -4, x: 6}, dir: {y: 0, x: 1}},
     ];
     const actBlizzards2 = map2.blizzards().map((blizzard) => {
       return {

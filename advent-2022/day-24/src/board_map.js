@@ -58,7 +58,7 @@ class BoardMap
       }
     } else {
       // middle row
-      this._blizzards = this._blizzards.concat(BoardMap._parseLineBlizzards(line, this._height));
+      this._blizzards = this._blizzards.concat(BoardMap._parseLineBlizzards(line, -this._height));
     }
   }
   /*
