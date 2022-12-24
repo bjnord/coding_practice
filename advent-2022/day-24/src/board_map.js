@@ -157,5 +157,32 @@ class BoardMap
   {
     this._blizzards.forEach((b) => b.move({y: this._height, x: this._width}));
   }
+  /**
+   * Generate the current blizzard matrix.
+   *
+   * This is a two-dimensional array (row-first) with a count of blizzards
+   * in each cell (or `-1` for edge cells). The row index is inverted from
+   * the `y` coordinate (`matrix[3]` yields the row for `y=-3`).
+   *
+   * @return {Array.Array.number}
+   *   Return the current blizzard matrix.
+   */
+  blizzardMatrix()
+  {
+    const matrix = Array(this._height).fill([])
+      .map(() => Array(this._width).fill(0));
+    for (let y = 0; y < this._height; y++) {
+      matrix[y][0] = -1;
+      matrix[y][this._height - 1] = -1;
+    }
+    for (let x = 0; x < this._width; x++) {
+      matrix[0][x] = -1;
+      matrix[this._width - 1][x] = -1;
+    }
+    for (const bliz of this._blizzards) {
+      matrix[-bliz.position().y][bliz.position().x]++;
+    }
+    return matrix;
+  }
 }
 module.exports = BoardMap;

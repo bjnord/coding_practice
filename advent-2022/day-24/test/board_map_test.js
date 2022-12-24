@@ -112,8 +112,46 @@ describe('BoardMap blizzard movement tests', () => {
       {y: -1, x: 4},
     ];
     map.moveBlizzards();
-    expect(map.blizzards().map((b) => b.position()), 'example 1 post-move-1 pos').to.eql(expBlizzardPos1);
+    expect(map.blizzards().map((b) => b.position()), 'example 1 minute 1 pos').to.eql(expBlizzardPos1);
     map.moveBlizzards();
-    expect(map.blizzards().map((b) => b.position()), 'example 1 post-move-2 pos').to.eql(expBlizzardPos2);
+    expect(map.blizzards().map((b) => b.position()), 'example 1 minute 2 pos').to.eql(expBlizzardPos2);
+  });
+});
+describe('BoardMap blizzard matrix tests', () => {
+  it('should construct a blizzard map correctly', () => {
+    const map = new BoardMap(exampleInput);
+    const expBlizMatrix0 = [
+      [-1, -1, -1, -1, -1, -1, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  1,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  1,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1, -1, -1, -1, -1, -1, -1],
+    ];
+    const expBlizMatrix1 = [
+      [-1, -1, -1, -1, -1, -1, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  1,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  1,  0, -1],
+      [-1, -1, -1, -1, -1, -1, -1],
+    ];
+    const expBlizMatrix3 = [
+      [-1, -1, -1, -1, -1, -1, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  2,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1,  0,  0,  0,  0,  0, -1],
+      [-1, -1, -1, -1, -1, -1, -1],
+    ];
+    expect(map.blizzardMatrix(), 'example 1 initial matrix').to.eql(expBlizMatrix0);
+    map.moveBlizzards();
+    expect(map.blizzardMatrix(), 'example 1 minute 1 matrix').to.eql(expBlizMatrix1);
+    map.moveBlizzards();
+    map.moveBlizzards();
+    expect(map.blizzardMatrix(), 'example 1 minute 3 matrix').to.eql(expBlizMatrix3);
   });
 });
