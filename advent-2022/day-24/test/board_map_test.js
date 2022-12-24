@@ -69,6 +69,11 @@ describe('Board construction tests', () => {
   });
 });
 describe('Board construction tests (pathological boards)', () => {
+  it('should detect invalid cell characater', () => {
+    const inputBadCell = '#.###\n#.>E#\n###.#\n';
+    const badCellFn = () => { new BoardMap(inputBadCell); };
+    expect(badCellFn, 'invalid cell char').to.throw(SyntaxError);
+  });
   it('should detect missing start row', () => {
     const inputMissingStart = '#.<.#\n###.#\n';
     const missingStartFn = () => { new BoardMap(inputMissingStart); };
@@ -83,5 +88,15 @@ describe('Board construction tests (pathological boards)', () => {
     const inputRowsAfterEnd = '#.###\n#.>.#\n###.#\n#..^#\n';
     const rowsAfterEndFn = () => { new BoardMap(inputRowsAfterEnd); };
     expect(rowsAfterEndFn, 'middle end row').to.throw(SyntaxError);
+  });
+  it('should detect start row with no door', () => {
+    const inputBadStart = '#####\n#.v.#\n###.#\n';
+    const badStartFn = () => { new BoardMap(inputBadStart); };
+    expect(badStartFn, 'start row with no door').to.throw(SyntaxError);
+  });
+  it('should detect end row with no door', () => {
+    const inputBadEnd = '#.###\n#.v.#\n#####\n';
+    const badEndFn = () => { new BoardMap(inputBadEnd); };
+    expect(badEndFn, 'end row with no door').to.throw(SyntaxError);
   });
 });
