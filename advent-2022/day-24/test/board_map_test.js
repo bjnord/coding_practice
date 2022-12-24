@@ -20,7 +20,13 @@ describe('Board construction tests', () => {
       {pos: {y: 2, x: 1}, dir: {y: 0, x: 1}},
       {pos: {y: 4, x: 4}, dir: {y: -1, x: 0}},
     ];
-    expect(map.blizzards()).to.eql(expBlizzards);
+    const actBlizzards = map.blizzards().map((blizzard) => {
+      return {
+        pos: blizzard.position(),
+        dir: blizzard.direction(),
+      };
+    });
+    expect(actBlizzards).to.eql(expBlizzards);
   });
   it('should parse a whole input set correctly (complex example)', () => {
     const exampleInput2 = fs.readFileSync('input/example2.txt', 'utf8');
@@ -53,7 +59,13 @@ describe('Board construction tests', () => {
       {pos: {y: 4, x: 5}, dir: {y: 1, x: 0}},
       {pos: {y: 4, x: 6}, dir: {y: 0, x: 1}},
     ];
-    expect(map2.blizzards()).to.eql(expBlizzards2);
+    const actBlizzards2 = map2.blizzards().map((blizzard) => {
+      return {
+        pos: blizzard.position(),
+        dir: blizzard.direction(),
+      };
+    });
+    expect(actBlizzards2).to.eql(expBlizzards2);
   });
 });
 describe('Board construction tests (pathological boards)', () => {

@@ -1,4 +1,5 @@
 'use strict';
+const Blizzard = require('../src/blizzard');
 
 class BoardMap
 {
@@ -52,29 +53,14 @@ class BoardMap
     }
   }
   /*
-   * Translate line character to blizzard direction.
-   */
-  static _parseBlizzardDir(ch)
-  {
-    const chars = '^>v<';
-    const dirs = [
-      {y: 1, x: 0},
-      {y: 0, x: 1},
-      {y: -1, x: 0},
-      {y: 0, x: -1},
-    ];
-    return dirs[chars.indexOf(ch)];
-  }
-  /*
    * Translate line characters to blizzards.
    */
   static _parseLineBlizzards(line, y)
   {
     const lineBlizzards = [];
     line.split('').forEach((ch, x) => {
-      const dir = BoardMap._parseBlizzardDir(ch);
-      if (dir) {
-        lineBlizzards.push({pos: {y, x}, dir});
+      if (Blizzard.isBlizzardChar(ch)) {
+        lineBlizzards.push(new Blizzard(ch, {y, x}));
       } else if ((ch !== '#') && (ch !== '.')) {
         throw new SyntaxError(`unknown cell '${ch}' at ${y},${x}`);
       }
@@ -147,8 +133,8 @@ class BoardMap
   /**
    * Get current blizzards.
    *
-   * @return {Array.Object}
-   *   Returns a list of blizzard `y`,`x` positions and directions.
+   * @return {Array.Blizzard}
+   *   Returns a list of blizzards.
    */
   blizzards()
   {
