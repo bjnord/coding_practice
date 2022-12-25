@@ -2,16 +2,50 @@
 const expect = require('chai').expect;
 const fs = require('fs');
 const BoardMap = require('../src/board_map');
-const exampleInput = `#.#####
+const exampleInput = [`
+#.#####
 #.....#
 #>....#
 #.....#
 #...v.#
 #.....#
-#####.#`;
+#####.#
+`, `
+#.#####
+#.....#
+#.>...#
+#.....#
+#.....#
+#...v.#
+#####.#
+`, `
+#.#####
+#...v.#
+#..>..#
+#.....#
+#.....#
+#.....#
+#####.#
+`, `
+#.#####
+#.....#
+#...2.#
+#.....#
+#.....#
+#.....#
+#####.#
+`, `
+#.#####
+#.....#
+#....>#
+#...v.#
+#.....#
+#.....#
+#####.#
+`];
 describe('BoardMap construction tests', () => {
   it('should parse a whole input set correctly', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleInput[0]);
     expect(map.height(), 'example 1 height').to.equal(7);
     expect(map.width(), 'example 1 width').to.equal(7);
     expect(map.startPosition(), 'example 1 start pos').to.eql({y: 0, x: 1});
@@ -102,7 +136,7 @@ describe('BoardMap construction tests (pathological boards)', () => {
 });
 describe('BoardMap blizzard movement tests', () => {
   it('should move blizzards correctly', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleInput[0]);
     const expBlizzardPos1 = [
       {y: -2, x: 2},
       {y: -5, x: 4},
@@ -119,7 +153,7 @@ describe('BoardMap blizzard movement tests', () => {
 });
 describe('BoardMap blizzard matrix tests', () => {
   it('should construct a blizzard map correctly', () => {
-    const map = new BoardMap(exampleInput);
+    const map = new BoardMap(exampleInput[0]);
     const expBlizMatrix0 = [
       [-1, -1, -1, -1, -1, -1, -1],
       [-1,  0,  0,  0,  0,  0, -1],
@@ -153,5 +187,16 @@ describe('BoardMap blizzard matrix tests', () => {
     map.moveBlizzards();
     map.moveBlizzards();
     expect(map.blizzardMatrix(), 'example 1 minute 3 matrix').to.eql(expBlizMatrix3);
+  });
+});
+describe('BoardMap dump generation tests', () => {
+  it('should construct a blizzard map correctly', () => {
+    const map = new BoardMap(exampleInput[0]);
+    let t = 0;
+    for (; t < 5; t++) {
+      expect(map.blizzardDump().trim(), `example 1 minute ${t} dump`).to.equal(exampleInput[t].trim());
+      map.moveBlizzards();
+    }
+    expect(map.blizzardDump().trim(), `example 1 minute ${t} dump`).to.equal(exampleInput[0].trim());
   });
 });

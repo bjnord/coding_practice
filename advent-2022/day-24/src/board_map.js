@@ -184,5 +184,43 @@ class BoardMap
     }
     return matrix;
   }
+  /**
+   * Generate a dump of the current board.
+   *
+   * @return {string}
+   *   Return lines separated by `\n`.
+   */
+  blizzardDump()
+  {
+    let dump = '';
+    for (let y = 0; y < this._height; y++) {
+      for (let x = 0; x < this._width; x++) {
+        if (y === 0) {
+          dump += (this._startPos.x === x) ? '.' : '#';
+        } else if (y === (this._height - 1)) {
+          dump += (this._endPos.x === x) ? '.' : '#';
+        } else if ((x === 0) || (x === (this._width - 1))) {
+          dump += '#';
+        } else {
+          // TODO OPTIMIZE - very slow (although dump is only used for
+          //      small examples)
+          const blizzardsAt = this._blizzards.filter((bliz) => {
+            return (bliz.position().y === -y) && (bliz.position().x === x);
+          });
+          if (blizzardsAt.length > 9) {
+            dump += '*';
+          } else if (blizzardsAt.length > 1) {
+            dump += blizzardsAt.length;
+          } else if (blizzardsAt.length === 1) {
+            dump += blizzardsAt[0].dumpChar();
+          } else {
+            dump += '.';
+          }
+        }
+      }
+      dump += '\n';
+    }
+    return dump;
+  }
 }
 module.exports = BoardMap;

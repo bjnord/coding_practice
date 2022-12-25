@@ -73,5 +73,25 @@ class Blizzard
     this._pos.y = -(math.mod((-this._pos.y - 1) + -this._dir.y, dim.y - 2) + 1);
     this._pos.x =  (math.mod(( this._pos.x - 1) +  this._dir.x, dim.x - 2) + 1);
   }
+  /**
+   * Return the dump character for this blizzard's position.
+   *
+   * @return {string}
+   *   Returns the dump character (one of `^` `>` `v` `<`).
+   */
+  dumpChar()
+  {
+    if (this._dir.y > 0) {
+      return '^';
+    } else if (this._dir.x > 0) {
+      return '>';
+    } else if (this._dir.y < 0) {
+      return 'v';
+    } else if (this._dir.x < 0) {
+      return '<';
+    } else {
+      throw new SyntaxError(`no matching char for dir ${this._dir.y},${this._dir.x}`);
+    }
+  }
 }
 module.exports = Blizzard;
