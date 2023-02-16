@@ -5,6 +5,13 @@
 - [Rust Language Cheat Sheet](https://cheats.rs/)
 - [Idiomatic Rust](https://github.com/mre/idiomatic-rust)
 
+## Setup
+
+- Rust is installed/updated with the `rustup` tool
+  - `rustup show`
+  - `rustup check` + `rustup update`
+- What version is active? `rustc --version` + `cargo --version`
+
 ## Terms
 
 - "turbofish" refers to the `::<>` type coercion syntax
