@@ -8,5 +8,6 @@
 synacor/tmp/
 hogan-57/*/*/target/
 rust/*/target/
+advent-2015/*/target/
 advent-2020/*/target/
 euler-rust/target/
