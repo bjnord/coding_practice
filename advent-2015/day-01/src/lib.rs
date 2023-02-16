@@ -76,6 +76,30 @@ impl Instructions {
             Direction::Down => -1,
         }
     }
+
+    /// Return the first step that enters the basement, or `0` if
+    /// no step does.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_01::Instructions;
+    /// let mut instructions = "()())".parse::<Instructions>().unwrap();
+    /// assert_eq!(5, instructions.basement());
+    /// instructions = "(()".parse::<Instructions>().unwrap();
+    /// assert_eq!(0, instructions.basement());
+    /// ```
+    #[must_use]
+    pub fn basement(&self) -> usize {
+        let mut f: i32 = 0;
+        for (i, df) in self.directions.iter().map(Self::floor_delta).enumerate() {
+            f += df;
+            if f < 0 {
+                return i + 1;
+            }
+        }
+        0
+    }
 }
 
 #[cfg(test)]
@@ -145,5 +169,11 @@ mod tests {
         assert_eq!(-3, Instructions::from_str(str_1).unwrap().floor());
         let str_2 = ")())())";
         assert_eq!(-3, Instructions::from_str(str_2).unwrap().floor());
+    }
+
+    #[test]
+    fn test_instructions_basement_1() {
+        let s = ")";
+        assert_eq!(1, Instructions::from_str(s).unwrap().basement());
     }
 }
