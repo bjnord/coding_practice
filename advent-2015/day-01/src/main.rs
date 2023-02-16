@@ -1,3 +1,5 @@
+use day_01::Instructions;
+use std::fs;
 use std::time::Instant;
 
 fn main() {
@@ -7,11 +9,12 @@ fn main() {
 /// Output solution for part 1.
 fn part1() {
     let start = Instant::now();
-    //
+    let input: String = fs::read_to_string("private/input.txt").unwrap();
+    let instructions = input.parse::<Instructions>().unwrap();
     let gen_time = start.elapsed();
-    //
+    let floor = instructions.floor();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 1 expected", 1);
+    println!("Day 1 - Part 1 : {} <=> 74 expected", floor);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
