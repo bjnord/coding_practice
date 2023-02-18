@@ -8,8 +8,11 @@
 ## Setup
 
 - Rust is installed/updated with the `rustup` tool
-  - `rustup show`
-  - `rustup check` + `rustup update`
+  - `rustup show` shows active toolchains/channels (and what version)
+  - `rustup check` + `rustup update` (to update version)
+- Rust has _channels_ (`stable`, `beta`, `nightly`)
+  - and `rustup toolchain <cmd>` can be used to install a specific version
+    - _i.e._ `1.47` and `1.47.0` can be used as a channel name
 - What version is active? `rustc --version` + `cargo --version`
 
 ## Terms

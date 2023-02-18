@@ -1,6 +1,6 @@
 # Advent of Code 2015 in Rust
 
-I used stable `rustc 1.46.0` to develop this year (no unstable/nightly features).
+I used stable `rustc 1.67.1` to develop this year (no unstable/nightly features).
 
 I'm not using the [cargo-aoc crate](https://crates.io/crates/cargo-aoc). But each day emits similar output, with times for generating and running.
 
