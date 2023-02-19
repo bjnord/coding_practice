@@ -10,7 +10,7 @@ test:
 	cargo test
 
 clippy:
-	cargo clippy -- -Dclippy::pedantic
+	cargo clippy -- -D clippy::pedantic -A clippy::uninlined_format_args
 
 doc:
 	cargo doc

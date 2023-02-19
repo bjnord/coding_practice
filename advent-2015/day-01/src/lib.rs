@@ -26,7 +26,6 @@ impl Direction {
     /// # Errors
     ///
     /// Returns `Err` if the input character is not a valid direction.
-    #[must_use]
     pub fn from_char(dir: char) -> Result<Self, DirectionError> {
         match dir {
             '(' => Ok(Direction::Up),
@@ -70,6 +69,7 @@ impl Instructions {
             .sum()
     }
 
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     fn floor_delta(d: &Direction) -> i32 {
         match d {
             Direction::Up => 1,
