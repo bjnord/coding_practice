@@ -7,7 +7,7 @@ pub enum Direction {
     Down,
 }
 
-custom_error!{#[derive(PartialEq)]
+custom_error! {#[derive(PartialEq)]
     pub DirectionError
     InvalidDirChar{dir: char} = "invalid direction character '{dir}'",
 }
@@ -30,7 +30,7 @@ impl Direction {
         match dir {
             '(' => Ok(Direction::Up),
             ')' => Ok(Direction::Down),
-            _ => Err(DirectionError::InvalidDirChar { dir })
+            _ => Err(DirectionError::InvalidDirChar { dir }),
         }
     }
 }
@@ -64,9 +64,7 @@ impl Instructions {
     /// ```
     #[must_use]
     pub fn floor(&self) -> i32 {
-        self.directions.iter()
-            .map(Self::floor_delta)
-            .sum()
+        self.directions.iter().map(Self::floor_delta).sum()
     }
 
     #[allow(clippy::trivially_copy_pass_by_ref)]
@@ -118,7 +116,7 @@ mod tests {
             Err(e) => {
                 assert_eq!(DirectionError::InvalidDirChar { dir: '[' }, e);
                 assert_eq!("invalid direction character '['", e.to_string());
-            },
+            }
             Ok(_) => panic!("test did not fail"),
         }
     }
@@ -127,11 +125,19 @@ mod tests {
     fn test_instructions_from_str() {
         let str = "(()())";
         let exp_directions: Vec<Direction> = vec![
-            Direction::Up, Direction::Up,
-            Direction::Down, Direction::Up,
-            Direction::Down, Direction::Down,
+            Direction::Up,
+            Direction::Up,
+            Direction::Down,
+            Direction::Up,
+            Direction::Down,
+            Direction::Down,
         ];
-        assert_eq!(Instructions { directions: exp_directions }, Instructions::from_str(str).unwrap());
+        assert_eq!(
+            Instructions {
+                directions: exp_directions
+            },
+            Instructions::from_str(str).unwrap()
+        );
     }
 
     #[test]
@@ -140,7 +146,7 @@ mod tests {
             Err(e) => {
                 assert_eq!(DirectionError::InvalidDirChar { dir: '>' }, e);
                 assert_eq!("invalid direction character '>'", e.to_string());
-            },
+            }
             Ok(_) => panic!("test did not fail"),
         }
     }
