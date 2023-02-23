@@ -36,7 +36,7 @@ impl FromStr for Wrapping {
 
 impl Wrapping {
     #[must_use]
-    pub fn area(&self) -> u32 {
+    pub fn paper(&self) -> u32 {
         2 * self.length * self.width
             + 2 * self.width * self.height
             + 2 * self.height * self.length
@@ -111,16 +111,16 @@ mod tests {
     // "A present with dimensions 2x3x4 requires 2*6 + 2*12 + 2*8 = 52 square feet of wrapping
     // paper plus 6 square feet of slack, for a total of 58 square feet."
     #[test]
-    fn test_wrapping_area_ex1() {
+    fn test_wrapping_paper_ex1() {
         let w = Wrapping::from_str("2x3x4").unwrap();
-        assert_eq!(58, w.area());
+        assert_eq!(58, w.paper());
     }
 
     // "A present with dimensions 1x1x10 requires 2*1 + 2*10 + 2*10 = 42 square feet of wrapping
     // paper plus 1 square foot of slack, for a total of 43 square feet."
     #[test]
-    fn test_wrapping_area_ex2() {
+    fn test_wrapping_paper_ex2() {
         let w = Wrapping::from_str("1x1x10").unwrap();
-        assert_eq!(43, w.area());
+        assert_eq!(43, w.paper());
     }
 }

@@ -15,9 +15,9 @@ fn part1() {
         .map(|line| line.trim().parse::<Wrapping>().unwrap())
         .collect();
     let gen_time = start.elapsed();
-    let total_area = packages.iter().map(Wrapping::area).sum::<u32>();
+    let total_paper = packages.iter().map(Wrapping::paper).sum::<u32>();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 1 - Part 1 : {} <=> 1606483 expected", total_area);
+    println!("Day 1 - Part 1 : {} <=> 1606483 expected", total_paper);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
