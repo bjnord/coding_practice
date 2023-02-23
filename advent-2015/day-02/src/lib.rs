@@ -37,31 +37,32 @@ impl FromStr for Wrapping {
 impl Wrapping {
     #[must_use]
     pub fn paper(&self) -> u32 {
+        let min = self.min_dimensions();
         2 * self.length * self.width
             + 2 * self.width * self.height
             + 2 * self.height * self.length
-            + self.extra()
+            + min.0 * min.1
     }
 
-    fn extra(&self) -> u32 {
+    fn min_dimensions(&self) -> (u32, u32) {
         #[allow(clippy::collapsible_else_if)]
         if self.length < self.width {
             if self.width < self.height {
-                self.length * self.width
+                (self.length, self.width)
             } else {
-                self.length * self.height
+                (self.length, self.height)
             }
         } else if self.width < self.height {
             if self.height < self.length {
-                self.width * self.height
+                (self.width, self.height)
             } else {
-                self.width * self.length
+                (self.width, self.length)
             }
         } else {
             if self.width < self.length {
-                self.height * self.width
+                (self.height, self.width)
             } else {
-                self.height * self.length
+                (self.height, self.length)
             }
         }
     }
@@ -100,11 +101,12 @@ mod tests {
     //TODO fn test_wrapping_with_invalid_dimension()
 
     #[test]
-    fn test_wrapping_extra() {
+    fn test_wrapping_min_dimensions() {
         let examples = vec!["5x6x7", "5x7x6", "6x5x7", "6x7x5", "7x5x6", "7x6x5"];
         for example in examples {
             let w = Wrapping::from_str(example).unwrap();
-            assert_eq!(30, w.extra());
+            let min = w.min_dimensions();
+            assert_eq!(30, min.0 * min.1);
         }
     }
 
