@@ -35,6 +35,14 @@ impl FromStr for Wrapping {
 }
 
 impl Wrapping {
+    /// Calculate the square feet of wrapping paper required for this package.
+    ///
+    /// Examples
+    /// ```
+    /// # use day_02::Wrapping;
+    /// let w: Wrapping = "5x6x7".parse().unwrap();
+    /// assert_eq!(244, w.paper());
+    /// ```
     #[must_use]
     pub fn paper(&self) -> u32 {
         let min = self.min_dimensions();
@@ -44,6 +52,7 @@ impl Wrapping {
             + min.0 * min.1
     }
 
+    // Calculate the dimensions of the smallest face of this package.
     fn min_dimensions(&self) -> (u32, u32) {
         #[allow(clippy::collapsible_else_if)]
         if self.length < self.width {
@@ -67,14 +76,21 @@ impl Wrapping {
         }
     }
 
+    /// Calculate the feet of ribbon required for this package.
+    ///
+    /// Examples
+    /// ```
+    /// # use day_02::Wrapping;
+    /// let w: Wrapping = "5x6x7".parse().unwrap();
+    /// assert_eq!(232, w.ribbon());
+    /// ```
     #[must_use]
     pub fn ribbon(&self) -> u32 {
         let min = self.min_dimensions();
-        2 * min.0
-            + 2 * min.1
-            + self.cubic()
+        2 * min.0 + 2 * min.1 + self.cubic()
     }
 
+    // Calculate the cubic feet of this package.
     fn cubic(&self) -> u32 {
         self.length * self.width * self.height
     }
