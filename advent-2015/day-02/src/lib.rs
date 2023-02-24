@@ -101,18 +101,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_wrapping_from_string() {
+    fn test_wrapping_parse() {
         let exp = Package {
             length: 5,
             width: 6,
             height: 7,
         };
-        assert_eq!(exp, Package::from_str("5x6x7").unwrap());
+        assert_eq!(exp, "5x6x7".parse().unwrap());
     }
 
     #[test]
-    fn test_wrapping_from_string_invalid() {
-        match Package::from_str("5x6x7x8") {
+    fn test_wrapping_parse_invalid() {
+        match "5x6x7x8".parse::<Package>() {
             Err(e) => {
                 assert_eq!(
                     PackageError::InvalidString {
@@ -132,7 +132,7 @@ mod tests {
     fn test_wrapping_min_dimensions() {
         let examples = vec!["5x6x7", "5x7x6", "6x5x7", "6x7x5", "7x5x6", "7x6x5"];
         for example in examples {
-            let p = Package::from_str(example).unwrap();
+            let p: Package = example.parse().unwrap();
             let min = p.min_dimensions();
             assert_eq!(30, min.0 * min.1);
         }
@@ -142,7 +142,7 @@ mod tests {
     // paper plus 6 square feet of slack, for a total of 58 square feet."
     #[test]
     fn test_wrapping_paper_ex1() {
-        let p = Package::from_str("2x3x4").unwrap();
+        let p: Package = "2x3x4".parse().unwrap();
         assert_eq!(58, p.paper());
     }
 
@@ -150,13 +150,13 @@ mod tests {
     // paper plus 1 square foot of slack, for a total of 43 square feet."
     #[test]
     fn test_wrapping_paper_ex2() {
-        let p = Package::from_str("1x1x10").unwrap();
+        let p: Package = "1x1x10".parse().unwrap();
         assert_eq!(43, p.paper());
     }
 
     #[test]
     fn test_wrapping_cubic() {
-        let p = Package::from_str("6x7x5").unwrap();
+        let p: Package = "6x7x5".parse().unwrap();
         assert_eq!(210, p.cubic());
     }
 
@@ -164,7 +164,7 @@ mod tests {
     // plus 2*3*4 = 24 feet of ribbon for the bow, for a total of 34 feet."
     #[test]
     fn test_wrapping_ribbon_ex1() {
-        let p = Package::from_str("2x3x4").unwrap();
+        let p: Package = "2x3x4".parse().unwrap();
         assert_eq!(34, p.ribbon());
     }
 
@@ -172,7 +172,7 @@ mod tests {
     // plus 1*1*10 = 10 feet of ribbon for the bow, for a total of 14 feet."
     #[test]
     fn test_wrapping_ribbon_ex2() {
-        let p = Package::from_str("1x1x10").unwrap();
+        let p: Package = "1x1x10".parse().unwrap();
         assert_eq!(14, p.ribbon());
     }
 }

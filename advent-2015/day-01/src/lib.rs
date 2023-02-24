@@ -122,7 +122,7 @@ mod tests {
     }
 
     #[test]
-    fn test_instructions_from_str() {
+    fn test_instructions_parse() {
         let str = "(()())";
         let exp_directions: Vec<Direction> = vec![
             Direction::Up,
@@ -136,13 +136,13 @@ mod tests {
             Instructions {
                 directions: exp_directions
             },
-            Instructions::from_str(str).unwrap()
+            str.parse().unwrap()
         );
     }
 
     #[test]
-    fn test_instructions_from_str_invalid() {
-        match Instructions::from_str("((>())") {
+    fn test_instructions_parse_invalid() {
+        match "((>())".parse::<Instructions>() {
             Err(e) => {
                 assert_eq!(DirectionError::InvalidDirChar { dir: '>' }, e);
                 assert_eq!("invalid direction character '>'", e.to_string());
@@ -154,32 +154,32 @@ mod tests {
     #[test]
     fn test_instructions_floor_3() {
         let str_1 = "(((";
-        assert_eq!(3, Instructions::from_str(str_1).unwrap().floor());
+        assert_eq!(3, str_1.parse::<Instructions>().unwrap().floor());
         let str_2 = "(()(()(";
-        assert_eq!(3, Instructions::from_str(str_2).unwrap().floor());
+        assert_eq!(3, str_2.parse::<Instructions>().unwrap().floor());
         let str_3 = "))(((((";
-        assert_eq!(3, Instructions::from_str(str_3).unwrap().floor());
+        assert_eq!(3, str_3.parse::<Instructions>().unwrap().floor());
     }
 
     #[test]
     fn test_instructions_floor_m1() {
         let str_1 = "())";
-        assert_eq!(-1, Instructions::from_str(str_1).unwrap().floor());
+        assert_eq!(-1, str_1.parse::<Instructions>().unwrap().floor());
         let str_2 = "))(";
-        assert_eq!(-1, Instructions::from_str(str_2).unwrap().floor());
+        assert_eq!(-1, str_2.parse::<Instructions>().unwrap().floor());
     }
 
     #[test]
     fn test_instructions_floor_m3() {
         let str_1 = ")))";
-        assert_eq!(-3, Instructions::from_str(str_1).unwrap().floor());
+        assert_eq!(-3, str_1.parse::<Instructions>().unwrap().floor());
         let str_2 = ")())())";
-        assert_eq!(-3, Instructions::from_str(str_2).unwrap().floor());
+        assert_eq!(-3, str_2.parse::<Instructions>().unwrap().floor());
     }
 
     #[test]
     fn test_instructions_basement_1() {
         let s = ")";
-        assert_eq!(1, Instructions::from_str(s).unwrap().basement());
+        assert_eq!(1, s.parse::<Instructions>().unwrap().basement());
     }
 }
