@@ -40,8 +40,8 @@ impl Package {
     /// Examples
     /// ```
     /// # use day_02::Package;
-    /// let p: Package = "5x6x7".parse().unwrap();
-    /// assert_eq!(244, p.paper());
+    /// let package: Package = "5x6x7".parse().unwrap();
+    /// assert_eq!(244, package.paper());
     /// ```
     #[must_use]
     pub fn paper(&self) -> u32 {
@@ -81,8 +81,8 @@ impl Package {
     /// Examples
     /// ```
     /// # use day_02::Package;
-    /// let p: Package = "5x6x7".parse().unwrap();
-    /// assert_eq!(232, p.ribbon());
+    /// let package: Package = "5x6x7".parse().unwrap();
+    /// assert_eq!(232, package.ribbon());
     /// ```
     #[must_use]
     pub fn ribbon(&self) -> u32 {
