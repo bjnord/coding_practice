@@ -2,22 +2,22 @@ use custom_error::custom_error;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub struct Wrapping {
+pub struct Package {
     length: u32,
     width: u32,
     height: u32,
 }
 
 custom_error! {#[derive(PartialEq)]
-    pub WrappingError
+    pub PackageError
     InvalidString{s: String} = "invalid string '{s}'",
     InvalidDimension{dim: String, value: String} = "invalid {dim} '{value}'",
 }
 
-impl FromStr for Wrapping {
-    type Err = WrappingError;
+impl FromStr for Package {
+    type Err = PackageError;
 
-    fn from_str(s: &str) -> Result<Self, WrappingError> {
+    fn from_str(s: &str) -> Result<Self, PackageError> {
         let dimensions: Vec<u32> = s
             .split('x')
             .map(|dim| dim.parse::<u32>().unwrap())
@@ -29,19 +29,19 @@ impl FromStr for Wrapping {
                 height: dimensions[2],
             })
         } else {
-            Err(WrappingError::InvalidString { s: String::from(s) })
+            Err(PackageError::InvalidString { s: String::from(s) })
         }
     }
 }
 
-impl Wrapping {
+impl Package {
     /// Calculate the square feet of wrapping paper required for this package.
     ///
     /// Examples
     /// ```
-    /// # use day_02::Wrapping;
-    /// let w: Wrapping = "5x6x7".parse().unwrap();
-    /// assert_eq!(244, w.paper());
+    /// # use day_02::Package;
+    /// let p: Package = "5x6x7".parse().unwrap();
+    /// assert_eq!(244, p.paper());
     /// ```
     #[must_use]
     pub fn paper(&self) -> u32 {
@@ -80,9 +80,9 @@ impl Wrapping {
     ///
     /// Examples
     /// ```
-    /// # use day_02::Wrapping;
-    /// let w: Wrapping = "5x6x7".parse().unwrap();
-    /// assert_eq!(232, w.ribbon());
+    /// # use day_02::Package;
+    /// let p: Package = "5x6x7".parse().unwrap();
+    /// assert_eq!(232, p.ribbon());
     /// ```
     #[must_use]
     pub fn ribbon(&self) -> u32 {
@@ -102,20 +102,20 @@ mod tests {
 
     #[test]
     fn test_wrapping_from_string() {
-        let exp = Wrapping {
+        let exp = Package {
             length: 5,
             width: 6,
             height: 7,
         };
-        assert_eq!(exp, Wrapping::from_str("5x6x7").unwrap());
+        assert_eq!(exp, Package::from_str("5x6x7").unwrap());
     }
 
     #[test]
     fn test_wrapping_from_string_invalid() {
-        match Wrapping::from_str("5x6x7x8") {
+        match Package::from_str("5x6x7x8") {
             Err(e) => {
                 assert_eq!(
-                    WrappingError::InvalidString {
+                    PackageError::InvalidString {
                         s: String::from("5x6x7x8")
                     },
                     e
@@ -132,8 +132,8 @@ mod tests {
     fn test_wrapping_min_dimensions() {
         let examples = vec!["5x6x7", "5x7x6", "6x5x7", "6x7x5", "7x5x6", "7x6x5"];
         for example in examples {
-            let w = Wrapping::from_str(example).unwrap();
-            let min = w.min_dimensions();
+            let p = Package::from_str(example).unwrap();
+            let min = p.min_dimensions();
             assert_eq!(30, min.0 * min.1);
         }
     }
@@ -142,37 +142,37 @@ mod tests {
     // paper plus 6 square feet of slack, for a total of 58 square feet."
     #[test]
     fn test_wrapping_paper_ex1() {
-        let w = Wrapping::from_str("2x3x4").unwrap();
-        assert_eq!(58, w.paper());
+        let p = Package::from_str("2x3x4").unwrap();
+        assert_eq!(58, p.paper());
     }
 
     // "A present with dimensions 1x1x10 requires 2*1 + 2*10 + 2*10 = 42 square feet of wrapping
     // paper plus 1 square foot of slack, for a total of 43 square feet."
     #[test]
     fn test_wrapping_paper_ex2() {
-        let w = Wrapping::from_str("1x1x10").unwrap();
-        assert_eq!(43, w.paper());
+        let p = Package::from_str("1x1x10").unwrap();
+        assert_eq!(43, p.paper());
     }
 
     #[test]
     fn test_wrapping_cubic() {
-        let w = Wrapping::from_str("6x7x5").unwrap();
-        assert_eq!(210, w.cubic());
+        let p = Package::from_str("6x7x5").unwrap();
+        assert_eq!(210, p.cubic());
     }
 
     // "A present with dimensions 2x3x4 requires 2+2+3+3 = 10 feet of ribbon to wrap the present
     // plus 2*3*4 = 24 feet of ribbon for the bow, for a total of 34 feet."
     #[test]
     fn test_wrapping_ribbon_ex1() {
-        let w = Wrapping::from_str("2x3x4").unwrap();
-        assert_eq!(34, w.ribbon());
+        let p = Package::from_str("2x3x4").unwrap();
+        assert_eq!(34, p.ribbon());
     }
 
     // "A present with dimensions 1x1x10 requires 1+1+1+1 = 4 feet of ribbon to wrap the present
     // plus 1*1*10 = 10 feet of ribbon for the bow, for a total of 14 feet."
     #[test]
     fn test_wrapping_ribbon_ex2() {
-        let w = Wrapping::from_str("1x1x10").unwrap();
-        assert_eq!(14, w.ribbon());
+        let p = Package::from_str("1x1x10").unwrap();
+        assert_eq!(14, p.ribbon());
     }
 }

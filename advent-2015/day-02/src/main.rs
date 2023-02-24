@@ -1,4 +1,4 @@
-use day_02::Wrapping;
+use day_02::Package;
 use std::fs;
 use std::time::Instant;
 
@@ -11,12 +11,12 @@ fn main() {
 fn part1() {
     let start = Instant::now();
     let input: String = fs::read_to_string("private/input.txt").unwrap();
-    let packages: Vec<Wrapping> = input
+    let packages: Vec<Package> = input
         .lines()
-        .map(|line| line.trim().parse::<Wrapping>().unwrap())
+        .map(|line| line.trim().parse::<Package>().unwrap())
         .collect();
     let gen_time = start.elapsed();
-    let total_paper = packages.iter().map(Wrapping::paper).sum::<u32>();
+    let total_paper: u32 = packages.iter().map(Package::paper).sum();
     let run_time = start.elapsed() - gen_time;
     println!("Day 2 - Part 1 : {} <=> 1606483 expected", total_paper);
     println!("    generator: {:?}", gen_time);
@@ -27,12 +27,12 @@ fn part1() {
 fn part2() {
     let start = Instant::now();
     let input: String = fs::read_to_string("private/input.txt").unwrap();
-    let packages: Vec<Wrapping> = input
+    let packages: Vec<Package> = input
         .lines()
-        .map(|line| line.trim().parse::<Wrapping>().unwrap())
+        .map(|line| line.trim().parse::<Package>().unwrap())
         .collect();
     let gen_time = start.elapsed();
-    let total_ribbon = packages.iter().map(Wrapping::ribbon).sum::<u32>();
+    let total_ribbon: u32 = packages.iter().map(Package::ribbon).sum();
     let run_time = start.elapsed() - gen_time;
     println!("Day 2 - Part 2 : {} <=> 3842356 expected", total_ribbon);
     println!("    generator: {:?}", gen_time);
