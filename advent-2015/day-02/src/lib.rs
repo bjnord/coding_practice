@@ -3,9 +3,9 @@ use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct Package {
-    length: u32,
-    width: u32,
-    height: u32,
+    pub length: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 custom_error! {#[derive(PartialEq)]
