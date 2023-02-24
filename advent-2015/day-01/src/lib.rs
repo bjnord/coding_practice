@@ -53,7 +53,7 @@ impl FromStr for Instructions {
 }
 
 impl Instructions {
-    /// Return the floor reached after following instructions.
+    /// Determine the floor reached after following the instructions.
     ///
     /// # Examples
     ///
@@ -67,6 +67,7 @@ impl Instructions {
         self.directions.iter().map(Self::floor_delta).sum()
     }
 
+    // Map the given direction to its corresponding +/- floor change.
     #[allow(clippy::trivially_copy_pass_by_ref)]
     fn floor_delta(d: &Direction) -> i32 {
         match d {
@@ -75,8 +76,7 @@ impl Instructions {
         }
     }
 
-    /// Return the first step that enters the basement, or `0` if
-    /// no step does.
+    /// Determine the first step that enters the basement.
     ///
     /// # Examples
     ///
@@ -87,6 +87,11 @@ impl Instructions {
     /// instructions = "(()".parse::<Instructions>().unwrap();
     /// assert_eq!(0, instructions.basement());
     /// ```
+    ///
+    /// # Returns
+    ///
+    /// Returns the step number (1-relative), or `0` if the basement is never
+    /// entered.
     #[must_use]
     pub fn basement(&self) -> usize {
         let mut f: i32 = 0;
