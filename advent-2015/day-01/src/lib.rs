@@ -7,8 +7,7 @@ pub enum Direction {
     Down,
 }
 
-custom_error! {#[derive(PartialEq)]
-    pub DirectionError
+custom_error! {pub DirectionError
     InvalidDirChar{dir: char} = "invalid direction character '{dir}'",
 }
 
@@ -117,13 +116,8 @@ mod tests {
 
     #[test]
     fn test_direction_from_char_invalid() {
-        match Direction::from_char('[') {
-            Err(e) => {
-                assert_eq!(DirectionError::InvalidDirChar { dir: '[' }, e);
-                assert_eq!("invalid direction character '['", e.to_string());
-            }
-            Ok(_) => panic!("test did not fail"),
-        }
+        let e = Direction::from_char('[').unwrap_err();
+        assert_eq!("invalid direction character '['", e.to_string());
     }
 
     #[test]
@@ -147,13 +141,8 @@ mod tests {
 
     #[test]
     fn test_instructions_parse_invalid() {
-        match "((>())".parse::<Instructions>() {
-            Err(e) => {
-                assert_eq!(DirectionError::InvalidDirChar { dir: '>' }, e);
-                assert_eq!("invalid direction character '>'", e.to_string());
-            }
-            Ok(_) => panic!("test did not fail"),
-        }
+        let e = "((>())".parse::<Instructions>().unwrap_err();
+        assert_eq!("invalid direction character '>'", e.to_string());
     }
 
     #[test]
