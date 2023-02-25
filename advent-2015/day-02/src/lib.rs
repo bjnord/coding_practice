@@ -1,4 +1,5 @@
 use custom_error::custom_error;
+use std::convert::Into;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -8,10 +9,9 @@ pub struct Package {
     pub height: u32,
 }
 
-custom_error! {#[derive(PartialEq)]
-    pub PackageError
+custom_error! {pub PackageError
     InvalidString{s: String} = "invalid string '{s}'",
-    InvalidDimension{dim: String, value: String} = "invalid {dim} '{value}'",
+    InvalidDimension{source: std::num::ParseIntError} = "non-integer dimension",
 }
 
 impl FromStr for Package {
@@ -20,8 +20,8 @@ impl FromStr for Package {
     fn from_str(s: &str) -> Result<Self, PackageError> {
         let dimensions: Vec<u32> = s
             .split('x')
-            .map(|dim| dim.parse::<u32>().unwrap())
-            .collect::<Vec<u32>>();
+            .map(|dim| dim.parse::<u32>().map_err(Into::into))
+            .collect::<Result<Vec<u32>, PackageError>>()?;
         if dimensions.len() == 3 {
             Ok(Self {
                 length: dimensions[0],
@@ -101,7 +101,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_wrapping_parse() {
+    fn test_package_parse() {
         let exp = Package {
             length: 5,
             width: 6,
@@ -111,25 +111,19 @@ mod tests {
     }
 
     #[test]
-    fn test_wrapping_parse_invalid() {
-        match "5x6x7x8".parse::<Package>() {
-            Err(e) => {
-                assert_eq!(
-                    PackageError::InvalidString {
-                        s: String::from("5x6x7x8")
-                    },
-                    e
-                );
-                assert_eq!("invalid string '5x6x7x8'", e.to_string());
-            }
-            Ok(_) => panic!("test did not fail"),
-        }
+    fn test_package_parse_invalid_string() {
+        let e = "5x6x7x8".parse::<Package>().unwrap_err();
+        assert_eq!("invalid string '5x6x7x8'", e.to_string());
     }
 
-    //TODO fn test_wrapping_with_invalid_dimension()
+    #[test]
+    fn test_package_parse_invalid_dimension() {
+        let e = "5x6xB".parse::<Package>().unwrap_err();
+        assert_eq!("non-integer dimension", e.to_string());
+    }
 
     #[test]
-    fn test_wrapping_min_dimensions() {
+    fn test_package_min_dimensions() {
         let examples = vec!["5x6x7", "5x7x6", "6x5x7", "6x7x5", "7x5x6", "7x6x5"];
         for example in examples {
             let p: Package = example.parse().unwrap();
@@ -141,7 +135,7 @@ mod tests {
     // "A present with dimensions 2x3x4 requires 2*6 + 2*12 + 2*8 = 52 square feet of wrapping
     // paper plus 6 square feet of slack, for a total of 58 square feet."
     #[test]
-    fn test_wrapping_paper_ex1() {
+    fn test_package_paper_ex1() {
         let p: Package = "2x3x4".parse().unwrap();
         assert_eq!(58, p.paper());
     }
@@ -149,13 +143,13 @@ mod tests {
     // "A present with dimensions 1x1x10 requires 2*1 + 2*10 + 2*10 = 42 square feet of wrapping
     // paper plus 1 square foot of slack, for a total of 43 square feet."
     #[test]
-    fn test_wrapping_paper_ex2() {
+    fn test_package_paper_ex2() {
         let p: Package = "1x1x10".parse().unwrap();
         assert_eq!(43, p.paper());
     }
 
     #[test]
-    fn test_wrapping_cubic() {
+    fn test_package_cubic() {
         let p: Package = "6x7x5".parse().unwrap();
         assert_eq!(210, p.cubic());
     }
@@ -163,7 +157,7 @@ mod tests {
     // "A present with dimensions 2x3x4 requires 2+2+3+3 = 10 feet of ribbon to wrap the present
     // plus 2*3*4 = 24 feet of ribbon for the bow, for a total of 34 feet."
     #[test]
-    fn test_wrapping_ribbon_ex1() {
+    fn test_package_ribbon_ex1() {
         let p: Package = "2x3x4".parse().unwrap();
         assert_eq!(34, p.ribbon());
     }
@@ -171,7 +165,7 @@ mod tests {
     // "A present with dimensions 1x1x10 requires 1+1+1+1 = 4 feet of ribbon to wrap the present
     // plus 1*1*10 = 10 feet of ribbon for the bow, for a total of 14 feet."
     #[test]
-    fn test_wrapping_ribbon_ex2() {
+    fn test_package_ribbon_ex2() {
         let p: Package = "1x1x10".parse().unwrap();
         assert_eq!(14, p.ribbon());
     }
