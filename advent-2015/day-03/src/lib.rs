@@ -171,7 +171,7 @@ impl Instructions {
             self.directions
                 .iter()
                 .step_by(2)
-                .fold(hashmap! {pos.key() => 1}, |mut acc, dir| {
+                .fold(hashmap! {pos.key() => 2}, |mut acc, dir| {
                     pos = pos.add(dir.delta_pos());
                     *acc.entry(pos.key()).or_insert(0) += 1;
                     acc
