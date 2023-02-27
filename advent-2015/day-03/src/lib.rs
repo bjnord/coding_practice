@@ -124,9 +124,12 @@ impl FromStr for Instructions {
     }
 }
 
+// TODO DRY up `.fold()` guts with `Grid` struct
 impl Instructions {
     /// Determine the number of houses receiving at least one present after all instructions are
     /// followed.
+    ///
+    /// In this version, Santa does all the deliveries.
     ///
     /// # Examples
     ///
@@ -142,6 +145,44 @@ impl Instructions {
             .directions
             .iter()
             .fold(hashmap! {pos.key() => 1}, |mut acc, dir| {
+                pos = pos.add(dir.delta_pos());
+                *acc.entry(pos.key()).or_insert(0) += 1;
+                acc
+            });
+        grid.len()
+    }
+
+    /// Determine the number of houses receiving at least one present after all instructions are
+    /// followed.
+    ///
+    /// In this version, Santa and Robo-Santa alternate deliveries.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use day_03::Instructions;
+    /// let instructions = "^>v<".parse::<Instructions>().unwrap();
+    /// assert_eq!(3, instructions.n_present_houses_robo());
+    /// ```
+    #[must_use]
+    pub fn n_present_houses_robo(&self) -> usize {
+        let mut pos = Position { y: 0, x: 0 };
+        let mut grid =
+            self.directions
+                .iter()
+                .step_by(2)
+                .fold(hashmap! {pos.key() => 1}, |mut acc, dir| {
+                    pos = pos.add(dir.delta_pos());
+                    *acc.entry(pos.key()).or_insert(0) += 1;
+                    acc
+                });
+        pos = Position { y: 0, x: 0 };
+        grid = self
+            .directions
+            .iter()
+            .skip(1)
+            .step_by(2)
+            .fold(grid, |mut acc, dir| {
                 pos = pos.add(dir.delta_pos());
                 *acc.entry(pos.key()).or_insert(0) += 1;
                 acc
@@ -205,5 +246,29 @@ mod tests {
         // "^v^v^v^v^v delivers a bunch of presents to some very lucky children at only 2 houses."
         let str_2 = "^v^v^v^v^v";
         assert_eq!(2, str_2.parse::<Instructions>().unwrap().n_present_houses());
+    }
+
+    #[test]
+    fn test_instructions_n_present_houses_robo() {
+        // "^v delivers presents to 3 houses, because Santa goes north, and then Robo-Santa goes
+        // south."
+        let str_1 = "^v";
+        assert_eq!(
+            3,
+            str_1
+                .parse::<Instructions>()
+                .unwrap()
+                .n_present_houses_robo()
+        );
+        // "^v^v^v^v^v now delivers presents to 11 houses, with Santa going one direction and
+        // Robo-Santa going the other."
+        let str_2 = "^v^v^v^v^v";
+        assert_eq!(
+            11,
+            str_2
+                .parse::<Instructions>()
+                .unwrap()
+                .n_present_houses_robo()
+        );
     }
 }
