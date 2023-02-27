@@ -4,7 +4,7 @@ extern crate maplit;
 use custom_error::custom_error;
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Position {
     pub y: i32,
     pub x: i32,
@@ -29,22 +29,6 @@ impl Position {
             y: self.y + p.y,
             x: self.x + p.x,
         }
-    }
-
-    /// Create string key from position.
-    ///
-    /// This is _e.g._ suitable to use with `HashMap`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use day_03::Position;
-    /// let p = Position{y: -2, x: 3};
-    /// assert_eq!(String::from("-2,3"), p.key());
-    /// ```
-    #[must_use]
-    pub fn key(&self) -> String {
-        format!("{},{}", self.y, self.x)
     }
 }
 
@@ -144,9 +128,9 @@ impl Instructions {
         let grid = self
             .directions
             .iter()
-            .fold(hashmap! {pos.key() => 1}, |mut acc, dir| {
+            .fold(hashmap! {pos => 1}, |mut acc, dir| {
                 pos = pos.add(dir.delta_pos());
-                *acc.entry(pos.key()).or_insert(0) += 1;
+                *acc.entry(pos).or_insert(0) += 1;
                 acc
             });
         grid.len()
@@ -171,9 +155,9 @@ impl Instructions {
             self.directions
                 .iter()
                 .step_by(2)
-                .fold(hashmap! {pos.key() => 2}, |mut acc, dir| {
+                .fold(hashmap! {pos => 2}, |mut acc, dir| {
                     pos = pos.add(dir.delta_pos());
-                    *acc.entry(pos.key()).or_insert(0) += 1;
+                    *acc.entry(pos).or_insert(0) += 1;
                     acc
                 });
         pos = Position { y: 0, x: 0 };
@@ -184,7 +168,7 @@ impl Instructions {
             .step_by(2)
             .fold(grid, |mut acc, dir| {
                 pos = pos.add(dir.delta_pos());
-                *acc.entry(pos.key()).or_insert(0) += 1;
+                *acc.entry(pos).or_insert(0) += 1;
                 acc
             });
         grid.len()
