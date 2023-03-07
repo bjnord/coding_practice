@@ -37,7 +37,7 @@ impl FromStr for Package {
 impl Package {
     /// Calculate the square feet of wrapping paper required for this package.
     ///
-    /// Examples
+    /// # Examples
     /// ```
     /// # use day_02::Package;
     /// let package: Package = "5x6x7".parse().unwrap();
@@ -78,7 +78,7 @@ impl Package {
 
     /// Calculate the feet of ribbon required for this package.
     ///
-    /// Examples
+    /// # Examples
     /// ```
     /// # use day_02::Package;
     /// let package: Package = "5x6x7".parse().unwrap();
