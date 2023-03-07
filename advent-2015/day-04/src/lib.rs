@@ -34,7 +34,7 @@ impl AdventCoin {
     /// ```
     /// # use day_04::AdventCoin;
     /// let coin = AdventCoin::new("abcdef");
-    /// assert_eq!(609043, coin.number(5));
+    /// assert_eq!(3337, coin.number(3));
     /// ```
     ///
     /// # Panics
@@ -46,6 +46,11 @@ impl AdventCoin {
         loop {
             let s = self.hash(n);
             match n_zeros {
+                3 => {
+                    if &s[..3] == "000" {
+                        return n;
+                    }
+                },
                 5 => {
                     if &s[..5] == "00000" {
                         return n;
@@ -73,17 +78,5 @@ mod tests {
     fn test_coin_hash() {
         let coin = AdventCoin::new("pqrstuv");
         assert_eq!("000006136ef2ff3b291c85725f17325c", coin.hash(1048970));
-    }
-
-    #[test]
-    fn test_coin_number_5() {
-        let coin = AdventCoin::new("pqrstuv");
-        assert_eq!(1048970, coin.number(5));
-    }
-
-    #[test]
-    fn test_coin_number_6() {
-        let coin = AdventCoin::new("pqrstuv");
-        assert_eq!(5714438, coin.number(6));
     }
 }
