@@ -85,6 +85,8 @@ See [this helful answer](https://stackoverflow.com/a/31013156/291754) on the dif
 - `Copy` is for things with a size known at compile-time, and which can be accurately duplicated using `memcpy`. Generally you can only use this for structures with primitive types like `i32`.
 - `Clone` allows the implementer to do arbitrarily complicated operations to create a new `T` that's a functional duplicate (within the context of this app). It could be shallow or deep.
 
+_from "Rust Brain Teasers" book:_ The `From` and `Into` traits are reciprocal, and if you provide one, Rust will automatically provide the other for you. (_e.g._ you define Fahrenheight-from-Celcius and Rust defines Celcius-into-Fahrenheit) Same with `TryFrom` and `TryInto`.
+
 ## Error Handling
 
 MEME: Don't just mindlessly short-circuit error handling in the interest of implementation speed. Think carefully about whether a panic is acceptable, or if the error might happen in production and needs to be handled.
@@ -448,6 +450,7 @@ MEME: Review the `for A in B` [definition in the language reference](https://doc
 ### Other Helpful Iteration Methods
 
 1. `try_fold()` calls a function that returns `Option`, and iterates until it sees a `None`.
+1. `step_by(n)` lets you get every `n`th item and `skip(n)` lets you skip `n` items; between them you can _e.g._ iterate the odd and even ones.
 
 ### Ranges
 
