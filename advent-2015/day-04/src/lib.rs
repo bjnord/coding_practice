@@ -14,7 +14,7 @@ impl AdventCoin {
 
     /// Calculate the MD5 hash for the given `number`.
     ///
-    /// Examples
+    /// # Examples
     /// ```
     /// # use day_04::AdventCoin;
     /// let coin = AdventCoin::new("abcdef");
@@ -27,22 +27,39 @@ impl AdventCoin {
         format!("{:x}", digest)
     }
 
-    /// Find the lowest positive number that produces an MD5 hash starting with `00000`.
+    /// Find the lowest positive number that produces an MD5 hash starting with the given number of
+    /// leading zeros.
     ///
-    /// Examples
+    /// # Examples
     /// ```
     /// # use day_04::AdventCoin;
     /// let coin = AdventCoin::new("abcdef");
-    /// assert_eq!(609043, coin.number());
+    /// assert_eq!(609043, coin.number(5));
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `n_zeros` is not a supported value.
     #[must_use]
-    pub fn number(&self) -> u64 {
+    pub fn number(&self, n_zeros: u32) -> u64 {
         let mut n: u64 = 1;
         loop {
             let s = self.hash(n);
-            if &s[..5] == "00000" {
-                return n;
-            }
+            match n_zeros {
+                5 => {
+                    if &s[..5] == "00000" {
+                        return n;
+                    }
+                },
+                6 => {
+                    if &s[..6] == "000000" {
+                        return n;
+                    }
+                },
+                _ => {
+                    panic!("unsupported number of zeros");
+                },
+            };
             n += 1;
         }
     }
@@ -59,8 +76,14 @@ mod tests {
     }
 
     #[test]
-    fn test_coin_number() {
+    fn test_coin_number_5() {
         let coin = AdventCoin::new("pqrstuv");
-        assert_eq!(1048970, coin.number());
+        assert_eq!(1048970, coin.number(5));
+    }
+
+    #[test]
+    fn test_coin_number_6() {
+        let coin = AdventCoin::new("pqrstuv");
+        assert_eq!(5714438, coin.number(6));
     }
 }
