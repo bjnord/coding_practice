@@ -41,16 +41,11 @@ impl AdventCoin {
         let mut n: u64 = 1;
         loop {
             for (i, ch) in self.hash(n).chars().enumerate() {
-                match ch {
-                    '0' => {
-                        if i >= n_zeros - 1 {
-                            return n;
-                        }
-                    }
-                    _ => {
-                        break;
-                    }
-                };
+                if i >= n_zeros {
+                    return n;
+                } else if ch != '0' {
+                    break;
+                }
             }
             n += 1;
         }
@@ -65,5 +60,11 @@ mod tests {
     fn test_coin_hash() {
         let coin = AdventCoin::new("pqrstuv");
         assert_eq!("000006136ef2ff3b291c85725f17325c", coin.hash(1048970));
+    }
+
+    #[test]
+    fn test_coin_number_pathological() {
+        let coin = AdventCoin::new("abcdef");
+        assert_eq!(1, coin.number(0));
     }
 }
