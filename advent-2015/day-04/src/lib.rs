@@ -36,35 +36,22 @@ impl AdventCoin {
     /// let coin = AdventCoin::new("abcdef");
     /// assert_eq!(3337, coin.number(3));
     /// ```
-    ///
-    /// # Panics
-    ///
-    /// Panics if `n_zeros` is not a supported value.
     #[must_use]
-    pub fn number(&self, n_zeros: u32) -> u64 {
+    pub fn number(&self, n_zeros: usize) -> u64 {
         let mut n: u64 = 1;
         loop {
-            let s = self.hash(n);
-            match n_zeros {
-                3 => {
-                    if &s[..3] == "000" {
-                        return n;
+            for (i, ch) in self.hash(n).chars().enumerate() {
+                match ch {
+                    '0' => {
+                        if i >= n_zeros - 1 {
+                            return n;
+                        }
                     }
-                },
-                5 => {
-                    if &s[..5] == "00000" {
-                        return n;
+                    _ => {
+                        break;
                     }
-                },
-                6 => {
-                    if &s[..6] == "000000" {
-                        return n;
-                    }
-                },
-                _ => {
-                    panic!("unsupported number of zeros");
-                },
-            };
+                };
+            }
             n += 1;
         }
     }
