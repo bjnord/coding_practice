@@ -18,7 +18,7 @@ impl FromStr for SantaString {
             .map(|ch| u32::from(SantaString::is_vowel(ch)))
             .sum();
         lazy_static! {
-            static ref DOUBLE_RE: Regex = Regex::new(r"(\w)\1").unwrap();
+            static ref DOUBLE_RE: Regex = Regex::new(r"([a-z])\1").unwrap();
             static ref NAUGHTY_RE: Regex = Regex::new(r"(?:ab|cd|pq|xy)").unwrap();
         }
         let has_double = DOUBLE_RE.is_match(s).unwrap();

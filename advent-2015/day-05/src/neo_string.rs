@@ -13,8 +13,8 @@ impl FromStr for NeoString {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         lazy_static! {
-            static ref DOUBLE_PAIR_RE: Regex = Regex::new(r"(\w\w).*\1").unwrap();
-            static ref SANDWICH_RE: Regex = Regex::new(r"(\w)\w\1").unwrap();
+            static ref DOUBLE_PAIR_RE: Regex = Regex::new(r"([a-z][a-z]).*\1").unwrap();
+            static ref SANDWICH_RE: Regex = Regex::new(r"([a-z])[a-z]\1").unwrap();
         }
         let has_double_pair = DOUBLE_PAIR_RE.is_match(s).unwrap();
         let has_sandwich = SANDWICH_RE.is_match(s).unwrap();
