@@ -1,4 +1,4 @@
-use day_05::SantaString;
+use day_05::santa_string::SantaString;
 use std::fs;
 use std::time::Instant;
 

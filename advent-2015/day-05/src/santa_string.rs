@@ -45,7 +45,7 @@ impl SantaString {
     ///
     /// # Examples
     /// ```
-    /// # use day_05::SantaString;
+    /// # use day_05::santa_string::SantaString;
     /// let ss: SantaString = "aaa".parse().unwrap();
     /// assert_eq!(true, ss.is_nice());
     /// ```
