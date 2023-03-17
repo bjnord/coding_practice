@@ -51,18 +51,12 @@ impl SantaString {
     /// ```
     #[must_use]
     pub fn is_nice(&self) -> bool {
-        self.n_vowels >= 3 &&
-            self.has_double &&
-            !self.has_naughty
+        self.n_vowels >= 3 && self.has_double && !self.has_naughty
     }
 
     // Is the given character a vowel?
     fn is_vowel(ch: char) -> bool {
-        ch == 'a' ||
-            ch == 'e' ||
-            ch == 'i' ||
-            ch == 'o' ||
-            ch == 'u'
+        ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u'
     }
 }
 

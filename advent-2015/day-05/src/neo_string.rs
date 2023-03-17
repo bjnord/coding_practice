@@ -45,8 +45,7 @@ impl NeoString {
     /// ```
     #[must_use]
     pub fn is_nice(&self) -> bool {
-        self.has_double_pair &&
-            self.has_sandwich
+        self.has_double_pair && self.has_sandwich
     }
 }
 
