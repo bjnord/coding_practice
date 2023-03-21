@@ -1,4 +1,5 @@
 use custom_error::custom_error;
+use std::collections::HashSet;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
@@ -51,7 +52,7 @@ impl FromStr for Instruction {
         let ns = s.replace("turn o", "turn_o");
         let tokens: Vec<&str> = ns.split_whitespace().collect();
         if tokens.len() != 4 || tokens[2] != "through" {
-            return Err(Self::Err::InvalidInstruction { s: String::from(s) })
+            return Err(Self::Err::InvalidInstruction { s: String::from(s) });
         }
         let command = String::from(tokens[0]);
         // FIXME
@@ -60,13 +61,61 @@ impl FromStr for Instruction {
         let from_pos = tokens[1].parse::<Position>().unwrap();
         let to_pos = tokens[3].parse::<Position>().unwrap();
         match &command[..] {
-            "turn_on" | "turn_off" | "toggle" => {
-                Ok(Self { command, from_pos, to_pos })
-            },
-            _ => {
-                Err(Self::Err::InvalidCommand { s: String::from(command) })
+            "turn_on" | "turn_off" | "toggle" => Ok(Self {
+                command,
+                from_pos,
+                to_pos,
+            }),
+            _ => Err(Self::Err::InvalidCommand { s: command }),
+        }
+    }
+}
+
+pub struct Grid {
+    grid: HashSet<Position>,
+}
+
+impl Grid {
+    #[allow(clippy::missing_panics_doc)]
+    #[must_use]
+    pub fn new(instructions: &[Instruction]) -> Self {
+        let mut grid: HashSet<Position> = HashSet::new();
+        for instruction in instructions {
+            for y in instruction.from_pos.y..=instruction.to_pos.y {
+                for x in instruction.from_pos.x..=instruction.to_pos.x {
+                    let pos = Position { y, x };
+                    match &instruction.command[..] {
+                        "turn_on" => {
+                            grid.insert(pos);
+                        }
+                        "turn_off" => {
+                            grid.remove(&pos);
+                        }
+                        "toggle" => {
+                            if grid.contains(&pos) {
+                                grid.remove(&pos);
+                            } else {
+                                grid.insert(pos);
+                            }
+                        }
+                        _ => {
+                            panic!("should not happen")
+                        }
+                    }
+                }
             }
         }
+        Self { grid }
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.grid.is_empty()
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.grid.len()
     }
 }
 
@@ -124,15 +173,27 @@ mod tests {
 
     #[test]
     fn test_instruction_parse_invalid() {
-        let e = "turn off and on 0,1 through 9,10".parse::<Instruction>().unwrap_err();
-        assert_eq!("invalid instruction 'turn off and on 0,1 through 9,10'", e.to_string());
-        let e = "turn off 100,101 thru 129,130".parse::<Instruction>().unwrap_err();
-        assert_eq!("invalid instruction 'turn off 100,101 thru 129,130'", e.to_string());
+        let e = "turn off and on 0,1 through 9,10"
+            .parse::<Instruction>()
+            .unwrap_err();
+        assert_eq!(
+            "invalid instruction 'turn off and on 0,1 through 9,10'",
+            e.to_string()
+        );
+        let e = "turn off 100,101 thru 129,130"
+            .parse::<Instruction>()
+            .unwrap_err();
+        assert_eq!(
+            "invalid instruction 'turn off 100,101 thru 129,130'",
+            e.to_string()
+        );
     }
 
     #[test]
     fn test_instruction_parse_invalid_command() {
-        let e = "turn out 0,1 through 9,10".parse::<Instruction>().unwrap_err();
+        let e = "turn out 0,1 through 9,10"
+            .parse::<Instruction>()
+            .unwrap_err();
         assert_eq!("invalid command 'turn_out'", e.to_string());
     }
 
@@ -141,5 +202,23 @@ mod tests {
         // FIXME
         //let e = "turn off 0,1 through 9,IO".parse::<Instruction>().unwrap_err();
         //assert_eq!("invalid position", e.to_string());
+    }
+
+    #[test]
+    fn test_grid() {
+        let instructions: [Instruction; 2] = [
+            Instruction {
+                command: String::from("turn_on"),
+                from_pos: Position { y: 1, x: 1 },
+                to_pos: Position { y: 3, x: 3 },
+            },
+            Instruction {
+                command: String::from("toggle"),
+                from_pos: Position { y: 3, x: 3 },
+                to_pos: Position { y: 5, x: 5 },
+            },
+        ];
+        let grid = Grid::new(&instructions);
+        assert_eq!(16, grid.len());
     }
 }
