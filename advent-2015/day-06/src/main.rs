@@ -17,8 +17,9 @@ fn part1() {
         .collect();
     let grid = Grid::new(&instructions);
     let gen_time = start.elapsed();
+    let n_lit = grid.len();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 6 - Part 1 : {} <=> 400410 expected", grid.len());
+    println!("Day 6 - Part 1 : {} <=> 400410 expected", n_lit);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
@@ -33,8 +34,9 @@ fn part2() {
         .collect();
     let dimgrid = DimGrid::new(&instructions);
     let gen_time = start.elapsed();
+    let brightness = dimgrid.sum();
     let run_time = start.elapsed() - gen_time;
-    println!("Day 6 - Part 2 : {} <=> 15343601 expected", dimgrid.sum());
+    println!("Day 6 - Part 2 : {} <=> 15343601 expected", brightness);
     println!("    generator: {:?}", gen_time);
     println!("    runner: {:?}", run_time);
 }
