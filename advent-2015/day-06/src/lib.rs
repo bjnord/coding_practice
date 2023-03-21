@@ -1,5 +1,5 @@
 use custom_error::custom_error;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
@@ -119,6 +119,52 @@ impl Grid {
     }
 }
 
+pub struct DimGrid {
+    grid: HashMap<Position, u32>,
+}
+
+impl DimGrid {
+    #[allow(clippy::missing_panics_doc)]
+    #[must_use]
+    pub fn new(instructions: &[Instruction]) -> Self {
+        let mut grid: HashMap<Position, u32> = HashMap::new();
+        for instruction in instructions {
+            for y in instruction.from_pos.y..=instruction.to_pos.y {
+                for x in instruction.from_pos.x..=instruction.to_pos.x {
+                    let pos = Position { y, x };
+                    match &instruction.command[..] {
+                        "turn_on" => {
+                            *grid.entry(pos).or_insert(0) += 1;
+                        }
+                        "turn_off" => {
+                            if grid.contains_key(&pos) {
+                                match grid.get(&pos) {
+                                    Some(0) | None => {}
+                                    Some(_n) => {
+                                        grid.entry(pos).and_modify(|v| *v -= 1);
+                                    }
+                                }
+                            }
+                        }
+                        "toggle" => {
+                            *grid.entry(pos).or_insert(0) += 2;
+                        }
+                        _ => {
+                            panic!("should not happen")
+                        }
+                    }
+                }
+            }
+        }
+        Self { grid }
+    }
+
+    #[must_use]
+    pub fn sum(&self) -> u32 {
+        self.grid.values().sum()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,5 +266,28 @@ mod tests {
         ];
         let grid = Grid::new(&instructions);
         assert_eq!(16, grid.len());
+    }
+
+    #[test]
+    fn test_dimgrid() {
+        let instructions: [Instruction; 3] = [
+            Instruction {
+                command: String::from("turn_on"),
+                from_pos: Position { y: 1, x: 1 },
+                to_pos: Position { y: 3, x: 3 },
+            },
+            Instruction {
+                command: String::from("turn_off"),
+                from_pos: Position { y: 3, x: 3 },
+                to_pos: Position { y: 5, x: 5 },
+            },
+            Instruction {
+                command: String::from("toggle"),
+                from_pos: Position { y: 3, x: 3 },
+                to_pos: Position { y: 5, x: 5 },
+            },
+        ];
+        let dimgrid = DimGrid::new(&instructions);
+        assert_eq!(26, dimgrid.sum());
     }
 }
