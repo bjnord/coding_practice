@@ -55,11 +55,8 @@ impl FromStr for Instruction {
             return Err(Self::Err::InvalidInstruction { s: String::from(s) });
         }
         let command = String::from(tokens[0]);
-        // FIXME
-        //let from_pos = tokens[1].parse::<Position>().map_err(Into::into)?;
-        //let to_pos = tokens[3].parse::<Position>().map_err(Into::into)?;
-        let from_pos = tokens[1].parse::<Position>().unwrap();
-        let to_pos = tokens[3].parse::<Position>().unwrap();
+        let from_pos = tokens[1].parse::<Position>().map_err(Into::<Self::Err>::into)?;
+        let to_pos = tokens[3].parse::<Position>().map_err(Into::<Self::Err>::into)?;
         match &command[..] {
             "turn_on" | "turn_off" | "toggle" => Ok(Self {
                 command,
@@ -245,9 +242,8 @@ mod tests {
 
     #[test]
     fn test_instruction_parse_invalid_position() {
-        // FIXME
-        //let e = "turn off 0,1 through 9,IO".parse::<Instruction>().unwrap_err();
-        //assert_eq!("invalid position", e.to_string());
+        let e = "turn off 0,1 through 9,IO".parse::<Instruction>().unwrap_err();
+        assert_eq!("invalid position", e.to_string());
     }
 
     #[test]
