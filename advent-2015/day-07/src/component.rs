@@ -113,6 +113,12 @@ impl fmt::Display for Component {
     }
 }
 
+impl Component {
+    pub fn wire_name(&self) -> String {
+        self.sink_wire.to_string()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,6 +131,7 @@ mod tests {
         let c: Component = "123 -> x".parse().unwrap();
         assert_eq!(exp, c, "ex1");
         assert_eq!("123 -> x", c.to_string(), "ex1 to_string");
+        assert_eq!("x", c.wire_name(), "ex1 wire_name");
     }
 
     // "x AND y -> z means that the bitwise AND of wire x and wire y is provided to wire z."
@@ -135,6 +142,7 @@ mod tests {
         let c: Component = "x AND y -> z".parse().unwrap();
         assert_eq!(exp, c, "ex2a");
         assert_eq!("x AND y -> z", c.to_string(), "ex2a to_string");
+        assert_eq!("z", c.wire_name(), "ex2a wire_name");
     }
     #[test]
     fn test_component_parse_ex2b() {
@@ -143,6 +151,7 @@ mod tests {
         let c: Component = "b OR 6 -> jn".parse().unwrap();
         assert_eq!(exp, c, "ex2b");
         assert_eq!("b OR 6 -> jn", c.to_string(), "ex2b to_string");
+        assert_eq!("jn", c.wire_name(), "ex2b wire_name");
     }
     #[test]
     fn test_component_parse_ex2c() {
@@ -151,6 +160,7 @@ mod tests {
         let c: Component = "3 AND a -> my".parse().unwrap();
         assert_eq!(exp, c, "ex2c");
         assert_eq!("3 AND a -> my", c.to_string(), "ex2c to_string");
+        assert_eq!("my", c.wire_name(), "ex2c wire_name");
     }
 
     // "p LSHIFT 2 -> q means that the value from wire p is left-shifted by 2 and then provided to
@@ -162,6 +172,7 @@ mod tests {
         let c: Component = "p LSHIFT 2 -> q".parse().unwrap();
         assert_eq!(exp, c, "ex3a");
         assert_eq!("p LSHIFT 2 -> q", c.to_string(), "ex3a to_string");
+        assert_eq!("q", c.wire_name(), "ex3a wire_name");
     }
     #[test]
     fn test_component_parse_ex3b() {
@@ -170,6 +181,7 @@ mod tests {
         let c: Component = "q RSHIFT 2 -> p".parse().unwrap();
         assert_eq!(exp, c, "ex3b");
         assert_eq!("q RSHIFT 2 -> p", c.to_string(), "ex3b to_string");
+        assert_eq!("p", c.wire_name(), "ex3b wire_name");
     }
 
     // "NOT e -> f means that the bitwise complement of the value from wire e is provided to wire
@@ -181,6 +193,7 @@ mod tests {
         let c: Component = "NOT e -> f".parse().unwrap();
         assert_eq!(exp, c, "ex4");
         assert_eq!("NOT e -> f", c.to_string(), "ex4 to_string");
+        assert_eq!("f", c.wire_name(), "ex4 wire_name");
     }
 
     // TODO test_component_parse_invalid
