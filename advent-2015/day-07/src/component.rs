@@ -33,7 +33,7 @@ impl fmt::Display for Operand {
 
 #[derive(Debug, PartialEq)]
 enum ComponentSource {
-    Input(Operand),  
+    Input(Operand),
     ANDGate(Operand, Operand),
     ORGate(Operand, Operand),
     NOTGate(Operand),
@@ -59,7 +59,8 @@ impl FromStr for Component {
                 r"^\w+\s+(?:AND|OR)\s+\w+\s+->\s+\w+$",
                 r"^NOT\s+\w+\s+->\s+\w+$",
                 r"^\w+\s+(?:LSHIFT|RSHIFT)\s+\d+\s+->\s+\w+$",
-            ]).unwrap();
+            ])
+            .unwrap();
         }
         let matches: Vec<_> = RE_SET.matches(s).into_iter().collect();
         match (matches[0], tokens[1]) {
@@ -85,17 +86,25 @@ impl FromStr for Component {
             }),
             (3, "LSHIFT") => Ok(Self {
                 // using `unwrap()` here because we know it's purely digits
-                source: ComponentSource::LSHIFTGate(Operand::new(tokens[0]), tokens[2].parse::<u16>().unwrap()),
+                source: ComponentSource::LSHIFTGate(
+                    Operand::new(tokens[0]),
+                    tokens[2].parse::<u16>().unwrap(),
+                ),
                 sink_wire: tokens[4].to_string(),
                 value: None,
             }),
             (3, "RSHIFT") => Ok(Self {
                 // using `unwrap()` here because we know it's purely digits
-                source: ComponentSource::RSHIFTGate(Operand::new(tokens[0]), tokens[2].parse::<u16>().unwrap()),
+                source: ComponentSource::RSHIFTGate(
+                    Operand::new(tokens[0]),
+                    tokens[2].parse::<u16>().unwrap(),
+                ),
                 sink_wire: tokens[4].to_string(),
                 value: None,
             }),
-            (_, _) => { panic!("unknown component {}", s); }
+            (_, _) => {
+                panic!("unknown component {}", s);
+            }
         }
     }
 }
@@ -104,11 +113,17 @@ impl fmt::Display for Component {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.source {
             ComponentSource::Input(o) => write!(f, "{} -> {}", o, self.sink_wire),
-            ComponentSource::ANDGate(o1, o2) => write!(f, "{} AND {} -> {}", o1, o2, self.sink_wire),
+            ComponentSource::ANDGate(o1, o2) => {
+                write!(f, "{} AND {} -> {}", o1, o2, self.sink_wire)
+            }
             ComponentSource::ORGate(o1, o2) => write!(f, "{} OR {} -> {}", o1, o2, self.sink_wire),
             ComponentSource::NOTGate(o) => write!(f, "NOT {} -> {}", o, self.sink_wire),
-            ComponentSource::LSHIFTGate(o, n) => write!(f, "{} LSHIFT {} -> {}", o, n, self.sink_wire),
-            ComponentSource::RSHIFTGate(o, n) => write!(f, "{} RSHIFT {} -> {}", o, n, self.sink_wire),
+            ComponentSource::LSHIFTGate(o, n) => {
+                write!(f, "{} LSHIFT {} -> {}", o, n, self.sink_wire)
+            }
+            ComponentSource::RSHIFTGate(o, n) => {
+                write!(f, "{} RSHIFT {} -> {}", o, n, self.sink_wire)
+            }
         }
         // TODO then write `self.value`
     }
@@ -129,60 +144,58 @@ impl Component {
         match &self.source {
             ComponentSource::Input(o) => {
                 self.value = match o {
-                    Operand::Value(v) => { Some(*v) },
-                    Operand::Wire(w) => { circuit.wire_value_of(w) },
+                    Operand::Value(v) => Some(*v),
+                    Operand::Wire(w) => circuit.wire_value_of(w),
                 }
-            },
+            }
             ComponentSource::ANDGate(o1, o2) => {
                 let o1_value = match o1 {
-                    Operand::Value(v1) => { Some(*v1) },
-                    Operand::Wire(w1) => { circuit.wire_value_of(w1) },
+                    Operand::Value(v1) => Some(*v1),
+                    Operand::Wire(w1) => circuit.wire_value_of(w1),
                 };
                 let o2_value = match o2 {
-                    Operand::Value(v2) => { Some(*v2) },
-                    Operand::Wire(w2) => { circuit.wire_value_of(w2) },
+                    Operand::Value(v2) => Some(*v2),
+                    Operand::Wire(w2) => circuit.wire_value_of(w2),
                 };
                 self.value = match (o1_value, o2_value) {
-                    (Some(v1), Some(v2)) => { Some(v1 & v2) },
-                    (_, _) => { None },
+                    (Some(v1), Some(v2)) => Some(v1 & v2),
+                    (_, _) => None,
                 }
-            },
+            }
             ComponentSource::ORGate(o1, o2) => {
                 let o1_value = match o1 {
-                    Operand::Value(v1) => { Some(*v1) },
-                    Operand::Wire(w1) => { circuit.wire_value_of(w1) },
+                    Operand::Value(v1) => Some(*v1),
+                    Operand::Wire(w1) => circuit.wire_value_of(w1),
                 };
                 let o2_value = match o2 {
-                    Operand::Value(v2) => { Some(*v2) },
-                    Operand::Wire(w2) => { circuit.wire_value_of(w2) },
+                    Operand::Value(v2) => Some(*v2),
+                    Operand::Wire(w2) => circuit.wire_value_of(w2),
                 };
                 self.value = match (o1_value, o2_value) {
-                    (Some(v1), Some(v2)) => { Some(v1 | v2) },
-                    (_, _) => { None },
+                    (Some(v1), Some(v2)) => Some(v1 | v2),
+                    (_, _) => None,
                 }
-            },
+            }
             ComponentSource::NOTGate(o) => {
                 self.value = match o {
-                    Operand::Value(v) => { Some(!(*v)) },
-                    Operand::Wire(w) => {
-                        circuit.wire_value_of(w).map(|v| !v)
-                    },
+                    Operand::Value(v) => Some(!(*v)),
+                    Operand::Wire(w) => circuit.wire_value_of(w).map(|v| !v),
                 }
-            },
+            }
             ComponentSource::LSHIFTGate(o, n) => {
                 let o_value = match o {
-                    Operand::Value(v) => { Some(*v) },
-                    Operand::Wire(w) => { circuit.wire_value_of(w) },
+                    Operand::Value(v) => Some(*v),
+                    Operand::Wire(w) => circuit.wire_value_of(w),
                 };
                 self.value = o_value.map(|v| v << n);
-            },
+            }
             ComponentSource::RSHIFTGate(o, n) => {
                 let o_value = match o {
-                    Operand::Value(v) => { Some(*v) },
-                    Operand::Wire(w) => { circuit.wire_value_of(w) },
+                    Operand::Value(v) => Some(*v),
+                    Operand::Wire(w) => circuit.wire_value_of(w),
                 };
                 self.value = o_value.map(|v| v >> n);
-            },
+            }
         }
     }
 }
@@ -195,7 +208,11 @@ mod tests {
     #[test]
     fn test_component_parse_ex1() {
         let exp_cs = ComponentSource::Input(Operand::Value(123));
-        let exp = Component{ source: exp_cs, sink_wire: "x".to_string(), value: None };
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "x".to_string(),
+            value: None,
+        };
         let c: Component = "123 -> x".parse().unwrap();
         assert_eq!(exp, c, "ex1");
         assert_eq!("123 -> x", c.to_string(), "ex1 to_string");
@@ -205,8 +222,15 @@ mod tests {
     // "x AND y -> z means that the bitwise AND of wire x and wire y is provided to wire z."
     #[test]
     fn test_component_parse_ex2a() {
-        let exp_cs = ComponentSource::ANDGate(Operand::Wire("x".to_string()), Operand::Wire("y".to_string()));
-        let exp = Component{ source: exp_cs, sink_wire: "z".to_string(), value: None };
+        let exp_cs = ComponentSource::ANDGate(
+            Operand::Wire("x".to_string()),
+            Operand::Wire("y".to_string()),
+        );
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "z".to_string(),
+            value: None,
+        };
         let c: Component = "x AND y -> z".parse().unwrap();
         assert_eq!(exp, c, "ex2a");
         assert_eq!("x AND y -> z", c.to_string(), "ex2a to_string");
@@ -215,7 +239,11 @@ mod tests {
     #[test]
     fn test_component_parse_ex2b() {
         let exp_cs = ComponentSource::ORGate(Operand::Wire("b".to_string()), Operand::Value(6));
-        let exp = Component{ source: exp_cs, sink_wire: "jn".to_string(), value: None };
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "jn".to_string(),
+            value: None,
+        };
         let c: Component = "b OR 6 -> jn".parse().unwrap();
         assert_eq!(exp, c, "ex2b");
         assert_eq!("b OR 6 -> jn", c.to_string(), "ex2b to_string");
@@ -224,7 +252,11 @@ mod tests {
     #[test]
     fn test_component_parse_ex2c() {
         let exp_cs = ComponentSource::ANDGate(Operand::Value(3), Operand::Wire("a".to_string()));
-        let exp = Component{ source: exp_cs, sink_wire: "my".to_string(), value: None };
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "my".to_string(),
+            value: None,
+        };
         let c: Component = "3 AND a -> my".parse().unwrap();
         assert_eq!(exp, c, "ex2c");
         assert_eq!("3 AND a -> my", c.to_string(), "ex2c to_string");
@@ -236,7 +268,11 @@ mod tests {
     #[test]
     fn test_component_parse_ex3a() {
         let exp_cs = ComponentSource::LSHIFTGate(Operand::Wire("p".to_string()), 2);
-        let exp = Component{ source: exp_cs, sink_wire: "q".to_string(), value: None };
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "q".to_string(),
+            value: None,
+        };
         let c: Component = "p LSHIFT 2 -> q".parse().unwrap();
         assert_eq!(exp, c, "ex3a");
         assert_eq!("p LSHIFT 2 -> q", c.to_string(), "ex3a to_string");
@@ -245,7 +281,11 @@ mod tests {
     #[test]
     fn test_component_parse_ex3b() {
         let exp_cs = ComponentSource::RSHIFTGate(Operand::Wire("q".to_string()), 2);
-        let exp = Component{ source: exp_cs, sink_wire: "p".to_string(), value: None };
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "p".to_string(),
+            value: None,
+        };
         let c: Component = "q RSHIFT 2 -> p".parse().unwrap();
         assert_eq!(exp, c, "ex3b");
         assert_eq!("q RSHIFT 2 -> p", c.to_string(), "ex3b to_string");
@@ -257,7 +297,11 @@ mod tests {
     #[test]
     fn test_component_parse_ex4() {
         let exp_cs = ComponentSource::NOTGate(Operand::Wire("e".to_string()));
-        let exp = Component{ source: exp_cs, sink_wire: "f".to_string(), value: None };
+        let exp = Component {
+            source: exp_cs,
+            sink_wire: "f".to_string(),
+            value: None,
+        };
         let c: Component = "NOT e -> f".parse().unwrap();
         assert_eq!(exp, c, "ex4");
         assert_eq!("NOT e -> f", c.to_string(), "ex4 to_string");
