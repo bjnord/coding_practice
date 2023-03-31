@@ -225,6 +225,18 @@ match fn(...) {
 let x = fn(...).unwrap();
 ```
 
+`Option<T>` has a `map()` method which maps it to `Option<U>` if a value is present, or keeps it as `None` if not:
+
+```
+let maybe: Option<String> = "yes".to_string();
+let maybe_len = maybe.map(|s| s.len());
+println!("it is: {:?}, maybe_len);  // "it is: Some(3)"
+
+let maybe: Option<String> = None;
+let maybe_len = maybe.map(|s| s.len());
+println!("it is: {:?}, maybe_len);  // "it is: None"
+```
+
 ## Matching
 
 The [`matches!()` macro](https://doc.rust-lang.org/std/macro.matches.html) "Returns whether the given expression matches any of the given patterns" so you can do things like:

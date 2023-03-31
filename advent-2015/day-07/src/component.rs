@@ -54,7 +54,7 @@ impl FromStr for Component {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let tokens: Vec<&str> = s.split_whitespace().collect();
         lazy_static! {
-            static ref RE_SET: RegexSet = RegexSet::new(&[
+            static ref RE_SET: RegexSet = RegexSet::new([
                 r"^\w+\s+->\s+\w+$",
                 r"^\w+\s+(?:AND|OR)\s+\w+\s+->\s+\w+$",
                 r"^NOT\s+\w+\s+->\s+\w+$",
@@ -115,10 +115,12 @@ impl fmt::Display for Component {
 }
 
 impl Component {
+    #[must_use]
     pub fn wire_name(&self) -> String {
         self.sink_wire.to_string()
     }
 
+    #[must_use]
     pub fn wire_value(&self) -> Option<u16> {
         self.value
     }
@@ -163,11 +165,7 @@ impl Component {
                 self.value = match o {
                     Operand::Value(v) => { Some(!(*v)) },
                     Operand::Wire(w) => {
-                        if let Some(v) = circuit.wire_value_of(w) {
-                            Some(!v)
-                        } else {
-                            None
-                        }
+                        circuit.wire_value_of(w).map(|v| !v)
                     },
                 }
             },
@@ -176,22 +174,14 @@ impl Component {
                     Operand::Value(v) => { Some(*v) },
                     Operand::Wire(w) => { circuit.wire_value_of(w) },
                 };
-                self.value = if let Some(v) = o_value {
-                    Some(v << n)
-                } else {
-                    None
-                }
+                self.value = o_value.map(|v| v << n);
             },
             ComponentSource::RSHIFTGate(o, n) => {
                 let o_value = match o {
                     Operand::Value(v) => { Some(*v) },
                     Operand::Wire(w) => { circuit.wire_value_of(w) },
                 };
-                self.value = if let Some(v) = o_value {
-                    Some(v >> n)
-                } else {
-                    None
-                }
+                self.value = o_value.map(|v| v >> n);
             },
         }
     }

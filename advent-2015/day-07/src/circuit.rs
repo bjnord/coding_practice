@@ -7,6 +7,10 @@ pub struct Circuit {
 }
 
 impl Circuit {
+    /// # Panics
+    ///
+    /// Panics if an invalid component is found.
+    #[must_use]
     pub fn new(input: &str) -> Self {
         let components: HashMap<String, Component> = input
             .lines()
@@ -16,6 +20,7 @@ impl Circuit {
         Self { components }
     }
 
+    #[must_use]
     pub fn wire_value_of(&self, wire_name: &str) -> Option<u16> {
         self.components[wire_name].wire_value()
     }
