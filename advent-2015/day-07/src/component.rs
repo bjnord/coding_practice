@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use regex::{Regex, RegexSet};
 use std::fmt;
 use std::str::FromStr;
@@ -51,13 +52,15 @@ impl FromStr for Component {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let tokens: Vec<&str> = s.split_whitespace().collect();
-        let re_set = RegexSet::new(&[
-            r"^\w+\s+->\s+\w+$",
-            r"^\w+\s+(?:AND|OR)\s+\w+\s+->\s+\w+$",
-            r"^NOT\s+\w+\s+->\s+\w+$",
-            r"^\w+\s+(?:LSHIFT|RSHIFT)\s+\d+\s+->\s+\w+$",
-        ]).unwrap();
-        let matches: Vec<_> = re_set.matches(s).into_iter().collect();
+        lazy_static! {
+            static ref RE_SET: RegexSet = RegexSet::new(&[
+                r"^\w+\s+->\s+\w+$",
+                r"^\w+\s+(?:AND|OR)\s+\w+\s+->\s+\w+$",
+                r"^NOT\s+\w+\s+->\s+\w+$",
+                r"^\w+\s+(?:LSHIFT|RSHIFT)\s+\d+\s+->\s+\w+$",
+            ]).unwrap();
+        }
+        let matches: Vec<_> = RE_SET.matches(s).into_iter().collect();
         match (matches[0], tokens[1]) {
             (0, _) => Ok(Self {
                 source: ComponentSource::Input(Operand::new(tokens[0])),
