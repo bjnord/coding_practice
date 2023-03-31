@@ -15,6 +15,10 @@ impl Circuit {
             .collect();
         Self { components }
     }
+
+    pub fn wire_value_of(&self, wire_name: &str) -> Option<u16> {
+        self.components[wire_name].wire_value()
+    }
 }
 
 #[cfg(test)]
