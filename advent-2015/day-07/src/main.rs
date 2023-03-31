@@ -1,4 +1,4 @@
-use day_07::component::Component;
+use day_07::circuit::Circuit;
 use std::fs;
 use std::time::Instant;
 
@@ -10,10 +10,7 @@ fn main() {
 fn part1() {
     let start = Instant::now();
     let input: String = fs::read_to_string("private/input.txt").unwrap();
-    let components: Vec<Component> = input
-        .lines()
-        .map(|line| line.trim().parse::<Component>().unwrap())
-        .collect();
+    let circuit = Circuit::new(&input);
     let gen_time = start.elapsed();
     let ans: u16 = 0;
     let run_time = start.elapsed() - gen_time;
