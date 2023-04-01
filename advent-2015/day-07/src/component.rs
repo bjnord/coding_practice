@@ -1,4 +1,4 @@
-use crate::circuit::Circuit;
+use crate::circuit::CircuitValues;
 use lazy_static::lazy_static;
 use regex::{Regex, RegexSet};
 use std::fmt;
@@ -41,11 +41,13 @@ enum ComponentSource {
     RSHIFTGate(Operand, u16),
 }
 
+pub type ComponentValue = Option<u16>;
+
 #[derive(Debug, PartialEq)]
 pub struct Component {
     source: ComponentSource,
     sink_wire: String,
-    value: Option<u16>,
+    value: ComponentValue,
 }
 
 impl FromStr for Component {
@@ -136,26 +138,26 @@ impl Component {
     }
 
     #[must_use]
-    pub fn wire_value(&self) -> Option<u16> {
+    pub fn wire_value(&self) -> ComponentValue {
         self.value
     }
 
-    pub fn solve(&mut self, circuit: &Circuit) {
+    pub fn solve(&mut self, circuit_values: &CircuitValues) {
         match &self.source {
             ComponentSource::Input(o) => {
                 self.value = match o {
                     Operand::Value(v) => Some(*v),
-                    Operand::Wire(w) => circuit.wire_value_of(w),
+                    Operand::Wire(w) => circuit_values[w],
                 }
             }
             ComponentSource::ANDGate(o1, o2) => {
                 let o1_value = match o1 {
                     Operand::Value(v1) => Some(*v1),
-                    Operand::Wire(w1) => circuit.wire_value_of(w1),
+                    Operand::Wire(w1) => circuit_values[w1],
                 };
                 let o2_value = match o2 {
                     Operand::Value(v2) => Some(*v2),
-                    Operand::Wire(w2) => circuit.wire_value_of(w2),
+                    Operand::Wire(w2) => circuit_values[w2],
                 };
                 self.value = match (o1_value, o2_value) {
                     (Some(v1), Some(v2)) => Some(v1 & v2),
@@ -165,11 +167,11 @@ impl Component {
             ComponentSource::ORGate(o1, o2) => {
                 let o1_value = match o1 {
                     Operand::Value(v1) => Some(*v1),
-                    Operand::Wire(w1) => circuit.wire_value_of(w1),
+                    Operand::Wire(w1) => circuit_values[w1],
                 };
                 let o2_value = match o2 {
                     Operand::Value(v2) => Some(*v2),
-                    Operand::Wire(w2) => circuit.wire_value_of(w2),
+                    Operand::Wire(w2) => circuit_values[w2],
                 };
                 self.value = match (o1_value, o2_value) {
                     (Some(v1), Some(v2)) => Some(v1 | v2),
@@ -179,20 +181,20 @@ impl Component {
             ComponentSource::NOTGate(o) => {
                 self.value = match o {
                     Operand::Value(v) => Some(!(*v)),
-                    Operand::Wire(w) => circuit.wire_value_of(w).map(|v| !v),
+                    Operand::Wire(w) => circuit_values[w].map(|v| !v),
                 }
             }
             ComponentSource::LSHIFTGate(o, n) => {
                 let o_value = match o {
                     Operand::Value(v) => Some(*v),
-                    Operand::Wire(w) => circuit.wire_value_of(w),
+                    Operand::Wire(w) => circuit_values[w],
                 };
                 self.value = o_value.map(|v| v << n);
             }
             ComponentSource::RSHIFTGate(o, n) => {
                 let o_value = match o {
                     Operand::Value(v) => Some(*v),
-                    Operand::Wire(w) => circuit.wire_value_of(w),
+                    Operand::Wire(w) => circuit_values[w],
                 };
                 self.value = o_value.map(|v| v >> n);
             }
@@ -314,8 +316,8 @@ mod tests {
     #[test]
     fn test_component_solve_ex1() {
         let mut comp: Component = "123 -> x".parse().unwrap();
-        let circ = Circuit::new("123 -> x");
-        comp.solve(&circ);
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
         assert_eq!(123, comp.wire_value().unwrap(), "solve_ex1 value");
     }
 
@@ -323,15 +325,15 @@ mod tests {
     #[test]
     fn test_component_solve_ex2a() {
         let mut comp: Component = "65 AND 192 -> z".parse().unwrap();
-        let circ = Circuit::new("65 AND 192 -> z");
-        comp.solve(&circ);
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
         assert_eq!(64, comp.wire_value().unwrap(), "solve_ex2a value");
     }
     #[test]
     fn test_component_solve_ex2b() {
         let mut comp: Component = "65 OR 192 -> z".parse().unwrap();
-        let circ = Circuit::new("65 OR 192 -> z");
-        comp.solve(&circ);
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
         assert_eq!(193, comp.wire_value().unwrap(), "solve_ex2b value");
     }
 
@@ -340,15 +342,15 @@ mod tests {
     #[test]
     fn test_component_solve_ex3a() {
         let mut comp: Component = "65 LSHIFT 2 -> q".parse().unwrap();
-        let circ = Circuit::new("65 LSHIFT 2 -> q");
-        comp.solve(&circ);
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
         assert_eq!(260, comp.wire_value().unwrap(), "solve_ex3a value");
     }
     #[test]
     fn test_component_solve_ex3b() {
         let mut comp: Component = "193 RSHIFT 2 -> p".parse().unwrap();
-        let circ = Circuit::new("193 RSHIFT 2 -> p");
-        comp.solve(&circ);
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
         assert_eq!(48, comp.wire_value().unwrap(), "solve_ex3b value");
     }
 
@@ -357,8 +359,8 @@ mod tests {
     #[test]
     fn test_component_solve_ex4() {
         let mut comp: Component = "NOT 123 -> f".parse().unwrap();
-        let circ = Circuit::new("NOT 123 -> f");
-        comp.solve(&circ);
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
         assert_eq!(65412, comp.wire_value().unwrap(), "solve_ex4 value");
     }
 }

@@ -1,5 +1,7 @@
-use crate::component::Component;
+use crate::component::{Component, ComponentValue};
 use std::collections::HashMap;
+
+pub type CircuitValues = HashMap<String, ComponentValue>;
 
 #[derive(Debug, PartialEq)]
 pub struct Circuit {
@@ -21,8 +23,8 @@ impl Circuit {
     }
 
     #[must_use]
-    pub fn wire_value_of(&self, wire_name: &str) -> Option<u16> {
-        self.components[wire_name].wire_value()
+    pub fn values(&self) -> CircuitValues {
+        self.components.values().map(|c| (c.wire_name(), c.wire_value())).collect()
     }
 }
 
