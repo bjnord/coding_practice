@@ -205,6 +205,7 @@ impl Component {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
 
     // "123 -> x means that the signal 123 is provided to wire x."
     #[test]
@@ -320,47 +321,95 @@ mod tests {
         comp.solve(&cv);
         assert_eq!(123, comp.wire_value().unwrap(), "solve_ex1 value");
     }
+    #[test]
+    fn test_component_solve_ex1_w() {
+        let mut comp: Component = "y -> x".parse().unwrap();
+        let cv = HashMap::from([("y".to_string(), Some(123_u16))]);
+        comp.solve(&cv);
+        assert_eq!(123, comp.wire_value().unwrap(), "solve_ex1_w value");
+    }
 
     // "x AND y -> z means that the bitwise AND of wire x and wire y is provided to wire z."
     #[test]
     fn test_component_solve_ex2a() {
-        let mut comp: Component = "65 AND 192 -> z".parse().unwrap();
-        let cv = CircuitValues::new();
+        let mut comp: Component = "x AND y -> z".parse().unwrap();
+        let cv = HashMap::from([
+            ("x".to_string(), Some(65_u16)),
+            ("y".to_string(), Some(192_u16)),
+        ]);
         comp.solve(&cv);
         assert_eq!(64, comp.wire_value().unwrap(), "solve_ex2a value");
     }
     #[test]
+    fn test_component_solve_ex2a_v() {
+        let mut comp: Component = "65 AND 192 -> z".parse().unwrap();
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
+        assert_eq!(64, comp.wire_value().unwrap(), "solve_ex2a_v value");
+    }
+    #[test]
     fn test_component_solve_ex2b() {
+        let mut comp: Component = "x OR y -> z".parse().unwrap();
+        let cv = HashMap::from([
+            ("x".to_string(), Some(65_u16)),
+            ("y".to_string(), Some(192_u16)),
+        ]);
+        comp.solve(&cv);
+        assert_eq!(193, comp.wire_value().unwrap(), "solve_ex2b value");
+    }
+    #[test]
+    fn test_component_solve_ex2b_v() {
         let mut comp: Component = "65 OR 192 -> z".parse().unwrap();
         let cv = CircuitValues::new();
         comp.solve(&cv);
-        assert_eq!(193, comp.wire_value().unwrap(), "solve_ex2b value");
+        assert_eq!(193, comp.wire_value().unwrap(), "solve_ex2b_v value");
     }
 
     // "p LSHIFT 2 -> q means that the value from wire p is left-shifted by 2 and then provided to
     // wire q."
     #[test]
     fn test_component_solve_ex3a() {
-        let mut comp: Component = "65 LSHIFT 2 -> q".parse().unwrap();
-        let cv = CircuitValues::new();
+        let mut comp: Component = "p LSHIFT 2 -> q".parse().unwrap();
+        let cv = HashMap::from([("p".to_string(), Some(65_u16))]);
         comp.solve(&cv);
         assert_eq!(260, comp.wire_value().unwrap(), "solve_ex3a value");
     }
     #[test]
+    fn test_component_solve_ex3a_v() {
+        let mut comp: Component = "65 LSHIFT 2 -> q".parse().unwrap();
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
+        assert_eq!(260, comp.wire_value().unwrap(), "solve_ex3a_v value");
+    }
+    #[test]
     fn test_component_solve_ex3b() {
+        let mut comp: Component = "p RSHIFT 2 -> p".parse().unwrap();
+        let cv = HashMap::from([("p".to_string(), Some(193_u16))]);
+        comp.solve(&cv);
+        assert_eq!(48, comp.wire_value().unwrap(), "solve_ex3b value");
+    }
+    #[test]
+    fn test_component_solve_ex3b_v() {
         let mut comp: Component = "193 RSHIFT 2 -> p".parse().unwrap();
         let cv = CircuitValues::new();
         comp.solve(&cv);
-        assert_eq!(48, comp.wire_value().unwrap(), "solve_ex3b value");
+        assert_eq!(48, comp.wire_value().unwrap(), "solve_ex3b_v value");
     }
 
     // "NOT e -> f means that the bitwise complement of the value from wire e is provided to wire
     // f."
     #[test]
     fn test_component_solve_ex4() {
+        let mut comp: Component = "NOT e -> f".parse().unwrap();
+        let cv = HashMap::from([("e".to_string(), Some(123_u16))]);
+        comp.solve(&cv);
+        assert_eq!(65412, comp.wire_value().unwrap(), "solve_ex4 value");
+    }
+    #[test]
+    fn test_component_solve_ex4_v() {
         let mut comp: Component = "NOT 123 -> f".parse().unwrap();
         let cv = CircuitValues::new();
         comp.solve(&cv);
-        assert_eq!(65412, comp.wire_value().unwrap(), "solve_ex4 value");
+        assert_eq!(65412, comp.wire_value().unwrap(), "solve_ex4_v value");
     }
 }
