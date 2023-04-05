@@ -1,4 +1,4 @@
-use crate::circuit::CircuitValues;
+use crate::circuit;
 use lazy_static::lazy_static;
 use regex::{Regex, RegexSet};
 use std::fmt;
@@ -41,13 +41,13 @@ enum ComponentSource {
     RSHIFTGate(Operand, u16),
 }
 
-pub type ComponentValue = Option<u16>;
+pub type Value = Option<u16>;
 
 #[derive(Debug, PartialEq)]
 pub struct Component {
     source: ComponentSource,
     sink_wire: String,
-    value: ComponentValue,
+    value: Value,
 }
 
 impl FromStr for Component {
@@ -138,7 +138,7 @@ impl Component {
     }
 
     #[must_use]
-    pub fn wire_value(&self) -> ComponentValue {
+    pub fn wire_value(&self) -> Value {
         self.value
     }
 
@@ -146,7 +146,7 @@ impl Component {
         self.value = None;
     }
 
-    pub fn solve(&mut self, circuit_values: &CircuitValues) {
+    pub fn solve(&mut self, circuit_values: &circuit::Values) {
         match &self.source {
             ComponentSource::Input(o) => {
                 self.value = match o {
@@ -321,7 +321,7 @@ mod tests {
     #[test]
     fn test_component_solve_ex1() {
         let mut comp: Component = "123 -> x".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(123, comp.wire_value().unwrap(), "solve_ex1 value");
     }
@@ -347,7 +347,7 @@ mod tests {
     #[test]
     fn test_component_solve_ex2a_v() {
         let mut comp: Component = "65 AND 192 -> z".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(64, comp.wire_value().unwrap(), "solve_ex2a_v value");
     }
@@ -364,7 +364,7 @@ mod tests {
     #[test]
     fn test_component_solve_ex2b_v() {
         let mut comp: Component = "65 OR 192 -> z".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(193, comp.wire_value().unwrap(), "solve_ex2b_v value");
     }
@@ -381,7 +381,7 @@ mod tests {
     #[test]
     fn test_component_solve_ex3a_v() {
         let mut comp: Component = "65 LSHIFT 2 -> q".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(260, comp.wire_value().unwrap(), "solve_ex3a_v value");
     }
@@ -395,7 +395,7 @@ mod tests {
     #[test]
     fn test_component_solve_ex3b_v() {
         let mut comp: Component = "193 RSHIFT 2 -> p".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(48, comp.wire_value().unwrap(), "solve_ex3b_v value");
     }
@@ -412,7 +412,7 @@ mod tests {
     #[test]
     fn test_component_solve_ex4_v() {
         let mut comp: Component = "NOT 123 -> f".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(65412, comp.wire_value().unwrap(), "solve_ex4_v value");
     }
@@ -420,7 +420,7 @@ mod tests {
     #[test]
     fn test_component_reset_value() {
         let mut comp: Component = "123 -> x".parse().unwrap();
-        let cv = CircuitValues::new();
+        let cv = circuit::Values::new();
         comp.solve(&cv);
         assert_eq!(Some(123), comp.wire_value(), "reset_value initial value");
         comp.reset_wire_value();

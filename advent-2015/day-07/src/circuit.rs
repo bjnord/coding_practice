@@ -1,7 +1,8 @@
-use crate::component::{Component, ComponentValue};
+use crate::component;
+use crate::component::Component;
 use std::collections::HashMap;
 
-pub type CircuitValues = HashMap<String, ComponentValue>;
+pub type Values = HashMap<String, component::Value>;
 
 #[derive(Debug, PartialEq)]
 pub struct Circuit {
@@ -23,7 +24,7 @@ impl Circuit {
     }
 
     #[must_use]
-    pub fn values(&self) -> CircuitValues {
+    pub fn values(&self) -> Values {
         self.components
             .values()
             .map(|c| (c.wire_name(), c.wire_value()))
@@ -31,7 +32,7 @@ impl Circuit {
     }
 
     #[must_use]
-    pub fn value_of(&self, wire_name: &str) -> ComponentValue {
+    pub fn value_of(&self, wire_name: &str) -> component::Value {
         self.components[wire_name].wire_value()
     }
 
@@ -52,7 +53,7 @@ impl Circuit {
     /// # Panics
     ///
     /// Panics if `wire_value` doesn't have a value.
-    pub fn override_wire(&mut self, wire_name: &str, wire_value: ComponentValue) {
+    pub fn override_wire(&mut self, wire_name: &str, wire_value: component::Value) {
         // this `unwrap()` will panic by design
         let input = format!("{} -> {}", wire_value.unwrap(), wire_name);
         // using `unwrap()` here because we know string will be valid
