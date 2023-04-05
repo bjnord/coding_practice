@@ -53,6 +53,7 @@ impl Circuit {
     ///
     /// Panics if `wire_value` doesn't have a value.
     pub fn override_wire(&mut self, wire_name: &str, wire_value: ComponentValue) {
+        // this `unwrap()` will panic by design
         let input = format!("{} -> {}", wire_value.unwrap(), wire_name);
         // using `unwrap()` here because we know string will be valid
         let input_component = input.parse::<Component>().unwrap();
@@ -130,5 +131,12 @@ mod tests {
         let mut c = Circuit::new("123 -> x\n");
         c.override_wire("y", Some(45600));
         let _v = c.value_of("y");
+    }
+
+    #[test]
+    #[should_panic]
+    pub fn test_circuit_override_wire_no_value() {
+        let mut c = Circuit::new("123 -> x\n");
+        c.override_wire("x", None);
     }
 }
