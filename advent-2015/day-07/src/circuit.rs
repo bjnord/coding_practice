@@ -49,8 +49,12 @@ impl Circuit {
         }
     }
 
+    /// # Panics
+    ///
+    /// Panics if `wire_value` doesn't have a value.
     pub fn override_wire(&mut self, wire_name: &str, wire_value: ComponentValue) {
         let input = format!("{} -> {}", wire_value.unwrap(), wire_name);
+        // using `unwrap()` here because we know string will be valid
         let input_component = input.parse::<Component>().unwrap();
         self.components
             .entry(wire_name.to_string())

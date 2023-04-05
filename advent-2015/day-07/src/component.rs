@@ -142,6 +142,7 @@ impl Component {
         self.value
     }
 
+    #[must_use]
     pub fn replace_wire_value(self, wire_value: ComponentValue) -> Self {
         Self {
             value: wire_value,
