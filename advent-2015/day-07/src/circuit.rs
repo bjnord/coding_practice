@@ -48,6 +48,14 @@ impl Circuit {
             }
         }
     }
+
+    pub fn override_wire(&mut self, wire_name: &str, wire_value: ComponentValue) {
+        let input = format!("{} -> {}", wire_value.unwrap(), wire_name);
+        let input_component = input.parse::<Component>().unwrap();
+        self.components
+            .entry(wire_name.to_string())
+            .and_modify(|c| *c = input_component);
+    }
 }
 
 #[cfg(test)]
@@ -91,5 +99,24 @@ mod tests {
         ]);
         assert_eq!(exp, c.values(), "circuit solve");
         assert_eq!(Some(72_u16), c.value_of("d"), "circuit value_of d after");
+    }
+
+    #[test]
+    pub fn test_circuit_override_wire() {
+        let mut c = Circuit::new("123 -> x\nNOT x -> h\n");
+        c.solve();
+        assert_eq!(Some(123_u16), c.value_of("x"), "circuit value_of x before");
+        assert_eq!(Some(65412_u16), c.value_of("h"), "circuit value_of h before");
+        c.override_wire("x", Some(12300));
+        c.solve();
+        assert_eq!(Some(12300_u16), c.value_of("x"), "circuit value_of x after");
+    }
+
+    #[test]
+    #[should_panic]
+    pub fn test_circuit_override_wire_not_found() {
+        let mut c = Circuit::new("123 -> x\n");
+        c.override_wire("y", Some(45600));
+        let _v = c.value_of("y");
     }
 }
