@@ -142,6 +142,13 @@ impl Component {
         self.value
     }
 
+    pub fn replace_wire_value(self, wire_value: ComponentValue) -> Self {
+        Self {
+            value: wire_value,
+            ..self
+        }
+    }
+
     pub fn solve(&mut self, circuit_values: &CircuitValues) {
         match &self.source {
             ComponentSource::Input(o) => {
@@ -411,5 +418,15 @@ mod tests {
         let cv = CircuitValues::new();
         comp.solve(&cv);
         assert_eq!(65412, comp.wire_value().unwrap(), "solve_ex4_v value");
+    }
+
+    #[test]
+    fn test_component_replace_value() {
+        let mut comp: Component = "123 -> x".parse().unwrap();
+        let cv = CircuitValues::new();
+        comp.solve(&cv);
+        assert_eq!(Some(123), comp.wire_value(), "replace_value initial value");
+        let comp = comp.replace_wire_value(Some(456));
+        assert_eq!(Some(456), comp.wire_value(), "replace_value initial value");
     }
 }
