@@ -56,6 +56,12 @@ impl Circuit {
             .entry(wire_name.to_string())
             .and_modify(|c| *c = input_component);
     }
+
+    pub fn reset(&mut self) {
+        for component in self.components.values_mut() {
+            component.reset_wire_value();
+        }
+    }
 }
 
 #[cfg(test)]
@@ -102,14 +108,16 @@ mod tests {
     }
 
     #[test]
-    pub fn test_circuit_override_wire() {
+    pub fn test_circuit_override_wire_and_reset() {
         let mut c = Circuit::new("123 -> x\nNOT x -> h\n");
         c.solve();
         assert_eq!(Some(123_u16), c.value_of("x"), "circuit value_of x before");
         assert_eq!(Some(65412_u16), c.value_of("h"), "circuit value_of h before");
         c.override_wire("x", Some(12300));
+        c.reset();
         c.solve();
         assert_eq!(Some(12300_u16), c.value_of("x"), "circuit value_of x after");
+        assert_eq!(Some(53235_u16), c.value_of("h"), "circuit value_of h after");
     }
 
     #[test]
