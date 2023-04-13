@@ -43,6 +43,10 @@ impl QuotedString {
         ds = ds.replace("\\\\", "\\");
         ds
     }
+
+    pub fn overhead(&self) -> usize {
+        self.n_chars - self.length
+    }
 }
 
 #[cfg(test)]
@@ -55,6 +59,7 @@ mod tests {
         let qs: QuotedString = "\"\"".parse().unwrap();
         assert_eq!(2, qs.n_chars, "ex1 n_chars");
         assert_eq!(0, qs.length, "ex1 length");
+        assert_eq!(2, qs.overhead(), "ex1 overhead");
     }
 
     // "abc" is 5 characters of code, but 3 characters in the string data.
@@ -63,6 +68,7 @@ mod tests {
         let qs: QuotedString = "\"abc\"".parse().unwrap();
         assert_eq!(5, qs.n_chars, "ex2 n_chars");
         assert_eq!(3, qs.length, "ex2 length");
+        assert_eq!(2, qs.overhead(), "ex2 overhead");
     }
 
     // "aaa\"aaa" is 10 characters of code, but the string itself contains six "a" characters and a
@@ -72,6 +78,7 @@ mod tests {
         let qs: QuotedString = "\"aaa\\\"aaa\"".parse().unwrap();
         assert_eq!(10, qs.n_chars, "ex3 n_chars");
         assert_eq!(7, qs.length, "ex3 length");
+        assert_eq!(3, qs.overhead(), "ex3 overhead");
     }
 
     // "\x27" is 6 characters of code, but the string itself contains just one - an apostrophe ('),
@@ -81,6 +88,7 @@ mod tests {
         let qs: QuotedString = "\"\\x27\"".parse().unwrap();
         assert_eq!(6, qs.n_chars, "ex4 n_chars");
         assert_eq!(1, qs.length, "ex4 length");
+        assert_eq!(5, qs.overhead(), "ex4 overhead");
     }
 
     #[test]
