@@ -34,13 +34,15 @@ impl QuotedString {
             static ref HEX_CHAR_RE: Regex = Regex::new("\\\\x(..)").unwrap();
         }
         let mut ds = s.to_string();
+        // since we only need the length, replace encoded chars with SUB placeholders to avoid
+        // order depedencies
+        ds = ds.replace("\\\"", "\x1a");
+        ds = ds.replace("\\\\", "\x1a");
         while HEX_CHAR_RE.is_match(ds.as_str()) {
             let capture = HEX_CHAR_RE.captures_iter(ds.as_str()).next().unwrap();
             let cap_s = String::from("\\x") + &capture[1];
             ds = ds.replace(cap_s.as_str(), "\x1a");
         }
-        ds = ds.replace("\\\"", "\"");
-        ds = ds.replace("\\\\", "\\");
         ds
     }
 
@@ -95,5 +97,23 @@ mod tests {
     fn test_parse_invalid() {
         let e = "\"123".parse::<QuotedString>().unwrap_err();
         assert_eq!("invalid string '\"123'", e.to_string());
+    }
+
+    // "\\xlv\xb6p" appears in the puzzle input, and shows a decoding order dependency.
+    #[test]
+    fn test_parse_order_ex1() {
+        let qs: QuotedString = "\"\\\\xlv\\xb6p\"".parse().unwrap();
+        assert_eq!(12, qs.n_chars, "order_ex1 n_chars");
+        assert_eq!(6, qs.length, "order_ex1 length");
+        assert_eq!(6, qs.overhead(), "order_ex1 overhead");
+    }
+
+    // "bxb\x5ccl" appears in the puzzle input, and shows a decoding order dependency.
+    #[test]
+    fn test_parse_order_ex2() {
+        let qs: QuotedString = "\"bxb\\x5ccl\"".parse().unwrap();
+        assert_eq!(11, qs.n_chars, "order_ex2 n_chars");
+        assert_eq!(6, qs.length, "order_ex2 length");
+        assert_eq!(5, qs.overhead(), "order_ex2 overhead");
     }
 }
