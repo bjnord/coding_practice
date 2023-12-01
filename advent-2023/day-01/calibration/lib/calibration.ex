@@ -3,22 +3,8 @@ defmodule Calibration do
   Documentation for `Calibration`.
   """
 
-  @doc """
-  Calculate calibration value.
-
-  ## Examples
-
-      iex> Calibration.value('ab1c2de')
-      12
-
-  """
-  def value(chars) do
-    first = chars |> Enum.find(fn (ch) -> (ch >= ?0) && (ch <= ?9) end)
-    last = chars |> Enum.reverse() |> Enum.find(fn (ch) -> (ch >= ?0) && (ch <= ?9) end)
-    ((first - ?0) * 10) + (last - ?0)
-  end
-
   alias Calibration.Parser, as: Parser
+  alias Calibration.Value, as: Value
   alias Snow.CLI, as: CLI
 
   @doc """
@@ -40,7 +26,7 @@ defmodule Calibration do
   def part1(input_file) do
     File.read!(input_file)
     |> Parser.parse()
-    |> Enum.map(&Calibration.value/1)
+    |> Enum.map(&Value.naïve_value/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
