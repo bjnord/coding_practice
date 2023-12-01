@@ -37,7 +37,8 @@ defmodule Calibration do
   def part2(input_file) do
     File.read!(input_file)
     |> Parser.parse()
-    nil  # TODO
+    |> Enum.map(&Value.value/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

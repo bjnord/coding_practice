@@ -19,6 +19,24 @@ defmodule Calibration.ValueTest do
           15,
           77,
         ],
+        part2_entries: [
+          'two1nine',
+          'eightwothree',
+          'abcone2threexyz',
+          'xtwone3four',
+          '4nineeightseven2',
+          'zoneight234',
+          '7pqrstsixteen',
+        ],
+        exp_part2_values: [
+          29,
+          83,
+          13,
+          24,
+          42,
+          14,
+          76,
+        ],
       ]
     end
 
@@ -27,6 +45,11 @@ defmodule Calibration.ValueTest do
                          |> Enum.map(&Value.naïve_value/1)
       assert act_part1_values == fixture.exp_part1_values
     end
-  end
 
+    test "calculate calibration values (part 2 rules)", fixture do
+      act_part2_values = fixture.part2_entries
+                         |> Enum.map(&Value.value/1)
+      assert act_part2_values == fixture.exp_part2_values
+    end
+  end
 end
