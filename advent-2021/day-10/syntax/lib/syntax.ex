@@ -58,7 +58,6 @@ defmodule Syntax do
       else
         openers
       end
-    {next, rem_charlist, opener, rem_openers}
     case next do
       ?( -> entry_status(rem_charlist, [next | openers])
       ?[ -> entry_status(rem_charlist, [next | openers])
