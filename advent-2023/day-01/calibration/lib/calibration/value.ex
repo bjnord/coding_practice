@@ -10,7 +10,7 @@ defmodule Calibration.Value do
 
       iex> Calibration.Value.naïve_value('ab1c2de')
       12
-      iex> Calibration.Value.naïve_value('two4six8ten')
+      iex> Calibration.Value.naïve_value('two4six8nine')
       48
   """
   def naïve_value(chars) do

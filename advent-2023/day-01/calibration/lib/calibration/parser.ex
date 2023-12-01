@@ -5,6 +5,12 @@ defmodule Calibration.Parser do
 
   @doc ~S"""
   Parse input as a block string.
+
+  Returns a list of charlists.
+
+  ## Examples
+      iex> Calibration.Parser.parse("1two3\nfour5six\n")
+      ['1two3', 'four5six']
   """
   def parse(input) do
     input
