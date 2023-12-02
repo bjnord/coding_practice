@@ -3,19 +3,6 @@ defmodule Cube do
   Documentation for `Cube`.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Cube.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
-
   import Cube.Parser
   alias Cube.Game, as: Game
   import Snow.CLI
