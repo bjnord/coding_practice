@@ -40,7 +40,7 @@ defmodule Cube.Parser do
     [id_str, reveals_str] =
       line
       |> String.trim_trailing()
-      |> String.split(":", trim: true)
+      |> String.split(":")
     %Game{
       id: parse_id(id_str),
       reveals: parse_reveals(reveals_str),
@@ -58,7 +58,7 @@ defmodule Cube.Parser do
   # "2 blue, 1 green; 4 green, 3 red"
   defp parse_reveals(reveals_str) do
     reveals_str
-    |> String.split(";", trim: true)
+    |> String.split(";")
     |> Enum.map(&parse_reveal/1)
   end
 
@@ -66,7 +66,7 @@ defmodule Cube.Parser do
   # Returns map: `%{blue: 2, green: 1}`
   defp parse_reveal(reveal_str) do
     reveal_str
-    |> String.split(",", trim: true)
+    |> String.split(",")
     |> Enum.map(&parse_reveal_pair/1)
     |> Enum.into(%{})
   end
