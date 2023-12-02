@@ -1,8 +1,8 @@
 defmodule Smoke.ParserTest do
   use ExUnit.Case
-  doctest Smoke.Parser
+  doctest Smoke.Parser, import: true
 
-  alias Smoke.Parser, as: Parser
+  import Smoke.Parser
 
   describe "puzzle example" do
     setup do
@@ -25,7 +25,10 @@ defmodule Smoke.ParserTest do
     end
 
     test "parser gets expected locations", fixture do
-      assert Parser.parse(fixture.input) == fixture.exp_locations
+      act_locations = fixture.input
+                      |> parse_input_string()
+                      |> Enum.to_list()
+      assert act_locations == fixture.exp_locations
     end
   end
 end

@@ -1,6 +1,8 @@
 defmodule Syntax.ParserTest do
   use ExUnit.Case
-  doctest Syntax.Parser
+  doctest Syntax.Parser, import: true
+
+  import Syntax.Parser
 
   describe "puzzle example" do
     setup do
@@ -34,8 +36,8 @@ defmodule Syntax.ParserTest do
 
     test "parser gets expected entries", fixture do
       act_entries = fixture.input
-                    |> Syntax.Parser.parse_input_string()
-                    |> Enum.map(fn e -> e end)
+                    |> parse_input_string()
+                    |> Enum.to_list()
       assert act_entries == fixture.exp_entries
     end
   end

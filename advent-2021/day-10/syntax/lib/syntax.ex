@@ -25,9 +25,9 @@ defmodule Syntax do
   def part1(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
-    |> Enum.map(&Syntax.entry_status/1)
-    |> Enum.filter(fn {status, _chars} -> status == :corrupted end)
-    |> Enum.map(&Syntax.entry_score/1)
+    |> Stream.map(&Syntax.entry_status/1)
+    |> Stream.filter(fn {status, _chars} -> status == :corrupted end)
+    |> Stream.map(&Syntax.entry_score/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
@@ -111,10 +111,10 @@ defmodule Syntax do
   def part2(input_file, opts \\ []) do
     input_file
     |> parse_input(opts)
-    |> Enum.map(&Syntax.entry_status/1)
-    |> Enum.filter(fn {status, _chars} -> status == :incomplete end)
-    |> Enum.map(&Syntax.entry_completion/1)
-    |> Enum.map(&Syntax.entry_score/1)
+    |> Stream.map(&Syntax.entry_status/1)
+    |> Stream.filter(fn {status, _chars} -> status == :incomplete end)
+    |> Stream.map(&Syntax.entry_completion/1)
+    |> Stream.map(&Syntax.entry_score/1)
     |> middle_score()
     |> IO.inspect(label: "Part 2 answer is")
   end
