@@ -6,7 +6,7 @@ defmodule Syntax.MixProject do
       app: :syntax,
       escript: escript_config(),
       version: "0.1.0",
-      elixir: "~> 1.9",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -22,7 +22,7 @@ defmodule Syntax.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:logger_file_backend, "~> 0.0.12"},
+      {:logger_file_backend, "~> 0.0.13"},
       #{:math, "~> 0.7.0"},
       #{:propcheck, "~> 1.4", only: [:test]},
       {:submarine, path: "../../submarine"},
