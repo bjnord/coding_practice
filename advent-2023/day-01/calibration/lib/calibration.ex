@@ -3,9 +3,9 @@ defmodule Calibration do
   Documentation for `Calibration`.
   """
 
-  alias Calibration.Parser, as: Parser
+  import Calibration.Parser
   alias Calibration.Value, as: Value
-  alias Snow.CLI, as: CLI
+  import Snow.CLI
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -15,18 +15,18 @@ defmodule Calibration do
   - argv: Command-line arguments
   """
   def main(argv) do
-    {input_file, opts} = CLI.parse_args(argv)
-    if Enum.member?(opts[:parts], 1), do: part1(input_file)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file)
+    {input_file, opts} = parse_args(argv)
+    if Enum.member?(opts[:parts], 1), do: part1(input_file, opts)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
   end
 
   @doc """
   Process input file and display part 1 solution.
   """
-  def part1(input_file) do
-    File.read!(input_file)
-    |> Parser.parse()
-    |> Enum.map(&Value.naïve_value/1)
+  def part1(input_file, opts \\ []) do
+    input_file
+    |> parse_input(opts)
+    |> Stream.map(&Value.naïve_value/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
@@ -34,10 +34,10 @@ defmodule Calibration do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file) do
-    File.read!(input_file)
-    |> Parser.parse()
-    |> Enum.map(&Value.value/1)
+  def part2(input_file, opts \\ []) do
+    input_file
+    |> parse_input(opts)
+    |> Stream.map(&Value.value/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end

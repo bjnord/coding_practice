@@ -1,8 +1,8 @@
 defmodule Calibration.ParserTest do
   use ExUnit.Case
-  doctest Calibration.Parser
+  doctest Calibration.Parser, import: true
 
-  alias Calibration.Parser, as: Parser
+  import Calibration.Parser
 
   describe "puzzle example" do
     setup do
@@ -37,7 +37,10 @@ defmodule Calibration.ParserTest do
     end
 
     test "parser gets expected charlists", fixture do
-      assert Parser.parse(fixture.input) == fixture.exp_charlists
+      act_charlists = fixture.input
+                      |> parse_input_string()
+                      |> Enum.to_list()
+      assert act_charlists == fixture.exp_charlists
     end
   end
 end
