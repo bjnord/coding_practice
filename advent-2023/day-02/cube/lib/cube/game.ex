@@ -38,4 +38,23 @@ defmodule Cube.Game do
       true            -> b[key]
     end
   end
+
+  @doc """
+  Would game have been possible if the bag contained only 12 red cubes, 13 green cubes, and 14 blue cubes?
+
+  ## Examples
+
+      iex> %Cube.Game{id: 2, max_reveal: %{blue: 2, green: 4, red: 3}} |> Cube.Game.possible?()
+      true
+      iex> %Cube.Game{id: 3, max_reveal: %{blue: 12, green: 14, red: 13}} |> Cube.Game.possible?()
+      false
+  """
+  def possible?(game) do
+    cond do
+      game.max_reveal.red > 12   -> false
+      game.max_reveal.green > 13 -> false
+      game.max_reveal.blue > 14  -> false
+      true                       -> true
+    end
+  end
 end

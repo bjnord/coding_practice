@@ -40,6 +40,13 @@ defmodule Cube.GameTest do
           %Game{id: 4, max_reveal: %{green: 3, blue: 15, red: 14}},
           %Game{id: 5, max_reveal: %{red: 6, blue: 2, green: 3}},
         ],
+        exp_possibles: [
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
       ]
     end
 
@@ -47,6 +54,12 @@ defmodule Cube.GameTest do
       act_max_reveals = fixture.games
                         |> Enum.map(&Game.max/1)
       assert act_max_reveals == fixture.exp_max_reveals
+    end
+
+    test "calculate possible games", fixture do
+      act_possibles = fixture.exp_max_reveals
+                      |> Enum.map(&Game.possible?/1)
+      assert act_possibles == fixture.exp_possibles
     end
   end
 end

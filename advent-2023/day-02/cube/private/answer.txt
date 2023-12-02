@@ -1,0 +1,3 @@
+./cube private/input.txt
+Part 1 answer is: 2771
+Part 2 answer is: nil

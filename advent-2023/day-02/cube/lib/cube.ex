@@ -17,6 +17,7 @@ defmodule Cube do
   end
 
   import Cube.Parser
+  alias Cube.Game, as: Game
   import Snow.CLI
 
   @doc """
@@ -37,7 +38,10 @@ defmodule Cube do
   """
   def part1(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Stream.map(&Game.max/1)
+    |> Stream.filter(&Game.possible?/1)
+    |> Stream.map(fn game -> game.id end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
