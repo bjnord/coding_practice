@@ -57,4 +57,16 @@ defmodule Cube.Game do
       true                       -> true
     end
   end
+
+  @doc """
+  Calculate power of a set of cubes.
+
+  ## Examples
+
+      iex> %Cube.Game{id: 2, max_reveal: %{blue: 2, green: 4, red: 3}} |> Cube.Game.cube_power()
+      24
+  """
+  def cube_power(game) do
+    game.max_reveal.red * game.max_reveal.green * game.max_reveal.blue
+  end
 end

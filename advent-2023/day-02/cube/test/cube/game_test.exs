@@ -47,6 +47,13 @@ defmodule Cube.GameTest do
           false,
           true
         ],
+        exp_powers: [
+          48,
+          12,
+          1560,
+          630,
+          36,
+        ],
       ]
     end
 
@@ -60,6 +67,12 @@ defmodule Cube.GameTest do
       act_possibles = fixture.exp_max_reveals
                       |> Enum.map(&Game.possible?/1)
       assert act_possibles == fixture.exp_possibles
+    end
+
+    test "calculate cube power", fixture do
+      act_powers = fixture.exp_max_reveals
+                   |> Enum.map(&Game.cube_power/1)
+      assert act_powers == fixture.exp_powers
     end
   end
 end

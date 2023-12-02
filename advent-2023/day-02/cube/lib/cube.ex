@@ -50,7 +50,9 @@ defmodule Cube do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Stream.map(&Game.max/1)
+    |> Stream.map(&Game.cube_power/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
