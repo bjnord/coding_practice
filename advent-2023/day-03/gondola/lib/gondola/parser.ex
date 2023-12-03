@@ -43,6 +43,8 @@ defmodule Gondola.Parser do
       %{parts: [%{number: 617, x1: 0, x2: 2}], symbols: [%{symbol: "*", x: 3}]}
       iex> parse_line("....@.@...\n")
       %{parts: [], symbols: [%{symbol: "@", x: 4}, %{symbol: "@", x: 6}]}
+      iex> parse_line("......=555\n")
+      %{parts: [%{number: 555, x1: 7, x2: 9}], symbols: [%{symbol: "=", x: 6}]}
   """
   def parse_line(line) do
     acc0 = %{
@@ -53,7 +55,7 @@ defmodule Gondola.Parser do
     }
     acc =
       line
-      |> String.trim_trailing()
+      |> String.replace_trailing("\n", ".")
       |> String.to_charlist()
       |> Enum.with_index()
       |> Enum.reduce(acc0, fn ch_x, acc ->
