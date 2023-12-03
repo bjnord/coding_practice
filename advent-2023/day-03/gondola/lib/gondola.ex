@@ -4,6 +4,7 @@ defmodule Gondola do
   """
 
   import Gondola.Parser
+  alias Gondola.Schematic, as: Schematic
   import Snow.CLI
 
   @doc """
@@ -24,7 +25,9 @@ defmodule Gondola do
   """
   def part1(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Schematic.adjacent_parts()
+    |> Enum.map(fn part -> part.number end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
