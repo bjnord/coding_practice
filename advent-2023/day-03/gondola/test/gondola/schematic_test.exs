@@ -1,6 +1,6 @@
 defmodule Gondola.SchematicTest do
   use ExUnit.Case
-  doctest Gondola.Schematic
+  doctest Gondola.Schematic, import: true
 
   alias Gondola.Schematic, as: Schematic
 

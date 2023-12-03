@@ -14,11 +14,24 @@ defmodule Gondola.Schematic do
     schematic.parts
     |> Enum.filter(fn part ->
       schematic.symbols
-      |> Enum.find(fn symbol ->
-        (symbol.y >= (part.y - 1)) && (symbol.y <= (part.y + 1)) &&
-          (symbol.x >= (part.x1 - 1)) && (symbol.x <= (part.x2 + 1))
-      end)
+      |> Enum.find(fn symbol -> adjacent?(part, symbol) end)
     end)
+  end
+
+  @doc """
+  Is this part adjacent to this symbol?
+
+  ## Examples
+      iex> adjacent?(%{number: 592, x1: 2, x2: 4, y: 6}, %{symbol: "+", x: 5, y: 5})
+      true
+      iex> adjacent?(%{number: 592, x1: 2, x2: 4, y: 6}, %{symbol: "+", x: 5, y: 4})
+      false
+      iex> adjacent?(%{number: 592, x1: 1, x2: 3, y: 6}, %{symbol: "+", x: 5, y: 5})
+      false
+  """
+  def adjacent?(part, symbol) do
+    (symbol.y >= (part.y - 1)) && (symbol.y <= (part.y + 1)) &&
+      (symbol.x >= (part.x1 - 1)) && (symbol.x <= (part.x2 + 1))
   end
 
   @doc """
@@ -32,16 +45,13 @@ defmodule Gondola.Schematic do
     |> Enum.map(fn symbol ->
       adj_parts =
         schematic.parts
-        |> Enum.filter(fn part ->
-          (symbol.y >= (part.y - 1)) && (symbol.y <= (part.y + 1)) &&
-            (symbol.x >= (part.x1 - 1)) && (symbol.x <= (part.x2 + 1))
-        end)
+        |> Enum.filter(fn part -> adjacent?(part, symbol) end)
       if length(adj_parts) == 2 do
         Enum.at(adj_parts, 0).number * Enum.at(adj_parts, 1).number
       else
         nil
       end
     end)
-    |> Enum.reject(fn ratio -> ratio == nil end)
+    |> Enum.reject(&is_nil/1)
   end
 end
