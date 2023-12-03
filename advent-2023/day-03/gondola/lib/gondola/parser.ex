@@ -37,43 +37,51 @@ defmodule Gondola.Parser do
   - `symbols`: list of symbols found on line (with x position)
 
   ## Examples
-      iex> parse_line("..35..633.\n")
-      %{parts: [%{number: 35, x1: 2, x2: 3}, %{number: 633, x1: 6, x2: 8}], symbols: []}
+      iex> parse_line(".633..633.\n")
+      %{parts: [%{number: 633, x1: 1, x2: 3}, %{number: 633, x1: 6, x2: 8}], symbols: []}
       iex> parse_line("617*......\n")
       %{parts: [%{number: 617, x1: 0, x2: 2}], symbols: [%{symbol: "*", x: 3}]}
-      iex> parse_line("....@.=...\n")
-      %{parts: [], symbols: [%{symbol: "@", x: 4}, %{symbol: "=", x: 6}]}
+      iex> parse_line("....@.@...\n")
+      %{parts: [], symbols: [%{symbol: "@", x: 4}, %{symbol: "@", x: 6}]}
   """
   def parse_line(line) do
-    trimmed_line =
+    acc0 = %{
+      parts: [],
+      symbols: [],
+      part_n: 0,
+      x1: nil,
+    }
+    acc =
       line
       |> String.trim_trailing()
-    parts =
-      Regex.scan(~r{\b\d+\b}, trimmed_line)
-      |> Enum.map(&hd/1)
-      |> Enum.map(fn part_n ->
-        # OPTIMIZE this kind of substring indexing is inefficient
-        {i, len} = :binary.match line, part_n
-        %{
-          number: String.to_integer(part_n),
-          x1: i,
-          x2: i + len - 1,
-        }
-      end)
-    symbols =
-      Regex.scan(~r{[^\d\.]}, trimmed_line)
-      |> Enum.map(&hd/1)
-      |> Enum.map(fn symbol ->
-        # OPTIMIZE this kind of substring indexing is inefficient
-        {i, _len} = :binary.match line, symbol
-        %{
-          symbol: symbol,
-          x: i,
-        }
+      |> String.to_charlist()
+      |> Enum.with_index()
+      |> Enum.reduce(acc0, fn ch_x, acc ->
+        {ch, x} = ch_x
+        cond do
+          (ch >= ?0) && (ch <= ?9) ->  # accumulate part number
+            x1 = if acc.part_n == 0, do: x, else: acc.x1
+            %{acc | part_n: acc.part_n * 10 + (ch - ?0), x1: x1}
+          (ch == ?.) && (acc.part_n > 0) ->  # emit part number
+            parts = [%{number: acc.part_n, x1: acc.x1, x2: x - 1} | acc.parts]
+            %{acc | parts: parts, part_n: 0, x1: nil}
+          ch == ?. ->
+            acc
+          true ->  # symbol
+            parts =
+              if acc.part_n > 0 do  # emit part number
+                [%{number: acc.part_n, x1: acc.x1, x2: x - 1} | acc.parts]
+              else
+                acc.parts
+              end
+            s = List.to_string([ch])
+            symbols = [%{symbol: s, x: x} | acc.symbols]
+            %{acc | symbols: symbols, parts: parts, part_n: 0, x1: nil}
+        end
       end)
     %{
-      parts: parts,
-      symbols: symbols,
+      parts: Enum.reverse(acc.parts),
+      symbols: Enum.reverse(acc.symbols),
     }
   end
 
