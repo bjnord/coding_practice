@@ -38,7 +38,11 @@ defmodule Gondola.SchematicTest do
           755,
           664,
           598,
-        ]
+        ],
+        exp_ratios: [
+          16345,
+          451490,
+        ],
       ]
     end
 
@@ -47,6 +51,12 @@ defmodule Gondola.SchematicTest do
                      |> Schematic.adjacent_parts()
                      |> Enum.map(fn part -> part.number end)
       assert act_adjacent == fixture.exp_adjacent
+    end
+
+    test "find gear ratios", fixture do
+      act_ratios = fixture.schematic
+                   |> Schematic.gear_ratios()
+      assert act_ratios == fixture.exp_ratios
     end
   end
 end

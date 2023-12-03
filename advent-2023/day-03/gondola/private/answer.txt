@@ -1,0 +1,3 @@
+./gondola private/input.txt
+Part 1 answer is: 540212
+Part 2 answer is: 87605697

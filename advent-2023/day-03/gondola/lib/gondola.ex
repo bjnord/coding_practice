@@ -36,7 +36,8 @@ defmodule Gondola do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Schematic.gear_ratios()
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
