@@ -50,6 +50,35 @@ their sum is `4361`.
 Of course, the actual engine schematic is much larger. **What is the sum
 of all of the part numbers in the engine schematic?**
 
+### Part One Design
+
+> **Spoilers ahead!**
+
+This year I'm trying to write the solution code first and the parser
+second (when possible), so I don't waste time building a parser that
+emits a form that doesn't fit the solution code. The day 3 solution
+code came together really fast, but then the parser was a slog. I
+ended up with the right answer for the puzzle example, but the wrong
+answer for the puzzle input, which is really unusual in the early days.
+
+After brainstorming a bit and coming up empty, I went to Reddit
+looking for edge cases, and I found two:
+
+1. [This post](https://www.reddit.com/r/adventofcode/comments/189nkdj/2023_day_3_lost_85_minutes_to_a_oneline_mistake/)
+pointed out that the same part number can occur more than once on a
+given line. My first parsing approach couldn't handle that, so I ended
+up having to completely rewrite the parser. :(
+
+2. [This post](https://www.reddit.com/r/adventofcode/comments/189o46a/right_on_test_input_but_not_real_input/)
+and the answer by [alexis\_M8](https://www.reddit.com/user/alexis_M8)
+helped me discover that my parser was failing to emit part numbers
+that were at the end of the line. From subsequent reading, a lot of
+people tripped on this one.
+
+3. I didn't have this issue, but a third edge case a lot of people
+are hitting is when a symbol is right next to two part numbers (like
+`"555*121"`).
+
 ## Part Two
 
 The engineer finds the missing part and installs it in the engine! As
@@ -96,3 +125,8 @@ adjacent to `617` is **not** a gear because it is only adjacent to one
 part number.) Adding up all of the gear ratios produces `467835`.
 
 **What is the sum of all of the gear ratios in your engine schematic?**
+
+### Part Two Design
+
+Fortunately, the parsed form was fine as-is to implement the part
+2 solution.
