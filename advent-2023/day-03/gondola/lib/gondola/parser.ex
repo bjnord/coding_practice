@@ -58,27 +58,15 @@ defmodule Gondola.Parser do
       |> String.replace_trailing("\n", ".")
       |> String.to_charlist()
       |> Enum.with_index()
-      |> Enum.reduce(acc0, fn ch_x, acc ->
-        {ch, x} = ch_x
+      |> Enum.reduce(acc0, fn {ch, x}, acc ->
         cond do
-          (ch >= ?0) && (ch <= ?9) ->  # accumulate part number
-            x1 = if acc.part_n == 0, do: x, else: acc.x1
-            %{acc | part_n: acc.part_n * 10 + (ch - ?0), x1: x1}
-          (ch == ?.) && (acc.part_n > 0) ->  # emit part number
-            parts = [%{number: acc.part_n, x1: acc.x1, x2: x - 1} | acc.parts]
-            %{acc | parts: parts, part_n: 0, x1: nil}
-          ch == ?. ->
-            acc
+          digit?(ch) ->
+            accumulate_part_number(acc, ch, x)
+          dot?(ch) ->
+            emit_part_number(acc, x)
           true ->  # symbol
-            parts =
-              if acc.part_n > 0 do  # emit part number
-                [%{number: acc.part_n, x1: acc.x1, x2: x - 1} | acc.parts]
-              else
-                acc.parts
-              end
-            s = List.to_string([ch])
-            symbols = [%{symbol: s, x: x} | acc.symbols]
-            %{acc | symbols: symbols, parts: parts, part_n: 0, x1: nil}
+            emit_symbol(acc, ch, x)
+            |> emit_part_number(x)
         end
       end)
     %{
@@ -87,10 +75,31 @@ defmodule Gondola.Parser do
     }
   end
 
-  @doc ~S"""
-  Transform a list of line contents into a `Schematic`.
-  """
-  def build_schematic(line_maps) do
+  defp digit?(ch) when (ch >= ?0) and (ch <= ?9), do: true
+  defp digit?(_ch), do: false
+  defp dot?(ch) when ch == ?., do: true
+  defp dot?(_ch), do: false
+
+  defp accumulate_part_number(acc, ch, x) do
+    x1 = if acc.x1, do: acc.x1, else: x
+    %{acc | part_n: acc.part_n * 10 + (ch - ?0), x1: x1}
+  end
+  defp emit_part_number(acc, x) do
+    if acc.x1 do
+      parts = [%{number: acc.part_n, x1: acc.x1, x2: x - 1} | acc.parts]
+      %{acc | parts: parts, part_n: 0, x1: nil}
+    else
+      acc
+    end
+  end
+  defp emit_symbol(acc, ch, x) do
+    s = List.to_string([ch])
+    symbols = [%{symbol: s, x: x} | acc.symbols]
+    %{acc | symbols: symbols}
+  end
+
+  # Transform a list of line contents into a `Schematic`.
+  defp build_schematic(line_maps) do
     line_maps
     |> Enum.with_index(fn line_map, y ->
       parts =
