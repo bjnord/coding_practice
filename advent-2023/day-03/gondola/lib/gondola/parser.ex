@@ -20,7 +20,13 @@ defmodule Gondola.Parser do
   @doc ~S"""
   Parse input as a block string.
 
-  Returns a `Schematic`.
+  Returns a `Schematic` with the following elements:
+  - `parts`: a list of part number maps (with x/y positions)
+  - `symbols`: a list of symbol maps (with x/y positions)
+
+  ## Examples
+      iex> parse_input_string("467..114..\n.....+.58.\n")
+      %Gondola.Schematic{parts: [%{number: 467, x1: 0, x2: 2, y: 0}, %{number: 114, x1: 5, x2: 7, y: 0}, %{number: 58, x1: 7, x2: 8, y: 1}], symbols: [%{symbol: "+", x: 5, y: 1}]}
   """
   def parse_input_string(input, _opts \\ []) do
     input
@@ -37,14 +43,10 @@ defmodule Gondola.Parser do
   - `symbols`: list of symbols found on line (with x position)
 
   ## Examples
-      iex> parse_line(".633..633.\n")
-      %{parts: [%{number: 633, x1: 1, x2: 3}, %{number: 633, x1: 6, x2: 8}], symbols: []}
-      iex> parse_line("617*......\n")
-      %{parts: [%{number: 617, x1: 0, x2: 2}], symbols: [%{symbol: "*", x: 3}]}
-      iex> parse_line("....@.@...\n")
-      %{parts: [], symbols: [%{symbol: "@", x: 4}, %{symbol: "@", x: 6}]}
-      iex> parse_line("......=555\n")
-      %{parts: [%{number: 555, x1: 7, x2: 9}], symbols: [%{symbol: "=", x: 6}]}
+      iex> parse_line("467..114..\n")
+      %{parts: [%{number: 467, x1: 0, x2: 2}, %{number: 114, x1: 5, x2: 7}], symbols: []}
+      iex> parse_line(".....+.58.\n")
+      %{parts: [%{number: 58, x1: 7, x2: 8}], symbols: [%{symbol: "+", x: 5}]}
   """
   def parse_line(line) do
     acc0 = %{

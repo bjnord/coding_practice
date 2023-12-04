@@ -50,5 +50,17 @@ defmodule Gondola.ParserTest do
                       |> parse_input_string()
       assert act_schematic == fixture.exp_schematic
     end
+
+    test "same part number appears 2+ times on same line" do
+      act = parse_line(".633..633.\n")
+      exp = %{parts: [%{number: 633, x1: 1, x2: 3}, %{number: 633, x1: 6, x2: 8}], symbols: []}
+      assert act == exp
+    end
+
+    test "part number appears at end of line" do
+      act = parse_line("......=555\n")
+      exp = %{parts: [%{number: 555, x1: 7, x2: 9}], symbols: [%{symbol: "=", x: 6}]}
+      assert act == exp
+    end
   end
 end
