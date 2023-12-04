@@ -47,6 +47,14 @@ defmodule Scratch.CardTest do
           0,
           0,
         ],
+        exp_copies: %{
+          1 => 1,
+          2 => 2,
+          3 => 4,
+          4 => 8,
+          5 => 14,
+          6 => 1,
+        },
       ]
     end
 
@@ -54,6 +62,12 @@ defmodule Scratch.CardTest do
       act_points = fixture.cards
                    |> Enum.map(&Card.value/1)
       assert act_points == fixture.exp_points
+    end
+
+    test "find card copy counts", fixture do
+      act_copies = fixture.cards
+                   |> Card.copies()
+      assert act_copies == fixture.exp_copies
     end
   end
 end

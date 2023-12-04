@@ -35,7 +35,9 @@ defmodule Scratch do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Card.copies()
+    |> Map.values()
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
