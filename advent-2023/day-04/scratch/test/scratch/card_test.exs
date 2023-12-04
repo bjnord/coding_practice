@@ -50,7 +50,7 @@ defmodule Scratch.CardTest do
       ]
     end
 
-    test "find symbol-adjacent parts", fixture do
+    test "find card point values", fixture do
       act_points = fixture.cards
                    |> Enum.map(&Card.value/1)
       assert act_points == fixture.exp_points
