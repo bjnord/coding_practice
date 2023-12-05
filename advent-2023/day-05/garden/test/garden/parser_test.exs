@@ -43,7 +43,16 @@ defmodule Garden.ParserTest do
         60 56 37
         56 93 4
         """,
-        exp_seeds: [ 79, 14, 55, 13 ],
+        exp_seeds_part1: [
+          {79, 1},
+          {14, 1},
+          {55, 1},
+          {13, 1},
+        ],
+        exp_seeds_part2: [
+          {79, 14},
+          {55, 13},
+        ],
         exp_seed_gmap: %Gmap{
           from: :seed,
           to: :soil,
@@ -66,8 +75,15 @@ defmodule Garden.ParserTest do
     test "parser gets expected seeds (part 1 rules)", fixture do
       {act_seeds, _gmaps} =
         fixture.input
-        |> parse_input_string()
-      assert act_seeds == fixture.exp_seeds
+        |> parse_input_string(part: 1)
+      assert act_seeds == fixture.exp_seeds_part1
+    end
+
+    test "parser gets expected seeds (part 2 rules)", fixture do
+      {act_seeds, _gmaps} =
+        fixture.input
+        |> parse_input_string(part: 2)
+      assert act_seeds == fixture.exp_seeds_part2
     end
 
     test "parser gets expected seed Gmap", fixture do

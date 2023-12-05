@@ -82,6 +82,7 @@ defmodule Garden.GmapTest do
         |> parse_input_string()
       act_locations =
         seeds
+        |> Enum.map(fn seed -> elem(seed, 0) end)
         |> Enum.map(fn seed -> Gmap.location(seed, gmaps) end)
       assert act_locations == fixture.exp_locations
     end
