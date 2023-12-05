@@ -38,14 +38,14 @@ defmodule Garden.Gmap do
   ## Parameters
 
   - `seed`: the integer seed number
-  - `gmaps`: the `Gmap`s to apply
+  - `gmaps`: a map of the `Gmap`s to apply
 
   Returns the integer location value.
   """
-  def location(seed, gmaps) do
-    gmaps
-    |> Enum.reduce(seed, fn gmap, value ->
-      transform(value, gmap)
-    end)
+  def location(seed, gmaps), do: location(seed, gmaps[:seed], gmaps)
+  def location(value, nil, _gmaps), do: value
+  def location(value, gmap, gmaps) do
+    transform(value, gmap)
+    |> location(gmaps[gmap.to], gmaps)
   end
 end

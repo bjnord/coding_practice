@@ -63,12 +63,18 @@ defmodule Garden.ParserTest do
       ]
     end
 
-    test "parser gets expected seeds and maps", fixture do
-      {act_seeds, act_gmaps} =
+    test "parser gets expected seeds (part 1 rules)", fixture do
+      {act_seeds, _gmaps} =
         fixture.input
         |> parse_input_string()
       assert act_seeds == fixture.exp_seeds
-      assert List.first(act_gmaps) == fixture.exp_seed_gmap
+    end
+
+    test "parser gets expected seed Gmap", fixture do
+      {_seeds, act_gmaps} =
+        fixture.input
+        |> parse_input_string()
+      assert act_gmaps[:seed] == fixture.exp_seed_gmap
     end
   end
 end

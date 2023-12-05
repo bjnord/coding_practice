@@ -67,12 +67,11 @@ defmodule Garden.GmapTest do
       {_seeds, gmaps} =
         fixture.input
         |> parse_input_string()
-      seed_to_soil = List.first(gmaps)
-      assert seed_to_soil.from == :seed
-      assert seed_to_soil.to == :soil
+      assert gmaps[:seed].from == :seed
+      assert gmaps[:seed].to == :soil
       fixture.exp_seed_to_soil_mappings
       |> Enum.each(fn {seed, exp_soil} ->
-        act_soil = Gmap.transform(seed, seed_to_soil)
+        act_soil = Gmap.transform(seed, gmaps[:seed])
         assert act_soil == exp_soil
       end)
     end

@@ -36,6 +36,8 @@ defmodule Garden.Parser do
       blocks
       |> Enum.drop(1)
       |> Enum.map(&parse_gmap_block/1)
+      |> Enum.map(fn gmap -> {gmap.from, gmap} end)
+      |> Enum.into(%{})
     {seeds, gmaps}
   end
 
