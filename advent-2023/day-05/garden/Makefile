@@ -1,6 +1,7 @@
 BIN = ./garden
 FILES = mix.exs test/test_helper.exs \
 	lib/garden.ex test/garden_test.exs \
+	lib/garden/gmap.ex test/garden/gmap_test.exs \
 	lib/garden/parser.ex test/garden/parser_test.exs
 VERBOSE = 0
 

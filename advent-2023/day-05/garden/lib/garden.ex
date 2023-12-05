@@ -4,6 +4,7 @@ defmodule Garden do
   """
 
   import Garden.Parser
+  alias Garden.Gmap
   import Snow.CLI
 
   @doc """
@@ -23,8 +24,10 @@ defmodule Garden do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    {seeds, gmaps} = parse_input(input_file)
+    seeds
+    |> Enum.map(fn seed -> Gmap.location(seed, gmaps) end)
+    |> Enum.min()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
