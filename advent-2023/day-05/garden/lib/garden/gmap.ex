@@ -4,6 +4,7 @@ defmodule Garden.Gmap do
   """
 
   defstruct from: nil, to: nil, maps: []
+  require Logger
 
   @doc """
   Transform a range, by applying a garden map.
@@ -18,9 +19,11 @@ defmodule Garden.Gmap do
   def transform({value, length}, gmap) do
     Stream.cycle([true])
     |> Enum.reduce_while({value, length, []}, fn _, {acc_v, acc_len, ranges} ->
+      Logger.debug("reduce before: {#{acc_v}, #{acc_len}, #{inspect(ranges)}}")
       map =
         gmap.maps
         |> Enum.find(fn map -> matching_map?(acc_v, map) end)
+      Logger.debug("reduce map: #{inspect(map)}")
       {new_v, new_len} =
         if map do
           {
@@ -31,6 +34,7 @@ defmodule Garden.Gmap do
           map =
             gmap.maps
             |> nearest_map(acc_v)
+          Logger.debug("reduce nearest map: #{inspect(map)}")
           if map do
             {
               acc_v,
@@ -44,6 +48,7 @@ defmodule Garden.Gmap do
           end
         end
       new_acc = {acc_v + new_len, acc_len - new_len, [{new_v, new_len} | ranges]}
+      Logger.debug("reduce after: #{inspect(new_acc)}")
       if elem(new_acc, 1) < 1 do
         {:halt, new_acc}
       else
