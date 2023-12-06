@@ -1,6 +1,6 @@
 defmodule Garden.Gmap do
   @moduledoc """
-  Gmap structure and functions for `Garden`.
+  Garden map structure and functions.
   """
 
   defstruct from: nil, to: nil, maps: []
@@ -98,8 +98,8 @@ defmodule Garden.Gmap do
   Returns the minimum location value (integer).
   """
   def min_location({seed, length}, gmaps), do: min_location({seed, length}, :seed, gmaps)
-  def min_location({value, length}, :location, _gmaps), do: value
-  def min_location({value, length}, gmap_type, gmaps) do
+  defp min_location({value, length}, :location, _gmaps), do: value
+  defp min_location({value, length}, gmap_type, gmaps) do
     transform({value, length}, gmaps[gmap_type])
     |> Enum.map(fn {value, length} -> min_location({value, length}, gmaps[gmap_type].to, gmaps) end)
     |> Enum.min()
@@ -116,8 +116,8 @@ defmodule Garden.Gmap do
   Returns the integer location value.
   """
   def location(seed, gmaps), do: location(seed, gmaps[:seed], gmaps)
-  def location(value, nil, _gmaps), do: value
-  def location(value, gmap, gmaps) do
+  defp location(value, nil, _gmaps), do: value
+  defp location(value, gmap, gmaps) do
     transform(value, gmap)
     |> location(gmaps[gmap.to], gmaps)
   end

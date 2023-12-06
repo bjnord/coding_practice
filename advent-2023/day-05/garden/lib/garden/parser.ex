@@ -1,6 +1,6 @@
 defmodule Garden.Parser do
   @moduledoc """
-  Parsing for `Garden`.
+  Garden map parser functions.
   """
 
   alias Garden.Gmap
@@ -9,7 +9,7 @@ defmodule Garden.Parser do
   Parse the input file.
 
   Returns a tuple containing:
-  - a list of integer seeds
+  - a list of seed ranges (`{value, length}` tuples)
   - a list of `Gmap`s
   """
   def parse_input(input_file, opts \\ []) do
@@ -21,7 +21,7 @@ defmodule Garden.Parser do
   Parse input as a block string.
 
   Returns a tuple containing:
-  - a list of integer seeds
+  - a list of seed ranges (`{value, length}` tuples)
   - a list of `Gmap`s
   """
   def parse_input_string(input, opts \\ []) do
@@ -44,13 +44,14 @@ defmodule Garden.Parser do
   @doc ~S"""
   Parse an input line containing a list of seeds.
 
-  This produces a different result depending on the puzzle part rules.
+  (This produces a different result depending on the puzzle part rules.
+  See "Examples".)
 
   ## Parameters
 
   - `part` keyword (1 or 2)
 
-  Returns a list of integer seeds.
+  Returns a list of seed ranges (`{value, length}` tuples).
 
   ## Examples
       iex> parse_seeds_line("seeds: 79 14 55 13\n", part: 1)
@@ -77,6 +78,12 @@ defmodule Garden.Parser do
 
   @doc ~S"""
   Parse a list of input lines containing a garden map.
+
+  ```
+  seed-to-soil map:
+  50 98 2
+  52 50 48
+  ```
 
   Returns a `Gmap`.
   """
