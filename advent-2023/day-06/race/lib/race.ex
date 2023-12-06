@@ -23,7 +23,7 @@ defmodule Race do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
-    parse_input(input_file)
+    parse_input(input_file, part: 1)
     |> Enum.map(&Race.n_wins/1)
     |> Enum.product()
     |> IO.inspect(label: "Part 1 answer is")
@@ -33,8 +33,9 @@ defmodule Race do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    parse_input(input_file, part: 2)
+    |> Enum.map(&Race.n_wins/1)
+    |> List.first()
     |> IO.inspect(label: "Part 2 answer is")
   end
 
