@@ -44,22 +44,17 @@ defmodule Garden.GmapTest do
         56 93 4
         """,
         exp_seed_to_soil_mappings_part1: [
-          {49, 49},
-          {50, 52},
-          {97, 99},
-          {98, 50},
-          {99, 51},
-          {79, 81},
-          {14, 14},
-          {55, 57},
-          {13, 13},
+          {{49, 1}, [{49, 1}]},
+          {{50, 1}, [{52, 1}]},
+          {{97, 1}, [{99, 1}]},
+          {{98, 1}, [{50, 1}]},
+          {{99, 1}, [{51, 1}]},
+          {{79, 1}, [{81, 1}]},
+          {{14, 1}, [{14, 1}]},
+          {{55, 1}, [{57, 1}]},
+          {{13, 1}, [{13, 1}]},
         ],
-        exp_locations_part1: [
-          82,
-          43,
-          86,
-          35,
-        ],
+        exp_min_location_part1: 35,
         exp_seed_to_soil_mappings_part2: [
           {{96, 4}, [{98, 2}, {50, 2}]},
           # values before earliest range:
@@ -91,8 +86,8 @@ defmodule Garden.GmapTest do
       assert gmaps[:seed].from == :seed
       assert gmaps[:seed].to == :soil
       fixture.exp_seed_to_soil_mappings_part1
-      |> Enum.each(fn {seed, exp_soil} ->
-        act_soil = Gmap.transform(seed, gmaps[:seed])
+      |> Enum.each(fn {{seed, length}, exp_soil} ->
+        act_soil = Gmap.transform({seed, length}, gmaps[:seed])
         assert act_soil == exp_soil
       end)
     end
@@ -101,11 +96,11 @@ defmodule Garden.GmapTest do
       {seeds, gmaps} =
         fixture.input
         |> parse_input_string(part: 1)
-      act_locations =
+      act_min_locations =
         seeds
-        |> Enum.map(fn seed -> elem(seed, 0) end)
-        |> Enum.map(fn seed -> Gmap.location(seed, gmaps) end)
-      assert act_locations == fixture.exp_locations_part1
+        |> Enum.map(fn seed -> Gmap.min_location(seed, gmaps) end)
+        |> Enum.min()
+      assert act_min_locations == fixture.exp_min_location_part1
     end
 
     test "seed-to-soil mappings (part 2)", fixture do

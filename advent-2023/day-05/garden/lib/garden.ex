@@ -26,8 +26,7 @@ defmodule Garden do
   def part1(input_file) do
     {seeds, gmaps} = parse_input(input_file, part: 1)
     seeds
-    |> Enum.map(fn seed -> elem(seed, 0) end)
-    |> Enum.map(fn seed -> Gmap.location(seed, gmaps) end)
+    |> Enum.map(fn seed -> Gmap.min_location(seed, gmaps) end)
     |> Enum.min()
     |> IO.inspect(label: "Part 1 answer is")
   end

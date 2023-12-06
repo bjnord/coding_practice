@@ -54,27 +54,6 @@ defmodule Garden.Gmap do
     |> Enum.reverse()
   end
 
-  @doc """
-  Transform a value, by applying a garden map.
-
-  ## Parameters
-
-  - `value`: the integer value
-  - `gmap`: the `Gmap` to apply
-
-  Returns the transformed integer value.
-  """
-  def transform(value, gmap) do
-    map =
-      gmap.maps
-      |> Enum.find(fn map -> matching_map?(value, map) end)
-    if map do
-      value - map.from + map.to
-    else
-      value
-    end
-  end
-
   defp matching_map?(value, map) do
     from = map.from
     to = map.from + map.length - 1
@@ -98,27 +77,10 @@ defmodule Garden.Gmap do
   Returns the minimum location value (integer).
   """
   def min_location({seed, length}, gmaps), do: min_location({seed, length}, :seed, gmaps)
-  defp min_location({value, length}, :location, _gmaps), do: value
+  defp min_location({value, _length}, :location, _gmaps), do: value
   defp min_location({value, length}, gmap_type, gmaps) do
     transform({value, length}, gmaps[gmap_type])
     |> Enum.map(fn {value, length} -> min_location({value, length}, gmaps[gmap_type].to, gmaps) end)
     |> Enum.min()
-  end
-
-  @doc """
-  Find the location of a seed, by applying successive garden maps.
-
-  ## Parameters
-
-  - `seed`: the integer seed number
-  - `gmaps`: a map of the `Gmap`s to apply
-
-  Returns the integer location value.
-  """
-  def location(seed, gmaps), do: location(seed, gmaps[:seed], gmaps)
-  defp location(value, nil, _gmaps), do: value
-  defp location(value, gmap, gmaps) do
-    transform(value, gmap)
-    |> location(gmaps[gmap.to], gmaps)
   end
 end
