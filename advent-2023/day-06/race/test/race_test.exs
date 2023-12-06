@@ -25,6 +25,11 @@ defmodule RaceTest do
           8,
           9,
         ],
+        exp_n_losses: [
+          4,
+          8,
+          22,
+        ],
       ]
     end
 
@@ -40,6 +45,12 @@ defmodule RaceTest do
       act_n_wins = fixture.races
                    |> Enum.map(&Race.n_wins/1)
       assert act_n_wins == fixture.exp_n_wins
+    end
+
+    test "calculate number of race losses", fixture do
+      act_n_losses = fixture.races
+                     |> Enum.map(&Race.n_losses/1)
+      assert act_n_losses == fixture.exp_n_losses
     end
   end
 end

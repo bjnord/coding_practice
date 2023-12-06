@@ -53,9 +53,11 @@ defmodule Race do
   """
   def distances(time) do
     for t <- 0..time do
-      (time - t) * t
+      distance(time, t)
     end
   end
+
+  defp distance(time, t), do: (time - t) * t
 
   @doc ~S"""
   Calculate number of winning races.
@@ -74,5 +76,27 @@ defmodule Race do
   def n_wins({time, record}) do
     distances(time)
     |> Enum.count(fn dist -> dist > record end)
+  end
+
+  @doc ~S"""
+  Calculate number of losing races.
+
+  ## Parameters
+
+  - `time` - length of race (in milliseconds)
+  - `record` - record race distance (in millimeters)
+
+  Returns the number of losing races.
+
+  ## Examples
+      iex> Race.n_losses({3, 1})
+      2
+  """
+  def n_losses({time, record}) do
+    earliest_i =
+      0..time
+      |> Enum.find_index(fn t -> distance(time, t) > record end)
+    n_wins = ((time - earliest_i) - (earliest_i - 1))
+    (time + 1) - n_wins
   end
 end
