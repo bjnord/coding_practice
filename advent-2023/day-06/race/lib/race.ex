@@ -24,7 +24,8 @@ defmodule Race do
   """
   def part1(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Enum.map(&Race.n_wins/1)
+    |> Enum.product()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
