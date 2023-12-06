@@ -6,7 +6,7 @@ defmodule Garden.Gmap do
   defstruct from: nil, to: nil, maps: []
 
   @doc """
-  Transform range, by applying a range map.
+  Transform a range, by applying a garden map.
 
   ## Parameters
 
@@ -55,7 +55,7 @@ defmodule Garden.Gmap do
   end
 
   @doc """
-  Transform value, by applying a range map.
+  Transform a value, by applying a garden map.
 
   ## Parameters
 
@@ -88,7 +88,25 @@ defmodule Garden.Gmap do
   end
 
   @doc """
-  Find the location of a seed, by applying successive maps.
+  Find the minimum location of a seed range, by applying successive garden maps.
+
+  ## Parameters
+
+  - `{seed, length}`: the seed range to transform (integer value and range length)
+  - `gmaps`: a map of the `Gmap`s to apply
+
+  Returns the minimum location value (integer).
+  """
+  def min_location({seed, length}, gmaps), do: min_location({seed, length}, :seed, gmaps)
+  def min_location({value, length}, :location, _gmaps), do: value
+  def min_location({value, length}, gmap_type, gmaps) do
+    transform({value, length}, gmaps[gmap_type])
+    |> Enum.map(fn {value, length} -> min_location({value, length}, gmaps[gmap_type].to, gmaps) end)
+    |> Enum.min()
+  end
+
+  @doc """
+  Find the location of a seed, by applying successive garden maps.
 
   ## Parameters
 

@@ -80,6 +80,7 @@ defmodule Garden.GmapTest do
           {47, 3},
           {60, 3},
         ],
+        exp_min_location_part2: 46,
       ]
     end
 
@@ -127,6 +128,17 @@ defmodule Garden.GmapTest do
       act_mappings =
         Gmap.transform(fixture.notch_range_part2, gmap)
       assert act_mappings == fixture.exp_notch_mappings_part2
+    end
+
+    test "seed min location (part 2)", fixture do
+      {seeds, gmaps} =
+        fixture.input
+        |> parse_input_string(part: 2)
+      act_min_location =
+        seeds
+        |> Enum.map(fn seed -> Gmap.min_location(seed, gmaps) end)
+        |> Enum.min()
+      assert act_min_location == fixture.exp_min_location_part2
     end
   end
 end

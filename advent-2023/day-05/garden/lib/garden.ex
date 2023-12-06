@@ -36,8 +36,10 @@ defmodule Garden do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    {seeds, gmaps} = parse_input(input_file, part: 2)
+    seeds
+    |> Enum.map(fn seed -> Gmap.min_location(seed, gmaps) end)
+    |> Enum.min()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
