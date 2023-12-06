@@ -74,8 +74,10 @@ defmodule Race do
       2
   """
   def n_wins({time, record}) do
-    distances(time)
-    |> Enum.count(fn dist -> dist > record end)
+    earliest_i =
+      0..time
+      |> Enum.find_index(fn t -> distance(time, t) > record end)
+    ((time - earliest_i) - (earliest_i - 1))
   end
 
   @doc ~S"""
@@ -93,10 +95,6 @@ defmodule Race do
       2
   """
   def n_losses({time, record}) do
-    earliest_i =
-      0..time
-      |> Enum.find_index(fn t -> distance(time, t) > record end)
-    n_wins = ((time - earliest_i) - (earliest_i - 1))
-    (time + 1) - n_wins
+    (time + 1) - n_wins({time, record})
   end
 end
