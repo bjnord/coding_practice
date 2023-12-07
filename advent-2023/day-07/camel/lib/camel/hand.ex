@@ -78,4 +78,61 @@ defmodule Camel.Hand do
         max_by_cards({hand_a, a_rem}, {hand_b, b_rem})
     end
   end
+
+  @doc ~S"""
+  Strengthen a hand's classification taking jokers into account.
+
+  ## Parameters
+
+  - `hand` - a `Hand`
+
+  Returns a strengthened `Hand`.
+  """
+  def strengthen(hand) do
+    {new_type, new_type_i} = reclassify_hand(hand)
+    new_cards =
+      hand.cards
+      |> Enum.map(fn v -> if v == 11, do: 1, else: v end)
+    %Camel.Hand{hand | cards: new_cards, type: new_type, type_i: new_type_i}
+  end
+
+  @doc ~S"""
+  Reclassfy a hand taking jokers into account.
+
+  ## Parameters
+
+  - `hand`: a `Hand`
+
+  Returns a `{type, type_i}` tuple reflecting the new classification.
+  """
+  def reclassify_hand(hand) do
+    freq = Enum.frequencies(hand.cards)
+    jokers = if freq[11], do: freq[11], else: 0
+    cond do
+      jokers == 0 ->
+        {hand.type, hand.type_i}
+      hand.type == :kind5 ->
+        {hand.type, hand.type_i}
+      hand.type == :kind4 && jokers == 1 ->
+        {:kind5, 6}
+      hand.type == :kind4 && jokers == 4 ->
+        {hand.type, hand.type_i}
+      hand.type == :fullh && jokers >= 2 ->  # 2 or 3
+        {:kind5, 6}
+      hand.type == :kind3 && jokers == 1 ->
+        {:kind4, 5}
+      hand.type == :kind3 && jokers == 3 ->
+        {hand.type, hand.type_i}
+      hand.type == :pair2 && jokers == 2 ->
+        {:kind4, 5}
+      hand.type == :pair2 && jokers == 1 ->
+        {:fullh, 4}
+      hand.type == :pair1 && jokers >= 1 ->  # 1 or 2
+        {:kind3, 3}
+      hand.type == :highc && jokers == 1 ->
+        {:pair1, 1}
+      true ->
+        raise "unhandled case"
+    end
+  end
 end
