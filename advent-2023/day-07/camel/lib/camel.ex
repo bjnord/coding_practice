@@ -34,8 +34,11 @@ defmodule Camel do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    hands =
+      parse_input(input_file)
+      |> Enum.map(&Hand.strengthen/1)
+    ranks = Hand.ranks(hands)
+    Hand.winnings(hands, ranks)
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

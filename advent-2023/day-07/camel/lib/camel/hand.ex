@@ -116,8 +116,10 @@ defmodule Camel.Hand do
       hand.type == :kind4 && jokers == 1 ->
         {:kind5, 6}
       hand.type == :kind4 && jokers == 4 ->
-        {hand.type, hand.type_i}
-      hand.type == :fullh && jokers >= 2 ->  # 2 or 3
+        {:kind5, 6}
+      hand.type == :fullh && jokers == 3 ->
+        {:kind5, 6}
+      hand.type == :fullh && jokers == 2 ->
         {:kind5, 6}
       hand.type == :kind3 && jokers == 1 ->
         {:kind4, 5}
@@ -127,12 +129,14 @@ defmodule Camel.Hand do
         {:kind4, 5}
       hand.type == :pair2 && jokers == 1 ->
         {:fullh, 4}
-      hand.type == :pair1 && jokers >= 1 ->  # 1 or 2
+      hand.type == :pair1 && jokers == 2 ->
+        {:kind3, 3}
+      hand.type == :pair1 && jokers == 1 ->
         {:kind3, 3}
       hand.type == :highc && jokers == 1 ->
         {:pair1, 1}
       true ->
-        raise "unhandled case"
+        raise "unhandled case type=#{hand.type} jokers=#{jokers}"
     end
   end
 end
