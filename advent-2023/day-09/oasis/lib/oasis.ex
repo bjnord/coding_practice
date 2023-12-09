@@ -25,7 +25,8 @@ defmodule Oasis do
   """
   def part1(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Enum.map(&Oasis.predicted/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -44,19 +45,25 @@ defmodule Oasis do
   ## Parameters
 
   - `values` - the list of values (integer)
+  - `dir` - direction of travel (`:forward` or `:reverse`)
 
   Returns a list of pairwise difference values (integers).
 
   ## Examples
-      iex> calc_differences([2, 4, 6, 8])
+      iex> calc_differences([2, 4, 6, 8], :forward)
       [2, 2, 2]
-      iex> calc_differences([9, 10, 12, 15, 19])
-      [1, 2, 3, 4]
+      iex> calc_differences([19, 15, 12, 10, 9], :reverse)
+      [4, 3, 2, 1]
   """
-  def calc_differences(values) do
+  def calc_differences(values, :forward) do
     values
     |> Enum.chunk_every(2, 1, :discard)
-    |> Enum.map(fn [a, b] -> abs(b - a) end)
+    |> Enum.map(fn [a, b] -> b - a end)
+  end
+  def calc_differences(values, :reverse) do
+    values
+    |> Enum.chunk_every(2, 1, :discard)
+    |> Enum.map(fn [a, b] -> a - b end)
   end
 
   @doc ~S"""
@@ -78,7 +85,7 @@ defmodule Oasis do
     differences =
       Stream.cycle([true])
       |> Enum.reduce_while({values0, [values0]}, fn _, {values, acc} ->
-        new_values = calc_differences(values)
+        new_values = calc_differences(values, :reverse)
         Logger.debug("A next #{inspect(new_values)}")
         if Enum.all?(new_values, fn v -> v == 0 end) do
           {:halt, [new_values | acc]}

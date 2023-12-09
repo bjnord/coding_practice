@@ -25,7 +25,7 @@ defmodule OasisTest do
 
     test "find difference line", fixture do
       act_differences = fixture.entries
-                        |> Enum.map(&Oasis.calc_differences/1)
+                        |> Enum.map(fn entry -> Oasis.calc_differences(entry, :forward) end)
       assert act_differences == fixture.exp_differences
     end
 
@@ -33,6 +33,20 @@ defmodule OasisTest do
       act_predicted = fixture.entries
                       |> Enum.map(&Oasis.predicted/1)
       assert act_predicted == fixture.exp_predicted
+    end
+
+    test "find predicted value (negative offset)", fixture do
+      offset = 12
+      offset_entries =
+        fixture.entries
+        |> Enum.map(fn entry ->
+          Enum.map(entry, fn n -> n - offset end)
+        end)
+      act_predicted = offset_entries
+                      |> Enum.map(&Oasis.predicted/1)
+      offset_predicted = fixture.exp_predicted
+                         |> Enum.map(fn n -> n - offset end)
+      assert act_predicted == offset_predicted
     end
   end
 end
