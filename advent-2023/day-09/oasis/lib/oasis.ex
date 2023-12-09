@@ -35,7 +35,8 @@ defmodule Oasis do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Enum.map(&Oasis.prev_predicted/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 
@@ -103,12 +104,59 @@ defmodule Oasis do
           [new_values]
         else
           v = List.first(List.first(acc))
-          new_values = [v + List.first(values) | values]
+          new_values = [List.first(values) + v | values]
           Logger.debug("B next #{inspect(new_values)}")
           [new_values | acc]
         end
       end)
     Logger.debug("B final #{inspect(result)}")
+    result
+    |> List.first()
+    |> List.first()
+  end
+
+  @doc ~S"""
+  Find the predicted previous value for a list of values.
+
+  ## Parameters
+
+  - `values` - the list of values (integer)
+
+  Returns the predicted next value (integer)
+
+  ## Examples
+      iex> prev_predicted([2, 4, 6, 8])
+      0
+  """
+  def prev_predicted(values) do
+    Logger.debug("C initial #{inspect(values)}")
+    differences =
+      Stream.cycle([true])
+      |> Enum.reduce_while({values, [values]}, fn _, {values, acc} ->
+        new_values = calc_differences(values, :forward)
+        Logger.debug("C next #{inspect(new_values)}")
+        if Enum.all?(new_values, fn v -> v == 0 end) do
+          {:halt, [new_values | acc]}
+        else
+          {:cont, {new_values, [new_values | acc]}}
+        end
+      end)
+    Logger.debug("C final #{inspect(differences)}")
+    result =
+      differences
+      |> Enum.reduce([], fn values, acc ->
+        if acc == [] do
+          new_values = [0 | values]
+          Logger.debug("D initial #{inspect(new_values)}")
+          [new_values]
+        else
+          v = List.first(List.first(acc))
+          new_values = [List.first(values) - v | values]
+          Logger.debug("D next #{inspect(new_values)}")
+          [new_values | acc]
+        end
+      end)
+    Logger.debug("D final #{inspect(result)}")
     result
     |> List.first()
     |> List.first()
