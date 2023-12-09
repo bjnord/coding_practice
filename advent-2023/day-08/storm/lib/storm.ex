@@ -6,6 +6,7 @@ defmodule Storm do
   import Storm.Parser
   alias Storm.Map
   import Snow.CLI
+  alias Snow.SnowMath
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -33,8 +34,10 @@ defmodule Storm do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    map = parse_input(input_file)
+    Map.a_nodes(map)
+    |> Enum.map(fn node -> Map.cycle_length(map, node) end)
+    |> SnowMath.lcm()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

@@ -66,7 +66,7 @@ defmodule Storm.Parser do
     |> Enum.into(%{})
   end
 
-  defparsec :node_name, ascii_string([?A..?Z], 3)
+  defparsec :node_name, ascii_string([?A..?Z, ?1..?2], 3)
   defparsec :node_line,
     parsec(:node_name)
     |> ignore(string(" = ("))
@@ -83,6 +83,8 @@ defmodule Storm.Parser do
   ## Examples
       iex> parse_node_line("AAA = (BBB, CCC)\n")
       {"AAA", {"BBB", "CCC"}}
+      iex> parse_node_line("11A = (11B, XXX)\n")
+      {"11A", {"11B", "XXX"}}
   """
   def parse_node_line(line) do
     {:ok, [s, d1, d2], _, _, _, _} =
