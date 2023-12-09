@@ -128,6 +128,8 @@ I almost hauled out Floyd's algorithm, but instead I started by taking a closer 
 
 1. The "A" node leads to the same one that the "Z" node leads to, so there aren't any extra steps before getting into the cycle.
 
-1. There is only one "Z" node per "A" cycle.
+1. There is only one "Z" node in each "A" cycle.
 
 So the first step was to write enough code to run against the puzzle input and make sure those two conditions hold true there also... and they did! All we need is Least Common Multiple (LCM).
+
+(Later I saw a Reddit post that pointed out [the number of A and Z nodes is identical in the puzzle input](https://www.reddit.com/r/adventofcode/comments/18dgbhq/2023_day_8_part_2_this_must_be_the_way/), which would have been a faster way to gain confidence about the approach. Someone else [did it visually with graphviz](https://www.reddit.com/r/adventofcode/comments/18did3d/2023_day_8_part_1_my_input_maze_plotted_using/).)
