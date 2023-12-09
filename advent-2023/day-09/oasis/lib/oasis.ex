@@ -56,12 +56,12 @@ defmodule Oasis do
       iex> calc_differences([19, 15, 12, 10, 9], :reverse)
       [4, 3, 2, 1]
   """
-  def calc_differences(values, :forward) do
+  def calc_differences(values, dir) when dir == :forward do
     values
     |> Enum.chunk_every(2, 1, :discard)
     |> Enum.map(fn [a, b] -> b - a end)
   end
-  def calc_differences(values, :reverse) do
+  def calc_differences(values, dir) when dir == :reverse do
     values
     |> Enum.chunk_every(2, 1, :discard)
     |> Enum.map(fn [a, b] -> a - b end)
