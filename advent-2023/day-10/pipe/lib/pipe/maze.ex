@@ -5,6 +5,7 @@ defmodule Pipe.Maze do
 
   defstruct start: {}, tiles: %{}
 
+  require Logger
   alias Pipe.Maze
 
   @doc ~S"""
@@ -70,13 +71,16 @@ defmodule Pipe.Maze do
     start_dir = :east  # FIXME only works for certain inputs
     loop_len =
       Stream.cycle([true])
-      |> Enum.reduce_while({0, start_dir, maze.start}, fn _, {steps, dir, pos} ->
+      |> Enum.reduce_while({0, start_dir, maze.start}, fn _, {step, dir, pos} ->
+        tile = maze.tiles[pos]
         next_pos = next_pos(pos, dir)
-        next_dir = next_dir(maze.tiles[next_pos], dir)
+        next_tile = maze.tiles[next_pos]
+        next_dir = next_dir(next_tile, dir)
+        Logger.debug("step=#{step} pos=#{inspect(pos)} tile=#{<<tile::utf8>>} dir=#{dir} next_pos=#{inspect(next_pos)} next_tile=#{<<next_tile::utf8>>} next_dir=#{next_dir}")
         if next_pos == maze.start do
-          {:halt, steps + 1}
+          {:halt, step + 1}
         else
-          {:cont, {steps + 1, next_dir, next_pos}}
+          {:cont, {step + 1, next_dir, next_pos}}
         end
       end)
     div(loop_len, 2)
