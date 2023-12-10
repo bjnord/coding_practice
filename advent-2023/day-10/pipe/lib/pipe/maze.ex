@@ -66,7 +66,39 @@ defmodule Pipe.Maze do
 
   Returns an integer step count.
   """
-  def steps(_maze) do
-    0  # TODO
+  def steps(maze) do
+    start_dir = :east  # FIXME only works for certain inputs
+    loop_len =
+      Stream.cycle([true])
+      |> Enum.reduce_while({0, start_dir, maze.start}, fn _, {steps, dir, pos} ->
+        next_pos = next_pos(pos, dir)
+        next_dir = next_dir(maze.tiles[next_pos], dir)
+        if next_pos == maze.start do
+          {:halt, steps + 1}
+        else
+          {:cont, {steps + 1, next_dir, next_pos}}
+        end
+      end)
+    div(loop_len, 2)
   end
+
+  # TODO should write unit tests for these
+  defp next_pos({y, x}, dir) when dir == :north, do: {y-1, x}
+  defp next_pos({y, x}, dir) when dir == :south, do: {y+1, x}
+  defp next_pos({y, x}, dir) when dir == :east, do: {y, x+1}
+  defp next_pos({y, x}, dir) when dir == :west, do: {y, x-1}
+
+  # TODO should write unit tests for these
+  defp next_dir(tile, dir) when tile == ?F and dir == :north, do: :east
+  defp next_dir(tile, dir) when tile == ?| and dir == :north, do: :north
+  defp next_dir(tile, dir) when tile == ?7 and dir == :north, do: :west
+  defp next_dir(tile, dir) when tile == ?L and dir == :south, do: :east
+  defp next_dir(tile, dir) when tile == ?| and dir == :south, do: :south
+  defp next_dir(tile, dir) when tile == ?J and dir == :south, do: :west
+  defp next_dir(tile, dir) when tile == ?7 and dir == :east, do: :south
+  defp next_dir(tile, dir) when tile == ?- and dir == :east, do: :east
+  defp next_dir(tile, dir) when tile == ?J and dir == :east, do: :north
+  defp next_dir(tile, dir) when tile == ?F and dir == :west, do: :south
+  defp next_dir(tile, dir) when tile == ?- and dir == :west, do: :west
+  defp next_dir(tile, dir) when tile == ?L and dir == :west, do: :north
 end
