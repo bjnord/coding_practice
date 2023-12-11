@@ -32,6 +32,7 @@ defmodule GalaxyTest do
           {11, 0},
           {11, 5},
         ],
+        exp_path_length: 374,
       ]
     end
 
@@ -51,6 +52,12 @@ defmodule GalaxyTest do
       act_expanded = fixture.image
                      |> Galaxy.expand()
       assert act_expanded == fixture.exp_expanded
+    end
+
+    test "calculate total path length", fixture do
+      act_path_length = fixture.image
+                        |> Galaxy.path_length()
+      assert act_path_length == fixture.exp_path_length
     end
   end
 end

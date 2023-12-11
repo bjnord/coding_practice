@@ -5,6 +5,7 @@ defmodule Galaxy do
 
   import Galaxy.Parser
   import Snow.CLI
+  alias Snow.SnowMath
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -24,7 +25,7 @@ defmodule Galaxy do
   """
   def part1(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Galaxy.path_length()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -131,5 +132,29 @@ defmodule Galaxy do
   def pairs([next_pos | rest]) do
     # OPTIMIZE this is inefficient
     Enum.map(rest, fn pos -> {next_pos, pos} end) ++ pairs(rest)
+  end
+
+  @doc ~S"""
+  Find the total path length between all pairings of image positions, after
+  expanding the image.
+
+  ## Parameters
+
+  `positions` - list of (unexpanded) positions (`{y, x}` tuples)
+
+  Returns the sum of the path length between all pairings of the expanded
+  positions.
+
+  ## Examples
+      iex> Galaxy.path_length([{0, 1}, {0, 4}, {2, 0}])
+      18
+  """
+  def path_length(positions) do
+    expand(positions)
+    |> pairs()
+    |> Enum.map(fn {pos1, pos2} ->
+      SnowMath.manhattan(pos1, pos2)
+    end)
+    |> Enum.sum()
   end
 end
