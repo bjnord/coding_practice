@@ -111,4 +111,25 @@ defmodule Galaxy do
       {y + n_empty_y, x + n_empty_x}
     end)
   end
+
+  @doc ~S"""
+  Find all pairings of image positions.
+
+  ## Parameters
+
+  `positions` - list of positions (`{y, x}` tuples)
+
+  Returns a list of position pairs (`{{y1, x1}, {y2, x2}}` tuples).
+
+  ## Examples
+      iex> Galaxy.pairs([{0, 1}, {0, 6}, {3, 0}])
+      [{{0, 1}, {0, 6}},
+        {{0, 1}, {3, 0}},
+        {{0, 6}, {3, 0}}]
+  """
+  def pairs([_]), do: []
+  def pairs([next_pos | rest]) do
+    # OPTIMIZE this is inefficient
+    Enum.map(rest, fn pos -> {next_pos, pos} end) ++ pairs(rest)
+  end
 end
