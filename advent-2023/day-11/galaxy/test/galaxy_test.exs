@@ -17,6 +17,10 @@ defmodule GalaxyTest do
           {9, 4},
         ],
         exp_max: {9, 9},
+        exp_empties: {
+          [3, 7],
+          [2, 5, 8],
+        },
       ]
     end
 
@@ -24,6 +28,12 @@ defmodule GalaxyTest do
       act_image = fixture.image
                   |> Galaxy.max()
       assert act_image == fixture.exp_max
+    end
+
+    test "find empty rows and columns", fixture do
+      act_empties = fixture.image
+                    |> Galaxy.empties()
+      assert act_empties == fixture.exp_empties
     end
   end
 end

@@ -56,4 +56,36 @@ defmodule Galaxy do
       {max(y, max_y), max(x, max_x)}
     end)
   end
+
+  @doc ~S"""
+  Find the empty rows and columns for an image.
+
+  ## Parameters
+
+  `positions` - list of positions (`{y, x}` tuples)
+
+  Returns a `{max_y, max_x}` tuple.
+
+  ## Examples
+      iex> Galaxy.empties([{0, 1}, {0, 4}, {2, 0}])
+      {[1], [2, 3]}
+  """
+  def empties(positions) do
+    {max_y, max_x} = max(positions)
+    {nonempty_y, nonempty_x} =
+      positions
+      |> Enum.reduce({%{}, %{}}, fn {y, x}, {nonempty_y, nonempty_x} ->
+        {
+          Map.put(nonempty_y, y, true),
+          Map.put(nonempty_x, x, true),
+        }
+      end)
+    empty_y =
+      0..max_y
+      |> Enum.reject(fn y -> nonempty_y[y] end)
+    empty_x =
+      0..max_x
+      |> Enum.reject(fn x -> nonempty_x[x] end)
+    {empty_y, empty_x}
+  end
 end
