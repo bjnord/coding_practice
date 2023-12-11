@@ -34,7 +34,7 @@ defmodule Galaxy do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Galaxy.path_length(1_000_000)
     |> IO.inspect(label: "Part 2 answer is")
   end
 
@@ -96,6 +96,7 @@ defmodule Galaxy do
   ## Parameters
 
   `positions` - list of positions (`{y, x}` tuples)
+  `exp` - expansion distance (integer)
 
   Returns a list of expanded positions (`{y, x}` tuples).
 
@@ -103,13 +104,14 @@ defmodule Galaxy do
       iex> Galaxy.expand([{0, 1}, {0, 4}, {2, 0}])
       [{0, 1}, {0, 6}, {3, 0}]
   """
-  def expand(positions) do
+  def expand(positions), do: expand(positions, 2)
+  def expand(positions, exp) do
     {empty_y, empty_x} = empties(positions)
     positions
     |> Enum.map(fn {y, x} ->
       n_empty_y = Enum.count(empty_y, fn e_y -> e_y < y end)
       n_empty_x = Enum.count(empty_x, fn e_x -> e_x < x end)
-      {y + n_empty_y, x + n_empty_x}
+      {y + n_empty_y * (exp - 1), x + n_empty_x * (exp - 1)}
     end)
   end
 
@@ -141,6 +143,7 @@ defmodule Galaxy do
   ## Parameters
 
   `positions` - list of (unexpanded) positions (`{y, x}` tuples)
+  `exp` - expansion distance (integer)
 
   Returns the sum of the path length between all pairings of the expanded
   positions.
@@ -149,8 +152,9 @@ defmodule Galaxy do
       iex> Galaxy.path_length([{0, 1}, {0, 4}, {2, 0}])
       18
   """
-  def path_length(positions) do
-    expand(positions)
+  def path_length(positions), do: path_length(positions, 2)
+  def path_length(positions, exp) do
+    expand(positions, exp)
     |> pairs()
     |> Enum.map(fn {pos1, pos2} ->
       SnowMath.manhattan(pos1, pos2)
