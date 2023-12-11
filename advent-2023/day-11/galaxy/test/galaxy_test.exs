@@ -21,6 +21,17 @@ defmodule GalaxyTest do
           [3, 7],
           [2, 5, 8],
         },
+        exp_expanded: [
+          {0, 4},
+          {1, 9},
+          {2, 0},
+          {5, 8},
+          {6, 1},
+          {7, 12},
+          {10, 9},
+          {11, 0},
+          {11, 5},
+        ],
       ]
     end
 
@@ -34,6 +45,12 @@ defmodule GalaxyTest do
       act_empties = fixture.image
                     |> Galaxy.empties()
       assert act_empties == fixture.exp_empties
+    end
+
+    test "expand image", fixture do
+      act_expanded = fixture.image
+                     |> Galaxy.expand()
+      assert act_expanded == fixture.exp_expanded
     end
   end
 end

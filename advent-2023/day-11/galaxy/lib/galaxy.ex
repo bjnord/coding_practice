@@ -88,4 +88,27 @@ defmodule Galaxy do
       |> Enum.reject(fn x -> nonempty_x[x] end)
     {empty_y, empty_x}
   end
+
+  @doc ~S"""
+  Expand an image, taking into account empty rows and columns.
+
+  ## Parameters
+
+  `positions` - list of positions (`{y, x}` tuples)
+
+  Returns a list of expanded positions (`{y, x}` tuples).
+
+  ## Examples
+      iex> Galaxy.expand([{0, 1}, {0, 4}, {2, 0}])
+      [{0, 1}, {0, 6}, {3, 0}]
+  """
+  def expand(positions) do
+    {empty_y, empty_x} = empties(positions)
+    positions
+    |> Enum.map(fn {y, x} ->
+      n_empty_y = Enum.count(empty_y, fn e_y -> e_y < y end)
+      n_empty_x = Enum.count(empty_x, fn e_x -> e_x < x end)
+      {y + n_empty_y, x + n_empty_x}
+    end)
+  end
 end
