@@ -3,11 +3,11 @@ defmodule Springs.Row do
   Row structure and functions for `Springs`.
   """
 
-  defstruct springs: [], groups: []
+  defstruct clusters: [], counts: []
 
   @doc ~S"""
-  Determine the number of spring arrangements in a `Row` that satisfies
-  the groups constraint.
+  Find the number of unique spring arrangements in a `Row` that satisfy
+  the clusters and counts constraints.
 
   ## Parameters
 
@@ -17,30 +17,76 @@ defmodule Springs.Row do
 
   ## Examples
       iex> row = %Springs.Row{
-      ...>   springs: ['????', '#', '#'],
-      ...>   groups: [4, 1, 1],
+      ...>   clusters: ['????', '#', '#'],
+      ...>   counts: [4, 1, 1],
       ...> }
       iex> arrangements(row)
       1
+      iex> row3 = %Springs.Row{
+      ...>   clusters: ['??????##'],
+      ...>   counts: [1, 1, 3],
+      ...> }
+      iex> arrangements(row3)
+      3
   """
   def arrangements(row) do
     # neither of these lists are long, even in the puzzle input; but
     # TODO we could move the length calculation to the parser
-    n_springs = Enum.count(row.springs)
-    n_groups = Enum.count(row.groups)
-    n_arrangements(row, n_springs, n_groups)
+    n_clusters = Enum.count(row.clusters)
+    n_counts = Enum.count(row.counts)
+    arrangements(row, n_clusters, n_counts)
   end
 
-  defp n_arrangements(row, n_springs, n_groups) when n_springs == n_groups do
-    [row.springs, row.groups]
+  defp arrangements(row, n_clusters, n_counts) when n_clusters == n_counts do
+    [row.clusters, row.counts]
     |> Enum.zip()
-    |> Enum.map(fn {spring, group} -> permutations(spring, group) end)
+    |> Enum.map(fn {springs, count} ->
+      permutations(springs, count)
+      |> Enum.count()
+    end)
     |> Enum.product()
   end
 
+  defp arrangements(_row, n_clusters, n_counts) when n_clusters > n_counts do
+    raise "impossible"
+  end
+
+  defp arrangements(row, n_clusters, n_counts) when (n_clusters == 1) and (n_clusters < n_counts) do
+    arrangements_1(List.first(row.clusters), row.counts, 0)
+    |> Enum.count()
+  end
+
+  defp arrangements_1(springs, [count], level) do
+    springs
+    |> permutations(count)
+  end
+
+  defp arrangements_1(springs, [count | counts], level) do
+    n_springs = Enum.count(springs)
+    breakpoints(springs, n_springs)
+    |> Enum.reduce([], fn {_, i}, acc ->
+      left = Enum.take(springs, i)
+             |> permutations(count)
+      right = Enum.drop(springs, i+1)
+             |> arrangements_1(counts, level + 1)
+      combos =
+        for a <- left, b <- right, do: a ++ [?. | b]
+      acc ++ combos
+    end)
+    |> Enum.uniq()
+  end
+
+  defp breakpoints(springs, n_springs) do
+    springs
+    |> Enum.with_index()
+    |> Enum.reject(fn {ch, i} ->
+      (i == 0) || (i == n_springs - 1) || (ch == ?#)
+    end)
+  end
+
   @doc ~S"""
-  Determine the number of permutations of a spring cluster that satisfies
-  the count constraint.
+  Find the permutations of a spring cluster that satisfy the cluster
+  and count constraints.
 
   All permutations must have contiguous springs:
   - valid: `##...`, `.##..`, `...##`
@@ -51,42 +97,36 @@ defmodule Springs.Row do
   - `springs` - the spring cluster (charlist)
   - `count` - the number of springs (integer)
 
-  Returns the number of permutations (integer).
+  Returns the possible permutations (list of charlist).
 
   ## Examples
       iex> permutations('?#???', 5)
-      1
+      ['#####']
       iex> permutations('?????', 2)
-      4
+      ['...##', '..##.', '.##..', '##...']
       iex> permutations('?#???', 2)
-      2
+      ['.##..', '##...']
   """
   def permutations(springs, count) do
-    # OPTIMIZE could do a slightly faster one-pass count here
     n_springs = Enum.count(springs)
-    # TODO decide if calculating `n_unknowns` is worth it
-    n_unknowns = Enum.count(springs, fn s -> s == ?? end)
-    n_permutations(springs, n_springs, n_unknowns, count)
+    permutations(springs, n_springs, count)
   end
 
-  # ('?#???', 5) = '#####'
-  defp n_permutations(_springs, n_springs, _n_unknowns, count) when n_springs == count, do: 1
-
-  # ('?????', 2) = '...##', '..##.', '.##..', '##...'
-  defp n_permutations(_springs, n_springs, n_unknowns, count) when n_springs == n_unknowns do
-    (n_springs - count) + 1
+  # ('?#???', 5) = ['#####']
+  defp permutations(_springs, n_springs, count) when n_springs == count do
+    [List.duplicate(?#, count)]
   end
 
   # ('????', 5) is impossible
-  defp n_permutations(_springs, n_springs, _n_unknowns, count) when n_springs < count, do: 0
+  defp permutations(_springs, n_springs, count) when n_springs < count, do: []
 
-  # ('?#???', 2) = '.##..', '##...'
-  defp n_permutations(springs, n_springs, _n_unknowns, count) when n_springs > count do
+  # ('?#???', 2) = ['.##..', '##...']
+  defp permutations(springs, n_springs, count) when n_springs > count do
     slide(n_springs, count)
-    |> Enum.count(fn slide -> !invalid_springs?(springs, slide) end)
+    |> Enum.filter(fn slide -> !invalid_springs?(springs, slide) end)
   end
 
-  # (5, 2) = '...##', '..##.', '.##..', '##...'
+  # (5, 2) = ['...##', '..##.', '.##..', '##...']
   defp slide(n_springs, count) do
     0..(n_springs - count)
     |> Enum.map(fn offset ->

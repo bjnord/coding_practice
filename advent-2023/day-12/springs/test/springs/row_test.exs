@@ -9,37 +9,37 @@ defmodule Springs.RowTest do
       [
         rows: [
           %Row{
-            springs: ['???', '###'],
-            groups: [1, 1, 3],
+            clusters: ['????', '#', '#'],
+            counts: [4, 1, 1],
           },
           %Row{
-            springs: ['??', '??', '?##'],
-            groups: [1, 1, 3],
+            clusters: ['??', '??', '?##'],
+            counts: [1, 1, 3],
           },
           %Row{
-            springs: ['?#?#?#?#?#?#?#?'],
-            groups: [1, 3, 1, 6],
+            clusters: ['????', '######', '#####'],
+            counts: [1, 6, 5],
           },
           %Row{
-            springs: ['????', '#', '#'],
-            groups: [4, 1, 1],
+            clusters: ['?###????????'],
+            counts: [3, 2, 1],
           },
           %Row{
-            springs: ['????', '######', '#####'],
-            groups: [1, 6, 5],
+            clusters: ['?#?#?#?#?#?#?#?'],
+            counts: [1, 3, 1, 6],
           },
           %Row{
-            springs: ['?###????????'],
-            groups: [3, 2, 1],
+            clusters: ['???', '###'],
+            counts: [1, 1, 3],
           },
         ],
         exp_arrangements: [
           1,
           4,
-          1,
-          1,
           4,
           10,
+          1,
+          1,
         ],
       ]
     end
