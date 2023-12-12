@@ -37,6 +37,7 @@ defmodule Springs.Row do
     arrangements(row, n_clusters, n_counts)
   end
 
+  # TODO this special case can now go away?
   defp arrangements(row, n_clusters, n_counts) when n_clusters == n_counts do
     [row.clusters, row.counts]
     |> Enum.zip()
@@ -47,12 +48,38 @@ defmodule Springs.Row do
     |> Enum.product()
   end
 
-  defp arrangements(_row, n_clusters, n_counts) when n_clusters > n_counts do
-    raise "impossible"
-  end
-
+  # TODO this special case can now go away?
   defp arrangements(row, n_clusters, n_counts) when (n_clusters == 1) and (n_clusters < n_counts) do
     arrangements_1(List.first(row.clusters), row.counts, 0)
+    |> Enum.count()
+  end
+
+  defp arrangements(row, n_clusters, n_counts) when n_clusters < n_counts do
+    # N ways to divide the counts between the clusters
+    # (we find the combinations of "gaps" between the groups)
+    combinations =
+      1..(n_counts - 1)
+      |> Combination.combine(n_clusters - 1)
+    count_groups =
+      combinations
+      |> Enum.map(fn combination ->
+        [n_counts | combination]
+        |> Enum.sort()
+        |> Enum.reduce({[], row.counts, 0}, fn division, {acc, counts, i} ->
+          # TODO is there a better way to divide a list in half?
+          takes = Enum.take(counts, division - i)
+          rest = Enum.drop(counts, division - i)
+          {[takes | acc], rest, division}
+        end)
+        |> elem(0)
+        |> Enum.reverse()
+      end)
+    [row.clusters, count_groups]
+    |> Enum.zip()
+    |> Enum.map(fn {cluster, counts} ->
+      arrangements_1(cluster, counts, 0)
+    end)
+    |> Enum.uniq()
     |> Enum.count()
   end
 
@@ -65,6 +92,7 @@ defmodule Springs.Row do
     n_springs = Enum.count(springs)
     breakpoints(springs, n_springs)
     |> Enum.reduce([], fn {_, i}, acc ->
+      # TODO is there a better way to divide a list in half?
       left = Enum.take(springs, i)
              |> permutations(count)
       right = Enum.drop(springs, i+1)

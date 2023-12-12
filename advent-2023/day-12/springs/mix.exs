@@ -24,6 +24,7 @@ defmodule Springs.MixProject do
     [
       {:ex_doc, "~> 0.30.9", only: :dev, runtime: false},
       {:logger_file_backend, "~> 0.0.13"},
+      {:combination, "~> 0.0.3"},
       #{:math, "~> 0.7.0"},
       #{:propcheck, "~> 1.4", only: [:test]},
       {:snow, path: "../../snow"},
