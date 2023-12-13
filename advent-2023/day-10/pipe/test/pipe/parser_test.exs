@@ -37,6 +37,8 @@ defmodule Pipe.ParserTest do
           |F--J
           LJ.LJ
           """,
+        ],
+        start_inputs: [
           """
           .....
           .F-S.
@@ -190,6 +192,8 @@ defmodule Pipe.ParserTest do
               {4, 4} => ?J,
             },
           },
+        ],
+        exp_start_mazes: [
           %Maze{
             start: {1, 3},
             start_dir: :south,
@@ -264,10 +268,16 @@ defmodule Pipe.ParserTest do
       ]
     end
 
-    test "parser gets expected entries", fixture do
+    test "parser gets expected mazes (puzzle examples)", fixture do
       act_mazes = fixture.inputs
                   |> Enum.map(&parse_input_string/1)
       assert act_mazes == fixture.exp_mazes
+    end
+
+    test "parser gets expected mazes (moved-start examples)", fixture do
+      act_start_mazes = fixture.start_inputs
+                        |> Enum.map(&parse_input_string/1)
+      assert act_start_mazes == fixture.exp_start_mazes
     end
 
     test "parser raises exception for invalid maze", fixture do
