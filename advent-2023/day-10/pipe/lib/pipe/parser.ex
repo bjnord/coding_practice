@@ -34,10 +34,11 @@ defmodule Pipe.Parser do
 
   ## Parameters
 
-  `ch` - pipe character
-  `y` - y position (integer)
+  `line` - the input line
+  `y` - the y position (integer) of the input line
 
-  Returns a list of `{{y, x}, ch}` tuples.
+  Returns the characters on the input line and their positions, as a
+  list of `{{y, x}, ch}` tuples.
 
   ## Examples
       iex> parse_line({".S-7.\n", 1})
