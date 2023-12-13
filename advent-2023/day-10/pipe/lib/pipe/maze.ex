@@ -61,6 +61,24 @@ defmodule Pipe.Maze do
   end
 
   @doc ~S"""
+  Form a clean `Maze` by removing junk tiles.
+
+  ## Parameters
+
+  - `maze` - the junky `Maze`
+
+  Returns the `Maze` with junk tiles removed.
+  """
+  def clean(maze) do
+    walk(maze)
+    |> Enum.map(fn pos -> clean_tile(maze, pos, maze.start) end)
+    |> from_tiles()
+  end
+
+  defp clean_tile(_maze, pos, start) when pos == start, do: {pos, ?S}
+  defp clean_tile(maze, pos, _start), do: {pos, maze.tiles[pos]}
+
+  @doc ~S"""
   Calculate number of steps taken by following a maze.
 
   ## Parameters

@@ -190,5 +190,13 @@ defmodule Pipe.MazeTest do
                        |> Enum.map(&Maze.dimensions/1)
       assert act_dimensions == fixture.exp_dimensions
     end
+
+    test "clean", fixture do
+      fixture.mazes
+      |> Enum.chunk_every(2)
+      |> Enum.each(fn [exp_clean, junky] ->
+        assert Maze.clean(junky) == exp_clean
+      end)
+    end
   end
 end
