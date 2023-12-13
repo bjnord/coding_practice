@@ -8,6 +8,8 @@ defmodule Pipe.Maze do
   require Logger
   alias Pipe.Maze
 
+  @max_dim 15  # TODO change to 150 when done debugging
+
   @doc ~S"""
   Form a `Maze` from a list of pipe tiles.
 
@@ -180,4 +182,84 @@ defmodule Pipe.Maze do
       elem(Enum.max_by(positions, fn {_y, x} -> x end), 1) + 1,
     }
   end
+
+  @doc ~S"""
+  Calculate number of inner tiles enclosed by a `Maze` loop.
+
+  ## Parameters
+
+  - `maze` - the `Maze`
+
+  Returns the inner tile count (integer).
+  """
+  def inner(maze) do
+    clean_maze = clean(maze)
+    filled_maze =
+      corner_offsets(clean_maze)
+      |> Enum.reduce(clean_maze, fn o_pos, maze ->
+        flood(maze, o_pos)
+      end)
+      |> tap(fn maze -> dump(maze) end)  # FIXME DEBUG
+    filled_maze.tiles
+    |> Map.values()
+    |> Enum.count(& &1 == ?I)
+  end
+
+  defp corner_offsets(maze) do
+    walk(maze)
+    |> Enum.map(fn pos -> corner_offset(pos, maze.tiles[pos]) end)
+    |> Enum.filter(& &1)
+  end
+
+  defp corner_offset({y, x}, tile) when tile == ?F, do: {y + 1, x + 1}
+  defp corner_offset({y, x}, tile) when tile == ?7, do: {y + 1, x - 1}
+  defp corner_offset({y, x}, tile) when tile == ?J, do: {y - 1, x - 1}
+  defp corner_offset({y, x}, tile) when tile == ?L, do: {y - 1, x + 1}
+  defp corner_offset(_pos, _tile), do: nil
+
+  @doc ~S"""
+  Perform "flood fill" on a specified location of a `Maze`.
+
+  ## Parameters
+
+  - `maze` - the `Maze`
+  - `{y, x}` - the position from which to start the flood fill
+
+  Returns the updated `Map`.
+  """
+  def flood(maze, pos), do: flood_if(maze, pos)
+
+  defp flood_if(maze, pos) do
+    if maze.tiles[pos] do
+      maze
+    else
+      update_tile(maze, pos, ?I)
+      |> flood_neighbors(pos)
+    end
+  end
+
+  defp update_tile(maze, pos, tile) do
+    new_tiles = Map.put(maze.tiles, pos, tile)
+    %Maze{maze | tiles: new_tiles}
+  end
+
+  defp flood_neighbors(maze, pos) do
+    neighbors_of(maze, pos)
+    |> Enum.reduce(maze, fn n_pos, maze ->
+      flood_if(maze, n_pos)
+    end)
+  end
+
+  defp neighbors_of(_maze, {y, x}) do
+    [{-1, 0}, {0, 1}, {1, 0}, {0, -1}]
+    |> Enum.map(fn {dy, dx} -> {y + dy, x + dx} end)
+    |> Enum.reject(fn {y1, x1} ->
+      # TODO use dimensions of `maze` for max
+      out_of_bounds?(y1, @max_dim) || out_of_bounds?(x1, @max_dim)
+    end)
+  end
+
+  defp out_of_bounds?(n, _max) when (n < 0), do: true
+  defp out_of_bounds?(n, max) when (n >= max), do: true
+  defp out_of_bounds?(_n, _max), do: false
 end
