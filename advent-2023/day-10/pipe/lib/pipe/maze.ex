@@ -105,11 +105,10 @@ defmodule Pipe.Maze do
   def walk(maze) do
     Stream.cycle([true])
     |> Enum.reduce_while({0, [], maze.start_dir, maze.start}, fn _, {step, steps, dir, pos} ->
-      tile = maze.tiles[pos]
       next_pos = next_pos(pos, dir)
       next_tile = maze.tiles[next_pos]
       next_dir = next_dir(next_tile, dir)
-      Logger.debug("step=#{step} pos=#{inspect(pos)} tile=#{<<tile::utf8>>} dir=#{dir} next_pos=#{inspect(next_pos)} next_tile=#{<<next_tile::utf8>>} next_dir=#{next_dir}")
+      Logger.debug("step=#{step} pos=#{inspect(pos)} tile=#{<<maze.tiles[pos]::utf8>>} dir=#{dir} next_pos=#{inspect(next_pos)} next_tile=#{<<next_tile::utf8>>} next_dir=#{next_dir}")
       if next_pos == maze.start do
         {:halt, [pos | steps]}
       else
