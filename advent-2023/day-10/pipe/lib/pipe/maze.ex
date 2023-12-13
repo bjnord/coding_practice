@@ -61,30 +61,44 @@ defmodule Pipe.Maze do
   end
 
   @doc ~S"""
-  Calculate steps taken by following a maze.
+  Calculate number of steps taken by following a maze.
 
   ## Parameters
 
   - `maze` - a `Maze`
 
-  Returns an integer step count.
+  Returns the step count (integer).
   """
   def steps(maze) do
-    loop_len =
-      Stream.cycle([true])
-      |> Enum.reduce_while({0, maze.start_dir, maze.start}, fn _, {step, dir, pos} ->
-        tile = maze.tiles[pos]
-        next_pos = next_pos(pos, dir)
-        next_tile = maze.tiles[next_pos]
-        next_dir = next_dir(next_tile, dir)
-        Logger.debug("step=#{step} pos=#{inspect(pos)} tile=#{<<tile::utf8>>} dir=#{dir} next_pos=#{inspect(next_pos)} next_tile=#{<<next_tile::utf8>>} next_dir=#{next_dir}")
-        if next_pos == maze.start do
-          {:halt, step + 1}
-        else
-          {:cont, {step + 1, next_dir, next_pos}}
-        end
-      end)
-    div(loop_len, 2)
+    walk(maze)
+    |> Enum.count()
+    |> div(2)
+  end
+
+  @doc ~S"""
+  Find steps taken by following a maze.
+
+  ## Parameters
+
+  - `maze` - a `Maze`
+
+  Returns the list of steps taken, as `{y, x}` tuples.
+  """
+  def walk(maze) do
+    Stream.cycle([true])
+    |> Enum.reduce_while({0, [], maze.start_dir, maze.start}, fn _, {step, steps, dir, pos} ->
+      tile = maze.tiles[pos]
+      next_pos = next_pos(pos, dir)
+      next_tile = maze.tiles[next_pos]
+      next_dir = next_dir(next_tile, dir)
+      Logger.debug("step=#{step} pos=#{inspect(pos)} tile=#{<<tile::utf8>>} dir=#{dir} next_pos=#{inspect(next_pos)} next_tile=#{<<next_tile::utf8>>} next_dir=#{next_dir}")
+      if next_pos == maze.start do
+        {:halt, [pos | steps]}
+      else
+        {:cont, {step + 1, [pos | steps], next_dir, next_pos}}
+      end
+    end)
+    |> Enum.reverse()
   end
 
   # TODO should write unit tests for these

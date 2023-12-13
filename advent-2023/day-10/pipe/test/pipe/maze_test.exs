@@ -106,6 +106,64 @@ defmodule Pipe.MazeTest do
           },
         ],
         exp_steps: [4, 4, 8, 8],
+        exp_walks: [
+          [
+            {1, 1},
+            {1, 2},
+            {1, 3},
+            {2, 3},
+            {3, 3},
+            {3, 2},
+            {3, 1},
+            {2, 1},
+          ],
+          [
+            {1, 1},
+            {1, 2},
+            {1, 3},
+            {2, 3},
+            {3, 3},
+            {3, 2},
+            {3, 1},
+            {2, 1},
+          ],
+          [
+            {2, 0},
+            {2, 1},
+            {1, 1},
+            {1, 2},
+            {0, 2},
+            {0, 3},
+            {1, 3},
+            {2, 3},
+            {2, 4},
+            {3, 4},
+            {3, 3},
+            {3, 2},
+            {3, 1},
+            {4, 1},
+            {4, 0},
+            {3, 0},
+          ],
+          [
+            {2, 0},
+            {2, 1},
+            {1, 1},
+            {1, 2},
+            {0, 2},
+            {0, 3},
+            {1, 3},
+            {2, 3},
+            {2, 4},
+            {3, 4},
+            {3, 3},
+            {3, 2},
+            {3, 1},
+            {4, 1},
+            {4, 0},
+            {3, 0},
+          ],
+        ],
         exp_dimensions: [
           {4, 4},
           {5, 5},
@@ -115,10 +173,16 @@ defmodule Pipe.MazeTest do
       ]
     end
 
-    test "find steps", fixture do
+    test "find step counts", fixture do
       act_steps = fixture.mazes
                   |> Enum.map(&Maze.steps/1)
       assert act_steps == fixture.exp_steps
+    end
+
+    test "walk (find steps taken)", fixture do
+      act_walks = fixture.mazes
+                  |> Enum.map(&Maze.walk/1)
+      assert act_walks == fixture.exp_walks
     end
 
     test "find dimensions", fixture do
