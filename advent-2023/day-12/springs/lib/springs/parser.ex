@@ -34,30 +34,57 @@ defmodule Springs.Parser do
 
   ## Examples
       iex> parse_line(".??..??...?##. 1,1,3\n")
-      %Springs.Row{clusters: ['??', '??', '?##'], counts: [1, 1, 3]}
-      iex> parse_line("?#?#?#?#?#?#?#? 1,3,1,6\n")
-      %Springs.Row{clusters: ['?#?#?#?#?#?#?#?'], counts: [1, 3, 1, 6]}
+      %Springs.Row{
+        tokens: ['.', 2, '..', 2, '...', 1, '##.'],
+        counts: [1, 1, 3],
+      }
   """
   def parse_line(line) do
-    [clusters, counts] =
+    [tokens_str, counts_str] =
       line
       |> String.trim_trailing()
       |> String.split()
     %Row{
-      clusters: parse_clusters(clusters),
-      counts: parse_counts(counts),
+      tokens: parse_tokens(tokens_str),
+      counts: parse_counts(counts_str),
     }
   end
 
-  defp parse_clusters(clusters) do
-    clusters
-    |> String.split(".")
-    |> Enum.reject(fn s -> s == "" end)
-    |> Enum.map(&String.to_charlist/1)
+  defp parse_tokens(tokens_str) do
+    {rtokens, last_q, last_rfixed} =
+      tokens_str
+      |> String.to_charlist()
+      |> Enum.reduce({[], 0, ''}, fn ch, {rtokens, q, rfixed} ->
+        if ch == ?? do
+          {new_rtokens, new_rfixed} =
+            if List.first(rfixed) do
+              fixed = Enum.reverse(rfixed)
+              {[fixed | rtokens], ''}  # switch from .# to ?
+            else
+              {rtokens, ''}
+            end
+          {new_rtokens, q + 1, new_rfixed}
+        else
+          {new_rtokens, new_q} =
+            if q > 0 do
+              {[q | rtokens], 0}  # switch from ? to .#
+            else
+              {rtokens, 0}
+            end
+          {new_rtokens, new_q, [ch | rfixed]}
+        end
+      end)
+    if last_q > 0 do
+      [last_q | rtokens]
+    else
+      last_fixed = Enum.reverse(last_rfixed)
+      [last_fixed | rtokens]
+    end
+    |> Enum.reverse()
   end
 
-  defp parse_counts(counts) do
-    counts
+  defp parse_counts(counts_str) do
+    counts_str
     |> String.split(",")
     |> Enum.map(&String.to_integer/1)
   end
