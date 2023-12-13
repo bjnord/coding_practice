@@ -41,7 +41,14 @@ defmodule Mirror do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Enum.map(&Image.smudged_reflection/1)
+    |> Enum.map(fn {type, n} ->
+      case type do
+        :horiz -> n * 100
+        :vert  -> n
+      end
+    end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
