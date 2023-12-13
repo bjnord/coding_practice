@@ -10,6 +10,7 @@ defmodule Pipe.MazeTest do
         mazes: [
           %Maze{
             start: {1, 1},
+            start_dir: :east,
             tiles: %{
               {1, 1} => ?F,
               {1, 2} => ?-,
@@ -23,6 +24,7 @@ defmodule Pipe.MazeTest do
           },
           %Maze{
             start: {1, 1},
+            start_dir: :east,
             tiles: %{
               {0, 0} => ?-,
               {0, 1} => ?L,
@@ -53,6 +55,7 @@ defmodule Pipe.MazeTest do
           },
           %Maze{
             start: {2, 0},
+            start_dir: :east,
             tiles: %{
               {0, 2} => ?F,
               {0, 3} => ?7,
@@ -74,6 +77,7 @@ defmodule Pipe.MazeTest do
           },
           %Maze{
             start: {2, 0},
+            start_dir: :east,
             tiles: %{
               {0, 0} => ?7,
               {0, 1} => ?-,

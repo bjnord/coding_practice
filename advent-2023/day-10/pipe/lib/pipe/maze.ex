@@ -3,7 +3,7 @@ defmodule Pipe.Maze do
   Maze structure and functions for `Pipe`.
   """
 
-  defstruct start: {}, tiles: %{}
+  defstruct start: {}, start_dir: nil, tiles: %{}
 
   require Logger
   alias Pipe.Maze
@@ -19,19 +19,22 @@ defmodule Pipe.Maze do
   """
   def from_tiles(tile_list) do
     tiles = Enum.into(tile_list, %{})
-    start =
+    start_pos =
       Enum.find(tile_list, fn {_pos, ch} -> ch == ?S end)
       |> elem(0)
-    pipe = start_pipe(tiles, start)
-    %Maze{start: start, tiles: %{tiles | start => pipe}}
+    {start_tile, start_dir} = start_pipe(tiles, start_pos)
+    %Maze{
+      start: start_pos,
+      start_dir: start_dir,
+      tiles: %{tiles | start_pos => start_tile},
+    }
   end
 
-  # TODO should write unit tests for this
-  defp start_pipe(tiles, start) do
-    north = connects?(tiles, start, -1,  0, [?F, ?|, ?7])
-    south = connects?(tiles, start,  1,  0, [?L, ?|, ?J])
-    east  = connects?(tiles, start,  0,  1, [?7, ?-, ?J])
-    west  = connects?(tiles, start,  0, -1, [?F, ?-, ?L])
+  defp start_pipe(tiles, pos) do
+    north = connects?(tiles, pos, -1,  0, [?F, ?|, ?7])
+    south = connects?(tiles, pos,  1,  0, [?L, ?|, ?J])
+    east  = connects?(tiles, pos,  0,  1, [?7, ?-, ?J])
+    west  = connects?(tiles, pos,  0, -1, [?F, ?-, ?L])
     cond do
       north && south && east ->
         raise "invalid connect N=#{north} S=#{south} E=#{east} W=#{west}"
@@ -41,18 +44,17 @@ defmodule Pipe.Maze do
         raise "invalid connect N=#{north} S=#{south} E=#{east} W=#{west}"
       west && north && south ->
         raise "invalid connect N=#{north} S=#{south} E=#{east} W=#{west}"
-      north && south -> ?|
-      north && east  -> ?L
-      north && west  -> ?J
-      south && east  -> ?F
-      south && west  -> ?7
-      east && west   -> ?-
+      north && south -> {?|, :south}
+      north && east  -> {?L, :north}
+      north && west  -> {?J, :west}
+      south && east  -> {?F, :east}
+      south && west  -> {?7, :south}
+      east && west   -> {?-, :west}
       true ->
         raise "invalid connect N=#{north} S=#{south} E=#{east} W=#{west}"
     end
   end
 
-  # TODO should write unit tests for this
   defp connects?(tiles, {y, x}, dy, dx, possibles) do
     pos = {y + dy, x + dx}
     Enum.any?(possibles, fn p -> tiles[pos] == p end)
@@ -68,10 +70,9 @@ defmodule Pipe.Maze do
   Returns an integer step count.
   """
   def steps(maze) do
-    start_dir = :east  # FIXME only works for certain inputs
     loop_len =
       Stream.cycle([true])
-      |> Enum.reduce_while({0, start_dir, maze.start}, fn _, {step, dir, pos} ->
+      |> Enum.reduce_while({0, maze.start_dir, maze.start}, fn _, {step, dir, pos} ->
         tile = maze.tiles[pos]
         next_pos = next_pos(pos, dir)
         next_tile = maze.tiles[next_pos]
