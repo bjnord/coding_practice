@@ -105,4 +105,47 @@ defmodule Pipe.Maze do
   defp next_dir(tile, dir) when tile == ?F and dir == :west, do: :south
   defp next_dir(tile, dir) when tile == ?- and dir == :west, do: :west
   defp next_dir(tile, dir) when tile == ?L and dir == :west, do: :north
+
+  def dump(maze) do
+    {dim_y, dim_x} = dimensions(maze)
+    IO.puts("-- #{dim_y} x #{dim_x} -- start #{inspect(maze.start)} --")
+    for y <- 0..(dim_y-1), do: dump_row(maze, y, dim_x)
+    IO.puts("---------------------------")
+  end
+
+  defp dump_row(maze, y, dim_x) do
+    line =
+      0..(dim_x-1)
+      |> Enum.reduce([], fn x, line ->
+        [tile_at(maze, y, x) | line]
+      end)
+      |> Enum.reverse()
+      |> List.to_string()
+    IO.puts(line)
+  end
+
+  defp tile_at(maze, y, x) do
+    if {y, x} == maze.start do
+      ?S
+    else
+      Map.get(maze.tiles, {y, x}, ?.)
+    end
+  end
+
+  @doc ~S"""
+  Return the dimensions of a `Maze`.
+
+  ## Parameters
+
+  - `maze` - the `Maze`
+
+  Returns the `{y, x}` dimensions of the maze.
+  """
+  def dimensions(maze) do
+    positions = Map.keys(maze.tiles)
+    {
+      elem(Enum.max_by(positions, fn {y, _x} -> y end), 0) + 1,
+      elem(Enum.max_by(positions, fn {_y, x} -> x end), 1) + 1,
+    }
+  end
 end

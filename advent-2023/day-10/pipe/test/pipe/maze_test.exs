@@ -102,6 +102,12 @@ defmodule Pipe.MazeTest do
           },
         ],
         exp_steps: [4, 4, 8, 8],
+        exp_dimensions: [
+          {4, 4},
+          {5, 5},
+          {5, 5},
+          {5, 5},
+        ],
       ]
     end
 
@@ -109,6 +115,12 @@ defmodule Pipe.MazeTest do
       act_steps = fixture.mazes
                   |> Enum.map(&Maze.steps/1)
       assert act_steps == fixture.exp_steps
+    end
+
+    test "find dimensions", fixture do
+      act_dimensions = fixture.mazes
+                       |> Enum.map(&Maze.dimensions/1)
+      assert act_dimensions == fixture.exp_dimensions
     end
   end
 end
