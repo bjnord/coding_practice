@@ -189,24 +189,23 @@ defmodule Dish.Platform do
   end
 
   @doc ~S"""
-  Calculate the load on a `Platform` on the specified side.
+  Calculate the load on the north side of a `Platform`.
 
   ## Parameters
 
   - `platform` - the `Platform`
-  - `dir` - the measurement direction (`:north`, `:south`, `:east`, or `:west`)
 
   Returns the load amount (integer).
   """
-  def load(platform, dir) when dir == :north do
+  def load(platform) do
     platform.rocks
     |> Enum.reduce(0, fn rock, total_load ->
-      total_load + north_rock_load(platform.size, rock)
+      total_load + rock_load(platform.size, rock)
     end)
   end
 
-  def north_rock_load({h, _w}, {{y, _x}, type}) when type == :O, do: h - y
-  def north_rock_load(_size, _rock), do: 0
+  def rock_load({h, _w}, {{y, _x}, type}) when type == :O, do: h - y
+  def rock_load(_size, _rock), do: 0
 
 
   # TODO ExDoc

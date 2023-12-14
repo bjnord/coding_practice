@@ -90,7 +90,7 @@ defmodule Dish.PlatformTest do
           size: {10, 10},
           tilt: :north,
         },
-        exp_n_load: 136,
+        exp_load: 136,
         exp_part2_cycles: [
           # After 1 cycle:
           """
@@ -143,9 +143,9 @@ defmodule Dish.PlatformTest do
     end
 
     test "find load", fixture do
-      act_n_load = fixture.exp_n_platform
-                   |> Platform.load(:north)
-      assert act_n_load == fixture.exp_n_load
+      act_load = fixture.exp_n_platform
+                 |> Platform.load()
+      assert act_load == fixture.exp_load
     end
 
     test "first N cycles", fixture do
@@ -163,7 +163,7 @@ defmodule Dish.PlatformTest do
     test "load after 1_000_000_000 cycles", fixture do
       act_cycled_load =
         Platform.cycle_n(fixture.platform, 1_000_000_000)
-        |> Platform.load(:north)
+        |> Platform.load()
       assert act_cycled_load == fixture.exp_cycled_load
     end
   end

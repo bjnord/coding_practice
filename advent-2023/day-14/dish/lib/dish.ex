@@ -26,7 +26,7 @@ defmodule Dish do
   def part1(input_file) do
     parse_input(input_file)
     |> Platform.tilt(:north)
-    |> Platform.load(:north)
+    |> Platform.load()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -36,7 +36,7 @@ defmodule Dish do
   def part2(input_file) do
     parse_input(input_file)
     |> Platform.cycle_n(1_000_000_000)
-    |> Platform.load(:north)
+    |> Platform.load()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
