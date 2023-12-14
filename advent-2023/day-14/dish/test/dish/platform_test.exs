@@ -2,6 +2,7 @@ defmodule Dish.PlatformTest do
   use ExUnit.Case
   doctest Dish.Platform, import: true
 
+  import Dish.Parser
   alias Dish.Platform
 
   describe "puzzle example" do
@@ -90,6 +91,47 @@ defmodule Dish.PlatformTest do
           tilt: :north,
         },
         exp_n_load: 136,
+        exp_part2_cycles: [
+          # After 1 cycle:
+          """
+          .....#....
+          ....#...O#
+          ...OO##...
+          .OO#......
+          .....OOO#.
+          .O#...O#.#
+          ....O#....
+          ......OOOO
+          #...O###..
+          #..OO#....
+          """,
+          # After 2 cycles:
+          """
+          .....#....
+          ....#...O#
+          .....##...
+          ..O#......
+          .....OOO#.
+          .O#...O#.#
+          ....O#...O
+          .......OOO
+          #..OO###..
+          #.OOO#...O
+          """,
+          # After 3 cycles:
+          """
+          .....#....
+          ....#...O#
+          .....##...
+          ..O#......
+          .....OOO#.
+          .O#...O#.#
+          ....O#...O
+          .......OOO
+          #...O###.O
+          #.OOO#...O
+          """,
+        ],
       ]
     end
 
@@ -103,6 +145,18 @@ defmodule Dish.PlatformTest do
       act_n_load = fixture.exp_n_platform
                    |> Platform.load(:north)
       assert act_n_load == fixture.exp_n_load
+    end
+
+    test "cycle", fixture do
+      fixture.exp_part2_cycles
+      |> Enum.reduce(fixture.platform, fn exp_cycle_input, platform ->
+        exp_cycled =
+          parse_input_string(exp_cycle_input)
+          |> then(fn platform -> %Platform{platform | tilt: :east} end)
+        new_platform = Platform.cycle(platform)
+        assert new_platform == exp_cycled
+        new_platform
+      end)
     end
   end
 end
