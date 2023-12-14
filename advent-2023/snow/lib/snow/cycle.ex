@@ -11,6 +11,7 @@ defmodule Snow.Cycle do
 
   - `f`: function that transforms current state to next state
   - `x0`: initial state
+  - `compare`: (optional) state comparison function
 
   Returns a tuple with these elements:
 
@@ -19,13 +20,13 @@ defmodule Snow.Cycle do
   """
   # credit: code based on Python example in above Wikipedia article
   # TODO allow caller to supply equality function
-  def brent(f, x0) do
+  def brent(f, x0, compare \\ &==/2) do
     # Find cycle length using successive powers of two.
     λ =
       Stream.cycle([true])
       |> Enum.reduce_while({1, 1, x0, f.(x0)}, fn _, {power, λ, tortoise, hare} ->
         cond do
-          tortoise == hare ->
+          compare.(tortoise, hare) ->
             {:halt, λ}
           power == λ ->
             {:cont, {power * 2, 1, hare, f.(hare)}}
@@ -45,7 +46,7 @@ defmodule Snow.Cycle do
     μ =
       Stream.cycle([true])
       |> Enum.reduce_while({0, x0, nth_hare}, fn _, {μ, tortoise, hare} ->
-        if tortoise == hare do
+        if compare.(tortoise, hare) do
           {:halt, μ}
         else
           {:cont, {μ + 1, f.(tortoise), f.(hare)}}

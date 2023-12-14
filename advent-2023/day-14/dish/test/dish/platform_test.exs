@@ -132,22 +132,23 @@ defmodule Dish.PlatformTest do
           #.OOO#...O
           """,
         ],
+        exp_cycled_load: 64,
       ]
     end
 
-    test "tilt N", fixture do
+    test "tilt north", fixture do
       act_n_platform = fixture.platform
                        |> Platform.tilt(:north)
       assert act_n_platform == fixture.exp_n_platform
     end
 
-    test "find N load", fixture do
+    test "find load", fixture do
       act_n_load = fixture.exp_n_platform
                    |> Platform.load(:north)
       assert act_n_load == fixture.exp_n_load
     end
 
-    test "cycle", fixture do
+    test "first N cycles", fixture do
       fixture.exp_part2_cycles
       |> Enum.reduce(fixture.platform, fn exp_cycle_input, platform ->
         exp_cycled =
@@ -157,6 +158,13 @@ defmodule Dish.PlatformTest do
         assert new_platform == exp_cycled
         new_platform
       end)
+    end
+
+    test "load after 1_000_000_000 cycles", fixture do
+      act_cycled_load =
+        Platform.cycle_n(fixture.platform, 1_000_000_000)
+        |> Platform.load(:north)
+      assert act_cycled_load == fixture.exp_cycled_load
     end
   end
 end

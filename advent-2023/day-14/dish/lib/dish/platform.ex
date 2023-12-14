@@ -6,6 +6,30 @@ defmodule Dish.Platform do
   defstruct rocks: %{}, size: {0, 0}, tilt: :flat
 
   alias Dish.Platform
+  alias Snow.Cycle
+
+  @doc ~S"""
+  Run a `Platform` through N spin cycles.
+
+  ## Parameters
+
+  - `platform` - the `Platform`
+  - `n` - the number of spin cycles
+
+  Returns an updated `Platform`.
+  """
+  def cycle_n(platform, n) do
+    next_f = fn p -> cycle(p) end
+    compare_f = fn a, b -> hash(a) == hash(b) end
+    {λ, μ} = Cycle.brent(next_f, platform, compare_f)
+    n_spins = rem(n - μ, λ) + μ
+    if n_spins == 0 do
+      platform
+    else
+      0..(n_spins - 1)
+      |> Enum.reduce(platform, fn _, acc -> cycle(acc) end)
+    end
+  end
 
   @doc ~S"""
   Run a `Platform` through one spin cycle.
@@ -212,5 +236,14 @@ defmodule Dish.Platform do
       :none -> ?.
       _     -> ??
     end
+  end
+
+  def hash(platform) do
+    platform.rocks
+    |> Map.keys()
+    |> Enum.sort()
+    |> Enum.map(fn pos -> "#{inspect(pos)}" end)
+    |> Enum.join(" ")
+    |> then(fn s -> :crypto.hash(:md5, s) end)
   end
 end
