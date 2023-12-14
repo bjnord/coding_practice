@@ -44,8 +44,8 @@ defmodule Dish.Parser do
 
   ## Parameters
 
-  `line` - the input line
-  `y` - the y position (integer) of the input line
+  - `line`: the input line
+  - `y`: the y position (integer) of the input line
 
   Returns the rocks on the input line and their positions, as a
   list of `{{y, x}, type}` tuples.

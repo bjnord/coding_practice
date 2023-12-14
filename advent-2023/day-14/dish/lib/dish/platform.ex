@@ -9,12 +9,15 @@ defmodule Dish.Platform do
   alias Snow.Cycle
 
   @doc ~S"""
-  Run a `Platform` through N spin cycles.
+  Simulate running a `Platform` through N spin cycles.
+
+  N can be very large; this function will return the correct platform state,
+  as if that number of spin cycles was run.
 
   ## Parameters
 
-  - `platform` - the `Platform`
-  - `n` - the number of spin cycles
+  - `platform`: the `Platform`
+  - `n`: the number of spin cycles
 
   Returns an updated `Platform`.
   """
@@ -34,15 +37,16 @@ defmodule Dish.Platform do
   @doc ~S"""
   Run a `Platform` through one spin cycle.
 
-  "Each cycle tilts the platform four times so that the rounded rocks roll
-  north, then west, then south, then east. After each tilt, the rounded
-  rocks roll as far as they can before the platform tilts in the next
-  direction. After one cycle, the platform will have finished rolling
-  the rounded rocks in those four directions in that order."
+  > Each **cycle** tilts the platform four times so that the rounded rocks
+  > roll **north**, then **west**, then **south**, then **east**. After
+  > each tilt, the rounded rocks roll as far as they can before the
+  > platform tilts in the next direction. After one cycle, the platform
+  > will have finished rolling the rounded rocks in those four directions
+  > in that order.
 
   ## Parameters
 
-  - `platform` - the `Platform`
+  - `platform`: the `Platform`
 
   Returns an updated `Platform`.
   """
@@ -59,8 +63,8 @@ defmodule Dish.Platform do
 
   ## Parameters
 
-  - `platform` - the `Platform`
-  - `dir` - the tilt direction (`:flat`, `:north`, `:south`, `:east`, or `:west`)
+  - `platform`: the `Platform`
+  - `dir`: the tilt direction (`:flat`, `:north`, `:south`, `:east`, or `:west`)
 
   Returns an updated `Platform`.
   """
@@ -193,7 +197,7 @@ defmodule Dish.Platform do
 
   ## Parameters
 
-  - `platform` - the `Platform`
+  - `platform`: the `Platform`
 
   Returns the load amount (integer).
   """
@@ -204,11 +208,16 @@ defmodule Dish.Platform do
     end)
   end
 
-  def rock_load({h, _w}, {{y, _x}, type}) when type == :O, do: h - y
-  def rock_load(_size, _rock), do: 0
+  defp rock_load({h, _w}, {{y, _x}, type}) when type == :O, do: h - y
+  defp rock_load(_size, _rock), do: 0
 
+  @doc ~S"""
+  Dump a `Platform` to `stdout`.
 
-  # TODO ExDoc
+  ## Parameters
+
+  - `platform`: the `Platform`
+  """
   def dump(platform, opts \\ []) do
     {dim_y, dim_x} = platform.size
     IO.puts("")
@@ -237,6 +246,16 @@ defmodule Dish.Platform do
     end
   end
 
+  @doc ~S"""
+  Compute hash of a `Platform`.
+
+  This doesn't need to be a secure hash (tamper-resistant); just fast, and
+  sufficiently diverse.
+
+  ## Parameters
+
+  - `platform`: the `Platform`
+  """
   def hash(platform) do
     platform.rocks
     |> Map.keys()
