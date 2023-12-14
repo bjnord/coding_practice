@@ -257,11 +257,6 @@ defmodule Dish.Platform do
   - `platform`: the `Platform`
   """
   def hash(platform) do
-    platform.rocks
-    |> Map.keys()
-    |> Enum.sort()
-    |> Enum.map(fn pos -> "#{inspect(pos)}" end)
-    |> Enum.join(" ")
-    |> then(fn s -> :crypto.hash(:md5, s) end)
+    :erlang.phash2(platform)
   end
 end

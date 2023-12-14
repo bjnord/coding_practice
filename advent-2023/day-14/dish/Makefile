@@ -5,7 +5,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/dish/platform.ex test/dish/platform_test.exs
 VERBOSE = 0
 
-.PHONY: run test doc console clean
+.PHONY: run test time profile doc console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
@@ -15,6 +15,12 @@ test:
 		MIX_ENV=test mix propcheck.clean; \
 	fi
 	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+
+time: $(BIN)
+	time $(BIN) --parts=2 private/input.txt
+
+profile:
+	mix profile.eprof -e 'Dish.part2("private/input.txt")'
 
 doc:
 	mix docs
