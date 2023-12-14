@@ -18,8 +18,8 @@ defmodule Dish.Platform do
 
   Returns an updated `Platform`.
   """
-  def cycle_n(platform, n) do
-    next_f = fn p -> cycle(p) end
+  def spin_cycle_n(platform, n) do
+    next_f = fn p -> spin_cycle(p) end
     compare_f = fn a, b -> hash(a) == hash(b) end
     {λ, μ} = Cycle.brent(next_f, platform, compare_f)
     n_spins = rem(n - μ, λ) + μ
@@ -27,7 +27,7 @@ defmodule Dish.Platform do
       platform
     else
       0..(n_spins - 1)
-      |> Enum.reduce(platform, fn _, acc -> cycle(acc) end)
+      |> Enum.reduce(platform, fn _, acc -> spin_cycle(acc) end)
     end
   end
 
@@ -46,7 +46,7 @@ defmodule Dish.Platform do
 
   Returns an updated `Platform`.
   """
-  def cycle(platform) do
+  def spin_cycle(platform) do
     platform
     |> tilt(:north)
     |> tilt(:west)

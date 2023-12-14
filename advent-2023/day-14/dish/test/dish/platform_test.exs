@@ -91,7 +91,7 @@ defmodule Dish.PlatformTest do
           tilt: :north,
         },
         exp_load: 136,
-        exp_part2_cycles: [
+        exp_part2_spin_cycles: [
           # After 1 cycle:
           """
           .....#....
@@ -132,7 +132,7 @@ defmodule Dish.PlatformTest do
           #.OOO#...O
           """,
         ],
-        exp_cycled_load: 64,
+        exp_spin_cycled_load: 64,
       ]
     end
 
@@ -148,23 +148,23 @@ defmodule Dish.PlatformTest do
       assert act_load == fixture.exp_load
     end
 
-    test "first N cycles", fixture do
-      fixture.exp_part2_cycles
-      |> Enum.reduce(fixture.platform, fn exp_cycle_input, platform ->
-        exp_cycled =
-          parse_input_string(exp_cycle_input)
+    test "first N spin cycles", fixture do
+      fixture.exp_part2_spin_cycles
+      |> Enum.reduce(fixture.platform, fn exp_spin_cycle_input, platform ->
+        exp_spin_cycled =
+          parse_input_string(exp_spin_cycle_input)
           |> then(fn platform -> %Platform{platform | tilt: :east} end)
-        new_platform = Platform.cycle(platform)
-        assert new_platform == exp_cycled
+        new_platform = Platform.spin_cycle(platform)
+        assert new_platform == exp_spin_cycled
         new_platform
       end)
     end
 
-    test "load after 1_000_000_000 cycles", fixture do
-      act_cycled_load =
-        Platform.cycle_n(fixture.platform, 1_000_000_000)
+    test "load after 1_000_000_000 spin cycles", fixture do
+      act_spin_cycled_load =
+        Platform.spin_cycle_n(fixture.platform, 1_000_000_000)
         |> Platform.load()
-      assert act_cycled_load == fixture.exp_cycled_load
+      assert act_spin_cycled_load == fixture.exp_spin_cycled_load
     end
   end
 end

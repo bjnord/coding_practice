@@ -35,7 +35,7 @@ defmodule Dish do
   """
   def part2(input_file) do
     parse_input(input_file)
-    |> Platform.cycle_n(1_000_000_000)
+    |> Platform.spin_cycle_n(1_000_000_000)
     |> Platform.load()
     |> IO.inspect(label: "Part 2 answer is")
   end
