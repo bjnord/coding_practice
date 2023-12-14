@@ -85,7 +85,7 @@ defmodule Dish.PlatformTest do
             {9, 0} => :M,
             {9, 5} => :M,
           },
-          tilt: :flat,
+          tilt: :north,
         },
         exp_n_load: 136,
       ]
