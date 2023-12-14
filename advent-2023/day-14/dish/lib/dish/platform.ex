@@ -3,7 +3,7 @@ defmodule Dish.Platform do
   Platform structure and functions for `Dish`.
   """
 
-  defstruct rocks: %{}, tilt: :flat
+  defstruct rocks: %{}, size: {0, 0}, tilt: :flat
 
   alias Dish.Platform
 
@@ -25,7 +25,7 @@ defmodule Dish.Platform do
       end)
       |> List.flatten()
       |> Enum.into(%{})
-    %Platform{rocks: rockslide, tilt: dir}
+    %Platform{rocks: rockslide, size: platform.size, tilt: dir}
   end
 
   defp columns(platform) do
@@ -64,11 +64,11 @@ defmodule Dish.Platform do
   """
   def load(platform, dir) when dir == :north do
     platform.rocks
-    |> Enum.reduce(0, fn {{y, x}, type}, load ->
-      load + rock_load(type, y, x)
+    |> Enum.reduce(0, fn rock, total_load ->
+      total_load + north_rock_load(platform.size, rock)
     end)
   end
 
-  def rock_load(type, y, _x) when type == :O, do: 10 - y
-  def rock_load(_type, _y, _x), do: 0
+  def north_rock_load({h, _w}, {{y, _x}, type}) when type == :O, do: h - y
+  def north_rock_load(_size, _rock), do: 0
 end

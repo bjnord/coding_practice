@@ -28,7 +28,15 @@ defmodule Dish.Parser do
       |> Enum.map(&parse_line/1)
       |> List.flatten()
       |> Enum.into(%{})
-    %Platform{rocks: rocks, tilt: :flat}
+    {height, width} =
+      Map.keys(rocks)
+      |> Enum.reduce({0, 0}, fn {y, x}, {max_h, max_w} ->
+        {
+          max(max_h, y + 1),
+          max(max_w, x + 1),
+        }
+      end)
+    %Platform{rocks: rocks, size: {height, width}, tilt: :flat}
   end
 
   @doc ~S"""

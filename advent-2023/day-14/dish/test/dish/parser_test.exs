@@ -73,6 +73,7 @@ defmodule Dish.ParserTest do
               {9, 2} => :O,
               {9, 5} => :M,
             },
+            size: {10, 10},
             tilt: :flat,
           },
           %Platform{
@@ -113,6 +114,7 @@ defmodule Dish.ParserTest do
               {9, 0} => :M,
               {9, 5} => :M,
             },
+            size: {10, 10},
             tilt: :flat,
           },
         ],
