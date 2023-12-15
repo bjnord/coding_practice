@@ -5,9 +5,19 @@ defmodule LensTest do
   describe "puzzle example" do
     setup do
       [
-        input: """
-        rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7
-        """,
+        iv_tokens: [
+          "rn=1",
+          "cm-",
+          "qp=3",
+          "cm=2",
+          "qp-",
+          "pc=4",
+          "ot=9",
+          "ab=5",
+          "pc-",
+          "pc=6",
+          "ot=7",
+        ],
         exp_hash: 52,
         exp_iv_hashes: [
           30,
@@ -30,12 +40,9 @@ defmodule LensTest do
       assert act_hash == fixture.exp_hash
     end
 
-    test "find HASH value of IV", fixture do
-      # TODO move to `Lens.Parser`
-      act_iv_hashes =
-        fixture.input
-        |> String.split(",")
-        |> Enum.map(&Lens.hash/1)
+    test "find HASH values of IV", fixture do
+      act_iv_hashes = fixture.iv_tokens
+                      |> Enum.map(&Lens.hash/1)
       assert act_iv_hashes == fixture.exp_iv_hashes
     end
   end
