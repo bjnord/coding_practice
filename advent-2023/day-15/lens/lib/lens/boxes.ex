@@ -54,4 +54,27 @@ defmodule Lens.Boxes do
     |> Enum.reverse()
     |> then(fn lenses -> Map.put(boxes, box_n, lenses) end)
   end
+
+  @doc ~S"""
+  Calculate focusing power of the lenses in the boxes
+
+  ## Parameters
+
+  - `boxes`: the boxes (map; key is integer box ID from 0-255)
+
+  Returns the focusing power (integer).
+  """
+  def power(boxes) do
+    boxes
+    |> Enum.flat_map(fn {box_n, lenses} ->
+      lenses
+      |> Enum.with_index()
+      |> Enum.map(fn {lens, i} -> power(box_n, lens, i) end)
+    end)
+    |> Enum.sum()
+  end
+
+  defp power(box_n, {_label, focal}, i) do
+    (box_n + 1) * (i + 1) * focal
+  end
 end

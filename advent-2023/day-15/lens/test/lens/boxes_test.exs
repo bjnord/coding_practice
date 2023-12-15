@@ -33,6 +33,7 @@ defmodule Lens.BoxesTest do
             {"pc", 6},
           ],
         },
+        exp_power: 145,
       ]
     end
 
@@ -40,6 +41,12 @@ defmodule Lens.BoxesTest do
       act_boxes = fixture.iv
                   |> Boxes.install()
       assert act_boxes == fixture.exp_boxes
+    end
+
+    test "find focusing power", fixture do
+      act_power = fixture.exp_boxes
+                  |> Boxes.power()
+      assert act_power == fixture.exp_power
     end
   end
 end
