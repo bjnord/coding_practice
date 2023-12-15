@@ -3,6 +3,7 @@ defmodule Lens do
   Documentation for `Lens`.
   """
 
+  alias Lens.Boxes
   import Lens.Parser
   import Snow.CLI
 
@@ -36,8 +37,9 @@ defmodule Lens do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    parse_input(input_file, part: 2)
+    |> Boxes.install()
+    |> Boxes.power()
     |> IO.inspect(label: "Part 2 answer is")
   end
 
