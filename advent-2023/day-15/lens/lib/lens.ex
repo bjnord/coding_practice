@@ -23,8 +23,12 @@ defmodule Lens do
   Process input file and display part 1 solution.
   """
   def part1(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    # TODO use `Lens.Parser`
+    File.read!(input_file)
+    |> String.trim_trailing()
+    |> String.split(",")
+    |> Enum.map(&Lens.hash/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
