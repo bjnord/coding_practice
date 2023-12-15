@@ -18,13 +18,15 @@ defmodule Lens.Boxes do
   """
   def install(instructions) do
     instructions
-    |> Enum.reduce(%{}, fn instruction, boxes ->
-      lens_op(boxes, instruction)
+    |> Enum.reduce(%{}, fn inst, boxes ->
+      Map.get(boxes, elem(inst, 0), [])
+      |> lens_op(inst)
+      |> then(fn lenses -> Map.put(boxes, elem(inst, 0), lenses) end)
     end)
   end
 
-  defp lens_op(boxes, {box_n, :install, i_label, i_focal}) do
-    Map.get(boxes, box_n, [])
+  defp lens_op(box, {_box_n, :install, i_label, i_focal}) do
+    box
     |> Enum.reduce({[], false}, fn {label, focal}, {lenses, saw} ->
       if label == i_label do
         # replace
@@ -38,11 +40,10 @@ defmodule Lens.Boxes do
       if saw, do: lenses, else: [{i_label, i_focal} | lenses]
     end)
     |> Enum.reverse()
-    |> then(fn lenses -> Map.put(boxes, box_n, lenses) end)
   end
 
-  defp lens_op(boxes, {box_n, :remove, r_label}) do
-    Map.get(boxes, box_n, [])
+  defp lens_op(box, {_box_n, :remove, r_label}) do
+    box
     |> Enum.reduce([], fn {label, focal}, lenses ->
       if label == r_label do
         # remove
@@ -52,7 +53,6 @@ defmodule Lens.Boxes do
       end
     end)
     |> Enum.reverse()
-    |> then(fn lenses -> Map.put(boxes, box_n, lenses) end)
   end
 
   @doc ~S"""
