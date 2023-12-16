@@ -36,13 +36,20 @@ defmodule Beam.ContraptionTest do
           size: {10, 10},
         },
         exp_n_energized: 46,
+        exp_max_energized: 51,
       ]
     end
 
-    test "find energized tile count", fixture do
+    test "find energized tile count from 0,0 going east", fixture do
       act_n_energized = fixture.contraption
-                        |> Contraption.n_energized()
+                        |> Contraption.n_energized({0, 0}, :east)
       assert act_n_energized == fixture.exp_n_energized
+    end
+
+    test "find max energized tile count", fixture do
+      act_max_energized = fixture.contraption
+                          |> Contraption.max_energized()
+      assert act_max_energized == fixture.exp_max_energized
     end
   end
 end

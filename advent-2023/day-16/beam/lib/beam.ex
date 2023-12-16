@@ -25,7 +25,7 @@ defmodule Beam do
   """
   def part1(input_file) do
     parse_input(input_file)
-    |> Contraption.n_energized()
+    |> Contraption.n_energized({0, 0}, :east)
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -34,7 +34,7 @@ defmodule Beam do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Contraption.max_energized()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

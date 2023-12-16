@@ -35,7 +35,25 @@ defmodule Beam.Contraption do
   end
 
   @doc ~S"""
-  Calculate the number of energized tiles in a `Contraption`.
+  Calculate the number of energized tiles in a `Contraption`, starting from
+  the specified position and direction.
+
+  ## Parameters
+
+  - `contraption` - the `Contraption`
+  - `pos` - the `{y, x}` starting position
+  - `dir` - the starting direction (`:north`, `:south`, `:east`, or `:west`)
+
+  Returns the number of energized tiles (integer).
+  """
+  def n_energized(contraption, pos, dir) do
+    travel(contraption, pos, dir)
+    |> Enum.count()
+  end
+
+  @doc ~S"""
+  Calculate the maximum number of energized tiles in a `Contraption`,
+  starting from all possible edge positions and directions.
 
   ## Parameters
 
@@ -43,9 +61,25 @@ defmodule Beam.Contraption do
 
   Returns the number of energized tiles (integer).
   """
-  def n_energized(contraption) do
-    travel(contraption)
-    |> Enum.count()
+  def max_energized(contraption) do
+    {height, width} = contraption.size
+    max_of_rows =
+      for y <- 0..(height - 1) do
+        max(
+          travel(contraption, {y, 0}, :east) |> Enum.count(),
+          travel(contraption, {y, width - 1}, :west) |> Enum.count()
+        )
+      end
+      |> Enum.max()
+    max_of_columns =
+      for x <- 0..(width - 1) do
+        max(
+          travel(contraption, {0, x}, :south) |> Enum.count(),
+          travel(contraption, {height - 1, x}, :north) |> Enum.count()
+        )
+      end
+      |> Enum.max()
+    max(max_of_columns, max_of_rows)
   end
 
   @doc ~S"""
@@ -54,13 +88,14 @@ defmodule Beam.Contraption do
   ## Parameters
 
   - `contraption` - the `Contraption`
+  - `pos` - the `{y, x}` starting position
+  - `dir` - the starting direction (`:north`, `:south`, `:east`, or `:west`)
 
   Returns the list of tiles traversed (`{y, x}` tuples).
   """
-  def travel(contraption) when not is_tuple(contraption) do
-    # "The beam enters in the top-left corner from the left and heading
-    # to the right."
-    initial_q = [{{0, 0}, :east}]
+  # TODO this could just return the count
+  def travel(contraption, pos, dir) do
+    initial_q = [{pos, dir}]
     # path accumulator map: key = segment `{pos, dir}` / value = path `[pos, ...]`
     Stream.cycle([true])
     |> Enum.reduce_while({initial_q, %{}}, fn _, {segment_q, pathmap} ->
