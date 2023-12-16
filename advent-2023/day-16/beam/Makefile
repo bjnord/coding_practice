@@ -1,6 +1,7 @@
 BIN = ./beam
 FILES = mix.exs test/test_helper.exs \
 	lib/beam.ex test/beam_test.exs \
+	lib/beam/contraption.ex test/beam/contraption_test.exs \
 	lib/beam/parser.ex test/beam/parser_test.exs
 VERBOSE = 0
 
