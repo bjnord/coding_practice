@@ -60,103 +60,92 @@ defmodule Beam.Contraption do
   def travel(contraption) when not is_tuple(contraption) do
     # "The beam enters in the top-left corner from the left and heading
     # to the right."
-    step({{0, 0}, :east}, {%{}, %{}}, contraption)
-    |> then(fn {sp_seen, obj_seen} ->
-      Map.keys(obj_seen)
-      |> Enum.reduce(Map.keys(sp_seen), fn {pos, _dir}, acc -> [pos | acc] end)
+    initial_q = [{{0, 0}, :east}]
+    # path accumulator map: key = segment `{pos, dir}` / value = path `[pos, ...]`
+    Stream.cycle([true])
+    |> Enum.reduce_while({initial_q, %{}}, fn _, {segment_q, pathmap} ->
+      if segment_q == [] do
+        {:halt, pathmap}
+      else
+        # take next segment from queue
+        # TODO could `{pos, dir}` just be `segment`? (ever use `pos` or `dir` separately?)
+        [{pos, dir} | rem_q] = segment_q
+        if pathmap[{pos, dir}] do
+          # already followed this segment
+          {:cont, {rem_q, pathmap}}
+        else
+          # follow segment to end, obtaining path + next segments (if any)
+          {path, {next_pos, next_dirs}} = segment({pos, dir}, [], contraption)
+          # add segment to accumulator
+          # TODO could this use `%{pathmap | {pos, dir} => path}` notation?
+          pathmap = Map.put(pathmap, {pos, dir}, path)
+          # put next segments (if any) onto queue
+          case next_dirs do
+            :east_west ->
+              {:cont, {[{next_pos, :east}, {next_pos, :west} | rem_q], pathmap}}
+            :north_south ->
+              {:cont, {[{next_pos, :north}, {next_pos, :south} | rem_q], pathmap}}
+            nil ->
+              {:cont, {rem_q, pathmap}}
+            _ ->
+              raise "invalid next_dirs #{next_dirs}"
+          end
+        end
+      end
+    end)
+    |> Enum.reduce([], fn {_pos, path}, positions ->
+      # OPTIMIZE could reverse-fold
+      positions ++ path
     end)
     |> Enum.uniq()
   end
 
-  # returns `{sp_seen, obj_seen}` accumulator
-  defp step(step, step_acc, contraption) do
-    next_steps(step, step_acc, contraption)
-    |> Enum.map(fn {next_step, step_acc} ->
-      if next_step do
-        step(next_step, step_acc, contraption)
-      else
-        step_acc
-      end
-    end)
-    |> List.flatten()
-    |> Enum.reduce({%{}, %{}}, fn {sp_seen, obj_seen}, {sp_acc, obj_acc} ->
-      {
-        Enum.reduce(Map.keys(sp_seen), sp_acc, fn sp, acc -> Map.put(acc, sp, true) end),
-        Enum.reduce(Map.keys(obj_seen), obj_acc, fn obj, acc -> Map.put(acc, obj, true) end),
-      }
-    end)
-  end
-
-  # returns list of `{next_step, step_acc}`
+  # returns `{path, {next_pos, next_dirs}}`
   # "Then, its behavior depends on what it encounters as it moves:"
-  defp next_steps({pos, dir}, {sp_seen, obj_seen}, contraption) do
+  defp segment({pos, dir}, path, contraption) do
     tile = Map.get(contraption.tiles, pos, ?.)
     #label = "tile #{<<tile::utf8>>} pos #{inspect(pos)} dir #{dir}"
     #dump(contraption, label: label, cur_pos: pos)
     cond do
       # - (If the beam goes out of bounds, stop travelling.)
       out_of_bounds?(pos, contraption) ->
-        [{nil, {sp_seen, obj_seen}}]
-      # - (If the beam hits an object we've already seen, while travelling
-      #   in this direction, stop travelling.)
-      Map.get(obj_seen, {pos, dir}, nil) ->
-        [{nil, {sp_seen, obj_seen}}]
+        {path, {nil, nil}}
       # - If the beam encounters *empty space* (`.`), it continues in the
       #   same direction.
       tile == ?. ->
-        new_sp_seen = Map.put(sp_seen, pos, true)
-        [{{next_pos(pos, dir), dir}, {new_sp_seen, obj_seen}}]
+        segment({next_pos(pos, dir), dir}, [pos | path], contraption)
       # - If the beam encounters a *mirror* (`/` or `\`), the beam is
       #   *reflected* 90 degrees depending on the angle of the mirror.
       tile == ?/ && dir == :east ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :north), :north}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :north), :north}, [pos | path], contraption)
       tile == ?/ && dir == :north ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :east), :east}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :east), :east}, [pos | path], contraption)
       tile == ?/ && dir == :west ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :south), :south}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :south), :south}, [pos | path], contraption)
       tile == ?/ && dir == :south ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :west), :west}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :west), :west}, [pos | path], contraption)
       tile == ?\\ && dir == :east ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :south), :south}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :south), :south}, [pos | path], contraption)
       tile == ?\\ && dir == :south ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :east), :east}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :east), :east}, [pos | path], contraption)
       tile == ?\\ && dir == :west ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :north), :north}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :north), :north}, [pos | path], contraption)
       tile == ?\\ && dir == :north ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, :west), :west}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, :west), :west}, [pos | path], contraption)
       # - If the beam encounters the *pointy end of a splitter* (`|` or `-`),
       #   the beam passes through the splitter as if the splitter were *empty
       #   space*.
       tile == ?| && north_south?(dir) ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, dir), dir}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, dir), dir}, [pos | path], contraption)
       tile == ?- && east_west?(dir) ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [{{next_pos(pos, dir), dir}, {sp_seen, new_obj_seen}}]
+        segment({next_pos(pos, dir), dir}, [pos | path], contraption)
       # - If the beam encounters the *flat side of a splitter* (`|` or `-`),
       #   the beam is *split into two beams* going in each of the two
       #   directions the splitter's pointy ends are pointing.
-      # TODO could also insert into `new_obj_seen` for pass-thru directions
       tile == ?| && east_west?(dir) ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [
-          {{next_pos(pos, :north), :north}, {sp_seen, new_obj_seen}},
-          {{next_pos(pos, :south), :south}, {sp_seen, new_obj_seen}},
-        ]
+        {path, {pos, :north_south}}
       tile == ?- && north_south?(dir) ->
-        new_obj_seen = Map.put(obj_seen, {pos, dir}, true)
-        [
-          {{next_pos(pos, :east), :east}, {sp_seen, new_obj_seen}},
-          {{next_pos(pos, :west), :west}, {sp_seen, new_obj_seen}},
-        ]
+        {path, {pos, :east_west}}
       true ->
         raise "unimplemented tile=#{<<tile::utf8>>} pos=#{inspect(pos)} dir=#{dir}"
     end
