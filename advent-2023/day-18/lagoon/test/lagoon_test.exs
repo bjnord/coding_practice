@@ -31,5 +31,11 @@ defmodule LagoonTest do
                                |> Lagoon.border_size()
       assert act_lagoon_border_size == fixture.exp_lagoon_border_size
     end
+
+    test "find lagoon size", fixture do
+      act_lagoon_size = fixture.instructions
+                        |> Lagoon.lagoon_size()
+      assert act_lagoon_size == fixture.exp_lagoon_size
+    end
   end
 end
