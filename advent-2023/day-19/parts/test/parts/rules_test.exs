@@ -71,6 +71,77 @@ defmodule Parts.RulesTest do
           :accept
         ],
         exp_accepted_rating: 19114,
+        exp_rule_ranges_px: [
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {1,2005}, s: {1,4000}},
+            :qkq,
+          },
+          {
+            %{x: {1,4000}, m: {2091,4000}, a: {2006,4000}, s: {1,4000}},
+            :accept,
+          },
+          {
+            %{x: {1,4000}, m: {1,2090}, a: {2006,4000}, s: {1,4000}},
+            :rfg,
+          },
+        ],
+        exp_rule_ranges_rfg: [
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {1,4000}, s: {1,536}},
+            :gd,
+          },
+          {
+            %{x: {2441,4000}, m: {1,4000}, a: {1,4000}, s: {537,4000}},
+            :reject,
+          },
+          {
+            %{x: {1,2440}, m: {1,4000}, a: {1,4000}, s: {537,4000}},
+            :accept,
+          },
+        ],
+        exp_rule_ranges_in: [
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {1,4000}, s: {1,1350}},
+            :px,
+          },
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {1,4000}, s: {1351,4000}},
+            :qqz,
+          },
+        ],
+        exp_rule_ranges_gd: [
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {3334,4000}, s: {1,4000}},
+            :reject,
+          },
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {1,3333}, s: {1,4000}},
+            :reject,
+          },
+        ],
+        exp_intersections: [
+          {
+            %{x: {1,4000}, m: {1,4000}, a: {1,4000}, s: {1,4000}},
+            %{x: {1,2221}, m: {1,4000}, a: {3334,4000}, s: {1,4000}},
+            %{x: {1,2221}, m: {1,4000}, a: {3334,4000}, s: {1,4000}},
+          },
+          {
+            %{x: {1,4000}, m: {1011,2022}, a: {1,4000}, s: {1,4000}},
+            %{x: {1,4000}, m: {1,4000}, a: {1,4000}, s: {3033,3444}},
+            %{x: {1,4000}, m: {1011,2022}, a: {1,4000}, s: {3033,3444}},
+          },
+          {
+            %{x: {1,2227}, m: {1,4000}, a: {3334,4000}, s: {1,4000}},
+            %{x: {1,4000}, m: {707,4000}, a: {1,4000}, s: {1,1722}},
+            %{x: {1,2227}, m: {707,4000}, a: {3334,4000}, s: {1,1722}},
+          },
+          {
+            %{x: {0,0}, m: {2001,4000}, a: {1,4000}, s: {1,3000}},
+            %{x: {1,4000}, m: {1,2000}, a: {0,0}, s: {3001,4000}},
+            %{x: {0,0}, m: {0,0}, a: {0,0}, s: {0,0}},
+          },
+        ],
+        exp_distinct_combos: 167409079868000,
       ]
     end
 
@@ -82,6 +153,34 @@ defmodule Parts.RulesTest do
       act_accepted_rating =
         Rules.accepted_rating({fixture.workflows, fixture.parts})
       assert act_accepted_rating == fixture.exp_accepted_rating
+    end
+
+    test "find rule ranges", fixture do
+      act_rule_ranges_px = fixture.workflows.px
+                           |> Rules.rule_ranges()
+      assert act_rule_ranges_px == fixture.exp_rule_ranges_px
+      act_rule_ranges_rfg = fixture.workflows.rfg
+                            |> Rules.rule_ranges()
+      assert act_rule_ranges_rfg == fixture.exp_rule_ranges_rfg
+      act_rule_ranges_in = fixture.workflows.in
+                           |> Rules.rule_ranges()
+      assert act_rule_ranges_in == fixture.exp_rule_ranges_in
+      act_rule_ranges_gd = fixture.workflows.gd
+                           |> Rules.rule_ranges()
+      assert act_rule_ranges_gd == fixture.exp_rule_ranges_gd
+    end
+
+    test "find intersections", fixture do
+      fixture.exp_intersections
+      |> Enum.each(fn {a, b, exp_intersection} ->
+        act_intersection = Rules.intersection(a, b)
+        assert act_intersection == exp_intersection
+      end)
+    end
+
+    test "find distinct combos", fixture do
+      act_distinct_combos = Rules.distinct_combos(fixture.workflows)
+      assert act_distinct_combos == fixture.exp_distinct_combos
     end
   end
 end

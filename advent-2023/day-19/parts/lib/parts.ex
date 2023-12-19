@@ -34,7 +34,8 @@ defmodule Parts do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> elem(0)
+    |> Rules.distinct_combos()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
