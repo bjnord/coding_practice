@@ -120,7 +120,7 @@ does it take before you're only on nodes that end with `Z`?**
 
 ### Part Two Design
 
-> Spoilers ahead!
+> **Spoilers ahead!**
 
 One of the benefits of doing Advent of Code for 6 years now is that you start to recognize puzzle types when you see them again. This one clearly involves cycle detection.
 

@@ -155,7 +155,7 @@ total load on the north support beams?**
 
 ### Part Two Design
 
-> Spoilers ahead!
+> **Spoilers ahead!**
 
 On [Day 8](../day-08/) I said:
 
