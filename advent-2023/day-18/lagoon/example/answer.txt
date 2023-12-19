@@ -1,2 +1,2 @@
 Part 1 answer is: 62
-Part 2 answer is: nil
+Part 2 answer is: 952408144115

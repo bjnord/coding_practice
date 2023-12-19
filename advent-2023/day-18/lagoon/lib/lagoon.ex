@@ -33,7 +33,7 @@ defmodule Lagoon do
   """
   def part2(input_file) do
     parse_input(input_file, part: 2)
-    nil  # TODO
+    |> lagoon_size()
     |> IO.inspect(label: "Part 2 answer is")
   end
 
