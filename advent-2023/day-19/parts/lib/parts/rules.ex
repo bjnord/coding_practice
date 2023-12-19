@@ -8,12 +8,13 @@ defmodule Parts.Rules do
 
   ## Parameters
 
+  A tuple with these elements:
   - `workflows`: the workflows (map)
   - `parts`: the parts (list of keyword maps)
 
   Returns the rating sum (integer).
   """
-  def accepted_rating(workflows, parts) do
+  def accepted_rating({workflows, parts}) do
     part_decisions =
       parts
       |> Enum.map(fn part -> flow(workflows, part) end)
@@ -54,7 +55,6 @@ defmodule Parts.Rules do
   end
 
   defp rule(part, {attr, op, value, next}) do
-    # TODO could make op a function! _e.g._ `&</2`
     pv = part[attr]
     cond do
       (op == ?<) && (pv < value) ->
