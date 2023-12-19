@@ -21,18 +21,11 @@ defmodule LagoonTest do
           {:left, 2, 0x015232},
           {:up, 2, 0x7a21e3},
         ],
-        exp_lagoon_border_size: 38,
         exp_lagoon_size: 62,
       ]
     end
 
-    test "find lagoon border size", fixture do
-      act_lagoon_border_size = fixture.instructions
-                               |> Lagoon.border_size()
-      assert act_lagoon_border_size == fixture.exp_lagoon_border_size
-    end
-
-    test "find lagoon size", fixture do
+    test "find lagoon size (part 1)", fixture do
       act_lagoon_size = fixture.instructions
                         |> Lagoon.lagoon_size()
       assert act_lagoon_size == fixture.exp_lagoon_size
