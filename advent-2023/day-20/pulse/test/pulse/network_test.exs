@@ -133,5 +133,11 @@ defmodule Pulse.NetworkTest do
         assert act_highs == exp_highs
       end)
     end
+
+    test "pushes to get low signal", fixture do
+      act_pushes = Enum.at(fixture.networks, 1)
+                   |> Network.n_pushes_break(:output)
+      assert act_pushes == 1
+    end
   end
 end

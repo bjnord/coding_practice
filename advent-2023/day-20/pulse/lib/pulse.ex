@@ -34,8 +34,19 @@ defmodule Pulse do
   Process input file and display part 2 solution.
   """
   def part2(input_file) do
-    parse_input(input_file)
-    nil  # TODO
+    network = parse_input(input_file)
+    break_on = break_on(network)
+    Network.n_pushes_break(network, break_on)
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  defp break_on(network) do
+    to_rx =
+      network.modules
+      |> Enum.find(fn {_k, {_type, dests}} ->
+        dests
+        |> Enum.find(fn dest -> dest == :rx end)
+      end)
+    if to_rx, do: :rx, else: :output
   end
 end

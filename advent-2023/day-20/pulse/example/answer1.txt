@@ -1,2 +1,1 @@
 Part 1 answer is: 32000000
-Part 2 answer is: nil

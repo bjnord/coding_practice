@@ -69,7 +69,11 @@ defmodule Pulse.Network do
   defp send_pulses(_network, state, [], lines), do: {state, lines}
   defp send_pulses(network, state, [next_pulse | rem_q], lines) do
     {new_state, add_q, new_lines} = send_pulse(network, state, next_pulse, lines)
-    send_pulses(network, new_state, rem_q ++ add_q, new_lines)
+    if add_q do
+      send_pulses(network, new_state, rem_q ++ add_q, new_lines)
+    else  # :break
+      {new_state, new_lines}
+    end
   end
 
   defp send_pulse(network, state, pulse, lines) do
@@ -82,18 +86,24 @@ defmodule Pulse.Network do
     "#{source} -#{signal}-> #{dest}"
   end
 
-  defp process_pulse(network, state, {source, signal, dest}) do
-    {type, new_dests} = type_new_dests(network, dest)
+  defp process_pulse(network, state, {source, signal, dest}, opts \\ []) do
+    {type, new_dests} = type_new_dests(network, signal, dest, opts)
     process_pulse_type(state, source, dest, type, signal, new_dests)
   end
 
-  defp type_new_dests(network, dest) do
-    if network.modules[dest] do
-      network.modules[dest]
-    else
-      # sink destination (like `output`): pick any module type that doesn't
-      # mess with state, and have it send no further signals
-      {:broadcast, []}
+  defp type_new_dests(network, signal, dest, opts) do
+    cond do
+      network.modules[dest] ->
+        network.modules[dest]
+      (dest == opts[:break_on]) && (signal == :low) ->
+        {:break, nil}
+      #dest == opts[:break_on] ->
+      #  IO.puts("signal #{signal} dest #{dest} opts #{inspect(opts)}")
+      #  {:broadcast, []}
+      true ->
+        # sink destination (like `output`): pick any module type that doesn't
+        # mess with state, and have it send no further signals
+        {:broadcast, []}
     end
   end
 
@@ -140,6 +150,10 @@ defmodule Pulse.Network do
       dests
       |> Enum.map(fn dest -> {source, new_signal, dest} end)
     {new_state, add_q}
+  end
+
+  defp process_pulse_type(state, _input, _source, :break, _signal, _dests) do
+    {Map.put(state, :break, true), nil}
   end
 
   defp process_pulse_type(_state, _input, source, type, _signal, _dests) do
@@ -195,24 +209,52 @@ defmodule Pulse.Network do
 
   # this is like push() but without the dump (for performance)
   # returns `{state, {n_lows, n_highs}}`
-  def push_once(network, state) do
+  def push_once(network, state, opts \\ []) do
     # "Here at Desert Machine Headquarters, there is a module with a
     # single button on it called, aptly, the **button module**. When you
     # push the button, a single **low pulse** is sent directly to the
     # `broadcaster` module."
     initial_q = [{:button, :low, :broadcaster}]
-    send_pulses_nodump(network, state, initial_q, {0, 0})
+    send_pulses_nodump(network, state, initial_q, {0, 0}, opts)
   end
 
   # this is like send_pulses() but without the dump (for performance)
   # returns `{state, {lo_acc, hi_acc}}`
-  defp send_pulses_nodump(_network, state, [], acc), do: {state, acc}
-  defp send_pulses_nodump(network, state, [next_pulse | rem_q], acc) do
+  defp send_pulses_nodump(_network, state, [], acc, _opts), do: {state, acc}
+  defp send_pulses_nodump(network, state, [next_pulse | rem_q], acc, opts) do
     new_acc = add_acc(elem(next_pulse, 1), acc)
-    {new_state, add_q} = process_pulse(network, state, next_pulse)
-    send_pulses_nodump(network, new_state, rem_q ++ add_q, new_acc)
+    {new_state, add_q} = process_pulse(network, state, next_pulse, opts)
+    if add_q do
+      send_pulses_nodump(network, new_state, rem_q ++ add_q, new_acc, opts)
+    else  # :break
+      {new_state, new_acc}
+    end
   end
 
   defp add_acc(:low, {lo_acc, hi_acc}), do: {lo_acc + 1, hi_acc}
   defp add_acc(:high, {lo_acc, hi_acc}), do: {lo_acc, hi_acc + 1}
+
+  @doc ~S"""
+  Keep pushing the button for a `Network` until a low signal is received
+  on the specified module.
+
+  ## Parameters
+
+  - `network`: the `Network`
+  - `break_on`: the destination module (atom)
+
+  Returns the number of button pushes (integer).
+  """
+  def n_pushes_break(network, break_on) do
+    state0 = initial_state(network)
+    Stream.cycle([true])
+    |> Enum.reduce_while({state0, 0}, fn _, {state, n_pushes} ->
+      {next_state, _acc} = push_once(network, state, break_on: break_on)
+      if next_state[:break] do
+        {:halt, n_pushes + 1}
+      else
+        {:cont, {next_state, n_pushes + 1}}
+      end
+    end)
+  end
 end
