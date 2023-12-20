@@ -93,6 +93,10 @@ defmodule Pulse.NetworkTest do
             """,
           ],
         ],
+        exp_network_pulses: [
+          {1 * 12, {8 * 12, 4 * 12}},
+          {4 * 3, {17 * 3, 11 * 3}},
+        ],
       ]
     end
 
@@ -117,6 +121,16 @@ defmodule Pulse.NetworkTest do
         |> then(fn {dumps, _state} ->
           assert Enum.reverse(dumps) == exp_dumps
         end)
+      end)
+    end
+
+    test "network pulse trains", fixture do
+      [fixture.networks, fixture.exp_network_pulses]
+      |> Enum.zip()
+      |> Enum.each(fn {network, {n_pushes, {exp_lows, exp_highs}}} ->
+        {act_lows, act_highs} = Network.n_pushes(network, n_pushes)
+        assert act_lows == exp_lows
+        assert act_highs == exp_highs
       end)
     end
   end

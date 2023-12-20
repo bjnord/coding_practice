@@ -170,4 +170,49 @@ defmodule Pulse.Network do
       |> Enum.all?(fn {_inp, sig} -> sig == :high end)
     if all_high, do: :low, else: :high
   end
+
+  @doc ~S"""
+  Process N button pushes for a `Network`.
+
+  ## Parameters
+
+  - `network`: the `Network`
+  - `n_pushes`: the number of button pushes (integer)
+
+  Returns a tuple with these elements:
+  - `n_lows`: number of low pulses sent (integer)
+  - `n_highs`: number of high pulses sent (integer)
+  """
+  def n_pushes(network, n_pushes) do
+    state0 = initial_state(network)
+    1..n_pushes
+    |> Enum.reduce({state0, {0, 0}}, fn _, {state, {lo_acc, hi_acc}} ->
+      {next_state, {n_lows, n_highs}} = push_once(network, state)
+      {next_state, {lo_acc + n_lows, hi_acc + n_highs}}
+    end)
+    |> elem(1)
+  end
+
+  # this is like push() but without the dump (for performance)
+  # returns `{state, {n_lows, n_highs}}`
+  def push_once(network, state) do
+    # "Here at Desert Machine Headquarters, there is a module with a
+    # single button on it called, aptly, the **button module**. When you
+    # push the button, a single **low pulse** is sent directly to the
+    # `broadcaster` module."
+    initial_q = [{:button, :low, :broadcaster}]
+    send_pulses_nodump(network, state, initial_q, {0, 0})
+  end
+
+  # this is like send_pulses() but without the dump (for performance)
+  # returns `{state, {lo_acc, hi_acc}}`
+  defp send_pulses_nodump(_network, state, [], acc), do: {state, acc}
+  defp send_pulses_nodump(network, state, [next_pulse | rem_q], acc) do
+    new_acc = add_acc(elem(next_pulse, 1), acc)
+    {new_state, add_q} = process_pulse(network, state, next_pulse)
+    send_pulses_nodump(network, new_state, rem_q ++ add_q, new_acc)
+  end
+
+  defp add_acc(:low, {lo_acc, hi_acc}), do: {lo_acc + 1, hi_acc}
+  defp add_acc(:high, {lo_acc, hi_acc}), do: {lo_acc, hi_acc + 1}
 end
