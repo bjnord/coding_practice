@@ -49,21 +49,31 @@ defmodule Steps.Garden do
   Returns the number of reachable garden plots (integer).
   """
   def reachable(garden, n) do
-    take_step(garden, garden.start, n, %{})
+    take_steps(garden, [{garden.start, n}], %{})
     |> Enum.count(fn {_k, v} -> v == :reachable end)
   end
 
-  defp take_step(_garden, _pos, -1, seen), do: seen
-  defp take_step(garden, {y, x}, n, seen) do
-    if Map.get(seen, {y, x}, :unvisited) == :unvisited do
-      new_seen = Map.put(seen, {y, x}, reachable_state(n))
-      neighbors_of(garden, {y, x})
-      |> Enum.reduce(new_seen, fn n_pos, acc ->
-        acc2 = take_step(garden, n_pos, n - 1, acc)
-        Map.merge(acc, acc2)
+  # Breadth-First Search (BFS)
+  defp take_steps(_garden, [], seen), do: seen
+  defp take_steps(garden, queue, seen) do
+    {new_queue, new_seen} =
+      queue
+      |> Enum.reduce({[], seen}, fn {pos, n}, {acc_q, acc_s} ->
+        {step_q, step_seen} = take_step(garden, pos, n, acc_s)
+        {acc_q ++ step_q, step_seen}
       end)
+    take_steps(garden, new_queue, new_seen)
+  end
+
+  defp take_step(_garden, _pos, -1, seen), do: {[], seen}
+  defp take_step(garden, pos, n, seen) do
+    if Map.get(seen, pos, :unvisited) == :unvisited do
+      new_seen = Map.put(seen, pos, reachable_state(n))
+      new_queue = neighbors_of(garden, pos)
+                  |> Enum.map(fn pos -> {pos, n - 1} end)
+      {new_queue, new_seen}
     else
-      seen
+      {[], seen}
     end
   end
 
