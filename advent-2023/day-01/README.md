@@ -14,7 +14,7 @@ Collect stars by solving puzzles. Two puzzles will be made available on
 each day in the Advent calendar; the second puzzle is unlocked when you
 complete the first. Each puzzle grants **one star**. Good luck!
 
-You try to ask why they can't just use a [weather machine](../../advent-2015/day-01)
+You try to ask why they can't just use a [weather machine](../../advent-2015/day-01/)
 ("not powerful enough") and where they're even sending you ("the sky")
 and why your map looks mostly blank ("you sure ask a lot of questions")
 and hang on did you just say the sky ("of course, where do you think
