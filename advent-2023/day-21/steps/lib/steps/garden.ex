@@ -39,32 +39,36 @@ defmodule Steps.Garden do
   end
 
   @doc ~S"""
-  Find garden plots reachable in `n` steps.
+  Find the number of garden plots reachable in **exactly** `n` steps.
 
   ## Parameters
 
   - `garden` - the `Garden`
-  - `n` - the maximum steps to take (integer)
+  - `n` - the number steps to take (integer)
 
-  Returns the number of garden plots reachable (integer).
+  Returns the number of reachable garden plots (integer).
   """
   def reachable(garden, n) do
     take_step(garden, garden.start, n, %{})
-    |> map_size()
+    |> Enum.count(fn {_k, v} -> v == :reachable end)
   end
 
   defp take_step(_garden, _pos, -1, seen), do: seen
   defp take_step(garden, {y, x}, n, seen) do
-    if Map.get(seen, {y, x}, false) do
-      seen
-    else
-      new_seen = Map.put(seen, {y, x}, true)
+    if Map.get(seen, {y, x}, :unvisited) == :unvisited do
+      new_seen = Map.put(seen, {y, x}, reachable_state(n))
       neighbors_of(garden, {y, x})
       |> Enum.reduce(new_seen, fn n_pos, acc ->
         acc2 = take_step(garden, n_pos, n - 1, acc)
         Map.merge(acc, acc2)
       end)
+    else
+      seen
     end
+  end
+
+  defp reachable_state(n) do
+    if rem(n, 2) == 1, do: :unreachable, else: :reachable
   end
 
   defp neighbors_of(garden, {y, x}) do
@@ -100,7 +104,7 @@ defmodule Steps.Garden do
 
   defp tile_at(garden, y, x, seen) do
     cond do
-      Map.get(seen, {y, x}, false) ->
+      Map.get(seen, {y, x}, :unvisited) == :reachable ->
         ?O
       {y, x} == garden.start ->
         ?S

@@ -59,7 +59,7 @@ defmodule Steps.GardenTest do
       ]
     end
 
-    test "find garden plots reachable in 6 steps", fixture do
+    test "find garden plots reachable in exactly 6 steps", fixture do
       act_reachable =
         fixture.gardens
         |> Enum.map(fn garden -> Garden.reachable(garden, 6) end)
