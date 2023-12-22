@@ -11,9 +11,8 @@ defmodule Sand.Parser do
   Returns a list of `Brick`s (one per line).
   """
   def parse_input(input_file, _opts \\ []) do
-    input_file
-    |> File.stream!
-    |> Stream.map(&parse_line/1)
+    File.read!(input_file)
+    |> parse_input_string()
   end
 
   @doc ~S"""
@@ -23,8 +22,9 @@ defmodule Sand.Parser do
   """
   def parse_input_string(input, _opts \\ []) do
     input
-    |> String.splitter("\n", trim: true)
-    |> Stream.map(&parse_line/1)
+    |> String.split("\n", trim: true)
+    |> Enum.with_index()
+    |> Enum.map(&parse_line/1)
   end
 
   @doc ~S"""
@@ -33,10 +33,10 @@ defmodule Sand.Parser do
   Returns a `Brick`.
 
   ## Examples
-      iex> parse_line("5,4,2~7,6,2\n")
-      %Sand.Brick{from: %{x: 5, y: 4, z: 2}, to: %{x: 7, y: 6, z: 2}}
+      iex> parse_line({"5,4,2~7,6,2\n", 0})
+      %Sand.Brick{n: 1, from: %{x: 5, y: 4, z: 2}, to: %{x: 7, y: 6, z: 2}}
   """
-  def parse_line(line) do
+  def parse_line({line, i}) do
     line
     |> String.trim_trailing()
     |> String.split("~")
@@ -51,7 +51,7 @@ defmodule Sand.Parser do
       if from.y > to.y do
         raise "swapped Y #{from.y} > #{to.y}"
       end
-      %Brick{from: from, to: to}
+      %Brick{n: i + 1, from: from, to: to}
     end)
   end
 

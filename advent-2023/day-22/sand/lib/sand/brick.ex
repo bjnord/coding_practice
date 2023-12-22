@@ -3,7 +3,7 @@ defmodule Sand.Brick do
   Brick functions for `Sand`.
   """
 
-  defstruct from: %{x: 0, y: 0, z: 0}, to: %{x: 0, y: 0, z: 0}
+  defstruct n: 0, from: %{x: 0, y: 0, z: 0}, to: %{x: 0, y: 0, z: 0}
 
   @doc ~S"""
   Calculate new brick positions after they fall as far as they can.
@@ -50,9 +50,9 @@ defmodule Sand.Brick do
   Update brick position by dropping it to the specified Z coordinate.
 
   ## Examples
-      iex> g = %Sand.Brick{from: %{x: 1, y: 1, z: 8}, to: %{x: 1, y: 1, z: 9}}
+      iex> g = %Sand.Brick{n: 7, from: %{x: 1, y: 1, z: 8}, to: %{x: 1, y: 1, z: 9}}
       iex> drop_to(g, 5)
-      %Sand.Brick{from: %{x: 1, y: 1, z: 5}, to: %{x: 1, y: 1, z: 6}}
+      %Sand.Brick{n: 7, from: %{x: 1, y: 1, z: 5}, to: %{x: 1, y: 1, z: 6}}
   """
   def drop_to(brick, z) do
     if brick.from.z > brick.to.z do
@@ -63,6 +63,7 @@ defmodule Sand.Brick do
     end
     dz = brick.from.z - z
     %Sand.Brick{
+      n:    brick.n,
       from: %{brick.from | z: brick.from.z - dz},
       to:   %{brick.to   | z: brick.to.z   - dz},
     }
@@ -72,12 +73,12 @@ defmodule Sand.Brick do
   Determine if two bricks intersect.
 
   ## Examples
-      iex> b = %Sand.Brick{from: %{x: 0, y: 0, z: 2}, to: %{x: 2, y: 0, z: 2}}
-      iex> c = %Sand.Brick{from: %{x: 0, y: 2, z: 2}, to: %{x: 2, y: 2, z: 2}}
+      iex> b = %Sand.Brick{n: 2, from: %{x: 0, y: 0, z: 2}, to: %{x: 2, y: 0, z: 2}}
+      iex> c = %Sand.Brick{n: 3, from: %{x: 0, y: 2, z: 2}, to: %{x: 2, y: 2, z: 2}}
       iex> intersects?(b, c)
       false
-      iex> c = %Sand.Brick{from: %{x: 0, y: 2, z: 2}, to: %{x: 2, y: 2, z: 2}}
-      iex> d = %Sand.Brick{from: %{x: 0, y: 0, z: 2}, to: %{x: 0, y: 2, z: 2}}
+      iex> c = %Sand.Brick{n: 3, from: %{x: 0, y: 2, z: 2}, to: %{x: 2, y: 2, z: 2}}
+      iex> d = %Sand.Brick{n: 4, from: %{x: 0, y: 0, z: 2}, to: %{x: 0, y: 2, z: 2}}
       iex> intersects?(c, d)
       true
   """
