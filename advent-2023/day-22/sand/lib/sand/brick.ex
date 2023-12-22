@@ -129,6 +129,64 @@ defmodule Sand.Brick do
     end
   end
 
+  def dump(bricks) do
+    grid_x = Enum.flat_map(bricks, &coord_x/1)
+             |> grid()
+    grid_y = Enum.flat_map(bricks, &coord_y/1)
+             |> grid()
+    IO.puts(" x    y  ")
+    for z <- 19..1, do: dump_row(grid_x, grid_y, z)
+    IO.puts("---  ---")
+  end
+
+  def coord_x(brick), do: coord(brick, :x)
+  def coord_y(brick), do: coord(brick, :y)
+
+  def coord(brick, dim) do
+    for z <- brick.from.z..brick.to.z,
+        xy <- brick.from[dim]..brick.to[dim] do
+      {brick_ch(brick.n), {z, xy}}
+    end
+  end
+
+  def brick_ch(n) do
+    cond do
+      (n >=  1) && (n <= 26) -> ?A + n - 1
+      (n >= 27) && (n <= 52) -> ?a + n - 27
+      (n >= 53) && (n <= 61) -> ?1 + n - 53
+      true                   -> ?*
+    end
+  end
+
+  def grid(coord) do
+    coord
+    |> Enum.reduce(%{}, fn {ch, pos}, acc ->
+      Map.update(acc, pos, ch, fn _ -> ?? end)
+    end)
+  end
+
+  defp dump_row(grid_x, grid_y, z) do
+    line_x =
+      0..2
+      |> Enum.reduce([], fn x, line ->
+        [tile_at(grid_x, z, x) | line]
+      end)
+      |> Enum.reverse()
+      |> List.to_string()
+    line_y =
+      0..2
+      |> Enum.reduce([], fn y, line ->
+        [tile_at(grid_y, z, y) | line]
+      end)
+      |> Enum.reverse()
+      |> List.to_string()
+    IO.puts("#{line_x}  #{line_y}")
+  end
+
+  defp tile_at(grid, z, xy) do
+    Map.get(grid, {z, xy}, ?.)
+  end
+
   @doc ~S"""
   Determine which bricks are supporting which other bricks.
 
