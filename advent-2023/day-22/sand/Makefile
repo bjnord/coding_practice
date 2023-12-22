@@ -1,6 +1,7 @@
 BIN = ./sand
 FILES = mix.exs test/test_helper.exs \
 	lib/sand.ex test/sand_test.exs \
+	lib/sand/brick.ex test/sand/brick_test.exs \
 	lib/sand/parser.ex test/sand/parser_test.exs
 VERBOSE = 0
 
