@@ -3,14 +3,16 @@ defmodule Sand.Brick do
   Brick functions for `Sand`.
   """
 
-  defstruct n: 0, from: %{x: 0, y: 0, z: 0}, to: %{x: 0, y: 0, z: 0}
+  defstruct n: 0, from: %{x: 0, y: 0, z: 0}, to: %{x: 0, y: 0, z: 0}, supported_by: []
 
   @doc ~S"""
   Calculate new brick positions after they fall as far as they can.
 
   ## Parameters
 
-  Returns a list of `Brick`s.
+  - `bricks`: the list of `Brick`s
+
+  Returns the list of updated `Brick`s.
   """
   def drop(bricks) do
     bricks
@@ -27,15 +29,20 @@ defmodule Sand.Brick do
 
   defp drop([], settled_bricks), do: Enum.reverse(settled_bricks)
   defp drop([brick | rem_bricks], settled_bricks) do
-    int_z =
+    int_bricks =
       settled_bricks
       |> Enum.filter(fn sb -> would_intersect?(sb, brick) end)
-      |> Enum.map(fn sb -> sb.to.z end)
+    int_z = Enum.map(int_bricks, fn ib -> ib.to.z end)
     new_z = if int_z == [], do: 1, else: Enum.max(int_z) + 1
-    settled_brick = drop_to(brick, new_z)
+    settled_brick =
+      drop_to(brick, new_z)
+      |> then(fn brick ->
+        %Sand.Brick{brick | supported_by: supported_by(int_bricks, new_z - 1)}
+      end)
     drop(rem_bricks, [settled_brick | settled_bricks])
   end
 
+  # NOTE order matters: `b` is dropped to overlap Z coord of `a`
   defp would_intersect?(a, b) do
     dropped_b =
       if b.from.z > a.to.z do
@@ -46,8 +53,21 @@ defmodule Sand.Brick do
     intersects?(a, dropped_b)
   end
 
+  defp supported_by(int_bricks, z) do
+    int_bricks
+    |> Enum.filter(fn ib -> ib.to.z >= z end)
+    |> Enum.map(fn ib -> ib.n end)
+  end
+
   @doc ~S"""
   Update brick position by dropping it to the specified Z coordinate.
+
+  ## Parameters
+
+  - `brick`: the `Brick` to drop
+  - `z`: the new Z coordinate
+
+  Returns the updated `Brick`.
 
   ## Examples
       iex> g = %Sand.Brick{n: 7, from: %{x: 1, y: 1, z: 8}, to: %{x: 1, y: 1, z: 9}}
@@ -70,7 +90,14 @@ defmodule Sand.Brick do
   end
 
   @doc ~S"""
-  Determine if two bricks intersect.
+  Do the specified bricks intersect?
+
+  ## Parameters
+
+  - `a`: the first `Brick`
+  - `b`: the second `Brick`
+
+  Returns a boolean.
 
   ## Examples
       iex> b = %Sand.Brick{n: 2, from: %{x: 0, y: 0, z: 2}, to: %{x: 2, y: 0, z: 2}}
@@ -101,4 +128,58 @@ defmodule Sand.Brick do
         true
     end
   end
+
+  @doc ~S"""
+  Determine which bricks are supporting which other bricks.
+
+  ## Parameters
+
+  - `bricks`: the list of `Brick`s
+
+  Returns a map as follows:
+  - key: brick number
+  - value: list of brick numbers it supports
+  """
+  def supports(bricks) do
+    supports0 =
+      bricks
+      |> Enum.reduce(%{}, fn brick, acc -> Map.put(acc, brick.n, []) end)
+    bricks
+    |> Enum.flat_map(fn brick ->
+      brick.supported_by
+      |> Enum.map(fn sbn -> {sbn, brick.n} end)
+    end)
+    |> Enum.reduce(supports0, fn {by_n, n}, acc ->
+      %{acc | by_n => [n | acc[by_n]]}
+    end)
+  end
+
+  @doc ~S"""
+  Determine which bricks can be safely disintegrated.
+
+  ## Parameters
+
+  - `bricks`: the list of `Brick`s
+
+  Returns a list of brick numbers.
+  """
+  def disintegratable(bricks) do
+    supported_by =
+      bricks
+      |> Enum.reduce(%{}, fn brick, acc ->
+        Map.put(acc, brick.n, brick.supported_by)
+      end)
+    supports = supports(bricks)
+    bricks
+    |> Enum.reject(fn brick ->
+      # are any of the bricks I support, supported by me alone?
+      supports[brick.n]
+      |> Enum.any?(fn sn -> lone_list?(supported_by[sn]) end)
+    end)
+    |> Enum.map(fn brick -> brick.n end)
+  end
+
+  def lone_list?([]), do: false
+  def lone_list?([_n]), do: true
+  def lone_list?([_n | _rem]), do: false
 end
