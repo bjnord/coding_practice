@@ -17,7 +17,7 @@ defmodule Sand do
   def main(argv) do
     {input_file, opts} = parse_args(argv)
     if Enum.member?(opts[:parts], 1), do: part1(input_file)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file)
+    if Enum.member?(opts[:parts], 2), do: part2(input_file, opts)
   end
 
   @doc """
@@ -34,9 +34,12 @@ defmodule Sand do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file) do
+  def part2(input_file, opts \\ []) do
     parse_input(input_file)
-    nil  # TODO
+    |> Brick.drop()
+    |> Brick.chain_disintegration(opts)
+    |> Enum.map(fn {_n, count} -> count end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

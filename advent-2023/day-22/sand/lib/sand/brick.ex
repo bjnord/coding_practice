@@ -5,6 +5,8 @@ defmodule Sand.Brick do
 
   defstruct n: 0, from: %{x: 0, y: 0, z: 0}, to: %{x: 0, y: 0, z: 0}, supported_by: []
 
+  require Logger
+
   @doc ~S"""
   Calculate new brick positions after they fall as far as they can.
 
@@ -222,11 +224,7 @@ defmodule Sand.Brick do
   Returns a list of brick numbers.
   """
   def disintegratable(bricks) do
-    supported_by =
-      bricks
-      |> Enum.reduce(%{}, fn brick, acc ->
-        Map.put(acc, brick.n, brick.supported_by)
-      end)
+    supported_by = supported_by_map(bricks)
     supports = supports(bricks)
     bricks
     |> Enum.reject(fn brick ->
@@ -237,7 +235,96 @@ defmodule Sand.Brick do
     |> Enum.map(fn brick -> brick.n end)
   end
 
+  def supported_by_map(bricks) do
+    bricks
+    |> Enum.reduce(%{}, fn brick, acc ->
+      Map.put(acc, brick.n, brick.supported_by)
+    end)
+  end
+
   def lone_list?([]), do: false
   def lone_list?([_n]), do: true
   def lone_list?([_n | _rem]), do: false
+
+  @doc ~S"""
+  Determine how many bricks fall with each destructed brick.
+
+  ## Parameters
+
+  - `bricks`: the list of `Brick`s
+  """
+  def chain_disintegration(bricks, opts \\ []) do
+    if opts[:verbose] do
+      IO.puts("")
+      IO.puts("doing chain disintegration")
+      dump(bricks)
+    end
+    Stream.cycle([true])
+    |> Enum.reduce_while({bricks, []}, fn _, {rem_bricks, counts} ->
+      supported_by = rem_supported_by_map(rem_bricks)
+      supports = supports(rem_bricks)
+      # FIXME use `find()` rather than `filter()` + `first()`
+      dis_bricks =
+        rem_bricks
+        |> Enum.filter(fn brick ->
+          # are any of the bricks I support, supported by me alone?
+          supports[brick.n]
+          |> Enum.any?(fn sn -> lone_list?(supported_by[sn]) end)
+        end)
+      if dis_bricks == [] do
+        {:halt, counts}
+      else
+        [dis_brick | _] = dis_bricks
+        new_rem_bricks = Enum.reject(rem_bricks, fn b -> b.n == dis_brick.n end)
+        {count, dropped_bricks} = disintegrate_count(new_rem_bricks)
+        Logger.debug("did chain brick #{<<brick_ch(dis_brick.n)::utf8>>}: #{inspect({dis_brick.n, count})}")
+        if opts[:verbose] do
+          IO.puts("did chain brick #{<<brick_ch(dis_brick.n)::utf8>>}: #{inspect({dis_brick.n, count})}")
+          dump(dropped_bricks)
+        end
+        {:cont, {dropped_bricks, [{dis_brick.n, count} | counts]}}
+      end
+    end)
+    |> Enum.reverse()
+  end
+
+  defp rem_supported_by_map(bricks) do
+    remaining_n =
+      bricks
+      |> Enum.map(fn brick -> {brick.n, true} end)
+      |> Enum.into(%{})
+    bricks
+    |> Enum.reduce(%{}, fn brick, acc ->
+      rem_supported_by =
+        brick.supported_by
+        |> Enum.filter(fn sbn -> Map.get(remaining_n, sbn, nil) end)
+      Map.put(acc, brick.n, rem_supported_by)
+    end)
+  end
+
+  def nonchain_disintegration(bricks) do
+    supported_by = supported_by_map(bricks)
+    supports = supports(bricks)
+    bricks
+    |> Enum.filter(fn brick ->
+      # are any of the bricks I support, supported by me alone?
+      supports[brick.n]
+      |> Enum.any?(fn sn -> lone_list?(supported_by[sn]) end)
+    end)
+    |> Enum.map(fn dis_brick ->
+      other_bricks = Enum.reject(bricks, fn b -> b.n == dis_brick.n end)
+      count = elem(disintegrate_count(other_bricks), 0)
+      Logger.debug("did non-chain brick #{<<brick_ch(dis_brick.n)::utf8>>}: #{inspect({dis_brick.n, count})}")
+      {dis_brick.n, count}
+    end)
+  end
+
+  defp disintegrate_count(bricks) do
+    dropped_bricks = drop(bricks)
+    count =
+      [bricks, dropped_bricks]
+      |> Enum.zip()
+      |> Enum.count(fn {ob, db} -> ob.to.z != db.to.z end)
+    {count, dropped_bricks}
+  end
 end

@@ -83,6 +83,28 @@ defmodule Sand.BrickTest do
           14 => [],
         },
         exp_disintegratable: [2, 3, 4, 5, 7],
+        exp_chain_disint_counts: [
+          {1, 6},
+          {6, 1},
+        ],
+        exp_nonchain_disint_counts: [
+          {1, 6},
+          {6, 1},
+        ],
+        exp_double_chain_disint_counts: [
+          { 1, 6 + 7},
+          { 6, 1 + 7},
+          { 7, 0 + 7},
+          {13, 1},
+          { 8, 1},
+        ],
+        exp_double_nonchain_disint_counts: [
+          { 1, 6 + 7},
+          { 6, 1 + 7},
+          { 7, 0 + 7},
+          { 8, 6},
+          {13, 1},
+        ],
       ]
     end
 
@@ -119,6 +141,34 @@ defmodule Sand.BrickTest do
         fixture.exp_dropped_bricks
         |> Brick.disintegratable()
       assert act_disintegratable == fixture.exp_disintegratable
+    end
+
+    test "find chain disintegration counts", fixture do
+      act_chain_disint_counts =
+        fixture.exp_dropped_bricks
+        |> Brick.chain_disintegration()
+      assert act_chain_disint_counts == fixture.exp_chain_disint_counts
+    end
+
+    test "find chain disintegration counts (double example)", fixture do
+      act_double_chain_disint_counts =
+        fixture.exp_dropped_double_bricks
+        |> Brick.chain_disintegration()
+      assert act_double_chain_disint_counts == fixture.exp_double_chain_disint_counts
+    end
+
+    test "find non-chain disintegration counts", fixture do
+      act_nonchain_disint_counts =
+        fixture.exp_dropped_bricks
+        |> Brick.nonchain_disintegration()
+      assert act_nonchain_disint_counts == fixture.exp_nonchain_disint_counts
+    end
+
+    test "find non-chain disintegration counts (double example)", fixture do
+      act_double_nonchain_disint_counts =
+        fixture.exp_dropped_double_bricks
+        |> Brick.nonchain_disintegration()
+      assert act_double_nonchain_disint_counts == fixture.exp_double_nonchain_disint_counts
     end
   end
 end
