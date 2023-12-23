@@ -574,17 +574,66 @@ defmodule Trail.MazeTest do
           ],
         },
         exp_path_lengths: [94, 90, 86, 82, 82, 74],
+        exp_part2_graph: %{
+          {0, 1} => [
+            {15, {5, 3}}
+          ],
+          {3, 11} => [
+            {30, {11, 21}},
+            {22, {5, 3}},
+            {24, {13, 13}},
+          ],
+          {5, 3} => [
+            {22, {3, 11}},
+            {22, {13, 5}},
+            {15, {0, 1}},
+          ],
+          {11, 21} => [
+            {30, {3, 11}},
+            {18, {13, 13}},
+            {10, {19, 19}},
+          ],
+          {13, 5} => [
+            {12, {13, 13}},
+            {38, {19, 13}},
+            {22, {5, 3}},
+          ],
+          {13, 13} => [
+            {24, {3, 11}},
+            {10, {19, 13}},
+            {12, {13, 5}},
+            {18, {11, 21}},
+          ],
+          {19, 13} => [
+            {10, {13, 13}},
+            {10, {19, 19}},
+            {38, {13, 5}},
+          ],
+          {19, 19} => [
+            {10, {11, 21}},
+            {4, {22, 21}},
+            {10, {19, 13}},
+          ],
+          {22, 21} => [
+            {4, {19, 19}},
+          ],
+        },
       ]
     end
 
-    test "build maze graph", fixture do
+    test "build maze graph (part 1)", fixture do
       act_graph = Maze.walk(fixture.maze)
       assert act_graph == fixture.exp_graph
     end
 
-    test "find maze path lengths", fixture do
+    test "find maze path lengths (part 1)", fixture do
       act_path_lengths = Maze.path_lengths(fixture.maze)
       assert act_path_lengths == fixture.exp_path_lengths
+    end
+
+    test "build maze graph (part 2)", fixture do
+      act_part2_graph = Maze.walk_all(fixture.maze)
+      assert act_part2_graph == fixture.exp_part2_graph
     end
   end
 end

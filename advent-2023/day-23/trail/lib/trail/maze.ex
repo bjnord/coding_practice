@@ -70,7 +70,10 @@ defmodule Trail.Maze do
   end
 
   @doc ~S"""
-  Build a path graph from a `Maze`.
+  Build a path graph from a `Maze`, accounting for icy slopes.
+
+  This version builds a Directed Acyclic Graph (DAG) by following slopes in
+  a one-way direction.
 
   ## Parameters
 
@@ -88,8 +91,8 @@ defmodule Trail.Maze do
   defp walk(_maze, paths, []), do: paths
   defp walk(maze, paths, [{next_pos, from_pos} | queue]) do
     {length, to_pos, next_queue} =
-      path(maze, next_pos, from_pos)
-      |> tap(fn path -> Logger.debug("path from_pos #{inspect(from_pos)}: #{inspect(path)}") end)
+      path(maze, true, next_pos, from_pos)
+      |> tap(fn path -> Logger.debug("walk path from_pos #{inspect(from_pos)}: #{inspect(path)}") end)
     new_paths =
       Map.update(paths, from_pos, [{length, to_pos}], fn acc ->
         [{length, to_pos} | acc]
@@ -103,41 +106,100 @@ defmodule Trail.Maze do
           [{nq_next_pos, nq_from_pos} | acc]
         end
       end)
-    Logger.debug("new_paths #{inspect(Map.keys(new_paths))}")
-    Logger.debug("new_queue #{inspect(new_queue)}")
+    Logger.debug("walk new_paths #{inspect(Map.keys(new_paths))}")
+    Logger.debug("walk new_queue #{inspect(new_queue)}")
     walk(maze, new_paths, new_queue)
   end
 
-  defp path(maze, next_pos, from_pos) do
+  @doc ~S"""
+  Build a path graph from a `Maze`, ignoring icy slopes.
+
+  This version builds a graph that can contain cycles. It maps every segment
+  in both directions.
+
+  ## Parameters
+
+  - `maze`: the `Maze`
+
+  Returns a map describing the path graph, with:
+  - key: `{y0, x0}` starting position
+  - value: `{length, {y1, x1}}` length and ending position
+  """
+  def walk_all(maze) do
+    {start_y, start_x} = maze.start
+    walk_all(maze, %{}, [{{start_y + 1, start_x}, maze.start}])
+  end
+
+  defp walk_all(_maze, paths, []), do: paths
+  defp walk_all(maze, paths, [{next_pos, from_pos} | queue]) do
+    {length, to_pos, next_queue} =
+      path(maze, false, next_pos, from_pos)
+      |> tap(fn path -> Logger.debug("walk_all path from_pos #{inspect(from_pos)}: #{inspect(path)}") end)
+    new_paths =
+      if walk_all_walked?(paths, from_pos, to_pos) do
+        Logger.debug("walk_all new_paths NOT adding #{inspect(from_pos)} <-> #{inspect(to_pos)}")
+        paths
+      else
+        Logger.debug("walk_all new_paths adding #{inspect(from_pos)} <-> #{inspect(to_pos)}")
+        paths
+        |> Map.update(from_pos, [{length, to_pos}], fn acc ->
+          [{length, to_pos} | acc]
+        end)
+        |> Map.update(to_pos, [{length, from_pos}], fn acc ->
+          [{length, from_pos} | acc]
+        end)
+      end
+    new_queue =
+      next_queue
+      |> Enum.reduce(queue, fn {nq_next_pos, nq_from_pos}, acc ->
+        if walk_all_walked?(paths, from_pos, to_pos) do
+          acc  # path already walked
+        else
+          [{nq_next_pos, nq_from_pos} | acc]
+        end
+      end)
+    Logger.debug("walk_all new_paths #{inspect(Map.keys(new_paths))}")
+    Logger.debug("walk_all new_queue #{inspect(new_queue)}")
+    walk_all(maze, new_paths, new_queue)
+  end
+
+  def walk_all_walked?(paths, from_pos, to_pos) do
+    Map.get(paths, from_pos, [])
+    |> Enum.any?(fn {_l, tp} -> tp == to_pos end)
+  end
+
+  defp path(maze, slopes, next_pos, from_pos) do
     Stream.cycle([true])
     |> Enum.reduce_while({1, next_pos, from_pos}, fn _, {length, pos, prev_pos} ->
       # FIXME find a more elegant way to do all this:
-      neighbors = neighbors_of(maze, pos, prev_pos)
-      if slope?(maze, prev_pos) && slopes_out?(maze, neighbors) do
+      neighbors = neighbors_of(maze, slopes, pos, prev_pos)
+      if fork?(maze, slopes, prev_pos, neighbors) do
+        Logger.debug("fork prev_pos #{inspect(prev_pos)} neighbors #{inspect(neighbors)}")
         next_queue = neighbors
                      |> Enum.map(fn npos -> {npos, pos} end)
         {:halt, {length, pos, next_queue}}
       else
-        if Enum.count(neighbors) != 1 do
-          raise "invalid neighbors #{inspect(neighbors)}"
-        end
-        [next_pos] = neighbors
-        if next_pos == maze.finish do
-          {:halt, {length, next_pos, []}}
+        if neighbors == [] do
+          {:halt, {length, pos, []}}
         else
-          {:cont, {length + 1, next_pos, pos}}
+          [next_pos] = neighbors
+          if next_pos == maze.finish do
+            {:halt, {length, next_pos, []}}
+          else
+            {:cont, {length + 1, next_pos, pos}}
+          end
         end
       end
     end)
   end
 
-  defp neighbors_of(maze, {y, x}, prev_pos) do
+  defp neighbors_of(maze, slopes, {y, x}, prev_pos) do
     [:north, :east, :south, :west]
     |> Enum.map(fn dir -> {delta_pos({y, x}, delta(dir)), dir} end)
     |> Enum.reject(fn {{ny, nx}, dir} ->
       out_of_bounds?(ny, maze.size.y) ||
         out_of_bounds?(nx, maze.size.x) ||
-        impassable?(maze, {ny, nx}, dir, prev_pos)
+        impassable?(maze, slopes, {ny, nx}, dir, prev_pos)
     end)
     |> Enum.map(&(elem(&1, 0)))
   end
@@ -153,6 +215,17 @@ defmodule Trail.Maze do
   defp out_of_bounds?(n, max) when (n >= max), do: true
   defp out_of_bounds?(_n, _max), do: false
 
+  defp fork?(maze, slopes, prev_pos, neighbors) do
+    cond do
+      slopes && slope?(maze, prev_pos) && slopes_out?(maze, neighbors) ->
+        true
+      !slopes && Enum.count(neighbors) > 1 ->
+        true
+      true ->
+        false
+    end
+  end
+
   defp slope?(maze, pos) do
     case maze.tiles[pos] do
       # TODO is there a multivalue syntax?
@@ -167,14 +240,14 @@ defmodule Trail.Maze do
     |> Enum.any?(fn pos -> slope?(maze, pos) end)
   end
 
-  defp impassable?(maze, pos, dir, prev_pos) do
+  defp impassable?(maze, slopes, pos, dir, prev_pos) do
     tile = maze.tiles[pos]
     cond do
       tile == ?# ->
         true
-      (tile == ?v) && (dir == :north) ->
+      slopes && (tile == ?v) && (dir == :north) ->
         true
-      (tile == ?>) && (dir == :west) ->
+      slopes && (tile == ?>) && (dir == :west) ->
         true
       pos == prev_pos ->
         true
