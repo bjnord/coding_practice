@@ -573,12 +573,18 @@ defmodule Trail.MazeTest do
             {4, {22, 21}},
           ],
         },
+        exp_path_lengths: [94, 90, 86, 82, 82, 74],
       ]
     end
 
     test "build maze graph", fixture do
       act_graph = Maze.walk(fixture.maze)
       assert act_graph == fixture.exp_graph
+    end
+
+    test "find maze path lengths", fixture do
+      act_path_lengths = Maze.path_lengths(fixture.maze)
+      assert act_path_lengths == fixture.exp_path_lengths
     end
   end
 end

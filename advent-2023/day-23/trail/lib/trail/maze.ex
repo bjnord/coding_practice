@@ -46,6 +46,30 @@ defmodule Trail.Maze do
   end
 
   @doc ~S"""
+  Find the lengths of the possible paths through a `Maze`.
+
+  ## Parameters
+
+  - `maze`: the `Maze`
+
+  Returns a list of path lengths (integers).
+  """
+  def path_lengths(maze) do
+    walk(maze)
+    |> path_lengths(maze.start, 0)
+    |> List.flatten()
+    |> Enum.sort(fn a, b -> a >= b end)
+  end
+
+  defp path_lengths(_graph, nil, length), do: length + 1
+  defp path_lengths(graph, from_pos, length) do
+    Map.get(graph, from_pos, [{0, nil}])
+    |> Enum.map(fn {seg_length, to_pos} ->
+      path_lengths(graph, to_pos, length + seg_length)
+    end)
+  end
+
+  @doc ~S"""
   Build a path graph from a `Maze`.
 
   ## Parameters

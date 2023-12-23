@@ -3,8 +3,9 @@ defmodule Trail do
   Documentation for `Trail`.
   """
 
-  import Trail.Parser
   import Snow.CLI
+  alias Trail.Maze
+  import Trail.Parser
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -24,7 +25,8 @@ defmodule Trail do
   """
   def part1(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Maze.path_lengths()
+    |> Enum.max()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
