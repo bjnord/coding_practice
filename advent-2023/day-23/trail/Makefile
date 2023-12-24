@@ -5,7 +5,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/trail/parser.ex test/trail/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test doc console clean
+.PHONY: run test graphs doc console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
@@ -15,6 +15,10 @@ test:
 		MIX_ENV=test mix propcheck.clean; \
 	fi
 	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+
+graphs: $(BIN)
+	$(BIN) --parts=3 example/input.txt
+	$(BIN) --parts=3 private/input.txt
 
 doc:
 	mix docs

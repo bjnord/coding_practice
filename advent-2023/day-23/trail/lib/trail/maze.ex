@@ -255,4 +255,87 @@ defmodule Trail.Maze do
         false
     end
   end
+
+  @doc ~S"""
+  Generate and write a [Mermaid](https://mermaid.js.org/) graph.
+
+  ## Parameters
+
+  - `maze`: the `Maze`
+  - `graph_type`: the maze graph type (`:dag` or `:cyclic`)
+  - `filename`: the filename to write
+  """
+  def mermaid(maze, :dag, filename) do
+    mermaid_links(maze, false)
+    |> mermaid_write(filename)
+  end
+  def mermaid(maze, :cyclic, filename) do
+    mermaid_links(maze, true)
+    |> mermaid_write(filename)
+  end
+
+  defp mermaid_links(maze, all) do
+    graph = if all, do: walk_all(maze), else: walk(maze)
+    graph
+    |> Enum.flat_map(fn {from_pos, nodes} ->
+      nodes
+      |> Enum.map(fn {length, to_pos} ->
+        {from_pos, length, to_pos}
+      end)
+    end)
+  end
+
+  defp mermaid_write(links, filename) do
+    content =
+      links
+      |> Enum.reduce({0, %{}, []}, fn {from, len, to}, {id, tags, acc} ->
+        {new_id, new_tags, from_is_new} = new_tags(id, tags, from)
+        {newer_id, newer_tags, to_is_new} = new_tags(new_id, new_tags, to)
+        next_link = {from, newer_tags[from], from_is_new, len, to, newer_tags[to], to_is_new}
+        {newer_id, newer_tags, [next_link | acc]}
+      end)
+      |> elem(2)
+      |> Enum.reverse()
+      |> Enum.map(fn {from, from_tag, from_is_new, len, to, to_tag, to_is_new} ->
+        from_node = tag_node(from, from_tag, from_is_new)
+        to_node = tag_node(to, to_tag, to_is_new)
+        "#{from_node}-->|#{len}|#{to_node}"
+      end)
+      |> Enum.join("\n")
+      |> then(fn c -> "graph TD\n#{c}\n" end)
+    File.write!(filename, content)
+  end
+
+  defp new_tags(id, tags, pos) do
+    if Map.get(tags, pos, nil) do
+      {id, tags, false}
+    else
+      {id + 1, Map.put(tags, pos, id), true}
+    end
+  end
+
+  defp tag_node(pos, tag, is_new) do
+    if is_new do
+      "#{tag_id(tag)}[#{position(pos)}]"
+    else
+      tag_id(tag)
+    end
+  end
+
+  defp tag_id(id) do
+    cond do
+      (id >= 0) && (id <= 25) ->
+        "#{[?A + id]}"
+      (id >= 26) && (id <= 51) ->
+        "#{[?A, ?A + (id - 26)]}"
+      (id >= 52) && (id <= 77) ->
+        "#{[?B, ?A + (id - 52)]}"
+      true ->
+        raise "unsupported tag_id #{id}"
+    end
+  end
+
+  defp position({y, x}) do
+    "#{y}, #{x}"
+  end
 end
