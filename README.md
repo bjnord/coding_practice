@@ -18,6 +18,10 @@ The `advent-2022` directory holds my JavaScript solutions to the [2022 Advent of
 
 The `advent-2023` directory holds my Elixir solutions to the [2023 Advent of Code](https://adventofcode.com/2023/) challenge.
 
+The `advent-2024` directory holds my Elixir solutions to the [2024 Advent of Code](https://adventofcode.com/2024/) challenge.
+
+The `ecodes-2024` directory holds my Elixir solutions to the [2024 Everybody Codes](https://everybody.codes/event/2024/quests) challenge.
+
 The `synacor` directory holds my Ruby solution to the [Synacor Challenge](https://challenge.synacor.com/).
 
 ## Exercises
