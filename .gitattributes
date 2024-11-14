@@ -1,3 +1,5 @@
 *.bin binary
 advent-*/*/private/** filter=git-crypt diff=git-crypt
 advent-*/*/*/private/** filter=git-crypt diff=git-crypt
+ecodes-*/*/private/** filter=git-crypt diff=git-crypt
+ecodes-*/*/*/private/** filter=git-crypt diff=git-crypt
