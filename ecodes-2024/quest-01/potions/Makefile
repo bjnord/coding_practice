@@ -6,7 +6,8 @@ VERBOSE = 0
 .PHONY: run test doc console clean
 
 run: $(BIN)
-	$(BIN) private/everybody_codes_e2024_q01_p1.txt
+	$(BIN) private/everybody_codes_e2024_q01_p1.txt \
+		private/everybody_codes_e2024_q01_p2.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
