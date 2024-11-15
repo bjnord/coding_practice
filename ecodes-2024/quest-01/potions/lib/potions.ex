@@ -3,6 +3,8 @@ defmodule Potions do
   Documentation for `Potions`.
   """
 
+  import Kingdom.CLI
+
   @doc """
   Calculate number of potions required for a sequence of battles (using
   part 1 rules).
@@ -82,18 +84,14 @@ defmodule Potions do
   end
 
   def main(argv) do
-    [p1_file, p2_file, p3_file] = argv
-    potions = p1_file
-              |> File.read!()
-              |> calc_p1()
-    IO.puts("Part 1: #{potions} potions")
-    potions = p2_file
-              |> File.read!()
-              |> calc_p2()
-    IO.puts("Part 2: #{potions} potions")
-    potions = p3_file
-              |> File.read!()
-              |> calc_p3()
-    IO.puts("Part 3: #{potions} potions")
+    opts = parse_args(argv)
+    opts[:parts]
+    |> Enum.each(fn part ->
+      creatures =
+        "private/everybody_codes_e2024_q01_p#{part}.txt"
+        |> File.read!()
+      apply(Potions, :"calc_p#{part}", [creatures])
+      |> IO.inspect(label: "Part #{part}")
+    end)
   end
 end
