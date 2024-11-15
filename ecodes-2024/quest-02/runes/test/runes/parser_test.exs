@@ -1,0 +1,28 @@
+defmodule Runes.ParserTest do
+  use ExUnit.Case
+  doctest Runes.Parser, import: true
+
+  import Runes.Parser
+
+  describe "puzzle example" do
+    setup do
+      [
+        input: """
+        WORDS:THE,OWE,MES,ROD,HER
+
+        AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE
+        """,
+        exp_words: ["THE","OWE","MES","ROD","HER"],
+        exp_inscription: "AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE",
+      ]
+    end
+
+    test "parser gets expected words and inscription", fixture do
+      {act_words, act_inscription} =
+        fixture.input
+        |> parse_input_string()
+      assert act_words == fixture.exp_words
+      assert act_inscription == fixture.exp_inscription
+    end
+  end
+end
