@@ -7,7 +7,8 @@ VERBOSE = 0
 
 run: $(BIN)
 	$(BIN) private/everybody_codes_e2024_q01_p1.txt \
-		private/everybody_codes_e2024_q01_p2.txt
+		private/everybody_codes_e2024_q01_p2.txt \
+		private/everybody_codes_e2024_q01_p3.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \

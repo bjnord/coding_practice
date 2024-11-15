@@ -15,4 +15,8 @@ defmodule PotionsTest do
   test "part 2 with no creatures" do
     assert Potions.calc_p2("xx") == 0
   end
+
+  test "part 3 example" do
+    assert Potions.calc_p3("xBxAAABCDxCC") == 30
+  end
 end
