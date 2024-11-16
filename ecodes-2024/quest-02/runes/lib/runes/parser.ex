@@ -8,10 +8,11 @@ defmodule Runes.Parser do
 
   Returns a tuple containing:
   - the runic words (list of `String`)
-  - the helmet inscription text (`String`)
+  - the inscription text (`String`)
   """
-  def parse_input(input_file, opts \\ []) do
-    File.read!(input_file)
+  def parse_input_file(f, opts \\ []) when is_number(f) do
+    "private/everybody_codes_e2024_q02_p#{f}.txt"
+    |> File.read!()
     |> parse_input_string(opts)
   end
 
@@ -20,7 +21,7 @@ defmodule Runes.Parser do
 
   Returns a tuple containing:
   - the runic words (list of `String`)
-  - the helmet inscription text (`String`)
+  - the inscription text (`String`)
   """
   def parse_input_string(input, opts \\ []) do
     [words_line, inscription] =
