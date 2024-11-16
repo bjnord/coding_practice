@@ -37,8 +37,8 @@ defmodule Runes do
     _opts = parse_args(argv)
     [1]  # TODO `opts[:parts]`
     |> Enum.each(fn part ->
-      {words, inscription} = parse_input_file(part)
-      match_count(words, inscription)
+      {words, inscriptions} = parse_input_file(part)
+      match_count(words, hd(inscriptions))
       |> IO.inspect(label: "Part #{part}")
     end)
   end

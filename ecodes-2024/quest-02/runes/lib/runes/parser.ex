@@ -24,13 +24,16 @@ defmodule Runes.Parser do
   - the inscription text (`String`)
   """
   def parse_input_string(input, opts \\ []) do
-    [words_line, inscription] =
+    [words_line, inscription_lines] =
       input
       |> String.split("\n\n", trim: true)
     words =
       words_line
       |> parse_words_line(opts)
-    {words, String.trim_trailing(inscription)}
+    inscriptions =
+      inscription_lines
+      |> String.split("\n", trim: true)
+    {words, inscriptions}
   end
 
   @doc ~S"""
