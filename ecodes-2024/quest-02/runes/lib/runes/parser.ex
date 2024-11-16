@@ -7,7 +7,7 @@ defmodule Runes.Parser do
   Parse the input from a file.
 
   Returns a tuple containing:
-  - the runic words (list of `String`)
+  - the runic words (list of charlist)
   - the inscription text (`String`)
   """
   def parse_input_file(f, opts \\ []) when is_number(f) do
@@ -20,7 +20,7 @@ defmodule Runes.Parser do
   Parse the input from a string.
 
   Returns a tuple containing:
-  - the runic words (list of `String`)
+  - the runic words (list of charlist)
   - the inscription text (`String`)
   """
   def parse_input_string(input, opts \\ []) do
@@ -39,12 +39,13 @@ defmodule Runes.Parser do
   @doc ~S"""
   Parse an input line containing a list of runic words.
 
-  Returns the runic words (list of `String`).
+  Returns the runic words (list of charlist).
   """
   def parse_words_line(line, _opts \\ []) do
     line
     |> String.trim_trailing()
     |> String.replace("WORDS:", "")
     |> String.split(",")
+    |> Enum.map(&to_charlist/1)
   end
 end

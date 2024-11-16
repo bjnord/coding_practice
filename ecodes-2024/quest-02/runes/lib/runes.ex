@@ -12,8 +12,7 @@ defmodule Runes do
   def begin_match?(words, chars) do
     words
     |> Enum.find(fn word ->
-      word_ch = to_charlist(word)
-      Enum.slice(chars, 0, length(word_ch)) == word_ch
+      Enum.slice(chars, 0, length(word)) == word
     end)
   end
 

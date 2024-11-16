@@ -12,7 +12,7 @@ defmodule Runes.ParserTest do
 
         AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE
         """,
-        exp_words: ["THE","OWE","MES","ROD","HER"],
+        exp_words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"HER"],
         exp_inscriptions: ["AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE"],
       ]
     end

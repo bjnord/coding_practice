@@ -5,11 +5,11 @@ defmodule RunesTest do
   describe "part 1 examples" do
     setup do
       [
-        part1_words: ["THE","OWE","MES","ROD","HER"],
+        part1_words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"HER"],
         part1_inscription1: "AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE",
         part1_exp_match1a: nil,
-        part1_exp_match1b: "THE",
-        part1_exp_match1c: "OWE",
+        part1_exp_match1b: ~c"THE",
+        part1_exp_match1c: ~c"OWE",
         part1_exp_count1: 4,
         part1_inscription2: "THE FLAME SHIELDED THE HEART OF THE KINGS",
         part1_exp_count2: 3,
