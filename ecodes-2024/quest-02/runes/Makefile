@@ -4,7 +4,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/runes/parser.ex test/runes/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test doc console clean
+.PHONY: run test check doc console clean
 
 run: $(BIN)
 	$(BIN)
@@ -14,6 +14,9 @@ test:
 		MIX_ENV=test mix propcheck.clean; \
 	fi
 	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+
+check:
+	mix dialyzer
 
 doc:
 	mix docs
