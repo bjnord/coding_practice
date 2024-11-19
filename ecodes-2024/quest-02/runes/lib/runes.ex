@@ -32,12 +32,51 @@ defmodule Runes do
     end
   end
 
+  @doc """
+  Find count of matching runes in inscription.
+  """
+  def rune_count(words, inscription) do
+    i_chars = to_charlist(inscription)
+    fwd = matching_runes(words, i_chars, [], 0)
+    rev = matching_runes(words, Enum.reverse(i_chars), [], 0)
+          |> Enum.map(fn r ->
+            (length(i_chars) - 1) - r
+          end)
+    (fwd ++ rev)
+    |> Enum.uniq()
+    |> Enum.count()
+  end
+
+  defp matching_runes(_words, [], runes, _index), do: runes
+  defp matching_runes(words, i_chars, runes, index) do
+    match = begin_match?(words, i_chars)
+    runes =
+      if match do
+        index..(index+length(match)-1)
+        |> Enum.reduce(runes, fn r, acc -> [r | acc] end)
+      else
+        runes
+      end
+    matching_runes(words, tl(i_chars), runes, index + 1)
+  end
+
+  defp solve(1) do
+    {words, inscriptions} = parse_input_file(1)
+    match_count(words, hd(inscriptions))
+  end
+
+  defp solve(2) do
+    {words, inscriptions} = parse_input_file(2)
+    inscriptions
+    |> Enum.map(&(rune_count(words, &1)))
+    |> Enum.sum()
+  end
+
   def main(argv) do
     _opts = parse_args(argv)
-    [1]  # TODO `opts[:parts]`
+    [1, 2]  # TODO `opts[:parts]`
     |> Enum.each(fn part ->
-      {words, inscriptions} = parse_input_file(part)
-      match_count(words, hd(inscriptions))
+      solve(part)
       |> IO.inspect(label: "Part #{part}")
     end)
   end

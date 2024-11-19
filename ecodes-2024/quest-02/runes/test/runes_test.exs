@@ -5,7 +5,7 @@ defmodule RunesTest do
   describe "part 1 examples" do
     setup do
       [
-        part1_words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"HER"],
+        part1_words: [~c"HER", ~c"MES", ~c"OWE", ~c"ROD", ~c"THE"],
         part1_inscription1: "AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE",
         part1_exp_match1a: nil,
         part1_exp_match1b: ~c"THE",
@@ -17,6 +17,15 @@ defmodule RunesTest do
         part1_exp_count3: 2,
         part1_inscription4: "THERE IS THE END",
         part1_exp_count4: 3,
+        part2_words: [~c"HER", ~c"MES", ~c"OWE", ~c"QAQ", ~c"ROD", ~c"THE"],
+        part2_inscriptions: [
+          "AWAKEN THE POWE ADORNED WITH THE FLAMES BRIGHT IRE",
+          "THE FLAME SHIELDED THE HEART OF THE KINGS",
+          "POWE PO WER P OWE R",
+          "THERE IS THE END",
+          "QAQAQ",
+        ],
+        part2_exp_counts: [15, 9, 6, 7, 5]
       ]
     end
 
@@ -70,6 +79,16 @@ defmodule RunesTest do
       act_count4 = fixture.part1_words
                    |> Runes.match_count(fixture.part1_inscription4)
       assert act_count4 == fixture.part1_exp_count4
+    end
+
+    test "part 2", fixture do
+      act_counts =
+        fixture.part2_inscriptions
+        |> Enum.map(fn inscription ->
+          fixture.part2_words
+          |> Runes.rune_count(inscription)
+        end)
+      assert act_counts == fixture.part2_exp_counts
     end
   end
 end
