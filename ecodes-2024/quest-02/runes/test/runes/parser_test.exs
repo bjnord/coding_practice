@@ -12,8 +12,14 @@ defmodule Runes.ParserTest do
 
         AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE
         """,
-        exp_words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"HER"],
+        exp_words: [~c"HER", ~c"MES", ~c"OWE", ~c"ROD", ~c"THE"],
         exp_inscriptions: ["AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE"],
+        input2: """
+        WORDS:MAX,MA,AN,AD,AND,MAD
+
+        PER ARDUA AD ASTRA
+        """,
+        exp_words2: [~c"AND", ~c"MAD", ~c"MAX", ~c"AD", ~c"AN", ~c"MA"],
       ]
     end
 
@@ -23,6 +29,13 @@ defmodule Runes.ParserTest do
         |> parse_input_string()
       assert act_words == fixture.exp_words
       assert act_inscriptions == fixture.exp_inscriptions
+    end
+
+    test "parser sorts words longest first, then alpha", fixture do
+      {act_words2, _} =
+        fixture.input2
+        |> parse_input_string()
+      assert act_words2 == fixture.exp_words2
     end
   end
 end

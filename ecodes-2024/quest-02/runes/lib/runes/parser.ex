@@ -14,7 +14,7 @@ defmodule Runes.Parser do
   - `opts`: the parsing options
 
   Returns a tuple containing:
-  - the runic words
+  - the runic words (sorted longest first)
   - the inscription texts
   """
   @spec parse_input_file(pos_integer() | String.t(), [option()]) :: {[charlist()], [String.t()]}
@@ -38,7 +38,7 @@ defmodule Runes.Parser do
   - `opts`: the parsing options
 
   Returns a tuple containing:
-  - the runic words
+  - the runic words (sorted longest first)
   - the inscription texts
   """
   @spec parse_input_string(String.t(), [option()]) :: {[charlist()], [String.t()]}
@@ -62,5 +62,25 @@ defmodule Runes.Parser do
     |> String.replace("WORDS:", "")
     |> String.split(",")
     |> Enum.map(&to_charlist/1)
+    |> Enum.sort(&length_sorter/2)
+  end
+
+  # sorts rune words longest-to-shortest
+  defp length_sorter(a, b) do
+    cond do
+      length(a) > length(b) -> true
+      length(a) < length(b) -> false
+      true                  -> alpha_sorter(a, b)
+    end
+  end
+
+  # sorts equal-length rune words alphabetically
+  defp alpha_sorter([], []), do: true
+  defp alpha_sorter(a, b) do
+    cond do
+      hd(a) < hd(b) -> true
+      hd(a) > hd(b) -> false
+      true          -> alpha_sorter(tl(a), tl(b))
+    end
   end
 end
