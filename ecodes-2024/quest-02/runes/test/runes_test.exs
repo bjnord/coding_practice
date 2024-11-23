@@ -25,7 +25,23 @@ defmodule RunesTest do
           "THERE IS THE END",
           "QAQAQ",
         ],
-        part2_exp_counts: [15, 9, 6, 7, 5]
+        part2_exp_counts: [15, 9, 6, 7, 5],
+        part3_words: [~c"MES", ~c"OWE", ~c"ROD", ~c"RODEO", ~c"THE"],
+        part3_inscriptions: [
+          "HELWORLT",
+          "ENIGWDXL",
+          "TRODEOAL",
+        ],
+        part3_exp_cols: [
+          ~c"HET",
+          ~c"ENR",
+          ~c"LIO",
+          ~c"WGD",
+          ~c"OWE",
+          ~c"RDO",
+          ~c"LXA",
+          ~c"TLL",
+        ],
       ]
     end
 
@@ -89,6 +105,13 @@ defmodule RunesTest do
           |> Runes.rune_count(inscription)
         end)
       assert act_counts == fixture.part2_exp_counts
+    end
+
+    test "part 3 cols", fixture do
+      act_cols =
+        fixture.part3_inscriptions
+        |> Runes.inscription_cols()
+      assert act_cols == fixture.part3_exp_cols
     end
   end
 end

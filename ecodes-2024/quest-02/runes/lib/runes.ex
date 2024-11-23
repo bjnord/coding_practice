@@ -60,6 +60,14 @@ defmodule Runes do
     matching_runes(words, tl(i_chars), runes, index + 1)
   end
 
+  def inscription_cols(inscriptions) do
+    inscriptions
+    |> Enum.map(&(to_charlist(&1)))
+    # transpose: [h/t <https://stackoverflow.com/a/42887944/291754>]
+    |> List.zip
+    |> Enum.map(&Tuple.to_list/1)
+  end
+
   defp solve(1) do
     {words, inscriptions} = parse_input_file(1)
     match_count(words, hd(inscriptions))
