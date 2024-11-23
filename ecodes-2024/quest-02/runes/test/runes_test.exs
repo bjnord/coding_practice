@@ -48,7 +48,7 @@ defmodule RunesTest do
     test "part 1 rune word match example 1a", fixture do
       irunes1 = fixture.part1_inscription1
       act_match1a = fixture.part1_words
-                    |> Runes.begin_match?(irunes1)
+                    |> Runes.find_word(irunes1)
       assert act_match1a == fixture.part1_exp_match1a
     end
 
@@ -56,7 +56,7 @@ defmodule RunesTest do
       irunes1 = fixture.part1_inscription1
                 |> Enum.slice(7, 999)
       act_match1b = fixture.part1_words
-                    |> Runes.begin_match?(irunes1)
+                    |> Runes.find_word(irunes1)
       assert act_match1b == fixture.part1_exp_match1b
     end
 
@@ -64,7 +64,7 @@ defmodule RunesTest do
       irunes1 = fixture.part1_inscription1
                 |> Enum.slice(12, 999)
       act_match1c = fixture.part1_words
-                    |> Runes.begin_match?(irunes1)
+                    |> Runes.find_word(irunes1)
       assert act_match1c == fixture.part1_exp_match1c
     end
 
@@ -72,25 +72,25 @@ defmodule RunesTest do
 
     test "part 1 rune word count example 1", fixture do
       act_count1 = fixture.part1_words
-                   |> Runes.match_count(fixture.part1_inscription1)
+                   |> Runes.word_count(fixture.part1_inscription1)
       assert act_count1 == fixture.part1_exp_count1
     end
 
     test "part 1 rune word count example 2", fixture do
       act_count2 = fixture.part1_words
-                   |> Runes.match_count(fixture.part1_inscription2)
+                   |> Runes.word_count(fixture.part1_inscription2)
       assert act_count2 == fixture.part1_exp_count2
     end
 
     test "part 1 rune word count example 3", fixture do
       act_count3 = fixture.part1_words
-                   |> Runes.match_count(fixture.part1_inscription3)
+                   |> Runes.word_count(fixture.part1_inscription3)
       assert act_count3 == fixture.part1_exp_count3
     end
 
     test "part 1 rune word count example 4", fixture do
       act_count4 = fixture.part1_words
-                   |> Runes.match_count(fixture.part1_inscription4)
+                   |> Runes.word_count(fixture.part1_inscription4)
       assert act_count4 == fixture.part1_exp_count4
     end
 

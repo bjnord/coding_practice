@@ -9,7 +9,7 @@ defmodule Runes do
   @doc """
   Find matching rune word at beginning of inscription.
   """
-  def begin_match?(words, irunes) do
+  def find_word(words, irunes) do
     words
     |> Enum.find(fn word ->
       Enum.slice(irunes, 0, length(word)) == word
@@ -19,15 +19,15 @@ defmodule Runes do
   @doc """
   Find count of matching rune words in inscription.
   """
-  def match_count(words, irunes) do
-    match_count(words, irunes, 0)
+  def word_count(words, irunes) do
+    word_count(words, irunes, 0)
   end
 
-  defp match_count(_words, [], matches), do: matches
-  defp match_count(words, irunes, matches) do
-    case begin_match?(words, irunes) do
-      nil  -> match_count(words, tl(irunes), matches)
-      _    -> match_count(words, tl(irunes), matches + 1)
+  defp word_count(_words, [], matches), do: matches
+  defp word_count(words, irunes, matches) do
+    case find_word(words, irunes) do
+      nil  -> word_count(words, tl(irunes), matches)
+      _    -> word_count(words, tl(irunes), matches + 1)
     end
   end
 
@@ -48,7 +48,7 @@ defmodule Runes do
 
   defp matching_runes(_words, _irunes, matches, _index, 0), do: matches
   defp matching_runes(words, irunes, matches, index, count) do
-    match = begin_match?(words, irunes)
+    match = find_word(words, irunes)
     matches =
       if match do
         index..(index+length(match)-1)
@@ -68,7 +68,7 @@ defmodule Runes do
 
   defp solve(1) do
     {words, inscriptions} = parse_input_file(1)
-    match_count(words, hd(inscriptions))
+    word_count(words, hd(inscriptions))
   end
 
   defp solve(2) do
