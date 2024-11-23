@@ -4,16 +4,20 @@ defmodule Runes.ParserTest do
 
   import Runes.Parser
 
-  describe "puzzle example" do
+  describe "input parser" do
     setup do
       [
         input: """
         WORDS:THE,OWE,MES,ROD,HER
 
         AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE
+        THE FLAME SHIELDED THE HEART OF THE KINGS
         """,
         exp_words: [~c"HER", ~c"MES", ~c"OWE", ~c"ROD", ~c"THE"],
-        exp_inscriptions: ["AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE"],
+        exp_inscriptions: [
+          ~c"AWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE",
+          ~c"THE FLAME SHIELDED THE HEART OF THE KINGS",
+        ],
         input2: """
         WORDS:MAX,MA,AN,AD,AND,MAD
 
@@ -23,7 +27,7 @@ defmodule Runes.ParserTest do
       ]
     end
 
-    test "parser gets expected words and inscription", fixture do
+    test "gets expected words and inscription", fixture do
       {act_words, act_inscriptions} =
         fixture.input
         |> parse_input_string()
@@ -31,7 +35,7 @@ defmodule Runes.ParserTest do
       assert act_inscriptions == fixture.exp_inscriptions
     end
 
-    test "parser sorts words longest first, then alpha", fixture do
+    test "sorts words longest first, then alpha", fixture do
       {act_words2, _} =
         fixture.input2
         |> parse_input_string()

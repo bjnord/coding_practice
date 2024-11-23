@@ -9,37 +9,35 @@ defmodule Runes do
   @doc """
   Find matching rune word at beginning of inscription.
   """
-  def begin_match?(words, chars) do
+  def begin_match?(words, irunes) do
     words
     |> Enum.find(fn word ->
-      Enum.slice(chars, 0, length(word)) == word
+      Enum.slice(irunes, 0, length(word)) == word
     end)
   end
 
   @doc """
   Find count of matching rune words in inscription.
   """
-  def match_count(words, inscription) do
-    i_chars = to_charlist(inscription)
-    match_count(words, i_chars, 0)
+  def match_count(words, irunes) do
+    match_count(words, irunes, 0)
   end
 
-  defp match_count(_words, [], count), do: count
-  defp match_count(words, i_chars, count) do
-    case begin_match?(words, i_chars) do
-      nil  -> match_count(words, tl(i_chars), count)
-      _    -> match_count(words, tl(i_chars), count + 1)
+  defp match_count(_words, [], matches), do: matches
+  defp match_count(words, irunes, matches) do
+    case begin_match?(words, irunes) do
+      nil  -> match_count(words, tl(irunes), matches)
+      _    -> match_count(words, tl(irunes), matches + 1)
     end
   end
 
   @doc """
   Find count of matching runes in inscription.
   """
-  def rune_count(words, inscription) do
-    i_chars = to_charlist(inscription)
-    count = length(i_chars)
-    fwd = matching_runes(words, i_chars, [], 0, count)
-    rev = matching_runes(words, Enum.reverse(i_chars), [], 0, count)
+  def rune_count(words, irunes) do
+    count = length(irunes)
+    fwd = matching_runes(words, irunes, [], 0, count)
+    rev = matching_runes(words, Enum.reverse(irunes), [], 0, count)
           |> Enum.map(fn r ->
             (count - 1) - r
           end)
@@ -48,22 +46,21 @@ defmodule Runes do
     |> Enum.count()
   end
 
-  defp matching_runes(_words, _i_chars, runes, _index, 0), do: runes
-  defp matching_runes(words, i_chars, runes, index, count) do
-    match = begin_match?(words, i_chars)
-    runes =
+  defp matching_runes(_words, _irunes, matches, _index, 0), do: matches
+  defp matching_runes(words, irunes, matches, index, count) do
+    match = begin_match?(words, irunes)
+    matches =
       if match do
         index..(index+length(match)-1)
-        |> Enum.reduce(runes, fn r, acc -> [r | acc] end)
+        |> Enum.reduce(matches, fn r, acc -> [r | acc] end)
       else
-        runes
+        matches
       end
-    matching_runes(words, tl(i_chars), runes, index + 1, count - 1)
+    matching_runes(words, tl(irunes), matches, index + 1, count - 1)
   end
 
   def inscription_cols(inscriptions) do
     inscriptions
-    |> Enum.map(&(to_charlist(&1)))
     # transpose: [h/t <https://stackoverflow.com/a/42887944/291754>]
     |> List.zip
     |> Enum.map(&Tuple.to_list/1)

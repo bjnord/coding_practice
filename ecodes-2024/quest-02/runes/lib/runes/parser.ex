@@ -17,7 +17,7 @@ defmodule Runes.Parser do
   - the runic words (sorted longest first)
   - the inscription texts
   """
-  @spec parse_input_file(pos_integer() | String.t(), [option()]) :: {[charlist()], [String.t()]}
+  @spec parse_input_file(pos_integer() | String.t(), [option()]) :: {[charlist()], [charlist()]}
   def parse_input_file(f, opts \\ [])
   def parse_input_file(f, opts) when is_integer(f) do
     "private/everybody_codes_e2024_q02_p#{f}.txt"
@@ -41,7 +41,7 @@ defmodule Runes.Parser do
   - the runic words (sorted longest first)
   - the inscription texts
   """
-  @spec parse_input_string(String.t(), [option()]) :: {[charlist()], [String.t()]}
+  @spec parse_input_string(String.t(), [option()]) :: {[charlist()], [charlist()]}
   def parse_input_string(input, opts \\ []) do
     [words_line, inscription_lines] =
       input
@@ -52,6 +52,7 @@ defmodule Runes.Parser do
     inscriptions =
       inscription_lines
       |> String.split("\n", trim: true)
+      |> Enum.map(&to_charlist/1)
     {words, inscriptions}
   end
 
