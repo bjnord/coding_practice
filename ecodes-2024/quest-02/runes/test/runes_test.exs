@@ -25,7 +25,13 @@ defmodule RunesTest do
           ~c"THERE IS THE END",
           ~c"QAQAQ",
         ],
-        part2_exp_counts: [15, 9, 6, 7, 5],
+        part2_exp_matches: [
+          [7, 8, 9, 12, 13, 14, 17, 18, 19, 29, 30, 31, 36, 37, 38],
+          [0, 1, 2, 19, 20, 21, 32, 33, 34],
+          [1, 2, 3, 14, 15, 16],
+          [0, 1, 2, 3, 9, 10, 11],
+          [0, 1, 2, 3, 4],
+        ],
         part3_words: [~c"MES", ~c"OWE", ~c"ROD", ~c"RODEO", ~c"THE"],
         part3_inscriptions: [
           ~c"HELWORLT",
@@ -95,13 +101,16 @@ defmodule RunesTest do
     end
 
     test "part 2", fixture do
-      act_counts =
+      act_matches =
         fixture.part2_inscriptions
-        |> Enum.map(fn inscription ->
+        |> Enum.with_index()
+        |> Enum.map(fn {inscription, row} ->
           fixture.part2_words
-          |> Runes.rune_count(inscription)
+          |> Runes.matching_runes(inscription, {:row, row})
+          |> Enum.map(fn {col, :row, ^row} -> col end)
+          |> Enum.sort()
         end)
-      assert act_counts == fixture.part2_exp_counts
+      assert act_matches == fixture.part2_exp_matches
     end
 
     test "part 3 cols", fixture do

@@ -18,6 +18,8 @@ defmodule Runes do
 
   @doc """
   Find count of matching rune words in inscription.
+
+  (This finds matches in the forward direction only.)
   """
   def word_count(words, irunes) do
     word_count(words, irunes, 0)
@@ -32,18 +34,17 @@ defmodule Runes do
   end
 
   @doc """
-  Find count of matching runes in inscription.
+  Find matching runes in inscription.
+
+  (This finds matches in the forward and reverse directions.)
   """
-  def rune_count(words, irunes) do
-    count = length(irunes)
-    fwd = matching_runes(words, irunes, [], 0, count)
-    rev = matching_runes(words, Enum.reverse(irunes), [], 0, count)
-          |> Enum.map(fn r ->
-            (count - 1) - r
-          end)
+  def matching_runes(words, irunes, {dir, pos}) do
+    fwd = matching_runes(words, irunes, [], 0, length(irunes))
+          |> Enum.map(&({&1, dir, pos}))
+    rev = matching_runes(words, Enum.reverse(irunes), [], 0, length(irunes))
+          |> Enum.map(&({(length(irunes) - 1) - &1, dir, pos}))
     (fwd ++ rev)
     |> Enum.uniq()
-    |> Enum.count()
   end
 
   defp matching_runes(_words, _irunes, matches, _index, 0), do: matches
@@ -74,7 +75,11 @@ defmodule Runes do
   defp solve(2) do
     {words, inscriptions} = parse_input_file(2)
     inscriptions
-    |> Enum.map(&(rune_count(words, &1)))
+    |> Enum.with_index()
+    |> Enum.map(fn {inscription, row} ->
+      matching_runes(words, inscription, {:row, row})
+      |> Enum.count()
+    end)
     |> Enum.sum()
   end
 
