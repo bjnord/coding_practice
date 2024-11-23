@@ -37,18 +37,19 @@ defmodule Runes do
   """
   def rune_count(words, inscription) do
     i_chars = to_charlist(inscription)
-    fwd = matching_runes(words, i_chars, [], 0)
-    rev = matching_runes(words, Enum.reverse(i_chars), [], 0)
+    count = length(i_chars)
+    fwd = matching_runes(words, i_chars, [], 0, count)
+    rev = matching_runes(words, Enum.reverse(i_chars), [], 0, count)
           |> Enum.map(fn r ->
-            (length(i_chars) - 1) - r
+            (count - 1) - r
           end)
     (fwd ++ rev)
     |> Enum.uniq()
     |> Enum.count()
   end
 
-  defp matching_runes(_words, [], runes, _index), do: runes
-  defp matching_runes(words, i_chars, runes, index) do
+  defp matching_runes(_words, _i_chars, runes, _index, 0), do: runes
+  defp matching_runes(words, i_chars, runes, index, count) do
     match = begin_match?(words, i_chars)
     runes =
       if match do
@@ -57,7 +58,7 @@ defmodule Runes do
       else
         runes
       end
-    matching_runes(words, tl(i_chars), runes, index + 1)
+    matching_runes(words, tl(i_chars), runes, index + 1, count - 1)
   end
 
   def inscription_cols(inscriptions) do
