@@ -47,10 +47,14 @@ defmodule Runes.Parser do
     words =
       words_line
       |> parse_words_line(opts)
+    widths =
+      inscription_lines
+      |> String.split("\n", trim: true)
+      |> Enum.map(&(String.length(&1)))
     grid =
       inscription_lines
       |> parse_inscription_lines(opts)
-    %Artifact{words: words, grid: grid}
+    %Artifact{words: words, height: length(widths), widths: widths, grid: grid}
   end
 
   @spec parse_words_line(String.t(), [option()]) :: [charlist()]

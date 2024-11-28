@@ -37,6 +37,8 @@ defmodule Runes.ParserTest do
         exp_artifacts: [
           %Artifact{
             words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"HER"],
+            height: 1,
+            widths: [51],
             grid: %{
               {0,  0} => ?A, {0,  1} => ?W, {0,  2} => ?A, {0,  3} => ?K,
               {0,  4} => ?E, {0,  5} => ?N, {0,  6} => 32, {0,  7} => ?T,
@@ -55,6 +57,8 @@ defmodule Runes.ParserTest do
           },
           %Artifact{
             words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"HER", ~c"QAQ"],
+            height: 5,
+            widths: [50, 41, 19, 16, 5],
             grid: %{
               {0,  0} => ?A, {0,  1} => ?W, {0,  2} => ?A, {0,  3} => ?K,
               {0,  4} => ?E, {0,  5} => ?N, {0,  6} => 32, {0,  7} => ?T,
@@ -95,6 +99,8 @@ defmodule Runes.ParserTest do
           },
           %Artifact{
             words: [~c"THE", ~c"OWE", ~c"MES", ~c"ROD", ~c"RODEO"],
+            height: 3,
+            widths: [8, 8, 8],
             grid: %{
               {0, 0} => ?H, {0, 1} => ?E, {0, 2} => ?L, {0, 3} => ?W,
               {0, 4} => ?O, {0, 5} => ?R, {0, 6} => ?L, {0, 7} => ?T,
