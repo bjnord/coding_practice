@@ -1,7 +1,9 @@
 defmodule Runes.Parser do
   @moduledoc """
-  Runes map parser functions.
+  Runes parser functions.
   """
+
+  alias Runes.Artifact
 
   @type option() :: {:debug, boolean()}
 
@@ -13,11 +15,9 @@ defmodule Runes.Parser do
   - `f`: the puzzle input file descriptor (part number or filename)
   - `opts`: the parsing options
 
-  Returns a tuple containing:
-  - the runic words (sorted longest first)
-  - the inscription texts
+  Returns an `Artifact`.
   """
-  @spec parse_input_file(pos_integer() | String.t(), [option()]) :: {[charlist()], [charlist()]}
+  @spec parse_input_file(pos_integer() | String.t(), [option()]) :: Artifact.t()
   def parse_input_file(f, opts \\ [])
   def parse_input_file(f, opts) when is_integer(f) do
     "private/everybody_codes_e2024_q02_p#{f}.txt"
@@ -37,11 +37,9 @@ defmodule Runes.Parser do
   - `input`: the puzzle input
   - `opts`: the parsing options
 
-  Returns a tuple containing:
-  - the runic words (sorted longest first)
-  - the inscription texts
+  Returns an `Artifact`.
   """
-  @spec parse_input_string(String.t(), [option()]) :: {[charlist()], [charlist()]}
+  @spec parse_input_string(String.t(), [option()]) :: Artifact.t()
   def parse_input_string(input, opts \\ []) do
     [words_line, inscription_lines] =
       input
@@ -49,11 +47,10 @@ defmodule Runes.Parser do
     words =
       words_line
       |> parse_words_line(opts)
-    inscriptions =
+    grid =
       inscription_lines
-      |> String.split("\n", trim: true)
-      |> Enum.map(&to_charlist/1)
-    {words, inscriptions}
+      |> parse_inscription_lines(opts)
+    %Artifact{words: words, grid: grid}
   end
 
   @spec parse_words_line(String.t(), [option()]) :: [charlist()]
@@ -63,25 +60,19 @@ defmodule Runes.Parser do
     |> String.replace("WORDS:", "")
     |> String.split(",")
     |> Enum.map(&to_charlist/1)
-    |> Enum.sort(&length_sorter/2)
   end
 
-  # sorts rune words longest-to-shortest
-  defp length_sorter(a, b) do
-    cond do
-      length(a) > length(b) -> true
-      length(a) < length(b) -> false
-      true                  -> alpha_sorter(a, b)
-    end
-  end
-
-  # sorts equal-length rune words alphabetically
-  defp alpha_sorter([], []), do: true
-  defp alpha_sorter(a, b) do
-    cond do
-      hd(a) < hd(b) -> true
-      hd(a) > hd(b) -> false
-      true          -> alpha_sorter(tl(a), tl(b))
-    end
+  @spec parse_inscription_lines(String.t(), [option()]) :: map()
+  defp parse_inscription_lines(lines, _opts) do
+    lines
+    |> String.split("\n", trim: true)
+    |> Enum.with_index()
+    |> Enum.map(fn {line, y} ->
+      to_charlist(line)
+      |> Enum.with_index()
+      |> Enum.map(fn {ch, x} -> {{y, x}, ch} end)
+    end)
+    |> List.flatten()
+    |> Enum.into(%{})
   end
 end

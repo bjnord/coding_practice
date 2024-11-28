@@ -1,6 +1,7 @@
 BIN = ./runes
 FILES = mix.exs test/test_helper.exs \
 	lib/runes.ex test/runes_test.exs \
+	lib/runes/artifact.ex test/runes/artifact_test.exs \
 	lib/runes/parser.ex test/runes/parser_test.exs
 VERBOSE = 0
 
