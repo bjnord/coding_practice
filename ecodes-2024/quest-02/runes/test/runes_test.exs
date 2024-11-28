@@ -32,7 +32,7 @@ defmodule RunesTest do
           [0, 1, 2, 3, 9, 10, 11],
           [0, 1, 2, 3, 4],
         ],
-        part3_words: [~c"MES", ~c"OWE", ~c"ROD", ~c"RODEO", ~c"THE"],
+        part3_words: [~c"RODEO", ~c"MES", ~c"OWE", ~c"ROD", ~c"THE"],
         part3_inscriptions: [
           ~c"HELWORLT",
           ~c"ENIGWDXL",
@@ -47,6 +47,18 @@ defmodule RunesTest do
           ~c"RDO",
           ~c"LXA",
           ~c"TLL",
+        ],
+        part3_exp_matches: [
+          {0, 0},
+          {1, 0},
+          {1, 2},
+          {2, 2},
+          {3, 2},
+          {4, 0},
+          {4, 1},
+          {4, 2},
+          {5, 2},
+          {7, 0},
         ],
       ]
     end
@@ -118,6 +130,13 @@ defmodule RunesTest do
         fixture.part3_inscriptions
         |> Runes.inscription_cols()
       assert act_cols == fixture.part3_exp_cols
+    end
+
+    test "part 3", fixture do
+      act_matches =
+        Runes.grid_matching_runes(fixture.part3_words, fixture.part3_inscriptions)
+        |> Enum.sort()
+      assert act_matches == fixture.part3_exp_matches
     end
   end
 end

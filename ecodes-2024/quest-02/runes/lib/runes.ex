@@ -67,6 +67,34 @@ defmodule Runes do
     |> Enum.map(&Tuple.to_list/1)
   end
 
+  @doc """
+  Find matching runes in inscription grid.
+
+  (This finds matches in the forward and reverse directions, on both rows
+  and columns, wrapping around horizontally.
+  """
+  def grid_matching_runes(words, inscriptions) do
+    width = length(hd(inscriptions))
+    row_runes =
+      inscriptions
+      |> Enum.map(&(&1 ++ &1))
+      |> Enum.with_index()
+      |> Enum.map(fn {inscription, row} ->
+        matching_runes(words, inscription, {:row, row})
+        |> Enum.map(fn {x, :row, y} -> {rem(x, width), y} end)
+      end)
+    col_runes =
+      inscription_cols(inscriptions)
+      |> Enum.with_index()
+      |> Enum.map(fn {inscription, col} ->
+        matching_runes(words, inscription, {:col, col})
+        |> Enum.map(fn {y, :col, x} -> {x, y} end)
+      end)
+    (row_runes ++ col_runes)
+    |> List.flatten()
+    |> Enum.uniq()
+  end
+
   defp solve(1) do
     {words, inscriptions} = parse_input_file(1)
     word_count(words, hd(inscriptions))
@@ -83,9 +111,15 @@ defmodule Runes do
     |> Enum.sum()
   end
 
+  defp solve(3) do
+    {words, inscriptions} = parse_input_file(2)
+    grid_matching_runes(words, inscriptions)
+    |> Enum.count()
+  end
+
   def main(argv) do
-    _opts = parse_args(argv)
-    [1, 2]  # TODO `opts[:parts]`
+    opts = parse_args(argv)
+    opts[:parts]
     |> Enum.each(fn part ->
       solve(part)
       |> IO.inspect(label: "Part #{part}")
