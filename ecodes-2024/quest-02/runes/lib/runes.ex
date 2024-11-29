@@ -4,10 +4,12 @@ defmodule Runes do
   """
 
   import Kingdom.CLI
+  import Runes.Artifact
   import Runes.Parser
 
   defp solve(1) do
-    nil
+    parse_input_file(1)
+    |> word_row_count(0)
   end
 
   defp solve(2) do
