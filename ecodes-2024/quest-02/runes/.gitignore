@@ -22,6 +22,9 @@ erl_crash.dump
 # Ignore compiled binary.
 /runes
 
+# Ignore package tarball (built via "mix hex.build").
+runes-*.tar
+
 # Temporary files, for example, from tests.
 /tmp/
 # Ignore logfiles.

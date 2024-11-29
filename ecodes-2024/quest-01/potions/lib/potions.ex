@@ -83,13 +83,16 @@ defmodule Potions do
     battle_potions(m1) + 2 + battle_potions(m2) + 2 + battle_potions(m3) + 2
   end
 
+  def parse_input_file(part) do
+    "private/everybody_codes_e2024_q01_p#{part}.txt"
+    |> File.read!()
+  end
+
   def main(argv) do
     opts = parse_args(argv)
     opts[:parts]
     |> Enum.each(fn part ->
-      creatures =
-        "private/everybody_codes_e2024_q01_p#{part}.txt"
-        |> File.read!()
+      creatures = parse_input_file(part)
       apply(Potions, :"calc_p#{part}", [creatures])
       |> IO.inspect(label: "Part #{part}")
     end)
