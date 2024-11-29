@@ -21,7 +21,9 @@ defmodule Runes do
   end
 
   defp solve(3) do
-    nil
+    parse_input_file(3)
+    |> rune_matches()
+    |> Enum.count()
   end
 
   def main(argv) do

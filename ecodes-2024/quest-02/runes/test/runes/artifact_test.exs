@@ -55,6 +55,11 @@ defmodule Runes.ArtifactTest do
         ENIGWDXL
         TRODEOAL
         """,
+        exp_p3_rune_matches: [
+          {0, 7}, {0, 0}, {0, 1},
+          {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5},
+          {0, 4}, {1, 4},
+        ],
       ]
     end
 
@@ -74,6 +79,14 @@ defmodule Runes.ArtifactTest do
         0..(artifact.height - 1)
         |> Enum.map(&(rune_row_matches(artifact, &1)))
       assert act_matches == fixture.exp_p2_rune_matches
+    end
+
+    test "finds part 3 rune matches", fixture do
+      act_matches =
+        fixture.p3_input
+        |> parse_input_string()
+        |> rune_matches()
+      assert act_matches == fixture.exp_p3_rune_matches
     end
   end
 end
