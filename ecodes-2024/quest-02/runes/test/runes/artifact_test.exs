@@ -23,6 +23,31 @@ defmodule Runes.ArtifactTest do
         THERE IS THE END
         QAQAQ
         """,
+        exp_p2_rune_matches: [
+          [
+            {0, 7}, {0, 8}, {0, 9},
+            {0, 12}, {0, 13}, {0, 14},
+            {0, 17}, {0, 18}, {0, 19},
+            {0, 29}, {0, 30}, {0, 31},
+            {0, 36}, {0, 37}, {0, 38},
+          ],
+          [
+            {1, 0}, {1, 1}, {1, 2},
+            {1, 19}, {1, 20}, {1, 21},
+            {1, 32}, {1, 33}, {1, 34},
+          ],
+          [
+            {2, 1}, {2, 2}, {2, 3},
+            {2, 14}, {2, 15}, {2, 16},
+          ],
+          [
+            {3, 0}, {3, 1}, {3, 2}, {3, 3},
+            {3, 9}, {3, 10}, {3, 11},
+          ],
+          [
+            {4, 0}, {4, 1}, {4, 2}, {4, 3}, {4, 4},
+          ],
+        ],
         p3_input: """
         WORDS:THE,OWE,MES,ROD,RODEO
 
@@ -39,6 +64,16 @@ defmodule Runes.ArtifactTest do
         |> parse_input_string()
         |> word_row_count(0)
       assert act_count == fixture.exp_p1_word_count
+    end
+
+    test "finds part 2 rune matches", fixture do
+      artifact =
+        fixture.p2_input
+        |> parse_input_string()
+      act_matches =
+        0..(artifact.height - 1)
+        |> Enum.map(&(rune_row_matches(artifact, &1)))
+      assert act_matches == fixture.exp_p2_rune_matches
     end
   end
 end

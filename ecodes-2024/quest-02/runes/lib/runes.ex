@@ -13,7 +13,11 @@ defmodule Runes do
   end
 
   defp solve(2) do
-    nil
+    artifact = parse_input_file(2)
+    0..(artifact.height - 1)
+    |> Enum.map(&(rune_row_matches(artifact, &1)))
+    |> List.flatten()
+    |> Enum.count()
   end
 
   defp solve(3) do
