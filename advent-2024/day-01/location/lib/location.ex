@@ -6,22 +6,21 @@ defmodule Location do
   import Location.Parser
   import Snow.CLI
 
-  def sort_location_lists({alist, blist}) do
-    Enum.zip(Enum.sort(alist), Enum.sort(blist))
-  end
-
-  def location_pair_diff(location_pairs) do
-    location_pairs
+  def location_pair_diff({alist, blist}) do
+    [Enum.sort(alist), Enum.sort(blist)]
+    |> Enum.zip()
     |> Enum.map(fn {a, b} -> abs(a - b) end)
   end
 
   def similarity({alist, blist}) do
-    bcount =
-      Enum.reduce(blist, %{}, fn n, acc ->
-        Map.update(acc, n, 1, &(&1 + 1))
-      end)
-    alist
-    |> Enum.map(&(&1 * Map.get(bcount, &1, 0)))
+    bcount = occurrence_count(blist)
+    Enum.map(alist, &(&1 * Map.get(bcount, &1, 0)))
+  end
+
+  defp occurrence_count(llist) do
+    Enum.reduce(llist, %{}, fn n, acc ->
+      Map.update(acc, n, 1, &(&1 + 1))
+    end)
   end
 
   @doc """
@@ -42,7 +41,6 @@ defmodule Location do
   """
   def part1(input_file) do
     parse_input(input_file)
-    |> sort_location_lists()
     |> location_pair_diff()
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")

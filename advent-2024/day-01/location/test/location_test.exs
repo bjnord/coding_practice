@@ -11,14 +11,6 @@ defmodule LocationTest do
           [3, 4, 2, 1, 3, 3],
           [4, 3, 5, 3, 9, 3],
         },
-        exp_sorted_locations: [
-          {1, 3},
-          {2, 3},
-          {3, 3},
-          {3, 4},
-          {3, 5},
-          {4, 9},
-        ],
         exp_diffs: [
           2, 1, 0, 1, 2, 5,
         ],
@@ -28,14 +20,8 @@ defmodule LocationTest do
       ]
     end
 
-    test "gets expected sorted location lists", fixture do
-      act_sorted_lists = fixture.location_lists
-                         |> sort_location_lists()
-      assert act_sorted_lists == fixture.exp_sorted_locations
-    end
-
     test "gets expected differences", fixture do
-      act_diffs = fixture.exp_sorted_locations
+      act_diffs = fixture.location_lists
                   |> location_pair_diff()
       assert act_diffs == fixture.exp_diffs
     end
