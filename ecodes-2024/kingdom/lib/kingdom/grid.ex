@@ -38,6 +38,14 @@ defmodule Kingdom.Grid do
     }
   end
 
+  def neighbors_of(grid, {y, x}) do
+    [{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}]
+    |> Enum.map(fn dxdy -> delta_pos({y, x}, dxdy) end)
+    |> Enum.reject(fn {ny, nx} ->
+      out_of_bounds?(ny, grid.size.y) || out_of_bounds?(nx, grid.size.x)
+    end)
+  end
+
   def cardinals_of(grid, {y, x}) do
     [:north, :east, :south, :west]
     |> Enum.map(fn dir -> delta_pos({y, x}, delta(dir)) end)

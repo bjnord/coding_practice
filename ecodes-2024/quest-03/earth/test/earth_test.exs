@@ -67,6 +67,16 @@ defmodule EarthTest do
           [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         ],
         exp_dug_sum: 35,
+        exp_diagonal_dig_depths: [
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 1, 1, 1, 0, 1, 1, 0, 0 ],
+          [ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 ],
+          [ 0, 0, 1, 1, 2, 2, 1, 1, 0, 0 ],
+          [ 0, 0, 1, 1, 2, 2, 1, 1, 0, 0 ],
+          [ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        ],
+        exp_diagonal_dug_sum: 29,
       ]
     end
 
@@ -80,7 +90,7 @@ defmodule EarthTest do
       assert act_diggable_squares == fixture.diggable_squares
     end
 
-    test "produces correct dug grid", fixture do
+    test "produces correct dug grid (cardinals)", fixture do
       dug_grid = dig(fixture.example_grid)
       act_dig_depths =
         0..(dug_grid.size.y - 1)
@@ -93,6 +103,21 @@ defmodule EarthTest do
         Grid.values(dug_grid)
         |> Enum.sum()
       assert act_dug_sum == fixture.exp_dug_sum
+    end
+
+    test "produces correct dug grid (diagonals)", fixture do
+      dug_grid = diagonal_dig(fixture.example_grid)
+      act_diagonal_dig_depths =
+        0..(dug_grid.size.y - 1)
+        |> Enum.map(fn y ->
+          0..(dug_grid.size.x - 1)
+          |> Enum.map(fn x -> Grid.get(dug_grid, {y, x}) end)
+        end)
+      assert act_diagonal_dig_depths == fixture.exp_diagonal_dig_depths
+      act_diagonal_dug_sum =
+        Grid.values(dug_grid)
+        |> Enum.sum()
+      assert act_diagonal_dug_sum == fixture.exp_diagonal_dug_sum
     end
   end
 end

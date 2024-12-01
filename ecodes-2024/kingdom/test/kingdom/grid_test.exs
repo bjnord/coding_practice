@@ -47,6 +47,15 @@ defmodule Kingdom.GridTest do
           {2, 2},
           {2, 3},
         ],
+        exp_neighbors_1: [
+          [{0, 1}, {1, 0}, {1, 1}],
+          [{0, 0}, {0, 2}, {1, 0}, {1, 1}, {1, 2}],
+          [{0, 0}, {0, 1}, {1, 1}, {2, 0}, {2, 1}],
+          [{0, 0}, {0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}, {2, 2}],
+          [{0, 2}, {0, 3}, {1, 2}, {2, 2}, {2, 3}],
+          [{1, 1}, {1, 2}, {1, 3}, {2, 1}, {2, 3}],
+          [{1, 2}, {1, 3}, {2, 2}],
+        ],
         exp_cardinals_1: [
           [{0, 1}, {1, 0}],
           [{0, 2}, {1, 1}, {0, 0}],
@@ -62,6 +71,14 @@ defmodule Kingdom.GridTest do
     test "produce correct grids", fixture do
       act_grid = Grid.from_squares(fixture.squares_1)
       assert act_grid == fixture.exp_grid_1
+    end
+
+    test "produce correct neighbors", fixture do
+      grid = Grid.from_squares(fixture.squares_1)
+      act_neighbors =
+        fixture.positions_1
+        |> Enum.map(&(Grid.neighbors_of(grid, &1)))
+      assert act_neighbors == fixture.exp_neighbors_1
     end
 
     test "produce correct cardinals", fixture do

@@ -7,20 +7,25 @@ defmodule Earth do
   import Kingdom.CLI
   alias Kingdom.Grid
 
-  def dig(grid), do: dig(Grid.keys(grid), grid)
+  def dig(grid), do: dig(Grid.keys(grid), grid, :cardinals)
+  def diagonal_dig(grid), do: dig(Grid.keys(grid), grid, :neighbors)
 
-  def dig([], grid), do: grid
-  def dig(squares, grid) do
-    squares = diggable_squares(squares, grid)
+  defp dig([], grid, _rule), do: grid
+  defp dig(squares, grid, rule) do
+    squares = diggable_squares(squares, grid, rule)
     grid = Enum.reduce(squares, grid, &(dig_square(&1, &2)))
-    dig(squares, grid)
+    dig(squares, grid, rule)
   end
 
-  defp diggable_squares(squares, grid) do
+  defp diggable_squares(squares, grid, rule) do
     Enum.filter(squares, fn square ->
       square_depth = Grid.get(grid, square)
-      neighbor_depths = Grid.cardinals_of(grid, square)
-                        |> Enum.map(&(Grid.get(grid, &1)))
+      neighbors =
+        case rule do
+          :cardinals -> Grid.cardinals_of(grid, square)
+          :neighbors -> Grid.neighbors_of(grid, square)
+        end
+      neighbor_depths = Enum.map(neighbors, &(Grid.get(grid, &1)))
       diggable_square?(square_depth, neighbor_depths)
     end)
   end
@@ -50,7 +55,10 @@ defmodule Earth do
   end
 
   defp solve(3) do
-    nil  # TODO
+    parse_input_file("private/everybody_codes_e2024_q03_p3_border.txt")
+    |> diagonal_dig()
+    |> Grid.values()
+    |> Enum.sum()
   end
 
   def main(argv) do
