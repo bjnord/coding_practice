@@ -56,4 +56,12 @@ defmodule Kingdom.Grid do
   defp out_of_bounds?(n, _max) when (n < 0), do: true
   defp out_of_bounds?(n, max) when (n >= max), do: true
   defp out_of_bounds?(_n, _max), do: false
+
+  # `Map`-like functions
+  def keys(grid), do: Map.keys(grid.squares)
+  def values(grid), do: Map.values(grid.squares)
+  def get(grid, pos, default \\ nil), do: Map.get(grid.squares, pos, default)
+  def get_and_update(grid, pos, fun) do
+    %{grid | squares: elem(Map.get_and_update(grid.squares, pos, fun), 1)}
+  end
 end
