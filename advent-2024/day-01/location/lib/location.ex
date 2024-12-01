@@ -23,6 +23,18 @@ defmodule Location do
     |> Enum.map(fn {a, b} -> abs(a - b) end)
   end
 
+  def similarity(pairs) do
+    {alist, blist} =
+      pairs
+      |> Enum.unzip()
+    bcount =
+      Enum.reduce(blist, %{}, fn n, acc ->
+        Map.update(acc, n, 1, &(&1 + 1))
+      end)
+    alist
+    |> Enum.map(&(&1 * Map.get(bcount, &1, 0)))
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -52,7 +64,8 @@ defmodule Location do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> similarity()
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

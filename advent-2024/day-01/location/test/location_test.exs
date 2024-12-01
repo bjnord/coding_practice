@@ -31,6 +31,14 @@ defmodule LocationTest do
           2,
           5,
         ],
+        exp_similarity: [
+          9,
+          4,
+          0,
+          0,
+          9,
+          9,
+        ],
       ]
     end
 
@@ -44,6 +52,12 @@ defmodule LocationTest do
       act_diffs = fixture.exp_sorted_loc
                   |> pair_diff()
       assert act_diffs == fixture.exp_diffs
+    end
+
+    test "gets expected similarity", fixture do
+      act_similarity = fixture.locations
+                       |> similarity()
+      assert act_similarity == fixture.exp_similarity
     end
   end
 end
