@@ -43,7 +43,10 @@ defmodule Earth do
   end
 
   defp solve(2) do
-    nil  # TODO
+    parse_input_file(2)
+    |> dig()
+    |> Grid.values()
+    |> Enum.sum()
   end
 
   defp solve(3) do
