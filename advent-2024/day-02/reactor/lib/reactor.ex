@@ -18,6 +18,23 @@ defmodule Reactor do
     end
   end
 
+  def analyze_safety_with_dampener(levels) do
+    if analyze_safety(levels) == :safe do
+      :safe
+    else
+      analyze_safety_after_removal(levels, 0, length(levels))
+    end
+  end
+
+  defp analyze_safety_after_removal(_levels, i, count) when i == count, do: :unsafe
+  defp analyze_safety_after_removal(levels, i, count) do
+    if analyze_safety(List.delete_at(levels, i)) == :safe do
+      :safe
+    else
+      analyze_safety_after_removal(levels, i + 1, count)
+    end
+  end
+
   def analyze_steps(levels) do
     levels
     |> Enum.chunk_every(2, 1, :discard)
@@ -67,7 +84,8 @@ defmodule Reactor do
   """
   def part2(input_file) do
     parse_input(input_file)
-    nil  # TODO
+    |> Enum.map(&Reactor.analyze_safety_with_dampener/1)
+    |> Enum.count(&(&1 == :safe))
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

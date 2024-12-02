@@ -23,6 +23,14 @@ defmodule ReactorTest do
           :unsafe,
           :safe,
         ],
+        exp_dampener_analyses: [
+          :safe,
+          :unsafe,
+          :unsafe,
+          :safe,
+          :safe,
+          :safe,
+        ],
       ]
     end
 
@@ -30,6 +38,13 @@ defmodule ReactorTest do
       act_analyses = fixture.reports
                      |> Enum.map(&Reactor.analyze_safety/1)
       assert act_analyses == fixture.exp_analyses
+    end
+
+    test "produces expected analyses with dampener", fixture do
+      act_dampener_analyses =
+        fixture.reports
+        |> Enum.map(&Reactor.analyze_safety_with_dampener/1)
+      assert act_dampener_analyses == fixture.exp_dampener_analyses
     end
   end
 end
