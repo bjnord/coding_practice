@@ -6,25 +6,42 @@ defmodule Location.Parser do
   @doc ~S"""
   Parse the input file.
 
-  Returns a tuple with two location lists.
+  See `parse_input_string/1` for details.
+
+  ## Parameters
+
+  - `path`: the puzzle input file path
+
+  ## Returns
+
+  a tuple with two location lists
   """
-  def parse_input(input_file) do
-    File.read!(input_file)
+  @spec parse_input_file(String.t()) :: {[integer()], [integer()]}
+  def parse_input_file(path) do
+    path
+    |> File.read!()
     |> parse_input_string()
   end
 
   @doc ~S"""
   Parse input as a block string.
 
-  Returns a tuple with two location lists.
+  ## Parameters
+
+  - `input`: the puzzle input
+
+  ## Returns
+
+  a tuple with two location lists
 
   ## Examples
       iex> parse_input_string("5   7\n1   3\n 11  9 \n")
       {[5, 1, 11], [7, 3, 9]}
   """
+  @spec parse_input_string(String.t()) :: {[integer()], [integer()]}
   def parse_input_string(input) do
     input
-    |> String.splitter("\n", trim: true)
+    |> String.split("\n", trim: true)
     |> Enum.map(&parse_line/1)
     |> Enum.unzip()
   end
@@ -34,9 +51,11 @@ defmodule Location.Parser do
 
   ## Parameters
 
-  - `line`: input line containing a pair of location values
+  - `line`: a puzzle input line
 
-  Returns a tuple with the two location values.
+  ## Returns
+
+  a tuple with the two location values
 
   ## Examples
       iex> parse_line("5   7\n")
@@ -44,6 +63,7 @@ defmodule Location.Parser do
       iex> parse_line(" 11  9 \n")
       {11, 9}
   """
+  @spec parse_line(String.t()) :: {integer(), integer()}
   def parse_line(line) do
     line
     |> String.split()
