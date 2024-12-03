@@ -37,12 +37,12 @@ defmodule Program.Parser do
   a list of program instructions
 
   ## Examples
-      iex> parse_input_string("xmul(2,4)%&mul(3,7)!@^do_not_mul(5,5)+") |> Enum.to_list()
-      [{:mul, [2, 4]}, {:mul, [3, 7]}, {:mul, [5, 5]}]
+      iex> parse_input_string("xdo()mul(2,4)%&mul(3,7)!@^don't()_mul(5,5)+") |> Enum.to_list()
+      [{:do, []}, {:mul, [2, 4]}, {:mul, [3, 7]}, {:"don't", []}, {:mul, [5, 5]}]
   """
   @spec parse_input_string(String.t()) :: [instruction()]
   def parse_input_string(input) do
-    Regex.scan(~r/mul\(\d+,\d+\)/, input)
+    Regex.scan(~r/mul\(\d+,\d+\)|do\(\)|don't\(\)/, input)
     |> Enum.map(fn matches -> parse_inst(hd(matches)) end)
   end
 
@@ -60,17 +60,22 @@ defmodule Program.Parser do
   ## Examples
       iex> parse_inst("mul(13,8)")
       {:mul, [13, 8]}
-      iex> parse_inst("mul(5,2)")
-      {:mul, [5, 2]}
+      iex> parse_inst("do()")
+      {:do, []}
+      iex> parse_inst("don't()")
+      {:"don't", []}
   """
   @spec parse_inst(String.t()) :: instruction()
   def parse_inst(inst) do
-    numbers =
+    [op | opands] =
       inst
-      |> String.replace("mul(", "")
+      |> String.replace("()", "")
+      |> String.replace("(", ",")
       |> String.replace(")", "")
       |> String.split(",")
-      |> Enum.map(&String.to_integer/1)
-    {:mul, numbers}
+    {
+      String.to_atom(op),
+      Enum.map(opands, &String.to_integer/1),
+    }
   end
 end

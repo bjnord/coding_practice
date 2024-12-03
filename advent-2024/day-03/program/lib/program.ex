@@ -6,7 +6,7 @@ defmodule Program do
   import Program.Parser
   import Snow.CLI
 
-  def process(instructions) do
+  def process_mul(instructions) do
     instructions
     |> Enum.map(fn inst ->
       {op, opands} = inst
@@ -14,9 +14,34 @@ defmodule Program do
         :mul ->
           [a, b] = opands
           a * b
+        :do ->
+          0
+        :"don't" ->
+          0
       end
     end)
     |> Enum.sum()
+  end
+
+  def process_all(instructions) do
+    instructions
+    |> Enum.reduce({0, true}, fn inst, {acc, enabled} ->
+      {op, opands} = inst
+      case op do
+        :mul ->
+          [a, b] = opands
+          if enabled do
+            {acc + a * b, true}
+          else
+            {acc, false}
+          end
+        :do ->
+          {acc, true}
+        :"don't" ->
+          {acc, false}
+      end
+    end)
+    |> elem(0)
   end
 
   @doc """
@@ -37,7 +62,7 @@ defmodule Program do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    |> process()
+    |> process_mul()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -46,7 +71,7 @@ defmodule Program do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> process_all()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
