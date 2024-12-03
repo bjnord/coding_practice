@@ -6,6 +6,19 @@ defmodule Program do
   import Program.Parser
   import Snow.CLI
 
+  def process(instructions) do
+    instructions
+    |> Enum.map(fn inst ->
+      {op, opands} = inst
+      case op do
+        :mul ->
+          [a, b] = opands
+          a * b
+      end
+    end)
+    |> Enum.sum()
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -24,7 +37,7 @@ defmodule Program do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> process()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
