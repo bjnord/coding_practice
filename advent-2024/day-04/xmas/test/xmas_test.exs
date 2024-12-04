@@ -33,14 +33,21 @@ defmodule XmasTest do
             {9, 5} => ?X, {9, 6} => ?M, {9, 7} => ?A, {9, 8} => ?S, {9, 9} => ?X,
           }
         },
-        exp_count: 18,
+        exp_xmas_count: 18,
+        exp_x_mas_count: 9,
       ]
     end
 
     test "finds correct XMAS count", fixture do
       act_count = fixture.grid
                   |> count_xmas()
-      assert act_count == fixture.exp_count
+      assert act_count == fixture.exp_xmas_count
+    end
+
+    test "finds correct X-MAS count", fixture do
+      act_count = fixture.grid
+                  |> count_x_mas()
+      assert act_count == fixture.exp_x_mas_count
     end
   end
 end

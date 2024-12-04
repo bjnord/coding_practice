@@ -34,6 +34,100 @@ defmodule Xmas do
     #|> IO.inspect(label: "pos #{y0},#{x0} delta #{dy},#{dx}")
   end
 
+  def count_x_mas(grid) do
+    Grid.keys(grid)
+    |> Enum.reduce(0, fn pos, acc ->
+      case Grid.get(grid, pos) do
+        ?M -> acc + count_m(grid, pos)
+        _  -> acc
+      end
+    end)
+  end
+
+  defp count_m(grid, pos) do
+    count_m_right(grid, pos) + count_m_down(grid, pos)
+  end
+
+  def count_m_right(grid, {y, x}) do
+    if Grid.get(grid, {y, x + 2}) == ?M do
+      count_a_down(grid, {y, x}) + count_a_up(grid, {y, x})
+    else
+      0
+    end
+  end
+
+  def count_a_down(grid, {y, x}) do
+    if Grid.get(grid, {y + 1, x + 1}) == ?A do
+      count_s_down(grid, {y, x})
+    else
+      0
+    end
+  end
+
+  defp count_s_down(grid, {y, x}) do
+    if (Grid.get(grid, {y + 2, x}) == ?S) && (Grid.get(grid, {y + 2, x + 2}) == ?S) do
+      1
+    else
+      0
+    end
+  end
+
+  def count_a_up(grid, {y, x}) do
+    if Grid.get(grid, {y - 1, x + 1}) == ?A do
+      count_s_up(grid, {y, x})
+    else
+      0
+    end
+  end
+
+  defp count_s_up(grid, {y, x}) do
+    if (Grid.get(grid, {y - 2, x}) == ?S) && (Grid.get(grid, {y - 2, x + 2}) == ?S) do
+      1
+    else
+      0
+    end
+  end
+
+  def count_m_down(grid, {y, x}) do
+    if Grid.get(grid, {y + 2, x}) == ?M do
+      count_a_right(grid, {y, x}) + count_a_left(grid, {y, x})
+    else
+      0
+    end
+  end
+
+  def count_a_right(grid, {y, x}) do
+    if Grid.get(grid, {y + 1, x + 1}) == ?A do
+      count_s_right(grid, {y, x})
+    else
+      0
+    end
+  end
+
+  defp count_s_right(grid, {y, x}) do
+    if (Grid.get(grid, {y, x + 2}) == ?S) && (Grid.get(grid, {y + 2, x + 2}) == ?S) do
+      1
+    else
+      0
+    end
+  end
+
+  def count_a_left(grid, {y, x}) do
+    if Grid.get(grid, {y + 1, x - 1}) == ?A do
+      count_s_left(grid, {y, x})
+    else
+      0
+    end
+  end
+
+  defp count_s_left(grid, {y, x}) do
+    if (Grid.get(grid, {y, x - 2}) == ?S) && (Grid.get(grid, {y + 2, x - 2}) == ?S) do
+      1
+    else
+      0
+    end
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -61,7 +155,7 @@ defmodule Xmas do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> count_x_mas()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
