@@ -16,7 +16,7 @@ defmodule Xmas.Parser do
 
   a `Grid`
   """
-  @spec parse_input_file(String.t()) :: [list(integer())]
+  @spec parse_input_file(String.t()) :: Grid.t()
   def parse_input_file(path) do
     path
     |> File.read!()
