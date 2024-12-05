@@ -4,7 +4,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/smoke/parser.ex test/smoke/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test console clean
+.PHONY: run test check doc console clean
 
 run: $(BIN)
 	$(BIN) input/input.txt
@@ -14,6 +14,12 @@ test:
 		MIX_ENV=test mix propcheck.clean; \
 	fi
 	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+
+check:
+	mix dialyzer
+
+doc:
+	mix docs
 
 console:
 	iex -S mix

@@ -3,8 +3,10 @@ defmodule Smoke.Parser do
   Parsing for `Smoke`.
   """
 
+  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+
   @doc ~S"""
-  Parse the input file.
+  Parse an input file.
 
   See `parse_input_string/1` for details.
 
@@ -14,9 +16,9 @@ defmodule Smoke.Parser do
 
   ## Returns
 
-  a list of integer location lists
+  a 2D location height list
   """
-  @spec parse_input_file(String.t()) :: [list(integer())]
+  @spec parse_input_file(String.t()) :: streamable([[integer()]])
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -24,7 +26,7 @@ defmodule Smoke.Parser do
   end
 
   @doc ~S"""
-  Parse input as a block string.
+  Parse an input string.
 
   ## Parameters
 
@@ -32,13 +34,13 @@ defmodule Smoke.Parser do
 
   ## Returns
 
-  a list of integer location lists
+  a 2D location height list
 
   ## Examples
       iex> parse_input_string("8670\n5309\n") |> Enum.to_list()
       [[8, 6, 7, 0], [5, 3, 0, 9]]
   """
-  @spec parse_input_string(String.t()) :: [list(integer())]
+  @spec parse_input_string(String.t()) :: streamable([[integer()]])
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
@@ -46,15 +48,15 @@ defmodule Smoke.Parser do
   end
 
   @doc ~S"""
-  Parse an input line.
+  Parse an input line containing location heights.
 
   ## Parameters
 
-  - `line`: a puzzle input line
+  - `line`: the puzzle input line
 
   ## Returns
 
-  an integer location list
+  a location height list
 
   ## Examples
       iex> parse_line("8670\n")
