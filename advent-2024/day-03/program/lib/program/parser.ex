@@ -6,7 +6,7 @@ defmodule Program.Parser do
   @type instruction() :: {atom(), [integer()]}
 
   @doc ~S"""
-  Parse the input file.
+  Parse an input file.
 
   See `parse_input_string/1` for details.
 
@@ -26,7 +26,7 @@ defmodule Program.Parser do
   end
 
   @doc ~S"""
-  Parse input as a block string.
+  Parse an input string.
 
   ## Parameters
 
@@ -47,11 +47,11 @@ defmodule Program.Parser do
   end
 
   @doc ~S"""
-  Parse a program instruction.
+  Parse a program instruction string.
 
   ## Parameters
 
-  - `inst`: a program instruction string
+  - `inst`: the program instruction string
 
   ## Returns
 

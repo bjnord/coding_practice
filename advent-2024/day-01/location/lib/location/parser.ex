@@ -4,7 +4,7 @@ defmodule Location.Parser do
   """
 
   @doc ~S"""
-  Parse the input file.
+  Parse an input file.
 
   See `parse_input_string/1` for details.
 
@@ -24,7 +24,7 @@ defmodule Location.Parser do
   end
 
   @doc ~S"""
-  Parse input as a block string.
+  Parse an input string.
 
   ## Parameters
 
@@ -47,11 +47,11 @@ defmodule Location.Parser do
   end
 
   @doc ~S"""
-  Parse an input line.
+  Parse an input line containing location values.
 
   ## Parameters
 
-  - `line`: a puzzle input line
+  - `line`: the puzzle input line
 
   ## Returns
 

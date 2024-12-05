@@ -64,16 +64,16 @@ defmodule Reactor do
   - argv: Command-line arguments
   """
   def main(argv) do
-    {input_file, opts} = parse_args(argv)
-    if Enum.member?(opts[:parts], 1), do: part1(input_file)
-    if Enum.member?(opts[:parts], 2), do: part2(input_file)
+    {input_path, opts} = parse_args(argv)
+    if Enum.member?(opts[:parts], 1), do: part1(input_path)
+    if Enum.member?(opts[:parts], 2), do: part2(input_path)
   end
 
   @doc """
   Process input file and display part 1 solution.
   """
-  def part1(input_file) do
-    parse_input(input_file)
+  def part1(input_path) do
+    parse_input_file(input_path)
     |> Enum.map(&Reactor.analyze_safety/1)
     |> Enum.count(&(&1 == :safe))
     |> IO.inspect(label: "Part 1 answer is")
@@ -82,8 +82,8 @@ defmodule Reactor do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_file) do
-    parse_input(input_file)
+  def part2(input_path) do
+    parse_input_file(input_path)
     |> Enum.map(&Reactor.analyze_safety_with_dampener/1)
     |> Enum.count(&(&1 == :safe))
     |> IO.inspect(label: "Part 2 answer is")

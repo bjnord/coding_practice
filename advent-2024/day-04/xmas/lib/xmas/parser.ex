@@ -5,8 +5,10 @@ defmodule Xmas.Parser do
 
   alias Xmas.Grid
 
+  @type puzzle_square() :: {{integer(), integer()}, char()}
+
   @doc ~S"""
-  Parse the input file.
+  Parse an input file.
 
   ## Parameters
 
@@ -24,7 +26,7 @@ defmodule Xmas.Parser do
   end
 
   @doc ~S"""
-  Parse input as a block string.
+  Parse an input string.
 
   ## Parameters
 
@@ -48,11 +50,13 @@ defmodule Xmas.Parser do
 
   ## Parameters
 
-  - `line`: the input line
-  - `y`: the y position (integer) of the input line
+  - `line`: the puzzle input line
+  - `y`: the y position of the input line
 
-  Returns the puzzle square characters and their positions, as a list of
-  `{{y, x}, ch}` tuples.
+  ## Returns
+
+  the puzzle square characters and their positions, as a list of
+  `{{y, x}, ch}` tuples
 
   ## Examples
       iex> parse_line({".XMAS\n", 0})
@@ -60,6 +64,7 @@ defmodule Xmas.Parser do
       iex> parse_line({"SA.X.\n", 1})
       [{{1, 0}, ?S}, {{1, 1}, ?A}, {{1, 2}, ?.}, {{1, 3}, ?X}, {{1, 4}, ?.}]
   """
+  @spec parse_line({String.t(), integer()}) :: [puzzle_square()]
   def parse_line({line, y}) do
     line
     |> String.trim_trailing()
