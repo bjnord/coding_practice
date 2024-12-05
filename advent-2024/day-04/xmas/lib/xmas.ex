@@ -23,7 +23,6 @@ defmodule Xmas do
         delta <- deltas do
       xmas_at(grid, {y, x}, delta)
     end
-    #|> IO.inspect(label: "words")
     |> Enum.count(&(&1 == ~c"XMAS"))
   end
 
@@ -31,7 +30,6 @@ defmodule Xmas do
     0..3
     |> Enum.map(fn d -> {y0 + dy * d, x0 + dx * d} end)
     |> Enum.map(&(Grid.get(grid, &1)))
-    #|> IO.inspect(label: "pos #{y0},#{x0} delta #{dy},#{dx}")
   end
 
   def count_x_mas(grid) do

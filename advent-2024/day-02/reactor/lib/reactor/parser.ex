@@ -8,7 +8,7 @@ defmodule Reactor.Parser do
 
   Returns a list of reports (one per line).
   """
-  def parse_input(input_file, _opts \\ []) do
+  def parse_input(input_file) do
     input_file
     |> File.stream!
     |> Stream.map(&parse_line/1)
@@ -19,7 +19,7 @@ defmodule Reactor.Parser do
 
   Returns a list of reports (one per line).
   """
-  def parse_input_string(input, _opts \\ []) do
+  def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
     |> Stream.map(&parse_line/1)

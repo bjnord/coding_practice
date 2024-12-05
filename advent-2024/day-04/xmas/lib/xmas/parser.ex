@@ -5,8 +5,6 @@ defmodule Xmas.Parser do
 
   alias Xmas.Grid
 
-  @type option() :: {:debug, boolean()}
-
   @doc ~S"""
   Parse the input file.
 
@@ -31,14 +29,13 @@ defmodule Xmas.Parser do
   ## Parameters
 
   - `input`: the puzzle input
-  - `opts`: the parsing options
 
   ## Returns
 
   a `Grid`
   """
-  @spec parse_input_string(String.t(), [option()]) :: Grid.t()
-  def parse_input_string(input, _opts \\ []) do
+  @spec parse_input_string(String.t()) :: Grid.t()
+  def parse_input_string(input) do
     input
     |> String.split("\n", trim: true)
     |> Enum.with_index()
