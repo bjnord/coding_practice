@@ -28,6 +28,22 @@ defmodule Manual do
     end
   end
 
+  def reorder(pages, rules) do
+    pages
+    |> Enum.sort(fn a, b ->
+      rule_sorter(a, b, rules)
+    end)
+  end
+
+  defp rule_sorter(a, b, rules) do
+    b_followers = Map.get(rules, b, [])
+    if Enum.find(b_followers, &(&1 == a)) do
+      false
+    else
+      true
+    end
+  end
+
   @doc """
   Find the middle page of a page set.
 
@@ -76,8 +92,12 @@ defmodule Manual do
   Process input file and display part 2 solution.
   """
   def part2(input_path) do
-    {_rules, _page_sets} = parse_input_file(input_path)
-    nil  # TODO
+    {rules, page_sets} = parse_input_file(input_path)
+    page_sets
+    |> Enum.reject(&(Manual.correct_order?(&1, rules)))
+    |> Enum.map(&(Manual.reorder(&1, rules)))
+    |> Enum.map(&Manual.middle_page/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

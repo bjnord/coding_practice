@@ -34,6 +34,11 @@ defmodule ManualTest do
           53,
           29,
         ],
+        exp_reorders: [
+          [97, 75, 47, 61, 53],
+          [61, 29, 13],
+          [97, 75, 47, 29, 13],
+        ],
       ]
     end
 
@@ -50,6 +55,14 @@ defmodule ManualTest do
         |> Enum.filter(&(Manual.correct_order?(&1, fixture.rules)))
         |> Enum.map(&Manual.middle_page/1)
       assert act_middles == fixture.exp_middles
+    end
+
+    test "reorder page sets with incorrect order", fixture do
+      act_reorders =
+        fixture.page_sets
+        |> Enum.reject(&(Manual.correct_order?(&1, fixture.rules)))
+        |> Enum.map(&(Manual.reorder(&1, fixture.rules)))
+      assert act_reorders == fixture.exp_reorders
     end
   end
 end
