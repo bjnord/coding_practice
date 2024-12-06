@@ -24,6 +24,14 @@ defmodule GuardTest do
             {6, 4} => ?^, {7, 7} => ?#,
           },
         },
+        exp_loop_obstacles: [
+          {6, 3},
+          {7, 6},
+          {7, 7},
+          {8, 1},
+          {8, 3},
+          {9, 7},
+        ]
       ]
     end
 
@@ -37,6 +45,13 @@ defmodule GuardTest do
       act_path_length = fixture.loop_grid
                         |> Guard.path_length()
       assert act_path_length == :loop
+    end
+
+    test "finds potential loop-producing obstacles", fixture do
+      act_loopstacles = fixture.grid
+                        |> Guard.loop_obstacles()
+                        |> Enum.sort()
+      assert act_loopstacles == fixture.exp_loop_obstacles
     end
   end
 end

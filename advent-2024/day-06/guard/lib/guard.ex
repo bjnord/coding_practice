@@ -84,16 +84,35 @@ defmodule Guard do
   defp turn({dir, turns}, pos) do
     # detect looping (a "box" in which we just turned 4 times
     # and ended up in the same spot)
-    if Enum.at(turns, 3) == pos do
+    if Enum.find(turns, &(&1 == {pos, dir})) do
       :loop
     else
       case dir do
-        {-1, 0} -> {{0, 1}, [pos | turns]}
-        {0, 1}  -> {{1, 0}, [pos | turns]}
-        {1, 0}  -> {{0, -1}, [pos | turns]}
-        {0, -1} -> {{-1, 0}, [pos | turns]}
+        {-1, 0} -> {{0, 1}, [{pos, dir} | turns]}
+        {0, 1}  -> {{1, 0}, [{pos, dir} | turns]}
+        {1, 0}  -> {{0, -1}, [{pos, dir} | turns]}
+        {0, -1} -> {{-1, 0}, [{pos, dir} | turns]}
       end
     end
+  end
+
+  def loop_obstacles(grid) do
+    for y <- 0..(grid.size.y - 1),
+        x <- 0..(grid.size.x - 1) do
+      grid =
+        Grid.get_and_update(grid, {y, x}, fn ch ->
+          case ch do
+            ?^ -> {ch, ch}
+            _  -> {ch, ?#}
+          end
+        end)
+      if walk(grid, start_pos(grid), {{-1, 0}, []}, 0) == :loop do
+        {y, x}
+      else
+        :noloop
+      end
+    end
+    |> Enum.reject(&(&1 == :noloop))
   end
 
   @doc """
@@ -123,7 +142,8 @@ defmodule Guard do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Guard.loop_obstacles()
+    |> Enum.count()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
