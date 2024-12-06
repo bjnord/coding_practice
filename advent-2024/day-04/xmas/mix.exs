@@ -27,7 +27,7 @@ defmodule Xmas.MixProject do
       {:logger_file_backend, "~> 0.0.13"},
       #{:math, "~> 0.7.0"},
       #{:propcheck, "~> 1.4", only: [:test]},
-      {:snow, path: "../../../advent-2023/snow"},
+      {:history, path: "../../history"},
     ]
   end
 

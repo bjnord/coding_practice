@@ -3,8 +3,8 @@ defmodule Location do
   Documentation for `Location`.
   """
 
+  import History.CLI
   import Location.Parser
-  import Snow.CLI
 
   def location_pair_diff({alist, blist}) do
     [Enum.sort(alist), Enum.sort(blist)]

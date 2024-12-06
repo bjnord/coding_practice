@@ -3,8 +3,8 @@ defmodule Reactor do
   Documentation for `Reactor`.
   """
 
+  import History.CLI
   import Reactor.Parser
-  import Snow.CLI
 
   def analyze_safety(levels) do
     steps = analyze_steps(levels)

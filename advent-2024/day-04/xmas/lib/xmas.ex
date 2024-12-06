@@ -3,9 +3,9 @@ defmodule Xmas do
   Documentation for `Xmas`.
   """
 
+  import History.CLI
   alias Xmas.Grid
   import Xmas.Parser
-  import Snow.CLI
 
   def count_xmas(grid) do
     deltas = [

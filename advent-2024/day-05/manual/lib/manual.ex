@@ -3,8 +3,8 @@ defmodule Manual do
   Documentation for `Manual`.
   """
 
+  import History.CLI
   import Manual.Parser
-  import Snow.CLI
 
   def correct_order?(pages, rules) do
     correct_order?(pages, [], rules)

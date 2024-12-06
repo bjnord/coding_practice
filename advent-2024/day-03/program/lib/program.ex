@@ -3,8 +3,8 @@ defmodule Program do
   Documentation for `Program`.
   """
 
+  import History.CLI
   import Program.Parser
-  import Snow.CLI
 
   def process_mul(instructions) do
     instructions

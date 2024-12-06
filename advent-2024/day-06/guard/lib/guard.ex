@@ -3,9 +3,9 @@ defmodule Guard do
   Documentation for `Guard`.
   """
 
-  alias Xmas.Grid
   import Guard.Parser
-  import Snow.CLI
+  import History.CLI
+  alias Xmas.Grid
 
   @debug false
 
