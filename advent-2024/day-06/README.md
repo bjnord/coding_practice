@@ -2,7 +2,7 @@
 
 ## Part One
 
-The Historians use their fancy [device](../day-04) again, this time to 
+The Historians use their fancy [device](../day-04) again, this time to
 whisk you all away to the North Pole prototype suit manufacturing lab...
 in the year [1518](../../advent-2018/day-05)!
 It turns out that having direct access to history is very convenient for

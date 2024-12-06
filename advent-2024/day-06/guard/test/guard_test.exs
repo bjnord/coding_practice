@@ -15,7 +15,7 @@ defmodule GuardTest do
             {6, 4} => ?^,
           },
         },
-        exp_path_length: 41,
+        exp_squares_walked: 41,
         loop_grid: %Grid{
           size: %{y: 10, x: 10},
           squares: %{
@@ -35,16 +35,16 @@ defmodule GuardTest do
       ]
     end
 
-    test "predicts correct guard path length", fixture do
-      act_path_length = fixture.grid
-                        |> Guard.path_length()
-      assert act_path_length == fixture.exp_path_length
+    test "calculates unique squares walked", fixture do
+      act_squares_walked = fixture.grid
+                           |> Guard.squares_walked()
+      assert act_squares_walked == fixture.exp_squares_walked
     end
 
     test "detects looping", fixture do
-      act_path_length = fixture.loop_grid
-                        |> Guard.path_length()
-      assert act_path_length == :loop
+      act_squares_walked = fixture.loop_grid
+                           |> Guard.squares_walked()
+      assert act_squares_walked == :loop
     end
 
     test "finds potential loop-producing obstacles", fixture do

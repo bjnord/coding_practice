@@ -9,7 +9,7 @@ defmodule Guard do
 
   @debug false
 
-  def path_length(grid) do
+  def squares_walked(grid) do
     walk(grid, start_pos(grid), {{-1, 0}, []}, 0)
   end
 
@@ -81,8 +81,7 @@ defmodule Guard do
 
   # 90-degree right turn, accumulating previous turn locations
   defp turn({dir, turns}, pos) do
-    # detect looping (a "box" in which we just turned 4 times
-    # and ended up in the same spot)
+    # detect looping (return to same spot, facing same direction)
     if Enum.find(turns, &(&1 == {pos, dir})) do
       :loop
     else
@@ -132,7 +131,7 @@ defmodule Guard do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    |> Guard.path_length()
+    |> Guard.squares_walked()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
