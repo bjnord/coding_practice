@@ -67,7 +67,6 @@ defmodule Guard do
     0..(grid.size.x - 1)
     |> Enum.map(&(Grid.get(grid, {y, &1})))
     |> Enum.map(&dump_char/1)
-    |> List.to_string()  # FIXME necessary?
     |> IO.puts()
   end
 
