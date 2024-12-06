@@ -5,7 +5,7 @@ defmodule Guard do
 
   import Guard.Parser
   import History.CLI
-  alias Xmas.Grid
+  alias History.Grid
 
   @debug false
 

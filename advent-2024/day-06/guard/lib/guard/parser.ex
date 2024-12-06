@@ -3,7 +3,7 @@ defmodule Guard.Parser do
   Parsing for `Guard`.
   """
 
-  alias Xmas.Grid
+  alias History.Grid
 
   @type puzzle_square() :: {{integer(), integer()}, char()}
 

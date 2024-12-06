@@ -28,7 +28,6 @@ defmodule Guard.MixProject do
       #{:math, "~> 0.7.0"},
       #{:propcheck, "~> 1.4", only: [:test]},
       {:history, path: "../../history"},
-      {:xmas, path: "../../day-04/xmas"},
     ]
   end
 

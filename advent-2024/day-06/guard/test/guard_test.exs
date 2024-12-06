@@ -2,7 +2,7 @@ defmodule GuardTest do
   use ExUnit.Case
   doctest Guard
 
-  alias Xmas.Grid
+  alias History.Grid
 
   describe "puzzle example" do
     setup do

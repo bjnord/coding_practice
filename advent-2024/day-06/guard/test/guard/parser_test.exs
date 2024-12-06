@@ -2,8 +2,8 @@ defmodule Guard.ParserTest do
   use ExUnit.Case
   doctest Guard.Parser, import: true
 
-  alias Xmas.Grid
   import Guard.Parser
+  alias History.Grid
 
   describe "puzzle example" do
     setup do

@@ -1,6 +1,6 @@
-defmodule Xmas.Grid do
+defmodule History.Grid do
   @moduledoc """
-  Grid structure and functions for `Xmas`.
+  Grid structure and functions for `History`.
   """
 
   defstruct size: %{y: 0, x: 0}, squares: %{}
@@ -10,7 +10,7 @@ defmodule Xmas.Grid do
     squares: %{{integer(), integer()} => any()}
   }
 
-  alias Xmas.Grid
+  alias History.Grid
 
   @doc ~S"""
   Form a `Grid` from a list of squares.

@@ -3,7 +3,7 @@ defmodule Xmas.Parser do
   Parsing for `Xmas`.
   """
 
-  alias Xmas.Grid
+  alias History.Grid
 
   @type puzzle_square() :: {{integer(), integer()}, char()}
 

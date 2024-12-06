@@ -1,8 +1,8 @@
-defmodule Xmas.GridTest do
+defmodule History.GridTest do
   use ExUnit.Case
-  doctest Xmas.Grid, import: true
+  doctest History.Grid, import: true
 
-  alias Xmas.Grid
+  alias History.Grid
 
   describe "examples" do
     setup do

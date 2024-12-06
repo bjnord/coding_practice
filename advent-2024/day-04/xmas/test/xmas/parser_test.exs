@@ -2,7 +2,7 @@ defmodule Xmas.ParserTest do
   use ExUnit.Case
   doctest Xmas.Parser, import: true
 
-  alias Xmas.Grid
+  alias History.Grid
   import Xmas.Parser
 
   describe "puzzle example" do

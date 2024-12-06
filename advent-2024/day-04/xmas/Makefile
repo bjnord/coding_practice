@@ -1,7 +1,6 @@
 BIN = ./xmas
 FILES = mix.exs test/test_helper.exs \
 	lib/xmas.ex test/xmas_test.exs \
-	lib/xmas/grid.ex test/xmas/grid_test.exs \
 	lib/xmas/parser.ex test/xmas/parser_test.exs
 VERBOSE = 0
 

@@ -3,7 +3,7 @@ defmodule XmasTest do
   doctest Xmas
 
   import Xmas
-  alias Xmas.Grid
+  alias History.Grid
 
   describe "puzzle example" do
     setup do

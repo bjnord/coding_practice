@@ -4,7 +4,7 @@ defmodule Xmas do
   """
 
   import History.CLI
-  alias Xmas.Grid
+  alias History.Grid
   import Xmas.Parser
 
   def count_xmas(grid) do
