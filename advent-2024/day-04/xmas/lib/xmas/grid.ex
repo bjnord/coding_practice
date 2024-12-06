@@ -38,6 +38,10 @@ defmodule Xmas.Grid do
     }
   end
 
+  def in_bounds?(grid, {y, x}) do
+    !out_of_bounds?(y, grid.size.y) && !out_of_bounds?(x, grid.size.x)
+  end
+
   def neighbors_of(grid, {y, x}) do
     [{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}]
     |> Enum.map(fn dxdy -> delta_pos({y, x}, dxdy) end)
