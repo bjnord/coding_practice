@@ -10,7 +10,7 @@ defmodule Guard do
   @debug false
 
   def path_length(grid) do
-    walk(grid, start_pos(grid), {-1, 0}, 0)
+    walk(grid, start_pos(grid), {{-1, 0}, []}, 0)
   end
 
   defp start_pos(grid) do
@@ -18,7 +18,16 @@ defmodule Guard do
     |> Enum.find(fn pos -> Grid.get(grid, pos) == ?^ end)
   end
 
-  defp walk(grid, {y, x}, {dy, dx}, acc) do
+  # the third argument is our "turn state", a tuple containing:
+  # - current facing direction, as a delta `{dy, dx}`
+  # - list of `{y, x}` locations where we've previously turned
+  #
+  # when we detect a loop (a "box" in which we just turned 4 times
+  # and ended up in the same spot) it gets replaced with `:loop`
+  # to terminate the walk
+  #
+  defp walk(_grid, _pos, :loop, _acc), do: :loop
+  defp walk(grid, {y, x}, {{dy, dx}, turns}, acc) do
     ny = y + dy
     nx = x + dx
     cond do
@@ -29,10 +38,10 @@ defmodule Guard do
       Grid.get(grid, {ny, nx}) == ?# ->
         # turn but don't move
         if @debug, do: mark(grid, {y, x}) |> dump()
-        walk(grid, {y, x}, turn({dy, dx}), acc)
+        walk(grid, {y, x}, turn({{dy, dx}, turns}, {y, x}), acc)
       true ->
         # move one square forward
-        walk(mark(grid, {y, x}), {ny, nx}, {dy, dx}, accumulate(grid, {y, x}, acc))
+        walk(mark(grid, {y, x}), {ny, nx}, {{dy, dx}, turns}, accumulate(grid, {y, x}, acc))
     end
   end
 
@@ -71,13 +80,19 @@ defmodule Guard do
     end
   end
 
-  # 90-degree right turn
-  defp turn({dy, dx}) do
-    case {dy, dx} do
-      {-1, 0} -> {0, 1}
-      {0, 1}  -> {1, 0}
-      {1, 0}  -> {0, -1}
-      {0, -1} -> {-1, 0}
+  # 90-degree right turn, accumulating previous turn locations
+  defp turn({dir, turns}, pos) do
+    # detect looping (a "box" in which we just turned 4 times
+    # and ended up in the same spot)
+    if Enum.at(turns, 3) == pos do
+      :loop
+    else
+      case dir do
+        {-1, 0} -> {{0, 1}, [pos | turns]}
+        {0, 1}  -> {{1, 0}, [pos | turns]}
+        {1, 0}  -> {{0, -1}, [pos | turns]}
+        {0, -1} -> {{-1, 0}, [pos | turns]}
+      end
     end
   end
 
