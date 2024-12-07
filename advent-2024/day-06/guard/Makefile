@@ -6,7 +6,7 @@ CONFIGS = config/config.exs config/dev.exs \
 	config/test.exs config/prod.exs
 VERBOSE = 0
 
-.PHONY: run test check doc console clean
+.PHONY: run test check bench doc console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
@@ -19,6 +19,9 @@ test:
 
 check:
 	mix dialyzer
+
+bench:
+	mix run bench/run.exs | tee log/bench.out
 
 doc:
 	mix docs
