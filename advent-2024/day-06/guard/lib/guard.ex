@@ -32,11 +32,11 @@ defmodule Guard do
     cond do
       !Grid.in_bounds?(grid, {ny, nx}) ->
         # walked off edge; done
-        debug_dump(mark(grid, {y, x}))
+        if debug(), do: debug_dump(mark(grid, {y, x}))
         accumulate(grid, {y, x}, acc)
       Grid.get(grid, {ny, nx}) == ?# ->
         # turn but don't move
-        debug_dump(mark(grid, {y, x}))
+        if debug(), do: debug_dump(mark(grid, {y, x}))
         walk(grid, {y, x}, turn({{dy, dx}, turns}, {y, x}), acc)
       true ->
         # move one square forward
@@ -55,6 +55,8 @@ defmodule Guard do
       _  -> acc + 1
     end
   end
+
+  defp debug(), do: !!System.get_env("DEBUG")
 
   defp debug_dump(grid) do
     0..(grid.size.y - 1)
