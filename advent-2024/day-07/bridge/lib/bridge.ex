@@ -157,10 +157,10 @@ defmodule Bridge do
   defp step_solution?(total, [{a, op, [b | t]} | steps]) do
     # next step has more operations after the current one
     new_total = eval(a, op, b)
-    if new_total >= total do
+    if new_total > total do
       # since all operators increase the accumulated value: as soon as we go
-      # over the total (or equal it, with more operations left to do), we
-      # can abandon this branch of the tree, and continue with the next step
+      # over the total, we can abandon this branch of the tree, and continue
+      # with the next step
       step_solution?(total, steps)
     else
       # prepend new steps (one for each operator type), and continue with

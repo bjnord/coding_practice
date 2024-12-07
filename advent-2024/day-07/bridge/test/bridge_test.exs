@@ -52,5 +52,9 @@ defmodule BridgeTest do
                        |> Enum.map(&Bridge.solvable3?/1)
       assert act_solvables3 == fixture.exp_solvables3
     end
+
+    test "finds solvable equation (trailing zero case)" do
+      assert Bridge.solvable3?({51, [1, 7, 3, 0]}) == true
+    end
   end
 end
