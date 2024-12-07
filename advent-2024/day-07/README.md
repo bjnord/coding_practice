@@ -72,6 +72,10 @@ two was going to add operators... the only optimization I could think of
 was pruning branches that had already accumulated more than the expected
 total, and that would be worthless if the new operators were `-` or `/` etc.
 
+(Side note: I spent too much time figuring out how to flatten the list of
+equation operator combinations. It was good Elixir practice but ultimately
+code I didn't need. It's in the common module as `History.flatten_2d/1`.)
+
 Brute force was fast enough for part 1. And then...
 
 ## Part Two
