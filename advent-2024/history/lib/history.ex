@@ -21,13 +21,10 @@ defmodule History do
       [[:a, :b], [:c, :d], [:e, :f], [:g, :h], [:i, :j], [:k, :l], [:m, :n], [:o, :p]]
   """
   @spec flatten_2d([[]]) :: [[]]
-  def flatten_2d([h | t]) when is_list(h) do
-    if is_list(List.first(h)) do
-      [h | t]
-      |> Enum.map(&flatten_2d/1)
-      |> Enum.concat()
-    else
-      [h | t]
-    end
+  def flatten_2d(list) when is_list(hd(list)) and is_list(hd(hd(list))) do
+    list
+    |> Enum.map(&flatten_2d/1)
+    |> Enum.concat()
   end
+  def flatten_2d(list) when is_list(list), do: list
 end
