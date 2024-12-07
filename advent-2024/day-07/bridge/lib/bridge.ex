@@ -27,7 +27,8 @@ defmodule Bridge do
   @spec solvable?({integer(), [integer()]}) :: [[atom() | integer()]]
   def solvable?({total, [v | t]}) do
     form_equations(t, [v])
-    |> my_flatten()
+    |> History.flatten_2d()
+    |> Enum.map(&Enum.reverse/1)
     |> Enum.any?(&(operable?(total, &1)))
   end
 
@@ -38,15 +39,6 @@ defmodule Bridge do
       [v, :* | elements],
     ]
     |> Enum.map(&(form_equations(t, &1)))
-  end
-
-  defp my_flatten([a, b]) do
-    if length(a) == 2 do
-      [my_flatten(a), my_flatten(b)]
-      |> Enum.concat()
-    else
-      [Enum.reverse(a), Enum.reverse(b)]
-    end
   end
 
   defp operable?(total, [a]), do: a == total
@@ -103,7 +95,8 @@ defmodule Bridge do
   @spec solvable3?({integer(), [integer()]}) :: [[atom() | integer()]]
   def solvable3?({total, [v | t]}) do
     form_equations3(t, [v])
-    |> my_flatten3()
+    |> History.flatten_2d()
+    |> Enum.map(&Enum.reverse/1)
     |> Enum.any?(&(operable?(total, &1)))
   end
 
@@ -115,16 +108,6 @@ defmodule Bridge do
       [v, :|| | elements],
     ]
     |> Enum.map(&(form_equations3(t, &1)))
-  end
-
-  defp my_flatten3([a, b, c]) when is_integer(a), do: [a, b, c]
-  defp my_flatten3([a, b, c]) when is_list(a) do
-    if length(a) == 3 && is_list(List.first(a)) do
-      [my_flatten3(a), my_flatten3(b), my_flatten3(c)]
-      |> Enum.concat()
-    else
-      [Enum.reverse(a), Enum.reverse(b), Enum.reverse(c)]
-    end
   end
 
   @doc """
