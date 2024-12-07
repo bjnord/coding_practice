@@ -6,6 +6,8 @@ defmodule Bridge do
   import Bridge.Parser
   import History.CLI
 
+  @type equation() :: {integer(), [integer()]}
+
   @doc ~S"""
   Is the given equation solvable with `+` and `*` operators?
 
@@ -23,8 +25,7 @@ defmodule Bridge do
       iex> solvable?({21037, [9, 7, 18, 13]})
       false
   """
-  # FIXME `{integer(), [integer()]}` as type `equation()`
-  @spec solvable?({integer(), [integer()]}) :: [[atom() | integer()]]
+  @spec solvable?(equation()) :: boolean()
   def solvable?({total, [v | t]}) do
     form_equations(t, [v])
     |> History.flatten_2d()
@@ -91,8 +92,7 @@ defmodule Bridge do
       iex> solvable3?({21037, [9, 7, 18, 13]})
       false
   """
-  # FIXME `{integer(), [integer()]}` as type `equation()`
-  @spec solvable3?({integer(), [integer()]}) :: [[atom() | integer()]]
+  @spec solvable3?(equation()) :: boolean()
   def solvable3?({total, [v | t]}) do
     form_equations3(t, [v])
     |> History.flatten_2d()

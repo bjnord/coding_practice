@@ -18,7 +18,7 @@ defmodule Bridge.Parser do
 
   a list of equations
   """
-  @spec parse_input_file(String.t()) :: streamable([[integer()]])
+  @spec parse_input_file(String.t()) :: streamable([Bridge.equation()])
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -40,7 +40,7 @@ defmodule Bridge.Parser do
       iex> parse_input_string("55: 5 11\n21: 8 13\n") |> Enum.to_list()
       [{55, [5, 11]}, {21, [8, 13]}]
   """
-  @spec parse_input_string(String.t()) :: streamable([[integer()]])
+  @spec parse_input_string(String.t()) :: streamable([Bridge.equation()])
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
@@ -64,7 +64,7 @@ defmodule Bridge.Parser do
       iex> parse_line("10: 1 2 3 4\n")
       {10, [1, 2, 3, 4]}
   """
-  @spec parse_line(String.t()) :: [integer()]
+  @spec parse_line(String.t()) :: Bridge.equation()
   def parse_line(line) do
     line
     |> String.trim_trailing()
