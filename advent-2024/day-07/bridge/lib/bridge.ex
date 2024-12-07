@@ -111,61 +111,62 @@ defmodule Bridge do
   end
 
   @doc ~S"""
-  Is the given equation solvable with `+` `*` and `||` operators?
+  Is the given equation solvable with the given operators?
 
   ## Parameters
 
-  - `eq`: the equation
+  - `equation`: the equation
+  - `operators`: the operators
 
   ## Examples
-      iex> solvable3?({156, [15, 6]})
+      iex> solvable3?({156, [15, 6]}, [:+, :*])
+      false
+      iex> solvable3?({156, [15, 6]}, [:+, :*, :||])
       true
-      iex> solvable3?({292, [11, 6, 16, 20]})
+      iex> solvable3?({292, [11, 6, 16, 20]}, [:+, :*])
       true
-      iex> solvable3?({7290, [6, 8, 6, 15]})
+      iex> solvable3?({292, [11, 6, 16, 20]}, [:+, :*, :||])
       true
-      iex> solvable3?({21037, [9, 7, 18, 13]})
+      iex> solvable3?({21037, [9, 7, 18, 13]}, [:+, :*, :||])
       false
   """
-  @spec solvable3?(equation()) :: boolean()
-  def solvable3?({total, [a | t]}) do
-    step_solution?(total, steps3(a, t))
+  @spec solvable3?(equation(), [atom()]) :: boolean()
+  def solvable3?(equation, operators)
+  def solvable3?({total, [a | t]}, operators) do
+    step_solution?(total, operators, steps(a, operators, t))
   end
 
-  defp steps3(a, t) do
-    [
-      {a, :+, t},
-      {a, :*, t},
-      {a, :||, t},
-    ]
+  defp steps(a, operators, t) do
+    operators
+    |> Enum.map(&({a, &1, t}))
   end
 
-  defp step_solution?(_total, []) do
-    # we have exhausted all steps (equation operator combinations)
+  defp step_solution?(_total, _operators, []) do
+    # we have exhausted all steps in queue (equation operator combinations)
     false
   end
-  defp step_solution?(total, [{a, op, [b]} | steps]) do
+  defp step_solution?(total, operators, [{a, op, [b]} | queue]) do
     # next step has just one operation left to perform
     if eval(a, op, b) == total do
       # solution found!
       true
     else
-      # continue with next step
-      step_solution?(total, steps)
+      # continue with next step in queue
+      step_solution?(total, operators, queue)
     end
   end
-  defp step_solution?(total, [{a, op, [b | t]} | steps]) do
+  defp step_solution?(total, operators, [{a, op, [b | t]} | queue]) do
     # next step has more operations after the current one
     new_total = eval(a, op, b)
     if new_total > total do
       # since all operators increase the accumulated value: as soon as we go
       # over the total, we can abandon this branch of the tree, and continue
-      # with the next step
-      step_solution?(total, steps)
+      # with next step in queue
+      step_solution?(total, operators, queue)
     else
       # prepend new steps (one for each operator type), and continue with
-      # the first new step
-      step_solution?(total, steps3(new_total, t) ++ steps)
+      # next (new) step in queue
+      step_solution?(total, operators, steps(new_total, operators, t) ++ queue)
     end
   end
 
@@ -195,7 +196,7 @@ defmodule Bridge do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&Bridge.atom_solvable?/1)
+    |> Enum.filter(&(Bridge.solvable3?(&1, [:+, :*])))
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
@@ -206,7 +207,7 @@ defmodule Bridge do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&Bridge.solvable3?/1)
+    |> Enum.filter(&(Bridge.solvable3?(&1, [:+, :*, :||])))
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")

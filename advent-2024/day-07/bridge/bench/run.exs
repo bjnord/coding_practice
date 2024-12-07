@@ -7,7 +7,9 @@ IO.puts("")
 Benchee.run(
   %{
     "op_atoms" => fn -> Bridge.atom_solvable3?(equation) end,
-    "dynamic" => fn -> Bridge.solvable3?(equation) end,
+    "dynamic" => fn -> Bridge.solvable3?(equation, [:+, :*, :||]) end,
+    "dynamic_big" => fn -> Bridge.solvable3?(equation, [:*, :||, :+]) end,
+    "dynamic_bigger" => fn -> Bridge.solvable3?(equation, [:||, :*, :+]) end,
   },
-  profile_after: true
+  profile_after: false
 )
