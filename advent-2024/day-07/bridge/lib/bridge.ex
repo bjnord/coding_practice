@@ -6,6 +6,55 @@ defmodule Bridge do
   import Bridge.Parser
   import History.CLI
 
+  @doc ~S"""
+  Is the given equation solvable?
+
+  ## Parameters
+
+  - `eq`: the equation
+
+  ## Examples
+      iex> solvable?({190, [10, 19]})
+      true
+      iex> solvable?({3267, [81, 40, 27]})
+      true
+      iex> solvable?({292, [11, 6, 16, 20]})
+      true
+  """
+  # FIXME `{integer(), [integer()]}` as type `equation()`
+  @spec solvable?({integer(), [integer()]}) :: [[atom() | integer()]]
+  def solvable?({total, [v | t]}) do
+    form_equations(t, [v])
+    |> my_flatten()
+    |> Enum.any?(&(operable?(total, &1)))
+  end
+
+  defp form_equations([], elements), do: elements
+  defp form_equations([v | t], elements) do
+    [
+      [v, :+ | elements],
+      [v, :* | elements],
+    ]
+    |> Enum.map(&(form_equations(t, &1)))
+  end
+
+  defp my_flatten([a, b]) do
+    if length(a) == 2 do
+      [my_flatten(a), my_flatten(b)]
+      |> Enum.concat()
+    else
+      [Enum.reverse(a), Enum.reverse(b)]
+    end
+  end
+
+  defp operable?(total, [a]), do: a == total
+  defp operable?(total, [a, op, b | t]) do
+    case op do
+      :+ -> operable?(total, [a + b | t])
+      :* -> operable?(total, [a * b | t])
+    end
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -24,7 +73,9 @@ defmodule Bridge do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.filter(&Bridge.solvable?/1)
+    |> Enum.map(&(elem(&1, 0)))
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
