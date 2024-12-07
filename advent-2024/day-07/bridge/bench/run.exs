@@ -6,7 +6,7 @@ IO.puts("")
 
 Benchee.run(
   %{
-    "op_atoms" => fn -> Bridge.atom_solvable3?(equation) end,
+    # the order of the operators doesn't make a significant difference
     "dynamic" => fn -> Bridge.solvable?(equation, [:+, :*, :||]) end,
     "dynamic_big" => fn -> Bridge.solvable?(equation, [:*, :||, :+]) end,
     "dynamic_bigger" => fn -> Bridge.solvable?(equation, [:||, :*, :+]) end,

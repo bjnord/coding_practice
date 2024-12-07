@@ -9,49 +9,6 @@ defmodule Bridge do
   @type equation() :: {integer(), [integer()]}
 
   @doc ~S"""
-  Is the given equation solvable with `+` and `*` operators?
-
-  ## Parameters
-
-  - `eq`: the equation
-
-  ## Examples
-      iex> atom_solvable?({156, [15, 6]})
-      false
-      iex> atom_solvable?({292, [11, 6, 16, 20]})
-      true
-      iex> atom_solvable?({7290, [6, 8, 6, 15]})
-      false
-      iex> atom_solvable?({21037, [9, 7, 18, 13]})
-      false
-  """
-  @spec atom_solvable?(equation()) :: boolean()
-  def atom_solvable?({total, [v | t]}) do
-    form_equations(t, [v])
-    |> History.flatten_2d()
-    |> Enum.map(&Enum.reverse/1)
-    |> Enum.any?(&(operable?(total, &1)))
-  end
-
-  defp form_equations([], elements), do: elements
-  defp form_equations([v | t], elements) do
-    [
-      [v, :+ | elements],
-      [v, :* | elements],
-    ]
-    |> Enum.map(&(form_equations(t, &1)))
-  end
-
-  defp operable?(total, [a]), do: a == total
-  defp operable?(total, [a, op, b | t]) do
-    case op do
-      :+ -> operable?(total, [a + b | t])
-      :* -> operable?(total, [a * b | t])
-      :|| -> operable?(total, [op_concat(a, b) | t])
-    end
-  end
-
-  @doc ~S"""
   Concatenation operator
 
   ## Parameters
@@ -73,41 +30,6 @@ defmodule Bridge do
   def op_concat(a, b) do
     "#{a}#{b}"
     |> String.to_integer()
-  end
-
-  @doc ~S"""
-  Is the given equation solvable with `+` `*` and `||` operators?
-
-  ## Parameters
-
-  - `eq`: the equation
-
-  ## Examples
-      iex> atom_solvable3?({156, [15, 6]})
-      true
-      iex> atom_solvable3?({292, [11, 6, 16, 20]})
-      true
-      iex> atom_solvable3?({7290, [6, 8, 6, 15]})
-      true
-      iex> atom_solvable3?({21037, [9, 7, 18, 13]})
-      false
-  """
-  @spec atom_solvable3?(equation()) :: boolean()
-  def atom_solvable3?({total, [v | t]}) do
-    form_equations3(t, [v])
-    |> History.flatten_2d()
-    |> Enum.map(&Enum.reverse/1)
-    |> Enum.any?(&(operable?(total, &1)))
-  end
-
-  defp form_equations3([], elements), do: elements
-  defp form_equations3([v | t], elements) do
-    [
-      [v, :+ | elements],
-      [v, :* | elements],
-      [v, :|| | elements],
-    ]
-    |> Enum.map(&(form_equations3(t, &1)))
   end
 
   @doc ~S"""
