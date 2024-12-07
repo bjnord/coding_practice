@@ -110,6 +110,73 @@ defmodule Bridge do
     |> Enum.map(&(form_equations3(t, &1)))
   end
 
+  @doc ~S"""
+  Is the given equation solvable with `+` `*` and `||` operators?
+
+  ## Parameters
+
+  - `eq`: the equation
+
+  ## Examples
+      iex> solvable3?({156, [15, 6]})
+      true
+      iex> solvable3?({292, [11, 6, 16, 20]})
+      true
+      iex> solvable3?({7290, [6, 8, 6, 15]})
+      true
+      iex> solvable3?({21037, [9, 7, 18, 13]})
+      false
+  """
+  @spec solvable3?(equation()) :: boolean()
+  def solvable3?({total, [a | t]}) do
+    step_solution?(total, steps3(a, t))
+  end
+
+  defp steps3(a, t) do
+    [
+      {a, :+, t},
+      {a, :*, t},
+      {a, :||, t},
+    ]
+  end
+
+  defp step_solution?(_total, []) do
+    # we have exhausted all steps (equation operator combinations)
+    false
+  end
+  defp step_solution?(total, [{a, op, [b]} | steps]) do
+    # next step has just one operation left to perform
+    if eval(a, op, b) == total do
+      # solution found!
+      true
+    else
+      # continue with next step
+      step_solution?(total, steps)
+    end
+  end
+  defp step_solution?(total, [{a, op, [b | t]} | steps]) do
+    # next step has more operations after the current one
+    new_total = eval(a, op, b)
+    if new_total >= total do
+      # since all operators increase the accumulated value: as soon as we go
+      # over the total (or equal it, with more operations left to do), we
+      # can abandon this branch of the tree, and continue with the next step
+      step_solution?(total, steps)
+    else
+      # prepend new steps (one for each operator type), and continue with
+      # the first new step
+      step_solution?(total, steps3(new_total, t) ++ steps)
+    end
+  end
+
+  defp eval(a, op, b) do
+    case op do
+      :+ -> a + b
+      :* -> a * b
+      :|| -> op_concat(a, b)
+    end
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -139,7 +206,7 @@ defmodule Bridge do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&Bridge.atom_solvable3?/1)
+    |> Enum.filter(&Bridge.solvable3?/1)
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
