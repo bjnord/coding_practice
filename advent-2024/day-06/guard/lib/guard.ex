@@ -6,8 +6,7 @@ defmodule Guard do
   import Guard.Parser
   import History.CLI
   alias History.Grid
-
-  @debug false
+  require Logger
 
   def squares_walked(grid) do
     walk(grid, start_pos(grid), {{-1, 0}, []}, 0)
@@ -33,11 +32,11 @@ defmodule Guard do
     cond do
       !Grid.in_bounds?(grid, {ny, nx}) ->
         # walked off edge; done
-        if @debug, do: mark(grid, {y, x}) |> dump()
+        debug_dump(mark(grid, {y, x}))
         accumulate(grid, {y, x}, acc)
       Grid.get(grid, {ny, nx}) == ?# ->
         # turn but don't move
-        if @debug, do: mark(grid, {y, x}) |> dump()
+        debug_dump(mark(grid, {y, x}))
         walk(grid, {y, x}, turn({{dy, dx}, turns}, {y, x}), acc)
       true ->
         # move one square forward
@@ -57,20 +56,20 @@ defmodule Guard do
     end
   end
 
-  defp dump(grid) do
+  defp debug_dump(grid) do
     0..(grid.size.y - 1)
-    |> Enum.map(&(dump_line(grid, &1)))
-    IO.puts("")
+    |> Enum.map(&(debug_dump_line(grid, &1)))
+    Logger.debug("")
   end
 
-  defp dump_line(grid, y) do
+  defp debug_dump_line(grid, y) do
     0..(grid.size.x - 1)
     |> Enum.map(&(Grid.get(grid, {y, &1})))
-    |> Enum.map(&dump_char/1)
-    |> IO.puts()
+    |> Enum.map(&debug_dump_char/1)
+    |> Logger.debug()
   end
 
-  defp dump_char(ch) do
+  defp debug_dump_char(ch) do
     case ch do
       ?#  -> ?#
       ?^  -> ?X

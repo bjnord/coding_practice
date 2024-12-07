@@ -2,6 +2,8 @@ BIN = ./guard
 FILES = mix.exs test/test_helper.exs \
 	lib/guard.ex test/guard_test.exs \
 	lib/guard/parser.ex test/guard/parser_test.exs
+CONFIGS = config/config.exs config/dev.exs \
+	config/test.exs config/prod.exs
 VERBOSE = 0
 
 .PHONY: run test check doc console clean
@@ -27,5 +29,5 @@ console:
 clean:
 	rm -rf _build $(BIN) doc log/*.log
 
-$(BIN): $(FILES)
+$(BIN): $(FILES) $(CONFIGS)
 	mix escript.build
