@@ -43,13 +43,13 @@ defmodule BridgeTest do
 
     test "finds solvable equations (2 operators)", fixture do
       act_solvables = fixture.equations
-                      |> Enum.map(&Bridge.solvable?/1)
+                      |> Enum.map(&Bridge.atom_solvable?/1)
       assert act_solvables == fixture.exp_solvables
     end
 
     test "finds solvable equations (3 operators)", fixture do
       act_solvables3 = fixture.equations
-                       |> Enum.map(&Bridge.solvable3?/1)
+                       |> Enum.map(&Bridge.atom_solvable3?/1)
       assert act_solvables3 == fixture.exp_solvables3
     end
   end

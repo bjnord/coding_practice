@@ -16,17 +16,17 @@ defmodule Bridge do
   - `eq`: the equation
 
   ## Examples
-      iex> solvable?({156, [15, 6]})
+      iex> atom_solvable?({156, [15, 6]})
       false
-      iex> solvable?({292, [11, 6, 16, 20]})
+      iex> atom_solvable?({292, [11, 6, 16, 20]})
       true
-      iex> solvable?({7290, [6, 8, 6, 15]})
+      iex> atom_solvable?({7290, [6, 8, 6, 15]})
       false
-      iex> solvable?({21037, [9, 7, 18, 13]})
+      iex> atom_solvable?({21037, [9, 7, 18, 13]})
       false
   """
-  @spec solvable?(equation()) :: boolean()
-  def solvable?({total, [v | t]}) do
+  @spec atom_solvable?(equation()) :: boolean()
+  def atom_solvable?({total, [v | t]}) do
     form_equations(t, [v])
     |> History.flatten_2d()
     |> Enum.map(&Enum.reverse/1)
@@ -83,17 +83,17 @@ defmodule Bridge do
   - `eq`: the equation
 
   ## Examples
-      iex> solvable3?({156, [15, 6]})
+      iex> atom_solvable3?({156, [15, 6]})
       true
-      iex> solvable3?({292, [11, 6, 16, 20]})
+      iex> atom_solvable3?({292, [11, 6, 16, 20]})
       true
-      iex> solvable3?({7290, [6, 8, 6, 15]})
+      iex> atom_solvable3?({7290, [6, 8, 6, 15]})
       true
-      iex> solvable3?({21037, [9, 7, 18, 13]})
+      iex> atom_solvable3?({21037, [9, 7, 18, 13]})
       false
   """
-  @spec solvable3?(equation()) :: boolean()
-  def solvable3?({total, [v | t]}) do
+  @spec atom_solvable3?(equation()) :: boolean()
+  def atom_solvable3?({total, [v | t]}) do
     form_equations3(t, [v])
     |> History.flatten_2d()
     |> Enum.map(&Enum.reverse/1)
@@ -128,7 +128,7 @@ defmodule Bridge do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&Bridge.solvable?/1)
+    |> Enum.filter(&Bridge.atom_solvable?/1)
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
@@ -139,7 +139,7 @@ defmodule Bridge do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&Bridge.solvable3?/1)
+    |> Enum.filter(&Bridge.atom_solvable3?/1)
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
