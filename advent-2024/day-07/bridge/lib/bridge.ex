@@ -119,20 +119,20 @@ defmodule Bridge do
   - `operators`: the operators
 
   ## Examples
-      iex> solvable3?({156, [15, 6]}, [:+, :*])
+      iex> solvable?({156, [15, 6]}, [:+, :*])
       false
-      iex> solvable3?({156, [15, 6]}, [:+, :*, :||])
+      iex> solvable?({156, [15, 6]}, [:+, :*, :||])
       true
-      iex> solvable3?({292, [11, 6, 16, 20]}, [:+, :*])
+      iex> solvable?({292, [11, 6, 16, 20]}, [:+, :*])
       true
-      iex> solvable3?({292, [11, 6, 16, 20]}, [:+, :*, :||])
+      iex> solvable?({292, [11, 6, 16, 20]}, [:+, :*, :||])
       true
-      iex> solvable3?({21037, [9, 7, 18, 13]}, [:+, :*, :||])
+      iex> solvable?({21037, [9, 7, 18, 13]}, [:+, :*, :||])
       false
   """
-  @spec solvable3?(equation(), [atom()]) :: boolean()
-  def solvable3?(equation, operators)
-  def solvable3?({total, [a | t]}, operators) do
+  @spec solvable?(equation(), [atom()]) :: boolean()
+  def solvable?(equation, operators)
+  def solvable?({total, [a | t]}, operators) do
     step_solution?(total, operators, steps(a, operators, t))
   end
 
@@ -196,7 +196,7 @@ defmodule Bridge do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&(Bridge.solvable3?(&1, [:+, :*])))
+    |> Enum.filter(&(Bridge.solvable?(&1, [:+, :*])))
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
@@ -207,7 +207,7 @@ defmodule Bridge do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&(Bridge.solvable3?(&1, [:+, :*, :||])))
+    |> Enum.filter(&(Bridge.solvable?(&1, [:+, :*, :||])))
     |> Enum.map(&(elem(&1, 0)))
     |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")

@@ -16,7 +16,7 @@ defmodule BridgeTest do
           {21037, [9, 7, 18, 13]},
           {292, [11, 6, 16, 20]},
         ],
-        exp_solvables: [
+        exp_solvables2: [
           true,
           true,
           false,
@@ -42,19 +42,19 @@ defmodule BridgeTest do
     end
 
     test "finds solvable equations (2 operators)", fixture do
-      act_solvables = fixture.equations
-                      |> Enum.map(&(Bridge.solvable3?(&1, [:+, :*])))
-      assert act_solvables == fixture.exp_solvables
+      act_solvables2 = fixture.equations
+                       |> Enum.map(&(Bridge.solvable?(&1, [:+, :*])))
+      assert act_solvables2 == fixture.exp_solvables2
     end
 
     test "finds solvable equations (3 operators)", fixture do
       act_solvables3 = fixture.equations
-                       |> Enum.map(&(Bridge.solvable3?(&1, [:+, :*, :||])))
+                       |> Enum.map(&(Bridge.solvable?(&1, [:+, :*, :||])))
       assert act_solvables3 == fixture.exp_solvables3
     end
 
     test "finds solvable equation (trailing zero case)" do
-      assert Bridge.solvable3?({51, [1, 7, 3, 0]}, [:+, :*, :||]) == true
+      assert Bridge.solvable?({51, [1, 7, 3, 0]}, [:+, :*, :||]) == true
     end
   end
 end
