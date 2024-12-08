@@ -265,3 +265,7 @@ different positions you could choose.
 You need to get the guard stuck in a loop by adding a single new
 obstruction. **How many different positions could you choose for this
 obstruction?**
+
+![Anakin/Padme brute force meme](images/anakin-padme-brute-force.png)
+
+_Credit: [Reddit user u/Probable_Foreigner](https://www.reddit.com/r/adventofcode/comments/1h83rlf/2024_day_6_bruteforce_time/?share_id=f7guW3kXf3LmeAy1cDDJy)_
