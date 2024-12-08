@@ -3,8 +3,8 @@ grid = "private/input.txt"
 
 Benchee.run(
   %{
-    #"squares" => fn -> Guard.squares_walked(grid) end,
-    "slow" => fn -> Guard.loop_obstacles(grid) end,
+    "brute" => fn -> Guard.brute_loop_obstacles(grid) end,
+    "selective" => fn -> Guard.loop_obstacles(grid) end,
   },
-  profile_after: true
+  profile_after: false
 )
