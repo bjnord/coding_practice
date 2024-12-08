@@ -8,6 +8,10 @@ defmodule History do
 
   The deepest lists will be preserved as elements in a returned (flat) list.
 
+  Thanks to the folks on
+  [Elixir Forum](https://elixirforum.com/t/flatten-multi-dimensional-to-2-dimensional/67944/2)
+  for suggestions that cleaned this up nicely!
+
   ## Parameters
 
   - the multi-dimensional list
@@ -22,9 +26,7 @@ defmodule History do
   """
   @spec flatten_2d([[]]) :: [[]]
   def flatten_2d(list) when is_list(hd(list)) and is_list(hd(hd(list))) do
-    list
-    |> Enum.map(&flatten_2d/1)
-    |> Enum.concat()
+    Enum.flat_map(list, &flatten_2d/1)
   end
   def flatten_2d(list) when is_list(list), do: list
 end
