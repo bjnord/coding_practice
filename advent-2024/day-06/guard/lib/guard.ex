@@ -9,18 +9,13 @@ defmodule Guard do
   require Logger
 
   def squares_walked(grid) do
-    {visited, _, _} = walk(grid, start_pos(grid), {{-1, 0}, %{}}, {%{}, [], true})
+    {visited, _, _} = walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], true})
     if visited == :loop do
       :loop
     else
       Map.keys(visited)
       |> Enum.count()
     end
-  end
-
-  defp start_pos(grid) do
-    Grid.keys(grid)
-    |> Enum.find(fn pos -> Grid.get(grid, pos) == ?^ end)
   end
 
   # the third argument is our "turn state", a tuple containing:
@@ -57,9 +52,7 @@ defmodule Guard do
     end
   end
 
-  defp mark(grid, pos) do
-    Grid.get_and_update(grid, pos, &({&1, ?X}))
-  end
+  defp mark(grid, pos), do: Grid.put(grid, pos, ?X)
 
   # when walking forward, only count squares we haven't walked before
   #
@@ -132,7 +125,6 @@ defmodule Guard do
   defp debug_dump_char(ch) do
     case ch do
       ?#  -> ?#
-      ?^  -> ?X
       ?X  -> ?X
       _   -> ?.
     end
@@ -156,14 +148,8 @@ defmodule Guard do
   def brute_loop_obstacles(grid) do
     for y <- 0..(grid.size.y - 1),
         x <- 0..(grid.size.x - 1) do
-      grid =
-        Grid.get_and_update(grid, {y, x}, fn ch ->
-          case ch do
-            ?^ -> {ch, ch}
-            _  -> {ch, ?#}
-          end
-        end)
-      if elem(walk(grid, start_pos(grid), {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop do
+      grid = Grid.put(grid, {y, x}, ?#)
+      if elem(walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop do
         {y, x}
       else
         :noloop
@@ -175,21 +161,15 @@ defmodule Guard do
   def loop_obstacles(grid) do
     potential_loop_obstacles(grid)
     |> Enum.filter(fn {y, x} ->
-      grid =
-        Grid.get_and_update(grid, {y, x}, fn ch ->
-          case ch do
-            ?^ -> {ch, ch}
-            _  -> {ch, ?#}
-          end
-        end)
-      elem(walk(grid, start_pos(grid), {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop
+      grid = Grid.put(grid, {y, x}, ?#)
+      elem(walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop
     end)
   end
 
   defp potential_loop_obstacles(grid) do
-    walk(grid, start_pos(grid), {{-1, 0}, %{}}, {%{}, [], true})
+    walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], true})
     |> elem(1)
-    |> Enum.uniq()  # FIXME necessary?
+    |> Enum.uniq()
   end
 
   @doc """

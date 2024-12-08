@@ -3,11 +3,12 @@ defmodule History.Grid do
   Grid structure and functions for `History`.
   """
 
-  defstruct size: %{y: 0, x: 0}, squares: %{}
+  defstruct size: %{y: 0, x: 0}, squares: %{}, marker: %{}
 
   @type t :: %__MODULE__{
     size: %{y: integer(), x: integer()},
-    squares: %{{integer(), integer()} => any()}
+    squares: %{{integer(), integer()} => any()},
+    marker: %{atom() => any()},
   }
 
   alias History.Grid
@@ -27,6 +28,15 @@ defmodule History.Grid do
     %Grid{
       size: %{y: dim_y, x: dim_x},
       squares: squares,
+      marker: %{},
+    }
+  end
+
+  def create(dim_y, dim_x) do
+    %Grid{
+      size: %{y: dim_y, x: dim_x},
+      squares: %{},
+      marker: %{},
     }
   end
 
@@ -69,11 +79,21 @@ defmodule History.Grid do
   defp out_of_bounds?(n, max) when (n >= max), do: true
   defp out_of_bounds?(_n, _max), do: false
 
+  def set_marker(grid, sym, value) do
+    %{grid | marker: Map.put(grid.marker, sym, value)}
+  end
+
   # `Map`-like functions
   def keys(grid), do: Map.keys(grid.squares)
   def values(grid), do: Map.values(grid.squares)
   def get(grid, pos, default \\ nil), do: Map.get(grid.squares, pos, default)
   def get_and_update(grid, pos, fun) do
     %{grid | squares: elem(Map.get_and_update(grid.squares, pos, fun), 1)}
+  end
+  def put(grid, pos, value) do
+    %{grid | squares: Map.put(grid.squares, pos, value)}
+  end
+  def delete(grid, pos) do
+    %{grid | squares: Map.delete(grid.squares, pos)}
   end
 end

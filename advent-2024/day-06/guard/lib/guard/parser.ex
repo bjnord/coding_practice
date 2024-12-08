@@ -43,6 +43,19 @@ defmodule Guard.Parser do
     |> Enum.with_index()
     |> Enum.flat_map(&parse_line/1)
     |> Grid.from_squares()
+    |> mark_start()
+  end
+
+  defp mark_start(grid) do
+    Grid.keys(grid)
+    |> Enum.reduce(grid, fn pos, acc ->
+      if Grid.get(grid, pos) == ?^ do
+        Grid.delete(grid, pos)
+        |> Grid.set_marker(:start, pos)
+      else
+        acc
+      end
+    end)
   end
 
   @doc ~S"""
