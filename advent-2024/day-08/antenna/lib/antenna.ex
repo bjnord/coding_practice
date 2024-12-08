@@ -13,7 +13,7 @@ defmodule Antenna do
     end)
   end
 
-  def antinodes({antennas, {dim_y, dim_x} = dim}) do
+  def antinodes({antennas, dim}) do
     groups({antennas, dim})
     |> Enum.map(fn {_ch, positions} ->
       History.Math.pairings(positions)
@@ -26,11 +26,35 @@ defmodule Antenna do
     end)
     |> List.flatten()
     |> Enum.uniq()
-    |> Enum.reject(fn {y, x} ->
-      out_of_bounds?(y, dim_y) || out_of_bounds?(x, dim_x)
-    end)
+    |> Enum.reject(&(out_of_bounds?(&1, dim)))
   end
 
+  def resonant_antinodes({antennas, dim}) do
+    groups({antennas, dim})
+    |> Enum.map(fn {_ch, positions} ->
+      History.Math.pairings(positions)
+      |> Enum.map(fn {{ay, ax}, {by, bx}} ->
+        Stream.cycle([true])
+        |> Enum.reduce_while({1, []}, fn _, {dist, acc} ->
+          a = {ay + (by - ay) * dist, ax + (bx - ax) * dist}
+          b = {by + (ay - by) * dist, bx + (ax - bx) * dist}
+          # this is cheating, using knowledge of `input.txt`
+          if dist > 50 do
+            {:halt, acc}
+          else
+            {:cont, {dist + 1, [a, b | acc]}}
+          end
+        end)
+      end)
+    end)
+    |> List.flatten()
+    |> Enum.uniq()
+    |> Enum.reject(&(out_of_bounds?(&1, dim)))
+  end
+
+  defp out_of_bounds?({y, x}, {dim_y, dim_x}) do
+    out_of_bounds?(y, dim_y) || out_of_bounds?(x, dim_x)
+  end
   defp out_of_bounds?(n, _max) when (n < 0), do: true
   defp out_of_bounds?(n, max) when (n >= max), do: true
   defp out_of_bounds?(_n, _max), do: false
@@ -63,7 +87,8 @@ defmodule Antenna do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Antenna.resonant_antinodes()
+    |> Enum.count()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

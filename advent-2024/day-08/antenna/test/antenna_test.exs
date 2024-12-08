@@ -42,6 +42,7 @@ defmodule AntennaTest do
           {10, 10},
           {11, 10},
         ],
+        exp_resonant_antinodes: 34,
       ]
     end
 
@@ -56,6 +57,13 @@ defmodule AntennaTest do
                               |> Antenna.antinodes()
                               |> Enum.sort()
       assert act_antenna_antinodes == fixture.exp_antenna_antinodes
+    end
+
+    test "resonant antinodes", fixture do
+      act_resonant_antinodes = fixture.antenna_chart
+                               |> Antenna.resonant_antinodes()
+                               |> Enum.count()
+      assert act_resonant_antinodes == fixture.exp_resonant_antinodes
     end
   end
 end
