@@ -1,11 +1,13 @@
+BIN = ./antenna
 FILES = mix.exs test/test_helper.exs \
-	lib/history.ex test/history_test.exs \
-	lib/history/cli.ex test/history/cli_test.exs \
-	lib/history/grid.ex test/history/grid_test.exs \
-	lib/history/math.ex test/history/math_test.exs
+	lib/antenna.ex test/antenna_test.exs \
+	lib/antenna/parser.ex test/antenna/parser_test.exs
 VERBOSE = 0
 
-.PHONY: test check doc console clean
+.PHONY: run test check doc console clean
+
+run: $(BIN)
+	$(BIN) private/input.txt
 
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
@@ -24,3 +26,6 @@ console:
 
 clean:
 	rm -rf _build $(BIN) doc log/*.log
+
+$(BIN): $(FILES)
+	mix escript.build
