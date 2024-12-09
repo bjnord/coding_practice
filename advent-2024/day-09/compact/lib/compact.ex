@@ -3,6 +3,7 @@ defmodule Compact do
   Documentation for `Compact`.
   """
 
+  alias Compact.Disc
   import Compact.Parser
   import History.CLI
 
@@ -24,7 +25,9 @@ defmodule Compact do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Disc.create()
+    |> Disc.compact()
+    |> Disc.checksum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 

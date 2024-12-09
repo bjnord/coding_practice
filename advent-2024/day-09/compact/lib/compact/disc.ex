@@ -84,4 +84,18 @@ defmodule Compact.Disc do
         last_used(disc, n - 1)
     end
   end
+
+  def checksum(disc) do
+    0..(disc.n_blocks - 1)
+    |> Enum.map(&(checksum_block(disc, &1)))
+    |> Enum.sum()
+  end
+
+  defp checksum_block(disc, k) do
+    if disc.blocks[k] do
+      disc.blocks[k] * k
+    else
+      0
+    end
+  end
 end

@@ -45,6 +45,10 @@ defmodule Compact.DiscTest do
           "022111222......",
           "0099811188827773336446555566..............",
         ],
+        exp_checksums: [
+          2 * 1 + 2 * 2 + 1 * 3 + 1 * 4 + 1 * 5 + 2 * 6 + 2 * 7 + 2 * 8,
+          1928,
+        ],
       ]
     end
 
@@ -61,6 +65,14 @@ defmodule Compact.DiscTest do
                      |> Enum.map(&Disc.compact/1)
                      |> Enum.map(&Disc.to_string/1)
       assert act_compacts == fixture.exp_compacts
+    end
+
+    test "produces expected checksums", fixture do
+      act_checksums = fixture.layouts
+                      |> Enum.map(&Disc.create/1)
+                      |> Enum.map(&Disc.compact/1)
+                      |> Enum.map(&Disc.checksum/1)
+      assert act_checksums == fixture.exp_checksums
     end
   end
 end
