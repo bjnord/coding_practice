@@ -36,7 +36,9 @@ defmodule Compact do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Disc.create()
+    |> Disc.compact2()
+    |> Disc.checksum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
