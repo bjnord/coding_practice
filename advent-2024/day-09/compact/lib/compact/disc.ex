@@ -3,6 +3,8 @@ defmodule Compact.Disc do
   Compact disc functions.
   """
 
+  require Logger
+
   defstruct blocks: %{}, n_blocks: 0
 
   @type t :: %__MODULE__{
@@ -40,6 +42,46 @@ defmodule Compact.Disc do
       disc.blocks[k] + ?0
     else
       ?.
+    end
+  end
+
+  defp debug(), do: !!System.get_env("DEBUG")
+
+  @spec compact(__MODULE__.t()) :: __MODULE__.t()
+  def compact(disc) do
+    compact(disc, next_free(disc, 0), last_used(disc, disc.n_blocks - 1))
+  end
+
+  defp compact(disc, free_n, used_n) when free_n > used_n, do: disc
+  defp compact(disc, free_n, used_n) do
+    blocks =
+      disc.blocks
+      |> Map.put(free_n, disc.blocks[used_n])
+      |> Map.delete(used_n)
+    disc = %__MODULE__{disc | blocks: blocks}
+    if debug(), do: Logger.debug(__MODULE__.to_string(disc))
+    compact(disc, next_free(disc, free_n + 1), last_used(disc, used_n - 1))
+  end
+
+  defp next_free(disc, n) do
+    cond do
+      n >= disc.n_blocks ->
+        raise "next_free overrun"
+      Map.get(disc.blocks, n) == nil ->
+        n
+      true ->
+        next_free(disc, n + 1)
+    end
+  end
+
+  defp last_used(disc, n) do
+    cond do
+      n < 0 ->
+        raise "last_used underrun"
+      Map.get(disc.blocks, n) != nil ->
+        n
+      true ->
+        last_used(disc, n - 1)
     end
   end
 end
