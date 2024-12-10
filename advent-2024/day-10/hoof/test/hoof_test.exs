@@ -79,7 +79,7 @@ defmodule HoofTest do
             },
           },
         ],
-        exp_scores: [
+        exp_trailhead_scores: [
           [{{0, 0}, 1}],
           [{{0, 3}, 2}],
           [{{0, 3}, 4}],
@@ -92,12 +92,19 @@ defmodule HoofTest do
             {{6, 0}, 5}, {{6, 6}, 3}, {{7, 1}, 5},
           ],
         ],
+        exp_scores: [1, 2, 4, 3, 36],
       ]
     end
 
     test "produces expected trailhead scores", fixture do
+      act_trailhead_scores = fixture.grids
+                             |> Enum.map(&Hoof.trailhead_scores/1)
+      assert act_trailhead_scores == fixture.exp_trailhead_scores
+    end
+
+    test "produces expected score", fixture do
       act_scores = fixture.grids
-                   |> Enum.map(&Hoof.scores/1)
+                   |> Enum.map(&Hoof.score/1)
       assert act_scores == fixture.exp_scores
     end
   end

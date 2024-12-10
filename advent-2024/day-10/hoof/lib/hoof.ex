@@ -7,7 +7,14 @@ defmodule Hoof do
   import History.CLI
   alias History.Grid
 
-  def scores(grid) do
+  def score(grid) do
+    grid
+    |> trailhead_scores()
+    |> Enum.map(&(elem(&1, 1)))
+    |> Enum.sum()
+  end
+
+  def trailhead_scores(grid) do
     grid
     |> trailheads()
     |> Enum.map(&({&1, score(grid, &1)}))
@@ -20,8 +27,18 @@ defmodule Hoof do
     |> Enum.sort()
   end
 
-  defp score(_grid, _trailhead) do
-    1
+  defp score(grid, trailhead) do
+    nines(grid, 1, trailhead)
+    |> Enum.uniq()
+    |> Enum.count()
+  end
+
+  defp nines(_grid, 10, next_pos), do: [next_pos]
+  defp nines(grid, elev, next_pos) do
+    Grid.cardinals_of(grid, next_pos)
+    |> Enum.filter(fn pos -> Grid.get(grid, pos) == elev end)
+    |> Enum.map(&(nines(grid, elev + 1, &1)))
+    |> List.flatten()
   end
 
   @doc """
@@ -42,7 +59,7 @@ defmodule Hoof do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Hoof.score()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
