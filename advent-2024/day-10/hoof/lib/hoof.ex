@@ -41,6 +41,32 @@ defmodule Hoof do
     |> List.flatten()
   end
 
+  def rating(grid) do
+    grid
+    |> trailhead_ratings()
+    |> Enum.map(&(elem(&1, 1)))
+    |> Enum.sum()
+  end
+
+  def trailhead_ratings(grid) do
+    grid
+    |> trailheads()
+    |> Enum.map(&({&1, rating(grid, &1)}))
+  end
+
+  defp rating(grid, trailhead) do
+    paths(grid, 1, nil, trailhead)
+  end
+
+  defp paths(_grid, 10, _prev_pos, _next_pos), do: 1
+  defp paths(grid, elev, prev_pos, next_pos) do
+    Grid.cardinals_of(grid, next_pos)
+    |> Enum.reject(fn pos -> pos == prev_pos end)
+    |> Enum.filter(fn pos -> Grid.get(grid, pos) == elev end)
+    |> Enum.map(&(paths(grid, elev + 1, next_pos, &1)))
+    |> Enum.sum()
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -68,7 +94,7 @@ defmodule Hoof do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Hoof.rating()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

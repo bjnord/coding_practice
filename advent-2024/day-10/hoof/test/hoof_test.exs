@@ -4,6 +4,14 @@ defmodule HoofTest do
 
   alias History.Grid
 
+  def take_235(list) do
+    [
+      Enum.at(list, 2),
+      Enum.at(list, 3),
+      Enum.at(list, 5),
+    ]
+  end
+
   describe "puzzle examples" do
     setup do
       [
@@ -45,6 +53,23 @@ defmodule HoofTest do
             },
           },
           %Grid{
+            size: %{x: 6, y: 6},
+            squares: %{
+              {0, 0} => 0, {0, 1} => 1, {0, 2} => 2,
+              {0, 3} => 3, {0, 4} => 4, {0, 5} => 5,
+              {1, 0} => 1, {1, 1} => 2, {1, 2} => 3,
+              {1, 3} => 4, {1, 4} => 5, {1, 5} => 6,
+              {2, 0} => 2, {2, 1} => 3, {2, 2} => 4,
+              {2, 3} => 5, {2, 4} => 6, {2, 5} => 7,
+              {3, 0} => 3, {3, 1} => 4, {3, 2} => 5,
+              {3, 3} => 6, {3, 4} => 7, {3, 5} => 8,
+              {4, 0} => 4, {4, 2} => 6,
+              {4, 3} => 7, {4, 4} => 8, {4, 5} => 9,
+              {5, 0} => 5, {5, 1} => 6, {5, 2} => 7,
+              {5, 3} => 8, {5, 4} => 9,
+            }
+          },
+          %Grid{
             size: %{x: 7, y: 7},
             squares: %{
               {0, 0} => 1, {0, 1} => 0, {0, 4} => 9,
@@ -83,6 +108,7 @@ defmodule HoofTest do
           [{{0, 0}, 1}],
           [{{0, 3}, 2}],
           [{{0, 3}, 4}],
+          [{{0, 0}, 2}],
           [
             {{0, 1}, 1}, {{6, 5}, 2},
           ],
@@ -92,7 +118,17 @@ defmodule HoofTest do
             {{6, 0}, 5}, {{6, 6}, 3}, {{7, 1}, 5},
           ],
         ],
-        exp_scores: [1, 2, 4, 3, 36],
+        exp_scores: [1, 2, 4, 2, 3, 36],
+        exp_trailhead_ratings: [
+          [{{0, 3}, 13}],
+          [{{0, 0}, 227}],
+          [
+            {{0, 2}, 20}, {{0, 4}, 24}, {{2, 4}, 10},
+            {{4, 6},  4}, {{5, 2},  1}, {{5, 5},  4},
+            {{6, 0},  5}, {{6, 6},  8}, {{7, 1},  5},
+          ],
+        ],
+        exp_ratings: [13, 227, 81],
       ]
     end
 
@@ -106,6 +142,20 @@ defmodule HoofTest do
       act_scores = fixture.grids
                    |> Enum.map(&Hoof.score/1)
       assert act_scores == fixture.exp_scores
+    end
+
+    test "produces expected trailhead ratings", fixture do
+      act_trailhead_ratings = fixture.grids
+                              |> take_235()
+                              |> Enum.map(&Hoof.trailhead_ratings/1)
+      assert act_trailhead_ratings == fixture.exp_trailhead_ratings
+    end
+
+    test "produces expected rating", fixture do
+      act_ratings = fixture.grids
+                    |> take_235()
+                    |> Enum.map(&Hoof.rating/1)
+      assert act_ratings == fixture.exp_ratings
     end
   end
 end
