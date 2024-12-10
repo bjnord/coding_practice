@@ -5,6 +5,24 @@ defmodule Hoof do
 
   import Hoof.Parser
   import History.CLI
+  alias History.Grid
+
+  def scores(grid) do
+    grid
+    |> trailheads()
+    |> Enum.map(&({&1, score(grid, &1)}))
+  end
+
+  defp trailheads(grid) do
+    grid
+    |> Grid.keys()
+    |> Enum.filter(fn pos -> Grid.get(grid, pos) == 0 end)
+    |> Enum.sort()
+  end
+
+  defp score(_grid, _trailhead) do
+    1
+  end
 
   @doc """
   Parse arguments and call puzzle part methods.
