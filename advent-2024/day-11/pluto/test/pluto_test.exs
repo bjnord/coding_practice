@@ -48,5 +48,15 @@ defmodule PlutoTest do
         end)
       assert act_blink_stones == fixture.exp_blink_stones
     end
+
+    test "produce expected blink stones (DP)", fixture do
+      act_blink_stones =
+        [fixture.stone_lines, fixture.exp_blink_stones]
+        |> Enum.zip()
+        |> Enum.map(fn {stone_line, {n_blinks, _exp_n_stones}} ->
+          {n_blinks, Pluto.dp_n_stones(stone_line, n_blinks)}
+        end)
+      assert act_blink_stones == fixture.exp_blink_stones
+    end
   end
 end
