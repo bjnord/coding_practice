@@ -6,56 +6,39 @@ defmodule Pluto do
   import Pluto.Parser
   import History.CLI
 
-  @cheap_n_blinks 25
+  @n_blinks_step 25
 
   def dp_n_stones(stones, n_blinks) do
+    dp_n_stones_by(stones, n_blinks, @n_blinks_step)
+  end
+
+  defp dp_n_stones_by(stones, n_blinks, step) when n_blinks > step do
     stones
-    |> Enum.map(&({&1, n_blinks}))
-    |> dp_n_stones()
-  end
-
-  # an `entry` is a `{stone, n_blinks}` task to be resolved to `n_stones`
-
-  defp dp_n_stones(entries) do
-    entries
-    |> Enum.reduce({0, %{}}, fn entry, {n_stones, cache} ->
-      {entry_n_stones, cache} = dp_n_stones_of(entry, cache)
-      {n_stones + entry_n_stones, cache}
+    |> Enum.flat_map(fn stone -> last_blink([stone], step) end)
+    |> tally()
+    |> Enum.map(fn {stone, count} ->
+      dp_n_stones_by([stone], n_blinks - step, step) * count
     end)
-    |> elem(0)
+    |> Enum.sum()
+  end
+  defp dp_n_stones_by(stones, n_blinks, _step) do
+    stones
+    |> Enum.map(fn stone -> n_stones([stone], n_blinks) end)
+    |> Enum.sum()
   end
 
-  # returns tuple with:
-  # - `n_stones` for the given entry
-  # - updated `cache`
-  defp dp_n_stones_of({stone, n_blinks} = entry, cache) when n_blinks <= @cheap_n_blinks do
-    entry_n_stones = Map.get(cache, entry)
-    if entry_n_stones do
-      {entry_n_stones, cache}
-    else
-      entry_n_stones = n_stones([stone], n_blinks)
-      cache = Map.put(cache, entry, entry_n_stones)
-      {entry_n_stones, cache}
-    end
-  end
-  defp dp_n_stones_of({stone, n_blinks}, cache) do
-    blink([stone], 75 - n_blinks)
-    |> Enum.reduce({0, cache}, fn b_stone, {n_stones, cache} ->
-      b_entry = {b_stone, n_blinks - 1}
-      b_entry_n_stones = Map.get(cache, b_entry)
-      if b_entry_n_stones do
-        {n_stones + b_entry_n_stones, cache}
-      else
-        {b_entry_n_stones, cache} = dp_n_stones_of(b_entry, cache)
-        {n_stones + b_entry_n_stones, cache}
-      end
-    end)
+  defp tally(list) do
+    Enum.reduce(list, %{}, fn entry, acc -> Map.update(acc, entry, 1, &(&1 + 1)) end)
   end
 
   def n_stones(stones, n_blinks) do
+    last_blink(stones, n_blinks)
+    |> Enum.count()
+  end
+
+  defp last_blink(stones, n_blinks) do
     1..n_blinks
     |> Enum.reduce(stones, &(blink(&2, &1)))
-    |> Enum.count()
   end
 
   def blinks(stones, n_blinks) do
