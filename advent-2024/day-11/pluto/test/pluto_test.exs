@@ -9,7 +9,7 @@ defmodule PlutoTest do
           [0, 1, 10, 99, 999],
           [125, 17],
         ],
-        exp_blink_lines: [
+        exp_blink_line_groups: [
           [
             [1, 2024, 1, 0, 9, 9, 2021976],
           ],
@@ -29,23 +29,21 @@ defmodule PlutoTest do
       ]
     end
 
-    # TODO `Enum.zip()` might be cleaner than `with_index()` + `at()`
     test "produce expected blink lines", fixture do
       act_blink_lines =
-        fixture.stone_lines
-        |> Enum.with_index()
-        |> Enum.map(fn {stone_line, i} ->
-          Pluto.blinks(stone_line, length(Enum.at(fixture.exp_blink_lines, i)))
+        [fixture.stone_lines, fixture.exp_blink_line_groups]
+        |> Enum.zip()
+        |> Enum.map(fn {stone_line, exp_blink_lines} ->
+          Pluto.blinks(stone_line, length(exp_blink_lines))
         end)
-      assert act_blink_lines == fixture.exp_blink_lines
+      assert act_blink_lines == fixture.exp_blink_line_groups
     end
 
     test "produce expected blink stones", fixture do
       act_blink_stones =
-        fixture.stone_lines
-        |> Enum.with_index()
-        |> Enum.map(fn {stone_line, i} ->
-          {n_blinks, _exp_stones} = Enum.at(fixture.exp_blink_stones, i)
+        [fixture.stone_lines, fixture.exp_blink_stones]
+        |> Enum.zip()
+        |> Enum.map(fn {stone_line, {n_blinks, _exp_n_stones}} ->
           {n_blinks, Pluto.n_stones(stone_line, n_blinks)}
         end)
       assert act_blink_stones == fixture.exp_blink_stones
