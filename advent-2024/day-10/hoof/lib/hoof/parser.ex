@@ -5,8 +5,6 @@ defmodule Hoof.Parser do
 
   alias History.Grid
 
-  @type puzzle_square() :: {{integer(), integer()}, char()}
-
   @doc ~S"""
   Parse an input file.
 
@@ -55,8 +53,8 @@ defmodule Hoof.Parser do
 
   ## Returns
 
-  the non-empty puzzle square characters and their positions, as a list of
-  `{{y, x}, ch}` tuples
+  the non-empty grid square heights and their positions, as a list of
+  `{{y, x}, h}` tuples
 
   ## Examples
       iex> parse_line({"02431\n", 0})
@@ -64,7 +62,7 @@ defmodule Hoof.Parser do
       iex> parse_line({"..9.8\n", 1})
       [{{1, 2}, 9}, {{1, 4}, 8}]
   """
-  @spec parse_line({String.t(), integer()}) :: [puzzle_square()]
+  @spec parse_line({String.t(), integer()}) :: [Hoof.grid_square()]
   def parse_line({line, y}) do
     line
     |> String.trim_trailing()
