@@ -9,10 +9,10 @@ defmodule Claw do
   def ab_values(%{a: {ay, ax}, b: {by, bx}, prize: {py, px}}) do
     left = Nx.tensor([[ax, bx], [ay, by]], type: :f64)
     right = Nx.tensor([px, py], type: :f64)
-    dot = Nx.LinAlg.solve(left, right)
-    a = Nx.to_number(dot[0])
+    coeff = Nx.LinAlg.solve(left, right)
+    a = Nx.to_number(coeff[0])
         |> round()
-    b = Nx.to_number(dot[1])
+    b = Nx.to_number(coeff[1])
         |> round()
     solution(a, b, ay, ax, by, bx, py, px)
   end

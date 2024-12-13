@@ -163,7 +163,7 @@ to win all possible prizes?**
 
 ...and another thing we did a lot of in my comp sci program was matrices.
 Turning a system of N equations in N variables, into a matrix (tensor),
-and doing the dot product to solve, is still pretty familiar ground.
+and solving, is still pretty familiar ground.
 
 I have been eager to start learning [Nx](https://hexdocs.pm/nx/Nx.html)
 ever since I first saw José Valim demonstrate its power a few years ago.
