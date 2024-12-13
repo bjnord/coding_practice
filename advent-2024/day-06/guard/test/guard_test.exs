@@ -13,7 +13,7 @@ defmodule GuardTest do
             {0, 4} => ?#, {1, 9} => ?#, {3, 2} => ?#, {4, 7} => ?#,
             {6, 1} => ?#, {7, 8} => ?#, {8, 0} => ?#, {9, 6} => ?#,
           },
-          marker: %{start: {6, 4}},
+          meta: %{start: {6, 4}},
         },
         exp_squares_walked: 41,
         loop_grid: %Grid{
@@ -23,7 +23,7 @@ defmodule GuardTest do
             {6, 1} => ?#, {7, 8} => ?#, {8, 0} => ?#, {9, 6} => ?#,
             {7, 7} => ?#,
           },
-          marker: %{start: {6, 4}},
+          meta: %{start: {6, 4}},
         },
         exp_loop_obstacles: [
           {6, 3},

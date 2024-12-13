@@ -9,7 +9,7 @@ defmodule Guard do
   require Logger
 
   def squares_walked(grid) do
-    {visited, _, _} = walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], true})
+    {visited, _, _} = walk(grid, grid.meta.start, {{-1, 0}, %{}}, {%{}, [], true})
     if visited == :loop do
       :loop
     else
@@ -149,7 +149,7 @@ defmodule Guard do
     for y <- 0..(grid.size.y - 1),
         x <- 0..(grid.size.x - 1) do
       grid = Grid.put(grid, {y, x}, ?#)
-      if elem(walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop do
+      if elem(walk(grid, grid.meta.start, {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop do
         {y, x}
       else
         :noloop
@@ -162,12 +162,12 @@ defmodule Guard do
     potential_loop_obstacles(grid)
     |> Enum.filter(fn {y, x} ->
       grid = Grid.put(grid, {y, x}, ?#)
-      elem(walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop
+      elem(walk(grid, grid.meta.start, {{-1, 0}, %{}}, {%{}, [], false}), 0) == :loop
     end)
   end
 
   defp potential_loop_obstacles(grid) do
-    walk(grid, grid.marker.start, {{-1, 0}, %{}}, {%{}, [], true})
+    walk(grid, grid.meta.start, {{-1, 0}, %{}}, {%{}, [], true})
     |> elem(1)
     |> Enum.uniq()
   end

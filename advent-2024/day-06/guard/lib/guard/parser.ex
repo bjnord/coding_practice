@@ -51,7 +51,7 @@ defmodule Guard.Parser do
     |> Enum.reduce(grid, fn pos, acc ->
       if Grid.get(grid, pos) == ?^ do
         Grid.delete(grid, pos)
-        |> Grid.set_marker(:start, pos)
+        |> Grid.set_meta(:start, pos)
       else
         acc
       end

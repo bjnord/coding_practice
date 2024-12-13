@@ -3,12 +3,12 @@ defmodule History.Grid do
   Grid structure and functions for `History`.
   """
 
-  defstruct size: %{y: 0, x: 0}, squares: %{}, marker: %{}
+  defstruct size: %{y: 0, x: 0}, squares: %{}, meta: %{}
 
   @type t :: %__MODULE__{
     size: %{y: integer(), x: integer()},
     squares: %{{integer(), integer()} => any()},
-    marker: %{atom() => any()},
+    meta: %{atom() => any()},
   }
 
   alias History.Grid
@@ -28,7 +28,7 @@ defmodule History.Grid do
     %Grid{
       size: %{y: dim_y, x: dim_x},
       squares: squares,
-      marker: %{},
+      meta: %{},
     }
   end
 
@@ -36,7 +36,7 @@ defmodule History.Grid do
     %Grid{
       size: %{y: dim_y, x: dim_x},
       squares: %{},
-      marker: %{},
+      meta: %{},
     }
   end
 
@@ -79,8 +79,8 @@ defmodule History.Grid do
   defp out_of_bounds?(n, max) when (n >= max), do: true
   defp out_of_bounds?(_n, _max), do: false
 
-  def set_marker(grid, sym, value) do
-    %{grid | marker: Map.put(grid.marker, sym, value)}
+  def set_meta(grid, sym, value) do
+    %{grid | meta: Map.put(grid.meta, sym, value)}
   end
 
   # `Map`-like functions

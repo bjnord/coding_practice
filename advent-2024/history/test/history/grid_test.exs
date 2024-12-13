@@ -37,14 +37,14 @@ defmodule History.GridTest do
             {2, 2} => ?X,
             {2, 3} => ?M,
           },
-          marker: %{},
+          meta: %{},
         },
         empty_y: 5,
         empty_x: 9,
         exp_empty_grid: %Grid{
           size: %{y: 5, x: 9},
           squares: %{},
-          marker: %{},
+          meta: %{},
         },
       ]
     end
@@ -59,10 +59,10 @@ defmodule History.GridTest do
       assert act_grid == fixture.exp_empty_grid
     end
 
-    test "set marker" do
+    test "set meta" do
       grid = Grid.create(3, 3)
-             |> Grid.set_marker(:start, {0, 1})
-      assert grid.marker.start == {0, 1}
+             |> Grid.set_meta(:start, {0, 1})
+      assert grid.meta.start == {0, 1}
     end
   end
 end
