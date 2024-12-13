@@ -6,24 +6,32 @@ defmodule Claw do
   import Claw.Parser
   import History.CLI
 
-  def ab_values(%{a: {ay, ax}, b: {by, bx}, prize: {py, px}}, range \\ 1..100) do
-    range
-    |> Enum.find(fn a ->
-      a * ay + div(px - a * ax, bx) * by == py
-    end)
-    |> then(fn a ->
-      if a do
-        b = div(px - a * ax, bx)
+  def ab_values(%{a: {ay, ax}, b: {by, bx}, prize: {py, px}}) do
+    left = Nx.tensor([[ax, bx], [ay, by]], type: :f64)
+    right = Nx.tensor([px, py], type: :f64)
+    dot = Nx.LinAlg.solve(left, right)
+    a = Nx.to_number(dot[0])
+        |> round()
+    b = Nx.to_number(dot[1])
+        |> round()
+    solution(a, b, ay, ax, by, bx, py, px)
+  end
+
+  defp solution(a, b, ay, ax, by, bx, py, px) do
+    if a * ay + b * by == py do
+      if a * ax + b * bx == px do
         {a, b}
       else
         nil
       end
-    end)
+    else
+      nil
+    end
   end
 
-  def cost(machine, range \\ 1..100) do
+  def cost(machine) do
     machine
-    |> ab_values(range)
+    |> ab_values()
     |> cost_ab()
   end
 
@@ -62,7 +70,9 @@ defmodule Claw do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(&Claw.higher/1)
+    |> Enum.map(&Claw.cost/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
