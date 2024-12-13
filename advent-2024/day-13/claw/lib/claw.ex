@@ -17,17 +17,10 @@ defmodule Claw do
     solution(a, b, ay, ax, by, bx, py, px)
   end
 
-  defp solution(a, b, ay, ax, by, bx, py, px) do
-    if a * ay + b * by == py do
-      if a * ax + b * bx == px do
-        {a, b}
-      else
-        nil
-      end
-    else
-      nil
-    end
-  end
+  defp solution(a, b, ay, ax, by, bx, py, px) when
+    a * ay + b * by == py and
+    a * ax + b * bx == px, do: {a, b}
+  defp solution(_a, _b, _ay, _ax, _by, _bx, _py, _px), do: nil
 
   def cost(machine) do
     machine
