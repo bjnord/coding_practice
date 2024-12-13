@@ -81,7 +81,7 @@ defmodule Claw.Parser do
       iex> parse_machine("Button A: X+3, Y+4\nButton B: X+2, Y+5\nPrize: X=1717, Y=2345\n")
       %{a: {4, 3}, b: {5, 2}, prize: {2345, 1717}}
   """
-  @spec parse_machine(String.t()) :: %{}
+  @spec parse_machine(String.t()) :: map()
   def parse_machine(lines) do
     {:ok, [?A, ax, ay, ?B, bx, by, px, py], _, _, _, _} = machine(lines)
     %{
