@@ -39,6 +39,18 @@ defmodule ClawTest do
           200,
           0,
         ],
+        exp_ab_values_2: [
+          nil,
+          {1, 2},
+          nil,
+          {1, 2},
+        ],
+        exp_costs_2: [
+          0,
+          3,
+          0,
+          3,
+        ],
       ]
     end
 
@@ -52,6 +64,20 @@ defmodule ClawTest do
       act_costs = fixture.machines
                   |> Enum.map(&Claw.cost/1)
       assert act_costs == fixture.exp_costs
+    end
+
+    test "finds A and B values (part 2)", fixture do
+      act_ab_values = fixture.machines
+                      |> Enum.map(&Claw.higher/1)
+                      |> Enum.map(&(Claw.ab_values(&1, 1..100_000_000)))
+      assert act_ab_values == fixture.exp_ab_values_2
+    end
+
+    test "finds costs (part 2)", fixture do
+      act_costs = fixture.machines
+                  |> Enum.map(&Claw.higher/1)
+                  |> Enum.map(&(Claw.cost(&1, 1..100_000_000)))
+      assert act_costs == fixture.exp_costs_2
     end
   end
 end
