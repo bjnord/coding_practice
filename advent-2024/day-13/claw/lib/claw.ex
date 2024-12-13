@@ -6,6 +6,28 @@ defmodule Claw do
   import Claw.Parser
   import History.CLI
 
+  def ab_values(%{a: {ay, ax}, b: {by, bx}, prize: {py, px}}) do
+    1..100
+    |> Enum.filter(fn a ->
+      a * ay + div(px - a * ax, bx) * by == py
+    end)
+    |> Enum.map(fn a ->
+      b = div(px - a * ax, bx)
+      {a, b}
+    end)
+    |> Enum.sort()
+  end
+
+  def cost(machine) do
+    machine
+    |> ab_values()
+    |> List.first()
+    |> then(&cost_ab/1)
+  end
+
+  def cost_ab(nil), do: 0
+  def cost_ab({a, b}), do: a * 3 + b
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -24,7 +46,8 @@ defmodule Claw do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(&Claw.cost/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
