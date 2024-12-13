@@ -28,10 +28,10 @@ defmodule ClawTest do
           },
         ],
         exp_ab_values: [
-          [{80, 40}],
-          [],
-          [{38, 86}],
-          [],
+          {80, 40},
+          nil,
+          {38, 86},
+          nil,
         ],
         exp_costs: [
           280,

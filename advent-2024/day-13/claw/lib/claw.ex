@@ -8,21 +8,23 @@ defmodule Claw do
 
   def ab_values(%{a: {ay, ax}, b: {by, bx}, prize: {py, px}}) do
     1..100
-    |> Enum.filter(fn a ->
+    |> Enum.find(fn a ->
       a * ay + div(px - a * ax, bx) * by == py
     end)
-    |> Enum.map(fn a ->
-      b = div(px - a * ax, bx)
-      {a, b}
+    |> then(fn a ->
+      if a do
+        b = div(px - a * ax, bx)
+        {a, b}
+      else
+        nil
+      end
     end)
-    |> Enum.sort()
   end
 
   def cost(machine) do
     machine
     |> ab_values()
-    |> List.first()
-    |> then(&cost_ab/1)
+    |> cost_ab()
   end
 
   def cost_ab(nil), do: 0
