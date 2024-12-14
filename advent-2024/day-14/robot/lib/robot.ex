@@ -62,7 +62,7 @@ defmodule Robot do
       Map.update(acc, pos, 1, &(&1 + 1))
     end)
     |> Enum.map(fn {pos, n} ->
-      # TODO extract
+      # TODO extract to function
       q = quadrant_of(pos, dim)
       if q do
         {q, n}
@@ -71,8 +71,8 @@ defmodule Robot do
       end
     end)
     |> Enum.reject(&(&1 == nil))
-    |> dbg()
-    # TODO tally them into 4-length list
+    |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
+    |> Enum.map(fn {_q, list} -> Enum.sum(list) end)
   end
 
   @doc ~S"""
@@ -124,8 +124,11 @@ defmodule Robot do
   Process input file and display part 1 solution.
   """
   def part1(input_path) do
+    dim = {103, 101}
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(&(Robot.location_after(&1, dim, 100)))
+    |> Robot.quadrant_count(dim)
+    |> Enum.product()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
