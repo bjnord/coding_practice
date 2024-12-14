@@ -6,7 +6,7 @@ defmodule Claw.MixProject do
       app: :claw,
       escript: escript_config(),
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -24,6 +24,7 @@ defmodule Claw.MixProject do
     [
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.35", only: :dev, runtime: false},
+      {:freedom_formatter, "~> 2.0", only: :dev},
       {:logger_file_backend, "~> 0.0.13"},
       {:nimble_parsec, "~> 1.4.0"},
       {:nx, "~> 0.9"},
