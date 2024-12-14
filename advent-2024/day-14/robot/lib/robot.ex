@@ -107,6 +107,35 @@ defmodule Robot do
     end
   end
 
+  def create_pnm(robots, second, {dim_y, dim_x}) do
+    pixels =
+      robots
+      |> Enum.reduce(%{}, fn {pos, _vel}, acc ->
+        Map.update(acc, pos, 1, &(&1 + 1))
+      end)
+    header = "P1\n#{dim_x} #{dim_y}\n"
+    content =
+      0..(dim_y - 1)
+      |> Enum.map(&(pnm_line_y(pixels, &1, dim_x)))
+      |> Enum.join("\n")
+    n0 = Integer.to_string(second)
+         |> String.pad_leading(8, "0")
+    filename = "images/sec#{n0}.pnm"
+    File.write(filename, header <> content)
+  end
+
+  defp pnm_line_y(pixels, y, dim_x) do
+    0..(dim_x - 1)
+    |> Enum.map(fn x ->
+      cond do
+        Map.get(pixels, {y, x}) -> [?1, 32]
+        true                    -> [?0, 32]
+      end
+    end)
+    |> List.flatten()
+    |> List.to_string()
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 

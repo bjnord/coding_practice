@@ -44,5 +44,22 @@ defmodule RobotTest do
     #    |> Enum.map(&(Robot.location_after(robot, fixture.small_dim, &1)))
     #  assert act_steps == exp_steps
     #end
+
+    #test "create PNMs and GIF", fixture do
+    #  input_robots =
+    #    File.read!("private/input.txt")
+    #    |> Robot.Parser.parse_input_string
+    #  input_dim = {103, 101}
+    #  0..1_200
+    #  |> Enum.reduce(input_robots, fn s, robots ->
+    #    Robot.create_pnm(robots, s, input_dim)
+    #    robots
+    #    |> Enum.map(&(Robot.location_after(&1, input_dim, 1)))
+    #    |> Enum.zip(robots)
+    #    |> Enum.map(fn {{x, y}, {_, {dx, dy}}} ->
+    #      {{x, y}, {dx, dy}}
+    #    end)
+    #  end)
+    #end
   end
 end
