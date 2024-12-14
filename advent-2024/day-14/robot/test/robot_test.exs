@@ -31,5 +31,18 @@ defmodule RobotTest do
         |> Robot.quadrant_count(fixture.small_dim)
       assert act_quadrant_count == fixture.exp_quadrant_count
     end
+
+    # TODO turn this into property-based test
+    #test "find steps during 100 seconds", fixture do
+    #  robot = fixture.robots
+    #          |> Enum.at(0)
+    #  exp_steps =
+    #    1..100
+    #    |> Enum.map(&(Robot.location_after_by_adding(robot, fixture.small_dim, &1)))
+    #  act_steps =
+    #    1..100
+    #    |> Enum.map(&(Robot.location_after(robot, fixture.small_dim, &1)))
+    #  assert act_steps == exp_steps
+    #end
   end
 end
