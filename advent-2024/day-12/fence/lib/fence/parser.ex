@@ -43,6 +43,44 @@ defmodule Fence.Parser do
     |> Enum.with_index()
     |> Enum.flat_map(&parse_line/1)
     |> Grid.from_squares()
+    |> set_regions()
+  end
+
+  defp set_regions(grid) do
+    regions =
+      find_regions(grid, hd(Grid.keys(grid)), [])
+      |> Enum.reverse()
+    Grid.set_meta(grid, :regions, regions)
+  end
+
+  defp find_regions(_grid, nil, regions), do: regions
+  defp find_regions(grid, pos, regions) do
+    plant = Grid.get(grid, pos)
+    region = find_region(grid, plant, pos, %{})
+             |> elem(0)
+             |> Enum.sort()
+    grid =
+      region
+      |> Enum.reduce(grid, fn {_plant, rpos}, grid ->
+        Grid.delete(grid, rpos)
+      end)
+    next_pos =
+      Grid.keys(grid)
+      |> List.first()
+    find_regions(grid, next_pos, [region | regions])
+  end
+
+  defp find_region(grid, plant, pos, seen) do
+    grid
+    |> Grid.cardinals_of(pos)
+    |> Enum.reduce({[{plant, pos}], Map.put(seen, pos, true)}, fn npos, {region_pos, seen} ->
+      if (Grid.get(grid, npos) == Grid.get(grid, pos)) && !seen[npos] do
+        {new_pos, seen} = find_region(grid, plant, npos, seen)
+        {new_pos ++ region_pos, seen}
+      else
+        {region_pos, seen}
+      end
+    end)
   end
 
   @doc ~S"""
