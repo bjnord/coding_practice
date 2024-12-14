@@ -26,7 +26,7 @@ defmodule Hoof do
   "a trailhead's **score** is the number of 9-height positions reachable
   from that trailhead via a hiking trail"
   """
-  @spec trailhead_scores(Grid.t()) :: [integer()]
+  @spec trailhead_scores(Grid.t()) :: [{grid_square(), integer()}]
   def trailhead_scores(grid) do
     grid
     |> trailheads()
