@@ -18,11 +18,11 @@ defmodule Lanternfish.Parser do
 
   a `Grid` and list of directions
   """
-  @spec parse_input_file(String.t()) :: {Grid.t(), [atom()]}
-  def parse_input_file(path) do
+  @spec parse_input_file(String.t(), []) :: {Grid.t(), [atom()]}
+  def parse_input_file(path, opts \\ []) do
     path
     |> File.read!()
-    |> parse_input_string()
+    |> parse_input_string(opts)
   end
 
   @doc ~S"""
@@ -36,13 +36,13 @@ defmodule Lanternfish.Parser do
 
   a `Grid` and list of directions
   """
-  @spec parse_input_string(String.t()) :: {Grid.t(), [atom()]}
-  def parse_input_string(input) do
+  @spec parse_input_string(String.t(), []) :: {Grid.t(), [atom()]}
+  def parse_input_string(input, opts \\ []) do
     [grid_s, dir_s] =
       input
       |> String.split("\n\n", trim: true)
     {
-      parse_input_grid(grid_s),
+      parse_input_grid(grid_s, opts),
       parse_directions(dir_s),
     }
   end
@@ -58,12 +58,12 @@ defmodule Lanternfish.Parser do
 
   a `Grid`
   """
-  @spec parse_input_grid(String.t()) :: Grid.t()
-  def parse_input_grid(input) do
+  @spec parse_input_grid(String.t(), []) :: Grid.t()
+  def parse_input_grid(input, opts) do
     input
     |> String.split("\n", trim: true)
     |> Enum.with_index()
-    |> Enum.flat_map(&parse_line/1)
+    |> Enum.flat_map(&(parse_line(&1, opts)))
     |> Grid.from_squares()
     |> mark_start()
   end
@@ -87,6 +87,7 @@ defmodule Lanternfish.Parser do
 
   - `line`: the puzzle input line
   - `y`: the y position of the input line
+  - `opts`: parsing options
 
   ## Returns
 
@@ -98,15 +99,34 @@ defmodule Lanternfish.Parser do
       [{{0, 0}, ?#}, {{0, 1}, ?#}, {{0, 2}, ?#}, {{0, 3}, ?#}, {{0, 4}, ?#}]
       iex> parse_line({"#@.O#\n", 1})
       [{{1, 0}, ?#}, {{1, 1}, ?@}, {{1, 3}, ?O}, {{1, 4}, ?#}]
+      iex> parse_line({"#@.O\n", 2}, wide: true)
+      [{{2, 0}, ?#}, {{2, 1}, ?#}, {{2, 2}, ?@}, {{2, 6}, ?[}, {{2, 7}, ?]}]
   """
-  @spec parse_line({String.t(), integer()}) :: [puzzle_square()]
-  def parse_line({line, y}) do
+  @spec parse_line({String.t(), integer()}, []) :: [puzzle_square()]
+  def parse_line({line, y}, opts \\ []) do
     line
     |> String.trim_trailing()
     |> String.to_charlist()
     |> Enum.with_index()
     |> Enum.reject(fn {ch, _x} -> ch == ?. end)
-    |> Enum.map(fn {ch, x} -> {{y, x}, ch} end)
+    |> Enum.flat_map(fn {ch, x} -> parse_pos(y, x, ch, opts[:wide]) end)
+  end
+
+  defp parse_pos(y, x, ch, wide) do
+    case {ch, wide} do
+      {?#, true} ->
+        [{{y, (x * 2)}, ?#}, {{y, (x * 2) + 1}, ?#}]
+      {?O, true} ->
+        [{{y, (x * 2)}, ?[}, {{y, (x * 2) + 1}, ?]}]
+      {?@, true} ->
+        [{{y, (x * 2)}, ?@}]
+      {?#, _} ->
+        [{{y, x}, ?#}]
+      {?O, _} ->
+        [{{y, x}, ?O}]
+      {?@, _} ->
+        [{{y, x}, ?@}]
+    end
   end
 
   @doc ~S"""

@@ -73,9 +73,8 @@ defmodule Lanternfish do
     ch = Grid.get(grid, {y, x})
     cond do
       (y == ry) && (x == rx) -> ?@
-      ch == ?# -> ?#
-      ch == ?O -> ?O
-      true     -> ?.
+      ch in [?#, ?O, ?[, ?]] -> ch
+      true                   -> ?.
     end
   end
 

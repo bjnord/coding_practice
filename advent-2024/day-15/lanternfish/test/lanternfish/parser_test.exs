@@ -41,15 +41,59 @@ defmodule Lanternfish.ParserTest do
           :west, :north, :north, :east, :east, :east, :south, :south,
           :west, :south, :east, :east, :south, :west, :west,
         ],
+        input2: """
+        ##########
+        #..O..O.O#
+        #......O.#
+        #.OO..O.O#
+        #..O@..O.#
+        #O#..O...#
+        #O..O..O.#
+        #.OO.O.OO#
+        #....O...#
+        ##########
+
+        <vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
+        vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
+        ><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
+        <<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
+        ^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
+        ^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
+        >^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
+        <><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
+        ^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
+        v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
+        """,
+        exp_dump2: """
+        ####################
+        ##....[]....[]..[]##
+        ##............[]..##
+        ##..[][]....[]..[]##
+        ##....[]@.....[]..##
+        ##[]##....[]......##
+        ##[]....[]....[]..##
+        ##..[][]..[]..[][]##
+        ##........[]......##
+        ####################
+        """,
       ]
     end
 
-    test "produces correct grid", fixture do
+    test "produces correct grid (example 1)", fixture do
       {act_grid, act_directions} =
         fixture.input
         |> parse_input_string()
       assert act_grid == fixture.exp_grid
       assert act_directions == fixture.exp_directions
+    end
+
+    test "produces correct grid (example 2)", fixture do
+      act_grid2 =
+        fixture.input2
+        |> parse_input_string(wide: true)
+        |> elem(0)
+      act_dump2 = Lanternfish.dump_string({act_grid2, act_grid2.meta.start})
+      assert act_dump2 == fixture.exp_dump2
     end
   end
 end
