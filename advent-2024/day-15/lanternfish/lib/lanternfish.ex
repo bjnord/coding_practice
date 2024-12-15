@@ -7,12 +7,12 @@ defmodule Lanternfish do
   import History.CLI
   alias History.Grid
 
+  # NOTE these are returned backwards (final movement = head of list)
   def movements(grid, directions) do
     directions
     |> Enum.reduce([{grid, grid.meta.start}], fn dir, [{grid0, pos0} | acc] ->
       [move(grid0, pos0, dir), {grid0, pos0} | acc]
     end)
-    |> Enum.reverse()
   end
 
   def move(grid, pos, dir) do
@@ -79,6 +79,16 @@ defmodule Lanternfish do
     end
   end
 
+  def gps({grid, _pos}) do
+    Grid.keys(grid)
+    |> Enum.reduce(0, fn {y, x} = pos, acc ->
+      case Grid.get(grid, pos) do
+        ?O -> y * 100 + x + acc
+        _  -> acc
+      end
+    end)
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -96,8 +106,10 @@ defmodule Lanternfish do
   Process input file and display part 1 solution.
   """
   def part1(input_path) do
-    parse_input_file(input_path)
-    nil  # TODO
+    {grid, directions} = parse_input_file(input_path)
+    Lanternfish.movements(grid, directions)
+    |> List.first()
+    |> Lanternfish.gps()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
