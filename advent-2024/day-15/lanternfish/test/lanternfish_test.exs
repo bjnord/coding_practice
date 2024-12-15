@@ -399,19 +399,12 @@ defmodule LanternfishTest do
     end
 
     test "produces correct box movements (part 2, example 3)", fixture do
-      limit = 11  # FIXME DEBUG TEMP; 11 = all of them
       act_move_dumps3 =
         parse_input_string(fixture.input3, wide: true)
-        |> then(fn {grid, dirs} -> {grid, Enum.slice(dirs, 0..(limit - 1))} end)  # FIXME DEBUG TEMP
         |> Lanternfish.movements()
         |> Enum.reverse()
         |> Enum.map(&Lanternfish.dump_string/1)
-      #IO.puts("actual:")  # FIXME DEBUG TEMP
-      #IO.puts(List.last(act_move_dumps3))  # FIXME DEBUG TEMP
-      #IO.puts("expected:")  # FIXME DEBUG TEMP
-      #IO.puts(Enum.at(fixture.exp_move_dumps3, limit))  # FIXME DEBUG TEMP
       assert act_move_dumps3 == fixture.exp_move_dumps3
-                                |> Enum.slice(0..limit)  # FIXME DEBUG TEMP
     end
 
     test "produces correct box movements (part 2, example 2)", fixture do

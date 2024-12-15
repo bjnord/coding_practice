@@ -64,7 +64,6 @@ defmodule Lanternfish do
       :clear,
       Enum.uniq(l_shifts ++ r_shifts)
       |> Enum.sort(fn {_, to_left, _}, {_, to_right, _} -> sorter.(to_left, to_right) end)
-      #|> dbg()  # FIXME DEBUG TEMP
     }
   end
 

@@ -6,6 +6,7 @@ defmodule Lanternfish.Parser do
   alias History.Grid
 
   @type puzzle_square() :: {{integer(), integer()}, char()}
+  @type parser_options() :: [wide: boolean()]
 
   @doc ~S"""
   Parse an input file.
@@ -18,7 +19,7 @@ defmodule Lanternfish.Parser do
 
   a `Grid` and list of directions
   """
-  @spec parse_input_file(String.t(), []) :: {Grid.t(), [atom()]}
+  @spec parse_input_file(String.t(), parser_options()) :: {Grid.t(), [atom()]}
   def parse_input_file(path, opts \\ []) do
     path
     |> File.read!()
@@ -36,7 +37,7 @@ defmodule Lanternfish.Parser do
 
   a `Grid` and list of directions
   """
-  @spec parse_input_string(String.t(), []) :: {Grid.t(), [atom()]}
+  @spec parse_input_string(String.t(), parser_options()) :: {Grid.t(), [atom()]}
   def parse_input_string(input, opts \\ []) do
     [grid_s, dir_s] =
       input
@@ -58,7 +59,7 @@ defmodule Lanternfish.Parser do
 
   a `Grid`
   """
-  @spec parse_input_grid(String.t(), []) :: Grid.t()
+  @spec parse_input_grid(String.t(), parser_options()) :: Grid.t()
   def parse_input_grid(input, opts) do
     input
     |> String.split("\n", trim: true)
@@ -102,7 +103,7 @@ defmodule Lanternfish.Parser do
       iex> parse_line({"#@.O\n", 2}, wide: true)
       [{{2, 0}, ?#}, {{2, 1}, ?#}, {{2, 2}, ?@}, {{2, 6}, ?[}, {{2, 7}, ?]}]
   """
-  @spec parse_line({String.t(), integer()}, []) :: [puzzle_square()]
+  @spec parse_line({String.t(), integer()}, parser_options()) :: [puzzle_square()]
   def parse_line({line, y}, opts \\ []) do
     line
     |> String.trim_trailing()
