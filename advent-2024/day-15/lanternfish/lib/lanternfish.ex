@@ -5,6 +5,34 @@ defmodule Lanternfish do
 
   import Lanternfish.Parser
   import History.CLI
+  alias History.Grid
+
+  def movements(grid, _directions) do
+    [{grid, grid.meta.start}]
+  end
+
+  def dump_string({grid, {ry, rx}}) do
+    0..(grid.size.y - 1)
+    |> Enum.map(&(dump_line(grid, &1, {ry, rx})))
+    |> Enum.join("\n")
+    |> then(fn s -> s <> "\n" end)
+  end
+
+  defp dump_line(grid, y, {ry, rx}) do
+    0..(grid.size.x - 1)
+    |> Enum.map(&(dump_char(grid, {y, &1}, {ry, rx})))
+    |> List.to_string()
+  end
+
+  defp dump_char(grid, {y, x}, {ry, rx}) do
+    ch = Grid.get(grid, {y, x})
+    cond do
+      (y == ry) && (x == rx) -> ?@
+      ch == ?# -> ?#
+      ch == ?O -> ?O
+      true     -> ?.
+    end
+  end
 
   @doc """
   Parse arguments and call puzzle part methods.
