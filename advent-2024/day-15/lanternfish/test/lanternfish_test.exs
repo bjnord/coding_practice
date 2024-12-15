@@ -227,6 +227,140 @@ defmodule LanternfishTest do
         ##########
         """,
         exp_gps2: 10092,
+        input3: """
+        #######
+        #...#.#
+        #.....#
+        #..OO@#
+        #..O..#
+        #.....#
+        #######
+
+        <vv<<^^<<^^
+        """,
+        exp_move_dumps3: [
+          """
+          ##############
+          ##......##..##
+          ##..........##
+          ##....[][]@.##
+          ##....[]....##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##..........##
+          ##...[][]@..##
+          ##....[]....##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##..........##
+          ##...[][]...##
+          ##....[].@..##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##..........##
+          ##...[][]...##
+          ##....[]....##
+          ##.......@..##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##..........##
+          ##...[][]...##
+          ##....[]....##
+          ##......@...##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##..........##
+          ##...[][]...##
+          ##....[]....##
+          ##.....@....##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##...[][]...##
+          ##....[]....##
+          ##.....@....##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##...[][]...##
+          ##....[]....##
+          ##.....@....##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##...[][]...##
+          ##....[]....##
+          ##....@.....##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##...[][]...##
+          ##....[]....##
+          ##...@......##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##......##..##
+          ##...[][]...##
+          ##...@[]....##
+          ##..........##
+          ##..........##
+          ##############
+          """,
+          """
+          ##############
+          ##...[].##..##
+          ##...@.[]...##
+          ##....[]....##
+          ##..........##
+          ##..........##
+          ##############
+          """,
+        ],
+        exp_move_dump2w: """
+        ####################
+        ##[].......[].[][]##
+        ##[]...........[].##
+        ##[]........[][][]##
+        ##[]......[]....[]##
+        ##..##......[]....##
+        ##..[]............##
+        ##..@......[].[][]##
+        ##......[][]..[]..##
+        ####################
+        """,
+        exp_gps2w: 9021,
       ]
     end
 
@@ -262,6 +396,40 @@ defmodule LanternfishTest do
         |> List.first()
         |> Lanternfish.gps()
       assert act_gps2 == fixture.exp_gps2
+    end
+
+    test "produces correct box movements (part 2, example 3)", fixture do
+      limit = 11  # FIXME DEBUG TEMP; 11 = all of them
+      act_move_dumps3 =
+        parse_input_string(fixture.input3, wide: true)
+        |> then(fn {grid, dirs} -> {grid, Enum.slice(dirs, 0..(limit - 1))} end)  # FIXME DEBUG TEMP
+        |> Lanternfish.movements()
+        |> Enum.reverse()
+        |> Enum.map(&Lanternfish.dump_string/1)
+      #IO.puts("actual:")  # FIXME DEBUG TEMP
+      #IO.puts(List.last(act_move_dumps3))  # FIXME DEBUG TEMP
+      #IO.puts("expected:")  # FIXME DEBUG TEMP
+      #IO.puts(Enum.at(fixture.exp_move_dumps3, limit))  # FIXME DEBUG TEMP
+      assert act_move_dumps3 == fixture.exp_move_dumps3
+                                |> Enum.slice(0..limit)  # FIXME DEBUG TEMP
+    end
+
+    test "produces correct box movements (part 2, example 2)", fixture do
+      act_move_dump2w =
+        parse_input_string(fixture.input2, wide: true)
+        |> Lanternfish.movements()
+        |> List.first()
+        |> Lanternfish.dump_string()
+      assert act_move_dump2w == fixture.exp_move_dump2w
+    end
+
+    test "produces correct GPS (part 2, example 2)", fixture do
+      act_gps2w =
+        parse_input_string(fixture.input2, wide: true)
+        |> Lanternfish.movements()
+        |> List.first()
+        |> Lanternfish.gps()
+      assert act_gps2w == fixture.exp_gps2w
     end
   end
 end
