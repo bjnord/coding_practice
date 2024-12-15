@@ -112,6 +112,10 @@ defmodule Lanternfish.Parser do
   @doc ~S"""
   Parse an input line containing a list of directions.
 
+  "The moves form a single giant sequence; they are broken into multiple
+  lines just to make copy-pasting easier. Newlines within the move sequence
+  should be ignored."
+
   ## Parameters
 
   - `line`: the puzzle input line
@@ -121,15 +125,15 @@ defmodule Lanternfish.Parser do
   a list of directions
 
   ## Examples
-      iex> parse_directions("<^>^>v>v\n")
+      iex> parse_directions("<^>^\n>v>v\n")
       [:west, :north, :east, :north, :east, :south, :east, :south]
   """
   @spec parse_directions(String.t()) :: [atom()]
   def parse_directions(line) do
     line
-    |> String.trim_trailing()
     |> String.to_charlist()
     |> Enum.map(&parse_direction/1)
+    |> Enum.reject(&(&1 == nil))
   end
 
   defp parse_direction(ch) do
@@ -138,6 +142,7 @@ defmodule Lanternfish.Parser do
       ?> -> :east
       ?v -> :south
       ?< -> :west
+      10 -> nil
     end
   end
 end

@@ -18,7 +18,8 @@ defmodule Lanternfish.ParserTest do
         #......#
         ########
 
-        <^^>>>vv<v>>v<<
+        <^^>>>vv
+        <v>>v<<
         """,
         exp_grid: %Grid{
           size: %{y: 8, x: 8},
