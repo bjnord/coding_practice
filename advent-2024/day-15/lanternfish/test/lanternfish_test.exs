@@ -196,9 +196,7 @@ defmodule LanternfishTest do
       act_move_dumps =
         Lanternfish.movements(fixture.grid, fixture.directions)
         |> Enum.map(&Lanternfish.dump_string/1)
-        |> Enum.slice(0..0)  # FIXME DEBUG TEMP
       assert act_move_dumps == fixture.exp_move_dumps
-                               |> Enum.slice(0..0)  # FIXME DEBUG TEMP
     end
   end
 end
