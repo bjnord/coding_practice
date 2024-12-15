@@ -15,38 +15,29 @@ defmodule Lanternfish do
     end)
   end
 
-  def move(grid, pos, dir) do
+  defp move(grid, pos, dir) do
     next_pos = delta_pos(pos, delta(dir))
-    case Grid.get(grid, next_pos) do
-      ?# ->
-        {grid, pos}
-      nil ->
-        {grid, next_pos}
-      ?O ->
-        shift_boxes(grid, pos, next_pos, dir)
+    {status, shifts} = box_shifts(grid, {next_pos, Grid.get(grid, next_pos)}, dir, [])
+    if status == :clear do
+      {shift_boxes(grid, shifts), next_pos}
+    else
+      {grid, pos}
     end
   end
 
-  defp shift_boxes(grid, pos, next_pos, dir) do
-    {shift_pos, shift_ch} = beyond_box(grid, next_pos, dir, ?O)
-    case shift_ch do
-      ?# ->
-        {grid, pos}
-      nil ->
-        shift_box(grid, next_pos, shift_pos)
-    end
-  end
-
-  defp shift_box(grid, next_pos, shift_pos) do
-    grid = Grid.delete(grid, next_pos)
-           |> Grid.put(shift_pos, ?O)
-    {grid, next_pos}
-  end
-
-  defp beyond_box(_grid, pos, _dir, ch) when ch != ?O, do: {pos, ch}
-  defp beyond_box(grid, pos, dir, _ch) do
+  # always called with a box/floor/wall `{pos, ch}` (not the robot)
+  defp box_shifts(_grid, {_pos, ch}, _dir, _shifts) when ch == ?#, do: {:blocked, []}
+  defp box_shifts(_grid, {_pos, ch}, _dir, shifts) when ch == nil, do: {:clear, shifts}
+  defp box_shifts(grid, {pos, ch}, dir, shifts) do
     next_pos = delta_pos(pos, delta(dir))
-    beyond_box(grid, next_pos, dir, Grid.get(grid, next_pos))
+    box_shifts(grid, {next_pos, Grid.get(grid, next_pos)}, dir, [{pos, next_pos, ch} | shifts])
+  end
+
+  defp shift_boxes(grid, []), do: grid
+  defp shift_boxes(grid, [{from_pos, to_pos, ch} | rem]) do
+    Grid.delete(grid, from_pos)
+    |> Grid.put(to_pos, ch)
+    |> shift_boxes(rem)
   end
 
   defp delta(:north), do: {-1, 0}
