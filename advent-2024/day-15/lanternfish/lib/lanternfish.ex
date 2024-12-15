@@ -8,7 +8,7 @@ defmodule Lanternfish do
   alias History.Grid
 
   # NOTE these are returned backwards (final movement = head of list)
-  def movements(grid, directions) do
+  def movements({grid, directions}) do
     directions
     |> Enum.reduce([{grid, grid.meta.start}], fn dir, [{grid0, pos0} | acc] ->
       [move(grid0, pos0, dir), {grid0, pos0} | acc]
@@ -106,8 +106,8 @@ defmodule Lanternfish do
   Process input file and display part 1 solution.
   """
   def part1(input_path) do
-    {grid, directions} = parse_input_file(input_path)
-    Lanternfish.movements(grid, directions)
+    parse_input_file(input_path)
+    |> Lanternfish.movements()
     |> List.first()
     |> Lanternfish.gps()
     |> IO.inspect(label: "Part 1 answer is")
