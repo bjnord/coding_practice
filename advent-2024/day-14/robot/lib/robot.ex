@@ -81,6 +81,27 @@ defmodule Robot do
     |> Enum.product()
   end
 
+  def safety_factors(robots, dim, seconds) do
+    1..seconds
+    |> Enum.reduce({robots, []}, fn s, {robots, acc} ->
+      locations =
+        robots
+        |> Enum.map(&(Robot.location_after(&1, dim, 1)))
+      safety_factor =
+        locations
+        |> Robot.safety_factor(dim)
+      robots =
+        locations
+        |> Enum.zip(robots)
+        |> Enum.map(fn {{y, x}, {_, {dy, dx}}} ->
+          {{y, x}, {dy, dx}}
+        end)
+      {robots, [{s, safety_factor} | acc]}
+    end)
+    |> elem(1)
+    |> Enum.reverse()
+  end
+
   @doc ~S"""
   Calculate robot's quadrant.
 
@@ -171,7 +192,7 @@ defmodule Robot do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    6644  # TODO
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
