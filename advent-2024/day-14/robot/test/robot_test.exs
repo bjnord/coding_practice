@@ -21,15 +21,22 @@ defmodule RobotTest do
         ],
         small_dim: {7, 11},
         exp_quadrant_count: [1, 3, 4, 1],
+        exp_safety_factor: 12,
       ]
     end
 
-    test "find quadrant count after 100 seconds", fixture do
-      act_quadrant_count =
+    test "find safety factor after 100 seconds", fixture do
+      locations =
         fixture.robots
         |> Enum.map(&(Robot.location_after(&1, fixture.small_dim, 100)))
+      act_quadrant_count =
+        locations
         |> Robot.quadrant_count(fixture.small_dim)
       assert act_quadrant_count == fixture.exp_quadrant_count
+      act_safety_factor =
+        locations
+        |> Robot.safety_factor(fixture.small_dim)
+      assert act_safety_factor == fixture.exp_safety_factor
     end
 
     # TODO turn this into property-based test

@@ -56,8 +56,8 @@ defmodule Robot do
   #  {{y, x}, {dy, dx}}
   #end
 
-  def quadrant_count(robots, dim) do
-    robots
+  def quadrant_count(locations, dim) do
+    locations
     |> Enum.reduce(%{}, fn pos, acc ->
       Map.update(acc, pos, 1, &(&1 + 1))
     end)
@@ -73,6 +73,12 @@ defmodule Robot do
     |> Enum.reject(&(&1 == nil))
     |> Enum.group_by(&(elem(&1, 0)), &(elem(&1, 1)))
     |> Enum.map(fn {_q, list} -> Enum.sum(list) end)
+  end
+
+  def safety_factor(locations, dim) do
+    locations
+    |> quadrant_count(dim)
+    |> Enum.product()
   end
 
   @doc ~S"""
@@ -156,8 +162,7 @@ defmodule Robot do
     dim = {103, 101}
     parse_input_file(input_path)
     |> Enum.map(&(Robot.location_after(&1, dim, 100)))
-    |> Robot.quadrant_count(dim)
-    |> Enum.product()
+    |> Robot.safety_factor(dim)
     |> IO.inspect(label: "Part 1 answer is")
   end
 
