@@ -25,9 +25,14 @@ defmodule Computer do
 
   # If the computer tries to read an opcode past the end of the program, it instead halts.
   defp exec({registers, _program}, _pc, output, []), do: {registers, output}
+  defp exec({registers, program}, pc, output, [op1, op2]) when op1 == 3 do
+    new_pc = jnz({registers, pc}, op1, op2)
+    exec({registers, program}, new_pc, output, next_ops(program, new_pc))
+  end
   defp exec({registers, program}, pc, output, [op1, op2]) do
     {registers, output} =
       case op1 do
+        0 -> adv({registers, output}, op1, op2)
         2 -> bst({registers, output}, op1, op2)
         5 -> out({registers, output}, op1, op2)
       end
@@ -60,8 +65,10 @@ defmodule Computer do
   `A` by `2^B`.) The result of the division operation is **truncated**
   to an integer and then written to the `A` register.
   """
-  def adv({{a, b, c}, output}, _op1, _op2) do
-    # TODO
+  def adv({{a, b, c}, output}, _op1, op2) do
+    num = a
+    den = 2 ** combo({a, b, c}, op2)
+    a = div(num, den)
     {{a, b, c}, output}
   end
 
@@ -97,9 +104,11 @@ defmodule Computer do
 
   \* The instruction does this using a little trampoline.
   """
-  def jnz({{a, b, c}, output}, _op1, _op2) do
-    # TODO
-    {{a, b, c}, output}
+  def jnz({{a, _b, _c}, pc}, _op1, op2) do
+    cond do
+      a == 0 -> pc + 2
+      true   -> op2
+    end
   end
 
   @doc """

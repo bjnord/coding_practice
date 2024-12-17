@@ -2,9 +2,10 @@ defmodule ComputerTest do
   use ExUnit.Case
   doctest Computer
 
-  # TODO some edge-case tests
+  # TODO some additional tests (including edge cases)
   #      - empty program should halt instantly, return same registers + empty output
   #      - combo op 7 should raise exception
+  #      - property-based test on adv/bdv/cdv instruction
 
   describe "puzzle example" do
     setup do
@@ -21,6 +22,10 @@ defmodule ComputerTest do
             %{output: [0, 1, 2]},
           },
           # If register A contains 2024, the program 0,1,5,4,3,0 would output 4,2,5,6,7,7,7,7,3,1,0 and leave 0 in register A.
+          {
+            {{2024, 0, 0}, %{0 => 0, 1 => 1, 2 => 5, 3 => 4, 4 => 3, 5 => 0}},
+            %{registers: {0, nil, nil}, output: [4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]},
+          },
           # If register B contains 29, the program 1,7 would set register B to 26.
           # If register B contains 2024 and register C contains 43690, the program 4,0 would set register B to 44354.
         ],
