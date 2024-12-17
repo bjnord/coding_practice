@@ -41,6 +41,7 @@ defmodule ComputerTest do
           {729, 0, 0},
           %{0 => 0, 1 => 1, 2 => 5, 3 => 4, 4 => 3, 5 => 0},
         },
+        exp_output_string: "4,6,3,5,6,3,5,2,1,0",
       ]
     end
 
@@ -65,6 +66,14 @@ defmodule ComputerTest do
       |> Enum.map(fn {computer, exp_result} ->
         assert_matches(Computer.run(computer), exp_result)
       end)
+    end
+
+    test "example program produces correct output string", fixture do
+      act_output_string =
+        fixture.computer
+        |> Computer.run()
+        |> Computer.output_string()
+      assert act_output_string == fixture.exp_output_string
     end
   end
 end

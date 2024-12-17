@@ -13,6 +13,10 @@ defmodule Computer do
     {registers, Enum.reverse(outputs)}
   end
 
+  def output_string({_registers, outputs}) do
+    Enum.join(outputs, ",")
+  end
+
   defp next_ops(program, pc) do
     if Map.get(program, pc) == nil do
       []
@@ -38,6 +42,8 @@ defmodule Computer do
         2 -> bst({registers, output}, op1, op2)
         4 -> bxc({registers, output}, op1, op2)
         5 -> out({registers, output}, op1, op2)
+        6 -> bdv({registers, output}, op1, op2)
+        7 -> cdv({registers, output}, op1, op2)
       end
     exec({registers, program}, pc + 2, output, next_ops(program, pc + 2))
   end
@@ -69,10 +75,14 @@ defmodule Computer do
   to an integer and then written to the `A` register.
   """
   def adv({{a, b, c}, output}, _op1, op2) do
+    a = register_a_div({a, b, c}, op2)
+    {{a, b, c}, output}
+  end
+
+  defp register_a_div({a, b, c}, op2) do
     num = a
     den = 2 ** combo({a, b, c}, op2)
-    a = div(num, den)
-    {{a, b, c}, output}
+    div(num, den)
   end
 
   @doc """
@@ -140,8 +150,8 @@ defmodule Computer do
   `adv` instruction except that the result is stored in the **`B`
   register**. (The numerator is still read from the `A` register.)
   """
-  def bdv({{a, b, c}, output}, _op1, _op2) do
-    # TODO
+  def bdv({{a, b, c}, output}, _op1, op2) do
+    b = register_a_div({a, b, c}, op2)
     {{a, b, c}, output}
   end
 
@@ -150,8 +160,8 @@ defmodule Computer do
   `adv` instruction except that the result is stored in the **`C`
   register**. (The numerator is still read from the `A` register.)
   """
-  def cdv({{a, b, c}, output}, _op1, _op2) do
-    # TODO
+  def cdv({{a, b, c}, output}, _op1, op2) do
+    c = register_a_div({a, b, c}, op2)
     {{a, b, c}, output}
   end
 
@@ -173,7 +183,8 @@ defmodule Computer do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Computer.run()
+    |> Computer.output_string()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
