@@ -7,7 +7,9 @@ defmodule Computer do
   import History.CLI
 
   def run({registers, program}) do
-    exec({registers, program}, 0, [], next_ops(program, 0))
+    {registers, outputs} =
+      exec({registers, program}, 0, [], next_ops(program, 0))
+    {registers, Enum.reverse(outputs)}
   end
 
   defp next_ops(program, pc) do
@@ -27,6 +29,7 @@ defmodule Computer do
     {registers, output} =
       case op1 do
         2 -> bst({registers, output}, op1, op2)
+        5 -> out({registers, output}, op1, op2)
       end
     exec({registers, program}, pc + 2, output, next_ops(program, pc + 2))
   end
@@ -115,9 +118,9 @@ defmodule Computer do
   operand modulo 8, then **outputs** that value. (If a program outputs
   multiple values, they are separated by commas.)
   """
-  def out({{a, b, c}, output}, _op1, _op2) do
-    # TODO
-    {{a, b, c}, output}
+  def out({{a, b, c}, output}, _op1, op2) do
+    out = rem(combo({a, b, c}, op2), 8)
+    {{a, b, c}, [out | output]}
   end
 
   @doc """
