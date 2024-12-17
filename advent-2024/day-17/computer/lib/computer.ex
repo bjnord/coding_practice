@@ -7,6 +7,10 @@ defmodule Computer do
   import Computer.Parser
   import History.CLI
 
+  @type registers() :: {integer(), integer(), integer()}
+  @type program() :: %{integer() => integer()}
+
+  @spec run({registers(), program()}) :: {registers(), [integer()]}
   def run({registers, program}) do
     {registers, outputs} =
       exec({registers, program}, 0, [], next_ops(program, 0))
@@ -165,6 +169,58 @@ defmodule Computer do
     {{a, b, c}, output}
   end
 
+  @spec disassemble({registers(), program()}) :: [String.t()]
+  def disassemble({_registers, program}) do
+    program
+    |> Enum.chunk_every(2)
+    |> Enum.sort()
+    |> Enum.map(fn [{_k1, v1}, {_k2, v2}] -> {v1, v2} end)
+    |> Enum.map(fn {op1, op2} -> disassemble(op1, op2) end)
+  end
+
+  defp disassemble(0, op2), do: combo_op_to_string(0, "A", op2)  # ADV
+  defp disassemble(1, op2), do: literal_to_string(1, op2)        # BXL
+  defp disassemble(2, op2), do: combo_to_string(2, op2)          # BST
+  defp disassemble(3, op2), do: literal_to_string(3, op2)        # JNZ
+  defp disassemble(4, op2), do: fixed_to_string(4, "C", op2)     # BXC
+  defp disassemble(5, op2), do: combo_to_string(5, op2)          # OUT
+  defp disassemble(6, op2), do: combo_op_to_string(6, "A", op2)  # BDV
+  defp disassemble(7, op2), do: combo_op_to_string(7, "A", op2)  # CDV
+
+  defp combo_to_string(op1, op2) do
+    "#{op1} #{op2} :: #{opcode_of(op1)} #{combo_operand(op2)}"
+  end
+  defp combo_op_to_string(op1, xop, op2) do
+    "#{op1} #{op2} :: #{opcode_of(op1)} #{xop}, #{combo_operand(op2)}"
+  end
+  defp literal_to_string(op1, op2) do
+    "#{op1} #{op2} :: #{opcode_of(op1)} ##{op2}"
+  end
+  defp fixed_to_string(op1, xop, op2) do
+    "#{op1} #{op2} :: #{opcode_of(op1)} #{xop}"
+  end
+  def combo_operand(op2) do
+    cond do
+      op2 >= 0 && op2 <= 3 -> "##{op2}"
+      op2 == 4             -> "A"
+      op2 == 5             -> "B"
+      op2 == 6             -> "C"
+    end
+  end
+
+  def opcode_of(op1) do
+    case op1 do
+      0 -> "ADV"
+      1 -> "BXL"
+      2 -> "BST"
+      3 -> "JNZ"
+      4 -> "BXC"
+      5 -> "OUT"
+      6 -> "BDV"
+      7 -> "CDV"
+    end
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -176,6 +232,7 @@ defmodule Computer do
     {input_path, opts} = parse_args(argv)
     if Enum.member?(opts[:parts], 1), do: part1(input_path)
     if Enum.member?(opts[:parts], 2), do: part2(input_path)
+    if opts[:verbose], do: print_disassembly(input_path)
   end
 
   @doc """
@@ -195,5 +252,14 @@ defmodule Computer do
     parse_input_file(input_path)
     nil  # TODO
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Process input file and print a disassembly of the program.
+  """
+  def print_disassembly(input_path) do
+    parse_input_file(input_path)
+    |> Computer.disassemble()
+    |> Enum.map(&IO.puts/1)
   end
 end

@@ -5,9 +5,6 @@ defmodule Computer.Parser do
 
   import NimbleParsec
 
-  @type registers() :: {integer(), integer(), integer()}
-  @type program() :: %{integer() => integer()}
-
   @doc ~S"""
   Parse an input file.
 
@@ -21,7 +18,7 @@ defmodule Computer.Parser do
 
   the computer's initial registers and program
   """
-  @spec parse_input_file(String.t()) :: {registers(), program()}
+  @spec parse_input_file(String.t()) :: {Computer.registers(), Computer.program()}
   def parse_input_file(path) do
     path
     |> File.read!()
@@ -39,7 +36,7 @@ defmodule Computer.Parser do
 
   the computer's initial registers and program
   """
-  @spec parse_input_string(String.t()) :: {registers(), program()}
+  @spec parse_input_string(String.t()) :: {Computer.registers(), Computer.program()}
   def parse_input_string(input) do
     input
     |> String.split("\n\n", trim: true)
@@ -72,7 +69,7 @@ defmodule Computer.Parser do
       iex> parse_registers("Register A: 5\nRegister B: 3\nRegister C: 1\n")
       {5, 3, 1}
   """
-  @spec parse_registers(String.t()) :: registers()
+  @spec parse_registers(String.t()) :: Computer.registers()
   def parse_registers(registers) do
     registers
     |> String.split("\n", trim: true)
@@ -104,7 +101,7 @@ defmodule Computer.Parser do
       iex> parse_program("Program: 1,2,3,5,7\n")
       %{0 => 1, 1 => 2, 2 => 3, 3 => 5, 4 => 7}
   """
-  @spec parse_program(String.t()) :: program()
+  @spec parse_program(String.t()) :: Computer.program()
   def parse_program(line) do
     {:ok, [program], _, _, _, _} = program(line)
     program
