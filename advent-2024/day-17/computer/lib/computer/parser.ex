@@ -6,7 +6,7 @@ defmodule Computer.Parser do
   import NimbleParsec
 
   @type registers() :: {integer(), integer(), integer()}
-  @type program() :: [integer()]
+  @type program() :: %{integer() => integer()}
 
   @doc ~S"""
   Parse an input file.
@@ -102,7 +102,7 @@ defmodule Computer.Parser do
 
   ## Examples
       iex> parse_program("Program: 1,2,3,5,7\n")
-      [1, 2, 3, 5, 7]
+      %{0 => 1, 1 => 2, 2 => 3, 3 => 5, 4 => 7}
   """
   @spec parse_program(String.t()) :: program()
   def parse_program(line) do
@@ -111,5 +111,8 @@ defmodule Computer.Parser do
     |> String.trim_trailing()
     |> String.split(",")
     |> Enum.map(&String.to_integer/1)
+    |> Enum.with_index()
+    |> Enum.map(fn {m, i} -> {i, m} end)
+    |> Enum.into(%{})
   end
 end
