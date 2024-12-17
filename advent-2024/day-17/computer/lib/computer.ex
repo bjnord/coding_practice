@@ -3,6 +3,7 @@ defmodule Computer do
   Documentation for `Computer`.
   """
 
+  import Bitwise
   import Computer.Parser
   import History.CLI
 
@@ -33,7 +34,9 @@ defmodule Computer do
     {registers, output} =
       case op1 do
         0 -> adv({registers, output}, op1, op2)
+        1 -> bxl({registers, output}, op1, op2)
         2 -> bst({registers, output}, op1, op2)
+        4 -> bxc({registers, output}, op1, op2)
         5 -> out({registers, output}, op1, op2)
       end
     exec({registers, program}, pc + 2, output, next_ops(program, pc + 2))
@@ -78,8 +81,8 @@ defmodule Computer do
   of register `B` and the instruction's **literal** operand, then stores
   the result in register `B`.
   """
-  def bxl({{a, b, c}, output}, _op1, _op2) do
-    # TODO
+  def bxl({{a, b, c}, output}, _op1, op2) do
+    b = bxor(b, op2)
     {{a, b, c}, output}
   end
 
@@ -118,7 +121,7 @@ defmodule Computer do
   **ignores** it.)
   """
   def bxc({{a, b, c}, output}, _op1, _op2) do
-    # TODO
+    b = bxor(b, c)
     {{a, b, c}, output}
   end
 

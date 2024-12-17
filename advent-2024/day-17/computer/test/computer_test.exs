@@ -27,7 +27,15 @@ defmodule ComputerTest do
             %{registers: {0, nil, nil}, output: [4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]},
           },
           # If register B contains 29, the program 1,7 would set register B to 26.
+          {
+            {{0, 29, 0}, %{0 => 1, 1 => 7}},
+            %{registers: {nil, 26, nil}},
+          },
           # If register B contains 2024 and register C contains 43690, the program 4,0 would set register B to 44354.
+          {
+            {{0, 2024, 43690}, %{0 => 4, 1 => 0}},
+            %{registers: {nil, 44354, nil}},
+          },
         ],
         computer: {
           {729, 0, 0},
