@@ -17,6 +17,9 @@ defmodule Computer do
     {registers, Enum.reverse(outputs)}
   end
 
+  @spec run_using_a({registers(), program()}, integer()) :: {registers(), [integer()]}
+  def run_using_a({{_, b, c}, program}, a), do: run({{a, b, c}, program})
+
   def output_string({_registers, outputs}) do
     Enum.join(outputs, ",")
   end

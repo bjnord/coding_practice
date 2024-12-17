@@ -42,6 +42,7 @@ defmodule ComputerTest do
           %{0 => 0, 1 => 1, 2 => 5, 3 => 4, 4 => 3, 5 => 0},
         },
         exp_output_string: "4,6,3,5,6,3,5,2,1,0",
+        quine_register_a: 117440,  # = 0o345300
       ]
     end
 
@@ -74,6 +75,22 @@ defmodule ComputerTest do
         |> Computer.run()
         |> Computer.output_string()
       assert act_output_string == fixture.exp_output_string
+    end
+
+    test "example quine program produces itself", fixture do
+      {registers, program} =
+        "example/example2.txt"
+        |> Computer.Parser.parse_input_file()
+      act_output_string =
+        {registers, program}
+        |> Computer.run_using_a(fixture.quine_register_a)
+        |> Computer.output_string()
+      exp_output_string =
+        program
+        |> Enum.sort()
+        |> Enum.map(fn {_k, v} -> v end)
+        |> Enum.join(",")
+      assert act_output_string == exp_output_string
     end
   end
 end
