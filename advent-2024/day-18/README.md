@@ -100,6 +100,16 @@ Simulate the first kilobyte (`1024` bytes) falling onto your memory
 space. Afterward, **what is the minimum number of steps needed to reach
 the exit?**
 
+### Part One Design
+
+> **Spoilers ahead!**
+
+This one came together quickly. For Part One, I took a few more steps
+toward a generalized implementation of lowest-cost path finding using
+[Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+(based on code I've written in previous years). Someday it'll be a
+common library function that takes a graph and a costing function.
+
 ## Part Two
 
 The Historians aren't as used to moving around in this pixelated
@@ -142,3 +152,9 @@ Simulate more of the bytes that are about to corrupt your memory space.
 **What are the coordinates of the first byte that will prevent the exit
 from being reachable from your starting position?** (Provide the answer
 as two integers separated by a comma with no other characters.)
+
+### Part Two Design
+
+> **Spoilers ahead!**
+
+Much easier than I expected, just an efficient binary search.
