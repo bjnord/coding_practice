@@ -3,6 +3,7 @@ defmodule Dodge do
   Documentation for `Dodge`.
   """
 
+  alias Dodge.Graph
   import Dodge.Parser
   import History.CLI
 
@@ -24,7 +25,8 @@ defmodule Dodge do
   """
   def part1(input_path) do
     parse_input_file(input_path, {71, 71}, 1024)
-    nil  # TODO
+    |> Graph.new()
+    |> Graph.lowest_cost()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
