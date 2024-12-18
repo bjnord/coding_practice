@@ -22,9 +22,9 @@ defmodule History.Grid do
 
   Returns a `Grid`.
   """
-  def from_squares(square_list) do
+  def from_squares(square_list, size \\ nil) do
     squares = Enum.into(square_list, %{})
-    {dim_y, dim_x} = dimensions(square_list)
+    {dim_y, dim_x} = dimensions(square_list, size)
     %Grid{
       size: %{y: dim_y, x: dim_x},
       squares: squares,
@@ -40,13 +40,14 @@ defmodule History.Grid do
     }
   end
 
-  defp dimensions(square_list) do
+  defp dimensions(square_list, nil) do
     positions = Enum.map(square_list, &(elem(&1, 0)))
     {
       elem(Enum.max_by(positions, fn {y, _x} -> y end), 0) + 1,
       elem(Enum.max_by(positions, fn {_y, x} -> x end), 1) + 1,
     }
   end
+  defp dimensions(_square_list, size), do: size
 
   def in_bounds?(grid, {y, x}) do
     !out_of_bounds?(y, grid.size.y) && !out_of_bounds?(x, grid.size.x)
