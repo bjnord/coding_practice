@@ -55,6 +55,16 @@ defmodule OnsenTest do
           true,
           false,
         ],
+        exp_arrangements: [
+          2,
+          1,
+          4,
+          6,
+          0,
+          1,
+          2,
+          0,
+        ]
       ]
     end
 
@@ -63,6 +73,13 @@ defmodule OnsenTest do
         fixture.towels
         |> Enum.map(&(Onsen.possible?(&1, fixture.towel_patterns)))
       assert act_possibles == fixture.exp_possibles
+    end
+
+    test "counts all towel arrangements", fixture do
+      act_arrangements =
+        fixture.towels
+        |> Enum.map(&(Onsen.arrangements(&1, fixture.towel_patterns)))
+      assert act_arrangements == fixture.exp_arrangements
     end
   end
 end

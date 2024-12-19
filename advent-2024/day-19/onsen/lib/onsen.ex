@@ -26,6 +26,27 @@ defmodule Onsen do
     end
   end
 
+  def arrangements(towel, patterns) do
+    subarrangements(towel, patterns, patterns, 0)
+  end
+
+  def subarrangements(_towel, nil, _all_patterns, count), do: count
+  def subarrangements([], patterns, _all_patterns, count) do
+    if Map.get(patterns, ?.) == true do
+      count + 1
+    else
+      count
+    end
+  end
+  def subarrangements([color | towel], patterns, all_patterns, count) do
+    if Map.get(patterns, ?.) == true do
+      arrangements([color | towel], all_patterns) +
+        subarrangements(towel, Map.get(patterns, color), all_patterns, count)
+    else
+      subarrangements(towel, Map.get(patterns, color), all_patterns, count)
+    end
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -54,8 +75,10 @@ defmodule Onsen do
   Process input file and display part 2 solution.
   """
   def part2(input_path) do
-    parse_input_file(input_path)
-    nil  # TODO
+    {towel_patterns, towels} = parse_input_file(input_path)
+    towels
+    |> Enum.map(&(Onsen.arrangements(&1, towel_patterns)))
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
