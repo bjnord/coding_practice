@@ -6,6 +6,8 @@ defmodule Onsen do
   import Onsen.Parser
   import History.CLI
 
+  @max_chunk 8  # biggest pattern size in `input.txt`
+
   def possible?(towel, patterns) do
     subpossible?(towel, patterns, patterns)
   end
@@ -26,25 +28,33 @@ defmodule Onsen do
     end
   end
 
-  def arrangements(towel, patterns) do
-    subarrangements(towel, patterns, patterns, 0)
+  def arrangements(_towel, _patterns) do
+    0  # TODO
   end
 
-  def subarrangements(_towel, nil, _all_patterns, count), do: count
-  def subarrangements([], patterns, _all_patterns, count) do
-    if Map.get(patterns, ?.) == true do
-      count + 1
-    else
-      count
-    end
+  # returns list of lists: all the ways `towel` can be divided, with the
+  # given `max_chunk` size
+  def divisions(towel, max_chunk) do
+    len = String.length(towel)
+    1..min(len, max_chunk)
+    |> Enum.map(&divide(towel, len, max_chunk, &1))
+    |> Enum.reduce([], fn chunk_div, acc ->
+      chunk_div
+      |> Enum.reduce(acc, fn div, acc ->
+        [div | acc]
+      end)
+    end)
   end
-  def subarrangements([color | towel], patterns, all_patterns, count) do
-    if Map.get(patterns, ?.) == true do
-      arrangements([color | towel], all_patterns) +
-        subarrangements(towel, Map.get(patterns, color), all_patterns, count)
-    else
-      subarrangements(towel, Map.get(patterns, color), all_patterns, count)
-    end
+
+  # returns list of lists: all the ways `towel` can be divided, with the
+  # first chunk always being the front of `towel` (size `chunk`) plus
+  # all the possible divisions of the remainder
+  defp divide(towel, len, _max_chunk, chunk) when chunk == len, do: [[towel]]
+  defp divide(towel, len, max_chunk, chunk) do
+    left = String.slice(towel, 0..(chunk - 1))
+    right = String.slice(towel, chunk..(len - 1))
+    divisions(right, max_chunk)
+    |> Enum.map(fn div -> [left | div] end)
   end
 
   @doc """
@@ -75,7 +85,7 @@ defmodule Onsen do
   Process input file and display part 2 solution.
   """
   def part2(input_path) do
-    {towel_patterns, towels} = parse_input_file(input_path)
+    {towel_patterns, towels} = parse2_input_file(input_path)
     towels
     |> Enum.map(&(Onsen.arrangements(&1, towel_patterns)))
     |> Enum.sum()

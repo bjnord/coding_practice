@@ -19,7 +19,7 @@ defmodule Onsen.ParserTest do
         brgr
         bbrgwb
         """,
-        exp_config: {
+        exp_part_1: {
           %{
             ?r => %{
               ?. => true,
@@ -61,13 +61,41 @@ defmodule Onsen.ParserTest do
             [?b, ?b, ?r, ?g, ?w, ?b],
           ],
         },
+        exp_part_2: {
+          MapSet.new([
+            "r",
+            "wr",
+            "b",
+            "g",
+            "bwu",
+            "rb",
+            "gb",
+            "br",
+          ]),
+          [
+            "brwrr",
+            "bggr",
+            "gbbr",
+            "rrbgbr",
+            "ubwu",
+            "bwurrg",
+            "brgr",
+            "bbrgwb",
+          ],
+        },
       ]
     end
 
-    test "parser gets expected configuration", fixture do
-      act_config = fixture.input
+    test "parser gets expected result (part 1)", fixture do
+      act_part_1 = fixture.input
                    |> parse_input_string()
-      assert act_config == fixture.exp_config
+      assert act_part_1 == fixture.exp_part_1
+    end
+
+    test "parser gets expected result (part 2)", fixture do
+      act_part_2 = fixture.input
+                   |> parse2_input_string()
+      assert act_part_2 == fixture.exp_part_2
     end
   end
 end

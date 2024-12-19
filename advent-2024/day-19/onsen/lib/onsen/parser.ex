@@ -6,6 +6,9 @@ defmodule Onsen.Parser do
   @type towel_pattern() :: %{char() => bool() | towel_pattern()}
   @type towel() :: [char()]
 
+  @type towel2_pattern() :: %MapSet{}
+  @type towel2() :: String.t()
+
   @doc ~S"""
   Parse an input file.
 
@@ -48,7 +51,7 @@ defmodule Onsen.Parser do
   end
 
   @doc ~S"""
-  Parse an input string containing a towel pattern.
+  Parse an input string containing a list of towel patterns.
 
   ## Parameters
 
@@ -109,5 +112,89 @@ defmodule Onsen.Parser do
   defp parse_towel(towel) do
     towel
     |> String.to_charlist()
+  end
+
+  @doc ~S"""
+  Parse an input file (part 2).
+
+  ## Parameters
+
+  - `path`: the puzzle input file path
+
+  ## Returns
+
+  a towel configuration (part 2)
+  """
+  @spec parse2_input_file(String.t()) :: {towel2_pattern(), [towel2()]}
+  def parse2_input_file(path) do
+    path
+    |> File.read!()
+    |> parse2_input_string()
+  end
+
+  @doc ~S"""
+  Parse an input string (part 2).
+
+  ## Parameters
+
+  - `input`: the puzzle input
+
+  ## Returns
+
+  a towel configuration (part 2)
+  """
+  @spec parse2_input_string(String.t()) :: {towel2_pattern(), [towel2()]}
+  def parse2_input_string(input) do
+    input
+    |> String.split("\n\n", trim: true)
+    |> then(fn [towel_patterns, towels] ->
+      {
+        parse2_towel_patterns(towel_patterns),
+        parse2_towels(towels),
+      }
+    end)
+  end
+
+  @doc ~S"""
+  Parse an input string containing a list of towel patterns (part 2).
+
+  ## Parameters
+
+  - `patterns`: the puzzle input towel patterns
+
+  ## Returns
+
+  a map set of towel patterns
+
+  ## Examples
+      iex> parse2_towel_patterns("rw, rgub")
+      MapSet.new(["rw", "rgub"])
+  """
+  @spec parse2_towel_patterns(String.t()) :: towel2_pattern()
+  def parse2_towel_patterns(patterns) do
+    patterns
+    |> String.split(", ")
+    |> Enum.into(%MapSet{})
+  end
+
+  @doc ~S"""
+  Parse an input string containing a towel list.
+
+  ## Parameters
+
+  - `towels`: the puzzle input towels
+
+  ## Returns
+
+  a list of towels
+
+  ## Examples
+      iex> parse2_towels("rgubw\nuwub\n")
+      ["rgubw", "uwub"]
+  """
+  @spec parse2_towels(String.t()) :: [towel2()]
+  def parse2_towels(towels) do
+    towels
+    |> String.split("\n", trim: true)
   end
 end
