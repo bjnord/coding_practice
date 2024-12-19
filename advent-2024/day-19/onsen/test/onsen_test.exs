@@ -118,11 +118,11 @@ defmodule OnsenTest do
       end)
     end
 
-    #test "counts all towel arrangements (part 2)", fixture do
-    #  act_arrangements =
-    #    fixture.towels
-    #    |> Enum.map(&(Onsen.arrangements(&1, fixture.towel_patterns)))
-    #  assert act_arrangements == fixture.exp_arrangements
-    #end
+    test "counts all towel arrangements (part 2)", fixture do
+      act_arrangements =
+        fixture.towels2
+        |> Enum.map(&(Onsen.arrangements(&1, fixture.towel2_patterns)))
+      assert act_arrangements == fixture.exp_arrangements
+    end
   end
 end

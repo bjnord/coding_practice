@@ -28,16 +28,23 @@ defmodule Onsen do
     end
   end
 
-  def arrangements(_towel, _patterns) do
-    0  # TODO
+  def arrangements(towel, patterns) do
+    f = &(MapSet.member?(patterns, &1))
+    towel
+    |> Onsen.divisions(@max_chunk, f)
+    |> Enum.count()
   end
 
   # returns list of lists: all the ways `towel` can be divided, with the
   # given `max_chunk` size
-  def divisions(towel, max_chunk) do
+  #
+  # f is an optional filter function: should return `true` if chunk is legal,
+  # `false` otherwise
+  def divisions(towel, max_chunk, f \\ fn _ -> true end) do
     len = String.length(towel)
     1..min(len, max_chunk)
-    |> Enum.map(&divide(towel, len, max_chunk, &1))
+    |> Enum.map(&divide(towel, len, max_chunk, &1, f))
+    |> Enum.reject(&(&1 == nil))
     |> Enum.reduce([], fn chunk_div, acc ->
       chunk_div
       |> Enum.reduce(acc, fn div, acc ->
@@ -49,12 +56,22 @@ defmodule Onsen do
   # returns list of lists: all the ways `towel` can be divided, with the
   # first chunk always being the front of `towel` (size `chunk`) plus
   # all the possible divisions of the remainder
-  defp divide(towel, len, _max_chunk, chunk) when chunk == len, do: [[towel]]
-  defp divide(towel, len, max_chunk, chunk) do
+  defp divide(towel, len, _max_chunk, chunk, f) when chunk == len do
+    if f.(towel) do
+      [[towel]]
+    else
+      nil
+    end
+  end
+  defp divide(towel, len, max_chunk, chunk, f) do
     left = String.slice(towel, 0..(chunk - 1))
-    right = String.slice(towel, chunk..(len - 1))
-    divisions(right, max_chunk)
-    |> Enum.map(fn div -> [left | div] end)
+    if f.(left) do
+      right = String.slice(towel, chunk..(len - 1))
+      divisions(right, max_chunk, f)
+      |> Enum.map(fn div -> [left | div] end)
+    else
+      nil
+    end
   end
 
   @doc """
