@@ -87,6 +87,10 @@ defmodule Race do
   """
   def part1(input_path) do
     parse_input_file(input_path)
+    |> Race.cheats()
+    |> Enum.count()
+    |> IO.inspect(label: "Part 1 N cheats is")
+    parse_input_file(input_path)
     |> Race.cheat_min(100)
     |> IO.inspect(label: "Part 1 answer is")
   end
@@ -95,6 +99,10 @@ defmodule Race do
   Process input file and display part 2 solution.
   """
   def part2(input_path) do
+    parse_input_file(input_path)
+    []   # TODO
+    |> Enum.count()
+    |> IO.inspect(label: "Part 2 N cheats is")
     parse_input_file(input_path)
     nil  # TODO
     |> IO.inspect(label: "Part 2 answer is")
