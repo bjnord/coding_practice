@@ -148,3 +148,15 @@ initialized to `117440`. (The original initial value of register `A`,
 
 **What is the lowest positive initial value for register `A` that causes
 the program to output a copy of itself?**
+
+### Part Two Design
+
+I love the "implement a CPU" puzzles; I sense I'm in the minority but I
+had a lot of fun in [2019](../../advent-2019/) and also doing the
+[Synacor challenge](../../synacor).
+
+As in past years, Part Two requires figuring out what the machine code is
+actually doing. I already saw hints in Part One: A 3-bit word size, and the
+`adv`/`bdv`/`cdv` instructions which are essentially right-shift operators.
+Clearly `A` is made up of subfields, not just concatenated 3-bit values but
+sometimes with an extra shift, or maybe overlapping. Stay tuned...
