@@ -1,6 +1,7 @@
 BIN = ./deer_maze
 FILES = mix.exs test/test_helper.exs \
 	lib/deer_maze.ex test/deer_maze_test.exs \
+	lib/deer_maze/graph.ex test/deer_maze/graph_test.exs \
 	lib/deer_maze/parser.ex test/deer_maze/parser_test.exs
 VERBOSE = 0
 

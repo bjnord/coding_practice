@@ -1,6 +1,7 @@
 BIN = ./dodge
 FILES = mix.exs test/test_helper.exs \
 	lib/dodge.ex test/dodge_test.exs \
+	lib/dodge/graph.ex test/dodge/graph_test.exs \
 	lib/dodge/parser.ex test/dodge/parser_test.exs
 VERBOSE = 0
 
