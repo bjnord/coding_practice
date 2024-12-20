@@ -142,6 +142,20 @@ defmodule RaceTest do
           {{13, 8}, {13, 7}},
           {{13, 8}, {13, 9}}
         ],
+        exp_cheat_savings: %{
+          2 => 14,
+          4 => 14,
+          6 => 2,
+          8 => 4,
+          10 => 2,
+          12 => 3,
+          20 => 1,
+          36 => 1,
+          38 => 1,
+          40 => 1,
+          64 => 1,
+        },
+        exp_cheat_min10ps: 2 + 3 + 1 + 1 + 1 + 1 + 1,
       ]
     end
 
@@ -149,6 +163,18 @@ defmodule RaceTest do
       act_cheats = fixture.grid
                    |> Race.cheats()
       assert act_cheats == fixture.exp_cheats
+    end
+
+    test "finds cheat savings", fixture do
+      act_cheat_savings = fixture.grid
+                          |> Race.cheat_savings()
+      assert act_cheat_savings == fixture.exp_cheat_savings
+    end
+
+    test "finds number of cheats that save >= 10ps", fixture do
+      act_cheat_min10ps = fixture.grid
+                          |> Race.cheat_min(10)
+      assert act_cheat_min10ps == fixture.exp_cheat_min10ps
     end
   end
 end

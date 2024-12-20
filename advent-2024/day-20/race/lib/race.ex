@@ -3,6 +3,7 @@ defmodule Race do
   Documentation for `Race`.
   """
 
+  alias Race.Graph
   import Race.Parser
   import History.CLI
   alias History.Grid
@@ -34,6 +35,40 @@ defmodule Race do
     end
   end
 
+  def cheat_savings(grid) do
+    baseline_ps = lowest_cost(grid)
+    cheat_walls(grid)
+    |> Enum.map(&(savings_from_cheat(grid, baseline_ps, &1)))
+    |> Enum.frequencies()
+  end
+
+  defp lowest_cost(grid) do
+    grid
+    |> Graph.new()
+    |> Graph.lowest_cost()
+  end
+
+  defp cheat_walls(grid) do
+    grid
+    |> cheats()
+    |> Enum.map(fn {pos1, _pos2} -> pos1 end)
+    |> Enum.uniq()
+  end
+
+  defp savings_from_cheat(grid, baseline_ps, wall_pos) do
+    Grid.delete(grid, wall_pos)
+    |> lowest_cost()
+    |> then(fn ps -> baseline_ps - ps end)
+  end
+
+  def cheat_min(grid, saved_ps) do
+    grid
+    |> cheat_savings()
+    |> Enum.reject(fn {saving, _count} -> saving < saved_ps end)
+    |> Enum.map(&(elem(&1, 1)))
+    |> Enum.sum()
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -52,7 +87,7 @@ defmodule Race do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Race.cheat_min(100)
     |> IO.inspect(label: "Part 1 answer is")
   end
 
