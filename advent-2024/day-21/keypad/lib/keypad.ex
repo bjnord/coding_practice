@@ -15,40 +15,63 @@ defmodule Keypad do
     |> Enum.reverse()
   end
 
-  defp code_sequence(buttons) do
-    #buttons
+  defp code_sequence(moves) do
+    #moves
     #|> IO.inspect(label: "code")
-    vac_moves =
-      buttons
-      |> Enum.reduce({?A, []}, fn to, {from, moves} ->
-        Keypad.Numeric.move_permutations({from, to})
-        |> Enum.map(&({to, moves ++ &1 ++ [?A]}))
-        |> hd()  # FIXME
+    vac_perms =
+      moves
+      |> Enum.reduce({?A, [~c""]}, fn to, {from, from_perms} ->
+        #{from, to, from_perms}
+        #|> IO.inspect(label: "from, to, from_perms")
+        perms =
+          Keypad.Numeric.move_permutations({from, to})
+          |> Enum.flat_map(fn to_perm ->
+            next_robot(to_perm ++ [?A], 2)
+          end)
+          |> Enum.flat_map(fn deep_perm ->
+            #{deep_perm, from_perms}
+            #|> IO.inspect(label: "deep_perm, from_perms")
+            from_perms
+            |> Enum.map(&(&1 ++ deep_perm))
+            #|> dbg()
+          end)
+          #|> dbg()
+        {to, perms}
+        #|> IO.inspect(label: "code reduce")
       end)
       |> elem(1)
-      #|> IO.inspect(label: "vacuum")
-    rad_moves =
-      vac_moves
-      |> Enum.reduce({?A, []}, fn to, {from, moves} ->
+      #|> IO.inspect(label: "vacuum perms")
+    vac_perms
+    |> Enum.min_by(&Enum.count/1)
+    #|> IO.inspect(label: "vacuum min perm")
+  end
+
+  defp next_robot(moves, 0), do: [moves]
+  defp next_robot(moves, level) do
+    #moves
+    #|> IO.inspect(label: "robot[#{level}] moves")
+    moves
+    |> Enum.reduce({?A, [~c""]}, fn to, {from, from_perms} ->
+      #{from, to, from_perms}
+      #|> IO.inspect(label: "R from, to, from_perms")
+      perms =
         Keypad.Directional.move_permutations({from, to})
-        |> Enum.map(&({to, moves ++ &1 ++ [?A]}))
-        |> hd()  # FIXME
-      end)
-      |> elem(1)
-      #|> IO.inspect(label: "radiation")
-    cold_moves =
-      rad_moves
-      |> Enum.reduce({?A, []}, fn to, {from, moves} ->
-        #{List.to_string([from]), List.to_string([to]), moves}
-        #|> IO.inspect(label: "from, to, moves")
-        Keypad.Directional.move_permutations({from, to})
-        |> Enum.map(&({to, moves ++ &1 ++ [?A]}))
-        |> hd()  # FIXME
+        |> Enum.flat_map(fn to_perm ->
+          next_robot(to_perm ++ [?A], level - 1)
+        end)
+        |> Enum.flat_map(fn deep_perm ->
+          #{deep_perm, from_perms}
+          #|> IO.inspect(label: "R deep_perm, from_perms")
+          from_perms
+          |> Enum.map(&(&1 ++ deep_perm))
+          #|> dbg()
+        end)
         #|> dbg()
-      end)
-      |> elem(1)
-      #|> IO.inspect(label: "cold")
-    cold_moves
+      {to, perms}
+      #|> IO.inspect(label: "R reduce")
+    end)
+    |> elem(1)
+    #|> IO.inspect(label: "robot[#{level}] perms")
   end
 
   def complexity(codes) do

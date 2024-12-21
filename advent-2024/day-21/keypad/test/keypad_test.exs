@@ -2,15 +2,17 @@ defmodule KeypadTest do
   use ExUnit.Case
   doctest Keypad
 
-  describe "puzzle example" do
+  describe "puzzle and extra examples" do
     setup do
       [
         examples: [
+          # puzzle examples
           {~c"029A", ~c"<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A", 68},
           {~c"980A", ~c"<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A", 60},
           {~c"179A", ~c"<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A", 68},
           {~c"456A", ~c"<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A", 64},
           {~c"379A", ~c"<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A", 64},
+          # extra examples
           {~c"159A", nil, 82},
           {~c"375A", ~c"<v<A>>^AvA^A<vA<AA>>^AAvA^<A>AAvA^A<v<A>A>^AvA^A<A>A<v<A>A>^AAvA^A<A>A", 70},
           {~c"613A", nil, 62},
@@ -33,6 +35,7 @@ defmodule KeypadTest do
 
     test "calculate correct total complexity from chain of codes", fixture do
       act_complexity = fixture.examples
+                       |> Enum.slice(0..4)  # just puzzle examples
                        |> Enum.map(&(elem(&1, 0)))
                        |> Keypad.complexity()
       assert act_complexity == fixture.exp_complexity
