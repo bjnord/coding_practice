@@ -8,55 +8,47 @@ defmodule Keypad do
 
   def code_sequences(codes) do
     codes
-    |> Enum.reduce({{?A, ?A, ?A}, []}, fn code, {positions, sequences} ->
-      {positions, sequence} = code_sequence(positions, code)
-      {positions, [sequence | sequences]}
+    |> Enum.reduce([], fn code, sequences ->
+      [code_sequence(code) | sequences]
       #|> IO.inspect(label: "reduce")
     end)
-    |> elem(1)
     |> Enum.reverse()
   end
 
-  defp code_sequence({vac_pos, rad_pos, cold_pos}, buttons) do
+  defp code_sequence(buttons) do
     #buttons
     #|> IO.inspect(label: "code")
-    if vac_pos != ?A do
-      raise "vacuum not starting from A"
-    end
-    {vac_pos, vac_moves} =
+    vac_moves =
       buttons
-      |> Enum.reduce({vac_pos, []}, fn to, {from, acc} ->
+      |> Enum.reduce({?A, []}, fn to, {from, moves} ->
         Keypad.Numeric.move_permutations({from, to})
-        |> Enum.map(&({to, acc ++ &1 ++ [?A]}))
+        |> Enum.map(&({to, moves ++ &1 ++ [?A]}))
         |> hd()  # FIXME
       end)
+      |> elem(1)
       #|> IO.inspect(label: "vacuum")
-    if rad_pos != ?A do
-      raise "radiation not starting from A"
-    end
-    {rad_pos, rad_moves} =
+    rad_moves =
       vac_moves
-      |> Enum.reduce({rad_pos, []}, fn to, {from, acc} ->
+      |> Enum.reduce({?A, []}, fn to, {from, moves} ->
         Keypad.Directional.move_permutations({from, to})
-        |> Enum.map(&({to, acc ++ &1 ++ [?A]}))
+        |> Enum.map(&({to, moves ++ &1 ++ [?A]}))
         |> hd()  # FIXME
       end)
+      |> elem(1)
       #|> IO.inspect(label: "radiation")
-    if cold_pos != ?A do
-      raise "cold not starting from A"
-    end
-    {cold_pos, cold_moves} =
+    cold_moves =
       rad_moves
-      |> Enum.reduce({cold_pos, []}, fn to, {from, acc} ->
-        #{List.to_string([from]), List.to_string([to]), acc}
-        #|> IO.inspect(label: "from, to, acc")
+      |> Enum.reduce({?A, []}, fn to, {from, moves} ->
+        #{List.to_string([from]), List.to_string([to]), moves}
+        #|> IO.inspect(label: "from, to, moves")
         Keypad.Directional.move_permutations({from, to})
-        |> Enum.map(&({to, acc ++ &1 ++ [?A]}))
+        |> Enum.map(&({to, moves ++ &1 ++ [?A]}))
         |> hd()  # FIXME
         #|> dbg()
       end)
+      |> elem(1)
       #|> IO.inspect(label: "cold")
-    {{vac_pos, rad_pos, cold_pos}, cold_moves}
+    cold_moves
   end
 
   def complexity(codes) do
