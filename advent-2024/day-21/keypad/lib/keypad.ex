@@ -23,37 +23,40 @@ defmodule Keypad do
     if vac_pos != ?A do
       raise "vacuum not starting from A"
     end
-    {vac_pos, vac_motions} =
+    {vac_pos, vac_moves} =
       buttons
       |> Enum.reduce({vac_pos, []}, fn to, {from, acc} ->
-        Keypad.Numeric.motions({from, to})
-        |> then(&({to, acc ++ &1 ++ [?A]}))
+        Keypad.Numeric.move_permutations({from, to})
+        |> Enum.map(&({to, acc ++ &1 ++ [?A]}))
+        |> hd()  # FIXME
       end)
       #|> IO.inspect(label: "vacuum")
     if rad_pos != ?A do
       raise "radiation not starting from A"
     end
-    {rad_pos, rad_motions} =
-      vac_motions
+    {rad_pos, rad_moves} =
+      vac_moves
       |> Enum.reduce({rad_pos, []}, fn to, {from, acc} ->
-        Keypad.Directional.motions({from, to})
-        |> then(&({to, acc ++ &1 ++ [?A]}))
+        Keypad.Directional.move_permutations({from, to})
+        |> Enum.map(&({to, acc ++ &1 ++ [?A]}))
+        |> hd()  # FIXME
       end)
       #|> IO.inspect(label: "radiation")
     if cold_pos != ?A do
       raise "cold not starting from A"
     end
-    {cold_pos, cold_motions} =
-      rad_motions
+    {cold_pos, cold_moves} =
+      rad_moves
       |> Enum.reduce({cold_pos, []}, fn to, {from, acc} ->
         #{List.to_string([from]), List.to_string([to]), acc}
         #|> IO.inspect(label: "from, to, acc")
-        Keypad.Directional.motions({from, to})
-        |> then(&({to, acc ++ &1 ++ [?A]}))
+        Keypad.Directional.move_permutations({from, to})
+        |> Enum.map(&({to, acc ++ &1 ++ [?A]}))
+        |> hd()  # FIXME
         #|> dbg()
       end)
       #|> IO.inspect(label: "cold")
-    {{vac_pos, rad_pos, cold_pos}, cold_motions}
+    {{vac_pos, rad_pos, cold_pos}, cold_moves}
   end
 
   def complexity(codes) do

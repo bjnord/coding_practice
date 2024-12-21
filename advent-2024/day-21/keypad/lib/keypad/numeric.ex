@@ -15,29 +15,32 @@ defmodule Keypad.Numeric do
   ```
   """
 
-  def motions({from, to}) do
+  def move_permutations({from, to}) do
     {fy, fx} = location(from)
     {ty, tx} = location(to)
     {dy, dx} = {ty - fy, tx - fx}
-    motions =
+    move_permutations =
       cond do
-        #(from == ?A) && (dx < 0) ->
-        #  # shouldn't matter, but this is how the puzzle example seems to do it:
-        #  [?< | vert_moves(dy) ++ horiz_moves(dx + 1)]
-        (from == ?0) || (from == ?A) ->
-          vert_moves(dy) ++ horiz_moves(dx)
+        ((from == ?0) || (from == ?A)) && ((to == ?1) || (to == ?4) || (to == ?7)) ->
+          [vert_moves(dy) ++ horiz_moves(dx)]
+        ((from == ?1) || (from == ?4) || (from == ?7)) && ((to == ?0) || (to == ?A)) ->
+          [horiz_moves(dx) ++ vert_moves(dy)]
         true ->
-          horiz_moves(dx) ++ vert_moves(dy)
+          [
+            horiz_moves(dx) ++ vert_moves(dy),
+            vert_moves(dy) ++ horiz_moves(dx),
+          ]
+          |> Enum.uniq()
       end
-    sanity_check(motions, {fy, fx})
-    motions
+    move_permutations
+    |> Enum.map(&(sanity_check(&1, {fy, fx})))
   end
 
-  defp sanity_check(motions, {y, x}) do
-    motions
-    |> Enum.reduce({y, x}, fn motion, {y, x} ->
+  defp sanity_check(moves, {y, x}) do
+    moves
+    |> Enum.reduce({y, x}, fn move, {y, x} ->
       {ny, nx} =
-        case motion do
+        case move do
           ?^ -> {y-1, x}
           ?v -> {y+1, x}
           ?< -> {y, x-1}
@@ -48,6 +51,7 @@ defmodule Keypad.Numeric do
       end
       {ny, nx}
     end)
+    moves
   end
 
   defp vert_moves(dy) when dy == 0, do: []

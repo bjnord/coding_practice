@@ -11,29 +11,32 @@ defmodule Keypad.Directional do
   ```
   """
 
-  def motions({from, to}) do
+  def move_permutations({from, to}) do
     {fy, fx} = location(from)
     {ty, tx} = location(to)
     {dy, dx} = {ty - fy, tx - fx}
-    motions =
+    move_permutations =
       cond do
-        #(from == ?A) && (dx < 0) ->
-        #  # shouldn't matter, but this is how the puzzle example seems to do it:
-        #  [?< | vert_moves(dy) ++ horiz_moves(dx + 1)]
-        (from == ?^) || (from == ?A) ->
-          vert_moves(dy) ++ horiz_moves(dx)
+        (from == ?<) ->
+          [horiz_moves(dx) ++ vert_moves(dy)]
+        ((from == ?^) || (from == ?A)) && (to == ?<) ->
+          [vert_moves(dy) ++ horiz_moves(dx)]
         true ->
-          horiz_moves(dx) ++ vert_moves(dy)
+          [
+            horiz_moves(dx) ++ vert_moves(dy),
+            vert_moves(dy) ++ horiz_moves(dx),
+          ]
+          |> Enum.uniq()
       end
-    sanity_check(motions, {fy, fx})
-    motions
+    move_permutations
+    |> Enum.map(&(sanity_check(&1, {fy, fx})))
   end
 
-  defp sanity_check(motions, {y, x}) do
-    motions
-    |> Enum.reduce({y, x}, fn motion, {y, x} ->
+  defp sanity_check(moves, {y, x}) do
+    moves
+    |> Enum.reduce({y, x}, fn move, {y, x} ->
       {ny, nx} =
-        case motion do
+        case move do
           ?^ -> {y-1, x}
           ?v -> {y+1, x}
           ?< -> {y, x-1}
@@ -44,6 +47,7 @@ defmodule Keypad.Directional do
       end
       {ny, nx}
     end)
+    moves
   end
 
   defp vert_moves(dy) when dy == 0, do: []
