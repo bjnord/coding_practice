@@ -22,7 +22,7 @@ defmodule History.MixProject do
   defp deps do
     [
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.30.9", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.35", only: :dev, runtime: false},
     ]
   end
 end

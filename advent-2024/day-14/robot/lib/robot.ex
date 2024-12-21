@@ -15,14 +15,10 @@ defmodule Robot do
   """
   def location_after({{y, x}, {dy, dx}}, {dim_y, dim_x}, secs) do
     {
-      neg_mod(y + dy * secs, dim_y),
-      neg_mod(x + dx * secs, dim_x),
+      History.Math.modulo(y + dy * secs, dim_y),
+      History.Math.modulo(x + dx * secs, dim_x),
     }
   end
-
-  defp neg_mod(n, m) when n > 0, do: rem(n, m)
-  defp neg_mod(n, m) when n < 0, do: rem(rem(n, m) + m, m)
-  defp neg_mod(0, _m), do: 0
 
   #def location_after_by_adding(robot, dim, secs) do
   #  1..secs

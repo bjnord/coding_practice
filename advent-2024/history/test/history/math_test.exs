@@ -14,6 +14,12 @@ defmodule History.MathTest do
     assert History.Math.manhattan(pos1, pos2) == 2372
   end
 
+  test "modulo on negative numbers" do
+    assert History.Math.modulo(0, 5) == 0
+    assert History.Math.modulo(7, 5) == 2
+    assert History.Math.modulo(-7, 5) == 3
+  end
+
   test "pairings" do
     entries = [:a, :b, :c, :d]
     pairings = [
