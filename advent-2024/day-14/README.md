@@ -176,3 +176,33 @@ a Christmas tree**.
 
 **What is the fewest number of seconds that must elapse for the robots to
 display the Easter egg?**
+
+### Part Two Design
+
+> **Spoilers ahead!**
+
+I had the right idea: Clearly I needed some metric for the map at each
+second, like a clump of contiguous robots. And any chance to play with
+image generation is fun (though my technique is very primitive).
+
+What sunk me was a failure of imagination: I missed that crucial
+word "most" (read carefully, kids!) and pictured it as **all robots**
+participating to make the tree (maybe with a few holes to represent lights
+or decorations). And I certainly wasn't thinking of a small off-center
+tree. All the metrics I could think of, out to a large number of seconds,
+failed to find anything.
+
+So, off to Reddit for a hint. Reddit user
+[waferthinninja](https://www.reddit.com/user/waferthinninja/)
+posted an interesting metric: The "safety factor" we had to calculate in
+Part One. I don't know if this was Eric's intent, but:
+
+[[2024 Day 14 (Part 2)] The clue was in part 1](https://www.reddit.com/r/adventofcode/comments/1he0g67/2024_day_14_part_2_the_clue_was_in_part_1/)
+
+> I figured that when "most of the robots" are forming a picture, they
+> would mostly be in one quadrant, so the danger level would be low.
+> For my input at least, the answer was when the danger level was lowest.
+
+Sure enough, when I graphed it, one second stood out noticeably. So I
+"solved" the puzzle visually, but now I really need to go back and have
+the code produce the number directly.
