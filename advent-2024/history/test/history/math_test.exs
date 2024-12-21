@@ -1,5 +1,6 @@
 defmodule History.MathTest do
   use ExUnit.Case
+  use PropCheck, default_opts: [numtests: 100]
   doctest History.Math
 
   # no AoC year is complete without...:
@@ -14,10 +15,26 @@ defmodule History.MathTest do
     assert History.Math.manhattan(pos1, pos2) == 2372
   end
 
-  test "modulo on negative numbers" do
-    assert History.Math.modulo(0, 5) == 0
-    assert History.Math.modulo(7, 5) == 2
-    assert History.Math.modulo(-7, 5) == 3
+  property "modulo is correct for non-negative and negative numerators" do
+    forall {n, m} <- gen_numerator_divisor() do
+      History.Math.modulo(n, m) == alt_modulo(n, m)
+    end
+  end
+
+  # "A remainder is the least positive integer that should be subtracted
+  # from a to make it divisible by b."
+  def alt_modulo(a, b) do
+    {a, b}
+    0..(b - 1)
+    |> Enum.find(&(divisible_by?(a - &1, b)))
+  end
+
+  defp divisible_by?(a, b) do
+    rem(abs(a), b) == 0
+  end
+
+  def gen_numerator_divisor() do
+    {oneof([non_neg_integer(), neg_integer()]), pos_integer()}
   end
 
   test "pairings" do

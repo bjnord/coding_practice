@@ -23,6 +23,8 @@ defmodule History.MixProject do
     [
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.35", only: :dev, runtime: false},
+      #{:math, "~> 0.7.0"},
+      {:propcheck, "~> 1.4", only: [:test]},
     ]
   end
 end

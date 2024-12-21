@@ -3,15 +3,16 @@ FILES = mix.exs test/test_helper.exs \
 	lib/history/cli.ex test/history/cli_test.exs \
 	lib/history/grid.ex test/history/grid_test.exs \
 	lib/history/math.ex test/history/math_test.exs
-VERBOSE = 0
 
 .PHONY: test check doc console clean
 
+#test: export PROPCHECK_VERBOSE=1
+#test: export PROPCHECK_DETECT_EXCEPTIONS=0
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
-		MIX_ENV=test mix propcheck.clean; \
+		( MIX_ENV=test mix propcheck.clean ); \
 	fi
-	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+	mix test
 
 check:
 	mix dialyzer
