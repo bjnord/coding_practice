@@ -3,14 +3,21 @@ defmodule History.Math do
   Math functions for `History`.
   """
 
+  @type coord_2d() :: {integer(), integer()}
+  @type coord_3d() :: {integer(), integer(), integer()}
+
   @doc """
   Compute the Manhattan distance between two positions.
+
+  The positions use integer coordinates.
   """
-  def manhattan({x1, y1}, {x2, y2}) do
-    abs(x1 - x2) + abs(y1 - y2)
+  @spec manhattan(coord_2d(), coord_2d()) :: integer()
+  def manhattan({y1, x1}, {y2, x2}) do
+    abs(y1 - y2) + abs(x1 - x2)
   end
-  def manhattan({x1, y1, z1}, {x2, y2, z2}) do
-    abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
+  @spec manhattan(coord_3d(), coord_3d()) :: integer()
+  def manhattan({z1, y1, x1}, {z2, y2, x2}) do
+    abs(z1 - z2) + abs(y1 - y2) + abs(x1 - x2)
   end
 
   @doc """
