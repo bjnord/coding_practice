@@ -1,6 +1,7 @@
 BIN = ./keypad
 FILES = mix.exs test/test_helper.exs \
 	lib/keypad.ex test/keypad_test.exs \
+	lib/keypad/numeric.ex test/keypad/numeric_test.exs \
 	lib/keypad/parser.ex test/keypad/parser_test.exs
 
 .PHONY: run test check doc console clean
