@@ -6,15 +6,67 @@ defmodule Keypad do
   import Keypad.Parser
   import History.CLI
 
-  def complexity(presses) do
-    presses
-    |> Enum.map(fn {code, sequence} -> complexity(code, sequence) end)
+  def code_sequences(codes) do
+    codes
+    |> Enum.reduce({{?A, ?A, ?A}, []}, fn code, {positions, sequences} ->
+      {positions, sequence} = code_sequence(positions, code)
+      {positions, [sequence | sequences]}
+      #|> IO.inspect(label: "reduce")
+    end)
+    |> elem(1)
+    |> Enum.reverse()
+  end
+
+  defp code_sequence({vac_pos, rad_pos, cold_pos}, buttons) do
+    #buttons
+    #|> IO.inspect(label: "code")
+    if vac_pos != ?A do
+      raise "vacuum not starting from A"
+    end
+    {vac_pos, vac_motions} =
+      buttons
+      |> Enum.reduce({vac_pos, []}, fn to, {from, acc} ->
+        Keypad.Numeric.motions({from, to})
+        |> then(&({to, acc ++ &1 ++ [?A]}))
+      end)
+      #|> IO.inspect(label: "vacuum")
+    if rad_pos != ?A do
+      raise "radiation not starting from A"
+    end
+    {rad_pos, rad_motions} =
+      vac_motions
+      |> Enum.reduce({rad_pos, []}, fn to, {from, acc} ->
+        Keypad.Directional.motions({from, to})
+        |> then(&({to, acc ++ &1 ++ [?A]}))
+      end)
+      #|> IO.inspect(label: "radiation")
+    if cold_pos != ?A do
+      raise "cold not starting from A"
+    end
+    {cold_pos, cold_motions} =
+      rad_motions
+      |> Enum.reduce({cold_pos, []}, fn to, {from, acc} ->
+        #{List.to_string([from]), List.to_string([to]), acc}
+        #|> IO.inspect(label: "from, to, acc")
+        Keypad.Directional.motions({from, to})
+        |> then(&({to, acc ++ &1 ++ [?A]}))
+        #|> dbg()
+      end)
+      #|> IO.inspect(label: "cold")
+    {{vac_pos, rad_pos, cold_pos}, cold_motions}
+  end
+
+  def complexity(codes) do
+    codes
+    |> code_sequences()
+    |> Enum.zip(codes)
+    |> Enum.map(fn {sequence, code} -> complexity(code, sequence) end)
     |> Enum.sum()
   end
 
   defp complexity(code, sequence) do
     sequence
-    |> String.length()
+    |> Enum.count()
     |> then(&(&1 * numeric_part(code)))
   end
 
@@ -43,7 +95,7 @@ defmodule Keypad do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Keypad.complexity()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
