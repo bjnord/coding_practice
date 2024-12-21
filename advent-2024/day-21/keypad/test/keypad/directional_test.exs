@@ -6,6 +6,8 @@ defmodule Keypad.DirectionalTest do
     setup do
       [
         motion_tests: [
+          #{{?A, ?<}, ~c"<v<"},  # dodge-around
+          #{{?A, ?v}, ~c"<v"},   # dodge-around
           {{?A, ?<}, ~c"v<<"},
           {{?A, ?v}, ~c"v<"},
           {{?<, ?A}, ~c">>^"},

@@ -7,7 +7,12 @@ defmodule Keypad.NumericTest do
       [
         motion_tests: [
           {{?A, ?0}, ~c"<"},
+          #{{?A, ?2}, ~c"<^"},    # dodge-around
+          #{{?A, ?1}, ~c"<^<"},   # dodge-around
+          #{{?A, ?4}, ~c"<^^<"},  # dodge-around
+          {{?A, ?2}, ~c"^<"},
           {{?A, ?1}, ~c"^<<"},
+          {{?A, ?4}, ~c"^^<<"},
           {{?0, ?A}, ~c">"},
           {{?0, ?1}, ~c"^<"},
           {{?0, ?8}, ~c"^^^"},

@@ -17,6 +17,9 @@ defmodule Keypad.Directional do
     {dy, dx} = {ty - fy, tx - fx}
     motions =
       cond do
+        #(from == ?A) && (dx < 0) ->
+        #  # shouldn't matter, but this is how the puzzle example seems to do it:
+        #  [?< | vert_moves(dy) ++ horiz_moves(dx + 1)]
         (from == ?^) || (from == ?A) ->
           vert_moves(dy) ++ horiz_moves(dx)
         true ->
