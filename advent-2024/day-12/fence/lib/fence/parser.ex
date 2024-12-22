@@ -58,8 +58,8 @@ defmodule Fence.Parser do
     region =
       find_region(grid, pos, %{})
       |> elem(0)
-      |> Enum.sort()
-    grid = clear_region_squares(grid, region)
+      |> then(fn {plant, positions} -> {plant, Enum.sort(positions)} end)
+    grid = clear_region_positions(grid, region)
     next_pos = List.first(Grid.keys(grid))
     find_regions(grid, next_pos, [region | regions])
   end
@@ -68,19 +68,24 @@ defmodule Fence.Parser do
     plant = Grid.get(grid, pos)
     grid
     |> Grid.cardinals_of(pos)
-    |> Enum.reduce({[{plant, pos}], Map.put(seen, pos, true)}, fn npos, {region_pos, seen} ->
-      if (Grid.get(grid, npos) == plant) && !seen[npos] do
-        {new_pos, seen} = find_region(grid, npos, seen)
-        {new_pos ++ region_pos, seen}
-      else
-        {region_pos, seen}
-      end
+    |> Enum.reduce({[pos], Map.put(seen, pos, true)}, fn npos, {positions, seen} ->
+      accumulate_positions(grid, plant, npos, positions, seen)
     end)
+    |> then(fn {positions, seen} -> {{plant, positions}, seen} end)
   end
 
-  defp clear_region_squares(grid, region) do
-    region
-    |> Enum.reduce(grid, fn {_plant, rpos}, grid ->
+  defp accumulate_positions(grid, plant, npos, positions, seen) do
+    if (Grid.get(grid, npos) == plant) && !seen[npos] do
+      {{_new_plant, new_positions}, new_seen} = find_region(grid, npos, seen)
+      {new_positions ++ positions, new_seen}
+    else
+      {positions, seen}
+    end
+  end
+
+  defp clear_region_positions(grid, {_plant, positions}) do
+    positions
+    |> Enum.reduce(grid, fn rpos, grid ->
       Grid.delete(grid, rpos)
     end)
   end
