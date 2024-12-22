@@ -14,23 +14,35 @@ defmodule Fence do
     end)
   end
 
+  # returns list of `{plant, {area, perimeter}}`
   def areas_perimeters(grid) do
-    Grid.keys(grid)
-    |> Enum.reduce(%{}, fn pos, acc ->
-      plant = Grid.get(grid, pos)
-      {areas, perims} = Map.get(acc, plant, {0, 0})
-      new_val = {
-        areas + 1,
-        perims + perimeters_of(grid, pos, plant),
-      }
-      Map.put(acc, plant, new_val)
-    end)
+    grid.meta.regions
+    |> Enum.map(&(region_area_perimeter(grid, &1)))
   end
 
-  def perimeters_of(grid, pos, plant) do
+  defp region_area_perimeter(grid, {plant, positions}) do
+    {plant, area_perimeter(grid, {plant, positions})}
+  end
+
+  defp area_perimeter(grid, {plant, positions}) do
+    {
+      area(positions),
+      perimeter(grid, {plant, positions}),
+    }
+  end
+
+  def area(positions), do: Enum.count(positions)
+
+  def perimeter(grid, {plant, positions}) do
+    positions
+    |> Enum.map(&(fence_count(grid, &1, plant)))
+    |> Enum.sum()
+  end
+
+  def fence_count(grid, pos, plant) do
     neighbors = Grid.cardinals_of(grid, pos)
     neighbors
-    |> Enum.reduce(4 - length(neighbors), fn npos, acc ->
+    |> Enum.reduce(border_fence_count(neighbors), fn npos, acc ->
       if Grid.get(grid, npos) != plant do
         acc + 1
       else
@@ -38,6 +50,9 @@ defmodule Fence do
       end
     end)
   end
+
+  # fences at the edges of the grid (no neighbor beyond)
+  defp border_fence_count(neighbors), do: 4 - length(neighbors)
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -57,7 +72,7 @@ defmodule Fence do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Fence.prices()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
