@@ -51,6 +51,34 @@ defmodule Fence do
     end)
   end
 
+  def bulk_prices(grid) do
+    areas_sides(grid)
+    |> Enum.reduce(0, fn {_plant, {area, side}}, acc ->
+      acc + area * side
+    end)
+  end
+
+  # returns list of `{plant, {area, sides}}`
+  def areas_sides(grid) do
+    grid.meta.regions
+    |> Enum.map(&(region_area_sides(grid, &1)))
+  end
+
+  defp region_area_sides(grid, {plant, positions}) do
+    {plant, area_sides(grid, {plant, positions})}
+  end
+
+  defp area_sides(grid, {plant, positions}) do
+    {
+      area(positions),
+      sides(grid, {plant, positions}),
+    }
+  end
+
+  def sides(_grid, {_plant, _positions}) do
+    0  # TODO
+  end
+
   # fences at the edges of the grid (no neighbor beyond)
   defp border_fence_count(neighbors), do: 4 - length(neighbors)
 
