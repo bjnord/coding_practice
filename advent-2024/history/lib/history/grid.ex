@@ -61,9 +61,15 @@ defmodule History.Grid do
     end)
   end
 
-  def cardinals_of(grid, {y, x}) do
+  def cardinals_of(grid, {y, x}, opts \\ []) do
     [:north, :east, :south, :west]
     |> Enum.map(fn dir -> delta_pos({y, x}, delta(dir)) end)
+    |> reject_out_of_bounds(grid, opts[:oob])
+  end
+
+  defp reject_out_of_bounds(neighbors, _grid, true), do: neighbors
+  defp reject_out_of_bounds(neighbors, grid, _) do
+    neighbors
     |> Enum.reject(fn {ny, nx} ->
       out_of_bounds?(ny, grid.size.y) || out_of_bounds?(nx, grid.size.x)
     end)

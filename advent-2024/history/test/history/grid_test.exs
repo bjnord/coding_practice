@@ -64,5 +64,41 @@ defmodule History.GridTest do
              |> Grid.set_meta(:start, {0, 1})
       assert grid.meta.start == {0, 1}
     end
+
+    test "find in-bounds cardinal neighbors", fixture do
+      grid = fixture.exp_grid_1
+      act_cardinals = Grid.cardinals_of(grid, {0, 0})
+      exp_cardinals = [
+        {0, 1},
+        {1, 0},
+      ]
+      assert act_cardinals == exp_cardinals
+      act_cardinals = Grid.cardinals_of(grid, {2, 3})
+      exp_cardinals = [
+        {1, 3},
+        {2, 2},
+      ]
+      assert act_cardinals == exp_cardinals
+    end
+
+    test "find all cardinal neighbors", fixture do
+      grid = fixture.exp_grid_1
+      act_cardinals = Grid.cardinals_of(grid, {0, 0}, oob: true)
+      exp_cardinals = [
+        {-1, 0},
+        {0, 1},
+        {1, 0},
+        {0, -1},
+      ]
+      assert act_cardinals == exp_cardinals
+      act_cardinals = Grid.cardinals_of(grid, {2, 3}, oob: true)
+      exp_cardinals = [
+        {1, 3},
+        {2, 4},
+        {3, 3},
+        {2, 2},
+      ]
+      assert act_cardinals == exp_cardinals
+    end
   end
 end

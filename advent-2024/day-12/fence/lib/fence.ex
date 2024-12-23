@@ -51,10 +51,13 @@ defmodule Fence do
     end)
   end
 
+  # fences at the edges of the grid (no neighbor beyond)
+  defp border_fence_count(neighbors), do: 4 - length(neighbors)
+
   def bulk_prices(grid) do
     areas_sides(grid)
     |> Enum.reduce(0, fn {_plant, {area, side}}, acc ->
-      acc + area * side
+      acc + area * side  # FIXME `acc` isn't an integer
     end)
   end
 
@@ -75,12 +78,36 @@ defmodule Fence do
     }
   end
 
-  def sides(_grid, {_plant, _positions}) do
-    0  # TODO
+  def sides(grid, {plant, positions}) do
+    positions
+    |> Enum.flat_map(&(position_sides(grid, &1, plant)))
   end
 
-  # fences at the edges of the grid (no neighbor beyond)
-  defp border_fence_count(neighbors), do: 4 - length(neighbors)
+  def position_sides(grid, pos, plant) do
+    neighbors = Grid.cardinals_of(grid, pos, oob: true)
+    neighbors
+    |> Enum.reduce([], fn npos, acc ->
+      if Grid.get(grid, npos) != plant do
+        [side_of(pos, npos) | acc]
+      else
+        acc
+      end
+    end)
+    |> Enum.reverse()
+  end
+
+  defp side_of({y, x}, {ny, nx}) do
+    {dy, dx} = {ny - y, nx - x}
+    {
+      {double(y) + dy, double(x) + dx},
+      fence_of(dy, dx),
+    }
+  end
+
+  defp double(n), do: n * 2 + 1
+
+  defp fence_of(_dy, 0), do: ?-
+  defp fence_of(0, _dx), do: ?|
 
   @doc """
   Parse arguments and call puzzle part methods.
