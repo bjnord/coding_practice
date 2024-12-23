@@ -6,10 +6,10 @@ defmodule Network do
   import Network.Parser
   import History.CLI
 
-  def t_triads(connections, f \\ &starts_t?/1) do
+  def t_triads(connections) do
     connections
     |> form_network()
-    |> triads(f)
+    |> triads(&starts_t?/1)
   end
 
   def form_network(connections) do
@@ -27,7 +27,7 @@ defmodule Network do
     end)
   end
 
-  def triads(network, f) do
+  def triads(network, f \\ fn _ -> true end) do
     Map.keys(network)
     |> Enum.filter(f)
     |> Enum.sort()
@@ -64,28 +64,30 @@ defmodule Network do
     |> MapSet.member?(b)
   end
 
-  def max_network(connections) do
+  def max_network(connections, opts \\ []) do
     connections
     |> form_network()
-    |> find_max_network()
+    |> find_max_network(opts)
     |> Enum.join(",")
   end
 
-  def find_max_network(network) do
-    triads(network, fn _ -> true end)
-    |> widen(network)
+  def find_max_network(network, opts) do
+    triads(network)
+    |> widen(network, opts)
   end
 
-  def widen([subnet], _network), do: subnet
-  def widen(subnets, network) do
-    #hd(subnets)
-    #|> Enum.count()
-    #|> IO.inspect(label: "widen")
+  def widen([subnet], _network, _opts), do: subnet
+  def widen(subnets, network, opts) do
+    if opts[:verbose] do
+      hd(subnets)
+      |> Enum.count()
+      |> IO.inspect(label: "widen")
+    end
     subnets
     |> Enum.flat_map(fn subnet -> widen_subnet(subnet, network) end)
     |> Enum.map(fn subnet -> Enum.sort(subnet) end)
     |> Enum.uniq()
-    |> widen(network)
+    |> widen(network, opts)
   end
 
   def widen_subnet(subnet, network) do
@@ -117,7 +119,7 @@ defmodule Network do
   def main(argv) do
     {input_path, opts} = parse_args(argv)
     if Enum.member?(opts[:parts], 1), do: part1(input_path)
-    if Enum.member?(opts[:parts], 2), do: part2(input_path)
+    if Enum.member?(opts[:parts], 2), do: part2(input_path, opts)
   end
 
   @doc """
@@ -133,9 +135,9 @@ defmodule Network do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_path) do
+  def part2(input_path, opts) do
     parse_input_file(input_path)
-    |> Network.max_network()
+    |> Network.max_network(opts)
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
