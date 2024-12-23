@@ -6,10 +6,10 @@ defmodule Network do
   import Network.Parser
   import History.CLI
 
-  def t_triads(connections) do
+  def t_triads(connections, f \\ &starts_t?/1) do
     connections
     |> form_network()
-    |> triads()
+    |> triads(f)
   end
 
   def form_network(connections) do
@@ -27,9 +27,9 @@ defmodule Network do
     end)
   end
 
-  def triads(network) do
+  def triads(network, f) do
     Map.keys(network)
-    |> Enum.filter(&starts_t?/1)
+    |> Enum.filter(f)
     |> Enum.sort()
     |> Enum.flat_map(fn node ->
       peers = Map.get(network, node)
@@ -64,6 +64,49 @@ defmodule Network do
     |> MapSet.member?(b)
   end
 
+  def max_network(connections) do
+    connections
+    |> form_network()
+    |> find_max_network()
+    |> Enum.join(",")
+  end
+
+  def find_max_network(network) do
+    triads(network, fn _ -> true end)
+    |> widen(network)
+  end
+
+  def widen([subnet], _network), do: subnet
+  def widen(subnets, network) do
+    #hd(subnets)
+    #|> Enum.count()
+    #|> IO.inspect(label: "widen")
+    subnets
+    |> Enum.flat_map(fn subnet -> widen_subnet(subnet, network) end)
+    |> Enum.map(fn subnet -> Enum.sort(subnet) end)
+    |> Enum.uniq()
+    |> widen(network)
+  end
+
+  def widen_subnet(subnet, network) do
+    non_subnet_nodes(subnet, network)
+    |> Enum.filter(fn node ->
+      subnet
+      |> Enum.all?(fn snode -> connects_to?(network, node, snode) end)
+    end)
+    |> Enum.map(fn node ->
+      [node | subnet]
+    end)
+  end
+
+  # OPTIMIZE
+  def non_subnet_nodes(subnet, network) do
+    Map.keys(network)
+    |> Enum.reject(fn node ->
+      Enum.find(subnet, &(&1 == node))
+    end)
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -92,7 +135,7 @@ defmodule Network do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Network.max_network()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

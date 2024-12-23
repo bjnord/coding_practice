@@ -48,6 +48,7 @@ defmodule NetworkTest do
           ["tc", "td", "wh"],
           ["td", "wh", "yn"],
         ],
+        exp_max_network: "co,de,ka,ta",
       ]
     end
 
@@ -55,6 +56,12 @@ defmodule NetworkTest do
       act_t_triads = fixture.connections
                      |> Network.t_triads()
       assert act_t_triads == fixture.exp_t_triads
+    end
+
+    test "find largest network", fixture do
+      act_max_network = fixture.connections
+                        |> Network.max_network()
+      assert act_max_network == fixture.exp_max_network
     end
   end
 end
