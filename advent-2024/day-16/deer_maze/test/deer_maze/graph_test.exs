@@ -101,16 +101,26 @@ defmodule DeerMaze.GraphTest do
               end: {1, 15},
             },
           },
+          #######  FIXME DEBUG TEMP
+          #....E#        (amusing that this
+          ###.#.#        is automatically
+          #.....#        a comment)
+          #.#.#.#
+          #S..#.#
+          #######
           %Graph{
             nodes: %{
-              {{1, 3}, :north} => [{{1, 5}, :end, 1002}, {{3, 3}, :south, 1002}],
-              {{1, 3}, :west} => [{{1, 5}, :end, 1002}, {{3, 3}, :south, 1002}],
-              {{1, 5}, :end} => [{{3, 5}, :south, 1002}, {{1, 3}, :west, 1002}],
-              {{3, 3}, :east} => [{{1, 3}, :north, 1002}, {{3, 5}, :east, 2}],
-              {{3, 3}, :north} => [{{1, 3}, :north, 2}, {{3, 5}, :east, 1002}],
-              {{3, 5}, :east} => [{{1, 5}, :end, 1002}, {{3, 3}, :west, 1002}],
-              {{3, 5}, :south} => [{{1, 5}, :end, 1002}, {{3, 3}, :west, 1002}],
-              {{5, 1}, :east} => [{{3, 3}, :east, 2004}, {{3, 3}, :north, 1004}]
+              {{5, 1}, :east} => [{{{3, 3}, :north}, 1004}, {{{5, 1}, :north}, 1000}],
+              {{5, 1}, :north} => [{{{3, 3}, :east}, 1004}],
+              # v
+              {{3, 3}, :north} => [{{{3, 3}, :east}, 1000}, {{{1, 3}, :north}, 2}],
+              {{3, 3}, :east} => [{{{3, 5}, :east}, 2}, {{{3, 3}, :north}, 1000}],
+              # v
+              {{1, 3}, :north} => [{{{1, 3}, :east}, 1000}],
+              {{3, 5}, :east} => [{{{3, 5}, :north}, 1000}],
+              # v
+              {{1, 3}, :east} => [{{{1, 5}, :end}, 2}],
+              {{3, 5}, :north} => [{{{1, 5}, :end}, 2}],
             },
             meta: %{
               start: {5, 1},
@@ -123,11 +133,11 @@ defmodule DeerMaze.GraphTest do
 
     test "produces correct graphs", fixture do
       act_graphs = fixture.inputs
-                   |> Enum.slice(2..2)  # FIXME DEBUG TEMP
+                   #|> Enum.slice(2..2)  # FIXME DEBUG TEMP
                    |> Enum.map(&parse_input_string/1)
                    |> Enum.map(&Graph.from_grid/1)
       assert act_graphs == fixture.exp_graphs
-                           |> Enum.slice(2..2)  # FIXME DEBUG TEMP
+                           #|> Enum.slice(2..2)  # FIXME DEBUG TEMP
     end
   end
 end

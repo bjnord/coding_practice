@@ -9,13 +9,13 @@ defmodule DeerMaze do
 
   def score(grid) do
     graph = Graph.from_grid(grid)
-    walk(graph, {graph.meta.start, :east, 0}, 0)
+    walk(graph, {{graph.meta.start, :east}, 0}, 0)
     |> List.flatten()
     |> Enum.min()
   end
 
-  defp walk(_graph, {_pos, dir, cost}, score) when dir == :end, do: score + cost
-  defp walk(graph, {pos, dir, cost}, score) do
+  defp walk(_graph, {{_pos, dir}, cost}, score) when dir == :end, do: score + cost
+  defp walk(graph, {{pos, dir}, cost}, score) do
     Map.get(graph.nodes, {pos, dir}, [])
     |> Enum.map(&(walk(graph, &1, score + cost)))
   end
