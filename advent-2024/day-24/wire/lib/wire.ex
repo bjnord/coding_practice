@@ -23,19 +23,19 @@ defmodule Wire do
     end)
   end
 
-  defp z_wire?(ident) do
-    Atom.to_string(ident)
+  defp z_wire?(wire) do
+    Atom.to_string(wire)
     |> String.first()
     |> then(fn gr -> gr == "z" end)
   end
 
-  defp add_to_queue(queue, ident = rhs, diagram) when is_atom(rhs) do
-    rhs = Map.get(diagram, ident)
-    add_to_queue([ident | queue], rhs, diagram)
+  defp add_to_queue(queue, wire = rhs, diagram) when is_atom(rhs) do
+    rhs = Map.get(diagram, wire)
+    add_to_queue([wire | queue], rhs, diagram)
   end
-  defp add_to_queue(queue, {ident1, _gate, ident2} = _rhs, diagram) do
-    add_to_queue(queue, ident1, diagram)
-    |> add_to_queue(ident2, diagram)
+  defp add_to_queue(queue, {wire1, _gate, wire2} = _rhs, diagram) do
+    add_to_queue(queue, wire1, diagram)
+    |> add_to_queue(wire2, diagram)
   end
   defp add_to_queue(queue, _rhs, _diagram), do: queue
 
@@ -46,12 +46,12 @@ defmodule Wire do
     eval_queue(next, diagram)
   end
 
-  defp eval_item(values, ident = rhs) when is_atom(rhs) do
-    Map.get(values, ident)
+  defp eval_item(values, wire = rhs) when is_atom(rhs) do
+    Map.get(values, wire)
   end
-  defp eval_item(values, {ident1, gate, ident2} = _rhs) do
-    value1 = Map.get(values, ident1)
-    value2 = Map.get(values, ident2)
+  defp eval_item(values, {wire1, gate, wire2} = _rhs) do
+    value1 = Map.get(values, wire1)
+    value2 = Map.get(values, wire2)
     expr(value1, gate, value2)
   end
   defp eval_item(_values, value = _rhs), do: value
@@ -64,8 +64,8 @@ defmodule Wire do
     Map.keys(values)
     |> Enum.filter(&z_wire?/1)
     |> Enum.sort(&(&1 >= &2))
-    |> Enum.reduce(0, fn ident, acc ->
-      acc * 2 + Map.get(values, ident)
+    |> Enum.reduce(0, fn wire, acc ->
+      acc * 2 + Map.get(values, wire)
     end)
   end
 
