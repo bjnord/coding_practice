@@ -102,8 +102,7 @@ defmodule RobotTest do
   # (this will be our alternate "obviously correct" implementation
 
   def location_after_by_addition(robot, dim, secs) do
-    #{dim, robot, secs}
-    #|> IO.inspect(label: "location_after_by_addition {dim, robot, secs}")
+    Logger.debug(["dim=", inspect(dim), " robot=", inspect(robot), " secs=", inspect(secs)])
     1..secs
     |> Enum.reduce(robot, fn _, robot ->
       step(robot, dim)
