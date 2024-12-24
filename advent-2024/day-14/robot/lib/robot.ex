@@ -20,38 +20,6 @@ defmodule Robot do
     }
   end
 
-  #def location_after_by_adding(robot, dim, secs) do
-  #  1..secs
-  #  |> Enum.reduce(robot, fn _, robot ->
-  #    step(robot, dim)
-  #  end)
-  #  |> elem(0)
-  #end
-
-  #def step({{y, x}, {dy, dx}}, {dim_y, dim_x}) do
-  #  y = y + dy
-  #  y =
-  #    cond do
-  #      y >= dim_y ->
-  #        y - dim_y
-  #      y < 0 ->
-  #        y + dim_y
-  #      true ->
-  #        y
-  #    end
-  #  x = x + dx
-  #  x =
-  #    cond do
-  #      x >= dim_x ->
-  #        x - dim_x
-  #      x < 0 ->
-  #        x + dim_x
-  #      true ->
-  #        x
-  #    end
-  #  {{y, x}, {dy, dx}}
-  #end
-
   def quadrant_count(locations, dim) do
     locations
     |> Enum.reduce(%{}, fn pos, acc ->

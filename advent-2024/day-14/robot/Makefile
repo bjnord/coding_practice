@@ -2,18 +2,19 @@ BIN = ./robot
 FILES = mix.exs test/test_helper.exs \
 	lib/robot.ex test/robot_test.exs \
 	lib/robot/parser.ex test/robot/parser_test.exs
-VERBOSE = 0
 
 .PHONY: run test check doc console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
 
+#test: export PROPCHECK_VERBOSE=1
+#test: export PROPCHECK_DETECT_EXCEPTIONS=0
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
-		MIX_ENV=test mix propcheck.clean; \
+		( MIX_ENV=test mix propcheck.clean ); \
 	fi
-	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+	mix test
 
 check:
 	mix dialyzer
