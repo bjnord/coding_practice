@@ -94,9 +94,9 @@ defmodule Wire.Parser do
 
   ## Examples
       iex> parse_line_fixed("x00: 1\n")
-      {:x00, 1}
+      {"x00", 1}
       iex> parse_line_fixed("y02: 0\n")
-      {:y02, 0}
+      {"y02", 0}
   """
   @spec parse_line_fixed(String.t()) :: {String.t(), fixed_wire()}
   def parse_line_fixed(line) do
@@ -105,7 +105,7 @@ defmodule Wire.Parser do
             |> List.to_string()
     value = Enum.at(chars, 3)
     {
-      String.to_atom(ident),
+      ident,
       value - ?0,
     }
   end
@@ -135,9 +135,9 @@ defmodule Wire.Parser do
 
   ## Examples
       iex> parse_line_gate("x00 AND y00 -> z00\n")
-      {:z00, {:x00, :AND, :y00}}
+      {"z00", {"x00", :AND, "y00"}}
       iex> parse_line_gate("y02 OR x02 -> z02\n")
-      {:z02, {:x02, :OR, :y02}}
+      {"z02", {"x02", :OR, "y02"}}
   """
   @spec parse_line_gate(String.t()) :: {String.t(), wire_gate()}
   def parse_line_gate(line) do
@@ -153,11 +153,11 @@ defmodule Wire.Parser do
     ident = Enum.slice(tokens, 7..9)
             |> List.to_string()
     {
-      String.to_atom(ident),
+      ident,
       {
-        String.to_atom(ident1),
+        ident1,
         String.to_atom(gate),
-        String.to_atom(ident2),
+        ident2,
       }
     }
   end

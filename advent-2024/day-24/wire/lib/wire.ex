@@ -29,7 +29,7 @@ defmodule Wire do
     |> then(fn gr -> gr == "z" end)
   end
 
-  defp add_to_queue(queue, wire = rhs, diagram) when is_atom(rhs) do
+  defp add_to_queue(queue, wire = rhs, diagram) when is_binary(rhs) do
     rhs = Map.get(diagram, wire)
     add_to_queue([wire | queue], rhs, diagram)
   end
