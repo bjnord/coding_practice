@@ -120,6 +120,41 @@ defmodule Wire do
   defp deob_length(w) when is_integer(w), do: 1
   defp deob_length(w), do: String.length(w)
 
+  def generate_adder(ww) do
+    0..(ww - 1)
+    |> Enum.reduce(%{}, fn i, diagram ->
+      Map.put(diagram, wire_name("x", i), 1)
+      |> Map.put(wire_name("y", i), 1)
+    end)
+    |> generate_adder(0, ww)
+  end
+
+  defp generate_adder(diagram, i, ww) when i == ww, do: diagram
+  defp generate_adder(diagram, 0, ww) do
+    Map.put(diagram, "z00", {"x00", :XOR, "y00"})
+    |> generate_adder(1, ww)
+  end
+  defp generate_adder(diagram, i, ww) do
+    # halfadd = XOR(a, b)
+    {halfadd_a, halfadd_b} =
+      {wire_name("x", i), wire_name("y", i)}
+    # halfcarry = AND(a, b)
+    {carryin_a, carryin_b} =
+      {wire_name("x", i - 1), wire_name("y", i - 1)}
+    # fulladd = XOR(halfadd, carryin)
+    {halfadd_wire, carryin_wire} =
+      {wire_name("halfadd_", i), wire_name("halfcarry_", i - 1)}
+    # carryout = OR(AND(halfadd, carryin), halfcarry)
+    carryop_wire = wire_name("fullcarop_", i)
+    # add this bit's full adder
+    Map.put(diagram, halfadd_wire, {halfadd_a, :XOR, halfadd_b})
+    |> Map.put(carryin_wire, {carryin_a, :AND, carryin_b})
+    |> Map.put(wire_name("z", i), {halfadd_wire, :XOR, carryin_wire})
+    |> Map.put(carryop_wire, {halfadd_wire, :AND, carryin_wire})
+    |> Map.put(wire_name("fullcarry_", i), {carryop_wire, :OR, carryin_wire})
+    |> generate_adder(i + 1, ww)
+  end
+
   def swaps(diagram, opts) do
     catalog =
       new_catalog()
@@ -129,6 +164,8 @@ defmodule Wire do
       #|> dbg()
     if opts[:verbose] do
       dump("log/dump.out", diagram, catalog)
+      adder_diagram = generate_adder(4)
+      dump("log/adder.out", adder_diagram, {%{}, %{}})
     end
     []
   end
