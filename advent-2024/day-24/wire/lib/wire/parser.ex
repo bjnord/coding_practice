@@ -119,6 +119,8 @@ defmodule Wire.Parser do
   @doc ~S"""
   Parse an input line containing a wire gate.
 
+  Since gates are commutative, swap Y-X to be X-Y.
+
   ## Parameters
 
   - `line`: the puzzle input line
@@ -130,7 +132,7 @@ defmodule Wire.Parser do
   ## Examples
       iex> parse_line_gate("x00 AND y00 -> z00\n")
       {:z00, {:x00, :AND, :y00}}
-      iex> parse_line_gate("x02 OR y02 -> z02\n")
+      iex> parse_line_gate("y02 OR x02 -> z02\n")
       {:z02, {:x02, :OR, :y02}}
   """
   @spec parse_line_gate(String.t()) :: wire()
@@ -141,6 +143,9 @@ defmodule Wire.Parser do
     gate = Enum.at(tokens, 3)
     ident2 = Enum.slice(tokens, 4..6)
              |> List.to_string()
+    {ident1, ident2} =
+      Enum.slice(tokens, 0..4)
+      |> swap({ident1, ident2})
     ident = Enum.slice(tokens, 7..9)
             |> List.to_string()
     {
@@ -152,4 +157,7 @@ defmodule Wire.Parser do
       }
     }
   end
+
+  defp swap([?y, _, _, _, ?x], {ident1, ident2}), do: {ident2, ident1}
+  defp swap(_, {ident1, ident2}), do: {ident1, ident2}
 end
