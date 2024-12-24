@@ -5,6 +5,7 @@ defmodule Wire do
 
   import Bitwise
   import History.CLI
+  require Logger
   import Wire.Parser
 
   def eval(diagram) do
@@ -21,12 +22,6 @@ defmodule Wire do
     |> Enum.reduce([], fn z_wire, queue ->
       add_to_queue(queue, z_wire, diagram)
     end)
-  end
-
-  defp z_wire?(wire) do
-    Atom.to_string(wire)
-    |> String.first()
-    |> then(fn gr -> gr == "z" end)
   end
 
   defp add_to_queue(queue, wire = rhs, diagram) when is_binary(rhs) do
@@ -69,6 +64,96 @@ defmodule Wire do
     end)
   end
 
+  def swaps(diagram) do
+    catalog =
+      new_catalog()
+      |> add_halfadds_to_catalog(diagram)
+      |> add_carries_to_catalog(diagram)
+      |> dbg()
+    []
+  end
+
+  defp new_catalog(), do: {%{}, %{}}
+
+  def add_halfadds_to_catalog(catalog, diagram) do
+    xy_gates(diagram, :XOR)
+    |> Enum.reduce(catalog, fn {i, wire}, catalog ->
+      if wire != nil do
+        add_to_catalog(catalog, {wire_name("halfadd_", i), wire})
+      else
+        catalog
+      end
+    end)
+  end
+
+  def add_carries_to_catalog(catalog, diagram) do
+    xy_gates(diagram, :AND)
+    |> Enum.reduce(catalog, fn {i, wire}, catalog ->
+      if wire != nil do
+        add_to_catalog(catalog, {wire_name("carry_", i), wire})
+      else
+        catalog
+      end
+    end)
+  end
+
+  def add_to_catalog({fwd, rev}, {a_wire, b_wire}) do
+    {
+      Map.put_new(fwd, a_wire, b_wire),
+      Map.put_new(rev, b_wire, a_wire),
+    }
+  end
+
+  def xy_gates(diagram, gate) do
+    ww = word_width(diagram)
+    0..(ww - 1)
+    |> Enum.map(fn i ->
+      Enum.find(diagram, fn {k, v} ->
+        k_ok =
+          if (i == 0) && (gate == :XOR) do
+            z_wire?(k)
+          else
+            !z_wire?(k)
+          end
+        v_ok =
+          (v == {wire_name("x", i), gate, wire_name("y", i)})
+        k_ok && v_ok
+      end)
+      |> then(&(wire_or_nil(i, &1)))
+    end)
+  end
+
+  def wire_name(a, i) do
+    ii =
+      Integer.to_string(i)
+      |> String.pad_leading(2, "0")
+    "#{a}#{ii}"
+  end
+
+  defp wire_or_nil(i, nil), do: {i, nil}
+  defp wire_or_nil(i, {k, _v}), do: {i, k}
+
+  defp word_width(diagram) do
+    nx = count(diagram, &x_wire?/1)
+    ny = count(diagram, &y_wire?/1)
+    if nx != ny do
+      raise "mismatch nx=#{nx} <> ny=#{ny}"
+    end
+    Logger.debug("word_width: x=#{nx} y=#{ny} z=#{nx + 1}")
+    nx
+  end
+
+  defp count(diagram, f) do
+    Map.keys(diagram)
+    |> Enum.count(f)
+  end
+
+  defp x_wire?(wire), do: wire_in_range?(wire, "x00", "x99")
+  defp y_wire?(wire), do: wire_in_range?(wire, "y00", "y99")
+  defp z_wire?(wire), do: wire_in_range?(wire, "z00", "z99")
+  defp wire_in_range?(w, a, b) when w >= a and w <= b, do: true
+  defp wire_in_range?(_w, _a, _b), do: false
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -96,7 +181,8 @@ defmodule Wire do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Wire.swaps()
+    |> Enum.join(",")
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

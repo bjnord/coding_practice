@@ -24,8 +24,8 @@ import Config
 config :logger,
     backends: [{LoggerFileBackend, :debug_log}]
 config :logger, :debug_log,
-    path: "log/#{Mix.env}.log",
-    level: :debug,
+    path: "log/#{config_env()}.log",
+    level: :info,
     format: "$date $time $metadata[$level] $message\n"
 
 # It is also possible to import configuration files, relative to this
@@ -34,4 +34,4 @@ config :logger, :debug_log,
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 
-import_config "#{Mix.env}.exs"
+import_config "#{config_env()}.exs"
