@@ -5,7 +5,11 @@ defmodule Wire.Parser do
 
   import NimbleParsec
 
-  @type wire() :: {atom(), integer()} | {atom(), {integer(), atom(), integer()}}
+  @type fixed_wire() :: integer()
+  @type wire_gate() :: {String.t(), atom(), String.t()}
+  @type connection_rhs() :: fixed_wire() | wire_gate()
+  @type connection() :: {String.t(), connection_rhs()}
+  @type diagram() :: %{String.t() => connection_rhs()}
 
   @doc ~S"""
   Parse an input file.
@@ -16,9 +20,9 @@ defmodule Wire.Parser do
 
   ## Returns
 
-  a list of wires
+  a wiring diagram
   """
-  @spec parse_input_file(String.t()) :: [wire()]
+  @spec parse_input_file(String.t()) :: diagram()
   def parse_input_file(path) do
     path
     |> File.read!()
@@ -34,9 +38,9 @@ defmodule Wire.Parser do
 
   ## Returns
 
-  a list of wires
+  a wiring diagram
   """
-  @spec parse_input_string(String.t()) :: [wire()]
+  @spec parse_input_string(String.t()) :: diagram()
   def parse_input_string(input) do
     [fixed_wires, wire_gates] =
       input
@@ -94,7 +98,7 @@ defmodule Wire.Parser do
       iex> parse_line_fixed("y02: 0\n")
       {:y02, 0}
   """
-  @spec parse_line_fixed(String.t()) :: wire()
+  @spec parse_line_fixed(String.t()) :: {String.t(), fixed_wire()}
   def parse_line_fixed(line) do
     {:ok, chars, _, _, _, _} = fixed_wire(line)
     ident = Enum.slice(chars, 0..2)
@@ -135,7 +139,7 @@ defmodule Wire.Parser do
       iex> parse_line_gate("y02 OR x02 -> z02\n")
       {:z02, {:x02, :OR, :y02}}
   """
-  @spec parse_line_gate(String.t()) :: wire()
+  @spec parse_line_gate(String.t()) :: {String.t(), wire_gate()}
   def parse_line_gate(line) do
     {:ok, tokens, _, _, _, _} = wire_gate(line)
     ident1 = Enum.slice(tokens, 0..2)
