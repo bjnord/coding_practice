@@ -6,6 +6,9 @@ defmodule Robot.Parser do
   import NimbleParsec
 
   @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
+  @type position() :: {non_neg_integer(), non_neg_integer()}
+  @type velocity() :: {integer(), integer()}
+  @type robot() :: {position(), velocity()}
 
   @doc ~S"""
   Parse an input file.
@@ -20,7 +23,7 @@ defmodule Robot.Parser do
 
   a list of robots
   """
-  @spec parse_input_file(String.t()) :: streamable([[integer()]])
+  @spec parse_input_file(String.t()) :: streamable(robot())
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -38,7 +41,7 @@ defmodule Robot.Parser do
 
   a list of robots
   """
-  @spec parse_input_string(String.t()) :: streamable([[integer()]])
+  @spec parse_input_string(String.t()) :: streamable(robot())
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
@@ -76,7 +79,7 @@ defmodule Robot.Parser do
       iex> parse_line("p=51,19 v=-11,17\n")
       {{19, 51}, {17, -11}}
   """
-  @spec parse_line(String.t()) :: [integer()]
+  @spec parse_line(String.t()) :: robot()
   def parse_line(line) do
     line
     |> String.trim_trailing()
