@@ -381,6 +381,35 @@ defmodule Wire do
   defp wire_in_range?(w, a, b) when w >= a and w <= b, do: true
   defp wire_in_range?(_w, _a, _b), do: false
 
+  def swap(diagram, swaplist) do
+    swaplist
+    |> Enum.reduce(diagram, fn {from, to}, diagram ->
+      trans = Map.get(diagram, from)
+      Map.put(diagram, from, Map.get(diagram, to))
+      |> Map.put(to, trans)
+    end)
+  end
+
+  def mermaid(path, diagram) do
+    {:ok, f} = File.open(path, [:write])
+    IO.binwrite(f, "graph TD\n")
+    Map.keys(diagram)
+    |> Enum.each(fn wire ->
+      mermaid_node(f, wire, Map.get(diagram, wire))
+    end)
+    File.close(f)
+  end
+
+  def mermaid_node(f, wire, {wire1, gate, wire2}) do
+    IO.binwrite(f, "#{wire}-->#{wire}#{gate}\n")
+    IO.binwrite(f, "#{wire}#{gate}-->#{wire1}\n")
+    IO.binwrite(f, "#{wire}#{gate}-->#{wire2}\n")
+  end
+
+  def mermaid_node(_f, _wire, _value) do
+    #IO.binwrite(f, "#{wire}-->#{value}\n")
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -408,6 +437,7 @@ defmodule Wire do
   """
   def part2(input_path, opts) do
     parse_input_file(input_path)
+    |> Wire.swap([{"z10", "vcf"}, {"fhg", "z17"}, {"dvb", "fsq"}, {"tnc", "z39"}])
     |> Wire.swaps(opts)
     |> Enum.join(",")
     |> IO.inspect(label: "Part 2 answer is")
