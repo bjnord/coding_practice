@@ -225,7 +225,9 @@ defmodule Wire do
       |> add_fulls_to_catalog(diagram)
     dump("log/dump.out", diagram, catalog, both: true)
     #
-    adder_diagram = generate_adder(45)  # TODO derive `45` from `diagram`
+    adder_diagram =
+      word_width(diagram)
+      |> generate_adder()
     dump("log/adder.out", adder_diagram, {%{}, %{}})
   end
 
