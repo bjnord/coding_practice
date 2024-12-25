@@ -153,7 +153,7 @@ defmodule Wire do
   defp deob_length(w), do: String.length(w)
 
   def generate_adder(ww) do
-    0..(ww - 1)
+    0..ww
     |> Enum.reduce(%{}, fn i, diagram ->
       Map.put(diagram, wire_name("x", i), 1)
       |> Map.put(wire_name("y", i), 1)
@@ -161,16 +161,21 @@ defmodule Wire do
     |> generate_adder(0, ww)
   end
 
-  defp generate_adder(diagram, i, ww) when i == ww, do: diagram
+  defp generate_adder(diagram, i, ww) when i == ww do
+    diagram
+    |> Map.put(wire_name("z", i), {wire_name("fullcarop_", i - 1), :OR, wire_name("halfcarry_", i - 1)})
+  end
   defp generate_adder(diagram, 0, ww) do
-    Map.put(diagram, "z00", {"x00", :XOR, "y00"})
+    diagram
+    |> Map.put("z00", {"x00", :XOR, "y00"})
     |> Map.put("halfcarry_00", {"x00", :AND, "y00"})
     |> generate_adder(1, ww)
   end
   defp generate_adder(diagram, i, ww) do
     wires = adder_wires(i)
     # halfadd = XOR(a, b)
-    Map.put(diagram, wires[:halfadd], {wires[:a], :XOR, wires[:b]})
+    diagram
+    |> Map.put(wires[:halfadd], {wires[:a], :XOR, wires[:b]})
     # halfcarry = AND(a, b)
     |> Map.put(wires[:halfcarry], {wires[:a], :AND, wires[:b]})
     # fulladd = XOR(halfadd, fullcarry-in)
