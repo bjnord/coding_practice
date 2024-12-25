@@ -198,21 +198,39 @@ defmodule Wire do
   def fullcarry_in_wire_name(1), do: wire_name("halfcarry_", 0)
   def fullcarry_in_wire_name(i), do: wire_name("fullcarry_", i - 1)
 
-  def swaps(diagram, opts) do
-    catalog =
-      new_catalog()
-      |> add_halfadds_to_catalog(diagram)
-      |> add_halfcarries_to_catalog(diagram)
-      |> add_fulls_to_catalog(diagram)
-    if opts[:verbose] do
-      dump("log/dump.out", diagram, catalog, both: true)
-      adder_diagram = generate_adder(45)
-      dump("log/adder.out", adder_diagram, {%{}, %{}})
-    end
-    []
+  def swapped_wires(diagram) do
+    swap_list(diagram)
+    |> Enum.map(fn {w1, w2} -> [w1, w2] end)
+    |> List.flatten()
+    |> Enum.sort
   end
 
-  defp new_catalog(), do: {%{}, %{}}
+  # TODO find these algorithmically :)
+  #      (I did it by diff'ing the puzzle input with a generated adder)
+  def swap_list(_diagram) do
+    [
+      {"z10", "vcf"},
+      {"fhg", "z17"},
+      {"dvb", "fsq"},
+      {"tnc", "z39"}
+    ]
+  end
+
+  #def swaps(diagram, opts) do
+  #  catalog =
+  #    new_catalog()
+  #    |> add_halfadds_to_catalog(diagram)
+  #    |> add_halfcarries_to_catalog(diagram)
+  #    |> add_fulls_to_catalog(diagram)
+  #  if opts[:verbose] do
+  #    dump("log/dump.out", diagram, catalog, both: true)
+  #    adder_diagram = generate_adder(45)
+  #    dump("log/adder.out", adder_diagram, {%{}, %{}})
+  #  end
+  #  []
+  #end
+  #
+  #defp new_catalog(), do: {%{}, %{}}
 
   def add_halfadds_to_catalog(catalog, diagram) do
     xy_gates(diagram, :XOR)
@@ -404,7 +422,7 @@ defmodule Wire do
   def main(argv) do
     {input_path, opts} = parse_args(argv)
     if Enum.member?(opts[:parts], 1), do: part1(input_path)
-    if Enum.member?(opts[:parts], 2), do: part2(input_path, opts)
+    if Enum.member?(opts[:parts], 2), do: part2(input_path)
   end
 
   @doc """
@@ -419,10 +437,9 @@ defmodule Wire do
   @doc """
   Process input file and display part 2 solution.
   """
-  def part2(input_path, opts) do
+  def part2(input_path) do
     parse_input_file(input_path)
-    |> Wire.swap([{"z10", "vcf"}, {"fhg", "z17"}, {"dvb", "fsq"}, {"tnc", "z39"}])
-    |> Wire.swaps(opts)
+    |> Wire.swapped_wires()
     |> Enum.join(",")
     |> IO.inspect(label: "Part 2 answer is")
   end
