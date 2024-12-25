@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+DIFF="log/dump-diff.out"
+
+make wire
+./wire --parts=0 --verbose private/input.txt
+echo "creating $DIFF ..." >&2
+sed -e 's/ 0$/ 1/' -e 's/? \[//' -e 's/ \[[a-z]*\]//' -e 's/\]//' log/dump.out | diff -ub log/adder.out - >$DIFF

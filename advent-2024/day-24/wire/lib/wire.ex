@@ -216,21 +216,20 @@ defmodule Wire do
     ]
   end
 
-  #def swaps(diagram, opts) do
-  #  catalog =
-  #    new_catalog()
-  #    |> add_halfadds_to_catalog(diagram)
-  #    |> add_halfcarries_to_catalog(diagram)
-  #    |> add_fulls_to_catalog(diagram)
-  #  if opts[:verbose] do
-  #    dump("log/dump.out", diagram, catalog, both: true)
-  #    adder_diagram = generate_adder(45)
-  #    dump("log/adder.out", adder_diagram, {%{}, %{}})
-  #  end
-  #  []
-  #end
-  #
-  #defp new_catalog(), do: {%{}, %{}}
+  def dump_adders(diagram) do
+    diagram = swap(diagram, swap_list(diagram))
+    catalog =
+      new_catalog()
+      |> add_halfadds_to_catalog(diagram)
+      |> add_halfcarries_to_catalog(diagram)
+      |> add_fulls_to_catalog(diagram)
+    dump("log/dump.out", diagram, catalog, both: true)
+    #
+    adder_diagram = generate_adder(45)  # TODO derive `45` from `diagram`
+    dump("log/adder.out", adder_diagram, {%{}, %{}})
+  end
+
+  defp new_catalog(), do: {%{}, %{}}
 
   def add_halfadds_to_catalog(catalog, diagram) do
     xy_gates(diagram, :XOR)
@@ -423,6 +422,7 @@ defmodule Wire do
     {input_path, opts} = parse_args(argv)
     if Enum.member?(opts[:parts], 1), do: part1(input_path)
     if Enum.member?(opts[:parts], 2), do: part2(input_path)
+    if opts[:verbose], do: dumps(input_path)
   end
 
   @doc """
@@ -442,5 +442,13 @@ defmodule Wire do
     |> Wire.swapped_wires()
     |> Enum.join(",")
     |> IO.inspect(label: "Part 2 answer is")
+  end
+
+  @doc """
+  Dump puzzle input adder and generated adder.
+  """
+  def dumps(input_path) do
+    parse_input_file(input_path)
+    |> Wire.dump_adders()
   end
 end

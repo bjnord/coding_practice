@@ -4,7 +4,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/wire/parser.ex test/wire/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test check doc console clean
+.PHONY: run test diff check doc console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
@@ -14,6 +14,10 @@ test:
 		MIX_ENV=test mix propcheck.clean; \
 	fi
 	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+
+# (this is how I solved part 2, by manual inspection)
+diff:
+	bin/dump-diff
 
 check:
 	mix dialyzer
