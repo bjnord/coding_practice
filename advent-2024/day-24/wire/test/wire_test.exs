@@ -189,7 +189,7 @@ defmodule WireTest do
       act_swap_diagram = fixture.input_for_swap
                          |> parse_input_string()
                          |> Wire.swap(fixture.swaplist)
-      Wire.mermaid("log/example.mmd", act_swap_diagram)
+      Wire.Mermaid.write_diagram(act_swap_diagram, "log/example.mmd")
       assert act_swap_diagram == fixture.exp_swap_diagram
     end
   end

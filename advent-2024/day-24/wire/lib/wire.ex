@@ -121,23 +121,6 @@ defmodule Wire do
   defp wire_in_range?(w, a, b) when w >= a and w <= b, do: true
   defp wire_in_range?(_w, _a, _b), do: false
 
-  def mermaid(path, diagram) do
-    {:ok, f} = File.open(path, [:write])
-    IO.binwrite(f, "graph TD\n")
-    Map.keys(diagram)
-    |> Enum.each(fn wire ->
-      mermaid_node(f, wire, Map.get(diagram, wire))
-    end)
-    File.close(f)
-  end
-
-  def mermaid_node(f, wire, {wire1, gate, wire2}) do
-    IO.binwrite(f, "#{wire}-->#{wire}#{gate}\n")
-    IO.binwrite(f, "#{wire}#{gate}-->#{wire1}\n")
-    IO.binwrite(f, "#{wire}#{gate}-->#{wire2}\n")
-  end
-  def mermaid_node(_f, _wire, _value), do: :ok
-
   @doc """
   Parse arguments and call puzzle part methods.
 
