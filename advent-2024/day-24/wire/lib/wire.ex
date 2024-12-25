@@ -175,6 +175,7 @@ defmodule Wire do
     {halfcarry_a, halfcarry_b, halfcarry_wire} =
       {wire_name("x", i), wire_name("y", i), wire_name("halfcarry_", i)}
     # fulladd = XOR(halfadd, fullcarry-in)
+    z_wire = wire_name("z", i)
     # fullcarop = AND(halfadd, fullcarry-in)
     fullcarryin_wire =
       if i == 1 do
@@ -185,11 +186,11 @@ defmodule Wire do
     fullcarop_wire = wire_name("fullcarop_", i)
     # fullcarry-out = OR(fullcarop, halfcarry)
     fullcarry_wire = wire_name("fullcarry_", i)
-    #
+    ###
     # add this bit's full adder
     Map.put(diagram, halfadd_wire, {halfadd_a, :XOR, halfadd_b})
     |> Map.put(halfcarry_wire, {halfcarry_a, :AND, halfcarry_b})
-    |> Map.put(wire_name("z", i), {halfadd_wire, :XOR, fullcarryin_wire})
+    |> Map.put(z_wire, {halfadd_wire, :XOR, fullcarryin_wire})  # fulladd
     |> Map.put(fullcarop_wire, {halfadd_wire, :AND, fullcarryin_wire})
     |> Map.put(fullcarry_wire, {fullcarop_wire, :OR, halfcarry_wire})
     |> generate_adder(i + 1, ww)
