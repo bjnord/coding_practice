@@ -72,13 +72,15 @@ defmodule Wire do
     |> Enum.sort()
     |> Enum.reduce(%{}, fn wire, seen ->
       IO.binwrite(f, "#{wire}\n")
+      #Map.get(diagram, wire)
+      #|> IO.inspect(label: "zwire #{wire}")
       dump_subtree(f, diagram, Map.get(diagram, wire), 3, mapping, seen, opts)
     end)
     IO.binwrite(f, "--\n")
     File.close(f)
   end
 
-  defp dump_subtree(f, _diagram, value = rhs, indent, _mapping, seen, opts) when is_integer(rhs) do
+  defp dump_subtree(f, _diagram, value = rhs, indent, _mapping, seen, _opts) when is_integer(rhs) do
     Integer.to_string(value)
     |> String.pad_leading(indent, " ")
     |> then(fn s -> IO.binwrite(f, "#{s}\n") end)
@@ -99,6 +101,8 @@ defmodule Wire do
         |> then(fn s -> s <> " #{gate}" end)
         |> then(fn s -> IO.binwrite(f, "#{s}\n") end)
         seen = Map.put(seen, wire1, true)
+        #Map.get(diagram, wire1)
+        #|> IO.inspect(label: "wire1 #{wire1}")
         dump_subtree(f, diagram, Map.get(diagram, wire1), indent + 3, mapping, seen, opts)
       end
     #
@@ -111,6 +115,8 @@ defmodule Wire do
         String.pad_leading(deob_wire2, deob_len2 + indent, " ")
         |> then(fn s -> IO.binwrite(f, "#{s}\n") end)
         seen = Map.put(seen, wire2, true)
+        #Map.get(diagram, wire2)
+        #|> IO.inspect(label: "wire2 #{wire2}")
         dump_subtree(f, diagram, Map.get(diagram, wire2), indent + 3, mapping, seen, opts)
       end
     #
@@ -150,27 +156,38 @@ defmodule Wire do
   defp generate_adder(diagram, i, ww) when i == ww, do: diagram
   defp generate_adder(diagram, 0, ww) do
     Map.put(diagram, "z00", {"x00", :XOR, "y00"})
+    |> Map.put("halfcarry_00", {"x00", :AND, "y00"})
     |> generate_adder(1, ww)
   end
   defp generate_adder(diagram, i, ww) do
     # halfadd = XOR(a, b)
-    {halfadd_a, halfadd_b} =
-      {wire_name("x", i), wire_name("y", i)}
+    {halfadd_a, halfadd_b, halfadd_wire} =
+      {wire_name("x", i), wire_name("y", i), wire_name("halfadd_", i)}
     # halfcarry = AND(a, b)
-    {carryin_a, carryin_b} =
-      {wire_name("x", i - 1), wire_name("y", i - 1)}
-    # fulladd = XOR(halfadd, carryin)
-    {halfadd_wire, carryin_wire} =
-      {wire_name("halfadd_", i), wire_name("halfcarry_", i - 1)}
-    # carryout = OR(AND(halfadd, carryin), halfcarry)
-    carryop_wire = wire_name("fullcarop_", i)
+    {halfcarry_a, halfcarry_b, halfcarry_wire} =
+      {wire_name("x", i), wire_name("y", i), wire_name("halfcarry_", i)}
+    # fulladd = XOR(halfadd, fullcarry-in)
+    # fullcarop = AND(halfadd, fullcarry-in)
+    fullcarryin_wire =
+      if i == 1 do
+        wire_name("halfcarry_", 0)
+      else
+        wire_name("fullcarry_", i - 1)
+      end
+    fullcarop_wire = wire_name("fullcarop_", i)
+    # fullcarry-out = OR(fullcarop, halfcarry)
+    fullcarry_wire = wire_name("fullcarry_", i)
+    #
     # add this bit's full adder
     Map.put(diagram, halfadd_wire, {halfadd_a, :XOR, halfadd_b})
-    |> Map.put(carryin_wire, {carryin_a, :AND, carryin_b})
-    |> Map.put(wire_name("z", i), {halfadd_wire, :XOR, carryin_wire})
-    |> Map.put(carryop_wire, {halfadd_wire, :AND, carryin_wire})
-    |> Map.put(wire_name("fullcarry_", i), {carryop_wire, :OR, carryin_wire})
+    |> Map.put(halfcarry_wire, {halfcarry_a, :AND, halfcarry_b})
+    |> Map.put(wire_name("z", i), {halfadd_wire, :XOR, fullcarryin_wire})
+    #|> Map.put(fullcarop_wire, {halfadd_wire, :AND, fullcarryin_wire})
+    |> Map.put(fullcarop_wire, {fullcarryin_wire, :AND, halfadd_wire})
+    #|> Map.put(wire_name("fullcarry_", i), {fullcarop_wire, :OR, halfcarry_wire})
+    |> Map.put(fullcarry_wire, {halfcarry_wire, :OR, fullcarop_wire})
     |> generate_adder(i + 1, ww)
+    #|> dbg()
   end
 
   def swaps(diagram, opts) do
@@ -182,7 +199,7 @@ defmodule Wire do
       #|> dbg()
     if opts[:verbose] do
       dump("log/dump.out", diagram, catalog, both: true)
-      adder_diagram = generate_adder(4)
+      adder_diagram = generate_adder(45)
       dump("log/adder.out", adder_diagram, {%{}, %{}})
     end
     []
@@ -256,7 +273,7 @@ defmodule Wire do
   def full_gates(catalog, diagram, i) do
     fulladd =
       Enum.find(diagram, fn {k, v} ->
-        carry_wire_name = carry_wire_name(i)
+        carry_wire_name = fullcarry_wire_name(i)
         k_match = !xyz_wire?(k)
         deob_v = deobfuscate_rhs(catalog, v)
         v_match1 = (deob_v == {wire_name("halfadd_", i), :XOR, carry_wire_name})
@@ -267,7 +284,7 @@ defmodule Wire do
     #
     {_, fco_name} = fullcarry_op =
       Enum.find(diagram, fn {k, v} ->
-        carry_wire_name = carry_wire_name(i)
+        carry_wire_name = fullcarry_wire_name(i)
         k_match = !xyz_wire?(k)
         deob_v = deobfuscate_rhs(catalog, v)
         v_match1 = (deob_v == {wire_name("halfadd_", i), :AND, carry_wire_name})
@@ -296,8 +313,8 @@ defmodule Wire do
     [fulladd, fullcarry_op, fullcarry]
   end
 
-  defp carry_wire_name(1), do: wire_name("halfcarry_", 0)
-  defp carry_wire_name(i), do: wire_name("fullcarry_", i - 1)
+  defp fullcarry_wire_name(1), do: wire_name("halfcarry_", 0)
+  defp fullcarry_wire_name(i), do: wire_name("fullcarry_", i - 1)
 
   #defp debug_key(k, v, deob_v, i, matches) do
   #  if k == "htw" do
