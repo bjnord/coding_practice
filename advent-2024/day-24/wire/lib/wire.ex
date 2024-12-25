@@ -72,8 +72,6 @@ defmodule Wire do
     |> Enum.sort()
     |> Enum.reduce(%{}, fn wire, seen ->
       IO.binwrite(f, "#{wire}\n")
-      #Map.get(diagram, wire)
-      #|> IO.inspect(label: "zwire #{wire}")
       dump_subtree(f, diagram, Map.get(diagram, wire), 3, mapping, seen, opts)
     end)
     IO.binwrite(f, "--\n")
@@ -103,8 +101,6 @@ defmodule Wire do
         |> then(fn s -> s <> " #{gate}" end)
         |> then(fn s -> IO.binwrite(f, "#{s}\n") end)
         seen = Map.put(seen, wire1, true)
-        #Map.get(diagram, wire1)
-        #|> IO.inspect(label: "wire1 #{wire1}")
         dump_subtree(f, diagram, Map.get(diagram, wire1), indent + 3, mapping, seen, opts)
       end
     #
@@ -117,8 +113,6 @@ defmodule Wire do
         String.pad_leading(deob_wire2, deob_len2 + indent, " ")
         |> then(fn s -> IO.binwrite(f, "#{s}\n") end)
         seen = Map.put(seen, wire2, true)
-        #Map.get(diagram, wire2)
-        #|> IO.inspect(label: "wire2 #{wire2}")
         dump_subtree(f, diagram, Map.get(diagram, wire2), indent + 3, mapping, seen, opts)
       end
     #
@@ -156,7 +150,6 @@ defmodule Wire do
     {deob_wire, deob_length(deob_wire)}
   end
 
-  #defp deob_length(w) when is_integer(w), do: 1
   defp deob_length(w), do: String.length(w)
 
   def generate_adder(ww) do
@@ -200,7 +193,6 @@ defmodule Wire do
     |> Map.put(fullcarop_wire, {halfadd_wire, :AND, fullcarryin_wire})
     |> Map.put(fullcarry_wire, {fullcarop_wire, :OR, halfcarry_wire})
     |> generate_adder(i + 1, ww)
-    #|> dbg()
   end
 
   def swaps(diagram, opts) do
@@ -209,7 +201,6 @@ defmodule Wire do
       |> add_halfadds_to_catalog(diagram)
       |> add_halfcarries_to_catalog(diagram)
       |> add_fulls_to_catalog(diagram)
-      #|> dbg()
     if opts[:verbose] do
       dump("log/dump.out", diagram, catalog, both: true)
       adder_diagram = generate_adder(45)
@@ -305,9 +296,6 @@ defmodule Wire do
         k_match && (v_match1 || v_match2)
       end)
       |> then(&(wire_or_nil(wire_name("fullcarop_", i), &1)))
-    #if i < 2 do
-    #  IO.binwrite(f, "fullcarry_op=#{inspect(fullcarry_op)} -- fco_name=#{fco_name}")
-    #end
     #
     fullcarry =
       Enum.find(diagram, fn {k, v} ->
@@ -315,13 +303,9 @@ defmodule Wire do
         deob_v = deobfuscate_rhs(catalog, v)
         v_match1 = (deob_v == {fco_name, :OR, wire_name("halfcarry_", i)})
         v_match2 = (deob_v == {wire_name("halfcarry_", i), :OR, fco_name})
-        #debug_key(k, v, deob_v, i, {k_match, v_match1, v_match2})
         k_match && (v_match1 || v_match2)
       end)
       |> then(&(wire_or_nil(wire_name("fullcarry_", i), &1)))
-    #if i < 2 do
-    #  IO.binwrite(f, "fullcarry=#{inspect(fullcarry)}")
-    #end
     #
     [fulladd, fullcarry_op, fullcarry]
   end
@@ -405,10 +389,7 @@ defmodule Wire do
     IO.binwrite(f, "#{wire}#{gate}-->#{wire1}\n")
     IO.binwrite(f, "#{wire}#{gate}-->#{wire2}\n")
   end
-
-  def mermaid_node(_f, _wire, _value) do
-    #IO.binwrite(f, "#{wire}-->#{value}\n")
-  end
+  def mermaid_node(_f, _wire, _value), do: :ok
 
   @doc """
   Parse arguments and call puzzle part methods.
