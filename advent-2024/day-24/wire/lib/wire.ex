@@ -168,33 +168,35 @@ defmodule Wire do
     |> generate_adder(1, ww)
   end
   defp generate_adder(diagram, i, ww) do
+    wires = adder_wires(i)
     # halfadd = XOR(a, b)
-    {halfadd_a, halfadd_b, halfadd_wire} =
-      {wire_name("x", i), wire_name("y", i), wire_name("halfadd_", i)}
+    Map.put(diagram, wires[:halfadd], {wires[:a], :XOR, wires[:b]})
     # halfcarry = AND(a, b)
-    {halfcarry_a, halfcarry_b, halfcarry_wire} =
-      {wire_name("x", i), wire_name("y", i), wire_name("halfcarry_", i)}
+    |> Map.put(wires[:halfcarry], {wires[:a], :AND, wires[:b]})
     # fulladd = XOR(halfadd, fullcarry-in)
-    z_wire = wire_name("z", i)
-    # fullcarop = AND(halfadd, fullcarry-in)
-    fullcarryin_wire =
-      if i == 1 do
-        wire_name("halfcarry_", 0)
-      else
-        wire_name("fullcarry_", i - 1)
-      end
-    fullcarop_wire = wire_name("fullcarop_", i)
+    |> Map.put(wires[:z], {wires[:halfadd], :XOR, wires[:fullcarry_in]})
+    # fullcarop = AND(halfadd, fullcarry-in)  [intermediate step for fullcarry]
+    |> Map.put(wires[:fullcarop], {wires[:halfadd], :AND, wires[:fullcarry_in]})
     # fullcarry-out = OR(fullcarop, halfcarry)
-    fullcarry_wire = wire_name("fullcarry_", i)
-    ###
-    # add this bit's full adder
-    Map.put(diagram, halfadd_wire, {halfadd_a, :XOR, halfadd_b})
-    |> Map.put(halfcarry_wire, {halfcarry_a, :AND, halfcarry_b})
-    |> Map.put(z_wire, {halfadd_wire, :XOR, fullcarryin_wire})  # fulladd
-    |> Map.put(fullcarop_wire, {halfadd_wire, :AND, fullcarryin_wire})
-    |> Map.put(fullcarry_wire, {fullcarop_wire, :OR, halfcarry_wire})
+    |> Map.put(wires[:fullcarry], {wires[:fullcarop], :OR, wires[:halfcarry]})
     |> generate_adder(i + 1, ww)
   end
+
+  defp adder_wires(i) do
+    [
+      {:a, wire_name("x", i)},
+      {:b, wire_name("y", i)},
+      {:halfadd, wire_name("halfadd_", i)},
+      {:halfcarry, wire_name("halfcarry_", i)},
+      {:fullcarry_in, fullcarry_in_wire_name(i)},
+      {:z, wire_name("z", i)},
+      {:fullcarop, wire_name("fullcarop_", i)},
+      {:fullcarry, wire_name("fullcarry_", i)},
+    ]
+  end
+
+  def fullcarry_in_wire_name(1), do: wire_name("halfcarry_", 0)
+  def fullcarry_in_wire_name(i), do: wire_name("fullcarry_", i - 1)
 
   def swaps(diagram, opts) do
     catalog =
