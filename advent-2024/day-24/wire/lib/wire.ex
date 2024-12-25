@@ -89,6 +89,8 @@ defmodule Wire do
   defp dump_subtree(f, diagram, {wire1, gate, wire2} = _rhs, indent, mapping, seen, opts) do
     {deob_wire1, deob_len1} = deobfuscate_wire(mapping, wire1, opts)
     {deob_wire2, deob_len2} = deobfuscate_wire(mapping, wire2, opts)
+    {{wire1, deob_wire1, deob_len1}, {wire2, deob_wire2, deob_len2}} =
+      flop_ops({wire1, deob_wire1, deob_len1}, {wire2, deob_wire2, deob_len2})
     #
     seen =
       if Map.get(seen, wire1) do
@@ -121,6 +123,19 @@ defmodule Wire do
       end
     #
     seen
+  end
+
+  defp flop_ops({wire1, deob_wire1, deob_len1}, {wire2, deob_wire2, deob_len2}) do
+    cond do
+      String.slice(deob_wire1, 0..9) == "halfcarry_" && String.slice(deob_wire2, 0..7) == "halfadd_" ->
+        {{wire2, deob_wire2, deob_len2}, {wire1, deob_wire1, deob_len1}}
+      String.slice(deob_wire1, 0..9) == "fullcarry_" && String.slice(deob_wire2, 0..7) == "halfadd_" ->
+        {{wire2, deob_wire2, deob_len2}, {wire1, deob_wire1, deob_len1}}
+      String.slice(deob_wire1, 0..9) == "halfcarry_" && String.slice(deob_wire2, 0..9) == "fullcarop_" ->
+        {{wire2, deob_wire2, deob_len2}, {wire1, deob_wire1, deob_len1}}
+      true ->
+        {{wire1, deob_wire1, deob_len1}, {wire2, deob_wire2, deob_len2}}
+    end
   end
 
   defp deobfuscate_wire(mapping, wire, opts) do
@@ -182,10 +197,8 @@ defmodule Wire do
     Map.put(diagram, halfadd_wire, {halfadd_a, :XOR, halfadd_b})
     |> Map.put(halfcarry_wire, {halfcarry_a, :AND, halfcarry_b})
     |> Map.put(wire_name("z", i), {halfadd_wire, :XOR, fullcarryin_wire})
-    #|> Map.put(fullcarop_wire, {halfadd_wire, :AND, fullcarryin_wire})
-    |> Map.put(fullcarop_wire, {fullcarryin_wire, :AND, halfadd_wire})
-    #|> Map.put(wire_name("fullcarry_", i), {fullcarop_wire, :OR, halfcarry_wire})
-    |> Map.put(fullcarry_wire, {halfcarry_wire, :OR, fullcarop_wire})
+    |> Map.put(fullcarop_wire, {halfadd_wire, :AND, fullcarryin_wire})
+    |> Map.put(fullcarry_wire, {fullcarop_wire, :OR, halfcarry_wire})
     |> generate_adder(i + 1, ww)
     #|> dbg()
   end
