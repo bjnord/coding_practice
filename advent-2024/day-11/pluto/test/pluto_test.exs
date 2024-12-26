@@ -57,7 +57,7 @@ defmodule PlutoTest do
             },
           ],
         ],
-        exp_blink_stones: [
+        exp_blink_stone_counts: [
           {1, 7},
           {25, 55312},
         ],
@@ -83,12 +83,17 @@ defmodule PlutoTest do
       assert act_blink_stone_maps == fixture.exp_blink_stone_maps
     end
 
-    test "produce expected blink stones", fixture do
-      act_blink_stones = [  # TODO
-        {1, 0},
-        {25, 0},
-      ]
-      assert act_blink_stones == fixture.exp_blink_stones
+    test "produce expected blink stone counts", fixture do
+      act_blink_stone_counts =
+        [fixture.example_stone_maps, fixture.exp_blink_stone_counts]
+        |> Enum.zip()
+        |> Enum.map(fn {stone_map, {n_blinks, _exp_count}} ->
+          Pluto.n_stones(stone_map, n_blinks)
+        end)
+      exp_blink_stone_counts =
+        fixture.exp_blink_stone_counts
+        |> Enum.map(&(elem(&1, 1)))
+      assert act_blink_stone_counts == exp_blink_stone_counts
     end
   end
 end

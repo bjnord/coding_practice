@@ -6,6 +6,17 @@ defmodule Pluto do
   import Pluto.Parser
   import History.CLI
 
+  def n_stones(stone_map, n_blinks) do
+    1..n_blinks
+    |> Enum.reduce(stone_map, fn _, acc -> blink(acc) end)
+    |> map_count()
+  end
+
+  defp map_count(stone_map) do
+    stone_map
+    |> Enum.reduce(0, fn {_stone, count}, acc -> acc + count end)
+  end
+
   def blink(stone_map) do
     stone_map
     |> Enum.reduce(stone_map, fn {stone, count}, stone_map ->
