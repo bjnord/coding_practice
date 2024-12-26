@@ -90,6 +90,18 @@ defmodule History.Grid do
     %{grid | meta: Map.put(grid.meta, sym, value)}
   end
 
+  def expand(grid, f \\ &(&1 * 2 + 1)) do
+    expand_squares(grid, f)
+    |> Grid.from_squares({f.(grid.size.y), f.(grid.size.x)})
+  end
+
+  defp expand_squares(grid, f) do
+    grid.squares
+    |> Enum.map(fn {{y, x}, value} ->
+      {{f.(y), f.(x)}, value}
+    end)
+  end
+
   # `Map`-like functions
   def keys(grid), do: Map.keys(grid.squares)
   def values(grid), do: Map.values(grid.squares)
