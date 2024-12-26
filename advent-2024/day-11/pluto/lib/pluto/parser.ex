@@ -3,6 +3,8 @@ defmodule Pluto.Parser do
   Parsing for `Pluto`.
   """
 
+  @type stone_map() :: %{integer() => integer()}
+
   @doc ~S"""
   Parse an input file.
 
@@ -14,9 +16,9 @@ defmodule Pluto.Parser do
 
   ## Returns
 
-  a list of stones
+  a map of stone counts
   """
-  @spec parse_input_file(String.t()) :: [integer()]
+  @spec parse_input_file(String.t()) :: stone_map()
   def parse_input_file(path) do
     path
     |> File.read!()
@@ -32,17 +34,19 @@ defmodule Pluto.Parser do
 
   ## Returns
 
-  a list of stones
+  a map of stone counts
 
   ## Examples
       iex> parse_input_string("125 17\n")
-      [125, 17]
+      %{125 => 1, 17 => 1}
   """
-  @spec parse_input_string(String.t()) :: [integer()]
+  @spec parse_input_string(String.t()) :: stone_map()
   def parse_input_string(input) do
     input
     |> String.trim_trailing()
     |> String.split()
     |> Enum.map(&String.to_integer/1)
+    |> Enum.map(&({&1, 1}))
+    |> Enum.into(%{})
   end
 end

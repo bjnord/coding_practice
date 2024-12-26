@@ -10,9 +10,13 @@ defmodule Pluto.ParserTest do
         input: """
         0 1 10 99 999
         """,
-        exp_stones: [
-          0, 1, 10, 99, 999,
-        ],
+        exp_stones: %{
+          0 => 1,
+          1 => 1,
+          10 => 1,
+          99 => 1,
+          999 => 1,
+        },
       ]
     end
 
