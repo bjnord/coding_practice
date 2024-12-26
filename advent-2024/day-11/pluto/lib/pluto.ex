@@ -7,27 +7,39 @@ defmodule Pluto do
   import History.CLI
 
   def blink(stone_map) do
-    map_to_list(stone_map)
-    |> Enum.reduce([], fn stone, stones ->
-      transform(stone)
-      |> Enum.reduce(stones, fn new_s, stones ->
-        [new_s | stones]
-      end)
-    end)
-    |> list_to_map()
-  end
-
-  # TEMPORARY
-  defp map_to_list(stone_map) do
     stone_map
-    |> Enum.reduce([], fn {stone, count}, acc ->
-      1..count
-      |> Enum.reduce(acc, fn _, acc -> [stone | acc] end)
+    |> Enum.reduce(stone_map, fn {stone, count}, stone_map ->
+      map_transform(stone_map, stone, count)
     end)
   end
 
-  # TEMPORARY
-  defp list_to_map(stones), do: tally(stones)
+  # update a stone map by
+  # - subtracting `count` of `stone` from the map
+  # - transforming `stone` to new list of stones
+  # - updating the resulting new stones' counts in the map
+  defp map_transform(stone_map, stone, count) do
+    stone_map
+    |> reduce_count(stone, count)
+    |> update_counts(transform(stone), count)
+  end
+
+  defp reduce_count(stone_map, stone, count) do
+    Map.get_and_update(stone_map, stone, fn cur ->
+      if cur == count do
+        :pop
+      else
+        {cur, cur - count}
+      end
+    end)
+    |> elem(1)
+  end
+
+  defp update_counts(stone_map, stones, count) do
+    stones
+    |> Enum.reduce(stone_map, fn stone, acc ->
+      Map.update(acc, stone, count, &(&1 + count))
+    end)
+  end
 
   # transform a stone into a **list** of new stones that **replaces** it
   defp transform(stone) do
