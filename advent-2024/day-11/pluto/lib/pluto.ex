@@ -121,7 +121,7 @@ defmodule Pluto do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    |> Pluto.dp_n_stones(75)
+    |> Pluto.n_stones(75)
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
