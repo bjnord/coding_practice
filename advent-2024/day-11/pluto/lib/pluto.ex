@@ -29,10 +29,6 @@ defmodule Pluto do
   # TEMPORARY
   defp list_to_map(stones), do: tally(stones)
 
-  defp tally(list) do
-    Enum.reduce(list, %{}, fn entry, acc -> Map.update(acc, entry, 1, &(&1 + 1)) end)
-  end
-
   # transform a stone into a **list** of new stones that **replaces** it
   defp transform(stone) do
     cond do
