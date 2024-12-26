@@ -6,59 +6,31 @@ defmodule Pluto do
   import Pluto.Parser
   import History.CLI
 
-  @n_blinks_step 25
-
-  def dp_n_stones(stones, n_blinks) do
-    dp_n_stones_by(stones, n_blinks, @n_blinks_step)
-  end
-
-  defp dp_n_stones_by(stones, n_blinks, step) when n_blinks > step do
-    stones
-    |> Enum.flat_map(fn stone -> last_blink([stone], step) end)
-    |> tally()
-    |> Enum.map(fn {stone, count} ->
-      dp_n_stones_by([stone], n_blinks - step, step) * count
-    end)
-    |> Enum.sum()
-  end
-  defp dp_n_stones_by(stones, n_blinks, _step) do
-    stones
-    |> Enum.map(fn stone -> n_stones([stone], n_blinks) end)
-    |> Enum.sum()
-  end
-
-  defp tally(list) do
-    Enum.reduce(list, %{}, fn entry, acc -> Map.update(acc, entry, 1, &(&1 + 1)) end)
-  end
-
-  def n_stones(stones, n_blinks) do
-    last_blink(stones, n_blinks)
-    |> Enum.count()
-  end
-
-  defp last_blink(stones, n_blinks) do
-    1..n_blinks
-    |> Enum.reduce(stones, &(blink(&2, &1)))
-  end
-
-  def blinks(stones, n_blinks) do
-    1..n_blinks
-    |> Enum.reduce([stones], fn n, [stones | blinks] ->
-      [blink(stones, n), stones | blinks]
-    end)
-    |> Enum.reverse()
-    |> Enum.drop(1)
-  end
-
-  defp blink(stones, _n) do
-    stones
+  def blink(stone_map) do
+    map_to_list(stone_map)
     |> Enum.reduce([], fn stone, stones ->
       transform(stone)
       |> Enum.reduce(stones, fn new_s, stones ->
         [new_s | stones]
       end)
     end)
-    |> Enum.reverse()
+    |> list_to_map()
+  end
+
+  # TEMPORARY
+  defp map_to_list(stone_map) do
+    stone_map
+    |> Enum.reduce([], fn {stone, count}, acc ->
+      1..count
+      |> Enum.reduce(acc, fn _, acc -> [stone | acc] end)
+    end)
+  end
+
+  # TEMPORARY
+  defp list_to_map(stones), do: tally(stones)
+
+  defp tally(list) do
+    Enum.reduce(list, %{}, fn entry, acc -> Map.update(acc, entry, 1, &(&1 + 1)) end)
   end
 
   # transform a stone into a **list** of new stones that **replaces** it
