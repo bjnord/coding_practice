@@ -63,4 +63,26 @@ defmodule History.Math do
   def pairings([h | t]) do
     Enum.map(t, &({h, &1})) ++ pairings(t)
   end
+
+  @doc """
+  Count the number of digits in a non-negative integer.
+
+  This can be done efficiently, without converting to strings, using
+  base-10 logarithm.
+
+  h/t [this Reddit comment by user ClimberSeb](https://www.reddit.com/r/adventofcode/s/cjeWV3D8yq)
+
+  ## Examples
+      iex> History.Math.n_digits(2024)
+      4
+  """
+  @spec n_digits(non_neg_integer()) :: pos_integer()
+  def n_digits(n) when is_integer(n) and n < 0 do
+    raise "negative numbers not supported"
+  end
+  def n_digits(n) when is_integer(n) do
+    :math.log10(n)
+    |> :math.floor()
+    |> then(&(round(&1) + 1))
+  end
 end

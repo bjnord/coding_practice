@@ -15,6 +15,10 @@ defmodule History.MathTest do
     assert History.Math.manhattan(pos1, pos2) == 2372
   end
 
+  ###
+  # modulo function
+  ###
+
   property "modulo is correct for non-negative and negative numerators" do
     forall {n, m} <- gen_numerator_divisor() do
       History.Math.modulo(n, m) == alt_modulo(n, m)
@@ -37,6 +41,10 @@ defmodule History.MathTest do
     {oneof([non_neg_integer(), neg_integer()]), pos_integer()}
   end
 
+  ###
+  # pairings function
+  ###
+
   test "pairings" do
     entries = [:a, :b, :c, :d]
     pairings = [
@@ -47,5 +55,21 @@ defmodule History.MathTest do
     assert History.Math.pairings(entries) == pairings
     assert History.Math.pairings([:z]) == []
     assert History.Math.pairings([]) == []
+  end
+
+  ###
+  # n_digits function
+  ###
+
+  property "n_digits is correct for non-negative integers" do
+    forall n <- sized(s, resize(2 ** (s + 2), non_neg_integer())) do
+      #collect(true, string_n_digits(n))
+      History.Math.n_digits(n) == string_n_digits(n)
+    end
+  end
+
+  def string_n_digits(n) do
+    Integer.to_string(n)
+    |> String.length()
   end
 end
