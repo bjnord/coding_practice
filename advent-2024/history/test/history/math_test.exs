@@ -3,6 +3,8 @@ defmodule History.MathTest do
   use PropCheck, default_opts: [numtests: 100]
   doctest History.Math
 
+  alias History.TestSupport
+
   # no AoC year is complete without...:
   test "Manhattan distance (3D)" do
     pos1 = {1105, -1205, 1229}
@@ -63,13 +65,8 @@ defmodule History.MathTest do
 
   property "n_digits is correct for non-negative integers" do
     forall n <- sized(s, resize(2 ** (s + 2), non_neg_integer())) do
-      #collect(true, string_n_digits(n))
-      History.Math.n_digits(n) == string_n_digits(n)
+      #collect(true, TestSupport.string_n_digits(n))
+      History.Math.n_digits(n) == TestSupport.string_n_digits(n)
     end
-  end
-
-  def string_n_digits(n) do
-    Integer.to_string(n)
-    |> String.length()
   end
 end

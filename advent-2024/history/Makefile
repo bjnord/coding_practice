@@ -4,7 +4,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/history/grid.ex test/history/grid_test.exs \
 	lib/history/math.ex test/history/math_test.exs
 
-.PHONY: test check doc console clean
+.PHONY: test check bench doc console clean
 
 #test: export PROPCHECK_VERBOSE=1
 #test: export PROPCHECK_DETECT_EXCEPTIONS=0
@@ -16,6 +16,9 @@ test:
 
 check:
 	mix dialyzer
+
+bench:
+	mix run bench/run.exs | tee log/bench.out
 
 doc:
 	mix docs

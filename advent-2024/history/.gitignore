@@ -24,3 +24,5 @@ history-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+# Ignore logfiles.
+/log/
