@@ -67,6 +67,7 @@ defmodule Pluto do
       # 0.)"
       rem(History.Math.n_digits(stone), 2) == 0 ->
         divide(stone)
+        |> Tuple.to_list()
       # "If none of the other rules apply, the stone is replaced by a new
       # stone; the old stone's number multiplied by 2024 is engraved on
       # the new stone."
@@ -85,15 +86,15 @@ defmodule Pluto do
 
   ## Examples
       iex> divide(98)
-      [9, 8]
+      {9, 8}
       iex> divide(901257)
-      [901, 257]
+      {901, 257}
   """
-  @spec divide(non_neg_integer()) :: [non_neg_integer()]
+  @spec divide(non_neg_integer()) :: {non_neg_integer(), non_neg_integer()}
   def divide(stone) do
     History.Math.n_digits(stone)
     |> then(&(10 ** div(&1, 2)))
-    |> then(&([div(stone, &1), rem(stone, &1)]))
+    |> then(&({div(stone, &1), rem(stone, &1)}))
   end
 
   @doc """
