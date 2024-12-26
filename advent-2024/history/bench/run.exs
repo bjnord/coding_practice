@@ -1,4 +1,4 @@
-Code.require_file("test/support/string_n_digits.ex")
+Code.require_file("test/support/functions.ex")
 
 Benchee.run(
   %{
