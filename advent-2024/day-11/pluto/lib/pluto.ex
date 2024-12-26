@@ -65,7 +65,7 @@ defmodule Pluto do
       # the digits are engraved on the new right stone. (The new numbers
       # don't keep extra leading zeroes: 1000 would become stones 10 and
       # 0.)"
-      rem(String.length(Integer.to_string(stone)), 2) == 0 ->
+      rem(History.Math.n_digits(stone), 2) == 0 ->
         divide(stone)
       # "If none of the other rules apply, the stone is replaced by a new
       # stone; the old stone's number multiplied by 2024 is engraved on
@@ -77,6 +77,11 @@ defmodule Pluto do
 
   @doc """
   Divide a stone in half.
+ 
+  This can be done efficiently, without converting to strings, by getting
+  the integer length using base-10 logarithm.
+
+  h/t [this Reddit comment by user ClimberSeb](https://www.reddit.com/r/adventofcode/s/cjeWV3D8yq)
 
   ## Examples
       iex> divide(98)
@@ -84,14 +89,11 @@ defmodule Pluto do
       iex> divide(901257)
       [901, 257]
   """
+  @spec divide(non_neg_integer()) :: [non_neg_integer()]
   def divide(stone) do
-    stone_s = Integer.to_string(stone)
-    length = String.length(stone_s)
-    half_length = div(length, 2)
-    a = String.slice(stone_s, 0..(half_length - 1))
-    b = String.slice(stone_s, half_length..(length - 1))
-    [a, b]
-    |> Enum.map(&String.to_integer/1)
+    History.Math.n_digits(stone)
+    |> then(&(10 ** div(&1, 2)))
+    |> then(&([div(stone, &1), rem(stone, &1)]))
   end
 
   @doc """

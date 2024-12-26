@@ -1,6 +1,9 @@
 defmodule PlutoTest do
   use ExUnit.Case
+  use PropCheck, default_opts: [numtests: 100]
   doctest Pluto, import: true
+
+  alias Pluto.TestSupport
 
   describe "puzzle examples" do
     setup do
@@ -95,5 +98,24 @@ defmodule PlutoTest do
         |> Enum.map(&(elem(&1, 1)))
       assert act_blink_stone_counts == exp_blink_stone_counts
     end
+  end
+
+  ###
+  # divide function
+  ###
+
+  property "divide is correct for positive integers w/even # of digits" do
+    forall n <- sized(s, resize(2 ** (s + 2), pos_integer_even_digits())) do
+      #collect(true, TestSupport.string_divide(n))
+      Pluto.divide(n) == TestSupport.string_divide(n)
+    end
+  end
+
+  def pos_integer_even_digits() do
+    such_that n <- integer(10, :inf), when: even_digits?(n)
+  end
+
+  defp even_digits?(n) do
+    rem(TestSupport.string_n_digits(n), 2) == 0
   end
 end

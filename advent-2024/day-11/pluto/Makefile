@@ -2,21 +2,25 @@ BIN = ./pluto
 FILES = mix.exs test/test_helper.exs \
 	lib/pluto.ex test/pluto_test.exs \
 	lib/pluto/parser.ex test/pluto/parser_test.exs
-VERBOSE = 0
 
-.PHONY: run test check doc console clean
+.PHONY: run test check bench doc console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
 
+#test: export PROPCHECK_VERBOSE=1
+#test: export PROPCHECK_DETECT_EXCEPTIONS=0
 test:
 	@if [ -f _build/propcheck.ctex ]; then \
-		MIX_ENV=test mix propcheck.clean; \
+		( MIX_ENV=test mix propcheck.clean ); \
 	fi
-	PROPCHECK_VERBOSE=$(VERBOSE) mix test
+	mix test
 
 check:
 	mix dialyzer
+
+bench:
+	mix run bench/run.exs | tee log/bench.out
 
 doc:
 	mix docs
