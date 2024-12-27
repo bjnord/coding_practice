@@ -21,15 +21,17 @@ defmodule Bridge do
   an integer with the digits of `a` and `b` concatenated
 
   ## Examples
-      iex> op_concat(2, 3)
-      23
+      iex> op_concat(6, 0)
+      60
       iex> op_concat(867, 5309)
       8675309
   """
-  @spec op_concat(integer(), integer()) :: integer()
-  def op_concat(a, b) do
-    "#{a}#{b}"
-    |> String.to_integer()
+  @spec op_concat(non_neg_integer(), non_neg_integer()) :: non_neg_integer()
+  def op_concat(a, b) when a >= 0 and b == 0, do: a * 10
+  def op_concat(a, b) when a >= 0 and b > 0 do
+    History.Math.n_digits(b)
+    |> then(&(10 ** &1))
+    |> then(&(a * &1 + b))
   end
 
   @doc ~S"""

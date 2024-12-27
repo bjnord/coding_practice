@@ -1,3 +1,5 @@
+Code.require_file("test/support/functions.ex")
+
 equation = "private/input.txt"
            |> Bridge.Parser.parse_input_file()
            |> Enum.at(25)
@@ -11,5 +13,15 @@ Benchee.run(
     "dynamic_big" => fn -> Bridge.solvable?(equation, [:*, :||, :+]) end,
     "dynamic_bigger" => fn -> Bridge.solvable?(equation, [:||, :*, :+]) end,
   },
+  parallel: 2,
+  profile_after: false
+)
+
+Benchee.run(
+  %{
+    "string_op_concat" => fn -> Bridge.TestSupport.string_op_concat(2024, 1225) end,
+    "log10_op_concat" => fn -> Bridge.op_concat(2024, 1225) end,
+  },
+  parallel: 2,
   profile_after: false
 )

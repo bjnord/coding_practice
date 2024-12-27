@@ -3,7 +3,7 @@ defmodule Bridge.Parser do
   Parsing for `Bridge`.
   """
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
 
   @doc ~S"""
   Parse an input file.
@@ -18,7 +18,7 @@ defmodule Bridge.Parser do
 
   a list of equations
   """
-  @spec parse_input_file(String.t()) :: streamable([Bridge.equation()])
+  @spec parse_input_file(String.t()) :: streamable(Bridge.equation())
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -40,7 +40,7 @@ defmodule Bridge.Parser do
       iex> parse_input_string("55: 5 11\n21: 8 13\n") |> Enum.to_list()
       [{55, [5, 11]}, {21, [8, 13]}]
   """
-  @spec parse_input_string(String.t()) :: streamable([Bridge.equation()])
+  @spec parse_input_string(String.t()) :: streamable(Bridge.equation())
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
