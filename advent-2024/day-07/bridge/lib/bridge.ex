@@ -8,6 +8,13 @@ defmodule Bridge do
 
   @type equation() :: {integer(), [integer()]}
 
+  def count_solvable(equations, operators) do
+    equations
+    |> Stream.filter(&(Bridge.solvable?(&1, operators)))
+    |> Stream.map(&(elem(&1, 0)))
+    |> Enum.sum()
+  end
+
   @doc ~S"""
   Concatenation operator
 
@@ -120,9 +127,7 @@ defmodule Bridge do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&(Bridge.solvable?(&1, [:+, :*])))
-    |> Enum.map(&(elem(&1, 0)))
-    |> Enum.sum()
+    |> Bridge.count_solvable([:+, :*])
     |> IO.inspect(label: "Part 1 answer is")
   end
 
@@ -131,9 +136,7 @@ defmodule Bridge do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    |> Enum.filter(&(Bridge.solvable?(&1, [:+, :*, :||])))
-    |> Enum.map(&(elem(&1, 0)))
-    |> Enum.sum()
+    |> Bridge.count_solvable([:+, :*, :||])
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
