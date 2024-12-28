@@ -6,6 +6,26 @@ defmodule Pluto do
   import History.CLI
   import Pluto.Parser
 
+  def mp_n_stones(stone_map, n_blinks) do
+    caller = self()
+    # this is a "parallel map" -- from "Programming Elixir ≥ 1.6" ch. 15
+    # send each stone to its own process, and calculate in parallel
+    stone_map
+    |> Enum.map(fn {stone, count} ->
+      spawn_link(fn ->
+        send(caller, {self(), n_stones(%{stone => count}, n_blinks)})
+      end)
+    end)
+    |> Enum.map(fn (_pid) ->
+      receive do
+        # if you need results in the same order, use: `{^pid, result}`
+        # (in this case, since we're just summing, it doesn't matter)
+        {_, result} -> result
+      end
+    end)
+    |> Enum.sum()
+  end
+
   def n_stones(stone_map, n_blinks) do
     1..n_blinks
     |> Enum.reduce(stone_map, fn _, acc -> blink(acc) end)
