@@ -3,16 +3,16 @@ defmodule Pluto do
   Documentation for `Pluto`.
   """
 
-  import Pluto.Parser
   import History.CLI
+  import Pluto.Parser
 
   def n_stones(stone_map, n_blinks) do
     1..n_blinks
     |> Enum.reduce(stone_map, fn _, acc -> blink(acc) end)
-    |> map_count()
+    |> stone_count()
   end
 
-  defp map_count(stone_map) do
+  def stone_count(stone_map) do
     stone_map
     |> Enum.reduce(0, fn {_stone, count}, acc -> acc + count end)
   end
