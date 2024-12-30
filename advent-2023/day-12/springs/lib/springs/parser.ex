@@ -34,9 +34,9 @@ defmodule Springs.Parser do
 
   ## Examples
       iex> parse_line(".??..??...?##. 1,1,3\n")
-      %Springs.Row{clusters: ['??', '??', '?##'], counts: [1, 1, 3]}
+      %Springs.Row{clusters: [{'??', 2, 0}, {'??', 2, 0}, {'?##', 1, 2}], counts: [1, 1, 3]}
       iex> parse_line("?#?#?#?#?#?#?#? 1,3,1,6\n")
-      %Springs.Row{clusters: ['?#?#?#?#?#?#?#?'], counts: [1, 3, 1, 6]}
+      %Springs.Row{clusters: [{'?#?#?#?#?#?#?#?', 8, 7}], counts: [1, 3, 1, 6]}
   """
   def parse_line(line) do
     [clusters, counts] =
@@ -54,6 +54,13 @@ defmodule Springs.Parser do
     |> String.split(".")
     |> Enum.reject(fn s -> s == "" end)
     |> Enum.map(&String.to_charlist/1)
+    |> Enum.map(&cluster_tuple/1)
+  end
+
+  defp cluster_tuple(pattern) do
+    n_q = Enum.count(pattern, &(&1 == ??))
+    n_s = Enum.count(pattern, &(&1 == ?#))
+    {pattern, n_q, n_s}
   end
 
   defp parse_counts(counts) do
