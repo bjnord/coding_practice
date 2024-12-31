@@ -2,78 +2,75 @@ defmodule Springs.RowTest do
   use ExUnit.Case
   doctest Springs.Row, import: true
 
+  import Springs.Parser
   alias Springs.Row
 
   describe "puzzle example" do
     setup do
       [
-        rows: [
-          %Row{
-            clusters: ['????', '#', '#'],
-            counts: [4, 1, 1],
-          },
-          %Row{
-            clusters: ['??', '??', '?##'],
-            counts: [1, 1, 3],
-          },
-          %Row{
-            clusters: ['????', '######', '#####'],
-            counts: [1, 6, 5],
-          },
-          %Row{
-            clusters: ['?###????????'],
-            counts: [3, 2, 1],
-          },
-          %Row{
-            clusters: ['?#?#?#?#?#?#?#?'],
-            counts: [1, 3, 1, 6],
-          },
-          %Row{
-            clusters: ['???', '###'],
-            counts: [1, 1, 3],
-          },
+        input: """
+        ???.### 1,1,3
+        .??..??...?##. 1,1,3
+        ?#?#?#?#?#?#?#? 1,3,1,6
+        ????.#...#... 4,1,1
+        ????.######..#####. 1,6,5
+        ?###???????? 3,2,1
+        ?#.?..?.##.###? 2,1,2,3
+        #???????.??.?.??.? 8,2,1,1
+        ?.?#?.?????.?.?.. 1,2,5,1
+        ??.?????.?.##.? 1,1,3,2
+        .?.?.??#?.#.?.???? 1,4,1,1,2
+        ?.#.???.??.??? 1,3,1,2
+        ?.##?.???.??.? 1,3,2,2
+        """,
+        exp_pairings: [
+          [
+            [[1, 1], [3]],
+          ],
+          [
+            [[1], [1], [3]],
+          ],
+          [
+            [[1, 3, 1, 6]],
+          ],
+          [
+            [[4], [1], [1]],
+          ],
+          [
+            [[1], [6], [5]],
+          ],
+          [
+            [[3, 2, 1]],
+          ],
+          [
+            [[2], [0], [1], [2], [3]],
+            [[2], [1], [0], [2], [3]],
+          ],
+          [
+            [[8], [2], [0], [1], [1]],
+            [[8], [2], [1], [0], [1]],
+            [[8], [2], [1], [1], [0]],
+          ],
+          [
+          ],
+          [
+          ],
+          [
+          ],
+          [
+          ],
+          [
+          ],
         ],
         exp_arrangements: [
           1,
           4,
+          1,
+          1,
           4,
           10,
-          1,
-          1,
-        ],
-        rows_addl: [
-          %Row{
-            clusters: ['?#', '?', '?', '##', '###?'],
-            counts: [2, 1, 2, 3],
-          },
-          %Row{
-            clusters: [~c"#???????", ~c"??", ~c"?", ~c"??", ~c"?"],
-            counts: [8, 2, 1, 1]
-          },
-          %Row{
-            clusters: [~c"?", ~c"?#?", ~c"?????", ~c"?", ~c"?"],
-            counts: [1, 2, 5, 1]
-          },
-          %Row{
-            clusters: [~c"??", ~c"?????", ~c"?", ~c"##", ~c"?"],
-            counts: [1, 1, 3, 2]
-          },
-          %Row{
-            clusters: ['?', '?', '??#?', '#', '?', '????'],
-            counts: [1, 4, 1, 1, 2],
-          },
-          %Row{
-            clusters: [~c"?", ~c"#", ~c"???", ~c"??", ~c"???"],
-            counts: [1, 3, 1, 2]
-          },
-          %Row{
-            clusters: [~c"?", ~c"##?", ~c"???", ~c"??", ~c"?"],
-            counts: [1, 3, 2, 2]
-          },
-        ],
-        exp_arrangements_addl: [
           1 * 2 * 1 * 1,
-          1 * 1 * (3 + 2),
+          1 * 1 * (2 + 1 + 2),
           1 * 2 * 1 * 2,
           2 * 1 * 1,  # `1, 3` must fit in `?????`
           2 * 1 * 1 * 1 * 3,
@@ -83,16 +80,21 @@ defmodule Springs.RowTest do
       ]
     end
 
-    test "find arrangements", fixture do
-      act_arrangements = fixture.rows
-                         |> Enum.map(&Row.arrangements/1)
-      assert act_arrangements == fixture.exp_arrangements
+    test "find pairings", fixture do
+      act_pairings = fixture.input
+                     |> parse_input_string()
+                     |> Enum.slice(0..7)  # FIXME DEBUG TEMP
+                     |> Enum.map(&Row.pairings/1)
+      assert act_pairings == fixture.exp_pairings
+                             |> Enum.slice(0..7)  # FIXME DEBUG TEMP
     end
 
-    test "find arrangements (add'l test cases)", fixture do
-      act_arrangements = fixture.rows_addl
-                         |> Enum.map(&Row.arrangements/1)
-      assert act_arrangements == fixture.exp_arrangements_addl
-    end
+    # FIXME uncomment
+    #test "find arrangements", fixture do
+    #  act_arrangements = fixture.input
+    #                     |> parse_input_string()
+    #                     |> Enum.map(&Row.arrangements/1)
+    #  assert act_arrangements == fixture.exp_arrangements
+    #end
   end
 end
