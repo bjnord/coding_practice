@@ -35,12 +35,16 @@ defmodule Xmas do
   """
   @spec count_xmas(Grid.t()) :: non_neg_integer()
   def count_xmas(grid) do
-    for y <- 0..(grid.size.y - 1),
-        x <- 0..(grid.size.x - 1),
+    for pos <- x_positions(grid),
         delta <- @deltas do
-      word_at(grid, {y, x}, delta)
+      word_at(grid, pos, delta)
     end
     |> Enum.count(&(&1 == ~c"XMAS"))
+  end
+
+  defp x_positions(grid) do
+    Grid.keys(grid)
+    |> Enum.filter(&(Grid.get(grid, &1) == ?X))
   end
 
   defp word_at(grid, {y0, x0}, {dy, dx}) do
