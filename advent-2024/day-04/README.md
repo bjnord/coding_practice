@@ -100,3 +100,14 @@ In this example, an `X-MAS` appears `9` times.
 
 Flip the word search from the instructions back over to the word search
 side and try again. **How many times does an `X-MAS` appear?**
+
+### Part Two Design
+
+As I decided on a search strategy, I realized that starting from a given "M",
+
+1. either the square two to the right of "M" will be an "M", or the square two below it will be, but it can't be both
+1. by checking only those two corners we will avoid finding duplicates as we continue further down
+
+But I still finished with a really clunky solution for finding all the ways the double "MAS" can appear. I made a note to come back to it.
+
+Then later (post-Christmas) I watched [Dave Thomas' day 4 video](https://youtu.be/Uy02EnbHvbA), and he noticed immediately that starting from the "A" at the center of each cross is much simpler! Implementing this strategy yielded a much cleaner solution.
