@@ -46,7 +46,7 @@ defmodule Xmas do
   defp word_at(grid, {y0, x0}, {dy, dx}) do
     0..3
     |> Enum.map(fn d -> {y0 + dy * d, x0 + dx * d} end)
-    |> Enum.map(&(Grid.get(grid, &1)))
+    |> Enum.map(&Grid.get(grid, &1))
   end
 
   @doc ~S"""
@@ -92,7 +92,7 @@ defmodule Xmas do
 
   defp matches_mas?(grid, {y, x}) do
     mas?(Grid.get(grid, {y - 1, x - 1}), Grid.get(grid, {y + 1, x + 1})) &&
-    mas?(Grid.get(grid, {y - 1, x + 1}), Grid.get(grid, {y + 1, x - 1}))
+      mas?(Grid.get(grid, {y - 1, x + 1}), Grid.get(grid, {y + 1, x - 1}))
   end
 
   defp mas?(?M, ?S), do: true

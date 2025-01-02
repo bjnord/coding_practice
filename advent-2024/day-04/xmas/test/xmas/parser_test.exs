@@ -49,8 +49,10 @@ defmodule Xmas.ParserTest do
     end
 
     test "produces correct grid", fixture do
-      act_grid = fixture.input
-                 |> parse_input_string()
+      act_grid =
+        fixture.input
+        |> parse_input_string()
+
       assert act_grid == fixture.exp_grid
     end
   end
