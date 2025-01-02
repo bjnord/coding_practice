@@ -21,12 +21,12 @@ defmodule Xmas do
     for y <- 0..(grid.size.y - 1),
         x <- 0..(grid.size.x - 1),
         delta <- deltas do
-      xmas_at(grid, {y, x}, delta)
+      word_at(grid, {y, x}, delta)
     end
     |> Enum.count(&(&1 == ~c"XMAS"))
   end
 
-  defp xmas_at(grid, {y0, x0}, {dy, dx}) do
+  defp word_at(grid, {y0, x0}, {dy, dx}) do
     0..3
     |> Enum.map(fn d -> {y0 + dy * d, x0 + dx * d} end)
     |> Enum.map(&(Grid.get(grid, &1)))
