@@ -7,6 +7,17 @@ defmodule Xmas do
   alias History.Grid
   import Xmas.Parser
 
+  @deltas [
+    {0, 1},   # horizontal
+    {0, -1},  # horizontal backwards
+    {1, 0},   # vertical
+    {-1, 0},  # vertical backwards
+    {1, 1},   # diagonal right
+    {-1, -1}, # diagonal right backwards
+    {1, -1},  # diagonal left
+    {-1, 1},  # diagonal left backwards
+  ]
+
   @doc ~S"""
   Find occurrences of "XMAS" in a grid of letters.
 
@@ -24,19 +35,9 @@ defmodule Xmas do
   """
   @spec count_xmas(Grid.t()) :: non_neg_integer()
   def count_xmas(grid) do
-    deltas = [
-      {0, 1},   # horizontal
-      {0, -1},  # horizontal backwards
-      {1, 0},   # vertical
-      {-1, 0},  # vertical backwards
-      {1, 1},   # diagonal right
-      {-1, -1}, # diagonal right backwards
-      {1, -1},  # diagonal left
-      {-1, 1},  # diagonal left backwards
-    ]
     for y <- 0..(grid.size.y - 1),
         x <- 0..(grid.size.x - 1),
-        delta <- deltas do
+        delta <- @deltas do
       word_at(grid, {y, x}, delta)
     end
     |> Enum.count(&(&1 == ~c"XMAS"))
