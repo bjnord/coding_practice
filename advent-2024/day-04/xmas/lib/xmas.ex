@@ -7,6 +7,21 @@ defmodule Xmas do
   alias History.Grid
   import Xmas.Parser
 
+  @doc ~S"""
+  Find occurrences of "XMAS" in a grid of letters.
+
+  This is a classic "word search" puzzle. "This word search allows words to
+  be horizontal, vertical, diagonal, written backwards, or even overlapping
+  other words."
+
+  ## Parameters
+
+  - `grid`: the grid of letters
+
+  ## Returns
+
+  the count of "XMAS" words found
+  """
   @spec count_xmas(Grid.t()) :: non_neg_integer()
   def count_xmas(grid) do
     deltas = [
@@ -33,6 +48,28 @@ defmodule Xmas do
     |> Enum.map(&(Grid.get(grid, &1)))
   end
 
+  @doc ~S"""
+  Find occurrences of double "MAS" in a cross ("X") pattern in a grid
+  of letters.
+
+  "Within the X, each MAS can be written forwards or backwards."
+
+  For example (where `.` can be any letter):
+
+  ```
+  S.M        M.M
+  .A.  -or-  .A.
+  S.M        S.S
+  ```
+
+  ## Parameters
+
+  - `grid`: the grid of letters
+
+  ## Returns
+
+  the count of double "MAS" crosses found
+  """
   @spec count_xmas(Grid.t()) :: non_neg_integer()
   def count_x_mas(grid) do
     Grid.keys(grid)
