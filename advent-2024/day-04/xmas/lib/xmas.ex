@@ -7,6 +7,7 @@ defmodule Xmas do
   alias History.Grid
   import Xmas.Parser
 
+  @spec count_xmas(Grid.t()) :: non_neg_integer()
   def count_xmas(grid) do
     deltas = [
       {0, 1},   # horizontal
@@ -32,6 +33,7 @@ defmodule Xmas do
     |> Enum.map(&(Grid.get(grid, &1)))
   end
 
+  @spec count_xmas(Grid.t()) :: non_neg_integer()
   def count_x_mas(grid) do
     Grid.keys(grid)
     |> Enum.reduce(0, fn pos, acc ->
