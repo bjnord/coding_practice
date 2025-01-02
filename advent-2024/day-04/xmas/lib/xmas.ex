@@ -36,95 +36,28 @@ defmodule Xmas do
     Grid.keys(grid)
     |> Enum.reduce(0, fn pos, acc ->
       case Grid.get(grid, pos) do
-        ?M -> acc + count_m(grid, pos)
+        ?A -> acc + count_mas(grid, pos)
         _  -> acc
       end
     end)
   end
 
-  defp count_m(grid, pos) do
-    count_m_right(grid, pos) + count_m_down(grid, pos)
-  end
-
-  def count_m_right(grid, {y, x}) do
-    if Grid.get(grid, {y, x + 2}) == ?M do
-      count_a_down(grid, {y, x}) + count_a_up(grid, {y, x})
-    else
-      0
-    end
-  end
-
-  def count_a_down(grid, {y, x}) do
-    if Grid.get(grid, {y + 1, x + 1}) == ?A do
-      count_s_down(grid, {y, x})
-    else
-      0
-    end
-  end
-
-  defp count_s_down(grid, {y, x}) do
-    if (Grid.get(grid, {y + 2, x}) == ?S) && (Grid.get(grid, {y + 2, x + 2}) == ?S) do
+  defp count_mas(grid, pos) do
+    if matches_mas?(grid, pos) do
       1
     else
       0
     end
   end
 
-  def count_a_up(grid, {y, x}) do
-    if Grid.get(grid, {y - 1, x + 1}) == ?A do
-      count_s_up(grid, {y, x})
-    else
-      0
-    end
+  defp matches_mas?(grid, {y, x}) do
+    mas?(Grid.get(grid, {y - 1, x - 1}), Grid.get(grid, {y + 1, x + 1})) &&
+    mas?(Grid.get(grid, {y - 1, x + 1}), Grid.get(grid, {y + 1, x - 1}))
   end
 
-  defp count_s_up(grid, {y, x}) do
-    if (Grid.get(grid, {y - 2, x}) == ?S) && (Grid.get(grid, {y - 2, x + 2}) == ?S) do
-      1
-    else
-      0
-    end
-  end
-
-  def count_m_down(grid, {y, x}) do
-    if Grid.get(grid, {y + 2, x}) == ?M do
-      count_a_right(grid, {y, x}) + count_a_left(grid, {y, x})
-    else
-      0
-    end
-  end
-
-  def count_a_right(grid, {y, x}) do
-    if Grid.get(grid, {y + 1, x + 1}) == ?A do
-      count_s_right(grid, {y, x})
-    else
-      0
-    end
-  end
-
-  defp count_s_right(grid, {y, x}) do
-    if (Grid.get(grid, {y, x + 2}) == ?S) && (Grid.get(grid, {y + 2, x + 2}) == ?S) do
-      1
-    else
-      0
-    end
-  end
-
-  def count_a_left(grid, {y, x}) do
-    if Grid.get(grid, {y + 1, x - 1}) == ?A do
-      count_s_left(grid, {y, x})
-    else
-      0
-    end
-  end
-
-  defp count_s_left(grid, {y, x}) do
-    if (Grid.get(grid, {y, x - 2}) == ?S) && (Grid.get(grid, {y + 2, x - 2}) == ?S) do
-      1
-    else
-      0
-    end
-  end
+  defp mas?(?M, ?S), do: true
+  defp mas?(?S, ?M), do: true
+  defp mas?(_, _), do: false
 
   @doc """
   Parse arguments and call puzzle part methods.
