@@ -6,12 +6,51 @@ defmodule Location do
   import History.CLI
   import Location.Parser
 
+  @doc ~S"""
+  Measure the distances between pairs of numbers.
+
+  Each input list is first sorted smallest to largest, and then the
+  pairwise distances are found.
+
+  ## Examples
+      iex> Location.location_pair_diff({[1, 3, 9], [5, 2, 6]})
+      [1, 2, 3]
+  """
+  @spec location_pair_diff({[integer()], [integer()]}) :: [integer()]
   def location_pair_diff({alist, blist}) do
     [Enum.sort(alist), Enum.sort(blist)]
     |> Enum.zip()
     |> Enum.map(fn {a, b} -> abs(a - b) end)
   end
 
+  @doc ~S"""
+  Calculate a total similarity score by adding up each number in the left
+  list after multiplying it by the number of times that number appears
+  in the right list.
+
+  For example, given these lists:
+
+  ```
+  3   4
+  4   3
+  2   5
+  1   3
+  3   9
+  3   3
+  ```
+
+  ...here is the process of finding the similarity score:
+
+  - The first number in the left list is 3. It appears in the right list
+    three times, so the similarity score increases by `3 * 3 = 9`.
+  - The second number in the left list is 4. It appears in the right list
+    once, so the similarity score increases by `4 * 1 = 4`.
+  - The third number in the left list is 2. It does not appear in the
+    right list, so the similarity score does not increase (`2 * 0 = 0`).
+
+  [...]
+  """
+  @spec similarity({[integer()], [integer()]}) :: [integer()]
   def similarity({alist, blist}) do
     bcount = occurrence_count(blist)
     Enum.map(alist, &(&1 * Map.get(bcount, &1, 0)))
