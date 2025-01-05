@@ -3,7 +3,8 @@ defmodule Keypad.Parser do
   Parsing for `Keypad`.
   """
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
+  @type code() :: [char()]
 
   @doc ~S"""
   Parse an input file.
@@ -18,7 +19,7 @@ defmodule Keypad.Parser do
 
   a list of codes
   """
-  @spec parse_input_file(String.t()) :: streamable([[char()]])
+  @spec parse_input_file(String.t()) :: streamable(code())
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -36,7 +37,7 @@ defmodule Keypad.Parser do
 
   a list of codes
   """
-  @spec parse_input_string(String.t()) :: streamable([[char()]])
+  @spec parse_input_string(String.t()) :: streamable(code())
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
@@ -60,7 +61,7 @@ defmodule Keypad.Parser do
       iex> parse_line("530A\n")
       ~c"530A"
   """
-  @spec parse_line(String.t()) :: [char()]
+  @spec parse_line(String.t()) :: code()
   def parse_line(line) do
     line
     |> String.trim_trailing()

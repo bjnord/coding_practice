@@ -5,7 +5,7 @@ defmodule Claw.Parser do
 
   import NimbleParsec
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
 
   @doc ~S"""
   Parse an input file.

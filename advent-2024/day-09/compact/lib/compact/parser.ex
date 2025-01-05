@@ -3,7 +3,7 @@ defmodule Compact.Parser do
   Parsing for `Compact`.
   """
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @type layout() :: [{:file, integer(), integer()} | {:space, integer()}]
 
   @doc ~S"""
   Parse an input file.
@@ -18,7 +18,7 @@ defmodule Compact.Parser do
 
   a file/space layout list
   """
-  @spec parse_input_file(String.t()) :: streamable([[integer()]])
+  @spec parse_input_file(String.t()) :: layout()
   def parse_input_file(path) do
     path
     |> File.read!()
@@ -36,7 +36,7 @@ defmodule Compact.Parser do
 
   a file/space layout list
   """
-  @spec parse_input_string(String.t()) :: [atom()]
+  @spec parse_input_string(String.t()) :: layout()
   def parse_input_string(input) do
     input
     |> String.trim_trailing()

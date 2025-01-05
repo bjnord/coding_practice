@@ -14,7 +14,7 @@ defmodule Compact.Disc do
     spaces: [{integer(), integer()}],
   }
 
-  @spec create(String.t()) :: __MODULE__.t()
+  @spec create(Compact.Parser.layout()) :: __MODULE__.t()
   def create(layout) do
     {blocks, n_blocks} =
       layout

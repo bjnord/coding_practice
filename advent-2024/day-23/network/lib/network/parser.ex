@@ -3,7 +3,7 @@ defmodule Network.Parser do
   Parsing for `Network`.
   """
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
   @type network() :: {String.t(), String.t()}
 
   @doc ~S"""
@@ -19,7 +19,7 @@ defmodule Network.Parser do
 
   a list of network connections
   """
-  @spec parse_input_file(String.t()) :: streamable([network()])
+  @spec parse_input_file(String.t()) :: streamable(network())
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -37,7 +37,7 @@ defmodule Network.Parser do
 
   a list of network connections
   """
-  @spec parse_input_string(String.t()) :: streamable([network()])
+  @spec parse_input_string(String.t()) :: streamable(network())
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)

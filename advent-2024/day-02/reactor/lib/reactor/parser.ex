@@ -3,7 +3,7 @@ defmodule Reactor.Parser do
   Parsing for `Reactor`.
   """
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
 
   @doc ~S"""
   Parse an input file.
