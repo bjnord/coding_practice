@@ -12,19 +12,38 @@ defmodule Safe do
   def rotate(rotations) do
     rotations
     |> Enum.reduce({50, []}, fn {rot_s, rot_i}, {pos, acc} ->
-      new_pos = rem(pos + rot_i, 100)
-      new_pos =
-        cond do
-          new_pos < 0 -> new_pos + 100
-          true        -> new_pos
-        end
+      {new_pos, clicks} = pos_and_clicks(pos, rot_i)
       {
         new_pos,
-        [{rot_s, rot_i, new_pos} | acc]
+        [{rot_s, rot_i, new_pos, clicks} | acc]
       }
     end)
     |> elem(1)
     |> Enum.reverse()
+  end
+
+  def pos_and_clicks(pos, rot_i) when rot_i > 0 do
+    clicks = div(rot_i, 100)
+    rot_i = rem(rot_i, 100)
+    if (pos + rot_i) >= 100 do
+      {rem(pos + rot_i, 100), clicks + 1}
+    else
+      {pos + rot_i, clicks}
+    end
+  end
+
+  def pos_and_clicks(pos, rot_i) when rot_i < 0 do
+    clicks = div(-rot_i, 100)
+    rot_i = -rem(-rot_i, 100)
+    if (pos + rot_i) <= 0 do
+      if pos == 0 do
+        {rem(pos + rot_i + 100, 100), clicks}
+      else
+        {rem(pos + rot_i + 100, 100), clicks + 1}
+      end
+    else
+      {pos + rot_i, clicks}
+    end
   end
 
   @doc """
@@ -55,7 +74,9 @@ defmodule Safe do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> rotate()
+    |> Enum.map(fn pos -> elem(pos, 3) end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
