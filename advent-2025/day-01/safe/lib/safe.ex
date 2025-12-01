@@ -3,21 +3,29 @@ defmodule Safe do
   Documentation for `Safe`.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Safe.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
-
   import Safe.Parser
   import History.CLI
+
+  @doc """
+  Rotate the dial.
+  """
+  def rotate(rotations) do
+    rotations
+    |> Enum.reduce({50, []}, fn {rot_s, rot_i}, {pos, acc} ->
+      new_pos = rem(pos + rot_i, 100)
+      new_pos =
+        cond do
+          new_pos < 0 -> new_pos + 100
+          true        -> new_pos
+        end
+      {
+        new_pos,
+        [{rot_s, rot_i, new_pos} | acc]
+      }
+    end)
+    |> elem(1)
+    |> Enum.reverse()
+  end
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -37,7 +45,8 @@ defmodule Safe do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> rotate()
+    |> Enum.count(fn pos -> elem(pos, 2) == 0 end)
     |> IO.inspect(label: "Part 1 answer is")
   end
 
