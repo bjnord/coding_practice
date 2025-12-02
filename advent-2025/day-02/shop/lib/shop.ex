@@ -24,6 +24,23 @@ defmodule Shop do
   end
 
   @doc """
+  Return the sum of all doubled product IDs within a product ID range.
+
+  ## Parameters
+
+  - `range`: the product ID range
+  """
+  # FIXME use `product_range()` type
+  @spec sum_doubled({integer(), integer()}) :: integer()
+  def sum_doubled(range) do
+    Range.new(elem(range, 0), elem(range, 1))
+    |> Enum.map(fn id ->
+      if is_doubled?(id), do: id, else: 0
+    end)
+    |> Enum.sum()
+  end
+
+  @doc """
   Does product ID contain a sequence of digits repeated twice?
 
   ## Parameters
@@ -73,7 +90,8 @@ defmodule Shop do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(&sum_doubled/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
