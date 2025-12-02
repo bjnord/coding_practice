@@ -7,7 +7,8 @@ defmodule Shop do
   import History.CLI
 
   @doc """
-  Return the sum of all doubled product IDs within a product ID range.
+  Return the sum of all product IDs within a product ID range which
+  contain a doubled digit pattern.
 
   ## Parameters
 
@@ -56,6 +57,66 @@ defmodule Shop do
   end
 
   @doc """
+  Return the sum of all product IDs within a product ID range which
+  contain a digit pattern repeated N times.
+
+  ## Parameters
+
+  - `range`: the product ID range
+  """
+  # FIXME use `product_range()` type
+  @spec sum_repeated({integer(), integer()}) :: integer()
+  def sum_repeated(range) do
+    Range.new(elem(range, 0), elem(range, 1))
+    |> Enum.map(fn id ->
+      if is_repeated?(id), do: id, else: 0
+    end)
+    |> Enum.sum()
+  end
+
+  @doc """
+  Does product ID contain a sequence of digits repeated N times?
+
+  ## Parameters
+
+  - `product_id`: the product ID (integer)
+
+  ## Examples
+      iex> Shop.is_repeated?(1)
+      false
+      iex> Shop.is_repeated?(12341234)
+      true
+      iex> Shop.is_repeated?(12312312)
+      false
+      iex> Shop.is_repeated?(123123123)
+      true
+      iex> Shop.is_repeated?(1212121212)
+      true
+      iex> Shop.is_repeated?(1111111)
+      true
+  """
+  @spec is_repeated?(integer()) :: boolean()
+  def is_repeated?(product_id) when product_id < 10, do: false
+  def is_repeated?(product_id) do
+    s = Integer.to_string(product_id)
+    len = String.length(s)
+    Range.new(1, div(len, 2))
+    |> Enum.to_list()
+    |> Enum.any?(fn n -> is_repeated_n?(s, len, n) end)
+  end
+
+  defp is_repeated_n?(s, len, n) do
+    if rem(len, n) == 0 do
+      [first | peers] = String.to_charlist(s)
+                        |> Enum.chunk_every(n)
+      Enum.all?(peers, fn peer -> peer == first end)
+    else
+      # can't be broken into equal pieces of length `n`
+      false
+    end
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -83,7 +144,8 @@ defmodule Shop do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(&sum_repeated/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

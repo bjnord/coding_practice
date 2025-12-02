@@ -31,6 +31,19 @@ defmodule ShopTest do
           0,
           0,
         ],
+        exp_rep_sums: [
+          33,
+          210,
+          2009,
+          1188511885,
+          222222,
+          0,
+          446446,
+          38593859,
+          565656,
+          824824824,
+          2121212121,
+        ],
       ]
     end
 
@@ -38,6 +51,12 @@ defmodule ShopTest do
       act_doub_sums = fixture.product_ranges
                       |> Enum.map(&Shop.sum_doubled/1)
       assert act_doub_sums == fixture.exp_doub_sums
+    end
+
+    test "correctly sum repeated product IDs", fixture do
+      act_rep_sums = fixture.product_ranges
+                     |> Enum.map(&Shop.sum_repeated/1)
+      assert act_rep_sums == fixture.exp_rep_sums
     end
   end
 end
