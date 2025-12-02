@@ -48,9 +48,7 @@ defmodule Shop do
     s = Integer.to_string(product_id)
     len = String.length(s)
     if rem(len, 2) == 0 do
-      l = String.slice(s, 0, div(len, 2))
-      r = String.slice(s, div(len, 2), div(len, 2))
-      l == r
+      is_repeated_n?(s, len, div(len, 2))
     else
       false
     end
