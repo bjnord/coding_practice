@@ -6,6 +6,8 @@ defmodule Shop do
   import Shop.Parser
   import History.CLI
 
+  @type product_range() :: {integer(), integer()}
+
   @doc """
   Return the sum of all product IDs within a product ID range which
   contain a doubled digit pattern.
@@ -14,8 +16,7 @@ defmodule Shop do
 
   - `range`: the product ID range
   """
-  # FIXME use `product_range()` type
-  @spec sum_doubled({integer(), integer()}) :: integer()
+  @spec sum_doubled(product_range()) :: integer()
   def sum_doubled(range) do
     Range.new(elem(range, 0), elem(range, 1))
     |> Enum.map(fn id ->
@@ -62,8 +63,7 @@ defmodule Shop do
 
   - `range`: the product ID range
   """
-  # FIXME use `product_range()` type
-  @spec sum_repeated({integer(), integer()}) :: integer()
+  @spec sum_repeated(product_range()) :: integer()
   def sum_repeated(range) do
     Range.new(elem(range, 0), elem(range, 1))
     |> Enum.map(fn id ->

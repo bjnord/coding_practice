@@ -3,8 +3,6 @@ defmodule Shop.Parser do
   Parsing for `Shop`.
   """
 
-  @type product_range() :: {integer(), integer()}
-
   @doc ~S"""
   Parse an input file.
 
@@ -18,7 +16,7 @@ defmodule Shop.Parser do
 
   a list of product ID ranges
   """
-  @spec parse_input_file(String.t()) :: [product_range()]
+  @spec parse_input_file(String.t()) :: [Shop.product_range()]
   def parse_input_file(path) do
     path
     |> File.read!()
@@ -40,7 +38,7 @@ defmodule Shop.Parser do
       iex> parse_input_string("11-22,95-115\n")
       [{11, 22}, {95, 115}]
   """
-  @spec parse_input_string(String.t()) :: [product_range()]
+  @spec parse_input_string(String.t()) :: [Shop.product_range()]
   def parse_input_string(input) do
     input
     |> String.trim_trailing()
@@ -65,7 +63,7 @@ defmodule Shop.Parser do
       iex> parse_range("95-115")
       {95, 115}
   """
-  @spec parse_range(String.t()) :: product_range()
+  @spec parse_range(String.t()) :: Shop.product_range()
   def parse_range(range) do
     range
     |> String.split("-")
