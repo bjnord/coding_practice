@@ -18,19 +18,6 @@ defmodule ShopTest do
           {824824821, 824824827},
           {2121212118, 2121212124},
         ],
-        exp_doub_counts: [
-          2,
-          1,
-          1,
-          1,
-          1,
-          0,
-          1,
-          1,
-          0,
-          0,
-          0,
-        ],
         exp_doub_sums: [
           33,
           99,
@@ -45,12 +32,6 @@ defmodule ShopTest do
           0,
         ],
       ]
-    end
-
-    test "correctly count doubled product IDs", fixture do
-      act_doub_counts = fixture.product_ranges
-                        |> Enum.map(&Shop.count_doubled/1)
-      assert act_doub_counts == fixture.exp_doub_counts
     end
 
     test "correctly sum doubled product IDs", fixture do

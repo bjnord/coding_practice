@@ -7,23 +7,6 @@ defmodule Shop do
   import History.CLI
 
   @doc """
-  Count doubled product IDs within a product ID range.
-
-  ## Parameters
-
-  - `range`: the product ID range
-  """
-  # FIXME use `product_range()` type
-  @spec count_doubled({integer(), integer()}) :: integer()
-  def count_doubled(range) do
-    Range.new(elem(range, 0), elem(range, 1))
-    |> Enum.map(&is_doubled?/1)
-    # FIXME use Enum.count() with function?
-    |> Enum.map(fn doub -> if doub, do: 1, else: 0 end)
-    |> Enum.sum()
-  end
-
-  @doc """
   Return the sum of all doubled product IDs within a product ID range.
 
   ## Parameters
