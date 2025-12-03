@@ -14,7 +14,7 @@ defmodule Lift.Parser do
   """
   def parse_input_file(path, _opts \\ []) do
     path
-    |> File.stream!
+    |> File.stream!()
     |> Stream.map(&parse_line/1)
   end
 
@@ -27,7 +27,7 @@ defmodule Lift.Parser do
 
   ## Examples
       iex> parse_input_string("12345\n97531\n") |> Enum.to_list()
-      ['12345', '97531']
+      [~c"12345", ~c"97531"]
   """
   def parse_input_string(input, _opts \\ []) do
     input
@@ -42,9 +42,9 @@ defmodule Lift.Parser do
 
   ## Examples
       iex> parse_line("23456\n")
-      '23456'
+      ~c"23456"
       iex> parse_line("86420\n")
-      '86420'
+      ~c"86420"
   """
   def parse_line(line) do
     line
