@@ -3,8 +3,8 @@ defmodule Safe do
   Documentation for `Safe`.
   """
 
+  import Decor.CLI
   import Safe.Parser
-  import History.CLI
 
   @doc """
   Rotate the dial.

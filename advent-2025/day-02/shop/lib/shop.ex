@@ -3,8 +3,8 @@ defmodule Shop do
   Documentation for `Shop`.
   """
 
+  import Decor.CLI
   import Shop.Parser
-  import History.CLI
 
   @type product_range() :: {integer(), integer()}
 

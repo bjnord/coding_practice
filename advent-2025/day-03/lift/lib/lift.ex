@@ -3,8 +3,8 @@ defmodule Lift do
   Documentation for `Lift`.
   """
 
+  import Decor.CLI
   import Lift.Parser
-  import History.CLI
   require Logger
 
   @doc """
