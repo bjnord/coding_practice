@@ -11,19 +11,31 @@ defmodule LiftTest do
           ~c"234234234234278",
           ~c"818181911112111"
         ],
-        exp_max_joltages: [
+        exp_max_joltages_2: [
           98,
           89,
           78,
           92,
         ],
+        exp_max_joltages_12: [
+          987654321111,
+          811111111119,
+          434234234278,
+          888911112111,
+        ],
       ]
     end
 
-    test "computes expected max joltages", fixture do
-      act_max_joltages = fixture.banks
-                         |> Enum.map(&Lift.max_joltage/1)
-      assert act_max_joltages == fixture.exp_max_joltages
+    test "computes expected max joltages for 2 batteries", fixture do
+      act_max_joltages_2 = fixture.banks
+                           |> Enum.map(&Lift.max_joltage/1)
+      assert act_max_joltages_2 == fixture.exp_max_joltages_2
+    end
+
+    test "computes expected max joltages for 12 batteries", fixture do
+      act_max_joltages_12 = fixture.banks
+                            |> Enum.map(fn bank -> Lift.max_joltage(bank, 12) end)
+      assert act_max_joltages_12 == fixture.exp_max_joltages_12
     end
   end
 end

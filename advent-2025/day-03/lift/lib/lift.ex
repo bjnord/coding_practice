@@ -5,21 +5,22 @@ defmodule Lift do
 
   import Lift.Parser
   import History.CLI
+  require Logger
 
   @doc """
   Generate a map of battery positions within a bank.
 
   ## Examples
       iex> Lift.position_map(~c"1234")
-      %{1 => [0], 2 => [1], 3 => [2], 4 => [3], 5 => [], 6 => [], 7 => [], 8 => [], 9 => []}
+      %{:len => 4, 1 => [0], 2 => [1], 3 => [2], 4 => [3], 5 => [], 6 => [], 7 => [], 8 => [], 9 => []}
       iex> Lift.position_map(~c"4142")
-      %{1 => [1], 2 => [3], 3 => [], 4 => [0, 2], 5 => [], 6 => [], 7 => [], 8 => [], 9 => []}
+      %{:len => 4, 1 => [1], 2 => [3], 3 => [], 4 => [0, 2], 5 => [], 6 => [], 7 => [], 8 => [], 9 => []}
   """
   def position_map(bank) do
     pos_map =
       bank
       |> Enum.with_index()
-      |> Enum.reduce(%{}, fn {ch, i}, acc ->
+      |> Enum.reduce(%{len: length(bank)}, fn {ch, i}, acc ->
         Map.update(acc, ch - ?0, [i], fn list -> [i | list] end)
       end)
     1..9
@@ -36,32 +37,40 @@ defmodule Lift do
       34
       iex> Lift.max_joltage(~c"4142")
       44
+      iex> Lift.max_joltage(~c"1234", 3)
+      234
+      iex> Lift.max_joltage(~c"4142", 3)
+      442
   """
-  def max_joltage(bank) do
+  def max_joltage(bank, n_batt \\ 2) do
     pos_map = position_map(bank)
-    find_max_joltage(pos_map, [{9, 0}])
+    Logger.debug("start -- bank #{inspect(bank)} n_batt=#{n_batt}")
+    find_max_joltage(pos_map, [{9, 0}], n_batt, pos_map[:len] - n_batt)
   end
 
-  defp find_max_joltage(_pos_map, [{9, _}, {batt_b, _}, {batt_a, _}]) do
-    # termination condition: found the highest two batteries
-    batt_a * 10 + batt_b
+  defp find_max_joltage(_pos_map, [{9, _} | found], 0, _) do
+    # termination condition: found the highest N batteries
+    Logger.debug("end -- found #{inspect(found)}")
+    found
+    |> Enum.reverse()
+    |> Enum.reduce(0, fn {batt, _}, acc -> acc * 10 + batt end)
   end
-  defp find_max_joltage(pos_map, [{0, _}, {batt, _}]) do
-    # couldn't find any batteries to the right of the first one
-    # start over and find a new first battery
-    find_max_joltage(pos_map, [{batt - 1, 0}])
+  defp find_max_joltage(pos_map, [{0, _}, {batt, _} | found], n_batt, max_i) do
+    # couldn't find any batteries to the right of the current one
+    # start over and find a new Nth battery
+    find_max_joltage(pos_map, [{batt - 1, 0} | found], n_batt + 1, max_i - 1)
   end
-  defp find_max_joltage(pos_map, [{batt, min_i} | found]) do
+  defp find_max_joltage(pos_map, [{batt, min_i} | found], n_batt, max_i) do
     positions = Map.get(pos_map, batt)
-    match_i = Enum.find(positions, fn pos -> pos >= min_i end)
+    match_i = Enum.find(positions, fn pos -> (pos >= min_i) && (pos <= max_i) end)
     if match_i do
       # found a battery that matches the requirements
       # keep it, and start searching for the next one to the right
-      find_max_joltage(pos_map, [{9, match_i + 1}, {batt, match_i} | found])
+      find_max_joltage(pos_map, [{9, match_i + 1}, {batt, match_i} | found], n_batt - 1, max_i + 1)
     else
       # didn't find a matching battery
-      # try the next highest battery
-      find_max_joltage(pos_map, [{batt - 1, min_i} | found])
+      # try to find the next highest battery
+      find_max_joltage(pos_map, [{batt - 1, min_i} | found], n_batt, max_i)
     end
   end
 
@@ -93,7 +102,8 @@ defmodule Lift do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(fn bank -> max_joltage(bank, 12) end)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
