@@ -4,7 +4,26 @@ defmodule Roll do
   """
 
   import Decor.CLI
+  alias Decor.Grid
   import Roll.Parser
+
+  @doc """
+  Find grid positions of rolls with fewer than four adjacent rolls.
+  """
+  def accessible_positions(grid) do
+    Grid.keys(grid)
+    |> Enum.filter(fn pos -> Grid.get(grid, pos) == ?@ end)
+    |> Enum.filter(fn pos -> accessible_roll?(grid, pos) end)
+  end
+
+  @doc """
+  Does the roll at this grid position have fewer than four adjacent rolls?
+  """
+  def accessible_roll?(grid, pos) do
+    Grid.neighbors_of(grid, pos)
+    |> Enum.count(fn pos -> Grid.get(grid, pos) == ?@ end)
+    |> then(fn count -> count < 4 end)
+  end
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -24,7 +43,8 @@ defmodule Roll do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> accessible_positions()
+    |> Enum.count()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
