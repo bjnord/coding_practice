@@ -26,6 +26,32 @@ defmodule Roll do
   end
 
   @doc """
+  Remove as many accessible rolls as possible from the grid.
+  """
+  def remove_rolls(grid) do
+    accessible_pos = accessible_positions(grid)
+    remove_rolls_step(grid, accessible_pos)
+  end
+
+  defp remove_rolls_step(grid, []), do: grid
+  defp remove_rolls_step(grid, positions) do
+    grid =
+      Enum.reduce(positions, grid, fn pos, acc ->
+        Grid.put(acc, pos, ?x)
+      end)
+    accessible_pos = accessible_positions(grid)
+    remove_rolls_step(grid, accessible_pos)
+  end
+
+  @doc """
+  Find grid positions of removed rolls.
+  """
+  def removed_positions(grid) do
+    Grid.keys(grid)
+    |> Enum.filter(fn pos -> Grid.get(grid, pos) == ?x end)
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -53,7 +79,9 @@ defmodule Roll do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> remove_rolls()
+    |> removed_positions()
+    |> Enum.count()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end

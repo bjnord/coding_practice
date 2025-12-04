@@ -47,6 +47,7 @@ defmodule RollTest do
           {9, 2},
           {9, 8},
         ],
+        exp_n_removable_rolls: 43,
       ]
     end
 
@@ -54,6 +55,13 @@ defmodule RollTest do
       act_accessible_pos = Roll.accessible_positions(fixture.grid)
                            |> Enum.sort()
       assert act_accessible_pos == fixture.exp_accessible_pos
+    end
+
+    test "counts removable rolls", fixture do
+      act_n_removable_rolls = Roll.remove_rolls(fixture.grid)
+                              |> Roll.removed_positions()
+                              |> Enum.count()
+      assert act_n_removable_rolls == fixture.exp_n_removable_rolls
     end
   end
 end
