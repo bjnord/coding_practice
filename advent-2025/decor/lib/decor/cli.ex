@@ -36,6 +36,7 @@ defmodule Decor.CLI do
   ###
   # Emit usage.
   #
+  @dialyzer {:no_return, usage: 0}
   defp usage() do
     escript = :escript.script_name()
     parts = Enum.join(@default_parts)
