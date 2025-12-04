@@ -6,9 +6,14 @@ defmodule Safe do
   import Decor.CLI
   import Safe.Parser
 
+  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @type rotation() :: {String.t(), integer()}
+  @type position() :: {String.t(), integer(), non_neg_integer(), non_neg_integer()}
+
   @doc """
   Rotate the dial.
   """
+  @spec rotate(streamable([rotation()])) :: [position()]
   def rotate(rotations) do
     rotations
     |> Enum.reduce({50, []}, fn {rot_s, rot_i}, {pos, acc} ->
@@ -22,6 +27,10 @@ defmodule Safe do
     |> Enum.reverse()
   end
 
+  @doc """
+  Update dial position and calculate number of clicks.
+  """
+  @spec pos_and_clicks(integer(), integer()) :: {integer(), non_neg_integer()}
   def pos_and_clicks(pos, rot_i) when rot_i > 0 do
     clicks = div(rot_i, 100)
     rot_i = rem(rot_i, 100)
@@ -31,7 +40,6 @@ defmodule Safe do
       {pos + rot_i, clicks}
     end
   end
-
   def pos_and_clicks(pos, rot_i) when rot_i < 0 do
     clicks = div(-rot_i, 100)
     rot_i = -rem(-rot_i, 100)

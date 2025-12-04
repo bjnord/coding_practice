@@ -18,7 +18,7 @@ defmodule Safe.Parser do
 
   a rotation list
   """
-  @spec parse_input_file(String.t()) :: streamable([[integer()]])
+  @spec parse_input_file(String.t()) :: streamable([Safe.rotation()])
   def parse_input_file(path) do
     path
     |> File.stream!()
@@ -40,7 +40,7 @@ defmodule Safe.Parser do
       iex> parse_input_string("R22\nL3456\n") |> Enum.to_list()
       [{"R22", 22}, {"L3456", -3456}]
   """
-  @spec parse_input_string(String.t()) :: streamable([[integer()]])
+  @spec parse_input_string(String.t()) :: streamable([Safe.rotation()])
   def parse_input_string(input) do
     input
     |> String.splitter("\n", trim: true)
@@ -64,7 +64,7 @@ defmodule Safe.Parser do
       iex> parse_line("L321\n")
       {"L321", -321}
   """
-  @spec parse_line(String.t()) :: [integer()]
+  @spec parse_line(String.t()) :: Safe.rotation()
   def parse_line(line) do
     rot_s = String.trim_trailing(line)
     i = String.to_integer(String.slice(rot_s, 1..-1//1))
