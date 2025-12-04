@@ -1,5 +1,6 @@
 BIN = ./shop
 FILES = mix.exs test/test_helper.exs \
+	config/config.exs config/dev.exs \
 	lib/shop.ex test/shop_test.exs \
 	lib/shop/parser.ex test/shop/parser_test.exs
 VERBOSE = 0

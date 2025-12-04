@@ -21,12 +21,18 @@ import Config
 #     config :logger, level: :info
 #
 
-config :logger,
-  backends: [{LoggerFileBackend, :debug_log}]
+config :logger, :default_handler,
+  config: [
+    file: ~c"log/#{Mix.env()}.log",
+    filesync_repeat_interval: 5000,
+    file_check: 5000,
+    max_no_bytes: 10_000_000,
+    max_no_files: 5,
+    compress_on_rotate: true
+  ],
+  level: :info
 
-config :logger, :debug_log,
-  path: "log/#{Mix.env()}.log",
-  level: :debug,
+config :logger, :default_formatter,
   format: "$date $time $metadata[$level] $message\n"
 
 # It is also possible to import configuration files, relative to this

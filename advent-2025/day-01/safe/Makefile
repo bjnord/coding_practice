@@ -1,5 +1,6 @@
 BIN = ./safe
 FILES = mix.exs test/test_helper.exs \
+	config/config.exs config/dev.exs \
 	lib/safe.ex test/safe_test.exs \
 	lib/safe/parser.ex test/safe/parser_test.exs
 VERBOSE = 0

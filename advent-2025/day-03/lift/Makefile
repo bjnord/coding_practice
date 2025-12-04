@@ -1,5 +1,6 @@
 BIN = ./lift
 FILES = mix.exs test/test_helper.exs \
+	config/config.exs config/dev.exs \
 	lib/lift.ex test/lift_test.exs \
 	lib/lift/parser.ex test/lift/parser_test.exs
 VERBOSE = 0
