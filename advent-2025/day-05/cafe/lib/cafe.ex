@@ -6,6 +6,27 @@ defmodule Cafe do
   import Cafe.Parser
   import Decor.CLI
 
+  @type ingredient() :: pos_integer()
+  @type fresh_range() :: {pos_integer(), pos_integer()}
+  @type inventory() :: {[fresh_range()], [ingredient()]}
+
+  @doc """
+  Find fresh ingredients in an inventory.
+  """
+  @spec find_fresh_ingredients(inventory()) :: [ingredient()]
+  def find_fresh_ingredients({fresh_ranges, ingredients}) do
+    ingredients
+    |> Enum.filter(fn ing ->
+      fresh_ranges
+      |> Enum.any?(fn range -> in_range?(range, ing) end)
+    end)
+  end
+
+  @spec in_range?(fresh_range(), ingredient()) :: boolean()
+  defp in_range?({lo, hi}, n) do
+    (lo <= n) && (n <= hi)
+  end
+
   @doc """
   Parse arguments and call puzzle part methods.
 
@@ -24,7 +45,8 @@ defmodule Cafe do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> find_fresh_ingredients()
+    |> Enum.count()
     |> IO.inspect(label: "Part 1 answer is")
   end
 

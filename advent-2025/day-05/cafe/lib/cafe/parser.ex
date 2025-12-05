@@ -3,10 +3,6 @@ defmodule Cafe.Parser do
   Parsing for `Cafe`.
   """
 
-  @type ingredient() :: pos_integer()
-  @type fresh_range() :: {pos_integer(), pos_integer()}
-  @type inventory() :: {[fresh_range()], [ingredient()]}
-
   @doc ~S"""
   Parse an input file.
 
@@ -20,7 +16,7 @@ defmodule Cafe.Parser do
 
   an inventory
   """
-  @spec parse_input_file(String.t()) :: inventory()
+  @spec parse_input_file(String.t()) :: Cafe.inventory()
   def parse_input_file(path) do
     path
     |> File.read!()
@@ -38,7 +34,7 @@ defmodule Cafe.Parser do
 
   an inventory
   """
-  @spec parse_input_string(String.t()) :: inventory()
+  @spec parse_input_string(String.t()) :: Cafe.inventory()
   def parse_input_string(input) do
     [fresh_ranges, ingredients] =
       input
@@ -65,7 +61,7 @@ defmodule Cafe.Parser do
       iex> parse_fresh_ranges("3-5\n10-14\n")
       [{3, 5}, {10, 14}]
   """
-  @spec parse_fresh_ranges(String.t()) :: [fresh_range()]
+  @spec parse_fresh_ranges(String.t()) :: [Cafe.fresh_range()]
   def parse_fresh_ranges(section) do
     section
     |> String.trim_trailing()
@@ -92,7 +88,7 @@ defmodule Cafe.Parser do
       iex> parse_ingredients("1\n5\n8\n")
       [1, 5, 8]
   """
-  @spec parse_ingredients(String.t()) :: [ingredient()]
+  @spec parse_ingredients(String.t()) :: [Cafe.ingredient()]
   def parse_ingredients(section) do
     section
     |> String.trim_trailing()
