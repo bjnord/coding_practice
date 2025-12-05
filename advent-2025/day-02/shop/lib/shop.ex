@@ -117,6 +117,125 @@ defmodule Shop do
   end
 
   @doc """
+  Return all lengths which equally divide a product ID.
+
+  Examples
+      iex> Shop.sublengths(1)
+      [1]
+      iex> Shop.sublengths(1111)
+      [1, 2]
+      iex> Shop.sublengths(111111111)
+      [1, 3]
+  """
+  @spec sublengths(pos_integer()) :: [pos_integer()]
+  def sublengths(product_id) do
+    case Decor.Math.n_digits(product_id) do
+      1 -> [1]
+      2 -> [1]
+      3 -> [1]
+      4 -> [1, 2]
+      5 -> [1]
+      6 -> [1, 2, 3]
+      7 -> [1]
+      8 -> [1, 2, 4]
+      9 -> [1, 3]
+      10 -> [1, 2, 5]
+    end
+  end
+
+  @doc """
+  Break product ID range into ranges with equal product ID lengths.
+
+  Examples
+      iex> Shop.break_range({1211, 1213})
+      [{1211, 1213}]
+      iex> Shop.break_range({9897, 10003})
+      [{10000, 10003}, {9897, 9999}]
+      iex> Shop.break_range({9897, 100004})
+      [{100000, 100004}, {10000, 99999}, {9897, 9999}]
+  """
+  @spec break_range(product_range()) :: [product_range()]
+  def break_range(range) do
+    Stream.cycle([true])
+    |> Enum.reduce_while({range, []}, fn _, {{lo, hi}, ranges} ->
+      if Decor.Math.n_digits(lo) == Decor.Math.n_digits(hi) do
+        {:halt, {{nil, nil}, [{lo, hi} | ranges]}}
+      else
+        next_lo = 10 ** Decor.Math.n_digits(lo)
+        new_hi = next_lo - 1
+        {:cont, {{next_lo, hi}, [{lo, new_hi} | ranges]}}
+      end
+    end)
+    |> elem(1)
+  end
+
+  @doc """
+  Find product IDs within the given range which have a repeating pattern.
+
+  Examples
+      iex> Shop.find_repeating({1211, 1213})
+      [1212]
+      iex> Shop.find_repeating({99000, 102101}) |> Enum.sort()
+      [99999, 100100, 101010, 101101]
+  """
+  @spec find_repeating(product_range()) :: [pos_integer()]
+  def find_repeating(range) do
+    break_range(range)
+    |> Enum.map(&find_eq_digits_repeating/1)
+    |> List.flatten()
+  end
+
+  @spec find_eq_digits_repeating(product_range()) :: [[pos_integer()]]
+  defp find_eq_digits_repeating({lo, hi}) do
+    # `lo` and `hi` will have an equal number of digits
+    sublengths(lo)
+    |> Enum.map(fn sublen -> find_sublength_repeating({lo, hi}, sublen) end)
+  end
+
+  @spec find_sublength_repeating(product_range(), pos_integer()) :: [pos_integer()]
+  defp find_sublength_repeating({lo, hi}, sublen) do
+    # `lo` and `hi` will have an equal number of digits
+    n_digits = Decor.Math.n_digits(lo)
+    lo_patt = first_n_digits(lo, sublen)
+    hi_patt = first_n_digits(hi, sublen)
+    for patt <- lo_patt..hi_patt,
+      id = repeat_patt(patt, div(n_digits, sublen)),
+      in_range?({lo, hi}, id),
+      into: [],
+      do: id
+  end
+
+  @spec first_n_digits(pos_integer(), pos_integer()) :: pos_integer()
+  defp first_n_digits(i, n) do
+    Integer.to_string(i)
+    |> String.slice(0, n)
+    |> String.to_integer()
+  end
+
+  @doc """
+  Repeat a pattern of digits `n` times.
+
+  Examples
+      iex> Shop.repeat_patt(12, 4)
+      12121212
+      iex> Shop.repeat_patt(123, 3)
+      123123123
+      iex> Shop.repeat_patt(1, 7)
+      1111111
+  """
+  @spec repeat_patt(pos_integer(), pos_integer()) :: pos_integer()
+  def repeat_patt(patt, n) do
+    pow = 10 ** Decor.Math.n_digits(patt)
+    1..n
+    |> Enum.reduce(0, fn _, acc -> acc * pow + patt end)
+  end
+
+  @spec in_range?(product_range(), pos_integer()) :: boolean()
+  defp in_range?({lo, hi}, n) do
+    (lo <= n) && (n <= hi)
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
