@@ -6,7 +6,7 @@ defmodule Shop do
   import Decor.CLI
   import Shop.Parser
 
-  @type product_range() :: {integer(), integer()}
+  @type product_range() :: {pos_integer(), pos_integer()}
 
   @doc """
   Return the sum of all product IDs within a product ID range which
@@ -16,7 +16,7 @@ defmodule Shop do
 
   - `range`: the product ID range
   """
-  @spec sum_doubled(product_range()) :: integer()
+  @spec sum_doubled(product_range()) :: pos_integer()
   def sum_doubled(range) do
     Range.new(elem(range, 0), elem(range, 1))
     |> Enum.map(fn id ->
@@ -44,7 +44,7 @@ defmodule Shop do
       iex> Shop.is_doubled?(123123)
       true
   """
-  @spec is_doubled?(integer()) :: boolean()
+  @spec is_doubled?(pos_integer()) :: boolean()
   def is_doubled?(product_id) do
     s = Integer.to_string(product_id)
     len = String.length(s)
@@ -63,7 +63,7 @@ defmodule Shop do
 
   - `range`: the product ID range
   """
-  @spec sum_repeated(product_range()) :: integer()
+  @spec sum_repeated(product_range()) :: pos_integer()
   def sum_repeated(range) do
     Range.new(elem(range, 0), elem(range, 1))
     |> Enum.map(fn id ->
@@ -93,7 +93,7 @@ defmodule Shop do
       iex> Shop.is_repeated?(1111111)
       true
   """
-  @spec is_repeated?(integer()) :: boolean()
+  @spec is_repeated?(pos_integer()) :: boolean()
   def is_repeated?(product_id) when product_id < 10, do: false
 
   def is_repeated?(product_id) do
