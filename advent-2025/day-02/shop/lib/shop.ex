@@ -159,14 +159,13 @@ defmodule Shop do
     Stream.cycle([true])
     |> Enum.reduce_while({range, []}, fn _, {{lo, hi}, ranges} ->
       if Decor.Math.n_digits(lo) == Decor.Math.n_digits(hi) do
-        {:halt, {{nil, nil}, [{lo, hi} | ranges]}}
+        {:halt, [{lo, hi} | ranges]}
       else
         next_lo = 10 ** Decor.Math.n_digits(lo)
         new_hi = next_lo - 1
         {:cont, {{next_lo, hi}, [{lo, new_hi} | ranges]}}
       end
     end)
-    |> elem(1)
   end
 
   @doc """
