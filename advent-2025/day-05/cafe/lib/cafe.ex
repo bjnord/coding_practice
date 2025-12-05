@@ -28,6 +28,38 @@ defmodule Cafe do
   end
 
   @doc """
+  Combine overlapping ranges in an inventory.
+  """
+  @spec combine_ranges(inventory()) :: [ingredient()]
+  def combine_ranges({fresh_ranges, _ingredients}) do
+    fresh_ranges
+    |> Enum.sort()
+    |> combine_next_range([])
+  end
+
+  defp combine_next_range([], acc), do: acc
+  defp combine_next_range([next_range | ranges], []) do
+    combine_next_range(ranges, [next_range])
+  end
+  defp combine_next_range([{next_lo, next_hi} | ranges], [{prev_lo, prev_hi} | acc]) do
+    if prev_hi < next_lo do
+      combine_next_range(ranges, [{next_lo, next_hi}, {prev_lo, prev_hi} | acc])
+    else
+      combine_next_range(ranges, [{min(prev_lo, next_lo), max(prev_hi, next_hi)} | acc])
+    end
+  end
+
+  @doc """
+  Count ingredients in a list of ranges.
+  """
+  @spec count_ingredients([fresh_range()]) :: pos_integer()
+  def count_ingredients(ranges) do
+    ranges
+    |> Enum.map(fn {lo, hi} -> hi - lo + 1 end)
+    |> Enum.sum()
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -55,7 +87,8 @@ defmodule Cafe do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Cafe.combine_ranges()
+    |> Cafe.count_ingredients()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
