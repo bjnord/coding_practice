@@ -48,14 +48,16 @@ defmodule ShopTest do
     end
 
     test "correctly sum doubled product IDs", fixture do
-      act_doub_sums = fixture.product_ranges
-                      |> Enum.map(&Shop.sum_doubled/1)
+      act_doub_sums =
+        fixture.product_ranges
+        |> Enum.map(&Shop.sum_doubled/1)
       assert act_doub_sums == fixture.exp_doub_sums
     end
 
     test "correctly sum repeated product IDs", fixture do
-      act_rep_sums = fixture.product_ranges
-                     |> Enum.map(&Shop.sum_repeated/1)
+      act_rep_sums =
+        fixture.product_ranges
+        |> Enum.map(&Shop.sum_repeated/1)
       assert act_rep_sums == fixture.exp_rep_sums
     end
   end

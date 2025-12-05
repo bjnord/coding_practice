@@ -28,12 +28,11 @@ config :logger, :default_handler,
     file_check: 5000,
     max_no_bytes: 10_000_000,
     max_no_files: 5,
-    compress_on_rotate: true
+    compress_on_rotate: true,
   ],
   level: :info
 
-config :logger, :default_formatter,
-  format: "$date $time $metadata[$level] $message\n"
+config :logger, :default_formatter, format: "$date $time $metadata[$level] $message\n"
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment

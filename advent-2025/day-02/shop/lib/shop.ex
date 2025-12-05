@@ -95,6 +95,7 @@ defmodule Shop do
   """
   @spec is_repeated?(integer()) :: boolean()
   def is_repeated?(product_id) when product_id < 10, do: false
+
   def is_repeated?(product_id) do
     s = Integer.to_string(product_id)
     len = String.length(s)
@@ -105,8 +106,9 @@ defmodule Shop do
 
   defp is_repeated_n?(s, len, n) do
     if rem(len, n) == 0 do
-      [first | peers] = String.to_charlist(s)
-                        |> Enum.chunk_every(n)
+      [first | peers] =
+        String.to_charlist(s)
+        |> Enum.chunk_every(n)
       Enum.all?(peers, fn peer -> peer == first end)
     else
       # can't be broken into equal pieces of length `n`

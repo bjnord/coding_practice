@@ -8,14 +8,14 @@ defmodule Shop.MixProject do
       version: "0.1.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
     ]
   end
 
@@ -33,7 +33,7 @@ defmodule Shop.MixProject do
 
   defp escript_config do
     [
-      main_module: Shop
+      main_module: Shop,
     ]
   end
 end

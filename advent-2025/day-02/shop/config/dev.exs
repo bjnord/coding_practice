@@ -3,5 +3,4 @@ import Config
 
 # NOTE you must recompile the app when changing config in this file
 
-#config :logger, :default_handler,
-#  level: :debug
+#config :logger, :default_handler, level: :debug

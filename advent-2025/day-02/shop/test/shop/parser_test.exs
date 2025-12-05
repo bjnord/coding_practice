@@ -27,8 +27,9 @@ defmodule Shop.ParserTest do
     end
 
     test "parser gets expected product ranges", fixture do
-      act_product_ranges = fixture.input
-                           |> parse_input_string()
+      act_product_ranges =
+        fixture.input
+        |> parse_input_string()
       assert act_product_ranges == fixture.exp_product_ranges
     end
   end
