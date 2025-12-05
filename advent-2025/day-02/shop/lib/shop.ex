@@ -173,6 +173,8 @@ defmodule Shop do
   Find product IDs within the given range which have a repeating pattern.
 
   Examples
+      iex> Shop.find_repeating({1, 12})
+      [11]
       iex> Shop.find_repeating({1211, 1213})
       [1212]
       iex> Shop.find_repeating({99000, 102101}) |> Enum.sort()
@@ -186,6 +188,8 @@ defmodule Shop do
   end
 
   @spec find_eq_digits_repeating(product_range()) :: [[pos_integer()]]
+  defp find_eq_digits_repeating({_lo, hi}) when hi < 10, do: []
+
   defp find_eq_digits_repeating({lo, hi}) do
     # `lo` and `hi` will have an equal number of digits
     sublengths(lo)
