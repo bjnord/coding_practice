@@ -24,7 +24,7 @@ defmodule Roll.MixProject do
     [
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.35", only: :dev, runtime: false},
-      {:logger_file_backend, "~> 0.0.13"},
+      {:freedom_formatter, "~> 2.1.3", only: :dev},
       #{:math, "~> 0.7.0"},
       #{:propcheck, "~> 1.4", only: [:test]},
       {:decor, path: "../../decor"},
