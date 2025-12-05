@@ -1,5 +1,6 @@
 defmodule ShopTest do
   use ExUnit.Case
+  use PropCheck, default_opts: [numtests: 100]
   doctest Shop
 
   describe "puzzle example" do
@@ -59,6 +60,72 @@ defmodule ShopTest do
         fixture.product_ranges
         |> Enum.map(&Shop.sum_repeated/1)
       assert act_rep_sums == fixture.exp_rep_sums
+    end
+  end
+
+  ###
+  # Property-Based Tests
+  #
+  # with help from Fred Hebert's book,
+  # [Property-Based Testing with PropEr, Erlang, and Elixir](https://pragprog.com/titles/fhproper)
+  #
+  # Published: Jan 2019, Pragmatic Programmers
+  # ISBN: 9781680506211
+
+  ###
+  # Properties
+
+  property "repeating patterns are detected" do
+    forall id <- gen_repeated_string() do
+      String.to_integer(id)
+      |> Shop.is_repeated?()
+    end
+  end
+
+  property "non-repeating patterns aren't detected" do
+    forall id <- gen_nonrepeated_string() do
+      String.to_integer(id)
+      |> Shop.is_repeated?()
+      |> then(fn b -> !b end)
+    end
+  end
+
+  # make verbose for metrics
+  property "repeated ID statistics", [:verbose] do
+    forall id <- gen_repeated_string() do
+      collect(true, to_range(10, byte_size(id)))
+    end
+  end
+
+  ###
+  # Helpers
+
+  def to_range(m, n) do
+    base = div(n, m)
+    {base * m, (base + 1) * m}
+  end
+
+  ###
+  # Generators
+
+  def gen_id_pattern() do
+    # resize so we get some 3- and 4-char patterns
+    sized(s, resize(s * 17, pos_integer()))
+  end
+
+  def gen_repeated_string() do
+    let {rep, patt} <- {range(2, 9), gen_id_pattern()} do
+      Integer.to_string(patt)
+      |> String.duplicate(rep)
+    end
+  end
+
+  def gen_nonrepeated_string() do
+    let id <- gen_repeated_string() do
+      # corrupt the pattern by decrementing any but the leading digit
+      delta = 10 ** (:rand.uniform(byte_size(id) - 1) - 1)
+      (String.to_integer(id) - delta)
+      |> Integer.to_string()
     end
   end
 end
