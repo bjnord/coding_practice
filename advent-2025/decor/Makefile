@@ -2,7 +2,8 @@ FILES = mix.exs test/test_helper.exs \
 	config/config.exs config/dev.exs \
 	lib/decor.ex test/decor_test.exs \
 	lib/decor/cli.ex test/decor/cli_test.exs \
-	lib/decor/grid.ex test/decor/grid_test.exs
+	lib/decor/grid.ex test/decor/grid_test.exs \
+	lib/decor/math.ex test/decor/math_test.exs
 
 .PHONY: test check doc console clean
 
