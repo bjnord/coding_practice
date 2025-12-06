@@ -80,6 +80,7 @@ defmodule History.Math do
   def n_digits(n) when is_integer(n) and n < 0 do
     raise "negative numbers not supported"
   end
+  def n_digits(n) when is_integer(n) and n == 0, do: 1
   def n_digits(n) when is_integer(n) do
     :math.log10(n)
     |> :math.floor()
