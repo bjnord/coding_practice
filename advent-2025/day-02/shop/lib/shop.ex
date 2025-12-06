@@ -184,6 +184,7 @@ defmodule Shop do
     break_range(range)
     |> Enum.map(&find_eq_digits_repeating/1)
     |> List.flatten()
+    |> Enum.uniq()
   end
 
   @spec find_eq_digits_repeating(product_range()) :: [[pos_integer()]]
@@ -236,6 +237,20 @@ defmodule Shop do
   @spec in_range?(product_range(), pos_integer()) :: boolean()
   defp in_range?({lo, hi}, n) do
     (lo <= n) && (n <= hi)
+  end
+
+  @doc """
+  Return the sum of all product IDs within a product ID range which
+  contain a digit pattern repeated N times.
+
+  ## Parameters
+
+  - `range`: the product ID range
+  """
+  @spec sum_repeated(product_range()) :: pos_integer()
+  def sum_repeated(range) do
+    find_repeating(range)
+    |> Enum.sum()
   end
 
   @doc """
