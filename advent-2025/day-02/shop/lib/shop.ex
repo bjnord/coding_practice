@@ -202,7 +202,7 @@ defmodule Shop do
     lo_patt = first_n_digits(lo, sublen)
     hi_patt = first_n_digits(hi, sublen)
     for patt <- lo_patt..hi_patt,
-      id = repeat_patt(patt, div(n_digits, sublen)),
+      id = repeat_pattern(patt, div(n_digits, sublen)),
       in_range?({lo, hi}, id),
       into: [],
       do: id
@@ -219,15 +219,15 @@ defmodule Shop do
   Repeat a pattern of digits `n` times.
 
   Examples
-      iex> Shop.repeat_patt(12, 4)
+      iex> Shop.repeat_pattern(12, 4)
       12121212
-      iex> Shop.repeat_patt(123, 3)
+      iex> Shop.repeat_pattern(123, 3)
       123123123
-      iex> Shop.repeat_patt(1, 7)
+      iex> Shop.repeat_pattern(1, 7)
       1111111
   """
-  @spec repeat_patt(pos_integer(), pos_integer()) :: pos_integer()
-  def repeat_patt(patt, n) do
+  @spec repeat_pattern(pos_integer(), pos_integer()) :: pos_integer()
+  def repeat_pattern(patt, n) do
     pow = 10 ** Decor.Math.n_digits(patt)
     1..n
     |> Enum.reduce(0, fn _, acc -> acc * pow + patt end)
