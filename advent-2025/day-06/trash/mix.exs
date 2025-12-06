@@ -33,7 +33,7 @@ defmodule Trash.MixProject do
 
   defp escript_config do
     [
-      main_module: Trash
+      main_module: Trash,
     ]
   end
 end

@@ -33,7 +33,7 @@ defmodule Cafe.MixProject do
 
   defp escript_config do
     [
-      main_module: Cafe
+      main_module: Cafe,
     ]
   end
 end
