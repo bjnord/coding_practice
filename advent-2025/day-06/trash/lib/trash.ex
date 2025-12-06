@@ -44,7 +44,7 @@ defmodule Trash do
   Process input file and display part 1 solution.
   """
   def part1(input_path) do
-    parse_input_file(input_path)
+    parse_input_file(input_path, part: 1)
     |> Enum.map(&solve/1)
     |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
@@ -54,7 +54,7 @@ defmodule Trash do
   Process input file and display part 2 solution.
   """
   def part2(input_path) do
-    parse_input_file(input_path)
+    parse_input_file(input_path, part: 2)
     nil  # TODO
     |> IO.inspect(label: "Part 2 answer is")
   end
