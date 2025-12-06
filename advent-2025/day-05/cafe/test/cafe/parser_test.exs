@@ -40,8 +40,9 @@ defmodule Cafe.ParserTest do
     end
 
     test "parser gets expected inventory", fixture do
-      act_inventory = fixture.input
-                      |> parse_input_string()
+      act_inventory =
+        fixture.input
+        |> parse_input_string()
       assert act_inventory == fixture.exp_inventory
     end
   end

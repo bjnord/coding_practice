@@ -38,9 +38,11 @@ defmodule Cafe do
   end
 
   defp combine_next_range([], acc), do: acc
+
   defp combine_next_range([next_range | ranges], []) do
     combine_next_range(ranges, [next_range])
   end
+
   defp combine_next_range([{next_lo, next_hi} | ranges], [{prev_lo, prev_hi} | acc]) do
     if prev_hi < next_lo do
       combine_next_range(ranges, [{next_lo, next_hi}, {prev_lo, prev_hi} | acc])
