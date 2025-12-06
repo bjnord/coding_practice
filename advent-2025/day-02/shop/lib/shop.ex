@@ -49,7 +49,7 @@ defmodule Shop do
     s = Integer.to_string(product_id)
     len = String.length(s)
     if rem(len, 2) == 0 do
-      is_repeated_n?(s, len, div(len, 2))
+      slow_is_repeated_n?(s, len, div(len, 2))
     else
       false
     end
@@ -63,11 +63,11 @@ defmodule Shop do
 
   - `range`: the product ID range
   """
-  @spec sum_repeated(product_range()) :: pos_integer()
-  def sum_repeated(range) do
+  @spec slow_sum_repeated(product_range()) :: pos_integer()
+  def slow_sum_repeated(range) do
     Range.new(elem(range, 0), elem(range, 1))
     |> Enum.map(fn id ->
-      if is_repeated?(id), do: id, else: 0
+      if slow_is_repeated?(id), do: id, else: 0
     end)
     |> Enum.sum()
   end
@@ -80,31 +80,31 @@ defmodule Shop do
   - `product_id`: the product ID (integer)
 
   ## Examples
-      iex> Shop.is_repeated?(1)
+      iex> Shop.slow_is_repeated?(1)
       false
-      iex> Shop.is_repeated?(12341234)
+      iex> Shop.slow_is_repeated?(12341234)
       true
-      iex> Shop.is_repeated?(12312312)
+      iex> Shop.slow_is_repeated?(12312312)
       false
-      iex> Shop.is_repeated?(123123123)
+      iex> Shop.slow_is_repeated?(123123123)
       true
-      iex> Shop.is_repeated?(1212121212)
+      iex> Shop.slow_is_repeated?(1212121212)
       true
-      iex> Shop.is_repeated?(1111111)
+      iex> Shop.slow_is_repeated?(1111111)
       true
   """
-  @spec is_repeated?(pos_integer()) :: boolean()
-  def is_repeated?(product_id) when product_id < 10, do: false
+  @spec slow_is_repeated?(pos_integer()) :: boolean()
+  def slow_is_repeated?(product_id) when product_id < 10, do: false
 
-  def is_repeated?(product_id) do
+  def slow_is_repeated?(product_id) do
     s = Integer.to_string(product_id)
     len = String.length(s)
     Range.new(1, div(len, 2))
     |> Enum.to_list()
-    |> Enum.any?(fn n -> is_repeated_n?(s, len, n) end)
+    |> Enum.any?(fn n -> slow_is_repeated_n?(s, len, n) end)
   end
 
-  defp is_repeated_n?(s, len, n) do
+  defp slow_is_repeated_n?(s, len, n) do
     if rem(len, n) == 0 do
       [first | peers] =
         String.to_charlist(s)

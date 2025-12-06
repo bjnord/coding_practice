@@ -78,14 +78,14 @@ defmodule ShopTest do
   property "repeating patterns are detected" do
     forall id <- gen_repeated_string() do
       String.to_integer(id)
-      |> Shop.is_repeated?()
+      |> Shop.slow_is_repeated?()
     end
   end
 
   property "non-repeating patterns aren't detected" do
     forall id <- gen_nonrepeated_string() do
       String.to_integer(id)
-      |> Shop.is_repeated?()
+      |> Shop.slow_is_repeated?()
       |> then(fn b -> !b end)
     end
   end
