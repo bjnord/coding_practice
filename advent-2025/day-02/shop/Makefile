@@ -5,7 +5,7 @@ FILES = mix.exs test/test_helper.exs \
 	lib/shop/parser.ex test/shop/parser_test.exs
 VERBOSE = 0
 
-.PHONY: run test check doc format console clean
+.PHONY: run test check bench doc format console clean
 
 run: $(BIN)
 	$(BIN) private/input.txt
@@ -18,6 +18,9 @@ test:
 
 check:
 	mix dialyzer
+
+bench:
+	mix run bench/run.exs | tee log/bench.out
 
 doc:
 	mix docs

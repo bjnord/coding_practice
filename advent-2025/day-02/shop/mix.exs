@@ -27,6 +27,7 @@ defmodule Shop.MixProject do
       {:freedom_formatter, "~> 2.1.3", only: :dev},
       #{:math, "~> 0.7.0"},
       {:propcheck, "~> 1.5", only: [:test]},
+      {:benchee, "~> 1.5", only: :dev},
       {:decor, path: "../../decor"},
     ]
   end
