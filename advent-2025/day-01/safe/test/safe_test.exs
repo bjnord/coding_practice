@@ -35,8 +35,10 @@ defmodule SafeTest do
     end
 
     test "rotate gets expected positions and clicks", fixture do
-      act_pos_and_clicks = fixture.rotations
-                           |> rotate()
+      act_pos_and_clicks =
+        fixture.rotations
+        |> rotate()
+
       assert act_pos_and_clicks == fixture.exp_pos_and_clicks
     end
   end

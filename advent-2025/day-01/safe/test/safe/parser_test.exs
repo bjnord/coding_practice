@@ -35,9 +35,11 @@ defmodule Safe.ParserTest do
     end
 
     test "parser gets expected rotations", fixture do
-      act_rotations = fixture.input
-                      |> parse_input_string()
-                      |> Enum.to_list()
+      act_rotations =
+        fixture.input
+        |> parse_input_string()
+        |> Enum.to_list()
+
       assert act_rotations == fixture.exp_rotations
     end
   end

@@ -3,7 +3,7 @@ defmodule Safe.Parser do
   Parsing for `Safe`.
   """
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
 
   @doc ~S"""
   Parse an input file.

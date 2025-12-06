@@ -6,7 +6,7 @@ defmodule Safe do
   import Decor.CLI
   import Safe.Parser
 
-  @opaque streamable(t) :: list(t) | Enum.t | Enumerable.t
+  @opaque streamable(t) :: list(t) | Enum.t() | Enumerable.t()
   @type rotation() :: {String.t(), integer()}
   @type position() :: {String.t(), integer(), non_neg_integer(), non_neg_integer()}
 
