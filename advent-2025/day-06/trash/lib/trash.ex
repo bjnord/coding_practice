@@ -9,6 +9,25 @@ defmodule Trash do
   import Decor.CLI
 
   @doc """
+  Solve an equation.
+  """
+  @spec solve(equation()) :: integer()
+  def solve({[operand1 | operands], operation}) do
+    operands
+    |> Enum.reduce(operand1, fn operand, acc ->
+      compute(acc, operand, operation)
+    end)
+  end
+
+  @spec compute(integer(), integer(), atom()) :: integer()
+  defp compute(op1, op2, operation) do
+    case operation do
+      :+ -> op1 + op2
+      :* -> op1 * op2
+    end
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -26,7 +45,8 @@ defmodule Trash do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> Enum.map(&solve/1)
+    |> Enum.sum()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
