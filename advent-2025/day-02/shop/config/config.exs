@@ -10,11 +10,11 @@ import Config
 
 # You can configure your application as:
 #
-#     config :teleport, key: :value
+#     config :shop, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:teleport, :key)
+#     Application.get_env(:shop, :key)
 #
 # You can also configure a 3rd-party app:
 #
