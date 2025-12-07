@@ -27,12 +27,12 @@ defmodule Split do
         if Map.get(splitter_map, beam) do
           {
             n_splits + 1,
-            Map.put(new_beams_map, beam - 1, true) |> Map.put(beam + 1, true),
+            Map.put(new_beams_map, beam - 1, true) |> Map.put(beam + 1, true)
           }
         else
           {
             n_splits,
-            Map.put(new_beams_map, beam, true),
+            Map.put(new_beams_map, beam, true)
           }
         end
       end)
