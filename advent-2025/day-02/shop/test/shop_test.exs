@@ -93,16 +93,35 @@ defmodule ShopTest do
   # make verbose for metrics
   property "repeated ID statistics", [:verbose] do
     forall id <- gen_repeated_string() do
-      collect(true, to_range(10, byte_size(id)))
+      collect(true, to_size_range(10, byte_size(id), "product ID size"))
+    end
+  end
+
+  property "slow and fast part 1 designs produce identical results" do
+    forall range <- gen_range() do
+      Shop.sum_doubled(range) == Shop.slow_sum_doubled(range)
+    end
+  end
+
+  property "slow and fast part 2 designs produce identical results" do
+    forall range <- gen_range() do
+      Shop.sum_repeated(range) == Shop.slow_sum_repeated(range)
+    end
+  end
+
+  # make verbose for metrics
+  property "range statistics", [:verbose] do
+    forall range <- gen_range() do
+      collect(true, {"range hi size", Decor.Math.n_digits(elem(range, 1))})
     end
   end
 
   ###
   # Helpers
 
-  def to_range(m, n) do
+  def to_size_range(m, n, label) do
     base = div(n, m)
-    {base * m, (base + 1) * m}
+    {label, {base * m, (base + 1) * m}}
   end
 
   ###
@@ -126,6 +145,16 @@ defmodule ShopTest do
       delta = 10 ** (:rand.uniform(byte_size(id) - 1) - 1)
       (String.to_integer(id) - delta)
       |> Integer.to_string()
+    end
+  end
+
+  def gen_range() do
+    # **NOTE** `resize(s ** 4)` produces a much more comprehensive test
+    # (the ranges used include some 8-digit numbers), but then `make test`
+    # is reeeeallllyyy sllloooooowwww. `resize(s ** 3)` is a reasonable
+    # compromise (6-digit numbers).
+    let {lo, n} <- {sized(s, resize(s ** 3, pos_integer())), sized(s, resize(s ** 3, pos_integer()))} do
+      {lo, lo + n}
     end
   end
 end
