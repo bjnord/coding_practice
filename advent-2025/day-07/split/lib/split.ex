@@ -50,6 +50,34 @@ defmodule Split do
   end
 
   @doc """
+  Count the number of worlds the split quantum beam will visit (part 2 rules).
+  """
+  @spec count_worlds(Grid.t()) :: integer()
+  def count_worlds(grid) do
+    Grid.keys(grid)
+    |> Enum.sort(:desc)
+    |> Enum.reduce(%{}, fn splitter_pos, acc ->
+      Map.put(acc, splitter_pos, n_worlds_from_splitter(acc, splitter_pos, grid.size.y))
+    end)
+    |> n_worlds_along_path(grid.meta.start, grid.size.y)
+  end
+
+  defp n_worlds_from_splitter(worlds, {y, x}, max_y) do
+    right = n_worlds_along_path(worlds, {y, x + 1}, max_y)
+    left = n_worlds_along_path(worlds, {y, x - 1}, max_y)
+    left + right
+  end
+
+  defp n_worlds_along_path(_worlds, {y, _x}, max_y) when y > max_y, do: 1
+
+  defp n_worlds_along_path(worlds, {y, x}, max_y) do
+    case Map.get(worlds, {y, x}) do
+      nil -> n_worlds_along_path(worlds, {y + 1, x}, max_y)
+      n   -> n
+    end
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -76,7 +104,7 @@ defmodule Split do
   """
   def part2(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> count_worlds()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
