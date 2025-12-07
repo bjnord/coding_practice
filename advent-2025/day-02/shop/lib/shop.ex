@@ -16,6 +16,8 @@ defmodule Shop do
   Return the sum of all product IDs within a product ID range which
   contain a doubled digit pattern.
 
+  **NOTE** This implementation is slow; use `sum_doubled/1` instead.
+
   ## Parameters
 
   - `range`: the product ID range
@@ -62,6 +64,8 @@ defmodule Shop do
   @doc """
   Return the sum of all product IDs within a product ID range which
   contain a digit pattern repeated N times.
+
+  **NOTE** This implementation is slow; use `sum_repeated/1` instead.
 
   ## Parameters
 

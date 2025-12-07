@@ -86,3 +86,39 @@ Adding up all the invalid IDs in this example produces `4174379265`.
 
 **What do you get if you add up all of the invalid IDs using these new
 rules?**
+
+### Part Two Design
+
+> **Spoilers ahead!**
+
+My initial design (testing each product ID in each range) worked, but took several seconds to run each part. Later in the day I was mulling what optimization approach to take (benchmarking, heatmaps, parallelism, etc.) when suddenly I realized there was a much simpler way to approach the problem.
+
+The revised design constructs all possible doubled or repeated product IDs from a substring of the range values, and then sees which ones actually fall into the range. For example: Given the range 1000-2900, you only need to try double-10 through double-29, as well as all 1s and all 2s. There are a few other things to be handled (like ranges where the lo and hi value have a different number of digits).
+
+After the code was done I fired up [Benchee](https://github.com/bencheeorg/benchee) and whoa, Nellie:
+
+```
+Operating System: Linux
+CPU Information: AMD EPYC 7571
+Number of Available Cores: 4
+Available memory: 15.45 GB
+Elixir 1.19.4
+Erlang 27.3.4.6
+JIT enabled: true
+
+Name                  ips        average  deviation         median         99th %
+fast part 1       19.43 K      0.00005 s    ±34.63%      0.00005 s      0.00010 s
+slow part 1     0.00080 K         1.26 s     ±2.78%         1.25 s         1.31 s
+
+Comparison:
+fast part 1       19.43 K
+slow part 1     0.00080 K - 24430.89x slower +1.26 s
+
+Name                  ips        average  deviation         median         99th %
+fast part 2       11.97 K      0.00008 s    ±23.63%      0.00008 s      0.00014 s
+slow part 2     0.00028 K         3.55 s     ±1.21%         3.54 s         3.61 s
+
+Comparison:
+fast part 2       11.97 K
+slow part 2     0.00028 K - 42520.65x slower +3.55 s
+```
