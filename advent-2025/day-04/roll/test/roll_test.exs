@@ -52,15 +52,17 @@ defmodule RollTest do
     end
 
     test "finds positions of accessible rolls", fixture do
-      act_accessible_pos = Roll.accessible_positions(fixture.grid)
-                           |> Enum.sort()
+      act_accessible_pos =
+        Roll.accessible_positions(fixture.grid)
+        |> Enum.sort()
       assert act_accessible_pos == fixture.exp_accessible_pos
     end
 
     test "counts removable rolls", fixture do
-      act_n_removable_rolls = Roll.remove_rolls(fixture.grid)
-                              |> Roll.removed_positions()
-                              |> Enum.count()
+      act_n_removable_rolls =
+        Roll.remove_rolls(fixture.grid)
+        |> Roll.removed_positions()
+        |> Enum.count()
       assert act_n_removable_rolls == fixture.exp_n_removable_rolls
     end
   end

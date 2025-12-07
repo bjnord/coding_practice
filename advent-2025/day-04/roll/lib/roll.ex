@@ -34,6 +34,7 @@ defmodule Roll do
   end
 
   defp remove_rolls_step(grid, []), do: grid
+
   defp remove_rolls_step(grid, positions) do
     grid =
       Enum.reduce(positions, grid, fn pos, acc ->
