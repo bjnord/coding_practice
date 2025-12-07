@@ -8,6 +8,10 @@ defmodule Shop do
 
   @type product_range() :: {pos_integer(), pos_integer()}
 
+  ###
+  # OLD AND BUSTED
+  ###
+
   @doc """
   Return the sum of all product IDs within a product ID range which
   contain a doubled digit pattern.
@@ -16,11 +20,11 @@ defmodule Shop do
 
   - `range`: the product ID range
   """
-  @spec sum_doubled(product_range()) :: pos_integer()
-  def sum_doubled(range) do
+  @spec slow_sum_doubled(product_range()) :: pos_integer()
+  def slow_sum_doubled(range) do
     Range.new(elem(range, 0), elem(range, 1))
     |> Enum.map(fn id ->
-      if is_doubled?(id), do: id, else: 0
+      if slow_is_doubled?(id), do: id, else: 0
     end)
     |> Enum.sum()
   end
@@ -33,19 +37,19 @@ defmodule Shop do
   - `product_id`: the product ID (integer)
 
   ## Examples
-      iex> Shop.is_doubled?(55)
+      iex> Shop.slow_is_doubled?(55)
       true
-      iex> Shop.is_doubled?(56)
+      iex> Shop.slow_is_doubled?(56)
       false
-      iex> Shop.is_doubled?(646)
+      iex> Shop.slow_is_doubled?(646)
       false
-      iex> Shop.is_doubled?(6464)
+      iex> Shop.slow_is_doubled?(6464)
       true
-      iex> Shop.is_doubled?(123123)
+      iex> Shop.slow_is_doubled?(123123)
       true
   """
-  @spec is_doubled?(pos_integer()) :: boolean()
-  def is_doubled?(product_id) do
+  @spec slow_is_doubled?(pos_integer()) :: boolean()
+  def slow_is_doubled?(product_id) do
     s = Integer.to_string(product_id)
     len = String.length(s)
     if rem(len, 2) == 0 do
@@ -115,6 +119,10 @@ defmodule Shop do
       false
     end
   end
+
+  ###
+  # NEW HOTNESS
+  ###
 
   @doc """
   Return all lengths which equally divide a product ID.
@@ -250,6 +258,56 @@ defmodule Shop do
   @spec sum_repeated(product_range()) :: pos_integer()
   def sum_repeated(range) do
     find_repeating(range)
+    |> Enum.sum()
+  end
+
+  @doc """
+  Find product IDs within the given range which have a doubled pattern.
+
+  Examples
+      iex> Shop.find_doubled({1, 12})
+      [11]
+      iex> Shop.find_doubled({1211, 1213})
+      [1212]
+      iex> Shop.find_doubled({99000, 102101}) |> Enum.sort()
+      [100100, 101101]
+  """
+  @spec find_doubled(product_range()) :: [pos_integer()]
+  def find_doubled(range) do
+    break_range(range)
+    |> Enum.map(&find_eq_digits_doubled/1)
+    |> List.flatten()
+    |> Enum.uniq()
+  end
+
+  @spec find_eq_digits_doubled(product_range()) :: [pos_integer()]
+  defp find_eq_digits_doubled({lo, hi}) do
+    # `lo` and `hi` will have an equal number of digits
+    n_digits = Decor.Math.n_digits(lo)
+    if rem(n_digits, 2) == 0 do
+      lo_patt = first_n_digits(lo, div(n_digits, 2))
+      hi_patt = first_n_digits(hi, div(n_digits, 2))
+      for patt <- lo_patt..hi_patt,
+        id = repeat_pattern(patt, 2),
+        in_range?({lo, hi}, id),
+        into: [],
+        do: id
+    else
+      []
+    end
+  end
+
+  @doc """
+  Return the sum of all product IDs within a product ID range which
+  contain a digit pattern repeated N times.
+
+  ## Parameters
+
+  - `range`: the product ID range
+  """
+  @spec sum_doubled(product_range()) :: pos_integer()
+  def sum_doubled(range) do
+    find_doubled(range)
     |> Enum.sum()
   end
 
