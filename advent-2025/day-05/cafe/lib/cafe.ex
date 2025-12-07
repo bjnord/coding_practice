@@ -7,7 +7,7 @@ defmodule Cafe do
   import Decor.CLI
 
   @type ingredient() :: pos_integer()
-  @type fresh_range() :: {pos_integer(), pos_integer()}
+  @type fresh_range() :: {ingredient(), ingredient()}
   @type inventory() :: {[fresh_range()], [ingredient()]}
 
   @doc """
