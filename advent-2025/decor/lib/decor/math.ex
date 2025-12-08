@@ -21,6 +21,23 @@ defmodule Decor.Math do
   end
 
   @doc """
+  Compute the Euclidean distance between two positions.
+
+  The positions can use integer or floating-point coordinates.
+  The return value will be floating point.
+  """
+  @spec euclidean_dist(coord_2d(), coord_2d()) :: integer()
+  def euclidean_dist({y1, x1}, {y2, x2}) do
+    (:math.pow(y1 - y2, 2) + :math.pow(x1 - x2, 2))
+    |> :math.sqrt()
+  end
+  @spec euclidean_dist(coord_3d(), coord_3d()) :: integer()
+  def euclidean_dist({z1, y1, x1}, {z2, y2, x2}) do
+    (:math.pow(z1 - z2, 2) + :math.pow(y1 - y2, 2) + :math.pow(x1 - x2, 2))
+    |> :math.sqrt()
+  end
+
+  @doc """
   Perform modulo division where the dividend (numerator) can be less
   than 0.
 

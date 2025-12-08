@@ -18,6 +18,21 @@ defmodule Decor.MathTest do
   end
 
   ###
+  # Euclidean (Pythagorean) distance
+  ###
+
+  test "Euclidean distance (2D)" do
+    pos1 = {3, 0}
+    pos2 = {0, 4}
+    assert_in_delta Decor.Math.euclidean_dist(pos1, pos2), 5.0, 0.000_001
+  end
+  test "Euclidean distance (3D)" do
+    pos1 = {812, 817, 162}
+    pos2 = {689, 690, 425}
+    assert_in_delta Decor.Math.euclidean_dist(pos1, pos2), 316.902_193_113, 0.000_001
+  end
+
+  ###
   # modulo function
   ###
 
