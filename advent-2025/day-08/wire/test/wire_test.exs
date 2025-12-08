@@ -55,6 +55,11 @@ defmodule WireTest do
           {530, 168, 117} => {530, 168, 117},
           {668, 470, 52} => {530, 168, 117},
         },
+        exp_3_largest_circuit_sizes: [
+          5,
+          4,
+          2,
+        ],
       ]
     end
 
@@ -71,6 +76,15 @@ defmodule WireTest do
         |> Wire.n_closest_box_pairs(10)
         |> Wire.connect_circuits()
       assert act_11_circuits == fixture.exp_11_circuits
+    end
+
+    test "finds expected sizes of largest 3 circuits", fixture do
+      act_3_largest_circuit_sizes =
+        fixture.box_positions
+        |> Wire.n_closest_box_pairs(10)
+        |> Wire.connect_circuits()
+        |> Wire.n_largest_circuit_sizes(3)
+      assert act_3_largest_circuit_sizes == fixture.exp_3_largest_circuit_sizes
     end
   end
 end

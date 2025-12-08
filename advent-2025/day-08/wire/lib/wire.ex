@@ -69,6 +69,17 @@ defmodule Wire do
   end
 
   @doc """
+  Find the sizes of the N largest circuits.
+  """
+  def n_largest_circuit_sizes(circ_map, n) do
+    Map.values(circ_map)
+    |> Enum.frequencies()
+    |> Map.values()
+    |> Enum.sort(:desc)
+    |> Enum.take(n)
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -88,7 +99,8 @@ defmodule Wire do
     parse_input_file(input_path)
     |> n_closest_box_pairs(1000)
     |> connect_circuits()
-    |> Enum.count()  # TODO get three largest circuits
+    |> n_largest_circuit_sizes(3)
+    |> Enum.product()
     |> IO.inspect(label: "Part 1 answer is")
   end
 
