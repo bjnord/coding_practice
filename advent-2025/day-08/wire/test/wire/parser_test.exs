@@ -55,8 +55,9 @@ defmodule Wire.ParserTest do
     end
 
     test "parser gets expected junction box positions", fixture do
-      act_box_positions = fixture.input
-                          |> parse_input_string()
+      act_box_positions =
+        fixture.input
+        |> parse_input_string()
       assert act_box_positions == fixture.exp_box_positions
     end
   end

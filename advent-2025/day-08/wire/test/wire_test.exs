@@ -59,15 +59,17 @@ defmodule WireTest do
     end
 
     test "finds expected closest 4 junction boxes", fixture do
-      act_closest_4_boxes = fixture.box_positions
-                            |> Wire.n_closest_box_pairs(4)
+      act_closest_4_boxes =
+        fixture.box_positions
+        |> Wire.n_closest_box_pairs(4)
       assert act_closest_4_boxes == fixture.exp_closest_4_boxes
     end
 
     test "finds expected 11 circuits after making 10 connections", fixture do
-      act_11_circuits = fixture.box_positions
-                        |> Wire.n_closest_box_pairs(10)
-                        |> Wire.connect_circuits()
+      act_11_circuits =
+        fixture.box_positions
+        |> Wire.n_closest_box_pairs(10)
+        |> Wire.connect_circuits()
       assert act_11_circuits == fixture.exp_11_circuits
     end
   end
