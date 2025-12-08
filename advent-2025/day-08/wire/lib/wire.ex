@@ -34,6 +34,41 @@ defmodule Wire do
   end
 
   @doc """
+  Connect pairs of junction boxes into circuits.
+  """
+  def connect_circuits(box_pairs) do
+    box_pairs
+    |> Enum.reduce(%{}, fn {a, b}, acc ->
+      a_circ = Map.get(acc, a)
+      b_circ = Map.get(acc, b)
+      cond do
+        a_circ && b_circ && (a_circ == b_circ) ->
+          acc
+        a_circ && b_circ && (a_circ != b_circ) ->
+          join_circuits(acc, a_circ, b_circ)
+        a_circ ->
+          Map.put(acc, b, a_circ)
+        b_circ ->
+          Map.put(acc, a, b_circ)
+        true ->
+          Map.put(acc, a, a)
+          |> Map.put(b, a)
+      end
+    end)
+  end
+
+  defp join_circuits(acc, a_circ, b_circ) do
+    Map.keys(acc)
+    |> Enum.reduce(acc, fn k, acc ->
+      if Map.get(acc, k) == b_circ do
+        Map.put(acc, k, a_circ)
+      else
+        acc
+      end
+    end)
+  end
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -52,7 +87,8 @@ defmodule Wire do
   def part1(input_path) do
     parse_input_file(input_path)
     |> n_closest_box_pairs(1000)
-    |> Enum.count()  # TODO connections and largest circuits
+    |> connect_circuits()
+    |> Enum.count()  # TODO get three largest circuits
     |> IO.inspect(label: "Part 1 answer is")
   end
 
