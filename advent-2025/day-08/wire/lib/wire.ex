@@ -5,6 +5,33 @@ defmodule Wire do
 
   import Wire.Parser
   import Decor.CLI
+  import Decor.Math
+
+  @doc """
+  Find the N closest pairs of junction boxes.
+  """
+  def n_closest_box_pairs(boxes, n) do
+    boxes
+    |> Enum.sort()
+    |> box_pair_distances([])
+    |> Enum.sort(fn a, b -> elem(a, 0) < elem(b, 0) end)
+    |> Enum.map(fn {_dist, a, b} -> {a, b} end)
+    |> Enum.take(n)
+  end
+
+  defp box_pair_distances([next_box, rem_box], acc) do
+    dist = {euclidean_dist(next_box, rem_box), next_box, rem_box}
+    [dist | acc]
+  end
+  defp box_pair_distances([next_box | rem_boxes], acc) do
+    acc =
+      rem_boxes
+      |> Enum.reduce(acc, fn rem_box, acc ->
+        dist = {euclidean_dist(next_box, rem_box), next_box, rem_box}
+        [dist | acc]
+      end)
+    box_pair_distances(rem_boxes, acc)
+  end
 
   @doc """
   Parse arguments and call puzzle part methods.
@@ -24,7 +51,8 @@ defmodule Wire do
   """
   def part1(input_path) do
     parse_input_file(input_path)
-    nil  # TODO
+    |> n_closest_box_pairs(1000)
+    |> Enum.count()  # TODO connections and largest circuits
     |> IO.inspect(label: "Part 1 answer is")
   end
 
