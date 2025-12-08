@@ -60,6 +60,9 @@ defmodule WireTest do
           4,
           2,
         ],
+        # 216,146,977 and 117,168,530
+        exp_final_connect: {{530, 168, 117}, {977, 146, 216}},
+        exp_part2_product: 25272,
       ]
     end
 
@@ -85,6 +88,16 @@ defmodule WireTest do
         |> Wire.connect_circuits()
         |> Wire.n_largest_circuit_sizes(3)
       assert act_3_largest_circuit_sizes == fixture.exp_3_largest_circuit_sizes
+    end
+
+    test "finds final connection that makes 1 circuit from all junction boxes", fixture do
+      n_boxes = Enum.count(fixture.box_positions)
+      act_final_connect =
+        fixture.box_positions
+        |> Wire.n_closest_box_pairs(1_000_000_000_000_000)
+        |> Wire.connect_all_circuits(n_boxes)
+      assert act_final_connect == fixture.exp_final_connect
+      assert Wire.part2_product(act_final_connect) == fixture.exp_part2_product
     end
   end
 end

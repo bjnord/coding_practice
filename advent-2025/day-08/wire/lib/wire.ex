@@ -80,6 +80,45 @@ defmodule Wire do
   end
 
   @doc """
+  Connect pairs of junction boxes until they all form 1 circuit.
+  Return the last pair.
+  """
+  def connect_all_circuits(box_pairs, n_boxes) do
+    box_pairs
+    |> Enum.reduce_while(%{}, fn {a, b}, acc ->
+      a_circ = Map.get(acc, a)
+      b_circ = Map.get(acc, b)
+      circ_map =
+        cond do
+          a_circ && b_circ && (a_circ == b_circ) ->
+            acc
+          a_circ && b_circ && (a_circ != b_circ) ->
+            join_circuits(acc, a_circ, b_circ)
+          a_circ ->
+            Map.put(acc, b, a_circ)
+          b_circ ->
+            Map.put(acc, a, b_circ)
+          true ->
+            Map.put(acc, a, a)
+            |> Map.put(b, a)
+        end
+      cond do
+        n_circuits(circ_map) > 1       -> {:cont, circ_map}
+        Enum.count(circ_map) < n_boxes -> {:cont, circ_map}
+        true                           -> {:halt, {a, b}}
+      end
+    end)
+  end
+
+  defp n_circuits(circ_map) do
+    Map.values(circ_map)
+    |> Enum.frequencies()
+    |> Enum.count()
+  end
+
+  def part2_product({{_z1, _y1, x1}, {_z2, _y2, x2}}), do: x1 * x2
+
+  @doc """
   Parse arguments and call puzzle part methods.
 
   ## Parameters
@@ -108,8 +147,12 @@ defmodule Wire do
   Process input file and display part 2 solution.
   """
   def part2(input_path) do
-    parse_input_file(input_path)
-    nil  # TODO
+    box_positions = parse_input_file(input_path)
+    n_boxes = Enum.count(box_positions)
+    box_positions
+    |> n_closest_box_pairs(1_000_000_000_000_000)
+    |> connect_all_circuits(n_boxes)
+    |> part2_product()
     |> IO.inspect(label: "Part 2 answer is")
   end
 end
